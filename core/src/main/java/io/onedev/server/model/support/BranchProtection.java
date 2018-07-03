@@ -23,7 +23,7 @@ import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.web.editable.annotation.BranchPattern;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.ReviewRequirementSpec;
-import io.onedev.server.web.editable.annotation.VerificationChoice;
+import io.onedev.server.web.editable.annotation.ConfigurationChoice;
 import io.onedev.utils.PathUtils;
 
 @Editable
@@ -45,9 +45,9 @@ public class BranchProtection implements Serializable {
 	
 	private String reviewRequirementSpec;
 	
-	private List<String> verifications = new ArrayList<>();
+	private List<String> configurations = new ArrayList<>();
 	
-	private boolean verifyMerges;
+	private boolean buildMerges;
 	
 	private transient Optional<ReviewRequirement> reviewRequirementOpt;
 	
@@ -122,28 +122,24 @@ public class BranchProtection implements Serializable {
 		this.reviewRequirementSpec = reviewRequirementSpec;
 	}
 
-	@Editable(order=500, name="Required Verifications", description="Optionally choose required verifications. "
-			+ "Verifications listed here are populated when external system (such as CI system) verifies and "
-			+ "publishes commit statuses. Run relevant external system against this project if you can not "
-			+ "find desired verifications here"
-			+ "")
-	@VerificationChoice
-	public List<String> getVerifications() {
-		return verifications;
+	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")
+	@ConfigurationChoice
+	public List<String> getConfigurations() {
+		return configurations;
 	}
 
-	public void setVerifications(List<String> verifications) {
-		this.verifications = verifications;
+	public void setConfigurations(List<String> configurations) {
+		this.configurations = configurations;
 	}
 
-	@Editable(order=600, name="Verify Merged Commits", description="If checked, verifications specified above "
-			+ "will be performed against merged commit (instead of head commit) when pull request is involved")
-	public boolean isVerifyMerges() {
-		return verifyMerges;
+	@Editable(order=600, name="Build Merged Commits", description="If checked, builds of merged commits "
+			+ "(instead of head commits) are required when pull request is involved")
+	public boolean isBuildMerges() {
+		return buildMerges;
 	}
 
-	public void setVerifyMerges(boolean verifyMerges) {
-		this.verifyMerges = verifyMerges;
+	public void setBuildMerges(boolean buildMerges) {
+		this.buildMerges = buildMerges;
 	}
 
 	@Editable(order=700, description="Optionally specify additional users to review particular paths. For each changed file, "
@@ -232,6 +228,16 @@ public class BranchProtection implements Serializable {
 		}
 		
 		return false;
+	}
+	
+	public void onRenameConfiguration(String oldName, String newName) {
+		int index = getConfigurations().indexOf(oldName);
+		if (index != -1)
+			getConfigurations().set(index, newName);
+	}
+	
+	public void onDeleteConfiguration(String configurationName) {
+		getConfigurations().remove(configurationName);
 	}
 	
 	public void onRenameUser(String oldName, String newName) {

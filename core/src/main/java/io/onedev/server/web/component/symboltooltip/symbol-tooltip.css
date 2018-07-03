@@ -6,7 +6,7 @@
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace; 
 	font-size: 10pt; 
 	padding: 4px 8px; 
-	z-index: 100; 
+	z-index: 10000; 
 	font-weight: bold;
 }
 .symbol-tooltip ul.declarations li {

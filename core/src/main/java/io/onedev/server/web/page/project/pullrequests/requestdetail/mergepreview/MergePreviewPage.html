@@ -18,11 +18,12 @@
 						<a wicket:id="mergedCommit" class="hash btn btn-sm btn-default"><span wicket:id="hash"></span></a>
 						<a wicket:id="copyMergedCommit" class="btn btn-sm btn-default"><i class="fa fa-clipboard"></i></a>
 					</span>
+					<span wicket:id="buildStatus" class="build-status"></span>						
 					<div class="description">Merged commit</div>
 				</div>
 			</div>
-			<div class="out-dated">
-				<a wicket:id="refresh"><i class="fa fa-warning"></i> Merge preview is out dated, click to refresh</a> 
+			<div wicket:id="outDated" class="out-dated alert alert-warning">
+				<a wicket:id="link"><i class="fa fa-warning"></i> Merge preview is out dated, click to refresh</a> 
 			</div>
 			<div wicket:id="revisionDiff" class="body"></div>		
 		</div>

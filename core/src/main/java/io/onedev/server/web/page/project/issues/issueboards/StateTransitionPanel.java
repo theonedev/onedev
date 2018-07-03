@@ -13,7 +13,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -59,7 +59,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 				super.onSubmit(target, form);
 				
 				Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(fieldBean);
-				OneDev.getInstance(IssueChangeManager.class).changeState(getIssue(), getTargetState(), fieldValues, null);
+				OneDev.getInstance(IssueActionManager.class).changeState(getIssue(), getTargetState(), fieldValues, null);
 				onSaved(target);
 			}
 

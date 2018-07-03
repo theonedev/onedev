@@ -28,7 +28,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.web.editable.EditableUtils;
 
 @Singleton
 public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullRequestUpdate> 
@@ -92,7 +91,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 			
 			LastActivity lastEvent = new LastActivity();
 			lastEvent.setDate(event.getDate());
-			lastEvent.setAction(EditableUtils.getDisplayName(event.getClass()));
+			lastEvent.setDescription("added new commits");
 			request.setLastActivity(lastEvent);
 		}
 	}

@@ -29,19 +29,19 @@ import org.joda.time.DateTime;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.manager.VerificationManager;
+import io.onedev.server.manager.BuildManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Constants;
-import io.onedev.server.util.Verification;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.avatar.ContributorAvatars;
+import io.onedev.server.web.component.build.BuildStatusPanel;
 import io.onedev.server.web.component.commitgraph.CommitGraphResourceReference;
 import io.onedev.server.web.component.commitgraph.CommitGraphUtils;
 import io.onedev.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.verification.VerificationStatusPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.model.CommitRefsModel;
@@ -149,13 +149,12 @@ public class CommitListPanel extends Panel {
 							commit.getAuthorIdent(), commit.getCommitterIdent(), true));
 
 					String commitHash = commit.name();
-					fragment.add(new VerificationStatusPanel("verificationStatus", 
-							new LoadableDetachableModel<Map<String, Verification>>() {
+					fragment.add(new BuildStatusPanel("buildStatus", 
+							new LoadableDetachableModel<List<Build>>() {
 
 						@Override
-						protected Map<String, Verification> load() {
-							return OneDev.getInstance(VerificationManager.class)
-									.getVerifications(projectModel.getObject(), commitHash);
+						protected List<Build> load() {
+							return OneDev.getInstance(BuildManager.class).findAll(projectModel.getObject(), commitHash);
 						}
 						
 					}));

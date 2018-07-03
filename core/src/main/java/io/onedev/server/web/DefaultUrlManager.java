@@ -10,17 +10,17 @@ import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
 
 import com.google.common.base.Splitter;
 
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UrlManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.PullRequestStatusChange;
+import io.onedev.server.model.PullRequestAction;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
@@ -29,10 +29,10 @@ import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.Requ
 @Singleton
 public class DefaultUrlManager implements UrlManager {
 
-	private final ConfigManager configManager;
+	private final SettingManager configManager;
 	
 	@Inject
-	public DefaultUrlManager(ConfigManager configManager) {
+	public DefaultUrlManager(SettingManager configManager) {
 		this.configManager = configManager;
 	}
 	
@@ -80,7 +80,7 @@ public class DefaultUrlManager implements UrlManager {
 
 	@Override
 	public String urlFor(PullRequest request) {
-		return urlFor(request.getTarget().getProject()) + "/pull/" + request.getNumber();
+		return urlFor(request.getTarget().getProject()) + "/pulls/" + request.getNumber();
 	}
 
 	@Override
@@ -90,9 +90,9 @@ public class DefaultUrlManager implements UrlManager {
 	}
 
 	@Override
-	public String urlFor(PullRequestStatusChange statusChange) {
-		String url = urlFor(statusChange.getRequest());
-		return url + "#" + statusChange.getAnchor();
+	public String urlFor(PullRequestAction action) {
+		String url = urlFor(action.getRequest());
+		return url + "#" + action.getAnchor();
 	}
 
 	@Override
@@ -106,7 +106,7 @@ public class DefaultUrlManager implements UrlManager {
 	}
 
 	@Override
-	public String urlFor(IssueChange change) {
+	public String urlFor(IssueAction change) {
 		return urlFor(change.getIssue()) + "#" + change.getAnchor();
 	}
 

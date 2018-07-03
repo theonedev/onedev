@@ -6,8 +6,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.web.component.comment.CodeCommentFilter;
-import io.onedev.server.web.component.comment.CodeCommentListPanel;
+import io.onedev.server.web.component.codecomment.CodeCommentFilter;
+import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 

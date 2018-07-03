@@ -56,31 +56,29 @@ import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
-import io.onedev.server.manager.BranchWatchManager;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.PullRequestManager;
-import io.onedev.server.manager.VerificationManager;
-import io.onedev.server.model.BranchWatch;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Verification;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branchchoice.BranchChoiceProvider;
 import io.onedev.server.web.component.branchchoice.BranchSingleChoice;
+import io.onedev.server.web.component.build.BuildStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.revisionpicker.RevisionPicker;
-import io.onedev.server.web.component.verification.VerificationStatusPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
 import io.onedev.server.web.page.project.pullrequests.requestlist.SearchOption;
 import io.onedev.server.web.page.project.pullrequests.requestlist.SearchOption.Status;
@@ -250,20 +248,6 @@ public class ProjectBranchesPage extends ProjectPage {
 		
 	};
 	
-	private final IModel<Map<String, BranchWatch>> branchWatchesModel = 
-			new LoadableDetachableModel<Map<String, BranchWatch>>() {
-
-		@Override
-		protected Map<String, BranchWatch> load() {
-			Map<String, BranchWatch> watches = new HashMap<>();
-			for (BranchWatch watch: OneDev.getInstance(BranchWatchManager.class).find(
-					Preconditions.checkNotNull(getLoginUser()), getProject()))
-				watches.put(watch.getBranch(), watch);
-			return watches;
-		}
-		
-	};
-
 	public static PageParameters paramsOf(Project project, @Nullable String baseBranch) {
 		PageParameters params = paramsOf(project);
 		if (baseBranch != null)
@@ -462,11 +446,11 @@ public class ProjectBranchesPage extends ProjectPage {
 				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId());
 				
 				String lastCommitHash = lastCommit.name();
-				item.add(new VerificationStatusPanel("verificationStatus", new LoadableDetachableModel<Map<String, Verification>>() {
+				item.add(new BuildStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 					@Override
-					protected Map<String, Verification> load() {
-						return OneDev.getInstance(VerificationManager.class).getVerifications(getProject(), lastCommitHash);
+					protected List<Build> load() {
+						return OneDev.getInstance(BuildManager.class).findAll(getProject(), lastCommitHash);
 					}
 					
 				}));
@@ -606,7 +590,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				WebMarkupContainer requestLink;
 				if (effectiveRequest != null && ab.getAhead() != 0) {
 					requestLink = new BookmarkablePageLink<Void>("effectiveRequest", 
-							RequestOverviewPage.class, RequestOverviewPage.paramsOf(effectiveRequest)); 
+							RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(effectiveRequest)); 
 					if (effectiveRequest.isOpen()) {
 						requestLink.add(new Label("label", "Open"));
 						requestLink.add(AttributeAppender.append("title", "A pull request is open for this change"));
@@ -622,45 +606,6 @@ public class ProjectBranchesPage extends ProjectPage {
 				}
 				actionsContainer.add(requestLink);
 				
-				actionsContainer.add(new AjaxLink<Void>("unwatchRequests") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						BranchWatch watch = branchWatchesModel.getObject().get(branch);
-						if (watch != null) {
-							OneDev.getInstance(BranchWatchManager.class).delete(watch);
-							branchWatchesModel.getObject().remove(branch);
-						}
-						target.add(actionsContainer);
-					}
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getLoginUser() != null && branchWatchesModel.getObject().containsKey(branch));
-					}
-
-				});
-				actionsContainer.add(new AjaxLink<Void>("watchRequests") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						BranchWatch watch = new BranchWatch();
-						watch.setProject(getProject());
-						watch.setBranch(branch);
-						watch.setUser(getLoginUser());
-						OneDev.getInstance(BranchWatchManager.class).save(watch);
-						target.add(actionsContainer);
-					}
-					
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(getLoginUser() != null && !branchWatchesModel.getObject().containsKey(branch));
-					}
-
-				});
-
 				actionsContainer.add(new ModalLink("delete") {
 
 					@Override
@@ -799,7 +744,6 @@ public class ProjectBranchesPage extends ProjectPage {
 	@Override
 	public void onDetach() {
 		branchesModel.detach();
-		branchWatchesModel.detach();
 		aheadBehindsModel.detach();
 		aheadBehindWidthModel.detach();
 		

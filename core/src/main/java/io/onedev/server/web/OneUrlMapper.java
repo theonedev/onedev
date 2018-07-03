@@ -44,14 +44,17 @@ import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.page.project.pullrequests.InvalidRequestPage;
 import io.onedev.server.web.page.project.pullrequests.newrequest.NewRequestPage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.codecomments.RequestCodeCommentsPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.mergepreview.MergePreviewPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
 import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
 import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
+import io.onedev.server.web.page.project.setting.configuration.ConfigurationEditPage;
+import io.onedev.server.web.page.project.setting.configuration.ConfigurationListPage;
+import io.onedev.server.web.page.project.setting.configuration.NewConfigurationPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issueworkflow.fields.IssueFieldsPage;
 import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
@@ -68,7 +71,6 @@ import io.onedev.server.web.page.test.TestPage;
 import io.onedev.server.web.page.user.AvatarEditPage;
 import io.onedev.server.web.page.user.NewUserPage;
 import io.onedev.server.web.page.user.PasswordEditPage;
-import io.onedev.server.web.page.user.TaskListPage;
 import io.onedev.server.web.page.user.TokenGeneratePage;
 import io.onedev.server.web.page.user.UserAuthorizationsPage;
 import io.onedev.server.web.page.user.UserListPage;
@@ -128,7 +130,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("users/${user}/profile", UserProfilePage.class));
 		add(new OnePageMapper("users/${user}/groups", UserMembershipsPage.class));
 		add(new OnePageMapper("users/${user}/authorizations", UserAuthorizationsPage.class));
-		add(new OnePageMapper("users/${user}/tasks", TaskListPage.class));
 		add(new OnePageMapper("users/${user}/avatar", AvatarEditPage.class));
 		add(new OnePageMapper("users/${user}/password", PasswordEditPage.class));
 		add(new OnePageMapper("users/${user}/token", TokenGeneratePage.class));
@@ -196,8 +197,8 @@ public class OneUrlMapper extends CompoundRequestMapper {
 
 		add(new OnePageMapper("projects/${project}/pulls", RequestListPage.class));
 		add(new OnePageMapper("projects/${project}/pulls/new", NewRequestPage.class));
-		add(new OnePageMapper("projects/${project}/pulls/${request}", RequestOverviewPage.class));
-		add(new OnePageMapper("projects/${project}/pulls/${request}/overview", RequestOverviewPage.class));
+		add(new OnePageMapper("projects/${project}/pulls/${request}", RequestActivitiesPage.class));
+		add(new OnePageMapper("projects/${project}/pulls/${request}/activities", RequestActivitiesPage.class));
 		add(new OnePageMapper("projects/${project}/pulls/${request}/code-comments", RequestCodeCommentsPage.class));
 		add(new OnePageMapper("projects/${project}/pulls/${request}/changes", RequestChangesPage.class));
 		add(new OnePageMapper("projects/${project}/pulls/${request}/merge-preview", MergePreviewPage.class));
@@ -223,6 +224,9 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/settings/issue-fields", IssueFieldsPage.class));
 		add(new OnePageMapper("projects/${project}/settings/issue-states", IssueStatesPage.class));
 		add(new OnePageMapper("projects/${project}/settings/issue-state-transitions", StateTransitionsPage.class));
+		add(new OnePageMapper("projects/${project}/settings/configurations", ConfigurationListPage.class));
+		add(new OnePageMapper("projects/${project}/settings/configurations/new", NewConfigurationPage.class));
+		add(new OnePageMapper("projects/${project}/settings/configurations/${configuration}", ConfigurationEditPage.class));
 		
 		add(new OnePageMapper("projects/${project}/no-commits", NoCommitsPage.class));
 	}

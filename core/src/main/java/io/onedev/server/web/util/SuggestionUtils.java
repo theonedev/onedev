@@ -10,13 +10,14 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.codeassist.InputSuggestion;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.GroupManager;
-import io.onedev.server.manager.VerificationManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.ProjectPrivilege;
@@ -26,8 +27,6 @@ import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.utils.Range;
 import io.onedev.utils.stringmatch.PatternApplied;
 import io.onedev.utils.stringmatch.WildcardUtils;
-
-import com.google.common.base.Preconditions;
 
 public class SuggestionUtils {
 	
@@ -94,23 +93,6 @@ public class SuggestionUtils {
 			if (index != -1) {
 				Range match = new Range(index, index+lowerCaseMatchWith.length());
 				InputSuggestion suggestion = new InputSuggestion(name, match);
-				if (escapeChars != null)
-					suggestion = suggestion.escape(escapeChars);
-				suggestions.add(suggestion);
-			}
-		}
-		return suggestions;
-	}
-	
-	public static List<InputSuggestion> suggestVerifications(Project project, String matchWith, @Nullable String escapeChars) {
-		String lowerCaseMatchWith = matchWith.toLowerCase();
-		int numSuggestions = 0;
-		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (String verificationName: OneDev.getInstance(VerificationManager.class).getVerificationNames(project)) {
-			int index = verificationName.toLowerCase().indexOf(lowerCaseMatchWith);
-			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
-				Range match = new Range(index, index+lowerCaseMatchWith.length());
-				InputSuggestion suggestion = new InputSuggestion(verificationName, match); 
 				if (escapeChars != null)
 					suggestion = suggestion.escape(escapeChars);
 				suggestions.add(suggestion);

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
@@ -58,7 +58,7 @@ public class ForgetPage extends BasePage {
 						if (user == null) {
 							return new TestResult.Failed("No user found with name or email: " + bean.getUserNameOrEmailAddress());
 						} else {
-							ConfigManager configManager = OneDev.getInstance(ConfigManager.class);
+							SettingManager configManager = OneDev.getInstance(SettingManager.class);
 							if (configManager.getMailSetting() != null) {
 								String password = RandomStringUtils.random(10, true, true);								
 								user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));

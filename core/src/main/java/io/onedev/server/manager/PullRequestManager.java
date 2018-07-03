@@ -7,10 +7,9 @@ import javax.annotation.Nullable;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.MergePreview;
 import io.onedev.server.model.support.ProjectAndBranch;
+import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.util.QualityCheckStatus;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
     
@@ -30,7 +29,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	@Nullable
 	PullRequest findLatest(Project project, User submitter);
 	
-	Collection<PullRequest> findOpenByVerifyCommit(String commitHash);
+	Collection<PullRequest> findOpenByCommit(String commitHash);
     
     void discard(PullRequest request, @Nullable String note);
     
@@ -64,10 +63,8 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	void restoreSourceBranch(PullRequest request, @Nullable String note);
 	
-	void saveMergeStrategy(PullRequest request);
-	
 	int countOpen(Project project);
 	
-	QualityCheckStatus checkQuality(PullRequest request);
+	void checkQuality(PullRequest request);
 	
 }

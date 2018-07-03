@@ -26,7 +26,7 @@ import io.onedev.server.event.lifecycle.SystemStarted;
 import io.onedev.server.event.lifecycle.SystemStarting;
 import io.onedev.server.event.lifecycle.SystemStopped;
 import io.onedev.server.event.lifecycle.SystemStopping;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.DataManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.persistence.PersistManager;
@@ -53,7 +53,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	private final UnitOfWork unitOfWork;
 	
-	private final ConfigManager configManager;
+	private final SettingManager configManager;
 	
 	private final DataManager dataManager;
 	
@@ -71,7 +71,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	@Inject
 	public OneDev(JettyRunner jettyRunner, PersistManager persistManager, TaskScheduler taskScheduler,
-			UnitOfWork unitOfWork, ServerConfig serverConfig, DataManager dataManager, ConfigManager configManager, 
+			UnitOfWork unitOfWork, ServerConfig serverConfig, DataManager dataManager, SettingManager configManager, 
 			UserManager userManager, ListenerRegistry listenerRegistry, WebSocketManager webSocketManager) {
 		this.jettyRunner = jettyRunner;
 		this.persistManager = persistManager;

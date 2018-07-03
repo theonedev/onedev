@@ -17,7 +17,7 @@ import org.joda.time.DateTime;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -39,7 +39,7 @@ public class LicenseManagementPage extends AdministrationPage {
 
 		@Override
 		protected LicenseDetail load() {
-			return OneDev.getInstance(ConfigManager.class).getLicense();
+			return OneDev.getInstance(SettingManager.class).getLicense();
 		}
 		
 	};
@@ -153,7 +153,7 @@ public class LicenseManagementPage extends AdministrationPage {
 								error("Invalid license key");
 								target.add(feedback);
 							} else {
-								OneDev.getInstance(ConfigManager.class).saveLicense(license);
+								OneDev.getInstance(SettingManager.class).saveLicense(license);
 								setResponsePage(LicenseManagementPage.class);
 								getSession().success("License key applied successfully");
 							}
@@ -194,7 +194,7 @@ public class LicenseManagementPage extends AdministrationPage {
 
 			@Override
 			public void onClick() {
-				OneDev.getInstance(ConfigManager.class).saveLicense(null);
+				OneDev.getInstance(SettingManager.class).saveLicense(null);
 				setResponsePage(LicenseManagementPage.class);
 			}
 

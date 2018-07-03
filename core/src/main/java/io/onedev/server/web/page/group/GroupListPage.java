@@ -27,7 +27,6 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.model.Group;
@@ -214,8 +213,6 @@ public class GroupListPage extends LayoutPage {
 		
 		add(groupsTable = new HistoryAwareDataTable<>("groups", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
-		
-		add(new NotificationPanel("feedback", groupsTable));
 	}
 
 	@Override
@@ -249,7 +246,7 @@ public class GroupListPage extends LayoutPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new GroupResourceReference()));
+		response.render(CssHeaderItem.forReference(new GroupCssResourceReference()));
 	}
 	
 }

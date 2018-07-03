@@ -1,20 +1,20 @@
 package io.onedev.server.web.page.project.pullrequests.requestdetail;
 
-import static io.onedev.server.model.support.MergeStrategy.ALWAYS_MERGE;
-import static io.onedev.server.model.support.MergeStrategy.MERGE_IF_NECESSARY;
-import static io.onedev.server.model.support.MergeStrategy.REBASE_MERGE;
-import static io.onedev.server.model.support.MergeStrategy.SQUASH_MERGE;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.ALWAYS_MERGE;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.MERGE_IF_NECESSARY;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_MERGE;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_MERGE;
 import static io.onedev.server.web.page.project.pullrequests.requestdetail.PullRequestOperation.APPROVE;
 import static io.onedev.server.web.page.project.pullrequests.requestdetail.PullRequestOperation.DELETE_SOURCE_BRANCH;
-import static io.onedev.server.web.page.project.pullrequests.requestdetail.PullRequestOperation.DISAPPROVE;
 import static io.onedev.server.web.page.project.pullrequests.requestdetail.PullRequestOperation.DISCARD;
 import static io.onedev.server.web.page.project.pullrequests.requestdetail.PullRequestOperation.REOPEN;
+import static io.onedev.server.web.page.project.pullrequests.requestdetail.PullRequestOperation.REQUEST_FOR_CHANGES;
 import static io.onedev.server.web.page.project.pullrequests.requestdetail.PullRequestOperation.RESTORE_SOURCE_BRANCH;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -25,19 +25,26 @@ import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
+import org.apache.wicket.markup.html.form.IChoiceRenderer;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -45,6 +52,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
@@ -58,40 +66,45 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.PullRequestActionManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.PullRequestUpdateManager;
-import io.onedev.server.manager.VerificationManager;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.MergePreview;
-import io.onedev.server.model.support.MergeStrategy;
+import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.ProjectAndBranch;
+import io.onedev.server.model.support.issue.WatchStatus;
+import io.onedev.server.model.support.pullrequest.MergePreview;
+import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.Verification;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
+import io.onedev.server.web.component.build.PullRequestBuildsPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.BranchLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
+import io.onedev.server.web.component.projectcomment.CommentInput;
+import io.onedev.server.web.component.review.ReviewListPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.component.verification.VerificationStatusPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidRequestPage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.codecomments.RequestCodeCommentsPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.mergepreview.MergePreviewPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
+import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
+import io.onedev.server.web.util.ConfirmOnClick;
+import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.model.EntityModel;
@@ -106,9 +119,13 @@ public abstract class RequestDetailPage extends ProjectPage {
 	
 	protected final IModel<PullRequest> requestModel;
 	
-	private boolean editingTitle;
+	private boolean isEditingTitle;
+	
+	private String title;
 	
 	private Long reviewUpdateId;
+	
+	private MergeStrategy mergeStrategy;
 	
 	public RequestDetailPage(PageParameters params) {
 		super(params);
@@ -155,7 +172,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!editingTitle);
+				setVisible(!isEditingTitle);
 			}
 			
 		});
@@ -164,7 +181,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				editingTitle = true;
+				isEditingTitle = true;
 				
 				target.add(requestHead);
 			}
@@ -173,7 +190,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				setVisible(!editingTitle && SecurityUtils.canModify(getPullRequest()));
+				setVisible(!isEditingTitle && SecurityUtils.canModify(getPullRequest()));
 			}
 			
 		});
@@ -183,12 +200,13 @@ public abstract class RequestDetailPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(editingTitle);
+				setVisible(isEditingTitle);
 			}
 			
 		};
 		requestHead.add(form);
 		
+		title = getPullRequest().getTitle();
 		form.add(new TextField<String>("title", new IModel<String>() {
 
 			@Override
@@ -197,15 +215,12 @@ public abstract class RequestDetailPage extends ProjectPage {
 
 			@Override
 			public String getObject() {
-				if (StringUtils.isNotBlank(getPullRequest().getTitle()))
-					return getPullRequest().getTitle();
-				else
-					return "";
+				return title;
 			}
 
 			@Override
 			public void setObject(String object) {
-				getPullRequest().setTitle(object);
+				title = object;
 			}
 			
 		}));
@@ -216,9 +231,10 @@ public abstract class RequestDetailPage extends ProjectPage {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				if (StringUtils.isNotBlank(getPullRequest().getTitle())) {
-					OneDev.getInstance(Dao.class).persist(getPullRequest());
-					editingTitle = false;
+				if (StringUtils.isNotBlank(title)) {
+					OneDev.getInstance(PullRequestActionManager.class).changeTitle(getPullRequest(), title);
+					send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
+					isEditingTitle = false;
 				}
 
 				target.add(requestHead);
@@ -231,7 +247,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				editingTitle = false;
+				isEditingTitle = false;
 				target.add(requestHead);
 				target.appendJavaScript("$(window).resize();");
 			}
@@ -283,13 +299,13 @@ public abstract class RequestDetailPage extends ProjectPage {
 
 		summaryContainer.add(newDiscardedNoteContainer());
 		summaryContainer.add(newMergedNoteContainer());
-		summaryContainer.add(newMergePreviewContainer());
+		summaryContainer.add(newMergeStatusContainer());
 		summaryContainer.add(new WebMarkupContainer("doNotMerge") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getPullRequest().getMergeStrategy() == MergeStrategy.DO_NOT_MERGE);
+				setVisible(getPullRequest().isOpen() && getPullRequest().getMergeStrategy() == MergeStrategy.DO_NOT_MERGE);
 			}
 			
 		}.setOutputMarkupPlaceholderTag(true));
@@ -300,7 +316,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 		
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new RequestTab("Overview", RequestOverviewPage.class));
+		tabs.add(new RequestTab("Activities", RequestActivitiesPage.class));
 		tabs.add(new RequestTab("File Changes", RequestChangesPage.class));
 		tabs.add(new RequestTab("Code Comments", RequestCodeCommentsPage.class));
 		if (request.isOpen())
@@ -351,8 +367,261 @@ public abstract class RequestDetailPage extends ProjectPage {
 			}
 			
 		});
+		
+		WebMarkupContainer sideContainer = new WebMarkupContainer("side") {
+
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+				String script = String.format("onedev.server.requestDetail.onSideDomReady('%s');", getMarkupId());
+				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+
+				if (event.getPayload() instanceof PageDataChanged) {
+					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+					IPartialPageRequestHandler partialPageRequestHandler = pageDataChanged.getHandler();
+					partialPageRequestHandler.add(this);
+				}
+				
+			}
+			
+		};
+		sideContainer.setOutputMarkupId(true);
+		add(sideContainer);
+		
+		sideContainer.add(newMergeStrategyContainer());
+		sideContainer.add(new ReviewListPanel("reviews", requestModel));
+		
+		BranchProtection protection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
+		if (protection != null && !protection.getConfigurations().isEmpty() && protection.isBuildMerges()) {
+			sideContainer.add(new Label("buildsTitle", "Builds (On Merged Commit)"));
+		} else {
+			sideContainer.add(new Label("buildsTitle", "Builds"));
+		}
+		sideContainer.add(new PullRequestBuildsPanel("builds", requestModel));
+		
+		sideContainer.add(newWatchContainer());
+		sideContainer.add(newManageContainer());
 	}
 	
+	private WebMarkupContainer newManageContainer() {
+		WebMarkupContainer container = new WebMarkupContainer("manage");
+		container.setVisible(SecurityUtils.canModify(getPullRequest()));
+		container.add(new Link<Void>("synchronize") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isOpen());
+			}
+
+			@Override
+			public void onClick() {
+				OneDev.getInstance(PullRequestManager.class).check(getPullRequest());
+				Session.get().success("Pull request is synchronized");
+			}
+			
+		});
+		container.add(new Link<Void>("delete") {
+
+			@Override
+			public void onClick() {
+				PullRequest request = getPullRequest();
+				OneDev.getInstance(PullRequestManager.class).delete(request);
+				Session.get().success("Pull request #" + request.getNumber() + " is deleted");
+				setResponsePage(RequestListPage.class, RequestListPage.paramsOf(getProject()));
+			}
+			
+		}.add(new ConfirmOnClick("Do you really want to delete this pull request?")));
+		return container;
+	}
+	
+	private WebMarkupContainer newMergeStrategyContainer() {
+		WebMarkupContainer mergeStrategyContainer = new WebMarkupContainer("mergeStrategy");
+		mergeStrategyContainer.setOutputMarkupId(true);
+
+		mergeStrategy = getPullRequest().getMergeStrategy();
+		
+		IModel<MergeStrategy> mergeStrategyModel = new PropertyModel<MergeStrategy>(this, "mergeStrategy");
+		
+		List<MergeStrategy> mergeStrategies = Arrays.asList(MergeStrategy.values());
+		DropDownChoice<MergeStrategy> editor = 
+				new DropDownChoice<MergeStrategy>("editor", mergeStrategyModel, mergeStrategies) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));						
+			}
+			
+		};
+		editor.add(new OnChangeAjaxBehavior() {
+					
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				OneDev.getInstance(PullRequestActionManager.class).changeMergeStrategy(getPullRequest(), mergeStrategy);
+				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
+			}
+			
+		});
+		mergeStrategyContainer.add(editor);
+		
+		mergeStrategyContainer.add(new Label("viewer", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getPullRequest().getMergeStrategy().getDisplayName();
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(getPullRequest().isMerged() || !SecurityUtils.canModify(getPullRequest()));						
+			}
+			
+		});
+
+		mergeStrategyContainer.add(new Label("help", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getPullRequest().getMergeStrategy().getDescription();
+			}
+			
+		}) {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				
+				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));						
+			}
+			
+		});
+		
+		return mergeStrategyContainer;
+	}
+	
+	private WebMarkupContainer newWatchContainer() {
+		final WebMarkupContainer watchContainer = new WebMarkupContainer("watch") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getLoginUser() != null);
+			}
+
+		};
+		
+		watchContainer.setOutputMarkupId(true);
+
+		final IModel<WatchStatus> optionModel = new LoadableDetachableModel<WatchStatus>() {
+
+			@Override
+			protected WatchStatus load() {
+				PullRequestWatch watch = getPullRequest().getWatch(getLoginUser());
+				if (watch != null) {
+					if (watch.isWatching())
+						return WatchStatus.WATCH;
+					else
+						return WatchStatus.DO_NOT_WATCH;
+				} else {
+					return WatchStatus.DEFAULT;
+				}
+			}
+			
+		};
+		
+		List<WatchStatus> options = Arrays.asList(WatchStatus.values());
+		
+		IChoiceRenderer<WatchStatus> choiceRenderer = new IChoiceRenderer<WatchStatus>() {
+
+			@Override
+			public Object getDisplayValue(WatchStatus object) {
+				return object.toString();
+			}
+
+			@Override
+			public String getIdValue(WatchStatus object, int index) {
+				return object.name();
+			}
+
+			@Override
+			public WatchStatus getObject(String id, IModel<? extends List<? extends WatchStatus>> choices) {
+				return WatchStatus.valueOf(id);
+			}
+			
+		};
+		DropDownChoice<WatchStatus> choice = new DropDownChoice<>("option", optionModel, 
+				options, choiceRenderer);
+		
+		choice.add(new OnChangeAjaxBehavior() {
+					
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				PullRequestWatch watch = getPullRequest().getWatch(getLoginUser());
+				Dao dao = OneDev.getInstance(Dao.class);
+				if (optionModel.getObject() == WatchStatus.WATCH) {
+					if (watch != null) {
+						watch.setWatching(true);
+					} else {
+						watch = new PullRequestWatch();
+						watch.setRequest(getPullRequest());
+						watch.setUser(getLoginUser());
+						watch.setWatching(true);
+						getPullRequest().getWatches().add(watch);
+					}
+					dao.persist(watch);
+				} else if (optionModel.getObject() == WatchStatus.DEFAULT) {
+					if (watch != null) {
+						dao.remove(watch);
+						getPullRequest().getWatches().remove(watch);
+					}
+				} else {
+					if (watch != null) {
+						watch.setWatching(false);
+					} else {
+						watch = new PullRequestWatch();
+						watch.setRequest(getPullRequest());
+						watch.setUser(getLoginUser());
+						watch.setWatching(false);
+						getPullRequest().getWatches().add(watch);
+					}
+					dao.persist(watch);
+				}
+				target.add(watchContainer);
+			}
+			
+		});
+		watchContainer.add(choice);
+		watchContainer.add(new Label("help", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				PullRequestWatch watch = getPullRequest().getWatch(getLoginUser());
+				if (watch != null) {
+					if (!watch.isWatching()) 
+						return "Ignore notifications irrelevant to me.";
+					else 
+						return "You will be notified of any activities.";
+				} else {
+					return "Ignore notifications irrelevant to me, but start to watch once I am involved."; 
+				}
+			}
+			
+		}));
+		
+		return watchContainer;
+	}
+
 	private WebMarkupContainer newStatusAndBranchesContainer() {
 		WebMarkupContainer statusAndBranchesContainer = new WebMarkupContainer("statusAndBranches");
 		
@@ -426,8 +695,8 @@ public abstract class RequestDetailPage extends ProjectPage {
 		return statusAndBranchesContainer;
 	}
 
-	private WebMarkupContainer newMergePreviewContainer() {
-		WebMarkupContainer mergePreviewContainer = new WebMarkupContainer("mergePreview") {
+	private WebMarkupContainer newMergeStatusContainer() {
+		WebMarkupContainer mergeStatusContainer = new WebMarkupContainer("mergeStatus") {
 
 			@Override
 			protected void onConfigure() {
@@ -438,9 +707,9 @@ public abstract class RequestDetailPage extends ProjectPage {
 			}
 			
 		};
-		mergePreviewContainer.setOutputMarkupPlaceholderTag(true);
+		mergeStatusContainer.setOutputMarkupPlaceholderTag(true);
 		
-		mergePreviewContainer.add(new WebMarkupContainer("calculating") {
+		mergeStatusContainer.add(new WebMarkupContainer("calculating") {
 
 			@Override
 			protected void onConfigure() {
@@ -449,13 +718,13 @@ public abstract class RequestDetailPage extends ProjectPage {
 			}
 			
 		});
-		mergePreviewContainer.add(new WebMarkupContainer("conflict") {
+		mergeStatusContainer.add(new WebMarkupContainer("conflict") {
 			
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				add(new DropdownLink("resolveInstructionsTrigger") {
+				add(new DropdownLink("resolveInstructions") {
 
 					@Override
 					protected void onConfigure() {
@@ -465,7 +734,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new ResolveConflictInstructionPanel(id, new EntityModel<PullRequest>(getPullRequest()));
+						return new ConflictResolveInstructionPanel(id, new EntityModel<PullRequest>(getPullRequest()));
 					}
 					
 				});
@@ -479,35 +748,13 @@ public abstract class RequestDetailPage extends ProjectPage {
 			}
 
 		});
-		mergePreviewContainer.add(new WebMarkupContainer("noConflict") {
+		mergeStatusContainer.add(new WebMarkupContainer("noConflict") {
 			
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
 
-				add(new Link<Void>("mergePreview") {
-					
-					@Override
-					public void onClick() {
-						PullRequest request = getPullRequest();
-						PageParameters params = MergePreviewPage.paramsOf(request);
-						setResponsePage(MergePreviewPage.class, params);
-					}
-
-				});
-
-				add(new VerificationStatusPanel("verificationStatus", 
-						new LoadableDetachableModel<Map<String, Verification>>() {
-
-					@Override
-					protected Map<String, Verification> load() {
-						return OneDev.getInstance(VerificationManager.class)
-								.getVerifications(getProject(), getPullRequest().getMergePreview().getMerged());
-					}
-					
-				}));
-				
-				add(new DropdownLink("checkoutInstructionsTrigger") {
+				add(new DropdownLink("checkoutInstructions") {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
@@ -527,7 +774,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 
 		});
 		
-		return mergePreviewContainer;
+		return mergeStatusContainer;
 	}
 	
 	private WebMarkupContainer newOperationsContainer() {
@@ -574,12 +821,12 @@ public abstract class RequestDetailPage extends ProjectPage {
 			
 		});
 		
-		operationsContainer.add(new AjaxLink<Void>("disapprove") {
+		operationsContainer.add(new AjaxLink<Void>("requestForChanges") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				reviewUpdateId = getPullRequest().getLatestUpdate().getId();
-				operationsContainer.replace(newOperationConfirm(confirmId, DISAPPROVE, operationsContainer));
+				operationsContainer.replace(newOperationConfirm(confirmId, REQUEST_FOR_CHANGES, operationsContainer));
 				target.add(operationsContainer);
 				target.appendJavaScript("$(window).resize();");
 			}
@@ -587,7 +834,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(DISAPPROVE.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
+				setVisible(REQUEST_FOR_CHANGES.canOperate(getPullRequest()) && !operationsContainer.get(confirmId).isVisible());
 			}
 			
 		});
@@ -696,6 +943,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 		
 		WebMarkupContainer hint = new WebMarkupContainer(HINT_ID);
 		hint.setOutputMarkupPlaceholderTag(true);
+		hint.setVisible(false);
 		fragment.add(hint);
 		
 		NotificationPanel feedback = new NotificationPanel("feedback", form);
@@ -709,7 +957,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 				super.onSubmit(target, form);
 				
 				PullRequest request = getPullRequest();
-				if ((operation == APPROVE || operation == DISAPPROVE) && 
+				if ((operation == APPROVE || operation == REQUEST_FOR_CHANGES) && 
 						!getPullRequest().getLatestUpdate().getId().equals(reviewUpdateId)) {
 					Long prevReviewUpdateId = reviewUpdateId;
 					WebMarkupContainer hint = new UnreviewedChangesPanel(HINT_ID, 
@@ -735,7 +983,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 					target.appendJavaScript("$(window).resize();");
 				} else {
 					operation.operate(request, noteInput.getModelObject());
-					setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(getPullRequest()));
+					setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(getPullRequest()));
 				}
 			}
 
@@ -902,7 +1150,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(CssHeaderItem.forReference(new RequestDetailResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new RequestDetailResourceReference()));
 	}
 	
 	private class RequestTab extends PageTab {

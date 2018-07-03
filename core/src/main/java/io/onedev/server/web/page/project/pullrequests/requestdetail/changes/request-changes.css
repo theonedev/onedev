@@ -1,16 +1,16 @@
-#request-detail>.changes>.head {
+#request-detail>.main>.changes>.head {
 	padding-bottom: 20px;
 	border-bottom: 1px dotted #BBB;
 	margin-bottom: 20px;
 	font-size: 16px;
 }
-#request-detail>.changes>.head .btn {
+#request-detail>.main>.changes>.head .btn {
 	font-size: 16px;
 }
-#request-detail>.changes>.head .full-changes {
+#request-detail>.main>.changes>.head .full-changes {
 	margin: 6px 0 0 20px;
 }
-#request-detail>.changes>.head .full-changes a {
+#request-detail>.main>.changes>.head .full-changes a {
 	color: #666;
 }
 

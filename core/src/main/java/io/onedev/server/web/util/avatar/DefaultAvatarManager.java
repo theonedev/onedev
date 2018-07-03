@@ -17,7 +17,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.facade.UserFacade;
@@ -36,10 +36,10 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	private static final String AVATARS_BASE_URL = "/site/avatars/";
 	
-	private final ConfigManager configManager;
+	private final SettingManager configManager;
 	
 	@Inject
-	public DefaultAvatarManager(ConfigManager configManager) {
+	public DefaultAvatarManager(SettingManager configManager) {
 		this.configManager = configManager;
 	}
 	

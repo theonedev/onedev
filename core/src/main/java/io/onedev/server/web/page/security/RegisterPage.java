@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.link.Link;
 
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -25,7 +25,7 @@ import io.onedev.server.web.page.user.UserPage;
 public class RegisterPage extends BasePage {
 	
 	public RegisterPage() {
-		if (!OneDev.getInstance(ConfigManager.class).getSecuritySetting().isEnableSelfRegister())
+		if (!OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableSelfRegister())
 			throw new UnauthenticatedException("User self-register is disabled");
 		if (getLoginUser() != null)
 			throw new IllegalStateException("Can not sign up a user while signed in");

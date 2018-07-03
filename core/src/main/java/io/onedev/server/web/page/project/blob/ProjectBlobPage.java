@@ -860,23 +860,32 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			state.requestId = null;
 			newSearchResult(target, null);
 			onResolvedRevisionChange(target);
-		} else {
-			if (!Objects.equal(state.blobIdent.path, blobIdent.path) 
-					|| (state.mark != null) != (prevMark != null)) {
-				state.blobIdent.path = blobIdent.path;
-				state.blobIdent.mode = blobIdent.mode;
-				state.mode = Mode.VIEW;
-				state.commentId = null;
-				newBlobNavigator(target);
-				newBlobOperations(target);
-				newBlobContent(target);
-				resizeWindow(target);
-				OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
-			} else if (state.mark != null) {
+		} else if (!Objects.equal(state.blobIdent.path, blobIdent.path)) {
+			state.blobIdent.path = blobIdent.path;
+			state.blobIdent.mode = blobIdent.mode;
+			state.mode = Mode.VIEW;
+			state.commentId = null;
+			newBlobNavigator(target);
+			newBlobOperations(target);
+			newBlobContent(target);
+			resizeWindow(target);
+			OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
+		} else if (state.mark != null) {
+			if (get(BLOB_CONTENT_ID) instanceof Markable) {
 				// This logic is added for performance reason, we do not want to 
 				// reload the file if go to different mark positions in same file
 				((Markable)get(BLOB_CONTENT_ID)).mark(target, state.mark);
+			} else {
+				state.mode = Mode.VIEW;
+				newBlobOperations(target);
+				newBlobContent(target);
+				resizeWindow(target);
 			}
+		} else if (prevMark != null) {
+			state.mode = Mode.VIEW;
+			newBlobOperations(target);
+			newBlobContent(target);
+			resizeWindow(target);
 		}
 		pushState(target);
 	}

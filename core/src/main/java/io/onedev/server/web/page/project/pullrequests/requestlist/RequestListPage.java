@@ -52,7 +52,7 @@ import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.newrequest.NewRequestPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.requestlist.SearchOption.Status;
 import io.onedev.server.web.util.PagingHistorySupport;
 
@@ -274,8 +274,8 @@ public class RequestListPage extends ProjectPage {
 				User userForDisplay = User.getForDisplay(request.getSubmitter(), request.getSubmitterName());
 				fragment.add(new AvatarLink("submitter", userForDisplay));
 				fragment.add(new Label("number", "#" + request.getNumber()));
-				fragment.add(new ViewStateAwarePageLink<Void>("text", RequestOverviewPage.class, 
-						RequestOverviewPage.paramsOf(request)) {
+				fragment.add(new ViewStateAwarePageLink<Void>("text", RequestActivitiesPage.class, 
+						RequestActivitiesPage.paramsOf(request)) {
 
 					@Override
 					public IModel<?> getBody() {
@@ -301,23 +301,15 @@ public class RequestListPage extends ProjectPage {
 				}
 					
 				WebMarkupContainer lastActivityContainer = new WebMarkupContainer("lastActivity");
-				if (request.getLastActivity() != null) {
-					String action = request.getLastActivity().getAction();
-					if (action.startsWith("there are")) {
-						lastActivityContainer.add(new WebMarkupContainer("user").setVisible(false));
-					} else {
-						userForDisplay = User.getForDisplay(request.getLastActivity().getUser(), 
-								request.getLastActivity().getUserName());
-						lastActivityContainer.add(new UserLink("user", userForDisplay));
-					}
-					lastActivityContainer.add(new Label("action", action));
-					lastActivityContainer.add(new Label("date", DateUtils.formatAge(request.getLastActivity().getDate())));
-				} else {
-					lastActivityContainer.add(new UserLink("user", User.getForDisplay(request.getSubmitter(), 
-							request.getSubmitterName())));
-					lastActivityContainer.add(new Label("action", "submitted"));
-					lastActivityContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
-				}
+				String description = request.getLastActivity().getDescription();
+				User user = User.getForDisplay(request.getLastActivity().getUser(), 
+						request.getLastActivity().getUserName());
+				if (user != null) 
+					lastActivityContainer.add(new UserLink("user", userForDisplay));
+				else
+					lastActivityContainer.add(new WebMarkupContainer("user").setVisible(false));
+				lastActivityContainer.add(new Label("description", description));
+				lastActivityContainer.add(new Label("date", DateUtils.formatAge(request.getLastActivity().getDate())));
 				fragment.add(lastActivityContainer);
 				
 				cellItem.add(fragment);

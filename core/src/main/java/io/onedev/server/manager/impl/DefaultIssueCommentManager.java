@@ -35,7 +35,7 @@ public class DefaultIssueCommentManager extends AbstractEntityManager<IssueComme
 			LastActivity lastActivity = new LastActivity();
 			lastActivity.setUser(comment.getUser());
 			lastActivity.setDate(comment.getDate());
-			lastActivity.setAction("commented");
+			lastActivity.setDescription("commented");
 			comment.getIssue().setLastActivity(lastActivity);
 			comment.getIssue().setNumOfComments(comment.getIssue().getNumOfComments()+1);
 		}		

@@ -48,6 +48,6 @@
 .commit-list .pull-right {
 	margin-top: 6px;
 }
-.commit-list .verification-status {
+.commit-list .build-status {
 	margin-right: 4px;
 }

@@ -27,7 +27,6 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
@@ -209,13 +208,12 @@ public class UserListPage extends LayoutPage {
 		
 		add(usersTable = new HistoryAwareDataTable<User, Void>("users", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
-		add(new NotificationPanel("feedback", usersTable));
 	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new UserResourceReference()));
+		response.render(CssHeaderItem.forReference(new UserCssResourceReference()));
 	}
 
 	@Override

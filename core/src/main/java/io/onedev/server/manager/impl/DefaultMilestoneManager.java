@@ -13,13 +13,13 @@ import org.hibernate.query.Query;
 import com.google.common.base.Preconditions;
 
 import io.onedev.launcher.loader.Listen;
-import io.onedev.server.event.issue.IssueChanged;
+import io.onedev.server.event.issue.IssueActionEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.manager.MilestoneManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.changedata.BatchChangeData;
+import io.onedev.server.model.support.issue.changedata.BatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.MilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.StateChangeData;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
@@ -174,17 +174,17 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 	
 	@Transactional
 	@Listen
-	public void on(IssueChanged event) {
+	public void on(IssueActionEvent event) {
 		Project project = event.getIssue().getProject();
-		if (event.getChange().getData() instanceof BatchChangeData) {
-			BatchChangeData data = (BatchChangeData) event.getChange().getData();
+		if (event.getAction().getData() instanceof BatchUpdateData) {
+			BatchUpdateData data = (BatchUpdateData) event.getAction().getData();
 			onStateChange(project, data.getOldMilestone(), data.getOldState(), data.getNewState());
 			onMilestoneChange(project, data.getNewState(), data.getOldMilestone(), data.getNewMilestone());
-		} else if (event.getChange().getData() instanceof StateChangeData) {
-			StateChangeData data = (StateChangeData) event.getChange().getData();
+		} else if (event.getAction().getData() instanceof StateChangeData) {
+			StateChangeData data = (StateChangeData) event.getAction().getData();
 			onStateChange(project, event.getIssue().getMilestoneName(), data.getOldState(), data.getNewState());
-		} else if (event.getChange().getData() instanceof MilestoneChangeData) {
-			MilestoneChangeData data = (MilestoneChangeData) event.getChange().getData();
+		} else if (event.getAction().getData() instanceof MilestoneChangeData) {
+			MilestoneChangeData data = (MilestoneChangeData) event.getAction().getData();
 			onMilestoneChange(project, event.getIssue().getState(), data.getOldMilestone(), data.getNewMilestone());
 		}
 	}

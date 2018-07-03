@@ -30,7 +30,7 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.MergePreview;
+import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.PageUtils;
 import io.onedev.server.rest.RestConstants;

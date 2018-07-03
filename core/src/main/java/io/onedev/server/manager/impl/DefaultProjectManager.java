@@ -6,9 +6,11 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -40,11 +42,12 @@ import io.onedev.server.event.lifecycle.SystemStopping;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.CloneCommand;
 import io.onedev.server.git.command.ListChangedFilesCommand;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserAuthorizationManager;
-import io.onedev.server.manager.VerificationManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
@@ -56,7 +59,6 @@ import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.ProjectPrivilege;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Verification;
 import io.onedev.server.util.facade.GroupAuthorizationFacade;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -75,7 +77,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     
     private final UserAuthorizationManager userAuthorizationManager;
     
-    private final VerificationManager verificationManager;
+    private final BuildManager buildManager;
     
     private final CacheManager cacheManager;
     
@@ -85,14 +87,13 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	
     @Inject
     public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager, ListenerRegistry listenerRegistry, 
-    		UserAuthorizationManager userAuthorizationManager, VerificationManager verificationManager, 
-    		CacheManager cacheManager) {
+    		UserAuthorizationManager userAuthorizationManager, BuildManager buildManager, CacheManager cacheManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
         this.listenerRegistry = listenerRegistry;
         this.userAuthorizationManager = userAuthorizationManager;
-        this.verificationManager = verificationManager;
+        this.buildManager = buildManager;
         this.cacheManager = cacheManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
@@ -345,7 +346,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 					&& !branchProtection.getReviewRequirement().matches(user)) {
 				return true;
 			}
-			if (!branchProtection.getVerifications().isEmpty())
+			if (!branchProtection.getConfigurations().isEmpty())
 				return true;
 			
 			if (file != null) {
@@ -367,8 +368,9 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 				return true;
 			}
 
-			Map<String, Verification> verifications = verificationManager.getVerifications(project, newObjectId.name());
-			if (!verifications.keySet().containsAll(branchProtection.getVerifications())) {
+			List<Build> builds = buildManager.findAll(project, newObjectId.name());
+			if (!builds.stream().map(it->it.getConfiguration().getName()).collect(Collectors.toSet())
+					.containsAll(branchProtection.getConfigurations())) {
 				return true;
 			}
 			

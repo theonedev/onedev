@@ -8,14 +8,15 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.CommentSupport;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
 import io.onedev.utils.HtmlUtils;
 import jersey.repackaged.com.google.common.collect.Lists;
 
-public class TitleChangeData implements ChangeData {
+public class TitleChangeData implements ActionData {
 
 	private static final long serialVersionUID = 1L;
 
@@ -29,8 +30,8 @@ public class TitleChangeData implements ChangeData {
 	}
 	
 	@Override
-	public Component render(String componentId, IssueChange change) {
-		return new PlainDiffPanel(componentId, Lists.newArrayList(oldTitle), Lists.newArrayList(newTitle), true);
+	public Component render(String componentId, IssueAction action) {
+		return new PlainDiffPanel(componentId, Lists.newArrayList(oldTitle), "a.txt", Lists.newArrayList(newTitle), "b.txt", true);
 	}
 	
 	@Override
@@ -44,8 +45,8 @@ public class TitleChangeData implements ChangeData {
 	}
 	
 	@Override
-	public String getTitle(IssueChange change, boolean external) {
-		Issue issue = change.getIssue();
+	public String getTitle(IssueAction action, boolean external) {
+		Issue issue = action.getIssue();
 		if (external) 
 			return String.format("[Title Changed] Issue #%d: %s", issue.getNumber(), issue.getTitle());  
 		else 
@@ -53,11 +54,11 @@ public class TitleChangeData implements ChangeData {
 	}
 
 	@Override
-	public String describeAsHtml(IssueChange change) {
-		String escaped = HtmlUtils.escapeHtml(change.getUser().getDisplayName());
+	public String describeAsHtml(IssueAction action) {
+		String escaped = HtmlUtils.escapeHtml(action.getUser().getDisplayName());
 		StringBuilder builder = new StringBuilder(String.format("<b>%s changed title</b>", escaped));
 		builder.append("<p style='margin: 16px 0;'>");
-		builder.append(DiffUtils.diffAsHtml(Lists.newArrayList(oldTitle), Lists.newArrayList(newTitle), true));
+		builder.append(DiffUtils.diffAsHtml(Lists.newArrayList(oldTitle), "a.txt", Lists.newArrayList(newTitle), "b.txt", true));
 		return builder.toString();
 	}
 

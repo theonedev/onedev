@@ -41,18 +41,19 @@ import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.CodeCommentManager;
 import io.onedev.server.manager.CommitInfoManager;
-import io.onedev.server.manager.VerificationManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.search.CommitIndexed;
-import io.onedev.server.util.Verification;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.avatar.ContributorAvatars;
+import io.onedev.server.web.component.build.BuildStatusPanel;
 import io.onedev.server.web.component.commitmessage.CommitMessageLabel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createbranch.CreateBranchLink;
@@ -60,7 +61,6 @@ import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.verification.VerificationStatusPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
@@ -217,11 +217,11 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent(), true));
 
-		add(new VerificationStatusPanel("verificationStatus", new LoadableDetachableModel<Map<String, Verification>>() {
+		add(new BuildStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 			@Override
-			protected Map<String, Verification> load() {
-				return OneDev.getInstance(VerificationManager.class).getVerifications(getProject(), getCommit().name());
+			protected List<Build> load() {
+				return OneDev.getInstance(BuildManager.class).findAll(getProject(), getCommit().name());
 			}
 			
 		}));

@@ -11,8 +11,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.comment.CodeCommentFilter;
-import io.onedev.server.web.component.comment.CodeCommentListPanel;
+import io.onedev.server.web.component.codecomment.CodeCommentFilter;
+import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 

@@ -21,14 +21,16 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.shiro.authz.UnauthorizedException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Preconditions;
 
+import io.onedev.server.exception.OneException;
+import io.onedev.server.manager.BuildManager;
+import io.onedev.server.manager.ConfigurationManager;
 import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.VerificationManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Project;
 import io.onedev.server.rest.RestConstants;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Verification;
 
 @Path("/repos/projects")
 @Consumes(MediaType.WILDCARD)
@@ -38,20 +40,26 @@ public class CommitStatusResource {
 
 	private final ProjectManager projectManager;
 	
-	private final VerificationManager verificationManager;
+	private final BuildManager buildManager;
+	
+	private final ConfigurationManager configurationManager;
 	
 	private final ObjectMapper objectMapper;
 	
 	@Inject
-	public CommitStatusResource(ProjectManager projectManager, VerificationManager verificationManager, 
-			ObjectMapper objectMapper) {
+	public CommitStatusResource(ProjectManager projectManager, BuildManager buildManager, 
+			ConfigurationManager configurationManager, ObjectMapper objectMapper) {
 		this.projectManager = projectManager;
-		this.verificationManager = verificationManager;
+		this.buildManager = buildManager;
 		this.objectMapper = objectMapper;
+		this.configurationManager = configurationManager;
 	}
 	
 	private Project getProject(String projectName) {
-		return Preconditions.checkNotNull(projectManager.find(projectName));
+		Project project = projectManager.find(projectName);
+		if (project == null)
+			throw new OneException("Unable to find project: " + projectName);
+		return project;
 	}
 	
 	@Consumes(MediaType.APPLICATION_JSON)
@@ -64,18 +72,33 @@ public class CommitStatusResource {
     	if (!SecurityUtils.canWrite(project))
     		throw new UnauthorizedException();
     	
-    	String state = commitStatus.get("state").toUpperCase();
-    	if (state.equals("PENDING"))
-    		state = "RUNNING";
-    	Verification verification = new Verification(Verification.Status.valueOf(state), 
-    			new Date(), commitStatus.get("description"), commitStatus.get("target_url"));
     	String context = commitStatus.get("context");
     	if (context == null)
     		context = "default";
-    	verificationManager.saveVerification(project, commit, context, verification);
+    	
+    	Configuration configuration = configurationManager.find(project, context);
+    	if (configuration == null) {
+    		String message = String.format("Unable to find configuration (project: %s, name: %s)", project.getName(), context);
+    		throw new OneException(message);
+    	}
+    	
+    	String status = commitStatus.get("state").toUpperCase();
+    	if (status.equals("PENDING"))
+    		status = "RUNNING";
+    	Build build = buildManager.find(configuration, commit);
+    	if (build == null) {
+    		build = new Build();
+    		build.setConfiguration(configuration);
+        	build.setCommit(commit);
+    	}
+    	build.setStatus(Build.Status.valueOf(status));
+    	build.setDate(new Date());
+    	build.setDescription(commitStatus.get("description"));
+    	build.setUrl(commitStatus.get("target_url"));
+    	buildManager.save(build);
     	UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
     	uriBuilder.path(context);
-    	commitStatus.put("id", "1");
+    	commitStatus.put("id", build.getId().toString());
     	
     	return Response.created(uriBuilder.build()).entity(commitStatus).type(RestConstants.JSON_UTF8).build();
     }

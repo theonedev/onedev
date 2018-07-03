@@ -16,6 +16,9 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
 import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
+import io.onedev.server.web.page.project.setting.configuration.ConfigurationEditPage;
+import io.onedev.server.web.page.project.setting.configuration.ConfigurationListPage;
+import io.onedev.server.web.page.project.setting.configuration.NewConfigurationPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issueworkflow.fields.IssueFieldsPage;
 import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
@@ -51,6 +54,8 @@ public abstract class ProjectSettingPage extends ProjectPage {
 				tabs.add(new ProjectSettingTab("Issue Fields", "fa fa-fw fa-list-ul", IssueFieldsPage.class));
 				tabs.add(new ProjectSettingTab("Issue States", "fa fa-fw fa-check", IssueStatesPage.class));
 				tabs.add(new ProjectSettingTab("Issue State Transitions", "fa fa-fw fa-exchange", StateTransitionsPage.class));
+				tabs.add(new ProjectSettingTab("Build Configurations", "fa fa-fw fa-cube", ConfigurationListPage.class, 
+						NewConfigurationPage.class, ConfigurationEditPage.class));
 				return tabs;
 			}
 			

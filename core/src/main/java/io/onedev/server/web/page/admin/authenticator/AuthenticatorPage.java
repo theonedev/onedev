@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Joiner;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.security.authenticator.Authenticated;
 import io.onedev.server.web.behavior.testform.TestFormBehavior;
 import io.onedev.server.web.behavior.testform.TestResult;
@@ -46,7 +46,7 @@ public class AuthenticatorPage extends AdministrationPage {
 		super.onInitialize();
 		
 		AuthenticatorHolder authenticatorHolder = new AuthenticatorHolder();
-		authenticatorHolder.setAuthenticator(OneDev.getInstance(ConfigManager.class).getAuthenticator());
+		authenticatorHolder.setAuthenticator(OneDev.getInstance(SettingManager.class).getAuthenticator());
 		
 		PropertyEditor<Serializable> authenticatorEditor = 
 				PropertyContext.editBean("editor", authenticatorHolder, "authenticator");
@@ -57,7 +57,7 @@ public class AuthenticatorPage extends AdministrationPage {
 			public void onSubmit() {
 				super.onSubmit();
 				
-				OneDev.getInstance(ConfigManager.class).saveAuthenticator(authenticatorHolder.getAuthenticator());
+				OneDev.getInstance(SettingManager.class).saveAuthenticator(authenticatorHolder.getAuthenticator());
 				getSession().success("External authentication setting has been saved");
 			}
 			

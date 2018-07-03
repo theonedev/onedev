@@ -17,19 +17,18 @@ import org.hibernate.StaleStateException;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.projectcomment.CommentInput;
+import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
@@ -126,7 +125,8 @@ class OpenedPanel extends GenericPanel<Issue> {
 						try {
 							if (getIssue().getVersion() != lastVersion)
 								throw new StaleStateException("");
-							OneDev.getInstance(IssueChangeManager.class).changeDescription(getIssue(), input.getModelObject());
+							getIssue().setDescription(input.getModelObject());
+							OneDev.getInstance(IssueManager.class).save(getIssue());
 	
 							Component viewer = newViewer();
 							editor.replaceWith(viewer);

@@ -1,127 +1,146 @@
-#request-detail>div, #request-detail>ul {
+#request-detail>.main {
+	margin-right: 360px;
+	pading-right: 20px;
+}
+#request-detail>.main>div {
 	margin-bottom: 20px;
 }
-#request-detail>div:last-child {
-	margin-bottom: 0;
+#request-detail>.main>.title {
+	font-size: 20px;
+	font-weight: bold;
+	color: #444;
+	position: relative;
 }
-#request-detail>.summary {
-	border: 1px solid #E0E0E0;
-	border-radius: 4px;
-	background: #F9F9F9;
-	padding: 20px;
+#request-detail>.main>.title a.edit {
+	color: #666;
+	margin-left: 8px;
 }
-#request-detail>.summary .md-editor {
-	margin-bottom: 20px;
-}
-#request-detail>.summary .merged-note, #request-detail>.summary .do-not-merge {
-	font-size: 16px;
-}
-
-#request-detail>.head .title, #request-detail>.head a.edit {
-	font-size: 24px; 
-	font-weight: bold; 
-	padding: 0;
-}
-#request-detail>.head input[type="text"] {
-	width: 600px;
+#request-detail>.main>.title input[type=text] {
+	width: 400px;
 	font-weight: normal;
 }
-#request-detail>.head .input-clear {
+#request-detail>.main>.title .input-clear {
 	right: auto;
-	left: 573px;
+	left: 373px;
 }
-
-#request-detail>.head a i {
-	color: #999; 
-	font-size: 19px;
+#request-detail>.main>.title .alert {
+	font-weight: normal;
+	font-size: 14px;
 }
-#request-detail>.head>div {
+#request-detail>.main>.status-and-branches {
+	font-size: 16px;
+	line-height: 20px;
+}
+#request-detail>.main>.status-and-branches>.status {
+	font-size: 16px;
 	margin-right: 8px;
 }
-#request-detail>.head>.id {
-	color: #999;
-}
 
-#request-detail>.status-and-branches {
-	font-size: 16px;
+#request-detail>.main>.summary>div {
+	margin-bottom: 20px;
 }
-#request-detail>.status-and-branches>.status {
-	font-size: 16px;
-	margin: -2px 12px 0 0;
-}
-#request-detail>.summary>div {
-	border-bottom: 1px dotted #BBB; 
-	margin-bottom: 16px; 
-	padding-bottom: 12px;
-}
-#request-detail>.summary>div.last-visible {
-	border-bottom: none; 
-	margin-bottom: 0; 
-	padding-bottom: 0;
-}
-#request-detail>.summary>.note {
-	font-size: 16px;
-} 
-#request-detail>.summary>.note.with-status-reasons {
-	font-size: 16px;
-	border-bottom: none;
+#request-detail>.main>.summary ul {
 	margin-bottom: 0;
-} 
+}
+#request-detail>.main>.summary .calculating img {
+	width: 24px;
+	height: 24px;
+}
 
-#request-detail>.summary>.status-reasons ul {
-	margin-bottom: 0; 
-	padding-left: 16px;
-} 
-#request-detail>.summary>.status-reasons ul>li {
-	margin-left: 20px;
-} 
-
-#request-detail>.summary kbd {
-	white-space: nowrap;
-}
-#request-detail>.summary img {
-	width: 24px; 
-	height: 24px; 
-	vertical-align: middle;
-}
-#request-detail>.summary .conflict {
-	color: #DD4B4B; 
-	font-size: 16px;
-} 
-#request-detail>.summary .no-conflict {
-	color: #399529; 
-	font-size: 16px;
-}
-#request-detail>.summary .no-conflict .verification-status {
-	margin-right: 0;
-}
-#request-detail>.summary .no-conflict>* {
+#request-detail>.main>.summary .no-conflict>* {
 	margin-right: 4px;
 }
 
-#request-detail>.summary>.operations>.confirm>.hint {
+#request-detail>.main>.summary>.operations>.confirm>.hint {
 	margin-bottom: 12px;
 	font-size: 16px;
 } 
-#request-detail>.summary>.operations>.confirm>.hint .warning {
+#request-detail>.main>.summary>.operations>.confirm>.hint .warning {
 	color: #EC5544;
 } 
-#request-detail>.summary>.operations>.buttons>a, 
-#request-detail>.summary>.operations>.confirm>form>input {
+#request-detail>.main>.summary>.operations>.buttons>a, 
+#request-detail>.main>.summary>.operations>.confirm>form>input {
 	margin-right: 12px;
 } 
-#request-detail>.summary>.operations>.confirm>form .markdown-editor {
+#request-detail>.main>.summary>.operations>.confirm>form .markdown-editor {
 	margin-bottom: 16px;
 } 
 
-.conflict-resolve-instruction, .checkout-request-instruction {
-	padding: 8px; 
-}
-
-#request-detail>ul.tabs>li>a .fa-circle {
+#request-detail>.main>ul.tabs>li>a .fa-circle {
 	color: #4667EE;
 	display: none;
 }
-#request-detail>ul.tabs>li>a.new .fa-circle {
+#request-detail>.main>ul.tabs>li>a.new .fa-circle {
 	display: inline;
+}
+
+#request-detail>.side>.nav {
+	font-size: 16px;
+	position: relative;
+	text-align: center;
+}
+#request-detail>.side>.nav a {
+	position: absolute;
+	color: #666;
+	top: 0;
+}
+#request-detail>.side>.nav a[disabled] {
+	color: #BBB;
+	cursor: default;
+}
+
+#request-detail>.side>.nav .prev {
+	left: 0;
+}
+#request-detail>.side>.nav .next {
+	right: 0;
+}
+
+#request-detail>.side>div>.head {
+	font-weight: bold;
+	margin-bottom: 12px;
+}
+
+#request-detail>.side {
+	position: fixed;
+	top: 48px;
+	right: 0;
+	bottom: 0;
+	width: 360px;
+	border-left: 2px solid #E0E0E0;
+	padding: 20px;
+	background: #FAFAFA;
+	overflow: auto;
+}
+#request-detail>.side>* {
+	margin-bottom: 20px;
+	border-top: 1px solid #E8E8E8;
+	padding-top: 20px;
+}
+#request-detail>.side>div:first-child {
+	border-top: none;
+	padding-top: 0;
+}
+
+.floating>.content>.instruction {
+	padding: 12px 12px 12px 24px; 
+	width: 500px;
+	margin-bottom: 0;
+}
+.floating>.content>.instruction>li {
+	list-style: decimal;
+	margin-bottom: 12px;
+}
+.floating>.content>.instruction>li:last-child {
+	margin-bottom: 0;
+}
+
+.floating>.content>.instruction>li>.code {
+	margin-top: 8px;
+	font-family: monospace;
+	font-size: 13px;
+	background: #F5F5F5;
+	border: 1px dashed #BBB;
+	border-radius: 4px;
+	padding: 8px;
 }

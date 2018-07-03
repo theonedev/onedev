@@ -49,6 +49,7 @@ import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.info.PageComponentInfo;
 import org.apache.wicket.util.IProvider;
+import org.apache.wicket.util.time.Duration;
 
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
 import io.onedev.launcher.bootstrap.Bootstrap;
@@ -85,6 +86,8 @@ public class OneWebApplication extends WebApplication {
 		getMarkupSettings().setStripWicketTags(true);
 		
 		getStoreSettings().setFileStoreFolder(Bootstrap.getTempDir());
+		
+		getRequestCycleSettings().setTimeout(Duration.minutes(30));
 		
 		BootstrapSettings bootstrapSettings = new BootstrapSettings();
 		bootstrapSettings.setAutoAppendResources(false);

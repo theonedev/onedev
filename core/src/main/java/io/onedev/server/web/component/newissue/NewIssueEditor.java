@@ -26,13 +26,13 @@ import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
+import io.onedev.server.web.component.projectcomment.CommentInput;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.util.IssueFieldBeanUtils;
+import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
 public abstract class NewIssueEditor extends FormComponentPanel<Issue> implements InputContext {

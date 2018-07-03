@@ -31,7 +31,7 @@ import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.command.ReceiveCommand;
 import io.onedev.server.git.command.UploadCommand;
 import io.onedev.server.git.exception.GitException;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.manager.WorkExecutor;
@@ -61,11 +61,11 @@ public class GitFilter implements Filter {
 	
 	private final ServerConfig serverConfig;
 	
-	private final ConfigManager configManager;
+	private final SettingManager configManager;
 	
 	@Inject
 	public GitFilter(OneDev oneDev, StorageManager storageManager, ProjectManager projectManager, 
-			WorkExecutor workManager, ServerConfig serverConfig, ConfigManager configManager) {
+			WorkExecutor workManager, ServerConfig serverConfig, SettingManager configManager) {
 		this.oneDev = oneDev;
 		this.storageManager = storageManager;
 		this.projectManager = projectManager;

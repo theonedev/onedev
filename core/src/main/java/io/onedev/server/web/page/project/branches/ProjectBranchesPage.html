@@ -19,7 +19,7 @@
 					<td class="detail">
 						<div class="title">
 							<a wicket:id="branchLink" class="name"><span wicket:id="name"></span></a>
-							<span wicket:id="verificationStatus" class="verification-status"></span>
+							<span wicket:id="buildStatus" class="build-status"></span>
 							<span class="label label-default" wicket:id="default">default</span>
 							<a wicket:id="makeDefault" class="make-default btn btn-xs btn-default"><i class="fa fa-check"></i> make default</a>
 						</div>
@@ -31,8 +31,6 @@
 						</div>
 						<div wicket:id="actions" class="actions">
 							<a wicket:id="effectiveRequest"><i class="fa fa-ext fa-branch-compare"></i> <span wicket:id="label"></span></a>
-							<a wicket:id="unwatchRequests" title="You are watching pull requests of this branch, click to unwatch"><i class="fa fa-eye"></i> Unwatch</a>
-							<a wicket:id="watchRequests" title="You are not watching pull requests of this branch, click to watch"><i class="fa fa-eye-slash"></i> Watch</a>
 							<a wicket:id="delete" title="Delete this branch"><i class="fa fa-trash"></i> Delete</a>
 						</div>
 					</td>

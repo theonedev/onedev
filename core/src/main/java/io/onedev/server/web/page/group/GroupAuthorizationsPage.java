@@ -136,7 +136,7 @@ public class GroupAuthorizationsPage extends GroupPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder("Add project...");
+				getSettings().setPlaceholder("Authorize project...");
 				getSettings().setFormatResult("onedev.server.projectChoiceFormatter.formatResult");
 				getSettings().setFormatSelection("onedev.server.projectChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("onedev.server.projectChoiceFormatter.escapeMarkup");

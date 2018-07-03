@@ -24,12 +24,12 @@ import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ManagedSerializedForm;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.lifecycle.SystemStarting;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.DataManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.UserManager;
-import io.onedev.server.model.Config;
-import io.onedev.server.model.Config.Key;
+import io.onedev.server.model.Setting;
+import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.setting.BackupSetting;
 import io.onedev.server.model.support.setting.MailSetting;
@@ -53,7 +53,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final UserManager userManager;
 	
-	private final ConfigManager configManager;
+	private final SettingManager configManager;
 	
 	private final IdManager idManager;
 	
@@ -71,7 +71,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	@Inject
 	public DefaultDataManager(IdManager idManager, UserManager userManager, 
-			ConfigManager configManager, PersistManager persistManager, 
+			SettingManager configManager, PersistManager persistManager, 
 			MailManager mailManager, Validator validator, TaskScheduler taskScheduler, 
 			PasswordService passwordService) {
 		this.userManager = userManager;
@@ -111,15 +111,15 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 
-		Config systemConfig = configManager.getConfig(Key.SYSTEM);
+		Setting systemConfig = configManager.getSetting(Key.SYSTEM);
 		SystemSetting systemSetting = null;
 		
-		if (systemConfig == null || systemConfig.getSetting() == null) {
+		if (systemConfig == null || systemConfig.getValue() == null) {
 			systemSetting = new SystemSetting();
 			systemSetting.setServerUrl(OneDev.getInstance().guessServerUrl());
 		} else {
-			if (!validator.validate(systemConfig.getSetting()).isEmpty())
-				systemSetting = (SystemSetting) systemConfig.getSetting();
+			if (!validator.validate(systemConfig.getValue()).isEmpty())
+				systemSetting = (SystemSetting) systemConfig.getValue();
 		}
 		if (systemSetting != null) {
 			manualConfigs.add(new ManualConfig("Specify System Setting", systemSetting) {
@@ -137,20 +137,20 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 
-		Config securityConfig = configManager.getConfig(Key.SECURITY);
+		Setting securityConfig = configManager.getSetting(Key.SECURITY);
 		if (securityConfig == null) {
 			configManager.saveSecuritySetting(new SecuritySetting());
 		} 
-		Config authenticatorConfig = configManager.getConfig(Key.AUTHENTICATOR);
+		Setting authenticatorConfig = configManager.getSetting(Key.AUTHENTICATOR);
 		if (authenticatorConfig == null) {
 			configManager.saveAuthenticator(null);
 		}
 		
-		Config mailConfig = configManager.getConfig(Key.MAIL);
+		Setting mailConfig = configManager.getSetting(Key.MAIL);
 		if (mailConfig == null) {
 			configManager.saveMailSetting(null);
-		} else if (mailConfig.getSetting() != null && !validator.validate(mailConfig.getSetting()).isEmpty()) {
-			manualConfigs.add(new ManualConfig("Specify Mail Setting", mailConfig.getSetting()) {
+		} else if (mailConfig.getValue() != null && !validator.validate(mailConfig.getValue()).isEmpty()) {
+			manualConfigs.add(new ManualConfig("Specify Mail Setting", mailConfig.getValue()) {
 
 				@Override
 				public Skippable getSkippable() {
@@ -165,11 +165,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		Config backupConfig = configManager.getConfig(Key.BACKUP);
+		Setting backupConfig = configManager.getSetting(Key.BACKUP);
 		if (backupConfig == null) {
 			configManager.saveBackupSetting(null);
-		} else if (backupConfig.getSetting() != null && !validator.validate(backupConfig.getSetting()).isEmpty()) {
-			Serializable backupSetting = backupConfig.getSetting();
+		} else if (backupConfig.getValue() != null && !validator.validate(backupConfig.getValue()).isEmpty()) {
+			Serializable backupSetting = backupConfig.getValue();
 			manualConfigs.add(new ManualConfig("Specify Backup Setting", backupSetting) {
 
 				@Override
@@ -185,7 +185,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 		
-		Config licenseKeyConfig = configManager.getConfig(Key.LICENSE);
+		Setting licenseKeyConfig = configManager.getSetting(Key.LICENSE);
 		if (licenseKeyConfig == null) {
 			configManager.saveLicense(null);
 		}

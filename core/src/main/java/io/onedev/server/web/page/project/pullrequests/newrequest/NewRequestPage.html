@@ -34,8 +34,7 @@
 	</div>
 	<wicket:fragment wicket:id="effectiveFrag">
 		<div class="alert alert-info">
-			<div wicket:id="description"></div> 
-			<b><a wicket:id="link"><span wicket:id="label"></span></a></b>
+			<span wicket:id="description"></span> <a wicket:id="link"><b wicket:id="label"></b></a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="sameBranchFrag">
@@ -49,7 +48,7 @@
 	<wicket:fragment wicket:id="mergedFrag">
 		<div class="alert alert-success">
 			<div class="summary">
-				<span class="fa fa-lg fa-check"></span>
+				<span class="fa fa-lg fa-check-circle"></span>
 				<a wicket:id="targetBranch"></a> is up to date with all commits from <a wicket:id="sourceBranch"></a>.
 				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.
 			</div>
@@ -80,23 +79,20 @@
 					</tr>
 					<tr class="merge-strategy">
 						<td class="name">Merge Strategy</td>
-						<td class="value">
-							<select wicket:id="mergeStrategy" class="form-control"></select>
-							<div wicket:id="mergeStrategyHelp" class="help-block"></div>							
-							<div wicket:id="immediateMergeNote" class="alert alert-warning immediate-merge">
-								<i class="fa fa-warning"></i> This pull request will be merged immediately after being created.<br>
-								Use the strategy <i>Do Not Merge</i> if you want to review your changes without merging now. 
-							</div>
+						<td wicket:id="mergeStrategy" class="merge-strategy value">
+							<select wicket:id="select" class="form-control"></select>
+							<div wicket:id="help" class="help-block"></div>	
+							<div wicket:id="status" class="status"></div>						
 						</td>
 					</tr>
 					<tr class="reviewers">
-						<td class="name">Required Reviewers</td>
+						<td class="name">Reviewers</td>
 						<td class="value"><div wicket:id="reviewers"></div></td>
 					</tr>
-					<wicket:enclosure child="verifications">
-					<tr class="verifications">
-						<td class="name">Required Verifications</td>
-						<td class="value"><div wicket:id="verifications"></div></td>
+					<wicket:enclosure child="builds">
+					<tr class="builds">
+						<td class="name">Builds</td>
+						<td class="value"><div wicket:id="builds"></div></td>
 					</tr>
 					</wicket:enclosure>
 				</table>

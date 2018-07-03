@@ -1,0 +1,107 @@
+#request-detail>.main>.activities .activity.new>.avatar {
+	border-left-color: #4667EE;
+}
+
+#request-detail>.main>.activities .activity>td {
+	border-bottom: 1px solid #EEE;
+	padding: 16px 0;
+}
+#request-detail>.main>.activities .activity:last-child>td {
+	border-bottom: none;
+}
+#request-detail>.main>.activities .activity>td.avatar {
+	width: 40px;
+	border-left: 4px solid white;
+	padding-left: 12px;
+}
+#request-detail>.main>.activities .activity>td.avatar .avatar {
+	width: 40px;
+	height: 40px;
+}
+#request-detail>.main>.activities .activity>td.content {
+	padding-left: 20px;
+}
+#request-detail>.main>.activities .UpdatedActivity>td.content .alert {
+	margin: 16px 0;
+}
+#request-detail>.main>.activities .UpdatedActivity>td.content td {
+	color: #888;
+	padding: 4px 0;
+}
+#request-detail>.main>.activities .UpdatedActivity>td.content tr:hover td {
+	background: #F5F5F5;
+}
+#request-detail>.main>.activities .UpdatedActivity>td.content td.icon {
+	width: 30px;
+}
+#request-detail>.main>.activities .UpdatedActivity>td.content td.author {
+	width: 35px;
+}
+#request-detail>.main>.activities .UpdatedActivity>td.content td.hash-and-status {
+	width: 160px;
+}
+#request-detail>.main>.activities .UpdatedActivity>td.content td.hash-and-status>div {
+	margin-left: 8px;
+}
+#request-detail>.main>.activities .UpdatedActivity>td.content a {
+	color: #555;
+}
+
+#request-detail>.main>.activities .activity>td>.content {
+	padding-top: 8px;
+} 
+#request-detail>.main>.activities .activity>td>.head,
+#request-detail>.main>.activities .activity>td>.content {
+	color: #999;
+}
+#request-detail>.main>.activities .activity>td>.head a,
+#request-detail>.main>.activities .activity>td>.content a {
+	color: #666;
+}
+#request-detail>.main>.activities .activity>td>.head a.changes,
+#request-detail>.main>.activities .activity>td>.content a.changes {
+	margin-left: 8px;
+	color: #999;
+}
+#request-detail>.main>.activities .activity>td>.body {
+	margin-top: 8px;
+}
+#request-detail>.main>.activities .add-comment {
+	margin-top: 16px;
+}
+#request-detail>.main>.activities .login-to-comment {
+	border: 1px solid #EEE;
+	vertical-align: center;
+	text-align: center;
+	padding: 20px;
+	font-size: 20px;
+	background: #F9F9F9;
+	border-radius: 4px;	
+}
+
+#request-detail>.main>.activities .activity.since-changes, 
+#request-detail>.main>.activities .activity.since-changes>.avatar {
+	display: none;
+}
+#request-detail>.main>.activities .activity.since-changes.visible {
+	display: table-row;
+}
+#request-detail>.main>.activities .activity.since-changes td.content {
+	font-size: 16px;
+}
+#request-detail>.main>.activities .activity.since-changes .icon {
+	border-radius: 13px;
+	background: #5CA7F8;
+	width: 26px;
+	height: 26px;
+	color: white;
+	padding: 6px;
+	margin-right: 4px;
+}
+#request-detail>.main>.activities .activity>td.content .plain.diff {
+	border: none;
+}
+#request-detail>.main>.activities .activity>td.content .plain.diff td {
+	padding: 0;
+	background: white;
+}

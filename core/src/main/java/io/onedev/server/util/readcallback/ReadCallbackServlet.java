@@ -22,7 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.web.img.Img;
 import io.onedev.utils.ClassUtils;
@@ -68,7 +68,7 @@ public class ReadCallbackServlet extends HttpServlet {
 		try {
 			String json = OneDev.getInstance(ObjectMapper.class).writeValueAsString(callback);
 			String queryString = URLEncoder.encode(json, Charsets.UTF_8.name());
-			return OneDev.getInstance(ConfigManager.class).getSystemSetting().getServerUrl() + PATH + "?" + queryString;
+			return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl() + PATH + "?" + queryString;
 		} catch (UnsupportedEncodingException | JsonProcessingException e) {
 			throw new RuntimeException(e);
 		}

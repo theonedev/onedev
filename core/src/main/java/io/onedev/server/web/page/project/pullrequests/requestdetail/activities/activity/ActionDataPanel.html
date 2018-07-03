@@ -1,0 +1,19 @@
+<wicket:panel>
+	<wicket:container wicket:id="content"></wicket:container>
+	<wicket:fragment wicket:id="withCommentOrDiffFrag">
+		<div class="head">
+			<a wicket:id="user"></a> <span wicket:id="action"></span> <span wicket:id="age"></span>
+			<a wicket:id="changes" class="changes" title="Changes since this action"><i class="fa fa-ext fa-file-diff"></i></a>
+		</div>
+		<div class="body">
+			<div wicket:id="comment" class="comment"></div>
+			<div wicket:id="diff" class="diff"></div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="withoutCommentAndDiffFrag">
+		<div class="content">
+			<a wicket:id="user"></a> <span wicket:id="action"></span> <span wicket:id="age"></span>
+			<a wicket:id="changes" class="changes" title="Changes since this action"><i class="fa fa-ext fa-file-diff"></i></a>
+		</div>
+	</wicket:fragment>
+</wicket:panel>

@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.launcher.bootstrap.Bootstrap;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.model.support.setting.MailSetting;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -26,14 +26,14 @@ public class DefaultMailManager implements MailManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultMailManager.class);
 	
-	private final ConfigManager configManager;
+	private final SettingManager configManager;
 	
 	private final ExecutorService executorService;
 	
 	private final Dao dao;
 	
 	@Inject
-	public DefaultMailManager(Dao dao, ConfigManager configManager, ExecutorService executorService) {
+	public DefaultMailManager(Dao dao, SettingManager configManager, ExecutorService executorService) {
 		this.dao = dao;
 		this.configManager = configManager;
 		this.executorService = executorService;

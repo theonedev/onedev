@@ -7,9 +7,9 @@ import org.hibernate.criterion.Restrictions;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.event.codecomment.CodeCommentCreated;
+import io.onedev.server.event.codecomment.CodeCommentAdded;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
-import io.onedev.server.event.pullrequest.PullRequestCodeCommented;
+import io.onedev.server.event.pullrequest.PullRequestCodeCommentAdded;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentReplied;
 import io.onedev.server.manager.CodeCommentRelationManager;
 import io.onedev.server.manager.PullRequestManager;
@@ -45,12 +45,12 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 		return find(criteria);
 	}
 
-	private void save(CodeCommentRelation relation, boolean passive) {
+	private void save(CodeCommentRelation relation, boolean derived) {
 		super.save(relation);
 		CodeComment comment = relation.getComment();
 		PullRequest request = relation.getRequest();
 		if (request.getLastActivity() == null || comment.getDate().after(request.getLastActivity().getDate())) {
-			PullRequestCodeCommented event = new PullRequestCodeCommented(request, comment, passive); 
+			PullRequestCodeCommentAdded event = new PullRequestCodeCommentAdded(request, comment, derived); 
 			listenerRegistry.post(event);
 			request.setLastActivity(event);
 			pullRequestManager.save(request);
@@ -65,7 +65,7 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 	
 	@Listen
 	@Transactional
-	public void on(CodeCommentCreated event) {
+	public void on(CodeCommentAdded event) {
 		if (event.getRequest() != null) {
 			CodeCommentRelation relation = new CodeCommentRelation();
 			relation.setComment(event.getComment());

@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.request.resource.AbstractResource;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.web.editable.BeanContext;
@@ -28,13 +28,13 @@ public class DatabaseBackupPage extends AdministrationPage {
 		add(new Label("storageDir", OneDev.getInstance(StorageManager.class).getStorageDir()));
 		
 		BackupSettingHolder backupSettingHolder = new BackupSettingHolder();
-		backupSettingHolder.setBackupSetting(OneDev.getInstance(ConfigManager.class).getBackupSetting());
+		backupSettingHolder.setBackupSetting(OneDev.getInstance(SettingManager.class).getBackupSetting());
 		Form<?> form = new Form<Void>("backupSetting") {
 
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				OneDev.getInstance(ConfigManager.class).saveBackupSetting(backupSettingHolder.getBackupSetting());
+				OneDev.getInstance(SettingManager.class).saveBackupSetting(backupSettingHolder.getBackupSetting());
 				getSession().success("Backup setting has been updated");
 				
 				setResponsePage(DatabaseBackupPage.class);

@@ -79,10 +79,6 @@
 #layout>.head>.user {
 	margin-right: 0;
 }
-#layout>.head>.user>.logged-in>.tasks {
-	color: #69B7F7;
-	margin-right: 16px;
-}
 #layout>.head>.user>.logged-in>a, #layout>.head>.user>.logged-in>span {
 	margin-right: 8px;
 	font-size: 20px;

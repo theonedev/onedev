@@ -21,7 +21,7 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -127,7 +127,7 @@ abstract class BacklogColumnPanel extends Panel {
 				Issue issue = OneDev.getInstance(IssueManager.class).load(params.getParameterValue("issue").toLong());
 				if (!SecurityUtils.canModify(issue)) 
 					throw new UnauthorizedException("Permission denied");
-				OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, null);
+				OneDev.getInstance(IssueActionManager.class).changeMilestone(issue, null);
 				if (getQuery().matches(issue)) {
 					target.add(BacklogColumnPanel.this);
 				} else {

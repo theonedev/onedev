@@ -15,7 +15,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.model.Group;
@@ -93,7 +92,6 @@ public class GroupProfilePage extends GroupPage {
 				}
 				
 			};	
-			form.add(new NotificationPanel("feedback", form));
 			form.add(editor);
 			
 			administratorInput = new CheckBox("administrator", Model.of(getGroup().isAdministrator()));

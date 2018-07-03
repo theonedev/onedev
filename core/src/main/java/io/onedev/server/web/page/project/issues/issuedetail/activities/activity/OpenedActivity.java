@@ -9,6 +9,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
+import io.onedev.server.web.util.DeleteCallback;
 
 @SuppressWarnings("serial")
 public class OpenedActivity implements IssueActivity {
@@ -20,7 +21,7 @@ public class OpenedActivity implements IssueActivity {
 	}
 	
 	@Override
-	public Panel render(String panelId, ActivityCallback callback) {
+	public Panel render(String panelId, DeleteCallback deleteCallback) {
 		return new OpenedPanel(panelId, new LoadableDetachableModel<Issue>() {
 
 			@Override

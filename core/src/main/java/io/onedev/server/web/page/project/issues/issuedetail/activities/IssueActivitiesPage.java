@@ -28,21 +28,21 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueCommentManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.avatar.AvatarLink;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
+import io.onedev.server.web.component.projectcomment.CommentInput;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
-import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.ActivityCallback;
-import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.ChangedActivity;
+import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.ActionActivity;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.CommentedActivity;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.IssueActivity;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.OpenedActivity;
 import io.onedev.server.web.page.security.LoginPage;
+import io.onedev.server.web.util.DeleteCallback;
+import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
 public class IssueActivitiesPage extends IssueDetailPage {
@@ -61,8 +61,8 @@ public class IssueActivitiesPage extends IssueDetailPage {
 		for (IssueComment comment: getIssue().getComments())  
 			activities.add(new CommentedActivity(comment));
 		
-		for (IssueChange change: getIssue().getChanges())
-			activities.add(new ChangedActivity(change));
+		for (IssueAction change: getIssue().getChanges())
+			activities.add(new ActionActivity(change));
 		
 		activities.sort((o1, o2) -> {
 			if (o1.getDate().getTime()<o2.getDate().getTime())
@@ -83,20 +83,18 @@ public class IssueActivitiesPage extends IssueDetailPage {
 		if (anchor != null)
 			row.setMarkupId(anchor);
 		
-		if (row.get("content") == null) {
-			row.add(activity.render("content", new ActivityCallback() {
-
-				@Override
-				public void onDelete(AjaxRequestTarget target) {
-					row.remove();
-					target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
-				}
-				
-			}));
-		}
-		
 		row.add(new AvatarLink("avatar", activity.getUser()));
 
+		row.add(activity.render("content", new DeleteCallback() {
+
+			@Override
+			public void onDelete(AjaxRequestTarget target) {
+				row.remove();
+				target.appendJavaScript(String.format("$('#%s').remove();", row.getMarkupId()));
+			}
+			
+		}));
+		
 		row.add(AttributeAppender.append("class", activity.getClass().getSimpleName()));
 		return row;
 	}

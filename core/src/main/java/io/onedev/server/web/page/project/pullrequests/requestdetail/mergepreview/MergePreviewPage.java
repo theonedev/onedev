@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.pullrequests.requestdetail.mergeprevie
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -17,21 +18,27 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.manager.BuildManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.MergePreview;
+import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.search.CommitIndexed;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
+import io.onedev.server.web.component.build.BuildStatusPanel;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
 import io.onedev.server.web.websocket.PageDataChanged;
+import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
 public class MergePreviewPage extends RequestDetailPage {
@@ -107,9 +114,29 @@ public class MergePreviewPage extends RequestDetailPage {
 			fragment.add(hashLink);
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getMerged())));
 			fragment.add(new WebMarkupContainer("copyMergedCommit").add(new CopyClipboardBehavior(Model.of(preview.getMerged()))));
-			
-			fragment.add(new AjaxLink<Void>("refresh") {
+			fragment.add(new BuildStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
+				@Override
+				protected List<Build> load() {
+					return OneDev.getInstance(BuildManager.class).findAll(getProject(), preview.getMerged());
+				}
+				
+			}));
+			fragment.add(new WebMarkupContainer("outDated") {
+
+				@Override
+				protected void onInitialize() {
+					super.onInitialize();
+					add(new AjaxLink<Void>("link") {
+
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							newContent(target);
+						}
+						
+					});
+				}
+				
 				@Override
 				public void onEvent(IEvent<?> event) {
 					super.onEvent(event);
@@ -117,6 +144,7 @@ public class MergePreviewPage extends RequestDetailPage {
 					if (event.getPayload() instanceof PageDataChanged) {
 						PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
 						pageDataChanged.getHandler().add(this);
+						OneDev.getInstance(WebSocketManager.class).onObserverChanged(MergePreviewPage.this);
 					}
 				}
 				
@@ -131,11 +159,6 @@ public class MergePreviewPage extends RequestDetailPage {
 							|| !latestPreview.getMerged().equals(preview.getMerged()));
 				}
 
-				@Override
-				public void onClick(AjaxRequestTarget target) {
-					newContent(target);
-				}
-				
 			}.setOutputMarkupPlaceholderTag(true));
 			
 			IModel<String> blameModel = new IModel<String>() {
@@ -208,6 +231,7 @@ public class MergePreviewPage extends RequestDetailPage {
 					if (event.getPayload() instanceof PageDataChanged) {
 						PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
 						newContent(pageDataChanged.getHandler());
+						OneDev.getInstance(WebSocketManager.class).onObserverChanged(MergePreviewPage.this);
 					}
 				}
 				

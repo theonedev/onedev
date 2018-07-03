@@ -575,3 +575,33 @@ a.input-clear.input-group-clear {
 .avatar+.name {
 	margin-left: 4px !important; 
 }
+
+.alert {
+	font-size: 16px;
+}
+.alert a {
+	font-weight: bold;
+}
+.alert-info {
+	border: 1px solid #46A7D8;
+	font-size: 16px;
+}
+.alert-success {
+	border: 1px solid #19A519;
+	background: #E5FBE5;
+	color: #399529; 
+}
+.alert-danger {
+	color: #DD4B4B; 
+	background: #FEDADA;
+	border: 1px solid #BF1111;
+}
+.alert-warning {
+	background: #FDF3C9;
+	color: #836A05;
+	border: 1px solid #AD8C07;
+}
+
+a.disabled, a[disabled="disabled"] {
+	cursor: default;
+}

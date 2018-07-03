@@ -42,10 +42,11 @@ public class PlainDiffPanel extends Panel {
 	
 	private List<DiffBlock<Tokenized>> diffBlocks;
 	
-	public PlainDiffPanel(String id, List<String> oldLines, List<String> newLines, boolean forceAlign) {
+	public PlainDiffPanel(String id, List<String> oldLines, @Nullable String oldFileName, 
+			List<String> newLines, @Nullable String newFileName, boolean forceAlign) {
 		super(id);
 		this.forceAlign = forceAlign;
-		diffBlocks = DiffUtils.diff(oldLines, null, newLines, null, WhitespaceOption.DO_NOT_IGNORE);
+		diffBlocks = DiffUtils.diff(oldLines, oldFileName, newLines, newFileName, WhitespaceOption.DO_NOT_IGNORE);
 	}
 
 	@Override
@@ -134,9 +135,7 @@ public class PlainDiffPanel extends Panel {
 		StringBuilder builder = new StringBuilder();
 		builder.append(""
 				+ "<colgroup>"
-				+ "<col width='40'></col>"
-				+ "<col width='40'></col>"
-				+ "<col width='15'></col>"
+				+ "<col width='60'></col>"
 				+ "<col></col>"
 				+ "</colgroup>");
 		for (int i=0; i<diffBlocks.size(); i++) {
@@ -225,10 +224,7 @@ public class PlainDiffPanel extends Panel {
 		int oldLineNo = block.getOldStart() + lineIndex;
 		int newLineNo = block.getNewStart() + lineIndex;
 		
-		builder.append("<td class='number noselect'>").append(oldLineNo+1).append("</td>");
-		builder.append("<td class='number noselect'>").append(newLineNo+1).append("</td>");
-		builder.append("<td class='operation noselect'>&nbsp;</td>");
-		builder.append("<td class='content' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
+		builder.append("<td colspan='2' class='content' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 		appendTokenized(builder, block.getUnits().get(lineIndex));
 		builder.append("</td>");
 		builder.append("</tr>");
@@ -239,10 +235,7 @@ public class PlainDiffPanel extends Panel {
 		builder.append("<tr class='code original'>");
 
 		int newLineNo = block.getNewStart() + lineIndex;
-		builder.append("<td class='number noselect new'>&nbsp;</td>");
-		builder.append("<td class='number noselect new'>").append(newLineNo+1).append("</td>");
-		builder.append("<td class='operation noselect new'>+</td>");
-		builder.append("<td class='content new' data-new='").append(newLineNo).append("'>");
+		builder.append("<td colspan='2' class='content new' data-new='").append(newLineNo).append("'>");
 		if (tokenDiffs != null) {
 			if (tokenDiffs.isEmpty()) {
 				builder.append("&nbsp;");
@@ -266,10 +259,7 @@ public class PlainDiffPanel extends Panel {
 		builder.append("<tr class='code original'>");
 		
 		int oldLineNo = block.getOldStart() + lineIndex;
-		builder.append("<td class='number noselect old'>").append(oldLineNo+1).append("</td>");
-		builder.append("<td class='number noselect old'>&nbsp;</td>");
-		builder.append("<td class='operation noselect old'>-</td>");
-		builder.append("<td class='content old' data-old='").append(oldLineNo).append("'>");
+		builder.append("<td colspan='2' class='content old' data-old='").append(oldLineNo).append("'>");
 		if (tokenDiffs != null) {
 			if (tokenDiffs.isEmpty()) {
 				builder.append("&nbsp;");
@@ -295,10 +285,7 @@ public class PlainDiffPanel extends Panel {
 
 		int oldLineNo = deleteBlock.getOldStart() + deleteLineIndex;
 		int newLineNo = insertBlock.getNewStart() + insertLineIndex;
-		builder.append("<td class='number noselect old new'>").append(oldLineNo+1).append("</td>");
-		builder.append("<td class='number noselect old new'>").append(newLineNo+1).append("</td>");
-		builder.append("<td class='operation noselect old new'>*</td>");
-		builder.append("<td class='content old new' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
+		builder.append("<td colspan='2' class='content old new' data-old='").append(oldLineNo).append("' data-new='").append(newLineNo).append("'>");
 		if (tokenDiffs.isEmpty()) {
 			builder.append("&nbsp;");
 		} else {
@@ -315,9 +302,9 @@ public class PlainDiffPanel extends Panel {
 		builder.append("<tr class='expander expander").append(blockIndex).append("'>");
 		
 		String script = String.format("javascript:$('#%s').data('callback')(%d);", getMarkupId(), blockIndex);
-		builder.append("<td colspan='2' class='expander noselect'><a title='Show more lines' href=\"")
+		builder.append("<td class='expander noselect'><a title='Show more lines' href=\"")
 				.append(script).append("\"><i class='fa fa-sort'></i></a></td>");
-		builder.append("<td colspan='2' class='skipped noselect'><i class='fa fa-ellipsis-h'></i> skipped ")
+		builder.append("<td class='skipped noselect'><i class='fa fa-ellipsis-h'></i> skipped ")
 				.append(skippedLines).append(" lines <i class='fa fa-ellipsis-h'></i></td>");
 		builder.append("</tr>");
 	}

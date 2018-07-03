@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
@@ -55,19 +54,19 @@ import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.RevListCommand;
-import io.onedev.server.manager.VerificationManager;
+import io.onedev.server.manager.BuildManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.ProjectAndRevision;
 import io.onedev.server.util.Constants;
-import io.onedev.server.util.Verification;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.avatar.ContributorAvatars;
+import io.onedev.server.web.component.build.BuildStatusPanel;
 import io.onedev.server.web.component.commitgraph.CommitGraphResourceReference;
 import io.onedev.server.web.component.commitgraph.CommitGraphUtils;
 import io.onedev.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.verification.VerificationStatusPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitQueryParser.CriteriaContext;
@@ -508,11 +507,11 @@ public class ProjectCommitsPage extends ProjectPage {
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 			item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 			
-			item.add(new VerificationStatusPanel("verificationStatus", new LoadableDetachableModel<Map<String, Verification>>() {
+			item.add(new BuildStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 				@Override
-				protected Map<String, Verification> load() {
-					return OneDev.getInstance(VerificationManager.class).getVerifications(getProject(), commit.name());
+				protected List<Build> load() {
+					return OneDev.getInstance(BuildManager.class).findAll(getProject(), commit.name());
 				}
 				
 			}));

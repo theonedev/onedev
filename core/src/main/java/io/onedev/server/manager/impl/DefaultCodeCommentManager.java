@@ -29,7 +29,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.event.codecomment.CodeCommentCreated;
+import io.onedev.server.event.codecomment.CodeCommentAdded;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.manager.CodeCommentManager;
@@ -69,7 +69,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	public void save(CodeComment comment, PullRequest request) {
 		if (comment.isNew()) {
 			dao.persist(comment);
-			CodeCommentCreated event = new CodeCommentCreated(comment, request);
+			CodeCommentAdded event = new CodeCommentAdded(comment, request);
 			listenerRegistry.post(event);
 		} else {
 			dao.persist(comment);

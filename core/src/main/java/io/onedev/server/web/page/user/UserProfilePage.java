@@ -11,7 +11,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
@@ -85,7 +84,6 @@ public class UserProfilePage extends UserPage {
 				}
 				
 			};	
-			form.add(new NotificationPanel("feedback", form));
 			form.add(editor);
 			
 			form.add(new Link<Void>("delete") {

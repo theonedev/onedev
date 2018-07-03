@@ -1,6 +1,7 @@
 #new-request>.head {
 	font-size: 18px;
 	margin-bottom: 20px;
+	font-weight: bold;
 }
 #new-request>.body>div {
 	margin-bottom: 20px;
@@ -68,8 +69,8 @@
 #new-request>.body>.status>.can-send form select {
 	width: auto;
 }
-#new-request .immediate-merge.alert {
-	margin: 12px 0 0 0;
+#new-request>.body>.status>.can-send table.reviews td.result {
+	display: none;
 }
 #new-request>.body>.nav-tabs {
 	margin-bottom: 20px;
@@ -80,4 +81,22 @@
 	border: 1px solid #DDD;
 	z-index: 200;
 	margin-bottom: 16px;
+}
+#new-request>.body>.status>.can-send .merge-strategy .status {
+	margin-top: 10px;
+	font-size: 16px;
+	font-weight: bold;
+}
+#new-request>.body>.status>.can-send .merge-strategy .status .no-conflict {
+	color: #399529;
+} 
+#new-request>.body>.status>.can-send .merge-strategy .status .conflict {
+	color: #DD4B4B;
+} 
+#new-request>.body>.status>.can-send .merge-strategy .status .calculating {
+	color: #BC7E12;
+}
+#new-request>.body>.status>.can-send .merge-strategy .status .calculating img {
+	width: 24px;
+	height: 24px;
 }

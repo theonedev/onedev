@@ -27,6 +27,8 @@ public class IssueWatch extends AbstractEntity {
 	
 	private boolean watching;
 	
+	private boolean notified;
+	
 	public Issue getIssue() {
 		return issue;
 	}
@@ -49,6 +51,14 @@ public class IssueWatch extends AbstractEntity {
 
 	public void setWatching(boolean watching) {
 		this.watching = watching;
+	}
+
+	public boolean isNotified() {
+		return notified;
+	}
+
+	public void setNotified(boolean notified) {
+		this.notified = notified;
 	}
 
 }

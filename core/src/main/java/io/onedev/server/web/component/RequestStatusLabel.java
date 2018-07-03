@@ -7,7 +7,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.CloseInfo;
+import io.onedev.server.model.support.pullrequest.CloseInfo;
 
 @SuppressWarnings("serial")
 public class RequestStatusLabel extends Label {

@@ -8,20 +8,20 @@ public abstract class PullRequestCodeCommentEvent extends PullRequestEvent imple
 
 	private final CodeComment comment;
 	
-	private final boolean passive;
+	private final boolean derived;
 	
-	public PullRequestCodeCommentEvent(PullRequest request, CodeComment comment, boolean passive) {
+	public PullRequestCodeCommentEvent(PullRequest request, CodeComment comment, boolean derived) {
 		super(request);
 		this.comment = comment;
-		this.passive = passive;
+		this.derived = derived;
 	}
 
 	public CodeComment getComment() {
 		return comment;
 	}
 
-	public boolean isPassive() {
-		return passive;
+	public boolean isDerived() {
+		return derived;
 	}
 
 }

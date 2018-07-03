@@ -8,16 +8,20 @@ import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
+import io.onedev.server.event.pullrequest.PullRequestActionEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
-import io.onedev.server.event.pullrequest.PullRequestCommented;
+import io.onedev.server.event.pullrequest.PullRequestCommentAdded;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
-import io.onedev.server.event.pullrequest.PullRequestStatusChangeEvent;
+import io.onedev.server.manager.IssueWatchManager;
+import io.onedev.server.manager.PullRequestWatchManager;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.EntityRemoved;
@@ -45,9 +49,16 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 	
 	private final StorageManager storageManager;
 	
+	private final PullRequestWatchManager pullRequestWatchManager;
+	
+	private final IssueWatchManager issueWatchManager;
+	
 	@Inject
-	public DefaultVisitManager(StorageManager storageManager) {
+	public DefaultVisitManager(StorageManager storageManager, PullRequestWatchManager pullRequestWatchManager, 
+			IssueWatchManager issueWatchManager) {
 		this.storageManager = storageManager;
+		this.pullRequestWatchManager = pullRequestWatchManager;
+		this.issueWatchManager = issueWatchManager;
 	}
 	
 	@Override
@@ -55,8 +66,14 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 		visitIssue(user, issue, new Date(System.currentTimeMillis()+1000L));
 	}
 
+	@Transactional
 	@Override
 	public void visitIssue(User user, Issue issue, Date date) {
+		IssueWatch watch = issueWatchManager.find(issue, user);
+		if (watch != null) {
+			watch.setNotified(false);
+			issueWatchManager.save(watch);
+		}
 		Environment env = getEnv(issue.getProject().getId().toString());
 		Store store = getStore(env, ISSUE_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
@@ -75,9 +92,16 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 	public void visitPullRequest(User user, PullRequest request) {
 		visitPullRequest(user, request, new Date(System.currentTimeMillis()+1000L));
 	}
-	
+
+	@Transactional
 	@Override
 	public void visitPullRequest(User user, PullRequest request, Date date) {
+		PullRequestWatch watch = pullRequestWatchManager.find(request, user);
+		if (watch != null) {
+			watch.setNotified(false);
+			pullRequestWatchManager.save(watch);
+		}
+		
 		Environment env = getEnv(request.getTargetProject().getId().toString());
 		Store store = getStore(env, PULL_REQUEST_STORE);
 		env.executeInTransaction(new TransactionalExecutable() {
@@ -90,6 +114,8 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 			}
 			
 		});
+		
+		
 	}
 	
 	@Override
@@ -212,13 +238,13 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 	}
 
 	@Listen
-	public void on(PullRequestCommented event) {
+	public void on(PullRequestCommentAdded event) {
 		visitPullRequest(event.getUser(), event.getRequest());
 	}
 	
 	@Listen
 	public void on(PullRequestCodeCommentEvent event) {
-		if (!event.isPassive())
+		if (!event.isDerived())
 			visitPullRequest(event.getUser(), event.getRequest());
 	}
 	
@@ -229,7 +255,7 @@ public class DefaultVisitManager extends AbstractEnvironmentManager implements V
 	}
 	
 	@Listen
-	public void on(PullRequestStatusChangeEvent event) {
+	public void on(PullRequestActionEvent event) {
 		if (event.getUser() != null)
 			visitPullRequest(event.getUser(), event.getRequest());
 	}

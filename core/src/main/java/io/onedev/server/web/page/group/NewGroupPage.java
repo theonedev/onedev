@@ -142,7 +142,7 @@ public class NewGroupPage extends LayoutPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new GroupResourceReference()));
+		response.render(CssHeaderItem.forReference(new GroupCssResourceReference()));
 	}
 	
 }

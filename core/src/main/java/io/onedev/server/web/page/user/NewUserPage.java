@@ -99,7 +99,7 @@ public class NewUserPage extends LayoutPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new UserResourceReference()));
+		response.render(CssHeaderItem.forReference(new UserCssResourceReference()));
 	}
 
 	@Override

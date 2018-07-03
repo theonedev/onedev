@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.event.pullrequest.PullRequestCommented;
+import io.onedev.server.event.pullrequest.PullRequestCommentAdded;
 import io.onedev.server.manager.PullRequestCommentManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.PullRequestComment;
@@ -12,7 +12,6 @@ import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.web.editable.EditableUtils;
 
 @Singleton
 public class DefaultPullRequestCommentManager extends AbstractEntityManager<PullRequestComment> 
@@ -37,12 +36,12 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 		boolean isNew = comment.isNew();
 		dao.persist(comment);
 		if (isNew) {
-			PullRequestCommented event = new PullRequestCommented(comment);
+			PullRequestCommentAdded event = new PullRequestCommentAdded(comment);
 			listenerRegistry.post(event);
 			
 			LastActivity lastEvent = new LastActivity();
 			lastEvent.setDate(event.getDate());
-			lastEvent.setAction(EditableUtils.getDisplayName(event.getClass()));
+			lastEvent.setDescription("added comment");
 			lastEvent.setUser(event.getUser());
 			comment.getRequest().setLastActivity(lastEvent);
 			pullRequestManager.save(event.getRequest());

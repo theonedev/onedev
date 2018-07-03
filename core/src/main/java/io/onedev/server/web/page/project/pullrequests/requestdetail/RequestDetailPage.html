@@ -1,80 +1,116 @@
 <wicket:extend>
 	<div id="request-detail">
-		<div wicket:id="requestHead" class="head clearfix">
-			<div wicket:id="title" class="title pull-left"></div>
-			<a wicket:id="editLink" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
-			<form wicket:id="editForm" class="pull-left form-inline clearable-wrapper">
-				<input wicket:id="title" type="text" placeholder="Input title" class="form-control"></input>
-				<input wicket:id="save" type="submit" value="Save" class="btn btn-primary"/>
-				<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"/>
-			</form>
+		<div class="main">
+			<div wicket:id="requestHead" class="title clearfix">
+				<div wicket:id="title" class="title pull-left"></div>
+				<a wicket:id="editLink" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
+				<form wicket:id="editForm" class="pull-left form-inline clearable-wrapper">
+					<input wicket:id="title" type="text" placeholder="Input title" class="form-control"></input>
+					<input wicket:id="save" type="submit" value="Save" class="btn btn-primary"/>
+					<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"/>
+				</form>
+			</div>
+			<div wicket:id="statusAndBranches" class="status-and-branches clearfix">
+				<div wicket:id="status" class="label pull-left status"></div>
+				<div class="pull-left branches">
+					<a wicket:id="user"></a> wants to merge into <a wicket:id="target" class="branch"></a>
+					from <a wicket:id="source" class="branch"></a> <span wicket:id="date"></span>
+				</div>
+			</div>
+			<div wicket:id="requestSummary" class="summary">
+				<div wicket:id="discardedNote" class="discarded alert alert-danger">
+					<i class="fa fa-info-circle"></i> This pull request has been discarded.
+				</div>
+				<div wicket:id="mergedNote" class="merged-note alert alert-success">
+					<div wicket:id="fastForwarded">
+						<i class="fa fa-info-circle"></i> Target branch was fast-forwarded to source branch
+					</div>
+					<div wicket:id="merged">
+						<i class="fa fa-info-circle"></i> Commits were merged into target branch
+					</div>
+					<div wicket:id="mergedOutside">
+						<i class="fa fa-info-circle"></i> Commits were merged into target branch by someone outside of this pull request
+					</div>
+					<div wicket:id="squashed">
+						<i class="fa fa-info-circle"></i> Commits were squashed into a single commit in target branch
+					</div>
+					<div wicket:id="rebased">
+						<i class="fa fa-info-circle"></i> Commits were rebased onto target branch
+					</div>
+				</div>
+				<div wicket:id="mergeStatus" class="merge-status">
+					<div wicket:id="calculating" class="calculating alert alert-warning">
+						<img src="/img/ajax-indicator-big.gif"></img> Calculating merge preview...
+					</div>
+					<div wicket:id="noConflict" class="no-conflict alert alert-success">
+						<label><i class="fa fa-check-circle"></i> Able to merge without conflicts</label>
+						<ul>
+							<li>OneDev will merge automatically after all reviews and builds pass</li>
+							<li>Follow <a wicket:id="checkoutInstructions" href="javascript:void(0);">this instruction</a> if you want to verify the pull request locally</li>
+						</ul>						
+					</div>
+					<div wicket:id="conflict" class="conflict alert alert-danger">
+						<span><i class="fa fa-warning"></i> There are merge conflicts.</span>
+						<wicket:enclosure child="resolveInstructions">
+							Please follow <a wicket:id="resolveInstructions" href="javascript:void(0);">this instruction</a> to resolve the conflicts.
+						</wicket:enclosure>
+					</div>
+				</div>
+				<div wicket:id="doNotMerge" class="do-not-merge alert alert-warning">
+					<i class="fa fa-info-circle"></i> This pull request is for review only and does not need to be merged
+				</div>
+				<div wicket:id="operations" class="operations">
+					<div class="buttons">
+						<a wicket:id="approve" class="btn btn-primary">Approve</a>
+						<a wicket:id="requestForChanges" class="btn btn-primary">Request for changes</a>
+						<a wicket:id="discard" class="btn btn-danger">Discard</a>
+						<a wicket:id="reopen" class="btn btn-primary">Reopen</a>
+						<a wicket:id="deleteSourceBranch" class="btn btn-primary">Delete source branch</a>
+						<a wicket:id="restoreSourceBranch" class="btn btn-primary">Restore source branch</a>
+					</div>
+					<div wicket:id="confirm" class="confirm"></div>
+				</div>
+			</div>
+			<ul wicket:id="requestTabs" class="tabs nav nav-tabs"></ul>
+			<wicket:child></wicket:child>
 		</div>
-		<div wicket:id="statusAndBranches" class="status-and-branches clearfix">
-			<div wicket:id="status" class="label pull-left status"></div>
-			<div class="pull-left branches">
-				<a wicket:id="user"></a> wants to merge into <a wicket:id="target" class="branch"></a>
-				from <a wicket:id="source" class="branch"></a> <span wicket:id="date"></span>
+		<div wicket:id="side" class="side">
+			<wicket:enclosure child="reviews">
+			<div class="reviews">
+				<div class="head">Reviews</div>
+				<div wicket:id="reviews" class="body"></div>
+			</div>
+			</wicket:enclosure>
+			<wicket:enclosure child="builds">
+			<div class="builds">
+				<div wicket:id="buildsTitle" class="head">Builds</div> 
+				<div class="body">
+					<div wicket:id="builds"></div>
+				</div>
+			</div>
+			</wicket:enclosure>
+			<div wicket:id="mergeStrategy" class="merge-strategy">
+				<div class="head">Merge Strategy</div>
+				<div class="body">
+					<select wicket:id="editor" class="form-control"></select> 
+					<span wicket:id="viewer"></span>
+					<div wicket:id="help" class="help-block"></div>
+				</div>
+			</div>
+			<div wicket:id="watch" class="watch">
+				<div class="head">Watch Status</div>
+				<div class="body">
+					<select wicket:id="option" class="form-control"></select>
+					<div wicket:id="help" class="help-block"></div>
+				</div>
+			</div>
+			<div wicket:id="manage" class="manage">
+				<a wicket:id="synchronize" class="check btn btn-default">Synchronize</a>
+				<p class="help-block">In case the pull request status is out of sync with underlying 
+				repository, you may synchronize them manually here</p>
+				<a wicket:id="delete" class="delete btn btn-danger">Delete</a>
 			</div>
 		</div>
-		<div wicket:id="requestSummary" class="summary">
-			<div wicket:id="discardedNote">
-				<i class="fa fa-info-circle"></i> This pull request has been discarded.
-			</div>
-			<div wicket:id="mergedNote" class="merged-note">
-				<div wicket:id="fastForwarded">
-					<i class="fa fa-info-circle"></i> Target branch was fast-forwarded to source branch
-				</div>
-				<div wicket:id="merged">
-					<i class="fa fa-info-circle"></i> Commits were merged into target branch
-				</div>
-				<div wicket:id="mergedOutside">
-					<i class="fa fa-info-circle"></i> Commits were merged into target branch by someone outside of this pull request
-				</div>
-				<div wicket:id="squashed">
-					<i class="fa fa-info-circle"></i> Commits were squashed into a single commit in target branch
-				</div>
-				<div wicket:id="rebased">
-					<i class="fa fa-info-circle"></i> Commits were rebased onto target branch
-				</div>
-			</div>
-			<div wicket:id="mergePreview" class="merge-preview">
-				<div wicket:id="calculating">
-					<img src="/img/ajax-indicator.gif"></img> Calculating merge preview...
-				</div>
-				<div wicket:id="noConflict" class="no-conflict">
-					<label><i class="fa fa-check-circle"></i> Able to merge without conflicts</label> 
-					<ul>
-						<li>Target branch will be updated to the 
-						<a wicket:id="mergePreview">merge result</a> 
-						<span wicket:id="verificationStatus" class="verification-status"></span> 
-						upon approvals of all reviewers and verifications</li>
-						<li>Follow <a wicket:id="checkoutInstructionsTrigger" href="javascript:void(0);">this instruction</a> if you want to verify the pull request locally</li>
-					</ul>						
-				</div>
-				<div wicket:id="conflict" class="conflict">
-					<span><i class="fa fa-warning"></i> There are merge conflicts.</span>
-					<wicket:enclosure child="resolveInstructionsTrigger">
-						Please follow <a wicket:id="resolveInstructionsTrigger" href="javascript:void(0);">this instruction</a> to resolve the conflicts.
-					</wicket:enclosure>
-				</div>
-			</div>
-			<div wicket:id="doNotMerge" class="do-not-merge">
-				This pull request is for review only and does not need to be merged
-			</div>
-			<div wicket:id="operations" class="operations">
-				<div class="buttons">
-					<a wicket:id="approve" class="btn btn-primary">Approve</a>
-					<a wicket:id="disapprove" class="btn btn-primary">Disapprove</a>
-					<a wicket:id="discard" class="btn btn-danger">Discard</a>
-					<a wicket:id="reopen" class="btn btn-primary">Reopen</a>
-					<a wicket:id="deleteSourceBranch" class="btn btn-primary">Delete source branch</a>
-					<a wicket:id="restoreSourceBranch" class="btn btn-primary">Restore source branch</a>
-				</div>
-				<div wicket:id="confirm" class="confirm"></div>
-			</div>
-		</div>
-		<ul wicket:id="requestTabs" class="tabs nav nav-tabs"></ul>
-		<wicket:child></wicket:child>
 	</div>
 	<wicket:fragment wicket:id="operationConfirmFrag">
 		<div wicket:id="hint" class="hint"></div>

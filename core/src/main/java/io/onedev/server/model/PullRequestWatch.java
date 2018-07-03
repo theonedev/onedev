@@ -1,6 +1,5 @@
 package io.onedev.server.model;
 
-import javax.annotation.Nullable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -26,9 +25,9 @@ public class PullRequestWatch extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private User user;
 	
-	private String reason;
+	private boolean watching;
 	
-	private boolean ignore;
+	private boolean notified;
 	
 	public PullRequest getRequest() {
 		return request;
@@ -36,6 +35,14 @@ public class PullRequestWatch extends AbstractEntity {
 
 	public void setRequest(PullRequest request) {
 		this.request = request;
+	}
+
+	public boolean isNotified() {
+		return notified;
+	}
+
+	public void setNotified(boolean notified) {
+		this.notified = notified;
 	}
 
 	public User getUser() {
@@ -46,21 +53,12 @@ public class PullRequestWatch extends AbstractEntity {
 		this.user = user;
 	}
 
-	@Nullable
-	public String getReason() {
-		return reason;
+	public boolean isWatching() {
+		return watching;
 	}
 
-	public void setReason(String reason) {
-		this.reason = reason;
-	}
-
-	public boolean isIgnore() {
-		return ignore;
-	}
-
-	public void setIgnore(boolean ignore) {
-		this.ignore = ignore;
+	public void setWatching(boolean watching) {
+		this.watching = watching;
 	}
 
 }

@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.manager.CacheManager;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.MembershipManager;
 import io.onedev.server.manager.UserManager;
@@ -57,14 +57,14 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     
     private final CacheManager cacheManager;
     
-    private final ConfigManager configManager;
+    private final SettingManager configManager;
     
     private final MembershipManager membershipManager;
     
     private final GroupManager groupManager;
     
 	@Inject
-    public OneAuthorizingRealm(UserManager userManager, CacheManager cacheManager, ConfigManager configManager, 
+    public OneAuthorizingRealm(UserManager userManager, CacheManager cacheManager, SettingManager configManager, 
     		MembershipManager membershipManager, GroupManager groupManager) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(AppLoader.getInstance(PasswordService.class));

@@ -22,9 +22,9 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.server.manager.ReviewManager;
+import io.onedev.server.manager.PullRequestReviewManager;
 import io.onedev.server.manager.UserManager;
-import io.onedev.server.model.Review;
+import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -37,20 +37,20 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class ReviewResource {
 
-	private final ReviewManager reviewManager;
+	private final PullRequestReviewManager reviewManager;
 	
 	private final UserManager userManager;
 	
 	@Inject
-	public ReviewResource(ReviewManager reviewManager, UserManager userManager) {
+	public ReviewResource(PullRequestReviewManager reviewManager, UserManager userManager) {
 		this.reviewManager = reviewManager;
 		this.userManager = userManager;
 	}
 	
     @GET
     @Path("/{id}")
-    public Review get(@PathParam("id") Long id) {
-    	Review review = reviewManager.load(id);
+    public PullRequestReview get(@PathParam("id") Long id) {
+    	PullRequestReview review = reviewManager.load(id);
     	if (!SecurityUtils.canRead(review.getRequest().getTargetProject()))
     		throw new UnauthorizedException();
     	return review;
@@ -59,7 +59,7 @@ public class ReviewResource {
     @DELETE
     @Path("/{id}")
     public void delete(@PathParam("id") Long id) {
-    	Review review = reviewManager.load(id);
+    	PullRequestReview review = reviewManager.load(id);
     	User currentUser = userManager.getCurrent();
     	if (review.getUser().equals(currentUser) || SecurityUtils.canManage(review.getRequest().getTargetProject())) 
     		reviewManager.delete(review);
@@ -72,7 +72,7 @@ public class ReviewResource {
     public Response query(@QueryParam("pullRequest") Long pullRequestId, @QueryParam("user") Long userId, 
     		@QueryParam("commit") String commit, @QueryParam("per_page") Integer perPage, 
     		@QueryParam("page") Integer page, @Context UriInfo uriInfo) {
-    	EntityCriteria<Review> criteria = reviewManager.newCriteria();
+    	EntityCriteria<PullRequestReview> criteria = reviewManager.newCriteria();
     	if (pullRequestId != null)
     		criteria.add(Restrictions.eq("request.id", pullRequestId));
     	if (userId != null)
@@ -88,8 +88,8 @@ public class ReviewResource {
 
     	int totalCount = reviewManager.count(criteria);
 
-    	Collection<Review> reviews = reviewManager.findRange(criteria, (page-1)*perPage, perPage);
-		for (Review review: reviews) {
+    	Collection<PullRequestReview> reviews = reviewManager.findRange(criteria, (page-1)*perPage, perPage);
+		for (PullRequestReview review: reviews) {
 			if (!SecurityUtils.canRead(review.getRequest().getTargetProject())) {
 				throw new UnauthorizedException("Unable to access pull request reviews of project '" 
 						+ review.getRequest().getTargetProject().getName() + "'");
@@ -104,7 +104,7 @@ public class ReviewResource {
     
     @Transactional
     @POST
-    public Long save(@NotNull(message="may not be empty") @Valid Review review) {
+    public Long save(@NotNull(message="may not be empty") @Valid PullRequestReview review) {
     	if (!SecurityUtils.canRead(review.getRequest().getTargetProject()) 
     			|| !review.getUser().equals(userManager.getCurrent()) && !SecurityUtils.isAdministrator()) {
     		throw new UnauthorizedException();

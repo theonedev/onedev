@@ -55,7 +55,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.newrequest.NewRequestPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -437,12 +437,12 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 					@Override
 					public String getObject() {
 						if (requestModel.getObject().isOpen())
-							return "This change is already opened for merge by a pull request";
+							return "<i class='fa fa-info-circle'></i> This change is already opened for merge by pull request ";
 						else 
-							return "This change is squashed/rebased onto base branch via a pull request";
+							return "<i class='fa fa-info-circle'></i> This change is squashed/rebased onto base branch via pull request ";
 					}
 					
-				}));
+				}).setEscapeModelStrings(false));
 				
 				add(new Link<Void>("link") {
 
@@ -454,15 +454,16 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 							@Override
 							public String getObject() {
 								PullRequest request = requestModel.getObject();
-								return "#" + request.getNumber() + " " + request.getTitle();
+								return "#" + request.getNumber() + " - " + request.getTitle();
 							}
+							
 						}));
 					}
 
 					@Override
 					public void onClick() {
 						PageParameters params = RequestDetailPage.paramsOf(requestModel.getObject());
-						setResponsePage(RequestOverviewPage.class, params);
+						setResponsePage(RequestActivitiesPage.class, params);
 					}
 					
 				});

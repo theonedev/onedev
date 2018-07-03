@@ -30,7 +30,7 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
@@ -38,7 +38,7 @@ import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.RunTaskBehavior;
-import io.onedev.server.web.component.comment.CommentInput;
+import io.onedev.server.web.component.projectcomment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
@@ -216,7 +216,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(customFieldsBean);
 						fieldValues.keySet().retainAll(selectedFields);
 						
-						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
+						OneDev.getInstance(IssueActionManager.class).batchUpdate(
 								getIssueIterator(), state, milestone, fieldValues, comment);
 						onUpdated(target);
 					}

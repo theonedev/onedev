@@ -28,7 +28,7 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
@@ -325,7 +325,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					if (!SecurityUtils.canModify(issue)) 
 						throw new UnauthorizedException("Permission denied");
 					
-					OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, getMilestone());
+					OneDev.getInstance(IssueActionManager.class).changeMilestone(issue, getMilestone());
 					markAccepted(target, issue, true);
 					checkMatched(target, issue);
 				} else if (fieldName.equals(Issue.STATE)) {
@@ -382,7 +382,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 							
 						};
 					} else {
-						OneDev.getInstance(IssueChangeManager.class).changeState(issue, getColumn(), new HashMap<>(), null);
+						OneDev.getInstance(IssueActionManager.class).changeState(issue, getColumn(), new HashMap<>(), null);
 						markAccepted(target, issue, true);
 						checkMatched(target, issue);
 					}
@@ -392,7 +392,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 
 					Map<String, Object> fieldValues = new HashMap<>();
 					fieldValues.put(fieldName, getColumn());
-					OneDev.getInstance(IssueChangeManager.class).changeFields(issue, fieldValues);
+					OneDev.getInstance(IssueActionManager.class).changeFields(issue, fieldValues);
 					markAccepted(target, issue, true);
 					checkMatched(target, issue);
 				}

@@ -53,6 +53,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -73,9 +75,9 @@ import io.onedev.server.git.Submodule;
 import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
-import io.onedev.server.manager.ConfigManager;
 import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.support.BranchProtection;
@@ -98,7 +100,7 @@ import io.onedev.utils.StringUtils;
 
 @Entity
 @Table(indexes={@Index(columnList="g_forkedFrom_id")})
-//@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @DynamicUpdate
 @Editable
 public class Project extends AbstractEntity {
@@ -137,7 +139,7 @@ public class Project extends AbstractEntity {
 	private long version;
 	
     @OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-    private Collection<BranchWatch> branchWatches = new ArrayList<>();
+    private Collection<Configuration> configurations = new ArrayList<>();
     
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -173,9 +175,6 @@ public class Project extends AbstractEntity {
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
-	
-	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<Task> tasks = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
@@ -345,7 +344,15 @@ public class Project extends AbstractEntity {
 		return getRefInfos(Constants.R_TAGS);
     }
 	
-    public List<RefInfo> getRefInfos(String prefix) {
+    public Collection<Configuration> getConfigurations() {
+		return configurations;
+	}
+
+	public void setConfigurations(Collection<Configuration> configurations) {
+		this.configurations = configurations;
+	}
+
+	public List<RefInfo> getRefInfos(String prefix) {
 		try (RevWalk revWalk = new RevWalk(getRepository())) {
 			List<Ref> refs = new ArrayList<Ref>(getRepository().getRefDatabase().getRefs(prefix).values());
 			List<RefInfo> refInfos = refs.stream()
@@ -406,7 +413,7 @@ public class Project extends AbstractEntity {
 	}
 	
 	public String getUrl() {
-		return OneDev.getInstance(ConfigManager.class).getSystemSetting().getServerUrl() + "/projects/" + getName();
+		return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl() + "/projects/" + getName();
 	}
 	
 	@Nullable
@@ -763,8 +770,10 @@ public class Project extends AbstractEntity {
 		try {
 			CreateBranchCommand command = git().branchCreate();
 			command.setName(branchName);
+			RevCommit commit = getRevCommit(branchRevision);
 			command.setStartPoint(getRevCommit(branchRevision));
 			command.call();
+			cacheObjectId(GitUtils.branch2ref(branchName), commit);
 		} catch (GitAPIException e) {
 			throw new RuntimeException(e);
 		}
@@ -779,6 +788,7 @@ public class Project extends AbstractEntity {
 			tag.setTagger(taggerIdent);
 			tag.setObjectId(getRevCommit(tagRevision));
 			tag.call();
+			cacheObjectId(GitUtils.tag2ref(tagName), tag.getObjectId());
 		} catch (GitAPIException e) {
 			throw new RuntimeException(e);
 		}

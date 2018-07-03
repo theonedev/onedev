@@ -9,6 +9,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueCommentManager;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.User;
+import io.onedev.server.web.util.DeleteCallback;
 
 @SuppressWarnings("serial")
 public class CommentedActivity implements IssueActivity {
@@ -20,7 +21,7 @@ public class CommentedActivity implements IssueActivity {
 	}
 	
 	@Override
-	public Panel render(String panelId, ActivityCallback callback) {
+	public Panel render(String panelId, DeleteCallback deleteCallback) {
 		return new CommentedPanel(panelId, new LoadableDetachableModel<IssueComment>() {
 
 			@Override
@@ -28,7 +29,7 @@ public class CommentedActivity implements IssueActivity {
 				return getComment();
 			}
 			
-		}, callback);
+		}, deleteCallback);
 	}
 	
 	public Long getCommentId() {

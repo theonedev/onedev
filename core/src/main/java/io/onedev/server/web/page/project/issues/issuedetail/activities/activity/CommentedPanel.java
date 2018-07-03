@@ -21,22 +21,23 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
+import io.onedev.server.web.component.projectcomment.CommentInput;
+import io.onedev.server.web.util.DeleteCallback;
+import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 
 @SuppressWarnings("serial")
 class CommentedPanel extends GenericPanel<IssueComment> {
 
-	private final ActivityCallback callback;
+	private final DeleteCallback deleteCallback;
 	
-	public CommentedPanel(String id, IModel<IssueComment> model, ActivityCallback callback) {
+	public CommentedPanel(String id, IModel<IssueComment> model, DeleteCallback deleteCallback) {
 		super(id, model);
-		this.callback = callback;
+		this.deleteCallback = deleteCallback;
 	}
 
 	@Override
@@ -154,7 +155,7 @@ class CommentedPanel extends GenericPanel<IssueComment> {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				OneDev.getInstance(IssueCommentManager.class).delete(getComment());
-				callback.onDelete(target);
+				deleteCallback.onDelete(target);
 			}
 			
 			@Override

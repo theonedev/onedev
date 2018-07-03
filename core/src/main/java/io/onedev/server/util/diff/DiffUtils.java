@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import javax.annotation.Nullable;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 
 import io.onedev.jsyntax.TextToken;
 import io.onedev.jsyntax.TokenTypes;
@@ -51,6 +52,15 @@ public class DiffUtils {
 		return tokens;
 	}
 	
+	public static List<String> getLines(@Nullable String text) {
+		List<String> lines = new ArrayList<>();
+		if (text != null)
+			lines = Splitter.on("\n").splitToList(text);
+		else
+			lines = new ArrayList<>();
+		return lines;
+	}
+	
 	private static List<Tokenized> tokenize(List<String> lines, @Nullable String fileName) {
 		Tokenizer tokenizer = TokenizerRegistry.getTokenizer(fileName);
 		if (tokenizer != null) {
@@ -77,8 +87,14 @@ public class DiffUtils {
 		} else {
 			List<Tokenized> tokenizedLines = new ArrayList<>();
 			for (String line: lines) {
-				long token = TokenUtils.getToken(0, line.length(), 0);
-				tokenizedLines.add(new Tokenized(line, TokenUtils.toArray(splitByWord(line, token))));
+				/* 
+				 * Do not tokenize line if file name is not specified, as sometimes we want to 
+				 * show addition/deletion as a whole. To tokenize line as plain text, specify 
+				 * file name with a .txt suffix
+				 */
+				long[] tokens = new long[1];
+				tokens[0] = TokenUtils.getToken(0, line.length(), 0); 
+				tokenizedLines.add(new Tokenized(line, tokens));
 			}
 			return tokenizedLines;
 		}
@@ -93,14 +109,12 @@ public class DiffUtils {
 				"Total size of old lines and new lines should be less than " + MAX_DIFF_SIZE + ".");
 		
 		List<String> processedOldLines = new ArrayList<>();
-		for (String line: oldLines) {
+		for (String line: oldLines) 
 			processedOldLines.add(whitespaceOption.process(line));
-		}
 		
 		List<String> processedNewLines = new ArrayList<>();
-		for (String line: newLines) {
+		for (String line: newLines) 
 			processedNewLines.add(whitespaceOption.process(line));
-		}
 		
 		List<Tokenized> oldTokenizedLines = tokenize(oldLines, oldFileName);
 		List<Tokenized> newTokenizedLines = tokenize(newLines, newFileName);
@@ -426,8 +440,10 @@ public class DiffUtils {
 			return null;
 	}
 	
-	public static String diffAsHtml(List<String> oldLines, List<String> newLines, boolean forceAlign) {
-		List<DiffBlock<Tokenized>> diffBlocks = DiffUtils.diff(oldLines, null, newLines, null, WhitespaceOption.DO_NOT_IGNORE);
+	public static String diffAsHtml(List<String> oldLines, @Nullable String oldFileName, 
+			List<String> newLines, @Nullable String newFileName, boolean forceAlign) {
+		List<DiffBlock<Tokenized>> diffBlocks = DiffUtils.diff(oldLines, oldFileName, newLines, newFileName, 
+				WhitespaceOption.DO_NOT_IGNORE);
 		StringBuilder builder = new StringBuilder("<div style='font-family: monospace;'>");
 		for (int i=0; i<diffBlocks.size(); i++) {
 			DiffBlock<Tokenized> block = diffBlocks.get(i);

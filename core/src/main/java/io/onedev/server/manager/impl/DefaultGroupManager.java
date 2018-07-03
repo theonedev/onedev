@@ -6,7 +6,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.server.manager.CacheManager;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.ProjectManager;
@@ -25,14 +25,14 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 
 	private final ProjectManager projectManager;
 	
-	private final ConfigManager configManager;
+	private final SettingManager configManager;
 	
 	private final CacheManager cacheManager;
 	
 	private final IssueFieldUnaryManager issueFieldManager;
 	
 	@Inject
-	public DefaultGroupManager(Dao dao, ProjectManager projectManager, ConfigManager configManager, 
+	public DefaultGroupManager(Dao dao, ProjectManager projectManager, SettingManager configManager, 
 			CacheManager cacheManager, IssueFieldUnaryManager issueFieldManager) {
 		super(dao);
 		this.projectManager = projectManager;

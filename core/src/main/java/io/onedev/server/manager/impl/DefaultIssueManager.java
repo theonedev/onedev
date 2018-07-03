@@ -98,7 +98,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Override
 	public void open(Issue issue) {
 		LastActivity lastActivity = new LastActivity();
-		lastActivity.setAction("submitted");
+		lastActivity.setDescription("submitted");
 		lastActivity.setUser(issue.getSubmitter());
 		lastActivity.setDate(issue.getSubmitDate());
 		issue.setLastActivity(lastActivity);

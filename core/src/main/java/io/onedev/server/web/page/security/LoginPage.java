@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
@@ -71,7 +71,7 @@ public class LoginPage extends BasePage {
 							user.setPassword(AppLoader.getInstance(PasswordService.class).encryptPassword(password));
 							userManager.save(user);
 							
-							ConfigManager configManager = OneDev.getInstance(ConfigManager.class);
+							SettingManager configManager = OneDev.getInstance(SettingManager.class);
 							if (configManager.getMailSetting() != null) {
 								
 								MailManager mailManager = OneDev.getInstance(MailManager.class);
@@ -178,12 +178,12 @@ public class LoginPage extends BasePage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(OneDev.getInstance(ConfigManager.class).getMailSetting() != null);
+				setVisible(OneDev.getInstance(SettingManager.class).getMailSetting() != null);
 			}
 			
 		});
 
-		boolean enableSelfRegister = OneDev.getInstance(ConfigManager.class).getSecuritySetting().isEnableSelfRegister();
+		boolean enableSelfRegister = OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableSelfRegister();
 		add(new ViewStateAwarePageLink<Void>("registerUser", RegisterPage.class).setVisible(enableSelfRegister));
 	}
 

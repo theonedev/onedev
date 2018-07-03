@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.lifecycle.SystemStarting;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -33,10 +33,10 @@ public class DefaultStorageManager implements StorageManager {
 	
 	private final Dao dao;
 	
-    private final ConfigManager configManager;
+    private final SettingManager configManager;
     
     @Inject
-    public DefaultStorageManager(Dao dao, ConfigManager configManager) {
+    public DefaultStorageManager(Dao dao, SettingManager configManager) {
     	this.dao = dao;
         this.configManager = configManager;
     }

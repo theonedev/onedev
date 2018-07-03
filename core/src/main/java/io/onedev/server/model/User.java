@@ -74,22 +74,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private Collection<UserAuthorization> authorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<Review> reviews = new ArrayList<>();
+	private Collection<PullRequestReview> reviews = new ArrayList<>();
 	
-	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
-
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<BranchWatch> branchWatches = new ArrayList<>();
-
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<PullRequestWatch> requestWatches = new ArrayList<>();
 
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueWatch> issueWatches = new ArrayList<>();
-    
-    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<Task> tasks = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
@@ -180,14 +171,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.memberships = memberships;
 	}
 
-	public Collection<Task> getTasks() {
-		return tasks;
-	}
-
-	public void setTasks(Collection<Task> tasks) {
-		this.tasks = tasks;
-	}
-
 	@SuppressWarnings("deprecation")
 	@Override
 	public String toString() {
@@ -239,10 +222,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.uuid = uuid;
 	}
 
-	public static String getWebSocketObservable(Long userId) {
-		return User.class.getName() + userId;
-	}
-	
 	@Override
 	public int compareTo(AbstractEntity entity) {
 		User user = (User) entity;

@@ -1,29 +1,32 @@
-#request-detail>.merge-preview>.available>.commits {
+#request-detail>.main>.merge-preview>.available>.commits {
 	margin-bottom: 20px;
 }
-#request-detail>.merge-preview>.available>.commits>.commit {
-	border: 1px solid #DDD;
-	background: #F5F5F5;
+#request-detail>.main>.merge-preview>.available>.commits>.commit {
+	background: #FAFAFA; 
+	border: 2px solid #E0E0E0;
 	padding: 20px;
 }
-#request-detail>.merge-preview>.available>.commits>.vs {
+#request-detail>.main>.merge-preview>.available>.commits>.vs {
 	margin: 55px 20px 0 20px;
 	color: #999;
 }
-#request-detail>.merge-preview>.available>.commits>.commit>.title {
+#request-detail>.main>.merge-preview>.available>.commits>.commit>.title {
 	font-size: 16px;
 	color: #666;
 	margin-bottom: 6px;
 }
-#request-detail>.merge-preview>.available>.commits>.commit>.description {
+#request-detail>.main>.merge-preview>.available>.commits>.commit>.description {
 	font-size: 13px;
 	color: #999;
 	margin-top: 8px;
 }
-
-#request-detail>.merge-preview>.available>.out-dated a {
-	color: #666;
+#request-detail>.main>.merge-preview>.available>.commits>.commit span.build-status {
+	margin-left: 4px;
 }
-#request-detail>.merge-preview>.not-available {
+
+#request-detail>.main>.merge-preview>.available>.out-dated a {
+	color: #836A05;
+}
+#request-detail>.main>.merge-preview>.not-available {
 	font-size: 16px;
 }

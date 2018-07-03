@@ -11,10 +11,11 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.Broadcast;
-import org.apache.wicket.event.IEvent;
+import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -35,7 +36,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.CodeCommentManager;
@@ -43,40 +43,39 @@ import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.model.ReviewInvitation;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CloseInfo;
 import io.onedev.server.model.support.MarkPos;
-import io.onedev.server.model.support.MergeStrategy;
 import io.onedev.server.model.support.ProjectAndBranch;
+import io.onedev.server.model.support.pullrequest.CloseInfo;
+import io.onedev.server.model.support.pullrequest.MergePreview;
+import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.search.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.QualityCheckStatus;
-import io.onedev.server.util.Verification;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.component.branchpicker.AffinalBranchPicker;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
+import io.onedev.server.web.component.build.PullRequestBuildsPanel;
 import io.onedev.server.web.component.commitlist.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.BranchLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
-import io.onedev.server.web.component.requestreviewer.ReviewerListPanel;
+import io.onedev.server.web.component.projectcomment.CommentInput;
+import io.onedev.server.web.component.review.ReviewListPanel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.component.verification.RequiredVerificationsPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.overview.RequestOverviewPage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
 import io.onedev.server.web.page.security.LoginPage;
-import io.onedev.server.web.websocket.PageDataChanged;
+import io.onedev.server.web.util.ProjectAttachmentSupport;
+import io.onedev.server.web.util.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
 public class NewRequestPage extends ProjectPage implements CommentSupport {
@@ -180,13 +179,10 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 				update.setRequest(request);
 				update.setHeadCommitHash(request.getHeadCommitHash());
 				update.setMergeBaseCommitHash(request.getBaseCommitHash());
+
+				request.setMergeStrategy(MergeStrategy.MERGE_IF_NECESSARY);
 				
-				if (request.getQualityCheckStatus().getAwaitingReviewers().isEmpty()) { 
-					// this often means that we are merging from trunk to our own branch 
-					request.setMergeStrategy(MergeStrategy.MERGE_IF_NECESSARY);
-				} else {
-					request.setMergeStrategy(MergeStrategy.ALWAYS_MERGE);
-				}
+				OneDev.getInstance(PullRequestManager.class).checkQuality(request);
 			}
 			requestModel = new LoadableDetachableModel<PullRequest>() {
 
@@ -461,12 +457,12 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 			@Override
 			public String getObject() {
 				if (requestModel.getObject().isOpen())
-					return "This change is already opened for merge by a pull request";
+					return "<i class='fa fa-info-circle'></i> This change is already opened for merge by pull request";
 				else 
-					return "This change is squashed/rebased onto base branch via a pull request";
+					return "<i class='fa fa-info-circle'></i> This change is squashed/rebased onto base branch via pull request";
 			}
 			
-		}));
+		}).setEscapeModelStrings(false));
 		
 		fragment.add(new Link<Void>("link") {
 
@@ -478,7 +474,7 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 					@Override
 					public String getObject() {
 						PullRequest request = getPullRequest();
-						return "#" + request.getNumber() + " " + request.getTitle();
+						return "#" + request.getNumber() + " - " + request.getTitle();
 					}
 					
 				}));
@@ -487,7 +483,7 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 			@Override
 			public void onClick() {
 				PageParameters params = RequestDetailPage.paramsOf(getPullRequest());
-				setResponsePage(RequestOverviewPage.class, params);
+				setResponsePage(RequestActivitiesPage.class, params);
 			}
 			
 		});
@@ -546,12 +542,12 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 				} else {
 					getPullRequest().setSource(source);
 					getPullRequest().setTarget(target);
-					for (ReviewInvitation invitation: getPullRequest().getReviewInvitations())
-						invitation.setUser(dao.load(User.class, invitation.getUser().getId()));
+					for (PullRequestReview review: getPullRequest().getReviews())
+						review.setUser(dao.load(User.class, review.getUser().getId()));
 					
 					OneDev.getInstance(PullRequestManager.class).open(getPullRequest());
 					
-					setResponsePage(RequestOverviewPage.class, RequestOverviewPage.paramsOf(getPullRequest()));
+					setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(getPullRequest()));
 				}			
 				
 			}
@@ -579,7 +575,7 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 		titleInput.setRequired(true).setLabel(Model.of("Title"));
 		titleContainer.add(titleInput);
 		
-		titleContainer.add(new NotificationPanel("feedback", titleInput));
+		titleContainer.add(new FencedFeedbackPanel("feedback", titleInput));
 		
 		titleContainer.add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
 
@@ -620,6 +616,18 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 			
 		});
 
+		WebMarkupContainer mergeStrategyContainer = new WebMarkupContainer("mergeStrategy") {
+
+			@Override
+			protected void onBeforeRender() {
+				addOrReplace(newMergeStatusContainer());
+				super.onBeforeRender();
+			}
+			
+		};
+		mergeStrategyContainer.setOutputMarkupId(true);
+		form.add(mergeStrategyContainer);
+		
 		IModel<MergeStrategy> mergeStrategyModel = new IModel<MergeStrategy>() {
 
 			@Override
@@ -640,79 +648,85 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 		
 		List<MergeStrategy> mergeStrategies = Arrays.asList(MergeStrategy.values());
 		DropDownChoice<MergeStrategy> mergeStrategyDropdown = 
-				new DropDownChoice<MergeStrategy>("mergeStrategy", mergeStrategyModel, mergeStrategies);
+				new DropDownChoice<MergeStrategy>("select", mergeStrategyModel, mergeStrategies);
 
 		mergeStrategyDropdown.add(new OnChangeAjaxBehavior() {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
+				target.add(mergeStrategyContainer);
 			}
 			
 		});
 		
-		form.add(mergeStrategyDropdown);
+		mergeStrategyContainer.add(mergeStrategyDropdown);
 		
-		form.add(new Label("mergeStrategyHelp", new AbstractReadOnlyModel<String>() {
+		mergeStrategyContainer.add(new Label("help", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
 				return getPullRequest().getMergeStrategy().getDescription();
 			}
 			
-		}) {
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-
-				if (event.getPayload() instanceof PageDataChanged) {
-					PageDataChanged payload = (PageDataChanged) event.getPayload();
-					payload.getHandler().add(this);
-				}
-			}
-			
-		}.setOutputMarkupId(true));
+		}));
 		
-		form.add(new WebMarkupContainer("immediateMergeNote") {
+		form.add(new ReviewListPanel("reviewers", requestModel));
+
+		form.add(new PullRequestBuildsPanel("builds", requestModel));
+		
+		return fragment;
+	}
+	
+	private Component newMergeStatusContainer() {
+		WebMarkupContainer container = new AjaxLazyLoadPanel("status") {
 			
 			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-
-				if (event.getPayload() instanceof PageDataChanged) {
-					PageDataChanged payload = (PageDataChanged) event.getPayload();
-					payload.getHandler().add(this);
-				}
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new DisableGlobalLoadingIndicatorListener());
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				
+				setVisible(getPullRequest().getMergeStrategy() != MergeStrategy.DO_NOT_MERGE);
+			}
+
+			@Override
+			public Component getLazyLoadComponent(String componentId) {
 				PullRequest request = getPullRequest();
+				MergePreview mergePreview = new MergePreview(request.getTarget().getObjectName(), 
+						request.getHeadCommitHash(), request.getMergeStrategy(), null);
+				ObjectId merged = mergePreview.getMergeStrategy().merge(request);
+				if (merged != null)
+					mergePreview.setMerged(merged.name());
+				request.setLastMergePreview(mergePreview);
 				
-				QualityCheckStatus qualityCheckStatus = request.getQualityCheckStatus();
-				boolean hasUnsuccessVerifications = false;
-				for (Verification verification: qualityCheckStatus.getEffectiveVerifications().values()) {
-					if (verification.getStatus() != Verification.Status.SUCCESS) {
-						hasUnsuccessVerifications = true;
-						break;
-					}
+				if (merged != null) {
+					Component result = new Label(componentId, "<i class=\"fa fa-check-circle\"></i> Able to merge without conflicts");
+					result.add(AttributeAppender.append("class", "no-conflict"));
+					result.setEscapeModelStrings(false);
+					return result;
+				} else { 
+					Component result = new Label(componentId, 
+							"<i class=\"fa fa-warning\"></i> There are merge conflicts. You can still create the pull request though");
+					result.add(AttributeAppender.append("class", "conflict"));
+					result.setEscapeModelStrings(false);
+					return result;
 				}
-				setVisible(request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE 
-						&& qualityCheckStatus.getAwaitingReviewers().isEmpty()
-						&& !hasUnsuccessVerifications
-						&& qualityCheckStatus.getAwaitingVerifications().isEmpty());
+			}
+
+			@Override
+			public Component getLoadingComponent(String markupId) {
+				Component component = new Label(markupId, "<img src='/img/ajax-indicator-big.gif'></img> Calculating merge preview...");
+				component.add(AttributeAppender.append("class", "calculating"));
+				component.setEscapeModelStrings(false);
+				return component;
 			}
 			
-		}.setOutputMarkupPlaceholderTag(true));
-		
-		form.add(new ReviewerListPanel("reviewers", requestModel));
-
-		form.add(new RequiredVerificationsPanel("verifications", requestModel));
-		
-		return fragment;
+		};
+		container.setOutputMarkupPlaceholderTag(true);		
+		return container;
 	}
 
 	@Override

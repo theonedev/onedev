@@ -19,8 +19,8 @@ import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.PullRequestStatusChange;
-import io.onedev.server.model.Review;
+import io.onedev.server.model.PullRequestAction;
+import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
@@ -96,7 +96,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return OneDev.getInstance(UserManager.class).getCurrent();
 	}
 	
-	public static boolean canModify(Review review) {
+	public static boolean canModify(PullRequestReview review) {
 		Project project = review.getRequest().getTargetProject();
 		if (canManage(project)) {
 			return true;
@@ -141,7 +141,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 	}
 	
-	public static boolean canModify(PullRequestStatusChange statusChange) {
+	public static boolean canModify(PullRequestAction statusChange) {
 		User currentUser = getUser();
 		if (currentUser == null) {
 			return false;

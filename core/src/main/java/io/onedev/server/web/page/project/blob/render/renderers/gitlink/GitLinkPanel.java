@@ -10,7 +10,7 @@ import org.apache.wicket.markup.html.link.Link;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.Submodule;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 
@@ -28,7 +28,7 @@ public class GitLinkPanel extends BlobViewPanel {
 		Blob blob = context.getProject().getBlob(context.getBlobIdent());
 		Submodule submodule = Submodule.fromString(blob.getText().getContent()); 
 		WebMarkupContainer link;
-		ConfigManager configManager = OneDev.getInstance(ConfigManager.class);
+		SettingManager configManager = OneDev.getInstance(SettingManager.class);
 		if (submodule.getUrl().startsWith(configManager.getSystemSetting().getServerUrl() + "/")) {
 			link = new WebMarkupContainer("link");
 			link.add(AttributeModifier.replace("href", submodule.getUrl() + "/blob/" + submodule.getCommitId()));

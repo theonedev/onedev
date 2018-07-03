@@ -35,7 +35,7 @@ import org.apache.wicket.model.Model;
 import com.google.common.base.Throwables;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.page.project.ProjectListPage;
@@ -127,7 +127,7 @@ public class UnexpectedExceptionPage extends BaseErrorPage {
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
-				tag.put("value", OneDev.getInstance(ConfigManager.class).getSystemSetting().getServerUrl());
+				tag.put("value", OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl());
 			}
 			
 		});

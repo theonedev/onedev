@@ -41,23 +41,22 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.event.pullrequest.PullRequestActionEvent;
+import io.onedev.server.event.pullrequest.PullRequestCodeCommentAdded;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
-import io.onedev.server.event.pullrequest.PullRequestVerificationEvent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.VisitManager;
-import io.onedev.server.model.support.CloseInfo;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastActivity;
-import io.onedev.server.model.support.MergePreview;
-import io.onedev.server.model.support.MergeStrategy;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.Referenceable;
+import io.onedev.server.model.support.pullrequest.CloseInfo;
+import io.onedev.server.model.support.pullrequest.MergePreview;
+import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.QualityCheckStatus;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.jackson.RestView;
-import io.onedev.server.web.editable.EditableUtils;
 
 @Entity
 /*
@@ -155,30 +154,22 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<ReviewInvitation> reviewInvitations = new ArrayList<>();
+	private Collection<PullRequestReview> reviews = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<Review> reviews = new ArrayList<>();
-	
-	@OneToMany(mappedBy="referenced", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestReference> referencedBy = new ArrayList<>();
-	
-	@OneToMany(mappedBy="referencedBy",cascade=CascadeType.REMOVE)
-	private Collection<PullRequestReference> referenced = new ArrayList<>();
+	private Collection<PullRequestBuild> builds = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
 
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestStatusChange> statusChanges = new ArrayList<>();
+	private Collection<PullRequestAction> actions = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<CodeCommentRelation> codeCommentRelations = new ArrayList<>();
-	
-	private transient QualityCheckStatus qualityStatus;
 	
 	private transient Boolean mergedIntoTarget;
 
@@ -351,28 +342,12 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		sortedUpdates = null;
 	}
 
-	public Collection<ReviewInvitation> getReviewInvitations() {
-		return reviewInvitations;
+	public Collection<PullRequestBuild> getBuilds() {
+		return builds;
 	}
 
-	public void setReviewInvitations(Collection<ReviewInvitation> reviewInvitations) {
-		this.reviewInvitations = reviewInvitations;
-	}
-
-	public Collection<PullRequestReference> getReferencedBy() {
-		return referencedBy;
-	}
-
-	public void setReferencedBy(Collection<PullRequestReference> referencedBy) {
-		this.referencedBy = referencedBy;
-	}
-
-	public Collection<PullRequestReference> getReferenced() {
-		return referenced;
-	}
-
-	public void setReferenced(Collection<PullRequestReference> referenced) {
-		this.referenced = referenced;
+	public void setPullRequestBuilds(Collection<PullRequestBuild> builds) {
+		this.builds = builds;
 	}
 
 	public Collection<PullRequestComment> getComments() {
@@ -383,12 +358,12 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		this.comments = comments;
 	}
 
-	public Collection<PullRequestStatusChange> getStatusChanges() {
-		return statusChanges;
+	public Collection<PullRequestAction> getActions() {
+		return actions;
 	}
 
-	public void setStatusChanges(Collection<PullRequestStatusChange> statusChanges) {
-		this.statusChanges = statusChanges;
+	public void setActions(Collection<PullRequestAction> actions) {
+		this.actions = actions;
 	}
 
 	public Collection<PullRequestWatch> getWatches() {
@@ -407,16 +382,6 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		this.codeCommentRelations = codeCommentRelations;
 	}
 	
-	public QualityCheckStatus getQualityCheckStatus() {
-		if (qualityStatus == null)
-			qualityStatus = OneDev.getInstance(PullRequestManager.class).checkQuality(this);
-		return qualityStatus;
-	}
-	
-	public void clearQualityStatus() {
-		qualityStatus = null;
-	}
-
 	@Nullable
 	public CloseInfo getCloseInfo() {
 		return closeInfo;
@@ -605,11 +570,11 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		return mergedCommits;
 	}
 	
-	public Collection<Review> getReviews() {
+	public Collection<PullRequestReview> getReviews() {
 		return reviews;
 	}
 	
-	public void setReviews(Collection<Review> reviews) {
+	public void setReviews(Collection<PullRequestReview> reviews) {
 		this.reviews = reviews;
 	}
 	
@@ -726,31 +691,27 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		return mergedIntoTarget;
 	}
 	
-	public void setLastActivity(PullRequestStatusChange statusChange) {
+	public void setLastActivity(PullRequestActionEvent event) {
+		PullRequestAction action = event.getAction();
 		LastActivity lastActivity = new LastActivity();
-		lastActivity.setDate(statusChange.getDate());
-		lastActivity.setAction(statusChange.getType().getName());
-		lastActivity.setUser(statusChange.getUser());
+		lastActivity.setDate(action.getDate());
+		lastActivity.setDescription(action.getData().getDescription());
+		lastActivity.setUser(action.getUser());
 		setLastActivity(lastActivity);
 	}
 	
 	public void setLastActivity(PullRequestCodeCommentEvent event) {
 		LastActivity lastActivity = new LastActivity();
 		lastActivity.setDate(event.getDate());
-		lastActivity.setAction(EditableUtils.getDisplayName(event.getClass()));
+		if (event instanceof PullRequestCodeCommentAdded)
+			lastActivity.setDescription("added code comment");
+		else
+			lastActivity.setDescription("replied code comment");
 		lastActivity.setUser(event.getUser());
 		setLastActivity(lastActivity);
 		setLastCodeCommentActivityDate(event.getDate());
 	}
 
-	public void setLastActivity(PullRequestVerificationEvent event) {
-		LastActivity lastActivity = new LastActivity();
-		lastActivity.setDate(event.getDate());
-		lastActivity.setAction(EditableUtils.getDisplayName(event.getClass()));
-		lastActivity.setUser(event.getUser());
-		setLastActivity(lastActivity);
-	}
-	
 	@Nullable
 	public ObjectId getSourceHead() {
 		ProjectAndBranch projectAndBranch = getSource();
@@ -758,6 +719,24 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 			return projectAndBranch.getObjectId(false);
 		else
 			return null;
+	}
+	
+	@Nullable
+	public PullRequestBuild getBuild(Configuration configuration) {
+		for (PullRequestBuild build: getBuilds()) {
+			if (build.getConfiguration().equals(configuration))
+				return build;
+		}
+		return null;
+	}
+	
+	@Nullable
+	public PullRequestReview getReview(User user) {
+		for (PullRequestReview review: getReviews()) {
+			if (review.getUser().equals(user))
+				return review;
+		}
+		return null;
 	}
 	
 	@Nullable

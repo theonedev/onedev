@@ -155,7 +155,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	private Collection<IssueComment> comments = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
-	private Collection<IssueChange> changes = new ArrayList<>();
+	private Collection<IssueAction> changes = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueVote> votes = new ArrayList<>();
@@ -263,11 +263,11 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.comments = comments;
 	}
 
-	public Collection<IssueChange> getChanges() {
+	public Collection<IssueAction> getChanges() {
 		return changes;
 	}
 
-	public void setChanges(Collection<IssueChange> changes) {
+	public void setChanges(Collection<IssueAction> changes) {
 		this.changes = changes;
 	}
 

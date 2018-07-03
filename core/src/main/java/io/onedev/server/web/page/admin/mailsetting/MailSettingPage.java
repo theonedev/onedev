@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
@@ -35,7 +35,7 @@ public class MailSettingPage extends AdministrationPage {
 		super.onInitialize();
 		
 		MailSettingHolder mailSettingHolder = new MailSettingHolder();
-		mailSettingHolder.setMailSetting(OneDev.getInstance(ConfigManager.class).getMailSetting());
+		mailSettingHolder.setMailSetting(OneDev.getInstance(SettingManager.class).getMailSetting());
 		
 		BeanEditor editor = BeanContext.editBean("editor", mailSettingHolder);
 		
@@ -45,7 +45,7 @@ public class MailSettingPage extends AdministrationPage {
 			public void onSubmit() {
 				super.onSubmit();
 				
-				OneDev.getInstance(ConfigManager.class).saveMailSetting(mailSettingHolder.getMailSetting());
+				OneDev.getInstance(SettingManager.class).saveMailSetting(mailSettingHolder.getMailSetting());
 				getSession().success("Mail setting has been saved");
 			}
 			

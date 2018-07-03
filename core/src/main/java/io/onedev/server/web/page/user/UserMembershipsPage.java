@@ -131,7 +131,7 @@ public class UserMembershipsPage extends UserPage {
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				getSettings().setPlaceholder("Add group...");
+				getSettings().setPlaceholder("Add to group...");
 				getSettings().setFormatResult("onedev.server.groupChoiceFormatter.formatResult");
 				getSettings().setFormatSelection("onedev.server.groupChoiceFormatter.formatSelection");
 				getSettings().setEscapeMarkup("onedev.server.groupChoiceFormatter.escapeMarkup");

@@ -25,17 +25,17 @@ public class LastActivity implements Serializable {
 	private String userName;
 
 	@Column(name="LAST_ACT_ACTION")
-	private String action;
+	private String description;
 
 	@Column(name="LAST_ACT_DATE")
 	private long date;
 
-	public String getAction() {
-		return action;
+	public String getDescription() {
+		return description;
 	}
 
-	public void setAction(String action) {
-		this.action = action;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	public Date getDate() {

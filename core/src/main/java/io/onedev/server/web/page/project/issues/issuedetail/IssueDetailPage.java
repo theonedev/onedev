@@ -51,7 +51,7 @@ import com.google.common.collect.Sets;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueVoteManager;
 import io.onedev.server.manager.IssueWatchManager;
@@ -73,14 +73,13 @@ import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.web.component.avatar.AvatarLink;
-import io.onedev.server.web.component.comment.CommentInput;
-import io.onedev.server.web.component.comment.ProjectAttachmentSupport;
 import io.onedev.server.web.component.issuestate.IssueStateLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.milestoneprogress.MilestoneProgressBar;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.projectcomment.CommentInput;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
@@ -99,6 +98,7 @@ import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.IssueFieldBeanUtils;
+import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.utils.StringUtils;
 
@@ -157,7 +157,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				OneDev.getInstance(IssueChangeManager.class).changeTitle(getIssue(), titleInput.getModelObject());
+				OneDev.getInstance(IssueActionManager.class).changeTitle(getIssue(), titleInput.getModelObject());
 				
 				Fragment titleViewer = newTitleViewer();
 				titleEditor.replaceWith(titleViewer);
@@ -588,7 +588,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						super.onSubmit(target, form);
 						
 						Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(fieldBean);
-						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
+						OneDev.getInstance(IssueActionManager.class).changeFields(getIssue(), fieldValues);
 						modal.close();
 						target.add(fieldsContainer);
 					}
@@ -999,8 +999,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		}
 	}
 
-	private IssueChangeManager getIssueChangeManager() {
-		return OneDev.getInstance(IssueChangeManager.class);
+	private IssueActionManager getIssueChangeManager() {
+		return OneDev.getInstance(IssueActionManager.class);
 	}
 
 	private IssueManager getIssueManager() {

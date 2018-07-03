@@ -14,12 +14,11 @@ import javax.inject.Singleton;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.MarkdownAware;
-import io.onedev.server.event.issue.IssueChanged;
+import io.onedev.server.event.issue.IssueActionEvent;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.IssueNotificationManager;
 import io.onedev.server.manager.IssueWatchManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.MarkdownManager;
@@ -28,7 +27,7 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.User;
@@ -41,7 +40,7 @@ import io.onedev.server.util.readcallback.ReadCallbackServlet;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @Singleton
-public class DefaultIssueNotificationManager implements IssueNotificationManager {
+public class DefaultIssueNotificationManager {
 	
 	private final MailManager mailManager;
 	
@@ -65,8 +64,8 @@ public class DefaultIssueNotificationManager implements IssueNotificationManager
 			return urlManager.urlFor(((IssueOpened)event).getIssue());
 		else if (event instanceof IssueCommented) 
 			return urlManager.urlFor(((IssueCommented)event).getComment());
-		else if (event instanceof IssueChanged)
-			return urlManager.urlFor(((IssueChanged)event).getChange());
+		else if (event instanceof IssueActionEvent)
+			return urlManager.urlFor(((IssueActionEvent)event).getAction());
 		else 
 			return urlManager.urlFor(event.getIssue());
 	}
@@ -143,8 +142,8 @@ public class DefaultIssueNotificationManager implements IssueNotificationManager
 			}
 		}
 		
-		if (event instanceof IssueChanged) {
-			IssueChange issueChange = ((IssueChanged) event).getChange();
+		if (event instanceof IssueActionEvent) {
+			IssueAction issueChange = ((IssueActionEvent) event).getAction();
 			for (Group group: issueChange.getData().getNewGroups().values()) 
 				involvedUsers.addAll(group.getMembers());
 			for (Map.Entry<String, User> entry: issueChange.getData().getNewUsers().entrySet()) {

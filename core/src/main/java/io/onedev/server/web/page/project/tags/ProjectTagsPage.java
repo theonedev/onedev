@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.tags;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -38,12 +37,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
-import io.onedev.server.manager.VerificationManager;
+import io.onedev.server.manager.BuildManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.Verification;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.component.build.BuildStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
@@ -52,7 +52,6 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.revisionpicker.RevisionPicker;
-import io.onedev.server.web.component.verification.VerificationStatusPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -267,12 +266,11 @@ public class ProjectTagsPage extends ProjectPage {
 				item.add(link);
 				
 				String commitHash = ref.getPeeledObj().name();
-				item.add(new VerificationStatusPanel("verificationStatus", 
-						new LoadableDetachableModel<Map<String, Verification>>() {
+				item.add(new BuildStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 					@Override
-					protected Map<String, Verification> load() {
-						return OneDev.getInstance(VerificationManager.class).getVerifications(getProject(), commitHash);
+					protected List<Build> load() {
+						return OneDev.getInstance(BuildManager.class).findAll(getProject(), commitHash);
 					}
 					
 				}));

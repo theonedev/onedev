@@ -2,15 +2,18 @@ package io.onedev.server.web.page.project.pullrequests.requestdetail;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.PullRequestManager;
-import io.onedev.server.manager.ReviewManager;
+import io.onedev.server.manager.PullRequestReviewManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.Review;
+import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.MergePreview;
+import io.onedev.server.model.support.pullrequest.MergePreview;
+import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.security.SecurityUtils;
 
 public enum PullRequestOperation {
@@ -36,17 +39,19 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			Review review = new Review();
-			review.setApproved(true);
-			review.setCommit(request.getHeadCommitHash());
-			review.setNote(comment);
-			review.setRequest(request);
-			review.setUser(SecurityUtils.getUser());
-			OneDev.getInstance(ReviewManager.class).save(review);
+			User user = SecurityUtils.getUser();
+			PullRequestReview review = request.getReview(user);
+			Preconditions.checkState(review != null);
+			ReviewResult result = new ReviewResult();
+			result.setApproved(true);
+			result.setComment(comment);
+			result.setCommit(request.getHeadCommitHash());
+			review.setResult(result);
+			OneDev.getInstance(PullRequestReviewManager.class).review(review);
 		}
 
 	},
-	DISAPPROVE {
+	REQUEST_FOR_CHANGES {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
@@ -55,13 +60,15 @@ public enum PullRequestOperation {
 
 		@Override
 		public void operate(PullRequest request, String comment) {
-			Review review = new Review();
-			review.setApproved(false);
-			review.setCommit(request.getHeadCommitHash());
-			review.setNote(comment);
-			review.setRequest(request);
-			review.setUser(SecurityUtils.getUser());
-			OneDev.getInstance(ReviewManager.class).save(review);
+			User user = SecurityUtils.getUser();
+			PullRequestReview review = request.getReview(user);
+			Preconditions.checkState(review != null);
+			ReviewResult result = new ReviewResult();
+			result.setApproved(false);
+			result.setComment(comment);
+			result.setCommit(request.getHeadCommitHash());
+			review.setResult(result);
+			OneDev.getInstance(PullRequestReviewManager.class).review(review);
 		}
 
 	},
@@ -129,8 +136,8 @@ public enum PullRequestOperation {
 	
 	private static boolean canReview(PullRequest request) {
 		User user = OneDev.getInstance(UserManager.class).getCurrent();
-		
-		return request.getQualityCheckStatus().getAwaitingReviewers().contains(user);
+		PullRequestReview review = request.getReview(user);
+		return review != null && review.getExcludeDate() == null;
 	}
 
 	public abstract void operate(PullRequest request, @Nullable String comment);

@@ -21,7 +21,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.server.manager.ConfigManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
@@ -47,10 +47,10 @@ public class GitPreReceiveCallback extends HttpServlet {
 	
 	private final UserManager userManager;
 	
-	private final ConfigManager configManager;
+	private final SettingManager configManager;
 	
 	@Inject
-	public GitPreReceiveCallback(ProjectManager projectManager, UserManager userManager, ConfigManager configManager) {
+	public GitPreReceiveCallback(ProjectManager projectManager, UserManager userManager, SettingManager configManager) {
 		this.projectManager = projectManager;
 		this.userManager = userManager;
 		this.configManager = configManager;
