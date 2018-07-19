@@ -34,7 +34,8 @@ import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.VisitManager;
+import io.onedev.server.manager.UserInfoManager;
+import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.issue.IssueField;
@@ -57,7 +58,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList="title"), @Index(columnList="noSpaceTitle"),  
 				@Index(columnList="number"), @Index(columnList="numberStr"), 
 				@Index(columnList="submitDate"), @Index(columnList="g_submitter_id"),
-				@Index(columnList="numOfVotes"), @Index(columnList="numOfComments"),
+				@Index(columnList="voteCount"), @Index(columnList="commentCount"),
 				@Index(columnList="g_milestone_id"), @Index(columnList="LAST_ACT_DATE")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
@@ -65,39 +66,39 @@ public class Issue extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final Map<String, String> BUILTIN_FIELDS = new LinkedHashMap<>();
+	public static final Map<String, String> FIELD_PATHS = new LinkedHashMap<>();
 	
-	public static final String NUMBER = "Number";
+	public static final String FIELD_NUMBER = "Number";
 	
-	public static final String STATE = "State";
+	public static final String FIELD_STATE = "State";
 	
-	public static final String TITLE = "Title";
+	public static final String FIELD_TITLE = "Title";
 	
-	public static final String DESCRIPTION = "Description";
+	public static final String FIELD_DESCRIPTION = "Description";
 	
-	public static final String SUBMITTER = "Submitter";
+	public static final String FIELD_SUBMITTER = "Submitter";
 	
-	public static final String SUBMIT_DATE = "Submit Date";
+	public static final String FIELD_SUBMIT_DATE = "Submit Date";
 	
-	public static final String VOTES = "Votes";
+	public static final String FIELD_VOTE_COUNT = "Vote Count";
 	
-	public static final String COMMENTS = "Comments";
+	public static final String FIELD_COMMENT_COUNT = "Comment Count";
 	
-	public static final String UPDATE_DATE = "Update Date";
+	public static final String FIELD_UPDATE_DATE = "Update Date";
 	
-	public static final String MILESTONE = "Milestone";
+	public static final String FIELD_MILESTONE = "Milestone";
 	
 	static {
-		BUILTIN_FIELDS.put(NUMBER, "number");
-		BUILTIN_FIELDS.put(STATE, "state");
-		BUILTIN_FIELDS.put(TITLE, "title");
-		BUILTIN_FIELDS.put(DESCRIPTION, "description");
-		BUILTIN_FIELDS.put(SUBMITTER, "submitter");
-		BUILTIN_FIELDS.put(SUBMIT_DATE, "submitDate");
-		BUILTIN_FIELDS.put(UPDATE_DATE, "lastActivity.date");
-		BUILTIN_FIELDS.put(VOTES, "numOfVotes");
-		BUILTIN_FIELDS.put(COMMENTS, "numOfComments");
-		BUILTIN_FIELDS.put(MILESTONE, "milestone");
+		FIELD_PATHS.put(FIELD_NUMBER, "number");
+		FIELD_PATHS.put(FIELD_STATE, "state");
+		FIELD_PATHS.put(FIELD_TITLE, "title");
+		FIELD_PATHS.put(FIELD_DESCRIPTION, "description");
+		FIELD_PATHS.put(FIELD_SUBMITTER, "submitter");
+		FIELD_PATHS.put(FIELD_SUBMIT_DATE, "submitDate");
+		FIELD_PATHS.put(FIELD_UPDATE_DATE, "lastActivity.date");
+		FIELD_PATHS.put(FIELD_VOTE_COUNT, "voteCount");
+		FIELD_PATHS.put(FIELD_COMMENT_COUNT, "commentCount");
+		FIELD_PATHS.put(FIELD_MILESTONE, "milestone");
 	}
 	
 	@Version
@@ -128,9 +129,9 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@Column(nullable=false)
 	private long submitDate;
 	
-	private int numOfVotes;
+	private int voteCount;
 	
-	private int numOfComments;
+	private int commentCount;
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -279,6 +280,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.votes = votes;
 	}
 
+	@Override
 	public Collection<IssueWatch> getWatches() {
 		return watches;
 	}
@@ -286,21 +288,37 @@ public class Issue extends AbstractEntity implements Referenceable {
 	public void setWatches(Collection<IssueWatch> watches) {
 		this.watches = watches;
 	}
-
-	public int getNumOfVotes() {
-		return numOfVotes;
+	
+	@Override
+	public EntityWatch getWatch(User user, boolean createIfNotExist) {
+		if (createIfNotExist) {
+			IssueWatch watch = (IssueWatch) super.getWatch(user, false);
+			if (watch == null) {
+				watch = new IssueWatch();
+				watch.setIssue(this);
+				watch.setUser(user);
+				getWatches().add(watch);
+			}
+			return watch;
+		} else {
+			return super.getWatch(user, false);
+		}
 	}
 
-	public void setNumOfVotes(int numOfVotes) {
-		this.numOfVotes = numOfVotes;
+	public int getVoteCount() {
+		return voteCount;
 	}
 
-	public int getNumOfComments() {
-		return numOfComments;
+	public void setVoteCount(int voteCount) {
+		this.voteCount = voteCount;
 	}
 
-	public void setNumOfComments(int numOfComments) {
-		this.numOfComments = numOfComments;
+	public int getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(int commentCount) {
+		this.commentCount = commentCount;
 	}
 
 	public Collection<IssueFieldUnary> getFieldUnaries() {
@@ -322,7 +340,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = OneDev.getInstance(VisitManager.class).getIssueVisitDate(user, this);
+			Date visitDate = OneDev.getInstance(UserInfoManager.class).getIssueVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;
@@ -366,15 +384,6 @@ public class Issue extends AbstractEntity implements Referenceable {
 	}
 	
 	@Nullable
-	public IssueWatch getWatch(User user) {
-		for (IssueWatch watch: getWatches()) {
-			if (user.equals(watch.getUser())) 
-				return watch;
-		}
-		return null;
-	}
-
-	@Nullable
 	public String getMilestoneName() {
 		return getMilestone()!=null? getMilestone().getName():null;
 	}
@@ -402,7 +411,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 		Serializable fieldBean = (Serializable) beanDescriptor.newBeanInstance();
 
 		for (PropertyDescriptor property: beanDescriptor.getPropertyDescriptors()) {
-			if (property.getDisplayName().equals(Issue.STATE)) {
+			if (property.getDisplayName().equals(Issue.FIELD_STATE)) {
 				property.setPropertyValue(fieldBean, getState());
 			} else {
 				IssueField field = getFields().get(property.getDisplayName());
@@ -460,7 +469,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 		if (fieldSpec != null) {
 			if (fieldSpec.getShowConditions() != null) {
 				for (ShowCondition condition: fieldSpec.getShowConditions()) {
-					if (condition.getInputName().equals(Issue.STATE)) { 
+					if (condition.getInputName().equals(Issue.FIELD_STATE)) { 
 						if (!condition.getValueMatcher().matches(state))
 							return false;
 					} else {
@@ -486,5 +495,5 @@ public class Issue extends AbstractEntity implements Referenceable {
 			return false;
 		}
 	}
-	
+
 }

@@ -1,331 +1,387 @@
 package io.onedev.server.web.page.project.pullrequests.requestlist;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
+import javax.annotation.Nullable;
+
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigatorLabel;
+import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.AbstractLink;
+import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.data.IDataProvider;
+import org.apache.wicket.markup.repeater.OddEvenItem;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.FileMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.git.BlobIdent;
+import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.manager.PullRequestQuerySettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.model.PullRequestQuerySetting;
+import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
+import io.onedev.server.model.support.pullrequest.query.PullRequestQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.component.RequestStatusLabel;
-import io.onedev.server.web.component.avatar.AvatarLink;
-import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
-import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.BranchLink;
-import io.onedev.server.web.component.link.UserLink;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.menu.MenuItem;
-import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.behavior.PullRequestQueryBehavior;
+import io.onedev.server.web.component.RequestStateLabel;
+import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.pullrequests.newrequest.NewRequestPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
-import io.onedev.server.web.page.project.pullrequests.requestlist.SearchOption.Status;
+import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
+import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
+import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QueryPosition;
+import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class RequestListPage extends ProjectPage {
 
+	private static final Logger logger = LoggerFactory.getLogger(RequestListPage.class);
+	
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
-	private static final Map<SortOption, String> sortNames = new LinkedHashMap<>();
+	private static final String PARAM_QUERY = "query";
 	
-	static {
-		sortNames.put(new SortOption("submitDate", false), "Newest");
-		sortNames.put(new SortOption("submitDate", true), "Oldest");
-		sortNames.put(new SortOption("lastEvent.date", false), "Recently updated");
-		sortNames.put(new SortOption("lastEvent.date", true), "Least recently updated");
-	}
+	private IModel<PullRequestQuery> parsedQueryModel = new LoadableDetachableModel<PullRequestQuery>() {
+
+		@Override
+		protected PullRequestQuery load() {
+			try {
+				PullRequestQuery parsedQuery = PullRequestQuery.parse(getProject(), query, true);
+				if (SecurityUtils.getUser() == null && parsedQuery.needsLogin())  
+					error("Please login to perform this query");
+				else
+					return parsedQuery;
+			} catch (Exception e) {
+				logger.error("Error parsing pull request query: " + query, e);
+				error(e.getMessage());
+			}
+			return null;
+		}
+		
+	};
 	
-	private SearchOption searchOption;
+	private String query;
 	
-	private SortOption sortOption;
+	private DataTable<PullRequest, Void> requestsTable;
 	
 	public RequestListPage(PageParameters params) {
 		super(params);
-		
-		searchOption = new SearchOption(params);
-		sortOption = new SortOption(params);
+		query = params.get(PARAM_QUERY).toOptionalString();
+	}
+
+	private PullRequestQuerySettingManager getPullRequestQuerySettingManager() {
+		return OneDev.getInstance(PullRequestQuerySettingManager.class);		
+	}
+	
+	private PullRequestManager getPullRequestManager() {
+		return OneDev.getInstance(PullRequestManager.class);		
+	}
+	
+	@Override
+	protected void onDetach() {
+		parsedQueryModel.detach();
+		super.onDetach();
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new MenuLink("filters") {
+
+		Component side;
+		add(side = new SavedQueriesPanel<NamedPullRequestQuery>("side") {
 
 			@Override
-			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				List<MenuItem> menuItems = new ArrayList<>();
+			protected NamedQueriesBean<NamedPullRequestQuery> newNamedQueriesBean() {
+				return new NamedPullRequestQueriesBean();
+			}
 
-				menuItems.add(new MenuItem() {
+			@Override
+			protected boolean needsLogin(NamedPullRequestQuery namedQuery) {
+				return PullRequestQuery.parse(getProject(), namedQuery.getQuery(), true).needsLogin();
+			}
+
+			@Override
+			protected Link<Void> newQueryLink(String componentId, NamedPullRequestQuery namedQuery) {
+				return new BookmarkablePageLink<Void>(componentId, RequestListPage.class, RequestListPage.paramsOf(getProject(), namedQuery.getQuery()));
+			}
+
+			@Override
+			protected QuerySetting<NamedPullRequestQuery> getQuerySetting() {
+				return getProject().getPullRequestQuerySettingOfCurrentUser();
+			}
+
+			@Override
+			protected ArrayList<NamedPullRequestQuery> getProjectQueries() {
+				return getProject().getSavedPullRequestQueries();
+			}
+
+			@Override
+			protected void onSaveQuerySetting(QuerySetting<NamedPullRequestQuery> querySetting) {
+				getPullRequestQuerySettingManager().save((PullRequestQuerySetting) querySetting);
+			}
+
+			@Override
+			protected void onSaveProjectQueries(ArrayList<NamedPullRequestQuery> projectQueries) {
+				getProject().setSavedPullRequestQueries(projectQueries);
+				OneDev.getInstance(ProjectManager.class).save(getProject());
+			}
+			
+		});
+		
+		Component querySave;
+		add(querySave = new AjaxLink<Void>("saveQuery") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(StringUtils.isNotBlank(query));
+				setVisible(SecurityUtils.getUser() != null);
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				configure();
+				if (!isEnabled()) {
+					tag.put("disabled", "disabled");
+					tag.put("title", "Input query to save");
+				}
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				new ModalPanel(target)  {
 
 					@Override
-					public String getLabel() {
-						return "Open requests";
-					}
-
-					@Override
-					public AbstractLink newLink(String id) {
-						return new Link<Void>(id) {
+					protected Component newContent(String id) {
+						return new SaveQueryPanel(id) {
 
 							@Override
-							public void onClick() {
-								searchOption = new SearchOption();
-								searchOption.setStatus(Status.OPEN);
-								
-								setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
+							protected void onSaveForMine(AjaxRequestTarget target, String name) {
+								PullRequestQuerySetting setting = getProject().getPullRequestQuerySettingOfCurrentUser();
+								NamedPullRequestQuery namedQuery = setting.getUserQuery(name);
+								if (namedQuery == null) {
+									namedQuery = new NamedPullRequestQuery(name, query);
+									setting.getUserQueries().add(namedQuery);
+								} else {
+									namedQuery.setQuery(query);
+								}
+								getPullRequestQuerySettingManager().save(setting);
+								target.add(side);
+								close();
+							}
+
+							@Override
+							protected void onSaveForAll(AjaxRequestTarget target, String name) {
+								NamedPullRequestQuery namedQuery = getProject().getSavedPullRequestQuery(name);
+								if (namedQuery == null) {
+									namedQuery = new NamedPullRequestQuery(name, query);
+									getProject().getSavedPullRequestQueries().add(namedQuery);
+								} else {
+									namedQuery.setQuery(query);
+								}
+								OneDev.getInstance(ProjectManager.class).save(getProject());
+								target.add(side);
+								close();
+							}
+
+							@Override
+							protected void onCancel(AjaxRequestTarget target) {
+								close();
 							}
 							
 						};
 					}
 					
-				});
-				
-				menuItems.add(new MenuItem() {
+				};
+			}		
+			
+		});
+		
+		TextField<String> input = new TextField<String>("input", Model.of(query));
+		input.add(new PullRequestQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
-					@Override
-					public String getLabel() {
-						return "Closed requests";
-					}
-
-					@Override
-					public AbstractLink newLink(String id) {
-						return new Link<Void>(id) {
-
-							@Override
-							public void onClick() {
-								searchOption = new SearchOption();
-								searchOption.setStatus(Status.CLOSED);
-								
-								setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
-							}
-							
-						};
-					}
-					
-				});
-				
-				User currentUser = OneDev.getInstance(UserManager.class).getCurrent();
-				if (currentUser != null) {
-					String userName = currentUser.getName();
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return "My open requests";
-						}
-
-						@Override
-						public AbstractLink newLink(String id) {
-							return new Link<Void>(id) {
-
-								@Override
-								public void onClick() {
-									searchOption = new SearchOption();
-									searchOption.setStatus(Status.OPEN);
-									searchOption.setSubmitterName(userName);
-
-									setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
-								}
-								
-							};
-						}
-						
-					});
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return "My closed requests";
-						}
-
-						@Override
-						public AbstractLink newLink(String id) {
-							return new Link<Void>(id) {
-
-								@Override
-								public void onClick() {
-									searchOption = new SearchOption();
-									searchOption.setStatus(Status.CLOSED);
-									searchOption.setSubmitterName(userName);
-
-									setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
-								}
-								
-							};
-						}
-						
-					});
-				}
-				return menuItems;
+			@Override
+			public Project getObject() {
+				return getProject();
+			}
+			
+		}));
+		input.add(new AjaxFormComponentUpdatingBehavior("input"){
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				query = input.getModelObject();
+				if (SecurityUtils.getUser() != null)
+					target.add(querySave);
 			}
 			
 		});
 		
-		add(new MenuLink("sortBy") {
+		Form<?> form = new Form<Void>("query");
+		form.add(input);
+		form.add(new AjaxButton("submit") {
 
 			@Override
-			protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
-				List<MenuItem> menuItems = new ArrayList<>();
-				
-				for (Map.Entry<SortOption, String> entry: sortNames.entrySet()) {
-					final SortOption sortOption = entry.getKey();
-					final String displayName = entry.getValue();
-					menuItems.add(new MenuItem() {
-
-						@Override
-						public String getLabel() {
-							return displayName;
-						}
-
-						@Override
-						public String getIconClass() {
-							if (RequestListPage.this.sortOption.equals(sortOption))
-								return "fa fa-check";
-							else
-								return null;
-						}
-
-						@Override
-						public AbstractLink newLink(String id) {
-							return new Link<Void>(id) {
-
-								@Override
-								public void onClick() {
-									setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));									
-								}
-								
-							};
-						}
-						
-					});
-				}
-
-				return menuItems;
+			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+				super.onSubmit(target, form);
+				setResponsePage(RequestListPage.class, paramsOf(getProject(), query));
 			}
 			
 		});
-		
-		add(new Link<Void>("newRequest") {
-
-			@Override
-			public void onClick() {
-				ProjectPage page = (ProjectPage) getPage();
-				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(page.getProject()));
-			}
-			
-		});
-
-		Form<?> form = new Form<Void>("filterForm") {
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-				
-				setResponsePage(RequestListPage.class, paramsOf(getProject(), searchOption, sortOption));
-			}
-			
-		};
-		form.add(BeanContext.editBean("editor", searchOption));
 		add(form);
+
+		add(new BookmarkablePageLink<Void>("newRequest", NewRequestPage.class, NewRequestPage.paramsOf(getProject())) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canRead(getProject()));
+			}
+			
+		});		
+		
+		add(new NotificationPanel("feedback", this));
 		
 		List<IColumn<PullRequest, Void>> columns = new ArrayList<>();
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Pull Request")) {
+		
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem,
-					String componentId, final IModel<PullRequest> rowModel) {
-				PullRequest request = rowModel.getObject();
-				Fragment fragment = new Fragment(componentId, "requestFrag", RequestListPage.this);
-				User userForDisplay = User.getForDisplay(request.getSubmitter(), request.getSubmitterName());
-				fragment.add(new AvatarLink("submitter", userForDisplay));
-				fragment.add(new Label("number", "#" + request.getNumber()));
-				fragment.add(new ViewStateAwarePageLink<Void>("text", RequestActivitiesPage.class, 
-						RequestActivitiesPage.paramsOf(request)) {
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
+				cellItem.add(new Label(componentId, ""));
+			}
+
+			@Override
+			public String getCssClass() {
+				return "new-indicator";
+			}
+			
+		});
+		
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("#")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getNumber()));
+			}
+
+		});
+		
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Title")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
+				OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
+				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
+						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
+				
+				cellItem.add(new BookmarkablePageLink<Void>(componentId, RequestActivitiesPage.class, 
+						RequestActivitiesPage.paramsOf(rowModel.getObject(), position)) {
 
 					@Override
 					public IModel<?> getBody() {
 						return Model.of(rowModel.getObject().getTitle());
 					}
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.setName("a");
+					}
 					
 				});
-				
-				fragment.add(new RequestStatusLabel("status", rowModel));
-				fragment.add(new BranchLink("target", request.getTarget(), null));
-				if (request.getSource() != null) { 
-					fragment.add(new BranchLink("source", request.getSource(), request));
-				} else {
-					fragment.add(new Label("source", "(deleted)") {
+			}
 
-						@Override
-						protected void onComponentTag(ComponentTag tag) {
-							super.onComponentTag(tag);
-							tag.setName("span");
-						}
-						
-					});
-				}
+		});
+		
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("State")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
+				cellItem.add(new RequestStateLabel(componentId, rowModel));
+			}
+
+		});
+		
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Target Branch")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
+				PullRequest request = rowModel.getObject();
+				PageParameters params = ProjectBlobPage.paramsOf(getProject(), 
+						new BlobIdent(request.getTargetBranch(), null, FileMode.TREE.getBits()));
+				cellItem.add(new BookmarkablePageLink<Void>(componentId, ProjectBlobPage.class, params) {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of(rowModel.getObject().getTargetBranch());
+					}
 					
-				WebMarkupContainer lastActivityContainer = new WebMarkupContainer("lastActivity");
-				String description = request.getLastActivity().getDescription();
-				User user = User.getForDisplay(request.getLastActivity().getUser(), 
-						request.getLastActivity().getUserName());
-				if (user != null) 
-					lastActivityContainer.add(new UserLink("user", userForDisplay));
-				else
-					lastActivityContainer.add(new WebMarkupContainer("user").setVisible(false));
-				lastActivityContainer.add(new Label("description", description));
-				lastActivityContainer.add(new Label("date", DateUtils.formatAge(request.getLastActivity().getDate())));
-				fragment.add(lastActivityContainer);
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						tag.setName("a");
+					}
+					
+				});
+			}
+
+		});
+		
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Last Activity")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
+				PullRequest request = rowModel.getObject();
+				Fragment fragment = new Fragment(componentId, "lastActivityFrag", RequestListPage.this);
+				fragment.add(new Label("user", request.getLastActivity().getUserName()).setVisible(request.getLastActivity().getUserName()!=null));
+					
+				fragment.add(new Label("description", request.getLastActivity().getDescription()));
+				fragment.add(new Label("date", DateUtils.formatAge(request.getLastActivity().getDate())));
 				
 				cellItem.add(fragment);
-
-				Date lastActivityDate;
-				if (request.getLastActivity() != null)
-					lastActivityDate = request.getLastActivity().getDate();
-				else
-					lastActivityDate = request.getSubmitDate();
-				cellItem.add(AttributeAppender.append("class", 
-						request.isVisitedAfter(lastActivityDate)?"request":"request new"));
 			}
-			
-		});
 
-		IDataProvider<PullRequest> dataProvider = new IDataProvider<PullRequest>() {
+		});
+		
+		SortableDataProvider<PullRequest, Void> dataProvider = new SortableDataProvider<PullRequest, Void>() {
 
 			@Override
 			public void detach() {
@@ -333,27 +389,26 @@ public class RequestListPage extends ProjectPage {
 
 			@Override
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
-				ProjectPage page = (ProjectPage) getPage();
-				
-				EntityCriteria<PullRequest> criteria = searchOption.getCriteria(page.getProject());
-				criteria.addOrder(sortOption.getOrder());
-				return OneDev.getInstance(Dao.class).findRange(criteria, (int)first, (int)count).iterator();
+				return getPullRequestManager().query(getProject(), parsedQueryModel.getObject(), (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
-				ProjectPage page = (ProjectPage) getPage();
-				return OneDev.getInstance(Dao.class).count(searchOption.getCriteria(page.getProject()));
+				PullRequestQuery parsedQuery = parsedQueryModel.getObject();
+				if (parsedQuery != null)
+					return getPullRequestManager().count(getProject(), parsedQuery.getCriteria());
+				else
+					return 0;
 			}
 
 			@Override
 			public IModel<PullRequest> model(PullRequest object) {
-				final Long pullRequestId = object.getId();
+				Long requestId = object.getId();
 				return new LoadableDetachableModel<PullRequest>() {
 
 					@Override
 					protected PullRequest load() {
-						return OneDev.getInstance(Dao.class).load(PullRequest.class, pullRequestId);
+						return getPullRequestManager().load(requestId);
 					}
 					
 				};
@@ -361,12 +416,12 @@ public class RequestListPage extends ProjectPage {
 			
 		};
 		
+		
 		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getProject());
-				searchOption.fillPageParams(params);
+				PageParameters params = paramsOf(getProject(), query);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -377,33 +432,42 @@ public class RequestListPage extends ProjectPage {
 			}
 			
 		};
-		
-		DataTable<PullRequest, Void> dataTable = new DataTable<>("requests", columns, 
-				dataProvider, WebConstants.PAGE_SIZE);
-		dataTable.setCurrentPage(pagingHistorySupport.getCurrentPage());
-		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
-		dataTable.addBottomToolbar(new NavigationToolbar(dataTable) {
+
+		add(requestsTable = new HistoryAwareDataTable<PullRequest, Void>("requests", columns, dataProvider, 
+				WebConstants.PAGE_SIZE, pagingHistorySupport) {
 
 			@Override
-			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
-				return new HistoryAwarePagingNavigator(navigatorId, table, pagingHistorySupport);
+			protected Item<PullRequest> newRowItem(String id, int index, IModel<PullRequest> model) {
+				Item<PullRequest> item = super.newRowItem(id, index, model);
+				PullRequest request = model.getObject();
+				item.add(AttributeAppender.append("class", 
+						request.isVisitedAfter(request.getLastActivity().getDate())?"request":"request new"));
+				return item;
+			}
+		});
+		
+		add(new NavigatorLabel("pageInfo", requestsTable) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(requestsTable.getItemCount() != 0);
 			}
 			
 		});
-		add(dataTable);		
+		
 	}
-
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		
 		response.render(CssHeaderItem.forReference(new RequestListResourceReference()));
 	}
-
-	public static PageParameters paramsOf(Project project, SearchOption searchOption, SortOption sortOption) {
+	
+	public static PageParameters paramsOf(Project project, @Nullable String query) {
 		PageParameters params = paramsOf(project);
-		searchOption.fillPageParams(params);
-		sortOption.fillPageParams(params);
+		if (query != null)
+			params.add(PARAM_QUERY, query);
 		return params;
 	}
 	

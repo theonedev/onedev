@@ -99,20 +99,20 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			public Boolean getObject() {
-				return selectedFields.contains(Issue.MILESTONE);
+				return selectedFields.contains(Issue.FIELD_MILESTONE);
 			}
 
 			@Override
 			public void setObject(Boolean object) {
 				if (object)
-					selectedFields.add(Issue.MILESTONE);
+					selectedFields.add(Issue.FIELD_MILESTONE);
 				else
-					selectedFields.remove(Issue.MILESTONE);
+					selectedFields.remove(Issue.FIELD_MILESTONE);
 			}
 			
 		}).add(newOnChangeBehavior(form)));
 		
-		List<String> customFieldNames = Lists.newArrayList(Issue.STATE);
+		List<String> customFieldNames = Lists.newArrayList(Issue.FIELD_STATE);
 		customFieldNames.addAll(getProject().getIssueWorkflow().getFieldNames());
 		form.add(new ListView<String>("customFields", customFieldNames) {
 
@@ -161,8 +161,8 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		}
 		
 		Set<String> excludedProperties = new HashSet<>();
-		if (!selectedFields.contains(Issue.MILESTONE))
-			excludedProperties.add(Issue.BUILTIN_FIELDS.get(Issue.MILESTONE));
+		if (!selectedFields.contains(Issue.FIELD_MILESTONE))
+			excludedProperties.add(Issue.FIELD_PATHS.get(Issue.FIELD_MILESTONE));
 		
 		builtInFieldsEditor = BeanContext.editBean("builtInFieldsEditor", builtInFieldsBean, excludedProperties); 
 		form.add(builtInFieldsEditor);
@@ -207,11 +207,11 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
 						Optional<Milestone> milestone;
-						if (selectedFields.contains(Issue.MILESTONE))
+						if (selectedFields.contains(Issue.FIELD_MILESTONE))
 							milestone = Optional.fromNullable(getProject().getMilestone(builtInFieldsBean.getMilestone()));
 						else
 							milestone = null;
-						String state = (String) IssueFieldBeanUtils.getFieldValue(customFieldsBean, Issue.STATE);
+						String state = (String) IssueFieldBeanUtils.getFieldValue(customFieldsBean, Issue.FIELD_STATE);
 						
 						Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(customFieldsBean);
 						fieldValues.keySet().retainAll(selectedFields);

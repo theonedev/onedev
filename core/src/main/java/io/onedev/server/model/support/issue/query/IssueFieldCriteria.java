@@ -8,6 +8,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.query.QueryBuildContext;
 
 public class IssueFieldCriteria extends FieldCriteria {
 
@@ -15,30 +16,21 @@ public class IssueFieldCriteria extends FieldCriteria {
 
 	private final long value;
 	
-	private final int operator;
-	
-	public IssueFieldCriteria(String name, long value, int operator) {
+	public IssueFieldCriteria(String name, long value) {
 		super(name);
 		this.value = value;
-		this.operator = operator;
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
 		Path<Long> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.ORDINAL);
-		if (operator == IssueQueryLexer.Is)
-			return context.getBuilder().equal(attribute, value);
-		else 
-			return context.getBuilder().notEqual(attribute, value);
+		return context.getBuilder().equal(attribute, value);
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
-		if (operator == IssueQueryLexer.Is)
-			return Objects.equals(fieldValue, value);
-		else 
-			return !Objects.equals(fieldValue, value);
+		return Objects.equals(fieldValue, value);
 	}
 
 	@Override
@@ -48,7 +40,7 @@ public class IssueFieldCriteria extends FieldCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(String.valueOf(value));
+		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(String.valueOf(value));
 	}
 
 }

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -24,27 +25,31 @@ import io.onedev.server.event.pullrequest.PullRequestCodeCommentReplied;
 import io.onedev.server.event.pullrequest.PullRequestCommentAdded;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
-import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.manager.PullRequestWatchManager;
 import io.onedev.server.manager.UrlManager;
-import io.onedev.server.manager.VisitManager;
+import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.NamedQuery;
+import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.pullrequest.actiondata.ActionData;
 import io.onedev.server.model.support.pullrequest.actiondata.ApprovedData;
 import io.onedev.server.model.support.pullrequest.actiondata.DiscardedData;
 import io.onedev.server.model.support.pullrequest.actiondata.MergedData;
 import io.onedev.server.model.support.pullrequest.actiondata.ReopenedData;
 import io.onedev.server.model.support.pullrequest.actiondata.RequestedForChangesData;
+import io.onedev.server.model.support.pullrequest.query.PullRequestQuery;
 import io.onedev.server.persistence.PersistListener;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.markdown.MentionParser;
+import io.onedev.server.util.query.EntityQuery;
+import io.onedev.server.util.query.QueryWatchBuilder;
 
 @Singleton
 public class DefaultPullRequestNotificationManager implements PersistListener {
@@ -57,17 +62,17 @@ public class DefaultPullRequestNotificationManager implements PersistListener {
 	
 	private final PullRequestWatchManager pullRequestWatchManager;
 	
-	private final VisitManager visitManager;
+	private final UserInfoManager userInfoManager;
 	
 	@Inject
 	public DefaultPullRequestNotificationManager(MailManager mailManager, UrlManager urlManager, 
 			MarkdownManager markdownManager, PullRequestWatchManager pullRequestWatchManager, 
-			VisitManager visitManager) {
+			UserInfoManager userInfoManager) {
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.markdownManager = markdownManager;
 		this.pullRequestWatchManager = pullRequestWatchManager;
-		this.visitManager = visitManager;
+		this.userInfoManager = userInfoManager;
 	}
 	
 	@Transactional
@@ -75,6 +80,32 @@ public class DefaultPullRequestNotificationManager implements PersistListener {
 	public void on(PullRequestEvent event) {
 		PullRequest request = event.getRequest();
 		User user = event.getUser();
+		
+		for(Map.Entry<User, Boolean> entry: new QueryWatchBuilder<PullRequest>() {
+
+			@Override
+			protected PullRequest getEntity() {
+				return request;
+			}
+
+			@Override
+			protected Collection<? extends QuerySetting<?>> getQuerySettings() {
+				return request.getTargetProject().getPullRequestQuerySettings();
+			}
+
+			@Override
+			protected EntityQuery<PullRequest> parse(String queryString) {
+				return PullRequestQuery.parse(request.getTargetProject(), queryString, true);
+			}
+
+			@Override
+			protected NamedQuery getSavedProjectQuery(String name) {
+				return request.getTargetProject().getSavedPullRequestQuery(name);
+			}
+			
+		}.getWatches().entrySet()) {
+			watch(request, entry.getKey(), entry.getValue());
+		};
 		
 		if (user != null)
 			watch(request, user, true);
@@ -166,29 +197,22 @@ public class DefaultPullRequestNotificationManager implements PersistListener {
 			Collection<User> usersToNotify = new HashSet<>();
 			
 			for (PullRequestWatch watch: request.getWatches()) {
-				Date visitDate = visitManager.getPullRequestVisitDate(watch.getUser(), request);
+				Date visitDate = userInfoManager.getPullRequestVisitDate(watch.getUser(), request);
 				if (watch.isWatching() 
-						&& !watch.isNotified() 
+						&& !userInfoManager.isNotified(watch.getUser(), watch.getRequest()) 
 						&& !watch.getUser().equals(event.getUser()) 
 						&& (visitDate == null || visitDate.getTime()<event.getDate().getTime()) 
 						&& (!(event instanceof PullRequestUpdated) || !watch.getUser().equals(request.getSubmitter()))
 						&& !notifiedUsers.contains(watch.getUser())) {
 					usersToNotify.add(watch.getUser());
-					watch.setNotified(true);
+					userInfoManager.setPullRequestNotified(watch.getUser(), watch.getRequest(), true);
 					pullRequestWatchManager.save(watch);
 				}
 			}
 
 			if (!usersToNotify.isEmpty()) {
 				String url = urlManager.urlFor(request);
-				String subject;
-				if (event instanceof PullRequestOpened) {
-					subject = String.format("%s opened pull request #%d - %s", 
-							request.getSubmitter().getDisplayName(), request.getNumber(), request.getTitle());
-				} else {
-					subject = String.format("New activities in pull request #%d - %s", request.getNumber(), request.getTitle());
-				}
-					
+				String subject = String.format("New activities in pull request #%d - %s", request.getNumber(), request.getTitle());
 				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()), subject, body);
 			}
@@ -209,7 +233,7 @@ public class DefaultPullRequestNotificationManager implements PersistListener {
 			PullRequestReview review = (PullRequestReview) entity;
 			if (review.getExcludeDate() == null && review.getResult() == null) {
 				for (int i=0; i<propertyNames.length; i++) {
-					if (propertyNames[i].equals(PullRequestReview.RESULT) && previousState[i] != null) {
+					if (propertyNames[i].equals(PullRequestReview.PATH_RESULT) && previousState[i] != null) {
 						inviteToReview(review);
 						break;
 					}
@@ -220,13 +244,9 @@ public class DefaultPullRequestNotificationManager implements PersistListener {
 	}
 	
 	private void watch(PullRequest request, User user, boolean watching) {
-		PullRequestWatch watch = request.getWatch(user);
-		if (watch == null) {
-			watch = new PullRequestWatch();
-			watch.setRequest(request);
-			watch.setUser(user);
+		PullRequestWatch watch = (PullRequestWatch) request.getWatch(user, true);
+		if (watch.isNew()) {
 			watch.setWatching(watching);
-			request.getWatches().add(watch);
 			pullRequestWatchManager.save(watch);
 		}
 	}

@@ -1,10 +1,12 @@
 package io.onedev.server.model.support.issue.query;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.query.QueryBuildContext;
 
 public class DescriptionCriteria extends IssueCriteria {
 
@@ -12,28 +14,25 @@ public class DescriptionCriteria extends IssueCriteria {
 
 	private final String value;
 	
-	private final int operator;
-	
-	public DescriptionCriteria(String value, int operator) {
+	public DescriptionCriteria(@Nullable String value) {
 		this.value = value;
-		this.operator = operator;
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
-		Expression<String> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.DESCRIPTION));
-		if (operator == IssueQueryLexer.Contains)
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
+		Expression<String> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_DESCRIPTION));
+		if (value != null)
 			return context.getBuilder().like(attribute, "%" + value + "%");
 		else
-			return context.getBuilder().notLike(attribute, "%" + value + "%");
+			return context.getBuilder().isNull(attribute);
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (operator == IssueQueryLexer.Contains)
+		if (value != null)
 			return issue.getDescription() != null && issue.getDescription().toLowerCase().contains(value.toLowerCase());
 		else
-			return issue.getDescription() == null || !issue.getDescription().toLowerCase().contains(value.toLowerCase());
+			return issue.getDescription() == null;
 	}
 
 	@Override
@@ -43,7 +42,10 @@ public class DescriptionCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.DESCRIPTION) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(value);
+		if (value != null)
+			return IssueQuery.quote(Issue.FIELD_DESCRIPTION) + " " + IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " + IssueQuery.quote(value);
+		else
+			return IssueQuery.quote(Issue.FIELD_DESCRIPTION) + " " + IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
 	}
 
 }

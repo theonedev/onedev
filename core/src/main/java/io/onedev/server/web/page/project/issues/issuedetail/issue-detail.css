@@ -36,28 +36,6 @@
 	margin-right: 20px;
 }
 
-#issue-detail>.side>.nav {
-	font-size: 16px;
-	position: relative;
-	text-align: center;
-}
-#issue-detail>.side>.nav a {
-	position: absolute;
-	color: #666;
-	top: 0;
-}
-#issue-detail>.side>.nav a[disabled] {
-	color: #BBB;
-	cursor: default;
-}
-
-#issue-detail>.side>.nav .prev {
-	left: 0;
-}
-#issue-detail>.side>.nav .next {
-	right: 0;
-}
-
 #issue-detail>.side>div>.head {
 	font-weight: bold;
 	margin-bottom: 16px;

@@ -54,16 +54,16 @@ abstract class CardDetailPanel extends GenericPanel<Issue> {
 		add(new Label("title", getIssue().getTitle()));
 
 		IssueWorkflow workflow = getIssue().getProject().getIssueWorkflow();
-		List<String> fieldNames = Lists.newArrayList(Issue.STATE);
-		fieldNames.add(Issue.SUBMITTER);
-		fieldNames.add(Issue.SUBMIT_DATE);
+		List<String> fieldNames = Lists.newArrayList(Issue.FIELD_STATE);
+		fieldNames.add(Issue.FIELD_SUBMITTER);
+		fieldNames.add(Issue.FIELD_SUBMIT_DATE);
 		for (String fieldName: workflow.getFieldNames()) {
 			if (getIssue().isFieldVisible(fieldName, getIssue().getState()))
 				fieldNames.add(fieldName);
 		}
-		fieldNames.add(Issue.MILESTONE);
-		fieldNames.add(Issue.COMMENTS);
-		fieldNames.add(Issue.VOTES);
+		fieldNames.add(Issue.FIELD_MILESTONE);
+		fieldNames.add(Issue.FIELD_COMMENT_COUNT);
+		fieldNames.add(Issue.FIELD_VOTE_COUNT);
 
 		if (fieldNames.size() % 2 != 0)
 			fieldNames.add(null);
@@ -95,16 +95,16 @@ abstract class CardDetailPanel extends GenericPanel<Issue> {
 
 			private Component renderField(String componentId, String fieldName) {
 				switch (fieldName) {
-				case Issue.STATE:
+				case Issue.FIELD_STATE:
 					return new IssueStateLabel(componentId, CardDetailPanel.this.getModel());
-				case Issue.SUBMITTER:
+				case Issue.FIELD_SUBMITTER:
 					Fragment fragment = new Fragment(componentId, "userFrag", CardDetailPanel.this);
 					fragment.add(new UserLink("name", User.getForDisplay(getIssue().getSubmitter(), getIssue().getSubmitterName())));
 					fragment.add(new AvatarLink("avatar", getIssue().getSubmitter()));
 					return fragment;
-				case Issue.SUBMIT_DATE:
+				case Issue.FIELD_SUBMIT_DATE:
 					return new Label(componentId, DateUtils.formatAge(getIssue().getSubmitDate()));
-				case Issue.MILESTONE:
+				case Issue.FIELD_MILESTONE:
 					if (getIssue().getMilestone() != null) {
 						return new BookmarkablePageLink<Void>(componentId, MilestoneDetailPage.class, 
 								MilestoneDetailPage.paramsOf(getIssue().getMilestone(), null)) {
@@ -118,10 +118,10 @@ abstract class CardDetailPanel extends GenericPanel<Issue> {
 					} else {
 						return new Label(componentId, "<i>No milestone</i>").setEscapeModelStrings(false);
 					}
-				case Issue.COMMENTS:
-					return new Label(componentId, getIssue().getNumOfComments());
-				case Issue.VOTES:
-					return new Label(componentId, getIssue().getNumOfVotes());
+				case Issue.FIELD_COMMENT_COUNT:
+					return new Label(componentId, getIssue().getCommentCount());
+				case Issue.FIELD_VOTE_COUNT:
+					return new Label(componentId, getIssue().getVoteCount());
 				default:
 					return new FieldValuesPanel(componentId) {
 

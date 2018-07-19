@@ -17,6 +17,8 @@ public class PullRequestBuild extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final String PATH_BUILD = "build";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Configuration configuration;

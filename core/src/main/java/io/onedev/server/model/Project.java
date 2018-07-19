@@ -77,6 +77,7 @@ import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.PullRequestQuerySettingManager;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.manager.UserManager;
@@ -84,8 +85,9 @@ import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.issue.IssueBoard;
-import io.onedev.server.model.support.issue.NamedQuery;
+import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
+import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -177,6 +179,9 @@ public class Project extends AbstractEntity {
 	private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestQuerySetting> pullRequestQuerySettings = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
 	@Lob
@@ -185,8 +190,12 @@ public class Project extends AbstractEntity {
 	
 	@Lob
 	@Column(nullable=false, length=65535)
-	private ArrayList<NamedQuery> savedIssueQueries = new ArrayList<>();
+	private ArrayList<NamedIssueQuery> savedIssueQueries = new ArrayList<>();
 
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<NamedPullRequestQuery> savedPullRequestQueries = new ArrayList<>();
+	
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<String> issueListFields = new ArrayList<>();
@@ -209,27 +218,40 @@ public class Project extends AbstractEntity {
     
     private transient Optional<RevCommit> lastCommitOptional;
     
-    private transient Optional<IssueQuerySetting> issueQuerySettingOfCurrentUser;
+    private transient Optional<IssueQuerySetting> issueQuerySettingOfCurrentUserHolder;
+    
+    private transient Optional<PullRequestQuerySetting> pullRequestQuerySettingOfCurrentUserHolder;
     
     public Project() {
-    	issueListFields.add(Issue.NUMBER);
-    	issueListFields.add(Issue.STATE);
-    	issueListFields.add(Issue.TITLE);
+    	issueListFields.add(Issue.FIELD_NUMBER);
+    	issueListFields.add(Issue.FIELD_STATE);
+    	issueListFields.add(Issue.FIELD_TITLE);
 		issueListFields.add("Type");
 		issueListFields.add("Priority");
-		issueListFields.add(Issue.SUBMITTER);
+		issueListFields.add(Issue.FIELD_SUBMITTER);
 		issueListFields.add("Assignee");
-		issueListFields.add(Issue.VOTES);
+		issueListFields.add(Issue.FIELD_VOTE_COUNT);
 		
-		savedIssueQueries.add(new NamedQuery("All", "all"));
-		savedIssueQueries.add(new NamedQuery("Open", "open"));
-		savedIssueQueries.add(new NamedQuery("My open", "open and mine"));
-		savedIssueQueries.add(new NamedQuery("Closed", "closed"));
-		savedIssueQueries.add(new NamedQuery("Added recently", "\"Submit Date\" is after \"last week\""));
-		savedIssueQueries.add(new NamedQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-		savedIssueQueries.add(new NamedQuery("Submitted by me", "\"Submitter\" is me"));
-		savedIssueQueries.add(new NamedQuery("Assigned to me", "\"Assignee\" is me"));
-		savedIssueQueries.add(new NamedQuery("High Priority", "\"Priority\" is \"High\""));
+		savedIssueQueries.add(new NamedIssueQuery("Open", "open"));
+		savedIssueQueries.add(new NamedIssueQuery("My open", "open and mine"));
+		savedIssueQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
+		savedIssueQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+		savedIssueQueries.add(new NamedIssueQuery("Submitted by me", "\"Submitter\" is me"));
+		savedIssueQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
+		savedIssueQueries.add(new NamedIssueQuery("High Priority", "\"Priority\" is \"High\""));
+		savedIssueQueries.add(new NamedIssueQuery("Closed", "closed"));
+		savedIssueQueries.add(new NamedIssueQuery("All", "all"));
+		
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Open", "open"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Need to be reviewed by me", "to be reviewed by me"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Need to be changed by me", "submitted by me and someone requested for changes"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Request for changes by me", "requested for changes by me"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Approved by me", "approved by me"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted by me", "submitted by me"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Closed", "merged or discarded"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("All", "all"));
     }
     
 	@Editable(order=100)
@@ -852,23 +874,40 @@ public class Project extends AbstractEntity {
 		this.issueWorkflow = issueWorkflow;
 	}
 
-	public ArrayList<NamedQuery> getSavedIssueQueries() {
+	public ArrayList<NamedIssueQuery> getSavedIssueQueries() {
 		return savedIssueQueries;
 	}
 
-	public void setSavedIssueQueries(ArrayList<NamedQuery> savedIssueQueries) {
+	public void setSavedIssueQueries(ArrayList<NamedIssueQuery> savedIssueQueries) {
 		this.savedIssueQueries = savedIssueQueries;
 	}
 	
+	public ArrayList<NamedPullRequestQuery> getSavedPullRequestQueries() {
+		return savedPullRequestQueries;
+	}
+
+	public void setSavedPullRequestQueries(ArrayList<NamedPullRequestQuery> savedPullRequestQueries) {
+		this.savedPullRequestQueries = savedPullRequestQueries;
+	}
+	
 	@Nullable
-	public NamedQuery getSavedIssueQuery(String name) {
-		for (NamedQuery namedQuery: getSavedIssueQueries()) {
+	public NamedIssueQuery getSavedIssueQuery(String name) {
+		for (NamedIssueQuery namedQuery: getSavedIssueQueries()) {
 			if (namedQuery.getName().equals(name))
 				return namedQuery;
 		}
 		return null;
 	}
 
+	@Nullable
+	public NamedPullRequestQuery getSavedPullRequestQuery(String name) {
+		for (NamedPullRequestQuery namedQuery: getSavedPullRequestQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
+	
 	public ArrayList<String> getIssueListFields() {
 		return issueListFields;
 	}
@@ -883,6 +922,14 @@ public class Project extends AbstractEntity {
 
 	public void setIssueQuerySettings(Collection<IssueQuerySetting> issueQuerySettings) {
 		this.issueQuerySettings = issueQuerySettings;
+	}
+
+	public Collection<PullRequestQuerySetting> getPullRequestQuerySettings() {
+		return pullRequestQuerySettings;
+	}
+
+	public void setPullRequestQuerySettings(Collection<PullRequestQuerySetting> pullRequestQuerySettings) {
+		this.pullRequestQuerySettings = pullRequestQuerySettings;
 	}
 
 	public long getVersion() {
@@ -1028,20 +1075,41 @@ public class Project extends AbstractEntity {
 		return authors;
 	}
 	
-	@Nullable
 	public IssueQuerySetting getIssueQuerySettingOfCurrentUser() {
-		if (issueQuerySettingOfCurrentUser == null) {
-			User currentUser = SecurityUtils.getUser();
-			if (currentUser != null)
-				issueQuerySettingOfCurrentUser = Optional.fromNullable(OneDev.getInstance(IssueQuerySettingManager.class).find(this, currentUser));
-			else
-				issueQuerySettingOfCurrentUser = Optional.absent();
+		if (issueQuerySettingOfCurrentUserHolder == null) {
+			User user = SecurityUtils.getUser();
+			if (user != null) {
+				IssueQuerySetting setting = OneDev.getInstance(IssueQuerySettingManager.class).find(this, user);
+				if (setting == null) {
+					setting = new IssueQuerySetting();
+					setting.setProject(this);
+					setting.setUser(user);
+				}
+				issueQuerySettingOfCurrentUserHolder = Optional.of(setting);
+			} else {
+				issueQuerySettingOfCurrentUserHolder = Optional.absent();
+			}
 		}
-		return issueQuerySettingOfCurrentUser.orNull();
+		return issueQuerySettingOfCurrentUserHolder.orNull();
 	}
 	
-	public void setIssueQuerySettingOfCurrentUser(IssueQuerySetting setting) {
-		issueQuerySettingOfCurrentUser = Optional.fromNullable(setting);
+	@Nullable
+	public PullRequestQuerySetting getPullRequestQuerySettingOfCurrentUser() {
+		if (pullRequestQuerySettingOfCurrentUserHolder == null) {
+			User user = SecurityUtils.getUser();
+			if (user != null) {
+				PullRequestQuerySetting setting = OneDev.getInstance(PullRequestQuerySettingManager.class).find(this, user);
+				if (setting == null) {
+					setting = new PullRequestQuerySetting();
+					setting.setProject(this);
+					setting.setUser(user);
+				}
+				pullRequestQuerySettingOfCurrentUserHolder = Optional.of(setting);
+			} else {
+				pullRequestQuerySettingOfCurrentUserHolder = Optional.absent();
+			}
+		}
+		return pullRequestQuerySettingOfCurrentUserHolder.orNull();
 	}
 	
 	@Nullable

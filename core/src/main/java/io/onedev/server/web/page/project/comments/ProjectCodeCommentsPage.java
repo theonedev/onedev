@@ -5,7 +5,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.component.codecomment.CodeCommentFilter;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -61,14 +60,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
 			}
 			
-		}) {
-			
-			@Override
-			protected PullRequest getPullRequest() {
-				return null;
-			}
-
-		});
+		}));
 	}
 
 	@Override

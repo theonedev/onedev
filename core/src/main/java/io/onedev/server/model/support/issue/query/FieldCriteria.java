@@ -24,7 +24,7 @@ public abstract class FieldCriteria extends IssueCriteria {
 	@Override
 	public Collection<String> getUndefinedFields(Project project) {
 		Set<String> undefinedFields = new HashSet<>();
-		if (!Issue.BUILTIN_FIELDS.containsKey(fieldName) 
+		if (!Issue.FIELD_PATHS.containsKey(fieldName) 
 				&& project.getIssueWorkflow().getFieldSpec(fieldName) == null) {
 			undefinedFields.add(fieldName);
 		}

@@ -1,48 +1,31 @@
 <wicket:extend>
 	<div id="request-list">
-		<div class="head">
-			<a wicket:id="filters" class="btn btn-default"><i class="fa fa-filter"></i> Filters <span class="caret"></span></a>
-			<a wicket:id="sortBy" class="btn btn-default"> <i class="fa fa-sort"></i> Sort by <span class="caret"></span></a>
-			<a wicket:id="newRequest" class="btn btn-success"><i class="fa fa-plus"></i> Open New</a>
-		</div>
-		<table class="body">
-			<tr>
-				<td class="filter">
-					<h4>Filter options</h4>
-					<hr>
-					<div class="body">
-						<form wicket:id="filterForm">
-							<div wicket:id="editor" class="no-autofocus"></div>
-							<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Filter</button>
-						</form>
+		<div wicket:id="side" class="side"></div>
+		<div class="main">
+			<div class="head">
+				<form wicket:id="query" class="clearable-wrapper">
+					<div class="input-group no-autofocus">
+						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order pull requests here"></input>
+						<span class="input-group-btn">
+							<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+						</span>
 					</div>
-				</td>
-				<td class="spacing">&nbsp;</td>
-				<td class="result">
-					<table wicket:id="requests"></table>
-				</td>
-			</tr>
-		</table>
+				</form>
+				<a wicket:id="newRequest" class="open-new btn btn-success"><i class="fa fa-plus"></i> New Pull Request</a>
+				<div class="others clearfix">
+					<a wicket:id="saveQuery" class="pull-left"><i class="fa fa-save"></i> Save Query</a>
+					<div wicket:id="pageInfo" class="page-info pull-right"></div>
+				</div>
+			</div>
+			<div class="body">
+				<div wicket:id="feedback"></div>
+				<table wicket:id="requests" class="table"></table>
+			</div>
+		</div>
 	</div>
-	<wicket:fragment wicket:id="requestFrag">
-		<div class="title clearfix">
-			<a wicket:id="submitter" class="avatar pull-left"></a>
-			<a wicket:id="text" class="text pull-left"></a> 
-			<span wicket:id="number" class="number pull-left"></span>
-			<span wicket:id="status" class="status pull-right"></span>
-		</div>
-		<div class="additional-info">
-			<span class="branches">
-				<a wicket:id="target" class="branch"></a>
-				<span class="fa fa-long-arrow-left"></span>
-				<a wicket:id="source" class="branch"></a>
-			</span>
-			<span wicket:id="lastActivity">
-				<span class="middot"></span>
-				<a wicket:id="user"></a>
-				<span wicket:id="description"></span> 
-				<span wicket:id="date"></span>
-			</span>
-		</div>
-	</wicket:fragment>
+	<wicket:fragment wicket:id="lastActivityFrag">
+		<span wicket:id="user"></span>
+		<span wicket:id="description"></span> 
+		<span wicket:id="date"></span>
+	</wicket:fragment>	
 </wicket:extend>

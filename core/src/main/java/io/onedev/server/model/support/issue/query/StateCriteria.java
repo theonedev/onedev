@@ -10,6 +10,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.query.QueryBuildContext;
 
 public class StateCriteria extends IssueCriteria {
 
@@ -17,28 +18,19 @@ public class StateCriteria extends IssueCriteria {
 
 	private String value;
 	
-	private int operator;
-	
-	public StateCriteria(String value, int operator) {
+	public StateCriteria(String value) {
 		this.value = value;
-		this.operator = operator;
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
-		Path<?> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.STATE));
-		if (operator == IssueQueryLexer.Is)
-			return context.getBuilder().equal(attribute, value);
-		else
-			return context.getBuilder().notEqual(attribute, value);
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
+		Path<?> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_STATE));
+		return context.getBuilder().equal(attribute, value);
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (operator == IssueQueryLexer.Is)
-			return issue.getState().equals(value);
-		else
-			return !issue.getState().equals(value);
+		return issue.getState().equals(value);
 	}
 
 	@Override
@@ -48,13 +40,12 @@ public class StateCriteria extends IssueCriteria {
 
 	@Override
 	public void fill(Issue issue, Set<String> initedLists) {
-		if (operator == IssueQueryLexer.Is)
-			issue.setState(value);
+		issue.setState(value);
 	}
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.STATE) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(value);
+		return IssueQuery.quote(Issue.FIELD_STATE) + " " + IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(value);
 	}
 
 	@Override

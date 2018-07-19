@@ -7,6 +7,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.query.QueryBuildContext;
 
 public class SubmitDateCriteria extends IssueCriteria {
 
@@ -25,8 +26,8 @@ public class SubmitDateCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
-		Path<Long> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.SUBMIT_DATE));
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
+		Path<Long> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_SUBMIT_DATE));
 		if (operator == IssueQueryLexer.IsBefore)
 			return context.getBuilder().lessThan(attribute, value.getTime());
 		else
@@ -48,7 +49,7 @@ public class SubmitDateCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.SUBMIT_DATE) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(rawValue);
+		return IssueQuery.quote(Issue.FIELD_SUBMIT_DATE) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(rawValue);
 	}
 
 }

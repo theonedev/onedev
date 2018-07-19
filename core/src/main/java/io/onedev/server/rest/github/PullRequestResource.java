@@ -175,7 +175,7 @@ public class PullRequestResource {
 		requestMap.put("updated_at", sdf.format(request.getLatestUpdate().getDate()));
 		
 		if (!request.isOpen()) {
-			requestMap.put("closed_at", sdf.format(request.getCloseInfo().getCloseDate()));
+			requestMap.put("closed_at", sdf.format(request.getCloseInfo().getDate()));
 		}
 		
 		return requestMap;
@@ -192,7 +192,7 @@ public class PullRequestResource {
 		if (!SecurityUtils.canRead(project))
     		throw new UnauthorizedException("Unauthorized access to project '" + projectName + "'");
 		
-    	EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
     	criteria.add(PullRequest.CriterionHelper.ofTargetProject(project));
     	if ("closed".equals(state))
         	criteria.add(PullRequest.CriterionHelper.ofClosed());

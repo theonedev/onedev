@@ -8,8 +8,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.VisitManager;
-import io.onedev.server.model.PullRequest;
+import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.codecomment.CodeCommentFilter;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
@@ -51,7 +50,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 
 			@Override
 			public void setObject(CodeCommentFilter object) {
-				PageParameters params = paramsOf(getPullRequest());
+				PageParameters params = paramsOf(getPullRequest(), getPosition());
 				object.fillPageParams(params);
 				setResponsePage(RequestCodeCommentsPage.class, params);
 			}
@@ -60,7 +59,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getPullRequest());
+				PageParameters params = paramsOf(getPullRequest(), getPosition());
 				filterOption.fillPageParams(params);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
@@ -71,14 +70,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
 			}
 			
-		}) {
-			
-			@Override
-			protected PullRequest getPullRequest() {
-				return RequestCodeCommentsPage.this.getPullRequest();
-			}
-
-		});
+		}));
 		
 		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
 			
@@ -110,7 +102,7 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getUser() != null) { 
-					OneDev.getInstance(VisitManager.class).visitPullRequestCodeComments(SecurityUtils.getUser(), getPullRequest());
+					OneDev.getInstance(UserInfoManager.class).visitPullRequestCodeComments(SecurityUtils.getUser(), getPullRequest());
 				}
 			}
 			

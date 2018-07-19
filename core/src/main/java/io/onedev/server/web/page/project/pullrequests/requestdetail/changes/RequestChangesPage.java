@@ -47,6 +47,7 @@ import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
+import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
@@ -353,11 +354,11 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		super.onDetach();
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, String oldCommit, String newCommit) {
+	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position, String oldCommit, String newCommit) {
 		State state = new State();
 		state.oldCommit = oldCommit;
 		state.newCommit = newCommit;
-		return paramsOf(request, state);
+		return paramsOf(request, position, state);
 	}
 
 	public static State getState(CodeComment comment) {
@@ -369,12 +370,12 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		return state;
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, CodeComment comment) {
-		return paramsOf(request, getState(comment));
+	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position, CodeComment comment) {
+		return paramsOf(request, position, getState(comment));
 	}
 	
-	public static PageParameters paramsOf(PullRequest request, State state) {
-		PageParameters params = RequestDetailPage.paramsOf(request);
+	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position, State state) {
+		PageParameters params = RequestDetailPage.paramsOf(request, position);
 		fillParams(params, state);
 		return params;
 	}
@@ -406,7 +407,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 	}
 	
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
-		PageParameters params = paramsOf(getPullRequest(), state);
+		PageParameters params = paramsOf(getPullRequest(), getPosition(), state);
 		CharSequence url = RequestCycle.get().urlFor(RequestChangesPage.class, params);
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}
@@ -498,7 +499,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		markState.newCommit = state.newCommit;
 		markState.pathFilter = state.pathFilter;
 		markState.whitespaceOption = state.whitespaceOption;
-		return urlFor(RequestChangesPage.class, paramsOf(getPullRequest(), markState)).toString();
+		return urlFor(RequestChangesPage.class, paramsOf(getPullRequest(), getPosition(), markState)).toString();
 	}
 
 	@Override
@@ -510,7 +511,7 @@ public class RequestChangesPage extends RequestDetailPage implements CommentSupp
 		commentState.newCommit = state.newCommit;
 		commentState.pathFilter = state.pathFilter;
 		commentState.whitespaceOption = state.whitespaceOption;
-		return urlFor(RequestChangesPage.class, paramsOf(getPullRequest(), commentState)).toString();
+		return urlFor(RequestChangesPage.class, paramsOf(getPullRequest(), getPosition(), commentState)).toString();
 	}
 	
 	@Override

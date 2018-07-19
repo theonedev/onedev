@@ -169,8 +169,8 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 				request.setHeadCommitHash(source.getObjectName());
 				if (request.getBaseCommitHash().equals(source.getObjectName())) {
 					CloseInfo closeInfo = new CloseInfo();
-					closeInfo.setCloseDate(new Date());
-					closeInfo.setCloseStatus(CloseInfo.Status.MERGED);
+					closeInfo.setDate(new Date());
+					closeInfo.setStatus(CloseInfo.Status.MERGED);
 					request.setCloseInfo(closeInfo);
 				}
 	
@@ -482,7 +482,7 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			public void onClick() {
-				PageParameters params = RequestDetailPage.paramsOf(getPullRequest());
+				PageParameters params = RequestDetailPage.paramsOf(getPullRequest(), null);
 				setResponsePage(RequestActivitiesPage.class, params);
 			}
 			
@@ -547,7 +547,7 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 					
 					OneDev.getInstance(PullRequestManager.class).open(getPullRequest());
 					
-					setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(getPullRequest()));
+					setResponsePage(RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(getPullRequest(), null));
 				}			
 				
 			}

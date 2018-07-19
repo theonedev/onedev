@@ -36,7 +36,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 		Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getIssue().getProject());
 		Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
 		IssueFieldBeanUtils.setState(fieldBean, getTargetState());
-		Collection<String> excludedFields = Sets.newHashSet(Issue.STATE);
+		Collection<String> excludedFields = Sets.newHashSet(Issue.FIELD_STATE);
 		for (String fieldName: getIssue().getProject().getIssueWorkflow().getFieldNames()) {
 			if (getIssue().isFieldVisible(fieldName, getIssue().getState()))
 				excludedFields.add(fieldName);

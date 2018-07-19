@@ -33,12 +33,12 @@ public class ChangedMergeStrategyData extends ActionData {
 
 			@Override
 			public List<String> getOldLines() {
-				return Lists.newArrayList(oldStrategy.getDisplayName());
+				return Lists.newArrayList(oldStrategy.toString());
 			}
 
 			@Override
 			public List<String> getNewLines() {
-				return Lists.newArrayList(newStrategy.getDisplayName());
+				return Lists.newArrayList(newStrategy.toString());
 			}
 
 			@Override

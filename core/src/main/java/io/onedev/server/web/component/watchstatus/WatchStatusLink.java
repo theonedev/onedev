@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import io.onedev.server.model.support.issue.WatchStatus;
+import io.onedev.server.model.support.WatchStatus;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 

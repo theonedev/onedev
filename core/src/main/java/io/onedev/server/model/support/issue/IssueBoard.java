@@ -107,7 +107,7 @@ public class IssueBoard implements Serializable {
 	private static List<String> getIdentifyFieldChoices() {
 		List<String> choices = new ArrayList<>();
 		Project project = OneContext.get().getProject();
-		choices.add(Issue.STATE);
+		choices.add(Issue.FIELD_STATE);
 		for (InputSpec fieldSpec: project.getIssueWorkflow().getFieldSpecs()) {
 			if (!fieldSpec.isAllowMultiple() && (fieldSpec instanceof ChoiceInput || fieldSpec instanceof UserChoiceInput || fieldSpec instanceof GroupChoiceInput))
 				choices.add(fieldSpec.getName());
@@ -120,7 +120,7 @@ public class IssueBoard implements Serializable {
 		Map<String, String> choices = new LinkedHashMap<>();
 		Project project = OneContext.get().getProject();
 		String fieldName = (String) OneContext.get().getEditContext().getInputValue("identifyField");
-		if (Issue.STATE.equals(fieldName)) {
+		if (Issue.FIELD_STATE.equals(fieldName)) {
 			for (StateSpec state: project.getIssueWorkflow().getStateSpecs())
 				choices.put(state.getName(), state.getName());
 		} else if (fieldName != null) {
@@ -149,7 +149,7 @@ public class IssueBoard implements Serializable {
 			} catch (Exception e) {
 			}
 		}
-		if (getIdentifyField().equals(Issue.STATE)) {
+		if (getIdentifyField().equals(Issue.FIELD_STATE)) {
 			for (String column: getColumns()) {
 				if (project.getIssueWorkflow().getStateSpec(column) == null)
 					undefinedStates.add(column);
@@ -169,7 +169,7 @@ public class IssueBoard implements Serializable {
 			} catch (Exception e) {
 			}
 		}
-		if (getIdentifyField().equals(Issue.STATE)) {
+		if (getIdentifyField().equals(Issue.FIELD_STATE)) {
 			for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
 				int index = getColumns().indexOf(entry.getKey());
 				if (index != -1)
@@ -186,7 +186,7 @@ public class IssueBoard implements Serializable {
 			} catch (Exception e) {
 			}
 		}
-		if (!Issue.STATE.equals(getIdentifyField())) { 
+		if (!Issue.FIELD_STATE.equals(getIdentifyField())) { 
 			InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(getIdentifyField());
 			if (fieldSpec == null)
 				undefinedFields.add(getIdentifyField());
@@ -264,7 +264,7 @@ public class IssueBoard implements Serializable {
 				}
 			}
 
-			if (!getIdentifyField().equals(Issue.STATE)) {
+			if (!getIdentifyField().equals(Issue.FIELD_STATE)) {
 				for (String column: getColumns()) {
 					InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(getIdentifyField());
 					List<String> choices = fieldSpec.getPossibleValues();

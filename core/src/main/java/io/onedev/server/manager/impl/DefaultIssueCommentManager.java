@@ -37,7 +37,7 @@ public class DefaultIssueCommentManager extends AbstractEntityManager<IssueComme
 			lastActivity.setDate(comment.getDate());
 			lastActivity.setDescription("commented");
 			comment.getIssue().setLastActivity(lastActivity);
-			comment.getIssue().setNumOfComments(comment.getIssue().getNumOfComments()+1);
+			comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
 		}		
 	}
 
@@ -45,7 +45,7 @@ public class DefaultIssueCommentManager extends AbstractEntityManager<IssueComme
 	@Override
 	public void delete(IssueComment comment) {
 		super.delete(comment);
-		comment.getIssue().setNumOfComments(comment.getIssue().getNumOfComments()-1);
+		comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()-1);
 	}
 
 }

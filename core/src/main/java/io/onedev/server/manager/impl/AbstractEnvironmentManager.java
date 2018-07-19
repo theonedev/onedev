@@ -126,6 +126,14 @@ public abstract class AbstractEnvironmentManager {
 			return defaultValue;
 	}
 	
+	protected boolean readBoolean(Store store, Transaction txn, ByteIterable key, boolean defaultValue) {
+		byte[] bytes = readBytes(store, txn, key);
+		if (bytes != null)
+			return bytes[0] == 1;
+		else
+			return defaultValue;
+	}
+	
 	protected void writeInt(Store store, Transaction txn, ByteIterable key, int value) {
 		byte[] bytes = ByteBuffer.allocate(Integer.BYTES).putInt(value).array();
 		store.put(txn, key, new ArrayByteIterable(bytes));
@@ -141,6 +149,11 @@ public abstract class AbstractEnvironmentManager {
 	
 	protected void writeLong(Store store, Transaction txn, ByteIterable key, long value) {
 		byte[] bytes = ByteBuffer.allocate(Long.BYTES).putLong(value).array();
+		store.put(txn, key, new ArrayByteIterable(bytes));
+	}
+	
+	protected void writeBoolean(Store store, Transaction txn, ByteIterable key, boolean value) {
+		byte[] bytes = new byte[] {(byte)(value?1:0)};
 		store.put(txn, key, new ArrayByteIterable(bytes));
 	}
 	

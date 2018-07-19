@@ -51,7 +51,7 @@ public class IssueFieldBeanUtils {
 	}
 	
 	public static void setState(Serializable fieldBean, String state) {
-		setFieldValue(fieldBean, Issue.STATE, state);
+		setFieldValue(fieldBean, Issue.FIELD_STATE, state);
 	}
 	
 	@Nullable

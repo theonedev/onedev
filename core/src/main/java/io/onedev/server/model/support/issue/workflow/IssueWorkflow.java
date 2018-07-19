@@ -17,7 +17,6 @@ import io.onedev.server.exception.OneException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.authorized.ProjectWriters;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
-import io.onedev.server.model.support.issue.query.IssueQueryLexer;
 import io.onedev.server.model.support.issue.query.OrCriteria;
 import io.onedev.server.model.support.issue.query.StateCriteria;
 import io.onedev.server.model.support.issue.workflow.action.PressButton;
@@ -306,7 +305,7 @@ public class IssueWorkflow implements Serializable {
 	
 	@Nullable
 	public InputSpec getFieldSpec(String fieldName) {
-		if (fieldName.equals(Issue.STATE))
+		if (fieldName.equals(Issue.FIELD_STATE))
 			return getFieldSpecOfState();
 		else
 			return getFieldSpecMap().get(fieldName);
@@ -406,7 +405,7 @@ public class IssueWorkflow implements Serializable {
 	
 	public InputSpec getFieldSpecOfState() {
 		ChoiceInput inputSpec = new ChoiceInput();
-		inputSpec.setName(Issue.STATE);
+		inputSpec.setName(Issue.FIELD_STATE);
 		inputSpec.setAllowEmpty(false);
 		SpecifiedChoices choicesProvider = new SpecifiedChoices();
 		for (StateSpec stateSpec: getStateSpecs()) {
@@ -423,7 +422,7 @@ public class IssueWorkflow implements Serializable {
 		List<IssueCriteria> criterias = new ArrayList<>();
 		for (StateSpec state: getStateSpecs()) {
 			if (category == state.getCategory())
-				criterias.add(new StateCriteria(state.getName(), IssueQueryLexer.Is));
+				criterias.add(new StateCriteria(state.getName()));
 		}
 		return new OrCriteria(criterias);
 	}

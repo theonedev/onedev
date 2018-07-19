@@ -13,8 +13,8 @@
 			<div wicket:id="statusAndBranches" class="status-and-branches clearfix">
 				<div wicket:id="status" class="label pull-left status"></div>
 				<div class="pull-left branches">
-					<a wicket:id="user"></a> wants to merge into <a wicket:id="target" class="branch"></a>
-					from <a wicket:id="source" class="branch"></a> <span wicket:id="date"></span>
+					<a wicket:id="user"></a> wants to merge <a wicket:id="source" class="branch"></a> into 
+					<a wicket:id="target" class="branch"></a> <span wicket:id="date"></span>
 				</div>
 			</div>
 			<div wicket:id="requestSummary" class="summary">
@@ -75,6 +75,7 @@
 			<wicket:child></wicket:child>
 		</div>
 		<div wicket:id="side" class="side">
+			<div wicket:id="requestNav" class="nav"></div>
 			<wicket:enclosure child="reviews">
 			<div class="reviews">
 				<div class="head">Reviews</div>
@@ -97,13 +98,7 @@
 					<div wicket:id="help" class="help-block"></div>
 				</div>
 			</div>
-			<div wicket:id="watch" class="watch">
-				<div class="head">Watch Status</div>
-				<div class="body">
-					<select wicket:id="option" class="form-control"></select>
-					<div wicket:id="help" class="help-block"></div>
-				</div>
-			</div>
+			<div wicket:id="watches" class="watches"></div>
 			<div wicket:id="manage" class="manage">
 				<a wicket:id="synchronize" class="check btn btn-default">Synchronize</a>
 				<p class="help-block">In case the pull request status is out of sync with underlying 

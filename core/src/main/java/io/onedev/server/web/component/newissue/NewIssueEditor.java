@@ -99,7 +99,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		milestoneChoice.setRequired(false);
 		add(milestoneChoice);
 		
-		Collection<String> excludedProperties = IssueFieldBeanUtils.getPropertyNames(fieldBeanClass, Sets.newHashSet(Issue.STATE));
+		Collection<String> excludedProperties = IssueFieldBeanUtils.getPropertyNames(fieldBeanClass, Sets.newHashSet(Issue.FIELD_STATE));
 		add(fieldEditor = new BeanContext(fieldBean.getClass(), excludedProperties).renderForEdit("fields", Model.of(fieldBean)));
 	}
 	

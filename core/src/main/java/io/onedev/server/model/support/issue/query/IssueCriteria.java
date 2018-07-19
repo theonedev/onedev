@@ -1,6 +1,5 @@
 package io.onedev.server.model.support.issue.query;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -11,13 +10,15 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.query.EntityCriteria;
+import io.onedev.server.util.query.QueryBuildContext;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 
-public abstract class IssueCriteria implements Serializable {
+public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public abstract Predicate getPredicate(Project project, QueryBuildContext context);
+	public abstract Predicate getPredicate(Project project, QueryBuildContext<Issue> context);
 
 	public final void fill(Issue issue) {
 		fill(issue, new HashSet<>());
@@ -26,12 +27,6 @@ public abstract class IssueCriteria implements Serializable {
 	public void fill(Issue issue, Set<String> initedLists) {
 	}
 	
-	public abstract boolean matches(Issue issue);
-	
-	public abstract boolean needsLogin();
-	
-	public abstract String toString();
-
 	public Collection<String> getUndefinedStates(Project project) {
 		return new HashSet<>();
 	}

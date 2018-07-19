@@ -36,7 +36,7 @@ import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.manager.VisitManager;
+import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.MarkPos;
@@ -198,7 +198,7 @@ public class CodeComment extends AbstractEntity {
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = OneDev.getInstance(VisitManager.class).getCodeCommentVisitDate(user, this);
+			Date visitDate = OneDev.getInstance(UserInfoManager.class).getCodeCommentVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;

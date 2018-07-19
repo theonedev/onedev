@@ -7,7 +7,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -46,8 +48,9 @@ import io.onedev.server.event.pullrequest.PullRequestCodeCommentAdded;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.PullRequestManager;
-import io.onedev.server.manager.VisitManager;
+import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
+import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.Referenceable;
@@ -72,8 +75,8 @@ import io.onedev.server.util.jackson.RestView;
 				@Index(columnList="number"), @Index(columnList="g_targetProject_id"), 
 				@Index(columnList="g_sourceProject_id"), @Index(columnList="g_submitter_id"),
 				@Index(columnList="headCommitHash"), @Index(columnList="PREVIEW_REQUEST_HEAD"), 
-				@Index(columnList="closeDate"), @Index(columnList="closeStatus"), 
-				@Index(columnList="g_closedBy_id"), @Index(columnList="closedByName")},
+				@Index(columnList="CLOSE_DATE"), @Index(columnList="CLOSE_STATUS"), 
+				@Index(columnList="CLOSE_USER"), @Index(columnList="CLOSE_USER_NAME")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"g_targetProject_id", "number"})})
 public class PullRequest extends AbstractEntity implements Referenceable {
 
@@ -83,6 +86,62 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	
 	public static final int MAX_CODE_COMMENTS = 1000;
 	 
+	public static final Map<String, String> FIELD_PATHS = new LinkedHashMap<>();
+	
+	public static final String FIELD_NUMBER = "Number";
+
+	public static final String FIELD_STATE = "State";
+	
+	public static final String FIELD_TARGET_BRANCH = "Target Branch";
+	
+	public static final String FIELD_SOURCE_PROJECT = "Source Project";
+	
+	public static final String FIELD_SOURCE_BRANCH = "Source Branch";
+	
+	public static final String FIELD_TITLE = "Title";
+	
+	public static final String FIELD_DESCRIPTION = "Description";
+	
+	public static final String FIELD_SUBMITTER = "Submitter";
+	
+	public static final String FIELD_SUBMIT_DATE = "Submit Date";
+	
+	public static final String FIELD_UPDATE_DATE = "Update Date";
+	
+	public static final String FIELD_CLOSE_DATE = "Close Date";
+	
+	public static final String FIELD_MERGE_STRATEGY = "Merge Strategy";
+	
+	public static final String PATH_CLOSE_STATUS = "closeInfo.status";
+	
+	public static final String PATH_CLOSE_USER = "closeInfo.user";
+	
+	public static final String PATH_LAST_MERGE_PREVIEW_MERGED = "lastMergePreview.merged";
+	
+	public static final String PATH_LAST_MERGE_PREVIEW_REQUEST_HEAD = "lastMergePreview.requestHead";
+	
+	public static final String PATH_ID = "id";
+	
+	public static final String STATE_OPEN = "Open";
+	
+	public static final String PATH_REVIEWS = "reviews";
+	
+	public static final String PATH_BUILDS = "builds";
+	
+	static {
+		FIELD_PATHS.put(FIELD_NUMBER, "number");
+		FIELD_PATHS.put(FIELD_TITLE, "title");
+		FIELD_PATHS.put(FIELD_SUBMITTER, "submitter");
+		FIELD_PATHS.put(FIELD_TARGET_BRANCH, "targetBranch");
+		FIELD_PATHS.put(FIELD_SOURCE_PROJECT, "sourceProject");
+		FIELD_PATHS.put(FIELD_SOURCE_BRANCH, "sourceBranch");
+		FIELD_PATHS.put(FIELD_DESCRIPTION, "description");
+		FIELD_PATHS.put(FIELD_SUBMIT_DATE, "submitDate");
+		FIELD_PATHS.put(FIELD_UPDATE_DATE, "lastActivity.date");
+		FIELD_PATHS.put(FIELD_CLOSE_DATE, "closeInfo.date");
+		FIELD_PATHS.put(FIELD_MERGE_STRATEGY, "mergeStrategy");
+	}
+	
 	@Embedded
 	private CloseInfo closeInfo;
 
@@ -149,7 +208,7 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	private String uuid = UUID.randomUUID().toString();
 	
 	private long number;
-
+	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
 
@@ -366,6 +425,7 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		this.actions = actions;
 	}
 
+	@Override
 	public Collection<PullRequestWatch> getWatches() {
 		return watches;
 	}
@@ -374,6 +434,22 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		this.watches = watches;
 	}
 
+	@Override
+	public EntityWatch getWatch(User user, boolean createIfNotExist) {
+		if (createIfNotExist) {
+			PullRequestWatch watch = (PullRequestWatch) super.getWatch(user, false);
+			if (watch == null) {
+				watch = new PullRequestWatch();
+				watch.setRequest(this);
+				watch.setUser(user);
+				getWatches().add(watch);
+			}
+			return watch;
+		} else {
+			return super.getWatch(user, false);
+		}
+	}
+	
 	public Collection<CodeCommentRelation> getCodeCommentRelations() {
 		return codeCommentRelations;
 	}
@@ -397,7 +473,7 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	
 	/**
 	 * Get last merge preview of this pull request. Note that this method may return an 
-	 * out dated merge preview. Refer to {@link this#getIntegrationPreview()}
+	 * outdated merge preview. Refer to {@link this#getIntegrationPreview()}
 	 * if you'd like to get an update-to-date merge preview
 	 *  
 	 * @return
@@ -418,7 +494,7 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	 * 
 	 * @return
 	 * 			update to date merge preview of this pull request, or <tt>null</tt> if 
-	 * 			the merge preview has not been calculated or out dated. In both cases, 
+	 * 			the merge preview has not been calculated or outdated. In both cases, 
 	 * 			it will trigger a re-calculation, and client should call this method later 
 	 * 			to get the calculated result 
 	 */
@@ -577,15 +653,6 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	public void setReviews(Collection<PullRequestReview> reviews) {
 		this.reviews = reviews;
 	}
-	
-	@Nullable
-	public PullRequestWatch getWatch(User user) {
-		for (PullRequestWatch watch: getWatches()) {
-			if (watch.getUser().equals(user))
-				return watch;
-		}
-		return null;
-	}
 
 	public String getNumberStr() {
 		return numberStr;
@@ -658,7 +725,7 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = OneDev.getInstance(VisitManager.class).getPullRequestVisitDate(user, this);
+			Date visitDate = OneDev.getInstance(UserInfoManager.class).getPullRequestVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;
@@ -668,7 +735,7 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	public boolean isCodeCommentsVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {
-			Date visitDate = OneDev.getInstance(VisitManager.class).getPullRequestCodeCommentsVisitDate(user, this);
+			Date visitDate = OneDev.getInstance(UserInfoManager.class).getPullRequestCodeCommentsVisitDate(user, this);
 			return visitDate != null && visitDate.getTime()>date.getTime();
 		} else {
 			return true;
@@ -676,11 +743,11 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	}
 	
 	public boolean isMerged() {
-		return closeInfo != null && closeInfo.getCloseStatus() == CloseInfo.Status.MERGED;
+		return closeInfo != null && closeInfo.getStatus() == CloseInfo.Status.MERGED;
 	}
 	
 	public boolean isDiscarded() {
-		return closeInfo != null && closeInfo.getCloseStatus() == CloseInfo.Status.DISCARDED;
+		return closeInfo != null && closeInfo.getStatus() == CloseInfo.Status.DISCARDED;
 	}
 	
 	public boolean isMergeIntoTarget() {

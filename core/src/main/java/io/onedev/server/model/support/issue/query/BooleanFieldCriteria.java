@@ -9,6 +9,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.query.QueryBuildContext;
 
 public class BooleanFieldCriteria extends FieldCriteria {
 
@@ -16,29 +17,20 @@ public class BooleanFieldCriteria extends FieldCriteria {
 
 	private final boolean value;
 	
-	private final int operator;
-	
-	public BooleanFieldCriteria(String name, boolean value, int operator) {
+	public BooleanFieldCriteria(String name, boolean value) {
 		super(name);
 		this.value = value;
-		this.operator = operator;
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
 		Path<String> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.VALUE);
-		if (operator == IssueQueryLexer.Is)
-			return context.getBuilder().equal(attribute, String.valueOf(value));
-		else 
-			return context.getBuilder().notEqual(attribute, String.valueOf(value));
+		return context.getBuilder().equal(attribute, String.valueOf(value));
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (operator == IssueQueryLexer.Is)
-			return Objects.equals(value, issue.getFieldValue(getFieldName()));
-		else
-			return !Objects.equals(value, issue.getFieldValue(getFieldName()));
+		return Objects.equals(value, issue.getFieldValue(getFieldName()));
 	}
 
 	@Override
@@ -48,13 +40,12 @@ public class BooleanFieldCriteria extends FieldCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(String.valueOf(value));
+		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(String.valueOf(value));
 	}
 
 	@Override
 	public void fill(Issue issue, Set<String> initedLists) {
-		if (operator == IssueQueryLexer.Is)
-			issue.setFieldValue(getFieldName(), value);
+		issue.setFieldValue(getFieldName(), value);
 	}
 
 }

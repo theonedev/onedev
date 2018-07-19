@@ -37,6 +37,7 @@ import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
+import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
@@ -71,8 +72,8 @@ public class MergePreviewPage extends RequestDetailPage {
 		newContent(null);
 	}
 
-	public static PageParameters paramsOf(PullRequest request, State state) {
-		PageParameters params = RequestDetailPage.paramsOf(request);
+	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position, State state) {
+		PageParameters params = RequestDetailPage.paramsOf(request, position);
 
 		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
 			params.set(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
@@ -263,7 +264,7 @@ public class MergePreviewPage extends RequestDetailPage {
 	}
 	
 	private void pushState(IPartialPageRequestHandler partialPageRequestHandler) {
-		PageParameters params = paramsOf(getPullRequest(), state);
+		PageParameters params = paramsOf(getPullRequest(), getPosition(), state);
 		CharSequence url = RequestCycle.get().urlFor(MergePreviewPage.class, params);
 		pushState(partialPageRequestHandler, url.toString(), state);
 	}

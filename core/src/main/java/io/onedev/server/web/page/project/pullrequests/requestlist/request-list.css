@@ -1,72 +1,48 @@
-#request-list>.head {
+#request-list {
+	display: table;
+	width: 100%;
+}
+#request-list>div {
+	display: table-cell;
+}
+#request-list>.side {
+	width: 240px;
+	border: 1px solid #E0E0E0;
+	padding: 20px; 
+	border-radius: 4px;
+}
+#request-list>.main {
+	padding-left: 20px;
+	vertical-align: top;
+}
+
+#request-list>.main>.head {
+	position: relative;
+}
+#request-list>.main>.head>* {
 	margin-bottom: 20px;
 }
-#request-list>.head a {
-	margin-right: 8px;
+#request-list>.main>.head>form {
+	margin-right: 168px;
 }
-#request-list td.filter {
-	width: 25%;
-	border: 2px solid #E0E0E0;
-	padding: 20px;
+#request-list>.main>.head>.open-new {
+	position: absolute;
+	right: 0;
+	top: 0;
 }
-#request-list td.spacing {
-	width: 20px;
+#request-list>.main>.head>.others>* {
+	margin-right: 16px;
+	color: #666;
 }
-#request-list td.result {
-	border: 2px solid #E0E0E0;
+#request-list>.main>.head>.others a[disabled] {
+	text-decoration: none;
+	color: #999;
+	cursor: default;
 }
-#request-list td.request {
-	color: #888;
-	padding: 12px 12px 0 12px;
-	border-left: 4px solid white;
+#request-list>.main>.body .new-indicator {
+	width: 4px;
+	padding: 0;
 }
-
-#request-list td.request.new {
-	border-left: 4px solid #4667EE;
-}
-#request-list td.request>div {
-	padding-bottom: 12px;
-	border-bottom: 2px dotted #BBB;
-}
-#request-list td.result tr:last-child td.request>div {
-	border-bottom: none;
-}
-
-#request-list td.request .title {
-	margin-right: 4px;
-	font-size: 16px;
-}
-#request-list td.request .title a {
-	color: #333;
-}
-
-#request-list td.request .title>* {
-	margin-right: 8px;
-}
-#request-list td.request .title>.status {
-	margin-right: 0;
-}
-
-#request-list td.request .branches {
-	white-space: nowrap;
-	font-size: 15px;
-}
-#request-list td.request .additional-info {
-	margin-top: 4px;
-	margin-left: 32px;
-}
-#request-list td.request .additional-info a {
-	color: #444;
-}
-#request-list td.request .additional-info .middot:before {
-	margin-left: 8px; 
-	margin-right: 8px;
-	font-size: 20px;
-	line-height: 9px;
-	
-}
-
-#request-list td.result .norecords-td {
-	padding: 20px;
-	font-size: 20px;
+#request-list>.main>.body tr.request.new td.new-indicator {
+	background: #4667EE;
 }

@@ -39,7 +39,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.protocol.http.WebSession;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
@@ -55,15 +54,16 @@ import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueVoteManager;
 import io.onedev.server.manager.IssueWatchManager;
-import io.onedev.server.manager.VisitManager;
+import io.onedev.server.manager.UserInfoManager;
+import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueVote;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.issue.IssueField;
-import io.onedev.server.model.support.issue.WatchStatus;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
@@ -72,7 +72,10 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
+import io.onedev.server.util.query.EntityQuery;
 import io.onedev.server.web.component.avatar.AvatarLink;
+import io.onedev.server.web.component.entitynav.EntityNavPanel;
+import io.onedev.server.web.component.entitywatches.EntityWatchesPanel;
 import io.onedev.server.web.component.issuestate.IssueStateLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -86,7 +89,6 @@ import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.userlist.UserListLink;
-import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -112,8 +114,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	private static final String ACTION_OPTIONS_ID = "actionOptions";
 	
 	private static final String TITLE_ID = "title";
-	
-	private static final String NAV_ID = "issueNav";
 	
 	private final IModel<Issue> issueModel;
 	
@@ -258,7 +258,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
 						IssueFieldBeanUtils.setState(fieldBean, transition.getToState());
 
-						Collection<String> excludedFields = Sets.newHashSet(Issue.STATE);
+						Collection<String> excludedFields = Sets.newHashSet(Issue.FIELD_STATE);
 						for (String fieldName: getProject().getIssueWorkflow().getFieldNames()) {
 							if (getIssue().isFieldVisible(fieldName, getIssue().getState()))
 								excludedFields.add(fieldName);
@@ -336,7 +336,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 		List<String> criterias = new ArrayList<>();
 		if (getIssue().getMilestone() != null)
-			criterias.add(IssueQuery.quote(Issue.MILESTONE) + " is " + IssueQuery.quote(getIssue().getMilestoneName()));
+			criterias.add(IssueQuery.quote(Issue.FIELD_MILESTONE) + " is " + IssueQuery.quote(getIssue().getMilestoneName()));
 		for (Map.Entry<String, IssueField> entry: getIssue().getFields().entrySet()) {
 			List<String> strings = entry.getValue().getValues();
 			if (strings.isEmpty()) {
@@ -404,9 +404,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
-				if (SecurityUtils.getUser() != null) { 
-					OneDev.getInstance(VisitManager.class).visitIssue(SecurityUtils.getUser(), getIssue());
-				}
+				if (SecurityUtils.getUser() != null) 
+					OneDev.getInstance(UserInfoManager.class).visitIssue(SecurityUtils.getUser(), getIssue());
 			}
 			
 			@Override
@@ -419,11 +418,58 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 		});	
 
-		add(newNavContainer());
+		add(new EntityNavPanel<Issue>("issueNav") {
+
+			@Override
+			protected EntityQuery<Issue> parse(String queryString) {
+				return IssueQuery.parse(getProject(), queryString, true);
+			}
+
+			@Override
+			protected Issue getEntity() {
+				return getIssue();
+			}
+
+			@Override
+			protected QueryPosition getPosition() {
+				return position;
+			}
+
+			@Override
+			protected void navTo(Issue issue, QueryPosition position) {
+				PageParameters params = IssueDetailPage.paramsOf(issue, position);
+				setResponsePage(getPageClass(), params);
+			}
+
+			@Override
+			protected List<Issue> query(EntityQuery<Issue> query, int offset, int count) {
+				return getIssueManager().query(getProject(), query, offset, count);
+			}
+			
+		});
+		
 		add(newFieldsContainer());
 		add(newMilestoneContainer());
 		add(newVotesContainer());
-		add(newWatchesContainer());
+		
+		add(new EntityWatchesPanel("watches") {
+
+			@Override
+			protected void onSaveWatch(EntityWatch watch) {
+				OneDev.getInstance(IssueWatchManager.class).save((IssueWatch) watch);
+			}
+
+			@Override
+			protected void onDeleteWatch(EntityWatch watch) {
+				OneDev.getInstance(IssueWatchManager.class).delete((IssueWatch) watch);
+			}
+
+			@Override
+			protected AbstractEntity getEntity() {
+				return getIssue();
+			}
+			
+		});
 		
 		Link<Void> deleteLink = new Link<Void>("delete") {
 
@@ -437,87 +483,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		deleteLink.add(new ConfirmOnClick("Do you really want to delete this issue?"));
 		deleteLink.setVisible(SecurityUtils.canModify(getIssue()));
 		add(deleteLink);		
-	}
-	
-	private Component newNavContainer() {
-		if (position != null) {
-			Fragment fragment = new Fragment(NAV_ID, "issueNavFrag", this);
-			fragment.add(new Link<Void>("next") {
-
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setEnabled(position.getOffset()>0);
-				}
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					if (position.getOffset() <= 0)
-						tag.put("disabled", "disabled");
-				}
-
-				@Override
-				public void onClick() {
-					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery(), true);
-					int count = position.getCount();
-					int offset = position.getOffset() - 1;
-					List<Issue> issues = getIssueManager().query(getProject(), query, offset, 1);
-					if (!issues.isEmpty()) {
-						if (!query.matches(getIssue()))
-							count--;
-						QueryPosition prevPosition = new QueryPosition(position.getQuery(), count, offset);
-						PageParameters params = IssueDetailPage.paramsOf(issues.get(0), prevPosition);
-						setResponsePage(getPageClass(), params);
-					} else {
-						WebSession.get().warn("No more issues");
-					}
-				}
-				
-			});
-			fragment.add(new Link<Void>("prev") {
-
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setEnabled(position.getOffset()<position.getCount()-1);
-				}
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					if (position.getOffset() >= position.getCount()-1)
-						tag.put("disabled", "disabled");
-				}
-
-				@Override
-				public void onClick() {
-					IssueQuery query = IssueQuery.parse(getProject(), position.getQuery(), true);
-					int offset = position.getOffset();
-					int count = position.getCount();
-					if (query.matches(getIssue())) 
-						offset++;
-					else
-						count--;
-					
-					List<Issue> issues = getIssueManager().query(getProject(), query, offset, 1);
-					if (!issues.isEmpty()) {
-						QueryPosition nextPosition = new QueryPosition(position.getQuery(), count, offset);
-						PageParameters params = IssueDetailPage.paramsOf(issues.get(0), nextPosition);
-						setResponsePage(getPageClass(), params);
-					} else {
-						WebSession.get().warn("No more issues");
-					}
-				}
-				
-			});
-			
-			fragment.add(new Label("current", "issue " + (position.getCount()-position.getOffset()) + " of " + position.getCount()));
-			
-			return fragment;
-		} else {
-			return new WebMarkupContainer(NAV_ID).setVisible(false);
-		}
 	}
 	
 	private Component newFieldsContainer() {
@@ -578,7 +543,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject());
 				Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true); 
 				
-				Collection<String> excludedFields = Sets.newHashSet(Issue.STATE);
+				Collection<String> excludedFields = Sets.newHashSet(Issue.FIELD_STATE);
 				form.add(BeanContext.editBean("editor", fieldBean, IssueFieldBeanUtils.getPropertyNames(fieldBeanClass, excludedFields)));
 				
 				form.add(new AjaxButton("save") {
@@ -747,7 +712,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 			@Override
 			public String getObject() {
-				return String.valueOf(getIssue().getNumOfVotes());
+				return String.valueOf(getIssue().getVoteCount());
 			}
 			
 		}));
@@ -853,138 +818,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		votesContainer.add(voteLink);
 		
 		return votesContainer;
-	}
-	
-	private List<IssueWatch> getEffectWatches() {
-		List<IssueWatch> watches = new ArrayList<>();
-		for (IssueWatch watch: getIssue().getWatches()) {
-			if (watch.isWatching())
-				watches.add(watch);
-		}
-		Collections.sort(watches, new Comparator<IssueWatch>() {
-
-			@Override
-			public int compare(IssueWatch o1, IssueWatch o2) {
-				return o2.getId().compareTo(o1.getId());
-			}
-			
-		});
-		return watches;
-	}
-	
-	private Component newWatchesContainer() {
-		WebMarkupContainer watchesContainer = new WebMarkupContainer("watches");
-		watchesContainer.setOutputMarkupId(true);
-
-		watchesContainer.add(new Label("count", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				return String.valueOf(getEffectWatches().size());
-			}
-			
-		}));
-		
-		watchesContainer.add(new ListView<IssueWatch>("watchers", new LoadableDetachableModel<List<IssueWatch>>() {
-
-			@Override
-			protected List<IssueWatch> load() {
-				List<IssueWatch> watches = getEffectWatches();
-				if (watches.size() > MAX_DISPLAY_AVATARS)
-					watches = watches.subList(0, MAX_DISPLAY_AVATARS);
-				return watches;
-			}
-			
-		}) {
-
-			@Override
-			protected void populateItem(ListItem<IssueWatch> item) {
-				User user = item.getModelObject().getUser();
-				item.add(new AvatarLink("watcher", user, user.getDisplayName()));
-			}
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(!getEffectWatches().isEmpty());
-			}
-			
-		});
-		
-		watchesContainer.add(new UserListLink("more") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getEffectWatches().size() > MAX_DISPLAY_AVATARS);
-			}
-
-			@Override
-			protected List<User> getUsers() {
-				List<IssueWatch> watches = getEffectWatches();
-				if (watches.size() > MAX_DISPLAY_AVATARS)
-					watches = watches.subList(MAX_DISPLAY_AVATARS, watches.size());
-				else
-					watches = new ArrayList<>();
-				return watches.stream().map(it->it.getUser()).collect(Collectors.toList());
-			}
-			
-		});
-		
-		watchesContainer.add(new WatchStatusLink("watch") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getLoginUser() != null);
-			}
-
-			@Override
-			protected WatchStatus getWatchStatus() {
-				IssueWatch issueWatch = getIssue().getWatch(getLoginUser());
-				if (issueWatch != null && !issueWatch.isWatching())
-					return WatchStatus.DO_NOT_WATCH;
-				else if (issueWatch != null && issueWatch.isWatching())
-					return WatchStatus.WATCH;
-				else
-					return WatchStatus.DEFAULT;
-			}
-
-			@Override
-			protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
-				if (watchStatus == WatchStatus.DO_NOT_WATCH) {
-					IssueWatch issueWatch = getIssue().getWatch(getLoginUser());
-					if (issueWatch == null) {
-						issueWatch = new IssueWatch();
-						issueWatch.setIssue(getIssue());
-						issueWatch.setUser(getLoginUser());
-						getIssue().getWatches().add(issueWatch);
-					}
-					issueWatch.setWatching(false);
-					OneDev.getInstance(IssueWatchManager.class).save(issueWatch);
-				} else if (watchStatus == WatchStatus.WATCH) {
-					IssueWatch issueWatch = getIssue().getWatch(getLoginUser());
-					if (issueWatch == null) {
-						issueWatch = new IssueWatch();
-						issueWatch.setIssue(getIssue());
-						issueWatch.setUser(getLoginUser());
-						getIssue().getWatches().add(issueWatch);
-					}
-					issueWatch.setWatching(true);
-					OneDev.getInstance(IssueWatchManager.class).save(issueWatch);
-				} else {
-					IssueWatch issueWatch = getIssue().getWatch(getLoginUser());
-					if (issueWatch != null) {
-						getIssue().getWatches().remove(issueWatch);
-						OneDev.getInstance(IssueWatchManager.class).delete(issueWatch);
-					}
-				}
-				target.add(watchesContainer);
-			}
-			
-		});
-
-		return watchesContainer;
 	}
 	
 	private void newEmptyActionOptions(@Nullable AjaxRequestTarget target) {

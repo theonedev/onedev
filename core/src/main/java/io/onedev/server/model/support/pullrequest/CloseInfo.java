@@ -3,10 +3,13 @@ package io.onedev.server.model.support.pullrequest;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import org.apache.commons.lang3.text.WordUtils;
 import org.hibernate.annotations.OptimisticLock;
 
 import io.onedev.server.model.User;
@@ -16,51 +19,63 @@ public class CloseInfo implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum Status {MERGED, DISCARDED};
+	public enum Status {
+		MERGED, DISCARDED;
+	
+		@Override
+		public String toString() {
+			return WordUtils.capitalize(name().toLowerCase());
+		}
+		
+	};
 	
 	@OptimisticLock(excluded=true)
 	@ManyToOne(fetch=FetchType.LAZY)
-	private User closedBy;
+	@JoinColumn(name="CLOSE_USER")
+	private User user;
 	
 	@OptimisticLock(excluded=true)
-	private String closedByName;
+	@Column(name="CLOSE_USER_NAME")
+	private String userName;
 
 	@OptimisticLock(excluded=true)
-	private Date closeDate;
+	@Column(name="CLOSE_DATE")
+	private Date date;
 	
 	@OptimisticLock(excluded=true)
-	private Status closeStatus;
+	@Column(name="CLOSE_STATUS")
+	private Status status;
 
-	public User getClosedBy() {
-		return closedBy;
+	public User getUser() {
+		return user;
 	}
 
-	public void setClosedBy(User closedBy) {
-		this.closedBy = closedBy;
+	public void setUser(User user) {
+		this.user = user;
 	}
 
-	public String getClosedByName() {
-		return closedByName;
+	public String getUserName() {
+		return userName;
 	}
 
-	public void setClosedByName(String closedByName) {
-		this.closedByName = closedByName;
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
-	public Date getCloseDate() {
-		return closeDate;
+	public Date getDate() {
+		return date;
 	}
 
-	public void setCloseDate(Date closeDate) {
-		this.closeDate = closeDate;
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
-	public Status getCloseStatus() {
-		return closeStatus;
+	public Status getStatus() {
+		return status;
 	}
 
-	public void setCloseStatus(Status closeStatus) {
-		this.closeStatus = closeStatus;
+	public void setStatus(Status status) {
+		this.status = status;
 	}
 	
 }

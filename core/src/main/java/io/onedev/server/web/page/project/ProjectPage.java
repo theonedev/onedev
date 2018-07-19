@@ -35,6 +35,7 @@ import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.FirstIssueQueryLink;
+import io.onedev.server.web.component.link.FirstPullRequestQueryLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
@@ -144,7 +145,20 @@ public abstract class ProjectPage extends LayoutPage {
 						0, ProjectTagsPage.class));
 				
 				tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
-						0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class, InvalidRequestPage.class));
+						0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class, InvalidRequestPage.class) {
+					
+					@Override
+					public Component render(String componentId) {
+						return new ProjectTabLink(componentId, this) {
+
+							@Override
+							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+								return new FirstPullRequestQueryLink(linkId, getProject());
+							}
+						};
+					}
+					
+				});
 				
 				tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, IssuesPage.class, 
 						IssueDetailPage.class, NewIssuePage.class) {

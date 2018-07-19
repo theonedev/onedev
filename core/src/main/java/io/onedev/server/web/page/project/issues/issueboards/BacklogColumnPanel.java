@@ -27,8 +27,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.query.IssueQuery;
-import io.onedev.server.model.support.issue.query.IssueQueryLexer;
-import io.onedev.server.model.support.issue.query.MilestoneUnaryCriteria;
+import io.onedev.server.model.support.issue.query.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -46,7 +45,7 @@ abstract class BacklogColumnPanel extends Panel {
 				List<IssueCriteria> criterias = new ArrayList<>();
 				if (backlogQuery.getCriteria() != null)
 					criterias.add(backlogQuery.getCriteria());
-				criterias.add(new MilestoneUnaryCriteria(IssueQueryLexer.IsEmpty));
+				criterias.add(new MilestoneCriteria(null));
 				return new IssueQuery(IssueCriteria.of(criterias), backlogQuery.getSorts());
 			} else {
 				return null;

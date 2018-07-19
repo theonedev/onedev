@@ -63,6 +63,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.ProjectAndBranch;
+import io.onedev.server.model.support.pullrequest.query.PullRequestQuery;
+import io.onedev.server.model.support.pullrequest.query.PullRequestQueryLexer;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branchchoice.BranchChoiceProvider;
@@ -80,9 +82,6 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
-import io.onedev.server.web.page.project.pullrequests.requestlist.SearchOption;
-import io.onedev.server.web.page.project.pullrequests.requestlist.SearchOption.Status;
-import io.onedev.server.web.page.project.pullrequests.requestlist.SortOption;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.utils.StringUtils;
 
@@ -590,7 +589,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				WebMarkupContainer requestLink;
 				if (effectiveRequest != null && ab.getAhead() != 0) {
 					requestLink = new BookmarkablePageLink<Void>("effectiveRequest", 
-							RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(effectiveRequest)); 
+							RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(effectiveRequest, null)); 
 					if (effectiveRequest.isOpen()) {
 						requestLink.add(new Label("label", "Open"));
 						requestLink.add(AttributeAppender.append("title", "A pull request is open for this change"));
@@ -625,10 +624,11 @@ public class ProjectBranchesPage extends ProjectPage {
 						PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
 						if (!pullRequestManager.findAllOpen(new ProjectAndBranch(getProject(), branch)).isEmpty()) {
 							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", ProjectBranchesPage.this);
-							SearchOption searchOption = new SearchOption();
-							searchOption.setStatus(Status.OPEN);
-							searchOption.setTargetBranch(branch);
-							PageParameters params = RequestListPage.paramsOf(getProject(), searchOption, new SortOption());
+							String query = String.format("\"%s\" %s \"%s\" %s %s", 
+									PullRequest.FIELD_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 
+									branch, PullRequestQuery.getRuleName(PullRequestQueryLexer.And), 
+									PullRequestQuery.getRuleName(PullRequestQueryLexer.Open));
+							PageParameters params = RequestListPage.paramsOf(getProject(), query);
 							bodyFrag.add(new ViewStateAwarePageLink<Void>("openRequests", RequestListPage.class, params));
 							bodyFrag.add(new Label("branch", branch));
 							fragment.add(bodyFrag);

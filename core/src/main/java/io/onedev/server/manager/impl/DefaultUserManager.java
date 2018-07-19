@@ -103,19 +103,13 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("reporterName", user.getDisplayName());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequest set closeInfo.closedBy=null, "
-    			+ "closeInfo.closedByName=:closedByName where closeInfo.closedBy=:closedBy");
-    	query.setParameter("closedBy", user);
-    	query.setParameter("closedByName", user.getDisplayName());
+    	query = getSession().createQuery("update PullRequest set closeInfo.user=null, "
+    			+ "closeInfo.userName=:closedByName where closeInfo.user=:user");
+    	query.setParameter("user", user);
+    	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequest set lastActivity.user=null, "
-    			+ "lastActivity.userName=:lastActivityUserName where lastActivity.user=:lastActivityUser");
-    	query.setParameter("lastActivityUser", user);
-    	query.setParameter("lastActivityUserName", user.getDisplayName());
-    	query.executeUpdate();
-
-    	query = getSession().createQuery("update PullRequestStatusChange set user=null, userName=:userName where user=:user");
+    	query = getSession().createQuery("update PullRequestAction set user=null, userName=:userName where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
@@ -125,20 +119,9 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update PullRequestReference set user=null, userName=:userName where user=:user");
-    	query.setParameter("user", user);
-    	query.setParameter("userName", user.getDisplayName());
-    	query.executeUpdate();
-    	
     	query = getSession().createQuery("update CodeComment set user=null, userName=:userName where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("userName", user.getDisplayName());
-    	query.executeUpdate();
-    	
-    	query = getSession().createQuery("update CodeComment set lastActivity.user=null, "
-    			+ "lastActivity.userName=:lastActivityUserName where lastActivity.user=:lastActivityUser");
-    	query.setParameter("lastActivityUser", user);
-    	query.setParameter("lastActivityUserName", user.getDisplayName());
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update CodeCommentReply set user=null, userName=:userName where user=:user");
@@ -156,7 +139,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update IssueChange set user=null, userName=:userName where user=:user");
+    	query = getSession().createQuery("update IssueAction set user=null, userName=:userName where user=:user");
     	query.setParameter("user", user);
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();

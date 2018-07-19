@@ -5,6 +5,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.query.QueryBuildContext;
 
 public class TitleCriteria extends IssueCriteria {
 
@@ -12,28 +13,19 @@ public class TitleCriteria extends IssueCriteria {
 
 	private final String value;
 	
-	private final int operator;
-	
-	public TitleCriteria(String value, int operator) {
+	public TitleCriteria(String value) {
 		this.value = value;
-		this.operator = operator;
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
-		Path<String> attribute = context.getRoot().get(Issue.BUILTIN_FIELDS.get(Issue.TITLE));
-		if (operator == IssueQueryLexer.Contains)
-			return context.getBuilder().like(attribute, "%" + value + "%");
-		else
-			return context.getBuilder().notLike(attribute, "%" + value + "%");
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
+		Path<String> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_TITLE));
+		return context.getBuilder().like(attribute, "%" + value + "%");
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		if (operator == IssueQueryLexer.Contains)
-			return issue.getTitle().toLowerCase().contains(value);
-		else
-			return !issue.getTitle().toLowerCase().contains(value);
+		return issue.getTitle().toLowerCase().contains(value);
 	}
 
 	@Override
@@ -43,7 +35,7 @@ public class TitleCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.TITLE) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(value);
+		return IssueQuery.quote(Issue.FIELD_TITLE) + " " + IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(value);
 	}
 
 }

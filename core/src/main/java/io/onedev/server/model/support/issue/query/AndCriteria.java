@@ -11,9 +11,12 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.query.AndCriteriaHelper;
+import io.onedev.server.util.query.ParensAware;
+import io.onedev.server.util.query.QueryBuildContext;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 
-public class AndCriteria extends IssueCriteria {
+public class AndCriteria extends IssueCriteria implements ParensAware {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -24,47 +27,23 @@ public class AndCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
-		List<Predicate> predicates = new ArrayList<>();
-		for (IssueCriteria criteria: criterias)
-			predicates.add(criteria.getPredicate(project, context));
-		return context.getBuilder().and(predicates.toArray(new Predicate[0]));
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
+		return new AndCriteriaHelper<Issue>(criterias).getPredicate(project, context);
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		for (IssueCriteria criteria: criterias) {
-			if (!criteria.matches(issue))
-				return false;
-		}
-		return true;
+		return new AndCriteriaHelper<Issue>(criterias).matches(issue);
 	}
 
 	@Override
 	public boolean needsLogin() {
-		for (IssueCriteria criteria: criterias) {
-			if (criteria.needsLogin())
-				return true;
-		}
-		return false;
+		return new AndCriteriaHelper<Issue>(criterias).needsLogin();
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		for (int i=0; i<criterias.size(); i++) {
-			IssueCriteria criteria = criterias.get(i);
-			if (i != 0)
-				builder.append(" and ");
-			if (criteria instanceof AndCriteria || criteria instanceof OrCriteria) {
-				builder.append("(");
-				builder.append(criteria.toString());
-				builder.append(")");
-			} else {
-				builder.append(criteria.toString());
-			}
-		}
-		return builder.toString().trim();
+		return new AndCriteriaHelper<Issue>(criterias).toString();
 	}
 
 	@Override

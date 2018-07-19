@@ -3,7 +3,6 @@ package io.onedev.server.model;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -14,14 +13,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import io.onedev.server.model.support.issue.NamedQuery;
+import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.issue.NamedIssueQuery;
 
 @Entity
 @Table(
 		indexes={@Index(columnList="g_project_id"), @Index(columnList="g_user_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"g_project_id", "g_user_id"})}
 )
-public class IssueQuerySetting extends AbstractEntity {
+public class IssueQuerySetting extends QuerySetting<NamedIssueQuery> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -35,7 +35,7 @@ public class IssueQuerySetting extends AbstractEntity {
 
 	@Lob
 	@Column(nullable=false, length=65535)
-	private ArrayList<NamedQuery> userQueries = new ArrayList<>();
+	private ArrayList<NamedIssueQuery> userQueries = new ArrayList<>();
 
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -44,6 +44,7 @@ public class IssueQuerySetting extends AbstractEntity {
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> projectQueryWatches = new LinkedHashMap<>();
 	
+	@Override
 	public Project getProject() {
 		return project;
 	}
@@ -52,6 +53,7 @@ public class IssueQuerySetting extends AbstractEntity {
 		this.project = project;
 	}
 
+	@Override
 	public User getUser() {
 		return user;
 	}
@@ -60,23 +62,17 @@ public class IssueQuerySetting extends AbstractEntity {
 		this.user = user;
 	}
 
-	public ArrayList<NamedQuery> getUserQueries() {
+	@Override
+	public ArrayList<NamedIssueQuery> getUserQueries() {
 		return userQueries;
 	}
 
-	public void setUserQueries(ArrayList<NamedQuery> userQueries) {
+	@Override
+	public void setUserQueries(ArrayList<NamedIssueQuery> userQueries) {
 		this.userQueries = userQueries;
 	}
 	
-	@Nullable
-	public NamedQuery getUserQuery(String name) {
-		for (NamedQuery namedQuery: getUserQueries()) {
-			if (namedQuery.getName().equals(name))
-				return namedQuery;
-		}
-		return null;
-	}
-
+	@Override
 	public LinkedHashMap<String, Boolean> getUserQueryWatches() {
 		return userQueryWatches;
 	}
@@ -85,6 +81,7 @@ public class IssueQuerySetting extends AbstractEntity {
 		this.userQueryWatches = userQueryWatches;
 	}
 
+	@Override
 	public LinkedHashMap<String, Boolean> getProjectQueryWatches() {
 		return projectQueryWatches;
 	}

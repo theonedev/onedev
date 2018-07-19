@@ -21,7 +21,7 @@ public class DefaultIssueVoteManager extends AbstractEntityManager<IssueVote>
 	@Transactional
 	public void save(IssueVote vote) {
 		if (vote.isNew())
-			vote.getIssue().setNumOfVotes(vote.getIssue().getNumOfVotes()+1);
+			vote.getIssue().setVoteCount(vote.getIssue().getVoteCount()+1);
 		super.save(vote);
 	}
 
@@ -29,7 +29,7 @@ public class DefaultIssueVoteManager extends AbstractEntityManager<IssueVote>
 	@Override
 	public void delete(IssueVote vote) {
 		super.delete(vote);
-		vote.getIssue().setNumOfVotes(vote.getIssue().getNumOfVotes()-1);
+		vote.getIssue().setVoteCount(vote.getIssue().getVoteCount()-1);
 	}
 
 }

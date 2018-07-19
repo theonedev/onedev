@@ -33,6 +33,7 @@ import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.model.support.issue.query.IssueQueryParser;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Constants;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
@@ -57,11 +58,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	private static final String VALUE_OPEN = "\"";
 	
 	private static final String VALUE_CLOSE = "\"";
-	
-	private static final List<String> DATE_EXAMPLES = Lists.newArrayList(
-			"one hour ago", "2 hours ago", "3PM", "noon", "today", "yesterday", 
-			"yesterday midnight", "3 days ago", "last week", "last Monday", 
-			"4 weeks ago", "1 month 2 days ago", "1 year ago"); 
 	
 	private static final int MAX_ISSUE_TITLE_LEN = 75;
 	
@@ -95,6 +91,22 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 			if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
 
+					private List<InputSuggestion> getUserSuggestions(String matchWith) {
+						List<InputSuggestion> suggestions = new ArrayList<>();
+						for (User user: OneDev.getInstance(UserManager.class).findAll()) {
+							Range match = Range.match(user.getName(), matchWith, true, false, true);
+							if (match != null) {
+								String description;
+								if (!user.getDisplayName().equals(user.getName()))
+									description = user.getDisplayName();
+								else
+									description = null;
+								suggestions.add(new InputSuggestion(user.getName(), description, match).escape("\"\\"));
+							}
+						}
+						return suggestions;
+					}
+					
 					@Override
 					protected List<InputSuggestion> match(String unfencedMatchWith) {
 						String unfencedLowerCaseMatchWith = unfencedMatchWith.toLowerCase();
@@ -102,13 +114,14 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 						Project project = getProject();
 
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(Issue.BUILTIN_FIELDS.keySet());
+							List<String> candidates = new ArrayList<>(Issue.FIELD_PATHS.keySet());
+							candidates.remove(Issue.FIELD_SUBMITTER);
 							for (InputSpec field: project.getIssueWorkflow().getFieldSpecs())
 								candidates.add(field.getName());
 							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = Lists.newArrayList(Issue.VOTES, Issue.COMMENTS, Issue.NUMBER, 
-									Issue.SUBMIT_DATE, Issue.UPDATE_DATE);
+							List<String> candidates = Lists.newArrayList(Issue.FIELD_VOTE_COUNT, Issue.FIELD_COMMENT_COUNT, Issue.FIELD_NUMBER, 
+									Issue.FIELD_SUBMIT_DATE, Issue.FIELD_UPDATE_DATE);
 							for (InputSpec field: project.getIssueWorkflow().getFieldSpecs()) {
 								if (field instanceof NumberInput || field instanceof ChoiceInput || field instanceof DateInput) 
 									candidates.add(field.getName());
@@ -116,66 +129,59 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = expectedElement.getParent().findChildrenByLabel("criteriaField", true);
-							Preconditions.checkState(fieldElements.size() == 1);
-							String fieldName = IssueQuery.getValue(fieldElements.get(0).getMatchedText());
-							List<Element> operatorElements = expectedElement.getParent().findChildrenByLabel("operator", true);
-							Preconditions.checkState(operatorElements.size() == 1);
-							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
-							
-							try {
-								IssueQuery.checkField(project, fieldName, IssueQuery.getOperator(operatorName));
-								InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
-								if (fieldSpec instanceof DateInput || fieldName.equals(Issue.SUBMIT_DATE) 
-										|| fieldName.equals(Issue.UPDATE_DATE)) {
-									List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
-									candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
-									candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
-									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, null));
-									CollectionUtils.addIgnoreNull(suggestions, suggestToFence(unfencedMatchWith));
-								} else if (fieldName.equals(Issue.SUBMITTER) || fieldSpec instanceof UserChoiceInput) {
-									for (User user: OneDev.getInstance(UserManager.class).findAll()) {
-										Range match = Range.match(user.getName(), unfencedLowerCaseMatchWith, true, false, true);
-										if (match != null) {
-											String description;
-											if (!user.getDisplayName().equals(user.getName()))
-												description = user.getDisplayName();
-											else
-												description = null;
-											suggestions.add(new InputSuggestion(user.getName(), description, match).escape("\"\\"));
+							if (fieldElements.isEmpty()) {
+								suggestions.addAll(getUserSuggestions(unfencedLowerCaseMatchWith));
+							} else {
+								String fieldName = IssueQuery.getValue(fieldElements.get(0).getMatchedText());
+								List<Element> operatorElements = expectedElement.getParent().findChildrenByLabel("operator", true);
+								Preconditions.checkState(operatorElements.size() == 1);
+								String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
+								
+								try {
+									IssueQuery.checkField(project, fieldName, IssueQuery.getOperator(operatorName));
+									InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
+									if (fieldSpec instanceof DateInput || fieldName.equals(Issue.FIELD_SUBMIT_DATE) 
+											|| fieldName.equals(Issue.FIELD_UPDATE_DATE)) {
+										List<String> candidates = new ArrayList<>(DateUtils.RELAX_DATE_EXAMPLES);
+										candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
+										candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
+										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, null));
+										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(unfencedMatchWith));
+									} else if (fieldSpec instanceof UserChoiceInput) {
+										suggestions.addAll(getUserSuggestions(unfencedLowerCaseMatchWith));
+									} else if (fieldSpec instanceof IssueChoiceInput) {
+										List<Issue> issues = OneDev.getInstance(IssueManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
+										for (Issue issue: issues) {
+											InputSuggestion suggestion = new InputSuggestion("#" + issue.getNumber(), StringUtils.abbreviate(issue.getTitle(), MAX_ISSUE_TITLE_LEN), null);
+											suggestions.add(suggestion);
 										}
-									}
-								} else if (fieldSpec instanceof IssueChoiceInput) {
-									List<Issue> issues = OneDev.getInstance(IssueManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
-									for (Issue issue: issues) {
-										InputSuggestion suggestion = new InputSuggestion("#" + issue.getNumber(), StringUtils.abbreviate(issue.getTitle(), MAX_ISSUE_TITLE_LEN), null);
-										suggestions.add(suggestion);
-									}
-								} else if (fieldSpec instanceof BooleanInput) {
-									suggestions.addAll(getSuggestions(Lists.newArrayList("true", "false"), unfencedLowerCaseMatchWith, null));
-								} else if (fieldSpec instanceof GroupChoiceInput) {
-									List<String> candidates = OneDev.getInstance(GroupManager.class).findAll().stream().map(it->it.getName()).collect(Collectors.toList());
-									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
-								} else if (fieldName.equals(Issue.STATE)) {
-									List<String> candidates = project.getIssueWorkflow().getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
-									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
-								} else if (fieldSpec instanceof ChoiceInput) {
-									OneContext.push(newOneContext());
-									try {
-										List<String> candidates = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
+									} else if (fieldSpec instanceof BooleanInput) {
+										suggestions.addAll(getSuggestions(Lists.newArrayList("true", "false"), unfencedLowerCaseMatchWith, null));
+									} else if (fieldSpec instanceof GroupChoiceInput) {
+										List<String> candidates = OneDev.getInstance(GroupManager.class).findAll().stream().map(it->it.getName()).collect(Collectors.toList());
 										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
-									} finally {
-										OneContext.pop();
-									}			
-								} else if (fieldName.equals(Issue.MILESTONE)) {
-									List<String> candidates = project.getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
-									suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
-								} else if (fieldName.equals(Issue.TITLE) || fieldName.equals(Issue.DESCRIPTION) 
-										|| fieldName.equals(Issue.VOTES) || fieldName.equals(Issue.COMMENTS) 
-										|| fieldName.equals(Issue.NUMBER) || fieldSpec instanceof NumberInput 
-										|| fieldSpec instanceof TextInput) {
-									return null;
+									} else if (fieldName.equals(Issue.FIELD_STATE)) {
+										List<String> candidates = project.getIssueWorkflow().getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
+										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
+									} else if (fieldSpec instanceof ChoiceInput) {
+										OneContext.push(newOneContext());
+										try {
+											List<String> candidates = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
+											suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
+										} finally {
+											OneContext.pop();
+										}			
+									} else if (fieldName.equals(Issue.FIELD_MILESTONE)) {
+										List<String> candidates = project.getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
+										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, "\"\\"));
+									} else if (fieldName.equals(Issue.FIELD_TITLE) || fieldName.equals(Issue.FIELD_DESCRIPTION) 
+											|| fieldName.equals(Issue.FIELD_VOTE_COUNT) || fieldName.equals(Issue.FIELD_COMMENT_COUNT) 
+											|| fieldName.equals(Issue.FIELD_NUMBER) || fieldSpec instanceof NumberInput 
+											|| fieldSpec instanceof TextInput) {
+										return null;
+									}
+								} catch (OneException ex) {
 								}
-							} catch (OneException ex) {
 							}
 						}
 						return suggestions;

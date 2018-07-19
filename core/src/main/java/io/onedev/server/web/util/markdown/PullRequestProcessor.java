@@ -19,7 +19,7 @@ public class PullRequestProcessor extends PullRequestParser implements MarkdownP
 	@Override
 	protected String toHtml(PullRequest request) {
 		CharSequence url = RequestCycle.get().urlFor(
-				RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(request)); 
+				RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(request, null)); 
 		return String.format("<a href='%s' class='request'>#%d</a>", url, request.getNumber());
 	}
 	

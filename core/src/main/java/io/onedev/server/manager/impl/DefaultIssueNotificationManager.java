@@ -1,42 +1,34 @@
 package io.onedev.server.manager.impl;
 
 import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.Listen;
-import io.onedev.server.OneDev;
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.issue.IssueActionEvent;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
-import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueWatchManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.manager.UrlManager;
-import io.onedev.server.manager.UserManager;
-import io.onedev.server.manager.VisitManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAction;
-import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.NamedQuery;
+import io.onedev.server.model.support.NamedQuery;
+import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.markdown.MentionParser;
-import io.onedev.server.util.readcallback.ReadCallback;
-import io.onedev.server.util.readcallback.ReadCallbackServlet;
+import io.onedev.server.util.query.EntityQuery;
+import io.onedev.server.util.query.QueryWatchBuilder;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @Singleton
@@ -86,28 +78,6 @@ public class DefaultIssueNotificationManager {
 		builder.append("</div>");
 	}
 	
-	private void appendReadCallback(StringBuilder builder, User user, IssueEvent event) {
-		EmailReadCallback callback = new EmailReadCallback(user.getId(), event.getIssue().getId(), event.getDate().getTime()+1000L);
-		builder.append("<img src='").append(ReadCallbackServlet.getUrl(callback)).append("' alt='read track'>");
-	}
-	
-	private boolean matches(Map<String, Optional<IssueQuery>> parsedQueries, Issue issue, @Nullable NamedQuery namedQuery) {
-		if (namedQuery != null) {
-			Optional<IssueQuery> issueQuery = parsedQueries.get(namedQuery.getQuery());
-			if (issueQuery == null) {
-				try {
-					issueQuery = Optional.of(IssueQuery.parse(issue.getProject(), namedQuery.getQuery(), true));
-				} catch (Exception e) {
-					issueQuery = Optional.empty();
-				}
-				parsedQueries.put(namedQuery.getQuery(), issueQuery);
-			}
-			return issueQuery.isPresent() && issueQuery.get().matches(issue); 
-		} else {
-			return false;
-		}
-	}
-	
 	@Transactional
 	@Listen
 	public void on(IssueEvent event) {
@@ -118,42 +88,43 @@ public class DefaultIssueNotificationManager {
 
 		Issue issue = event.getIssue();
 		
-		OneDev.getInstance(VisitManager.class).visitIssue(event.getUser(), issue);
-		
-		Map<String, Optional<IssueQuery>> parsedQueries = new HashMap<>();
-		
-		for (IssueQuerySetting setting: issue.getProject().getIssueQuerySettings()) {
-			boolean watched = false;
-			for (Map.Entry<String, Boolean> entry: setting.getUserQueryWatches().entrySet()) {
-				if (matches(parsedQueries, issue, setting.getUserQuery(entry.getKey()))) {
-					watch(issue, setting.getUser(), entry.getValue());
-					watched = true;
-					break;
-				}
+		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
+
+			@Override
+			protected Issue getEntity() {
+				return issue;
 			}
-			if (!watched) {
-				for (Map.Entry<String, Boolean> entry: setting.getProjectQueryWatches().entrySet()) {
-					if (matches(parsedQueries, issue, issue.getProject().getSavedIssueQuery(entry.getKey()))) {
-						watch(issue, setting.getUser(), entry.getValue());
-						watched = true;
-						break;
-					}
-				}
+
+			@Override
+			protected Collection<? extends QuerySetting<?>> getQuerySettings() {
+				return issue.getProject().getIssueQuerySettings();
 			}
+
+			@Override
+			protected EntityQuery<Issue> parse(String queryString) {
+				return IssueQuery.parse(issue.getProject(), queryString, true);
+			}
+
+			@Override
+			protected NamedQuery getSavedProjectQuery(String name) {
+				return issue.getProject().getSavedIssueQuery(name);
+			}
+			
+		}.getWatches().entrySet()) {
+			watch(issue, entry.getKey(), entry.getValue());
 		}
 		
 		if (event instanceof IssueActionEvent) {
-			IssueAction issueChange = ((IssueActionEvent) event).getAction();
-			for (Group group: issueChange.getData().getNewGroups().values()) 
+			IssueAction issueAction = ((IssueActionEvent) event).getAction();
+			for (Group group: issueAction.getData().getNewGroups().values()) 
 				involvedUsers.addAll(group.getMembers());
-			for (Map.Entry<String, User> entry: issueChange.getData().getNewUsers().entrySet()) {
+			for (Map.Entry<String, User> entry: issueAction.getData().getNewUsers().entrySet()) {
 				String subject = String.format("You are designated as \"%s\" of issue #%d: %s", 
 						entry.getKey(), issue.getNumber(), issue.getTitle());
 				StringBuilder body = new StringBuilder();
 				body.append(event.describeAsHtml());
 				appendParagraph(body);
 				appendIssueInfo(body, event);
-				appendReadCallback(body, entry.getValue(), event);
 				mailManager.sendMailAsync(Lists.newArrayList(entry.getValue().getEmail()), subject, body.toString());
 				notifiedUsers.add(entry.getValue());
 			}
@@ -173,7 +144,6 @@ public class DefaultIssueNotificationManager {
 					body.append(event.describeAsHtml());
 					appendParagraph(body);
 					appendIssueInfo(body, event);
-					appendReadCallback(body, user, event);
 					mailManager.sendMailAsync(Lists.newArrayList(user.getEmail()), subject, body.toString());
 					notifiedUsers.add(user);
 				}
@@ -197,47 +167,16 @@ public class DefaultIssueNotificationManager {
 			body.append(event.describeAsHtml());
 			appendParagraph(body);
 			appendIssueInfo(body, event);
-			appendReadCallback(body, user, event);
 			mailManager.sendMailAsync(Lists.newArrayList(user.getEmail()), event.getTitle(), body.toString());
 		}
 	}
 	
 	private void watch(Issue issue, User user, boolean watching) {
-		IssueWatch watch = issue.getWatch(user);
-		if (watch == null) {
-			watch = new IssueWatch();
-			watch.setIssue(issue);
-			watch.setUser(user);
+		IssueWatch watch = (IssueWatch) issue.getWatch(user, true);
+		if (watch.isNew()) {
 			watch.setWatching(watching);
-			issue.getWatches().add(watch);
 			issueWatchManager.save(watch);
 		}
 	}
 
-	public static class EmailReadCallback implements ReadCallback {
-
-		private Long userId;
-		
-		private Long issueId;
-		
-		private Long eventTime;
-		
-		public EmailReadCallback() {
-		}
-		
-		public EmailReadCallback(Long userId, Long issueId, Long eventTime) {
-			this.userId = userId;
-			this.issueId = issueId;
-			this.eventTime = eventTime;
-		}
-		
-		@Override
-		public void onRead() {
-			User user = OneDev.getInstance(UserManager.class).get(userId);
-			Issue issue = OneDev.getInstance(IssueManager.class).get(issueId);
-			if (user != null && issue != null) 
-				OneDev.getInstance(VisitManager.class).visitIssue(user, issue, new Date(eventTime));
-		}
-		
-	}
 }

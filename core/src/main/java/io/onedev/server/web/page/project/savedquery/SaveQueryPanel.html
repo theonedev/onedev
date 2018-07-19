@@ -1,0 +1,18 @@
+<wicket:panel>
+	<form wicket:id="form" class="save-request-query">
+		<div class="modal-header">
+			<button wicket:id="close" type="button" class="close">&times;</button>
+			<h4 id="modal-title" class="modal-title">
+				Save Query
+			</h4>
+		</div>
+		<div class="modal-body">
+			<div wicket:id="editor"></div>
+		</div>
+		<div class="modal-footer clearfix">
+			<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save as Mine"></input>
+			<a wicket:id="saveForAll" class="dirty-aware btn btn-primary">Save for All Users</a>
+			<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+		</div>
+	</form>	
+</wicket:panel>

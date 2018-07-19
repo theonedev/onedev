@@ -18,7 +18,6 @@ import io.onedev.server.manager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.query.IssueQuery;
-import io.onedev.server.model.support.issue.query.IssueQueryLexer;
 import io.onedev.server.model.support.issue.query.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.MilestoneDueLabel;
@@ -129,7 +128,7 @@ public class MilestoneDetailPage extends IssuesPage {
 
 			@Override
 			protected IssueQuery getBaseQuery() {
-				return new IssueQuery(new MilestoneCriteria(getMilestone().getName(), IssueQueryLexer.Is), new ArrayList<>());
+				return new IssueQuery(new MilestoneCriteria(getMilestone().getName()), new ArrayList<>());
 			}
 
 			@Override

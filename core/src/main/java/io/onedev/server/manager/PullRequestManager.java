@@ -1,6 +1,7 @@
 package io.onedev.server.manager;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -10,6 +11,8 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.persistence.dao.EntityManager;
+import io.onedev.server.util.query.EntityCriteria;
+import io.onedev.server.util.query.EntityQuery;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
     
@@ -67,4 +70,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	void checkQuality(PullRequest request);
 	
+	List<PullRequest> query(Project project, EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults);
+	
+	int count(Project project, EntityCriteria<PullRequest> requestCriteria);
 }

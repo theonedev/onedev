@@ -8,12 +8,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import io.onedev.server.model.support.EntityWatch;
+
 @Entity
 @Table(
 		indexes={@Index(columnList="g_issue_id"), @Index(columnList="g_user_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"g_issue_id", "g_user_id"})
 })
-public class IssueWatch extends AbstractEntity {
+public class IssueWatch extends EntityWatch {
 
 	private static final long serialVersionUID = 1L;
 
@@ -27,8 +29,6 @@ public class IssueWatch extends AbstractEntity {
 	
 	private boolean watching;
 	
-	private boolean notified;
-	
 	public Issue getIssue() {
 		return issue;
 	}
@@ -36,7 +36,13 @@ public class IssueWatch extends AbstractEntity {
 	public void setIssue(Issue issue) {
 		this.issue = issue;
 	}
+	
+	@Override
+	public Issue getEntity() {
+		return getIssue();
+	}
 
+	@Override
 	public User getUser() {
 		return user;
 	}
@@ -45,20 +51,14 @@ public class IssueWatch extends AbstractEntity {
 		this.user = user;
 	}
 
+	@Override
 	public boolean isWatching() {
 		return watching;
 	}
 
+	@Override
 	public void setWatching(boolean watching) {
 		this.watching = watching;
-	}
-
-	public boolean isNotified() {
-		return notified;
-	}
-
-	public void setNotified(boolean notified) {
-		this.notified = notified;
 	}
 
 }

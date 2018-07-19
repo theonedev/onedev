@@ -8,14 +8,14 @@ query
     ;
 
 criteria
-    : Mine																			#MineCriteria
-    | Open																			#OpenCriteria
-    | Closed																		#ClosedCriteria
-    | criteriaField=Quoted WS+ operator=(IsMe|IsNotMe|IsEmpty|IsNotEmpty) #UnaryCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsNot|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains|DoesNotContain) WS+ criteriaValue=Quoted #ValueCriteria
-    | criteria WS+ And WS+ criteria												#AndCriteria
-    | criteria WS+ Or WS+ criteria												#OrCriteria
-    | LParens WS* criteria WS* RParens														#BracedCriteria
+    : operator=(Mine|Open|Closed|SubmittedByMe)	#OperatorCriteria
+    | SubmittedBy WS+ criteriaValue=Quoted #OperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty) #FieldOperatorCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | criteria WS+ And WS+ criteria #AndCriteria
+    | criteria WS+ Or WS+ criteria #OrCriteria
+    | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
+    | LParens WS* criteria WS* RParens #ParensCriteria
     ;
 
 order
@@ -42,28 +42,24 @@ OrderBy
     : 'order' WS+ 'by'
     ;
 
+SubmittedBy
+	: 'submitted' WS+ 'by'
+	;
+
+SubmittedByMe
+	: 'submitted' WS+ 'by' WS+ 'me'
+	;
+		
 Is
 	: 'is'
 	;
 
-IsNot
-	: 'is' WS+ 'not'
-	;
-	
 IsMe
 	: 'is' WS+  'me'
 	;
 	
-IsNotMe
-	: 'is' WS+ 'not' WS+ 'me'
-	;		
-
 Contains
 	: 'contains'
-	;
-
-DoesNotContain
-	: 'does' WS+ 'not' WS+ 'contain'
 	;
 
 IsGreaterThan
@@ -86,16 +82,16 @@ IsEmpty
 	: 'is' WS+ 'empty'
 	;
 
-IsNotEmpty
-	: 'is' WS+ 'not' WS+ 'empty'
-	;
-	
 And
 	: 'and'
 	;
 	
 Or
 	: 'or'
+	;
+	
+Not
+	: 'not'
 	;
 	
 Asc

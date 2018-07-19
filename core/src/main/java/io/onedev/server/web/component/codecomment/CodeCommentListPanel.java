@@ -54,11 +54,12 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
-public abstract class CodeCommentListPanel extends Panel {
+public class CodeCommentListPanel extends Panel {
 
 	private final IModel<CodeCommentFilter> filterOptionModel;
 	
@@ -121,7 +122,8 @@ public abstract class CodeCommentListPanel extends Panel {
 				} else {
 					PullRequest request = getPullRequest();
 					if (request != null) {
-						setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, comment));
+						RequestDetailPage page = (RequestDetailPage) getPage();
+						setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, page.getPosition(), comment));
 					} else {
 						String compareCommit = comment.getCompareContext().getCompareCommit();
 						if (!compareCommit.equals(comment.getMarkPos().getCommit())
@@ -187,12 +189,9 @@ public abstract class CodeCommentListPanel extends Panel {
 				
 				WebMarkupContainer lastActivityContainer = new WebMarkupContainer("lastActivity");
 				if (comment.getLastActivity() != null) {
-					String action = comment.getLastActivity().getDescription();
-					lastActivityContainer.add(new Label("action", action));
-					
-					userForDisplay = User.getForDisplay(comment.getLastActivity().getUser(), 
-							comment.getLastActivity().getUserName());
-					lastActivityContainer.add(new UserLink("user", userForDisplay));
+					lastActivityContainer.add(new Label("user", comment.getLastActivity().getUserName())
+							.setVisible(comment.getLastActivity().getUserName()!=null));
+					lastActivityContainer.add(new Label("description", comment.getLastActivity().getDescription()));
 					lastActivityContainer.add(new Label("date", DateUtils.formatAge(comment.getLastActivity().getDate())));
 				} else {
 					lastActivityContainer.add(new WebMarkupContainer("action"));
@@ -306,6 +305,11 @@ public abstract class CodeCommentListPanel extends Panel {
 	}
 
 	@Nullable
-	protected abstract PullRequest getPullRequest();
+	private PullRequest getPullRequest() {
+		if (getPage() instanceof RequestDetailPage) 
+			return ((RequestDetailPage)getPage()).getPullRequest();
+		else
+			return null;
+	}
 	
 }

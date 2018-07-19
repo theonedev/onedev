@@ -30,8 +30,8 @@ public class FieldsEditBean implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getFieldChoices() {
-		List<String> fields = new ArrayList<>(Issue.BUILTIN_FIELDS.keySet());
-		fields.remove(Issue.DESCRIPTION);
+		List<String> fields = new ArrayList<>(Issue.FIELD_PATHS.keySet());
+		fields.remove(Issue.FIELD_DESCRIPTION);
 		ProjectPage page = (ProjectPage) WicketUtils.getPage();
 		for (InputSpec field: page.getProject().getIssueWorkflow().getFieldSpecs())
 			fields.add(field.getName());

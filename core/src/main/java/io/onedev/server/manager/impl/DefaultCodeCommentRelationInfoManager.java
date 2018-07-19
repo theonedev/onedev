@@ -287,6 +287,25 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 		}
 	}
 	
+	@Override
+	public Set<String> getPullRequestUUIDs(Project project, ObjectId commitId) {
+		byte[] commitKey = new byte[20];
+		commitId.copyRawTo(commitKey, 0);
+
+		Environment env = getEnv(project.getId().toString());
+		Store store = getStore(env, PULL_REQUEST_STORE);
+		
+		return env.computeInTransaction(new TransactionalComputable<Set<String>>() {
+			
+			@Override
+			public Set<String> compute(Transaction txn) {
+				return getPullRequestUUIDs(store, txn, new ArrayByteIterable(commitKey));
+			}
+			
+		});
+		
+	}
+	
 	@SuppressWarnings("unchecked")
 	private Map<String, ComparingInfo> getCodeCommentComparingInfos(Store store, Transaction txn, ByteIterable commitKey) {
 		byte[] valueBytes = readBytes(store, txn, commitKey);

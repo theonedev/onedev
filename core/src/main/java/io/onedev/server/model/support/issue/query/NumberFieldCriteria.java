@@ -9,6 +9,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.query.QueryBuildContext;
 
 public class NumberFieldCriteria extends FieldCriteria {
 
@@ -25,12 +26,10 @@ public class NumberFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
 		Path<Integer> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.ORDINAL);
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
-		else if (operator == IssueQueryLexer.IsNot)
-			return context.getBuilder().notEqual(attribute, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)
 			return context.getBuilder().greaterThan(attribute, value);
 		else
@@ -42,8 +41,6 @@ public class NumberFieldCriteria extends FieldCriteria {
 		Integer fieldValue = (Integer) issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.Is)
 			return Objects.equals(fieldValue, value);
-		else if (operator == IssueQueryLexer.IsNot)
-			return !Objects.equals(fieldValue, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)
 			return fieldValue != null && fieldValue > value;
 		else
@@ -62,8 +59,7 @@ public class NumberFieldCriteria extends FieldCriteria {
 
 	@Override
 	public void fill(Issue issue, Set<String> initedLists) {
-		if (operator == IssueQueryLexer.Is)
-			issue.setFieldValue(getFieldName(), value);
+		issue.setFieldValue(getFieldName(), value);
 	}
 
 }

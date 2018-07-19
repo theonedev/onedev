@@ -25,6 +25,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.Permission;
@@ -38,6 +43,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -98,6 +104,8 @@ import io.onedev.server.model.support.pullrequest.actiondata.MergedData;
 import io.onedev.server.model.support.pullrequest.actiondata.RemovedReviewerData;
 import io.onedev.server.model.support.pullrequest.actiondata.ReopenedData;
 import io.onedev.server.model.support.pullrequest.actiondata.RestoredSourceBranchData;
+import io.onedev.server.model.support.pullrequest.query.PullRequestQuery;
+import io.onedev.server.model.support.pullrequest.query.PullRequestQueryBuildContext;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -111,6 +119,10 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.BatchWorker;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.query.EntityQuery;
+import io.onedev.server.util.query.EntitySort;
+import io.onedev.server.util.query.EntitySort.Direction;
+import io.onedev.server.util.query.QueryBuildContext;
 import io.onedev.server.util.reviewrequirement.InvalidReviewRuleException;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.utils.concurrent.Prioritized;
@@ -246,9 +258,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Date date = new Date();
 		
 		CloseInfo closeInfo = new CloseInfo();
-		closeInfo.setCloseDate(date);
-		closeInfo.setClosedBy(user);
-		closeInfo.setCloseStatus(CloseInfo.Status.DISCARDED);
+		closeInfo.setDate(date);
+		closeInfo.setUser(user);
+		closeInfo.setStatus(CloseInfo.Status.DISCARDED);
 		request.setCloseInfo(closeInfo);
 		
 		PullRequestAction action = new PullRequestAction();
@@ -399,8 +411,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			request.setLastMergePreview(null);
 		
 		CloseInfo closeInfo = new CloseInfo();
-		closeInfo.setCloseDate(date);
-		closeInfo.setCloseStatus(CloseInfo.Status.MERGED);
+		closeInfo.setDate(date);
+		closeInfo.setStatus(CloseInfo.Status.MERGED);
 		request.setCloseInfo(closeInfo);
 		
 		String reason = null;
@@ -588,7 +600,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public PullRequest findEffective(ProjectAndBranch target, ProjectAndBranch source) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		Criterion merged = Restrictions.and(
-				Restrictions.eq("closeInfo.closeStatus", CloseInfo.Status.MERGED), 
+				Restrictions.eq("closeInfo.status", CloseInfo.Status.MERGED), 
 				Restrictions.eq("lastMergePreview.requestHead", source.getObjectName()));
 		
 		criteria.add(ofTarget(target)).add(ofSource(source)).add(Restrictions.or(ofOpen(), merged));
@@ -964,5 +976,62 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		criteria.add(verifyCommitCriterion);
 		return findAll(criteria);
 	}
+	
+	private Predicate[] getPredicates(io.onedev.server.util.query.EntityCriteria<PullRequest> criteria, Project project, QueryBuildContext<PullRequest> context) {
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(context.getBuilder().equal(context.getRoot().get("targetProject"), project));
+		if (criteria != null)
+			predicates.add(criteria.getPredicate(project, context));
+		return predicates.toArray(new Predicate[0]);
+	}
+	
+	private CriteriaQuery<PullRequest> buildCriteriaQuery(Session session, Project project, EntityQuery<PullRequest> requestQuery) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<PullRequest> query = builder.createQuery(PullRequest.class);
+		Root<PullRequest> root = query.from(PullRequest.class);
+		query.select(root).distinct(true);
+		
+		QueryBuildContext<PullRequest> context = new PullRequestQueryBuildContext(root, builder);
+		query.where(getPredicates(requestQuery.getCriteria(), project, context));
 
+		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		for (EntitySort sort: requestQuery.getSorts()) {
+			if (sort.getDirection() == Direction.ASCENDING)
+				orders.add(builder.asc(PullRequestQuery.getPath(root, PullRequest.FIELD_PATHS.get(sort.getField()))));
+			else
+				orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequest.FIELD_PATHS.get(sort.getField()))));
+		}
+
+		Path<String> idPath = root.get("id");
+		if (orders.isEmpty())
+			orders.add(builder.desc(idPath));
+		query.orderBy(orders);
+		
+		return query;
+	}
+
+	@Sessional
+	@Override
+	public List<PullRequest> query(Project project, EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults) {
+		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), project, requestQuery);
+		Query<PullRequest> query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(firstResult);
+		query.setMaxResults(maxResults);
+		return query.getResultList();
+	}
+	
+	@Sessional
+	@Override
+	public int count(Project project, io.onedev.server.util.query.EntityCriteria<PullRequest> requestCriteria) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
+
+		QueryBuildContext<PullRequest> context = new PullRequestQueryBuildContext(root, builder);
+		criteriaQuery.where(getPredicates(requestCriteria, project, context));
+
+		criteriaQuery.select(builder.countDistinct(root));
+		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
+	}
+	
 }

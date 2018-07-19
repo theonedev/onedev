@@ -147,7 +147,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	@Override
 	public List<String> getInputNames() {
 		List<String> inputNames = new ArrayList<>();
-		inputNames.add(Issue.STATE);
+		inputNames.add(Issue.FIELD_STATE);
 		int currentIndex = 0;
 		for (InputSpec field: getWorkflow().getFieldSpecs()) {
 			if (currentIndex != fieldIndex)
@@ -164,7 +164,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	
 	@Override
 	public boolean isReservedName(String inputName) {
-		for (String displayName: Issue.BUILTIN_FIELDS.keySet()) {
+		for (String displayName: Issue.FIELD_PATHS.keySet()) {
 			if (displayName.equals(inputName))
 				return true;
 		}

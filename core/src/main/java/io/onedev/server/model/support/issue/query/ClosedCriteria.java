@@ -5,6 +5,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.util.query.QueryBuildContext;
 
 public class ClosedCriteria extends IssueCriteria {
 
@@ -15,7 +16,7 @@ public class ClosedCriteria extends IssueCriteria {
 	}
 	
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
 		return getCriteria(project).getPredicate(project, context);
 	}
 

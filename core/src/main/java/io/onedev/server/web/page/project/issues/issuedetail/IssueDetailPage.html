@@ -51,21 +51,7 @@
 					</div>
 				</div>
 			</div>
-			<div wicket:id="watches" class="watches">
-				<div class="head">
-					Issue Watchers (<span wicket:id="count"></span>)
-				</div>
-				<div class="body">
-					<wicket:enclosure child="watchers">
-						<div class="watchers">
-							<span wicket:id="watchers"><a wicket:id="watcher" class="avatar"></a></span> <a wicket:id="more">and more</a>
-						</div>
-					</wicket:enclosure>
-					<div class="actions">
-						<a wicket:id="watch" class="watch-status btn btn-sm btn-default"></a>
-					</div>
-				</div>
-			</div>
+			<div wicket:id="watches" class="watches"></div>
 			<wicket:enclosure child="delete">
 			<div class="actions">
 				<a wicket:id="delete" class="delete btn btn-danger btn-sm"><i class="fa fa-trash"></i> Delete</a>
@@ -94,11 +80,6 @@
 	<wicket:fragment wicket:id="titleViewFrag">
 		<span wicket:id="title"></span>
 		<a wicket:id="edit" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="issueNavFrag">
-		<a wicket:id="prev" title="Previous issue" class="prev"><i class="fa fa-arrow-left"></i></a>
-		<span wicket:id="current"></span>
-		<a wicket:id="next" title="Next issue" class="next"><i class="fa fa-arrow-right"></i></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="userFrag">
 		<a wicket:id="avatar"></a> <a wicket:id="name"></a>

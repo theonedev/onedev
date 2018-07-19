@@ -14,6 +14,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.query.QueryBuildContext;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 
 public class ChoiceFieldCriteria extends FieldCriteria {
@@ -37,18 +38,13 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
-		Join<Issue, ?> join = context.getJoin(getFieldName());
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
+		Join<?, ?> join = context.getJoin(getFieldName());
 		if (allowMultiple) {
-			if (operator == IssueQueryLexer.Contains)
-				return context.getBuilder().equal(join.get(IssueFieldUnary.VALUE), value);
-			else
-				return context.getBuilder().notEqual(join.get(IssueFieldUnary.VALUE), value);
+			return context.getBuilder().equal(join.get(IssueFieldUnary.VALUE), value);
 		} else {
 			if (operator == IssueQueryLexer.Is)
 				return context.getBuilder().equal(join.get(IssueFieldUnary.VALUE), value);
-			else if (operator == IssueQueryLexer.IsNot)
-				return context.getBuilder().notEqual(join.get(IssueFieldUnary.VALUE), value);
 			else if (operator == IssueQueryLexer.IsGreaterThan)
 				return context.getBuilder().greaterThan(join.get(IssueFieldUnary.ORDINAL), ordinal);
 			else
@@ -61,15 +57,10 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
 		if (allowMultiple) {
-			if (operator == IssueQueryLexer.Contains)
-				return ((List<String>)fieldValue).contains(value);
-			else
-				return !((List<String>)fieldValue).contains(value);
+			return ((List<String>)fieldValue).contains(value);
 		} else {
 			if (operator == IssueQueryLexer.Is)
 				return Objects.equals(fieldValue, value);
-			else if (operator == IssueQueryLexer.IsNot)
-				return !Objects.equals(fieldValue, value);
 			else if (operator == IssueQueryLexer.IsGreaterThan)
 				return issue.getFieldOrdinal(getFieldName(), fieldValue) > ordinal;
 			else
@@ -112,22 +103,20 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	@Override
 	public void fill(Issue issue, Set<String> initedLists) {
 		if (allowMultiple) {
-			if (operator == IssueQueryLexer.Contains) {
-				List list;
-				if (!initedLists.contains(getFieldName())) {
+			List list;
+			if (!initedLists.contains(getFieldName())) {
+				list = new ArrayList();
+				issue.setFieldValue(getFieldName(), list);
+				initedLists.add(getFieldName());
+			} else {
+				list = (List) issue.getFieldValue(getFieldName());
+				if (list == null) {
 					list = new ArrayList();
 					issue.setFieldValue(getFieldName(), list);
-					initedLists.add(getFieldName());
-				} else {
-					list = (List) issue.getFieldValue(getFieldName());
-					if (list == null) {
-						list = new ArrayList();
-						issue.setFieldValue(getFieldName(), list);
-					}
 				}
-				list.add(value);
 			}
-		} else if (operator == IssueQueryLexer.Is) {
+			list.add(value);
+		} else {
 			issue.setFieldValue(getFieldName(), value);
 		}
 	}

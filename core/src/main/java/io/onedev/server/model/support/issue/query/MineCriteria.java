@@ -10,17 +10,18 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
+import io.onedev.server.util.query.QueryBuildContext;
 
 public class MineCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 
 	private IssueCriteria getCriteria(Project project) {
-		IssueCriteria submitterCriteria = new SubmitterCriteria(SecurityUtils.getUser(), IssueQueryLexer.Is);
+		IssueCriteria submitterCriteria = new SubmittedByCriteria(SecurityUtils.getUser());
 		List<IssueCriteria> fieldCriterias = new ArrayList<>();
 		for (InputSpec field: project.getIssueWorkflow().getFieldSpecs()) {
 			if (field instanceof UserChoiceInput) {
-				IssueCriteria fieldCriteria = new FieldUnaryCriteria(field.getName(), IssueQueryLexer.IsMe);
+				IssueCriteria fieldCriteria = new FieldOperatorCriteria(field.getName(), IssueQueryLexer.IsMe);
 				fieldCriterias.add(fieldCriteria);
 			} 
 		}
@@ -33,7 +34,7 @@ public class MineCriteria extends IssueCriteria {
 	}
 	
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
 		return getCriteria(project).getPredicate(project, context);
 	}
 

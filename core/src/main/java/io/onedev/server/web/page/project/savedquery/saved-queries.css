@@ -1,0 +1,34 @@
+.saved-queries>.head>.actions {
+	margin: 8px 0 0 12px;
+}
+.saved-queries>.head>.actions>a {
+	color: #444;
+	margin-right: 8px;
+	font-size: 16px;
+}
+.saved-queries>.head>.actions>a[disabled] {
+	color: #AAA;
+	cursor: default;
+}
+.saved-queries>.body>* {
+	margin-bottom: 20px;
+}
+.saved-queries>.body>:last-child {
+	margin-bottom: 0;
+}
+.saved-queries>.body .watch-status:after {
+	display: none;
+}
+.saved-queries>.body .watch-status:before {
+	font-size: 10px;
+}
+
+.edit-saved-queries th {
+	font-weight: bold !important;
+}
+.edit-saved-queries th.name {
+	width: 30%;
+}
+.edit-saved-queries tfoot {
+	display: none;
+}

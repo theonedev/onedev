@@ -11,41 +11,6 @@
 	padding: 20px; 
 	border-radius: 4px;
 }
-#issue-list>.side>.head>.actions {
-	margin: 8px 0 0 12px;
-}
-#issue-list>.side>.head>.actions>a {
-	color: #444;
-	margin-right: 8px;
-	font-size: 16px;
-}
-#issue-list>.side>.head>.actions>a[disabled] {
-	color: #AAA;
-	cursor: default;
-}
-#issue-list>.side>.body>* {
-	margin-bottom: 20px;
-}
-#issue-list>.side>.body>:last-child {
-	margin-bottom: 0;
-}
-#issue-list>.side>.body .watch-status:after {
-	display: none;
-}
-#issue-list>.side>.body .watch-status:before {
-	font-size: 10px;
-}
-
-.edit-saved-queries th {
-	font-weight: bold !important;
-}
-.edit-saved-queries th.name {
-	width: 30%;
-}
-.edit-saved-queries tfoot {
-	display: none;
-}
-
 #issue-list>.main {
 	padding-left: 20px;
 	vertical-align: top;

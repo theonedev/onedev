@@ -11,6 +11,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
 import io.onedev.server.web.websocket.PageDataChanged;
 
@@ -48,7 +49,8 @@ public class SinceChangesLink extends ViewStateAwarePageLink<Void> {
 		RequestChangesPage.State state = new RequestChangesPage.State();
 		state.oldCommit = oldCommitModel.getObject();
 		state.newCommit = request.getHeadCommitHash();
-		return RequestChangesPage.paramsOf(request, state);
+		RequestDetailPage page = (RequestDetailPage) getPage();
+		return RequestChangesPage.paramsOf(request, page.getPosition(), state);
 	}
 
 	@Override

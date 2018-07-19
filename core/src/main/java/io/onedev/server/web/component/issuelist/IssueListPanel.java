@@ -99,8 +99,6 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 	
 	private SelectionColumn<Issue, Void> selectionColumn;
 	
-	private Component querySave;
-	
 	private ModalLink batchEditSelected;
 	
 	private SortableDataProvider<Issue, Void> dataProvider;	
@@ -140,6 +138,33 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		Component querySave;
+		add(querySave = new AjaxLink<Void>("saveQuery") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(StringUtils.isNotBlank(getQuery()));
+				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				configure();
+				if (!isEnabled()) {
+					tag.put("disabled", "disabled");
+					tag.put("title", "Input query to save");
+				}
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				getQuerySaveSupport().onSaveQuery(target);
+			}		
+			
+		});
+		
 		TextField<String> input = new TextField<String>("input", getModel());
 		input.add(new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
@@ -247,32 +272,6 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 				super.onConfigure();
 				setVisible(SecurityUtils.canRead(getProject()));
 			}
-			
-		});
-		
-		add(querySave = new AjaxLink<Void>("saveQuery") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setEnabled(StringUtils.isNotBlank(getQuery()));
-				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
-			}
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				configure();
-				if (!isEnabled()) {
-					tag.put("disabled", "disabled");
-					tag.put("title", "Input query to save");
-				}
-			}
-
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target);
-			}		
 			
 		});
 		
@@ -442,7 +441,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		
 		for (String field: getProject().getIssueListFields()) {
 			switch (field) {
-			case Issue.NUMBER:
+			case Issue.FIELD_NUMBER:
 				columns.add(new AbstractColumn<Issue, Void>(Model.of("#")) {
 
 					@Override
@@ -452,8 +451,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.STATE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.STATE)) {
+			case Issue.FIELD_STATE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_STATE)) {
 
 					@Override
 					public String getCssClass() {
@@ -467,8 +466,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.TITLE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.TITLE)) {
+			case Issue.FIELD_TITLE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_TITLE)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
@@ -485,8 +484,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.SUBMITTER:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.SUBMITTER)) {
+			case Issue.FIELD_SUBMITTER:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_SUBMITTER)) {
 
 					@Override
 					public String getCssClass() {
@@ -505,8 +504,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.SUBMIT_DATE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.SUBMIT_DATE)) {
+			case Issue.FIELD_SUBMIT_DATE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_SUBMIT_DATE)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
@@ -515,8 +514,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.UPDATE_DATE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.UPDATE_DATE)) {
+			case Issue.FIELD_UPDATE_DATE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_UPDATE_DATE)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
@@ -525,8 +524,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.MILESTONE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.MILESTONE)) {
+			case Issue.FIELD_MILESTONE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_MILESTONE)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
@@ -545,23 +544,23 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.VOTES:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.VOTES)) {
+			case Issue.FIELD_VOTE_COUNT:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_VOTE_COUNT)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
 							IModel<Issue> rowModel) {
-						cellItem.add(new Label(componentId, rowModel.getObject().getNumOfVotes()));
+						cellItem.add(new Label(componentId, rowModel.getObject().getVoteCount()));
 					}
 				});
 				break;
-			case Issue.COMMENTS:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.COMMENTS)) {
+			case Issue.FIELD_COMMENT_COUNT:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_COMMENT_COUNT)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
 							IModel<Issue> rowModel) {
-						cellItem.add(new Label(componentId, rowModel.getObject().getNumOfVotes()));
+						cellItem.add(new Label(componentId, rowModel.getObject().getVoteCount()));
 					}
 				});
 				break;

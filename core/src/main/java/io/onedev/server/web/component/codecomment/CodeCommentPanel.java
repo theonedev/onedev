@@ -39,7 +39,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.CodeCommentManager;
 import io.onedev.server.manager.CodeCommentReplyManager;
-import io.onedev.server.manager.VisitManager;
+import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;
@@ -55,8 +55,10 @@ import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.projectcomment.CommentInput;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
+import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.websocket.PageDataChanged;
@@ -399,7 +401,12 @@ public abstract class CodeCommentPanel extends Panel {
 		super.onInitialize();
 
 		if (getPullRequest() != null) {
-			PageParameters params = RequestChangesPage.paramsOf(getPullRequest(), getComment());
+			QueryPosition position;
+			if (getPage() instanceof RequestDetailPage) 
+				position = ((RequestDetailPage)getPage()).getPosition();
+			else
+				position = null;
+			PageParameters params = RequestChangesPage.paramsOf(getPullRequest(), position, getComment());
 			add(new BookmarkablePageLink<Void>("outdatedContext", RequestChangesPage.class, params) {
 
 				@Override
@@ -484,7 +491,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			public void onEndRequest(RequestCycle cycle) {
 				if (SecurityUtils.getUser() != null) {
-					OneDev.getInstance(VisitManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
+					OneDev.getInstance(UserInfoManager.class).visitCodeComment(SecurityUtils.getUser(), getComment());
 				}
 			}
 			

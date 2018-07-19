@@ -1,6 +1,8 @@
 package io.onedev.server.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import javax.annotation.Nullable;
 import javax.persistence.GeneratedValue;
@@ -13,6 +15,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.proxy.HibernateProxy;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import io.onedev.server.model.support.EntityWatch;
 
 @MappedSuperclass
 @JsonIgnoreProperties("handler")
@@ -31,6 +35,23 @@ public abstract class AbstractEntity implements Serializable, Comparable<Abstrac
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+	
+	public Collection<? extends EntityWatch> getWatches() {
+		return new ArrayList<>();
+	}
+	
+	@Nullable
+	public EntityWatch getWatch(User user, boolean createIfNotExist) {
+		if (createIfNotExist) {
+			throw new UnsupportedOperationException();
+		} else {
+			for (EntityWatch watch: getWatches()) {
+				if (watch.getUser().equals(user)) 
+					return watch;
+			}
+			return null;
+		}
 	}
 
 	@Override

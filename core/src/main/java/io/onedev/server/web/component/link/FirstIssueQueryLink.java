@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.NamedQuery;
+import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
@@ -23,10 +23,10 @@ public class FirstIssueQueryLink extends ViewStateAwarePageLink<Void> {
 		String query = null;
 		List<String> queries = new ArrayList<>();
 		if (project.getIssueQuerySettingOfCurrentUser() != null) { 
-			for (NamedQuery namedQuery: project.getIssueQuerySettingOfCurrentUser().getUserQueries())
+			for (NamedIssueQuery namedQuery: project.getIssueQuerySettingOfCurrentUser().getUserQueries())
 				queries.add(namedQuery.getQuery());
 		}
-		for (NamedQuery namedQuery: project.getSavedIssueQueries())
+		for (NamedIssueQuery namedQuery: project.getSavedIssueQueries())
 			queries.add(namedQuery.getQuery());
 		for (String each: queries) {
 			try {

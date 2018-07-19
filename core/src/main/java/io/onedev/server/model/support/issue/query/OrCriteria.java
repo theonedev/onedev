@@ -11,9 +11,12 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.query.OrCriteriaHelper;
+import io.onedev.server.util.query.ParensAware;
+import io.onedev.server.util.query.QueryBuildContext;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 
-public class OrCriteria extends IssueCriteria {
+public class OrCriteria extends IssueCriteria implements ParensAware {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -24,47 +27,23 @@ public class OrCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext context) {
-		List<Predicate> predicates = new ArrayList<>();
-		for (IssueCriteria criteria: criterias)
-			predicates.add(criteria.getPredicate(project, context));
-		return context.getBuilder().or(predicates.toArray(new Predicate[0]));
+	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
+		return new OrCriteriaHelper<Issue>(criterias).getPredicate(project, context);
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		for (IssueCriteria criteria: criterias) {
-			if (criteria.matches(issue))
-				return true;
-		}
-		return false;
+		return new OrCriteriaHelper<Issue>(criterias).matches(issue);
 	}
 
 	@Override
 	public boolean needsLogin() {
-		for (IssueCriteria criteria: criterias) {
-			if (criteria.needsLogin())
-				return true;
-		}
-		return false;
+		return new OrCriteriaHelper<Issue>(criterias).needsLogin();
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		for (int i=0; i<criterias.size(); i++) {
-			IssueCriteria criteria = criterias.get(i);
-			if (i != 0)
-				builder.append(" or ");
-			if (criteria instanceof AndCriteria || criteria instanceof OrCriteria) {
-				builder.append("(");
-				builder.append(criteria.toString());
-				builder.append(")");
-			} else {
-				builder.append(criteria.toString());
-			}
-		}
-		return builder.toString().trim();
+		return new OrCriteriaHelper<Issue>(criterias).toString();
 	}
 	
 	@Override

@@ -6,9 +6,6 @@ import java.util.Date;
 import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 
 import io.onedev.server.model.User;
 
@@ -17,11 +14,7 @@ public class LastActivity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="LAST_ACT_USER")
-	private User user;
-	
-	@Column(name="LAST_ACT_USER_NAME")
+	@Column(name="LAST_ACT_USER")
 	private String userName;
 
 	@Column(name="LAST_ACT_ACTION")
@@ -47,21 +40,16 @@ public class LastActivity implements Serializable {
 	}
 
 	@Nullable
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	@Nullable
 	public String getUserName() {
 		return userName;
 	}
 
-	public void setUserName(String userName) {
+	public void setUserName(@Nullable String userName) {
 		this.userName = userName;
+	}
+
+	public void setUser(@Nullable User user) {
+		userName = user!=null?user.getDisplayName():null;
 	}
 	
 }
