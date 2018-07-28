@@ -20,13 +20,13 @@ class ActionPanel extends GenericPanel<IssueAction> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		IssueAction change = getModelObject();
-		User userForDisplay = User.getForDisplay(change.getUser(), change.getUserName());
+		IssueAction action = getModelObject();
+		User userForDisplay = User.getForDisplay(action.getUser(), action.getUserName());
 		add(new UserLink("user", userForDisplay));
-		add(new Label("title", change.getData().getTitle(change, false)));
-		add(new Label("age", DateUtils.formatAge(change.getDate())));
+		add(new Label("description", action.getData().getDescription()));
+		add(new Label("age", DateUtils.formatAge(action.getDate())));
 		
-		add(change.getData().render("body", change));
+		add(action.getData().render("body", action));
 	}
 
 }

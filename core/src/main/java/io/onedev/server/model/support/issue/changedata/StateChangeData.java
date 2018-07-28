@@ -6,15 +6,10 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.manager.MarkdownManager;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.support.CommentSupport;
 import io.onedev.server.model.support.issue.IssueField;
-import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.ActionDataPanel;
-import io.onedev.utils.HtmlUtils;
 
 public class StateChangeData extends FieldChangeData {
 
@@ -71,37 +66,15 @@ public class StateChangeData extends FieldChangeData {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected StateChangeData getChangeData() {
-				return StateChangeData.this;
-			}
-			
-			@Override
-			protected IssueAction getChange() {
+			protected IssueAction getAction() {
 				return action;
 			}
 		};
 	}
 
 	@Override
-	public String getTitle(IssueAction action, boolean external) {
-		Issue issue = action.getIssue();
-		if (external) 
-			return String.format("[%s] Issue #%d: %s", newState, issue.getNumber(), issue.getTitle());  
-		else 
-			return "changed state";
+	public String getDescription() {
+		return "changed state";
 	}
 	
-	@Override
-	public String describeAsHtml(IssueAction change) {
-		String escapedName = HtmlUtils.escapeHtml(change.getUser().getDisplayName());
-		StringBuilder builder = new StringBuilder(String.format("<b>%s changed state</b>", escapedName));
-		builder.append("<p style='margin: 16px 0;'>");
-		builder.append(DiffUtils.diffAsHtml(getOldLines(), null, getNewLines(), null, true));
-		if (comment != null) {
-			builder.append("<p style='margin: 16px 0;'>");
-			builder.append(OneDev.getInstance(MarkdownManager.class).escape(comment));			
-		}
-		return builder.toString();
-	}
-
 }

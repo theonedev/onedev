@@ -7,13 +7,11 @@ import java.util.Map;
 import org.apache.wicket.Component;
 
 import io.onedev.server.model.Group;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CommentSupport;
-import io.onedev.server.util.diff.DiffUtils;
+import io.onedev.server.model.support.DiffSupport;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
-import io.onedev.utils.HtmlUtils;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 public class TitleChangeData implements ActionData {
@@ -35,31 +33,37 @@ public class TitleChangeData implements ActionData {
 	}
 	
 	@Override
-	public List<String> getOldLines() {
-		return Lists.newArrayList(oldTitle);
+	public DiffSupport getDiffSupport() {
+		return new DiffSupport() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public List<String> getOldLines() {
+				return Lists.newArrayList(oldTitle);
+			}
+
+			@Override
+			public List<String> getNewLines() {
+				return Lists.newArrayList(newTitle);
+			}
+
+			@Override
+			public String getOldFileName() {
+				return "a.txt";
+			}
+
+			@Override
+			public String getNewFileName() {
+				return "b.txt";
+			}
+			
+		};
 	}
 
 	@Override
-	public List<String> getNewLines() {
-		return Lists.newArrayList(newTitle);
-	}
-	
-	@Override
-	public String getTitle(IssueAction action, boolean external) {
-		Issue issue = action.getIssue();
-		if (external) 
-			return String.format("[Title Changed] Issue #%d: %s", issue.getNumber(), issue.getTitle());  
-		else 
-			return "changed title";
-	}
-
-	@Override
-	public String describeAsHtml(IssueAction action) {
-		String escaped = HtmlUtils.escapeHtml(action.getUser().getDisplayName());
-		StringBuilder builder = new StringBuilder(String.format("<b>%s changed title</b>", escaped));
-		builder.append("<p style='margin: 16px 0;'>");
-		builder.append(DiffUtils.diffAsHtml(Lists.newArrayList(oldTitle), "a.txt", Lists.newArrayList(newTitle), "b.txt", true));
-		return builder.toString();
+	public String getDescription() {
+		return "changed title";
 	}
 
 	@Override

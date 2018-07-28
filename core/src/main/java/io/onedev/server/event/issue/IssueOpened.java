@@ -27,14 +27,4 @@ public class IssueOpened extends IssueEvent implements MarkdownAware {
 		return getIssue().getSubmitDate();
 	}
 
-	@Override
-	public String getTitle() {
-		return String.format("[%s] Issue #%d: %s", getIssue().getState(), getIssue().getNumber(), getIssue().getTitle());
-	}
-
-	@Override
-	public String describeAsHtml() {
-		return String.format("<b>%s opened new issue</b>", escape(getUser().getDisplayName()));
-	}
-
 }

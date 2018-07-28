@@ -7,16 +7,11 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.util.lang.Objects;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.manager.MarkdownManager;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.support.CommentSupport;
 import io.onedev.server.model.support.issue.IssueField;
-import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.ActionDataPanel;
-import io.onedev.utils.HtmlUtils;
 
 public class BatchUpdateData extends FieldChangeData {
 
@@ -100,37 +95,15 @@ public class BatchUpdateData extends FieldChangeData {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected BatchUpdateData getChangeData() {
-				return BatchUpdateData.this;
-			}
-			
-			@Override
-			protected IssueAction getChange() {
+			protected IssueAction getAction() {
 				return action;
 			}
 		};
 	}
 
 	@Override
-	public String getTitle(IssueAction action, boolean external) {
-		Issue issue = action.getIssue();
-		if (external) 
-			return String.format("[Batch Edited] Issue #%d: %s", issue.getNumber(), issue.getTitle());  
-		else 
-			return "batch edited";
+	public String getDescription() {
+		return "batch edited";
 	}
 	
-	@Override
-	public String describeAsHtml(IssueAction change) {
-		String escapedName = HtmlUtils.escapeHtml(change.getUser().getDisplayName());
-		StringBuilder builder = new StringBuilder(String.format("<b>%s batch edited</b>", escapedName));
-		builder.append("<p style='margin: 16px 0;'>");
-		builder.append(DiffUtils.diffAsHtml(getOldLines(), null, getNewLines(), null, true));
-		if (comment != null) {
-			builder.append("<p style='margin: 16px 0;'>");
-			builder.append(OneDev.getInstance(MarkdownManager.class).escape(comment));			
-		}
-		return builder.toString();
-	}
-
 }

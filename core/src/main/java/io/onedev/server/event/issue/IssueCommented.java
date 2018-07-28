@@ -34,17 +34,4 @@ public class IssueCommented extends IssueEvent implements MarkdownAware {
 		return comment.getDate();
 	}
 
-	@Override
-	public String getTitle() {
-		return String.format("[Commented] Issue #%d: %s", getIssue().getNumber(), getIssue().getTitle());
-	}
-
-	@Override
-	public String describeAsHtml() {
-		StringBuilder builder = new StringBuilder(String.format("<b>%s added new comment</b>", escape(getUser().getDisplayName())));
-		builder.append("<p style='margin: 16px 0;'>");
-		builder.append(escape(comment.getContent()));
-		return builder.toString();
-	}
-
 }

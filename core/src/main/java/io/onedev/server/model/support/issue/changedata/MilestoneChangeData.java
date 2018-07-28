@@ -10,14 +10,12 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 
 import io.onedev.server.model.Group;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CommentSupport;
-import io.onedev.server.util.diff.DiffUtils;
+import io.onedev.server.model.support.DiffSupport;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
-import io.onedev.utils.HtmlUtils;
 
 public class MilestoneChangeData implements ActionData {
 
@@ -34,11 +32,10 @@ public class MilestoneChangeData implements ActionData {
 	
 	@Override
 	public Component render(String componentId, IssueAction action) {
-		return new PlainDiffPanel(componentId, getOldLines(), null, getNewLines(), null, true);
+		return new PlainDiffPanel(componentId, getOldLines(), "a.txt", getNewLines(), "b.txt", true);
 	}
 	
-	@Override
-	public List<String> getOldLines() {
+	private List<String> getOldLines() {
 		List<String> oldLines = new ArrayList<>();
 		if (oldMilestone != null)
 			oldLines.add("Milestone: " + oldMilestone);
@@ -47,14 +44,42 @@ public class MilestoneChangeData implements ActionData {
 		return oldLines;
 	}
 
-	@Override
-	public List<String> getNewLines() {
+	private List<String> getNewLines() {
 		List<String> newLines = new ArrayList<>();
 		if (newMilestone != null)
 			newLines.add("Milestone: " + newMilestone);
 		else
 			newLines.add("Milestone: ");
 		return newLines;
+	}
+	
+	@Override
+	public DiffSupport getDiffSupport() {
+		return new DiffSupport() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public List<String> getOldLines() {
+				return getOldLines();
+			}
+
+			@Override
+			public List<String> getNewLines() {
+				return getNewLines();
+			}
+
+			@Override
+			public String getOldFileName() {
+				return "a.txt";
+			}
+
+			@Override
+			public String getNewFileName() {
+				return "b.txt";
+			}
+			
+		};
 	}
 	
 	public String getOldMilestone() {
@@ -66,21 +91,8 @@ public class MilestoneChangeData implements ActionData {
 	}
 
 	@Override
-	public String getTitle(IssueAction action, boolean external) {
-		Issue issue = action.getIssue();
-		if (external) 
-			return String.format("[Milestone Changed] Issue #%d: %s", issue.getNumber(), issue.getTitle());  
-		else 
-			return "changed milestone";
-	}
-
-	@Override
-	public String describeAsHtml(IssueAction action) {
-		String escaped = HtmlUtils.escapeHtml(action.getUser().getDisplayName());
-		StringBuilder builder = new StringBuilder(String.format("<b>%s changed milestone</b>", escaped));
-		builder.append("<p style='margin: 16px 0;'>");
-		builder.append(DiffUtils.diffAsHtml(getOldLines(), null, getNewLines(), null, true));
-		return builder.toString();
+	public String getDescription() {
+		return "changed milestone";
 	}
 
 	@Override

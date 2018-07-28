@@ -30,16 +30,6 @@ public class IssueActionEvent extends IssueEvent implements MarkdownAware {
 	}
 
 	@Override
-	public String getTitle() {
-		return action.getData().getTitle(action, true);
-	}
-
-	@Override
-	public String describeAsHtml() {
-		return action.getData().describeAsHtml(action);
-	}
-
-	@Override
 	public String getMarkdown() {
 		if (action.getData().getCommentSupport() != null)
 			return action.getData().getCommentSupport().getComment();

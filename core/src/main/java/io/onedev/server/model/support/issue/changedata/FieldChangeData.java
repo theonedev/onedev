@@ -12,15 +12,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Group;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CommentSupport;
+import io.onedev.server.model.support.DiffSupport;
 import io.onedev.server.model.support.issue.IssueField;
-import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
-import io.onedev.utils.HtmlUtils;
 import io.onedev.utils.StringUtils;
 
 public class FieldChangeData implements ActionData {
@@ -84,16 +82,12 @@ public class FieldChangeData implements ActionData {
 	
 	@Override
 	public Component render(String componentId, IssueAction action) {
-		return new PlainDiffPanel(componentId, oldLines, null, newLines, null, true);
+		return new PlainDiffPanel(componentId, oldLines, "a.txt", newLines, "b.txt", true);
 	}
 
 	@Override
-	public String getTitle(IssueAction action, boolean external) {
-		Issue issue = action.getIssue();
-		if (external) 
-			return String.format("[Fields Changed] Issue #%d: %s", issue.getNumber(), issue.getTitle());  
-		else 
-			return "changed fields";
+	public String getDescription() {
+		return "changed fields";
 	}
 
 	public List<String> getLines(Map<String, IssueField> fields) {
@@ -104,25 +98,37 @@ public class FieldChangeData implements ActionData {
 	}
 	
 	@Override
-	public String describeAsHtml(IssueAction action) {
-		String escaped = HtmlUtils.escapeHtml(action.getUser().getDisplayName());
-		StringBuilder builder = new StringBuilder(String.format("<b>%s changed fields</b>", escaped));
-		builder.append("<p style='margin: 16px 0;'>");
-		builder.append(DiffUtils.diffAsHtml(oldLines, null, newLines, null, true));
-		return builder.toString();
-	}
-
-	@Override
 	public CommentSupport getCommentSupport() {
 		return null;
 	}
 
-	public List<String> getOldLines() {
-		return oldLines;
-	}
+	@Override
+	public DiffSupport getDiffSupport() {
+		return new DiffSupport() {
 
-	public List<String> getNewLines() {
-		return newLines;
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public List<String> getOldLines() {
+				return oldLines;
+			}
+
+			@Override
+			public List<String> getNewLines() {
+				return newLines;
+			}
+
+			@Override
+			public String getOldFileName() {
+				return "a.txt";
+			}
+
+			@Override
+			public String getNewFileName() {
+				return "b.txt";
+			}
+			
+		};
 	}
 
 	@Override

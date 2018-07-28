@@ -15,6 +15,7 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -141,12 +142,21 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		}
 	}
 	
-	public static boolean canModify(PullRequestAction statusChange) {
+	public static boolean canModify(PullRequestAction action) {
 		User currentUser = getUser();
 		if (currentUser == null) {
 			return false;
 		} else {
-			return currentUser.equals(statusChange.getUser()) || canModify(statusChange.getRequest());
+			return currentUser.equals(action.getUser()) || canModify(action.getRequest());
+		}
+	}
+	
+	public static boolean canModify(IssueAction action) {
+		User currentUser = getUser();
+		if (currentUser == null) {
+			return false;
+		} else {
+			return currentUser.equals(action.getUser()) || canModify(action.getIssue());
 		}
 	}
 	

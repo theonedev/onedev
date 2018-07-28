@@ -1,8 +1,10 @@
 package io.onedev.server.manager.impl;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -17,6 +19,7 @@ import io.onedev.server.manager.IssueWatchManager;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.manager.UrlManager;
+import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAction;
@@ -42,52 +45,24 @@ public class DefaultIssueNotificationManager {
 	
 	private final IssueWatchManager issueWatchManager;
 	
+	private final UserInfoManager userInfoManager;
+	
 	@Inject
 	public DefaultIssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager, 
-			UrlManager urlManager, IssueWatchManager issueWatchManager) {
+			UrlManager urlManager, IssueWatchManager issueWatchManager, UserInfoManager userInfoManager) {
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.markdownManager = markdownManager;
 		this.issueWatchManager = issueWatchManager;
-	}
-	
-	private String getUrl(IssueEvent event) {
-		if (event instanceof IssueOpened)
-			return urlManager.urlFor(((IssueOpened)event).getIssue());
-		else if (event instanceof IssueCommented) 
-			return urlManager.urlFor(((IssueCommented)event).getComment());
-		else if (event instanceof IssueActionEvent)
-			return urlManager.urlFor(((IssueActionEvent)event).getAction());
-		else 
-			return urlManager.urlFor(event.getIssue());
-	}
-
-	private void appendParagraph(StringBuilder builder) {
-		builder.append("<p style='margin: 16px 0;'>");
-	}
-	
-	private void appendIssueInfo(StringBuilder builder, IssueEvent event) {
-		Issue issue = event.getIssue();
-		builder.append("<div style='border: 1px solid #E0E0E0; background: #F9F9F9; padding: 16px; border-radius: 4px;'>");
-		builder.append(String.format("<a href='%s'>Issue #%d: %s</a>", 
-				getUrl(event), issue.getNumber(), issue.getTitle()));
-		if (event.getIssue().getDescription() != null) {
-			appendParagraph(builder);
-			builder.append(markdownManager.escape(event.getIssue().getDescription()));
-		}
-		builder.append("</div>");
+		this.userInfoManager = userInfoManager;
 	}
 	
 	@Transactional
 	@Listen
 	public void on(IssueEvent event) {
-		Collection<User> involvedUsers = new HashSet<>();
-		Collection<User> notifiedUsers = new HashSet<>();
-		
-		involvedUsers.add(event.getUser());
-
 		Issue issue = event.getIssue();
-		
+		User user = event.getUser();
+
 		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
 
 			@Override
@@ -114,60 +89,77 @@ public class DefaultIssueNotificationManager {
 			watch(issue, entry.getKey(), entry.getValue());
 		}
 		
-		if (event instanceof IssueActionEvent) {
-			IssueAction issueAction = ((IssueActionEvent) event).getAction();
-			for (Group group: issueAction.getData().getNewGroups().values()) 
-				involvedUsers.addAll(group.getMembers());
-			for (Map.Entry<String, User> entry: issueAction.getData().getNewUsers().entrySet()) {
-				String subject = String.format("You are designated as \"%s\" of issue #%d: %s", 
-						entry.getKey(), issue.getNumber(), issue.getTitle());
-				StringBuilder body = new StringBuilder();
-				body.append(event.describeAsHtml());
-				appendParagraph(body);
-				appendIssueInfo(body, event);
-				mailManager.sendMailAsync(Lists.newArrayList(entry.getValue().getEmail()), subject, body.toString());
-				notifiedUsers.add(entry.getValue());
-			}
-		}
+		if (user != null)
+			watch(issue, user, true);
 		
+		Collection<User> notifiedUsers = new HashSet<>();
 		if (event instanceof MarkdownAware) {
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
 			if (markdown != null) {
 				String rendered = markdownManager.render(markdown);
-				Collection<User> mentionedUsers = new MentionParser().parseMentions(rendered);
-				mentionedUsers.removeAll(notifiedUsers);
-				for (User user: mentionedUsers) {
-					String subject = String.format("You are mentioned in issue #%d: %s", 
+				Collection<User> mentionUsers = new MentionParser().parseMentions(rendered);
+				if (!mentionUsers.isEmpty()) {
+					for (User mentionedUser: mentionUsers)
+						watch(issue, mentionedUser, true);
+
+					String url;
+					if (event instanceof IssueOpened)
+						url = urlManager.urlFor(((IssueOpened)event).getIssue());
+					else if (event instanceof IssueCommented) 
+						url = urlManager.urlFor(((IssueCommented)event).getComment());
+					else if (event instanceof IssueActionEvent)
+						url = urlManager.urlFor(((IssueActionEvent)event).getAction());
+					else 
+						url = urlManager.urlFor(event.getIssue());
+					
+					String subject = String.format("You are mentioned in issue #%d - %s", 
 							issue.getNumber(), issue.getTitle());
-					StringBuilder body = new StringBuilder();
-					body.append(event.describeAsHtml());
-					appendParagraph(body);
-					appendIssueInfo(body, event);
-					mailManager.sendMailAsync(Lists.newArrayList(user.getEmail()), subject, body.toString());
-					notifiedUsers.add(user);
+					String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+					
+					mailManager.sendMailAsync(mentionUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
+							subject, body);
+					notifiedUsers.addAll(mentionUsers);
 				}
 			}
 		} 		
 
-		involvedUsers.addAll(notifiedUsers);
-		for (User user: involvedUsers)
-			watch(issue, user, true);
-		
-		Collection<User> usersToNotify = new HashSet<>();
-		for (IssueWatch watch: issue.getWatches()) {
-			if (watch.isWatching() && !watch.getUser().equals(event.getUser()) 
-					&& !notifiedUsers.contains(watch.getUser())) {  
-				usersToNotify.add(watch.getUser());
+		if (event instanceof IssueActionEvent) {
+			IssueAction issueAction = ((IssueActionEvent) event).getAction();
+			for (Group group: issueAction.getData().getNewGroups().values()) {
+				for (User member: group.getMembers())
+					watch(issue, member, true);
+			}
+			String url = urlManager.urlFor(issue);
+			for (Map.Entry<String, User> entry: issueAction.getData().getNewUsers().entrySet()) {
+				String subject = String.format("You are designated as \"%s\" of issue #%d: %s", 
+						entry.getKey(), issue.getNumber(), issue.getTitle());
+				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+				mailManager.sendMailAsync(Lists.newArrayList(entry.getValue().getEmail()), subject, body.toString());
+				notifiedUsers.add(entry.getValue());
 			}
 		}
+				
+		Collection<User> usersToNotify = new HashSet<>();
 		
-		for (User user: usersToNotify) {
-			StringBuilder body = new StringBuilder();
-			body.append(event.describeAsHtml());
-			appendParagraph(body);
-			appendIssueInfo(body, event);
-			mailManager.sendMailAsync(Lists.newArrayList(user.getEmail()), event.getTitle(), body.toString());
+		for (IssueWatch watch: issue.getWatches()) {
+			Date visitDate = userInfoManager.getIssueVisitDate(watch.getUser(), issue);
+			if (watch.isWatching() 
+					&& !userInfoManager.isNotified(watch.getUser(), watch.getIssue()) 
+					&& !watch.getUser().equals(event.getUser()) 
+					&& (visitDate == null || visitDate.getTime()<event.getDate().getTime()) 
+					&& !notifiedUsers.contains(watch.getUser())) {
+				usersToNotify.add(watch.getUser());
+				userInfoManager.setIssueNotified(watch.getUser(), watch.getIssue(), true);
+				issueWatchManager.save(watch);
+			}
+		}
+
+		if (!usersToNotify.isEmpty()) {
+			String url = urlManager.urlFor(issue);
+			String subject = String.format("New activities in issue #%d - %s", issue.getNumber(), issue.getTitle());
+			String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+			mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()), subject, body);
 		}
 	}
 	
