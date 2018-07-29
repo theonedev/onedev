@@ -33,13 +33,13 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.codesearch.CommitIndexed;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.support.MarkPos;
-import io.onedev.server.search.CommitIndexed;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.diff.revision.CommentSupport;

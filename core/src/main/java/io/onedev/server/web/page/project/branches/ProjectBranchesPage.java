@@ -53,6 +53,7 @@ import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.entityquery.pullrequest.PullRequestQuery;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -63,8 +64,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.ProjectAndBranch;
-import io.onedev.server.model.support.pullrequest.query.PullRequestQuery;
-import io.onedev.server.model.support.pullrequest.query.PullRequestQueryLexer;
+import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branchchoice.BranchChoiceProvider;

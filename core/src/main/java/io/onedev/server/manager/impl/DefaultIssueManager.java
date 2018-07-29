@@ -29,6 +29,15 @@ import org.hibernate.query.Query;
 
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
+import io.onedev.server.entityquery.EntityQuery;
+import io.onedev.server.entityquery.EntitySort;
+import io.onedev.server.entityquery.QueryBuildContext;
+import io.onedev.server.entityquery.EntitySort.Direction;
+import io.onedev.server.entityquery.issue.AndCriteria;
+import io.onedev.server.entityquery.issue.IssueCriteria;
+import io.onedev.server.entityquery.issue.IssueQuery;
+import io.onedev.server.entityquery.issue.IssueQueryBuildContext;
+import io.onedev.server.entityquery.issue.MilestoneCriteria;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
@@ -41,11 +50,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.IssueBoard;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
-import io.onedev.server.model.support.issue.query.AndCriteria;
-import io.onedev.server.model.support.issue.query.IssueCriteria;
-import io.onedev.server.model.support.issue.query.IssueQuery;
-import io.onedev.server.model.support.issue.query.IssueQueryBuildContext;
-import io.onedev.server.model.support.issue.query.MilestoneCriteria;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -57,10 +61,6 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.query.EntityQuery;
-import io.onedev.server.util.query.EntitySort;
-import io.onedev.server.util.query.EntitySort.Direction;
-import io.onedev.server.util.query.QueryBuildContext;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValueResolution;
@@ -142,7 +142,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		return nextNumber.getAndIncrement();
 	}
 	
-	private Predicate[] getPredicates(io.onedev.server.util.query.EntityCriteria<Issue> criteria, Project project, QueryBuildContext<Issue> context) {
+	private Predicate[] getPredicates(io.onedev.server.entityquery.EntityCriteria<Issue> criteria, Project project, QueryBuildContext<Issue> context) {
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(context.getBuilder().equal(context.getRoot().get("project"), project));
 		if (criteria != null)
@@ -185,7 +185,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 	@Sessional
 	@Override
-	public List<Issue> query(Project project, io.onedev.server.util.query.EntityQuery<Issue> issueQuery, int firstResult, int maxResults) {
+	public List<Issue> query(Project project, io.onedev.server.entityquery.EntityQuery<Issue> issueQuery, int firstResult, int maxResults) {
 		CriteriaQuery<Issue> criteriaQuery = buildCriteriaQuery(getSession(), project, issueQuery);
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);

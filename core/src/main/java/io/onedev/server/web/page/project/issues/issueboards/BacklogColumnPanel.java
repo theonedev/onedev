@@ -21,13 +21,13 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entityquery.issue.IssueCriteria;
+import io.onedev.server.entityquery.issue.IssueQuery;
+import io.onedev.server.entityquery.issue.MilestoneCriteria;
 import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.query.IssueCriteria;
-import io.onedev.server.model.support.issue.query.IssueQuery;
-import io.onedev.server.model.support.issue.query.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;

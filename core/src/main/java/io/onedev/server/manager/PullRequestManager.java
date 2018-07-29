@@ -5,14 +5,14 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.entityquery.EntityCriteria;
+import io.onedev.server.entityquery.EntityQuery;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.util.query.EntityCriteria;
-import io.onedev.server.util.query.EntityQuery;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
     

@@ -11,13 +11,13 @@ import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.jsymbol.TokenPosition;
+import io.onedev.server.codesearch.hit.QueryHit;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.TextRange;
-import io.onedev.server.search.hit.QueryHit;
 
 public interface BlobRenderContext extends Serializable {
 

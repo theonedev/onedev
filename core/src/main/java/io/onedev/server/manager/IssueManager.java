@@ -6,13 +6,13 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.entityquery.EntityQuery;
+import io.onedev.server.entityquery.issue.IssueCriteria;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.util.query.EntityQuery;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValueResolution;

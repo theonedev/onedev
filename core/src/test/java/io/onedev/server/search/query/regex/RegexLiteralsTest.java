@@ -7,7 +7,7 @@ import org.junit.Test;
 
 import com.google.common.base.Splitter;
 
-import io.onedev.server.search.query.regex.RegexLiterals;
+import io.onedev.server.codesearch.query.regex.RegexLiterals;
 
 public class RegexLiteralsTest {
 

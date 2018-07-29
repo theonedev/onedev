@@ -21,7 +21,7 @@ public class PullRequestQueryValidator implements ConstraintValidator<PullReques
 		} else {
 			Project project = OneContext.get().getProject();
 			try {
-				io.onedev.server.model.support.pullrequest.query.PullRequestQuery.parse(project, value, true);
+				io.onedev.server.entityquery.pullrequest.PullRequestQuery.parse(project, value, true);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

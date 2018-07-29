@@ -30,11 +30,11 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.entityquery.issue.IssueQuery;
 import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.query.IssueQuery;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.RunTaskBehavior;

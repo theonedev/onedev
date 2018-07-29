@@ -30,11 +30,11 @@ import org.eclipse.jgit.lib.FileMode;
 
 import io.onedev.jsymbol.TokenPosition;
 import io.onedev.jsymbol.util.HighlightableLabel;
+import io.onedev.server.codesearch.hit.FileHit;
+import io.onedev.server.codesearch.hit.QueryHit;
+import io.onedev.server.codesearch.hit.TextHit;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.support.TextRange;
-import io.onedev.server.search.hit.FileHit;
-import io.onedev.server.search.hit.QueryHit;
-import io.onedev.server.search.hit.TextHit;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;

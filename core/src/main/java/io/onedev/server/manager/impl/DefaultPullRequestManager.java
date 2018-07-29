@@ -58,6 +58,12 @@ import com.google.common.base.Throwables;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
+import io.onedev.server.entityquery.EntityQuery;
+import io.onedev.server.entityquery.EntitySort;
+import io.onedev.server.entityquery.QueryBuildContext;
+import io.onedev.server.entityquery.EntitySort.Direction;
+import io.onedev.server.entityquery.pullrequest.PullRequestQuery;
+import io.onedev.server.entityquery.pullrequest.PullRequestQueryBuildContext;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.pullrequest.PullRequestActionEvent;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
@@ -104,8 +110,6 @@ import io.onedev.server.model.support.pullrequest.actiondata.MergedData;
 import io.onedev.server.model.support.pullrequest.actiondata.RemovedReviewerData;
 import io.onedev.server.model.support.pullrequest.actiondata.ReopenedData;
 import io.onedev.server.model.support.pullrequest.actiondata.RestoredSourceBranchData;
-import io.onedev.server.model.support.pullrequest.query.PullRequestQuery;
-import io.onedev.server.model.support.pullrequest.query.PullRequestQueryBuildContext;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -119,10 +123,6 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.BatchWorker;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.query.EntityQuery;
-import io.onedev.server.util.query.EntitySort;
-import io.onedev.server.util.query.EntitySort.Direction;
-import io.onedev.server.util.query.QueryBuildContext;
 import io.onedev.server.util.reviewrequirement.InvalidReviewRuleException;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.utils.concurrent.Prioritized;
@@ -977,7 +977,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		return findAll(criteria);
 	}
 	
-	private Predicate[] getPredicates(io.onedev.server.util.query.EntityCriteria<PullRequest> criteria, Project project, QueryBuildContext<PullRequest> context) {
+	private Predicate[] getPredicates(io.onedev.server.entityquery.EntityCriteria<PullRequest> criteria, Project project, QueryBuildContext<PullRequest> context) {
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(context.getBuilder().equal(context.getRoot().get("targetProject"), project));
 		if (criteria != null)
@@ -1022,7 +1022,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public int count(Project project, io.onedev.server.util.query.EntityCriteria<PullRequest> requestCriteria) {
+	public int count(Project project, io.onedev.server.entityquery.EntityCriteria<PullRequest> requestCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);

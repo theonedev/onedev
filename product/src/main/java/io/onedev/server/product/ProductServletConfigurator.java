@@ -24,7 +24,6 @@ import io.onedev.server.security.OneWebEnvironment;
 import io.onedev.server.util.jetty.ClasspathAssetServlet;
 import io.onedev.server.util.jetty.FileAssetServlet;
 import io.onedev.server.util.jetty.ServletConfigurator;
-import io.onedev.server.util.readcallback.ReadCallbackServlet;
 import io.onedev.server.util.serverconfig.ServerConfig;
 import io.onedev.server.web.component.markdown.AttachmentUploadServlet;
 import io.onedev.server.web.img.Img;
@@ -42,8 +41,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	
 	private final GitPostReceiveCallback postReceiveServlet;
 	
-	private final ReadCallbackServlet trackingServlet;
-	
 	private final WicketServlet wicketServlet;
 	
 	private final ServletContainer jerseyServlet;
@@ -53,7 +50,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	@Inject
 	public ProductServletConfigurator(ServerConfig serverConfig, ShiroFilter shiroFilter, GitFilter gitFilter, 
 			GitPreReceiveCallback preReceiveServlet, GitPostReceiveCallback postReceiveServlet, 
-			ReadCallbackServlet trackingServlet, WicketServlet wicketServlet, WebSocketManager webSocketManager, 
+			WicketServlet wicketServlet, WebSocketManager webSocketManager, 
 			ServletContainer jerseyServlet) {
 		this.serverConfig = serverConfig;
 		this.shiroFilter = shiroFilter;
@@ -63,7 +60,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		this.wicketServlet = wicketServlet;
 		this.webSocketManager = webSocketManager;
 		this.jerseyServlet = jerseyServlet;
-		this.trackingServlet = trackingServlet;
 	}
 	
 	@Override
@@ -85,9 +81,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
         
 		ServletHolder postReceiveServletHolder = new ServletHolder(postReceiveServlet);
         context.addServlet(postReceiveServletHolder, GitPostReceiveCallback.PATH + "/*");
-        
-		ServletHolder trackingServletHolder = new ServletHolder(trackingServlet);
-        context.addServlet(trackingServletHolder, ReadCallbackServlet.PATH + "/*");
         
 		ServletHolder wicketServletHolder = new ServletHolder(wicketServlet);
 		

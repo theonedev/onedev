@@ -40,6 +40,7 @@ import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.entityquery.pullrequest.PullRequestQuery;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.PullRequestManager;
@@ -49,7 +50,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestQuerySetting;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
-import io.onedev.server.model.support.pullrequest.query.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;

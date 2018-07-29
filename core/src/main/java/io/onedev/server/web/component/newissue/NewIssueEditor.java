@@ -20,9 +20,9 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.server.entityquery.issue.IssueCriteria;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;

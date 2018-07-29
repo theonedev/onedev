@@ -13,8 +13,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.protocol.http.WebSession;
 
+import io.onedev.server.entityquery.EntityQuery;
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.util.query.EntityQuery;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.utils.ReflectionUtils;
 import io.onedev.utils.WordUtils;

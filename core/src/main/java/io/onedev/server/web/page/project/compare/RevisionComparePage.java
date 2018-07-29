@@ -30,6 +30,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.codesearch.CommitIndexed;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.CodeCommentManager;
 import io.onedev.server.manager.PullRequestManager;
@@ -40,7 +41,6 @@ import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.ProjectAndRevision;
-import io.onedev.server.search.CommitIndexed;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.TooltipBehavior;
 import io.onedev.server.web.component.commitlist.CommitListPanel;

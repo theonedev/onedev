@@ -8,10 +8,10 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entityquery.issue.IssueCriteria;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.query.IssueCriteria;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.newissue.NewIssueEditor;
 

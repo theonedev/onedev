@@ -14,11 +14,11 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entityquery.issue.IssueQuery;
+import io.onedev.server.entityquery.issue.MilestoneCriteria;
 import io.onedev.server.manager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.query.IssueQuery;
-import io.onedev.server.model.support.issue.query.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.MilestoneDueLabel;
 import io.onedev.server.web.component.MilestoneStatusLabel;

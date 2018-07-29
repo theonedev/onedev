@@ -16,6 +16,9 @@ import org.hibernate.type.Type;
 import com.google.common.collect.Lists;
 
 import io.onedev.launcher.loader.Listen;
+import io.onedev.server.entityquery.EntityQuery;
+import io.onedev.server.entityquery.QueryWatchBuilder;
+import io.onedev.server.entityquery.pullrequest.PullRequestQuery;
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.pullrequest.PullRequestActionEvent;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
@@ -44,12 +47,9 @@ import io.onedev.server.model.support.pullrequest.actiondata.DiscardedData;
 import io.onedev.server.model.support.pullrequest.actiondata.MergedData;
 import io.onedev.server.model.support.pullrequest.actiondata.ReopenedData;
 import io.onedev.server.model.support.pullrequest.actiondata.RequestedForChangesData;
-import io.onedev.server.model.support.pullrequest.query.PullRequestQuery;
 import io.onedev.server.persistence.PersistListener;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.markdown.MentionParser;
-import io.onedev.server.util.query.EntityQuery;
-import io.onedev.server.util.query.QueryWatchBuilder;
 
 @Singleton
 public class DefaultPullRequestNotificationManager implements PersistListener {

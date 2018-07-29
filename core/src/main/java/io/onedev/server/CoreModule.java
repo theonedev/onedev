@@ -67,6 +67,10 @@ import com.vladsch.flexmark.Extension;
 import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.launcher.loader.AbstractPlugin;
 import io.onedev.launcher.loader.AbstractPluginModule;
+import io.onedev.server.codesearch.DefaultIndexManager;
+import io.onedev.server.codesearch.DefaultSearchManager;
+import io.onedev.server.codesearch.IndexManager;
+import io.onedev.server.codesearch.SearchManager;
 import io.onedev.server.command.ApplyDBConstraintsCommand;
 import io.onedev.server.command.BackupDBCommand;
 import io.onedev.server.command.CheckDataVersionCommand;
@@ -187,10 +191,6 @@ import io.onedev.server.rest.RestConstants;
 import io.onedev.server.rest.jersey.DefaultServletContainer;
 import io.onedev.server.rest.jersey.JerseyConfigurator;
 import io.onedev.server.rest.jersey.ResourceConfigProvider;
-import io.onedev.server.search.DefaultIndexManager;
-import io.onedev.server.search.DefaultSearchManager;
-import io.onedev.server.search.IndexManager;
-import io.onedev.server.search.SearchManager;
 import io.onedev.server.security.BasicAuthenticationFilter;
 import io.onedev.server.security.FilterChainConfigurator;
 import io.onedev.server.security.OneAuthorizingRealm;
@@ -205,7 +205,6 @@ import io.onedev.server.util.jackson.hibernate.HibernateObjectMapperConfigurator
 import io.onedev.server.util.jetty.DefaultJettyRunner;
 import io.onedev.server.util.jetty.JettyRunner;
 import io.onedev.server.util.markdown.MarkdownProcessor;
-import io.onedev.server.util.readcallback.ReadCallbackServlet;
 import io.onedev.server.util.validation.DefaultEntityValidator;
 import io.onedev.server.util.validation.EntityValidator;
 import io.onedev.server.util.validation.ValidatorProvider;
@@ -363,7 +362,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(GitFilter.class);
 		bind(GitPreReceiveCallback.class);
 		bind(GitPostReceiveCallback.class);
-		bind(ReadCallbackServlet.class);
 	}
 	
 	private void configureRestServices() {

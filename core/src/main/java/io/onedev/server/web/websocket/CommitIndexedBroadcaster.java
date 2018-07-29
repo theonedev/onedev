@@ -4,7 +4,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.Listen;
-import io.onedev.server.search.CommitIndexed;
+import io.onedev.server.codesearch.CommitIndexed;
 
 @Singleton
 public class CommitIndexedBroadcaster {

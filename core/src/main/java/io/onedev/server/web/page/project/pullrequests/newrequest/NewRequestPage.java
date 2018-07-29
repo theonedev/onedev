@@ -37,6 +37,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.codesearch.CommitIndexed;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.CodeCommentManager;
 import io.onedev.server.manager.PullRequestManager;
@@ -52,7 +53,6 @@ import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.search.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.component.branchpicker.AffinalBranchPicker;

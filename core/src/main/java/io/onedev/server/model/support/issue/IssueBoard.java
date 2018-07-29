@@ -145,7 +145,7 @@ public class IssueBoard implements Serializable {
 		Set<String> undefinedStates = new HashSet<>();
 		if (getBaseQuery() != null) {
 			try {
-				undefinedStates.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getBaseQuery(), false).getUndefinedStates(project));
+				undefinedStates.addAll(io.onedev.server.entityquery.issue.IssueQuery.parse(project, getBaseQuery(), false).getUndefinedStates(project));
 			} catch (Exception e) {
 			}
 		}
@@ -161,8 +161,8 @@ public class IssueBoard implements Serializable {
 	public void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions) {
 		if (getBaseQuery() != null) {
 			try {
-				io.onedev.server.model.support.issue.query.IssueQuery query = 
-						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getBaseQuery(), false);
+				io.onedev.server.entityquery.issue.IssueQuery query = 
+						io.onedev.server.entityquery.issue.IssueQuery.parse(project, getBaseQuery(), false);
 				for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 					query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 				setBaseQuery(query.toString());
@@ -182,7 +182,7 @@ public class IssueBoard implements Serializable {
 		Set<String> undefinedFields = new HashSet<>();
 		if (getBaseQuery() != null) {
 			try {
-				undefinedFields.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getBaseQuery(), false).getUndefinedFields(project));
+				undefinedFields.addAll(io.onedev.server.entityquery.issue.IssueQuery.parse(project, getBaseQuery(), false).getUndefinedFields(project));
 			} catch (Exception e) {
 			}
 		}
@@ -197,8 +197,8 @@ public class IssueBoard implements Serializable {
 	public boolean fixUndefinedFields(Project project, Map<String, UndefinedFieldResolution> resolutions) {
 		if (getBaseQuery() != null) {
 			try {
-				io.onedev.server.model.support.issue.query.IssueQuery query = 
-						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getBaseQuery(), false);
+				io.onedev.server.entityquery.issue.IssueQuery query = 
+						io.onedev.server.entityquery.issue.IssueQuery.parse(project, getBaseQuery(), false);
 				boolean remove = false;
 				for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 					UndefinedFieldResolution resolution = entry.getValue();
@@ -259,7 +259,7 @@ public class IssueBoard implements Serializable {
 		try {
 			if (getBaseQuery() != null) {
 				try {
-					undefinedFieldValues.addAll(io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getBaseQuery(), true).getUndefinedFieldValues(project));
+					undefinedFieldValues.addAll(io.onedev.server.entityquery.issue.IssueQuery.parse(project, getBaseQuery(), true).getUndefinedFieldValues(project));
 				} catch (Exception e) {
 				}
 			}
@@ -282,8 +282,8 @@ public class IssueBoard implements Serializable {
 	public boolean fixUndefinedFieldValues(Project project, Map<UndefinedFieldValue, UndefinedFieldValueResolution> resolutions) {
 		if (getBaseQuery() != null) {
 			try {
-				io.onedev.server.model.support.issue.query.IssueQuery query = 
-						io.onedev.server.model.support.issue.query.IssueQuery.parse(project, getBaseQuery(), true);
+				io.onedev.server.entityquery.issue.IssueQuery query = 
+						io.onedev.server.entityquery.issue.IssueQuery.parse(project, getBaseQuery(), true);
 				boolean remove = false;
 				for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
 					UndefinedFieldValueResolution resolution = entry.getValue();
