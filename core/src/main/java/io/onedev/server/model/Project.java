@@ -230,7 +230,6 @@ public class Project extends AbstractEntity {
 		issueListFields.add("Priority");
 		issueListFields.add(Issue.FIELD_SUBMITTER);
 		issueListFields.add("Assignee");
-		issueListFields.add(Issue.FIELD_VOTE_COUNT);
 		
 		savedIssueQueries.add(new NamedIssueQuery("Open", "open"));
 		savedIssueQueries.add(new NamedIssueQuery("My open", "open and mine"));
@@ -243,8 +242,8 @@ public class Project extends AbstractEntity {
 		savedIssueQueries.add(new NamedIssueQuery("All", "all"));
 		
 		savedPullRequestQueries.add(new NamedPullRequestQuery("Open", "open"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Need to be reviewed by me", "to be reviewed by me"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Need to be changed by me", "submitted by me and someone requested for changes"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("To be reviewed by me", "to be reviewed by me"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("To be changed by me", "submitted by me and someone requested for changes"));
 		savedPullRequestQueries.add(new NamedPullRequestQuery("Request for changes by me", "requested for changes by me"));
 		savedPullRequestQueries.add(new NamedPullRequestQuery("Approved by me", "approved by me"));
 		savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted by me", "submitted by me"));

@@ -127,7 +127,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	private String submitterName;
 	
 	@Column(nullable=false)
-	private long submitDate;
+	private Date submitDate;
 	
 	private int voteCount;
 	
@@ -241,11 +241,11 @@ public class Issue extends AbstractEntity implements Referenceable {
 	}
 
 	public Date getSubmitDate() {
-		return new Date(submitDate);
+		return submitDate;
 	}
 
 	public void setSubmitDate(Date submitDate) {
-		this.submitDate = submitDate.getTime();
+		this.submitDate = submitDate;
 	}
 
 	public Milestone getMilestone() {

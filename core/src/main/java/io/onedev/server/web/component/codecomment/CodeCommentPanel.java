@@ -556,7 +556,7 @@ public abstract class CodeCommentPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new CaretResourceReference()));
-		response.render(CssHeaderItem.forReference(new CodeCommentResourceReference()));
+		response.render(CssHeaderItem.forReference(new CodeCommentCssResourceReference()));
 	}
 
 	private void onAddReply(AjaxRequestTarget target) {

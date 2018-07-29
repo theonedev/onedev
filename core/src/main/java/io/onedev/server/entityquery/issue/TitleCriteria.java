@@ -21,12 +21,12 @@ public class TitleCriteria extends IssueCriteria {
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
 		Path<String> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_TITLE));
-		return context.getBuilder().like(attribute, "%" + value + "%");
+		return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		return issue.getTitle().toLowerCase().contains(value);
+		return issue.getTitle().toLowerCase().contains(value.toLowerCase());
 	}
 
 	@Override
@@ -36,7 +36,7 @@ public class TitleCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.FIELD_TITLE) + " " + IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(value);
+		return IssueQuery.quote(Issue.FIELD_TITLE) + " " + IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " + IssueQuery.quote(value);
 	}
 
 }

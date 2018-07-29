@@ -1,6 +1,5 @@
 package io.onedev.server.entityquery.issue;
 
-import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.criteria.Path;
@@ -10,7 +9,6 @@ import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
-import io.onedev.server.entityquery.issue.IssueQueryLexer;
 
 public class StringFieldCriteria extends FieldCriteria {
 
@@ -34,16 +32,16 @@ public class StringFieldCriteria extends FieldCriteria {
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
 		Path<String> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.VALUE);
 		if (operator == IssueQueryLexer.Is)
-			return context.getBuilder().equal(attribute, value);
+			return context.getBuilder().equal(context.getBuilder().lower(attribute), value.toLowerCase());
 		else 
-			return context.getBuilder().like(attribute, "%" + value + "%");
+			return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
 		String fieldValue = (String) issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.Is)
-			return Objects.equals(fieldValue, value);
+			return value.equalsIgnoreCase(fieldValue);
 		else 
 			return fieldValue != null && fieldValue.toLowerCase().contains(value.toLowerCase());
 	}
@@ -60,7 +58,8 @@ public class StringFieldCriteria extends FieldCriteria {
 
 	@Override
 	public void fill(Issue issue, Set<String> initedLists) {
-		issue.setFieldValue(getFieldName(), value);
+		if (operator == IssueQueryLexer.Is)
+			issue.setFieldValue(getFieldName(), value);
 	}
 	
 }

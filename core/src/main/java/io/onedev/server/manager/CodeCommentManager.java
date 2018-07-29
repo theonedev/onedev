@@ -8,6 +8,8 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.server.entityquery.EntityCriteria;
+import io.onedev.server.entityquery.EntityQuery;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -28,5 +30,10 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 	List<CodeComment> findAllAfter(Project project, @Nullable String commentUUID, int count);
 	
 	void save(CodeComment comment, @Nullable PullRequest request);
+
+	List<CodeComment> query(Project project, @Nullable PullRequest request, 
+			EntityQuery<CodeComment> commentQuery, int firstResult, int maxResults);
+	
+	int count(Project project, @Nullable PullRequest request, EntityCriteria<CodeComment> commentCriteria);
 	
 }

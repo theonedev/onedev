@@ -28,11 +28,11 @@ public class CloseDateCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<Long> attribute = PullRequestQuery.getPath(context.getRoot(), PullRequest.FIELD_PATHS.get(PullRequest.FIELD_CLOSE_DATE));
+		Path<Date> attribute = PullRequestQuery.getPath(context.getRoot(), PullRequest.FIELD_PATHS.get(PullRequest.FIELD_CLOSE_DATE));
 		if (operator == PullRequestQueryLexer.IsBefore)
-			return context.getBuilder().lessThan(attribute, value.getTime());
+			return context.getBuilder().lessThan(attribute, value);
 		else
-			return context.getBuilder().greaterThan(attribute, value.getTime());
+			return context.getBuilder().greaterThan(attribute, value);
 	}
 
 	@Override

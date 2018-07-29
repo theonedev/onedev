@@ -29,8 +29,7 @@ class AssistPanel extends Panel {
 
 	private final List<InputCompletion> suggestions;
 	
-	public AssistPanel(String id, Component input, InputStatus inputStatus, 
-			List<InputCompletion> suggestions, List<String> hints) {
+	public AssistPanel(String id, Component input, InputStatus inputStatus, List<InputCompletion> suggestions, List<String> hints) {
 		super(id);
 		this.input = input;
 		this.inputStatus = inputStatus;
@@ -93,7 +92,7 @@ class AssistPanel extends Panel {
 		WebMarkupContainer item = new WebMarkupContainer(itemId);
 		WebMarkupContainer link = new WebMarkupContainer("link");
 		Range match = suggestion.getMatch();
-		String label = suggestion.getSubstitution().getContent();
+		String label = suggestion.getLabel();
 		if (match != null) {
 			String prefix = StringEscapeUtils.escapeHtml4(label.substring(0, match.getFrom()));
 			String suffix = StringEscapeUtils.escapeHtml4(label.substring(match.getTo()));
@@ -107,9 +106,11 @@ class AssistPanel extends Panel {
 			item.add(new Label("description", suggestion.getDescription()));
 		else
 			item.add(new Label("description"));
-		String content = suggestion.complete(inputStatus).getContent();
+		String content = suggestion.getContent();
 		item.add(AttributeAppender.append("data-content", content));
 		item.add(AttributeAppender.append("data-caret", suggestion.getCaret()));
+		if (!suggestion.getContent().equals(inputStatus.getContent()))
+			item.add(AttributeAppender.append("class", "different"));
 		item.setOutputMarkupId(true);
 		return item;
 	}

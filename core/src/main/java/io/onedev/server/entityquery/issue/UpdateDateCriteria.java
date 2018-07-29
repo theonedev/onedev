@@ -28,11 +28,11 @@ public class UpdateDateCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<Long> attribute = IssueQuery.getPath(context.getRoot(), Issue.FIELD_PATHS.get(Issue.FIELD_UPDATE_DATE));
+		Path<Date> attribute = IssueQuery.getPath(context.getRoot(), Issue.FIELD_PATHS.get(Issue.FIELD_UPDATE_DATE));
 		if (operator == IssueQueryLexer.IsBefore)
-			return context.getBuilder().lessThan(attribute, value.getTime());
+			return context.getBuilder().lessThan(attribute, value);
 		else
-			return context.getBuilder().greaterThan(attribute, value.getTime());
+			return context.getBuilder().greaterThan(attribute, value);
 	}
 
 	@Override

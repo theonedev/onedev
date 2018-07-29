@@ -19,24 +19,20 @@ import io.onedev.codeassist.parser.Element;
 import io.onedev.codeassist.parser.TerminalExpect;
 import io.onedev.codeassist.parser.ParseExpect;
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.pullrequest.PullRequestQuery;
-import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
-import io.onedev.server.entityquery.pullrequest.PullRequestQueryParser;
+import io.onedev.server.entityquery.codecomment.CodeCommentQuery;
+import io.onedev.server.entityquery.codecomment.CodeCommentQueryParser;
 import io.onedev.server.exception.OneException;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
-import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserManager;
+import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
+import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.utils.Range;
 
 @SuppressWarnings("serial")
-public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
+public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
@@ -46,8 +42,8 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 	
 	private static final String ESCAPE_CHARS = "\"\\";
 	
-	public PullRequestQueryBehavior(IModel<Project> projectModel) {
-		super(PullRequestQueryParser.class, "query", false);
+	public CodeCommentQueryBehavior(IModel<Project> projectModel) {
+		super(CodeCommentQueryParser.class, "query", false);
 		this.projectModel = projectModel;
 	}
 
@@ -60,7 +56,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 	private Project getProject() {
 		return projectModel.getObject();
 	}
-
+	
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
@@ -91,50 +87,30 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 						Project project = getProject();
 
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(PullRequest.FIELD_PATHS.keySet());
-							candidates.remove(PullRequest.FIELD_SUBMITTER);
+							List<String> candidates = new ArrayList<>(CodeComment.FIELD_PATHS.keySet());
 							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = Lists.newArrayList(PullRequest.FIELD_NUMBER, 
-									PullRequest.FIELD_SUBMIT_DATE, PullRequest.FIELD_UPDATE_DATE, PullRequest.FIELD_CLOSE_DATE);
+							List<String> candidates = Lists.newArrayList(CodeComment.FIELD_CREATE_DATE, 
+									CodeComment.FIELD_UPDATE_DATE);
 							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
-							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
-							Preconditions.checkState(operatorElements.size() == 1);
-							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
-							int operator = PullRequestQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator != PullRequestQueryLexer.ContainsCommit)
-									suggestions.addAll(getUserSuggestions(unfencedLowerCaseMatchWith));
-								else
-									return null;
+								suggestions.addAll(getUserSuggestions(unfencedLowerCaseMatchWith));
 							} else {
-								String fieldName = PullRequestQuery.getValue(fieldElements.get(0).getMatchedText());
-								
+								String fieldName = CodeCommentQuery.getValue(fieldElements.get(0).getMatchedText());
+								List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+								Preconditions.checkState(operatorElements.size() == 1);
+								String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
+								int operator = CodeCommentQuery.getOperator(operatorName);							
 								try {
-									PullRequestQuery.checkField(project, fieldName, operator);
-									if (fieldName.equals(PullRequest.FIELD_SUBMIT_DATE) || fieldName.equals(PullRequest.FIELD_UPDATE_DATE)
-											|| fieldName.equals(PullRequest.FIELD_CLOSE_DATE)) {
+									CodeCommentQuery.checkField(project, fieldName, operator);
+									if (fieldName.equals(CodeComment.FIELD_CREATE_DATE) || fieldName.equals(CodeComment.FIELD_UPDATE_DATE)) {
 										suggestions.addAll(getSuggestions(DateUtils.RELAX_DATE_EXAMPLES, unfencedLowerCaseMatchWith, null));
 										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
-									} else if (fieldName.equals(PullRequest.FIELD_STATE)) {
-										List<String> candidates = Lists.newArrayList(PullRequest.STATE_OPEN);
-										for (CloseInfo.Status status: CloseInfo.Status.values())
-											candidates.add(status.toString());
-										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
-									} else if (fieldName.equals(PullRequest.FIELD_SOURCE_PROJECT)) {
-										List<String> candidates = new ArrayList<>();
-										for (Project each: OneDev.getInstance(ProjectManager.class).findAll())
-											candidates.add(each.getName());
-										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
-									} else if (fieldName.equals(PullRequest.FIELD_TARGET_BRANCH) || fieldName.equals(PullRequest.FIELD_SOURCE_BRANCH)) {
-										List<String> candidates = new ArrayList<>();
-										for (RefInfo refInfo: project.getBranches()) 
-											candidates.add(GitUtils.ref2branch(refInfo.getRef().getName()));
-										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
-									} else if (fieldName.equals(PullRequest.FIELD_TITLE) || fieldName.equals(PullRequest.FIELD_DESCRIPTION) 
-											|| fieldName.equals(PullRequest.FIELD_NUMBER)) {
+									} else if (fieldName.equals(CodeComment.FIELD_PATH)) {
+										suggestions.addAll(SuggestionUtils.suggestPath(projectModel.getObject(), unfencedLowerCaseMatchWith, ESCAPE_CHARS));
+									} else {
 										return null;
 									}
 								} catch (OneException ex) {
@@ -161,9 +137,9 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
-				String fieldName = PullRequestQuery.getValue(fieldElements.iterator().next().getMatchedText());
+				String fieldName = CodeCommentQuery.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
-					PullRequestQuery.checkField(getProject(), fieldName, PullRequestQuery.getOperator(suggestedLiteral));
+					CodeCommentQuery.checkField(getProject(), fieldName, CodeCommentQuery.getOperator(suggestedLiteral));
 				} catch (OneException e) {
 					return null;
 				}

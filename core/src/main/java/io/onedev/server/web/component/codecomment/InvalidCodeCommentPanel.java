@@ -60,7 +60,7 @@ public class InvalidCodeCommentPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CodeCommentResourceReference()));
+		response.render(CssHeaderItem.forReference(new CodeCommentCssResourceReference()));
 	}
 	
 }

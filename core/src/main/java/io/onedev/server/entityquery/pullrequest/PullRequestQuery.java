@@ -20,16 +20,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entityquery.EntityQuery;
 import io.onedev.server.entityquery.EntitySort;
 import io.onedev.server.entityquery.EntitySort.Direction;
-import io.onedev.server.exception.OneException;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.UserManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.entityquery.pullrequest.PullRequestQueryBaseVisitor;
-import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
-import io.onedev.server.entityquery.pullrequest.PullRequestQueryParser;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryParser.AndCriteriaContext;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryParser.CriteriaContext;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryParser.FieldOperatorValueCriteriaContext;
@@ -40,6 +30,13 @@ import io.onedev.server.entityquery.pullrequest.PullRequestQueryParser.OrCriteri
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryParser.OrderContext;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryParser.ParensCriteriaContext;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryParser.QueryContext;
+import io.onedev.server.exception.OneException;
+import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.UserManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.util.DateUtils;
 
 public class PullRequestQuery extends EntityQuery<PullRequest> {
@@ -268,13 +265,13 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 					throw new OneException("Can not order by field: " + fieldName);
 				}
 				
-				EntitySort pullRequestSort = new EntitySort();
-				pullRequestSort.setField(fieldName);
+				EntitySort requestSort = new EntitySort();
+				requestSort.setField(fieldName);
 				if (order.direction != null && order.direction.getText().equals("asc"))
-					pullRequestSort.setDirection(Direction.ASCENDING);
+					requestSort.setDirection(Direction.ASCENDING);
 				else
-					pullRequestSort.setDirection(Direction.DESCENDING);
-				requestSorts.add(pullRequestSort);
+					requestSort.setDirection(Direction.DESCENDING);
+				requestSorts.add(requestSort);
 			}
 			
 			return new PullRequestQuery(requestCriteria, requestSorts);
@@ -328,18 +325,6 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		return getOperator(PullRequestQueryLexer.ruleNames, operatorName);
 	}
 	
-	public static PullRequestQuery merge(PullRequestQuery query1, PullRequestQuery query2) {
-		List<PullRequestCriteria> criterias = new ArrayList<>();
-		if (query1.getCriteria() != null)
-			criterias.add(query1.getCriteria());
-		if (query2.getCriteria() != null)
-			criterias.add(query2.getCriteria());
-		List<EntitySort> sorts = new ArrayList<>();
-		sorts.addAll(query1.getSorts());
-		sorts.addAll(query2.getSorts());
-		return new PullRequestQuery(PullRequestCriteria.of(criterias), sorts);
-	}
-
 	@Override
 	public PullRequestCriteria getCriteria() {
 		return criteria;

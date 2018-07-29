@@ -37,7 +37,7 @@
 	border: 1px dashed #CCC;
 	color: #666;
 }
-.input-assist .help.multiple li {
+.input-assist .help li {
 	list-style: disc;
 	margin-left: 18px;
 }

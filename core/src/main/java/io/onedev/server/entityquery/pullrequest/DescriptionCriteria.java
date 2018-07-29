@@ -21,12 +21,12 @@ public class DescriptionCriteria extends PullRequestCriteria {
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
 		Path<String> attribute = context.getRoot().get(PullRequest.FIELD_PATHS.get(PullRequest.FIELD_DESCRIPTION));
-		return context.getBuilder().like(attribute, "%" + value + "%");
+		return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
-		return request.getDescription().toLowerCase().contains(value);
+		return request.getDescription()!=null && request.getDescription().toLowerCase().contains(value.toLowerCase());
 	}
 
 	@Override

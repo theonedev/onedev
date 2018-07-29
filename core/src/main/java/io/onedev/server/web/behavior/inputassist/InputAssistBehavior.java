@@ -133,12 +133,6 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 			if (inputCaret != null) {
 				InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
 				List<InputCompletion> suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
-				for (Iterator<InputCompletion> it = suggestions.iterator(); it.hasNext();) {
-					InputCompletion suggestion = it.next();
-					if (inputStatus.getContentBeforeCaret().equals(suggestion.getSubstitution().getContent())) {
-						it.remove();
-					}
-				}
 				int count = 0;
 				for (Iterator<InputCompletion> it = suggestions.iterator(); it.hasNext();) {
 					it.next();
@@ -152,8 +146,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 							@Override
 							protected Component newContent(String id) {
-								return new AssistPanel(id, getComponent(), inputStatus, suggestions, 
-										getHints(inputStatus));
+								return new AssistPanel(id, getComponent(), inputStatus, suggestions, getHints(inputStatus));
 							}
 
 							@Override
@@ -168,8 +161,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 						target.appendJavaScript(script);
 					} else {
 						Component content = dropdown.getContent();
-						Component newContent = new AssistPanel(content.getId(), getComponent(), inputStatus, 
-								suggestions, getHints(inputStatus));
+						Component newContent = new AssistPanel(content.getId(), getComponent(), inputStatus, suggestions, getHints(inputStatus));
 						content.replaceWith(newContent);
 						target.add(newContent);
 

@@ -1,8 +1,7 @@
 grammar IssueQuery;
 
 query
-    : WS* (criteria|All) WS+ OrderBy WS+ order (WS+ And WS+ order)* WS* EOF
-    | WS* (criteria|All) WS* EOF
+    : WS* (criteria|All) WS* (WS OrderBy WS+ order (WS+ And WS+ order)* WS*)? EOF
     | WS* OrderBy WS+ order (WS+ And WS+ order)* WS* EOF
     | WS* EOF
     ;
@@ -113,18 +112,14 @@ RParens
 Quoted
     : '"' (ESCAPE|~["\\])+? '"'
     ;
-
-/*
- * Use identifier to make the input "isnot" a whole token so that it becomes a "matchWith" 
- * to provide suggestion for "is not"   
- */
-Identifier
-	: [a-zA-Z]+
-	;
 	
 WS
     : ' '
     ;
+
+Identifier
+	: [a-zA-Z0-9:_/\\+-;]+
+	;    
 
 fragment
 ESCAPE

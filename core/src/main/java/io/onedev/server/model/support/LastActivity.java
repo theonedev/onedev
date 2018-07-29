@@ -21,7 +21,7 @@ public class LastActivity implements Serializable {
 	private String description;
 
 	@Column(name="LAST_ACT_DATE")
-	private long date;
+	private Date date;
 
 	public String getDescription() {
 		return description;
@@ -32,11 +32,11 @@ public class LastActivity implements Serializable {
 	}
 
 	public Date getDate() {
-		return new Date(date);
+		return date;
 	}
 
 	public void setDate(Date date) {
-		this.date = date.getTime();
+		this.date = date;
 	}
 
 	@Nullable

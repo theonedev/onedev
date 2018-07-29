@@ -111,8 +111,8 @@ onedev.server.inputassist = {
 					var $active = $dropdown.find("tr.active");
 					if ($active.length != 0) 
 						$input.data("update")($active);
-					else 
-						$input.data("update")($dropdown.find("tr").first());
+					else if ($dropdown.find("tr.different").length != 0)
+						$input.data("update")($dropdown.find("tr.different").first());
 				}
 				return false;
 			} else {
@@ -191,12 +191,10 @@ onedev.server.inputassist = {
 	},
 	
 	updateHelp: function($dropdown) {
-		if ($dropdown.find(".help>li").length > 1)
-			$dropdown.find(".help").addClass("multiple");
 		if ($dropdown.find("tr.active").length != 0) {
-			$dropdown.find(".help>.completion").empty().append("Press 'enter' to complete selected item");
+			$dropdown.find(".help>.complete").empty().append("Press 'enter' to complete selected item");
 		} else {
-			$dropdown.find(".help>.completion").empty().append("Press 'tab' to complete first item");
+			$dropdown.find(".help>.complete").empty().append("Press 'tab' to complete first item");
 		}
 	}
 };

@@ -154,7 +154,6 @@ public abstract class RequestDetailPage extends ProjectPage {
 		if (!getPullRequest().isValid())
 			throw new RestartResponseException(InvalidRequestPage.class, InvalidRequestPage.paramsOf(getPullRequest()));
 			
-
 		reviewUpdateId = requestModel.getObject().getLatestUpdate().getId();
 		
 		position = QueryPosition.from(params);

@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.project.pullrequests.requestdetail.codecomments;
 
-import org.apache.wicket.model.IModel;
+import javax.annotation.Nullable;
+
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
@@ -9,23 +11,27 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserInfoManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.codecomment.CodeCommentFilter;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QueryPosition;
 
 @SuppressWarnings("serial")
 public class RequestCodeCommentsPage extends RequestDetailPage {
 
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
-	private final CodeCommentFilter filterOption;
+	private static final String PARAM_QUERY = "query";
+	
+	private final String query;
 	
 	public RequestCodeCommentsPage(PageParameters params) {
 		super(params);
-
-		filterOption = new CodeCommentFilter(params);
+		
+		query = params.get(PARAM_QUERY).toString();
 	}
 
 	@Override
@@ -37,30 +43,11 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new CodeCommentListPanel("codeComments", new IModel<CodeCommentFilter>() {
+		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
 
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public CodeCommentFilter getObject() {
-				return filterOption;
-			}
-
-			@Override
-			public void setObject(CodeCommentFilter object) {
-				PageParameters params = paramsOf(getPullRequest(), getPosition());
-				object.fillPageParams(params);
-				setResponsePage(RequestCodeCommentsPage.class, params);
-			}
-			
-		}, new PagingHistorySupport() {
-			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getPullRequest(), getPosition());
-				filterOption.fillPageParams(params);
+				PageParameters params = paramsOf(getPullRequest(), getPosition(), query);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -70,7 +57,32 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
 			}
 			
-		}));
+		};
+		
+		add(new CodeCommentListPanel("codeComments", query) {
+
+			@Override
+			protected Project getProject() {
+				return RequestCodeCommentsPage.this.getProject();
+			}
+
+			@Override
+			protected PagingHistorySupport getPagingHistorySupport() {
+				return pagingHistorySupport;
+			}
+
+			@Override
+			protected void onQueryUpdated(AjaxRequestTarget target) {
+				PageParameters params = paramsOf(getPullRequest(), getPosition(), getQuery());
+				setResponsePage(RequestCodeCommentsPage.class, params);
+			}
+
+			@Override
+			protected PullRequest getPullRequest() {
+				return RequestCodeCommentsPage.this.getPullRequest();
+			}
+			
+		});
 		
 		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
 			
@@ -117,4 +129,11 @@ public class RequestCodeCommentsPage extends RequestDetailPage {
 		});		
 	}
 
+	public static PageParameters paramsOf(PullRequest request, @Nullable QueryPosition position, @Nullable String query) {
+		PageParameters params = paramsOf(request, position);
+		if (query != null)
+			params.add(PARAM_QUERY, query);
+		return params;
+	}
+	
 }

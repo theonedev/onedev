@@ -17,8 +17,8 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
 	private static final PrettyTime PRETTY_TIME = new PrettyTime();
 	
 	public static final List<String> RELAX_DATE_EXAMPLES = Lists.newArrayList(
-			"one hour ago", "2 hours ago", "3PM", "noon", "today", "yesterday", 
-			"yesterday midnight", "3 days ago", "last week", "last Monday", 
+			"2:30pm", "4-23", "2018-2-3", "one hour ago", "2 hours ago", "3PM", "noon", "today", 
+			"yesterday", "yesterday midnight", "3 days ago", "last week", "last Monday", 
 			"4 weeks ago", "1 month 2 days ago", "1 year ago"); 
 	
     public static String formatAge(Date date) {

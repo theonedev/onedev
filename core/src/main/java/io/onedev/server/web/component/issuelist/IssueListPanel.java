@@ -255,7 +255,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getProject()) && issuesTable.getItemCount() != 0);
+				setVisible(SecurityUtils.canManage(getProject()));
 			}
 			
 		});

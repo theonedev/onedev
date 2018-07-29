@@ -28,11 +28,11 @@ public class SubmitDateCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<Long> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_SUBMIT_DATE));
+		Path<Date> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_SUBMIT_DATE));
 		if (operator == IssueQueryLexer.IsBefore)
-			return context.getBuilder().lessThan(attribute, value.getTime());
+			return context.getBuilder().lessThan(attribute, value);
 		else
-			return context.getBuilder().greaterThan(attribute, value.getTime());
+			return context.getBuilder().greaterThan(attribute, value);
 	}
 
 	@Override

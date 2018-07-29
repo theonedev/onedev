@@ -21,12 +21,12 @@ public class TitleCriteria extends PullRequestCriteria {
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
 		Path<String> attribute = context.getRoot().get(PullRequest.FIELD_PATHS.get(PullRequest.FIELD_TITLE));
-		return context.getBuilder().like(attribute, "%" + value + "%");
+		return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
-		return request.getTitle().toLowerCase().contains(value);
+		return request.getTitle().toLowerCase().contains(value.toLowerCase());
 	}
 
 	@Override

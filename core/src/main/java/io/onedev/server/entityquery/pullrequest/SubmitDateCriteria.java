@@ -28,11 +28,11 @@ public class SubmitDateCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<Long> attribute = context.getRoot().get(PullRequest.FIELD_PATHS.get(PullRequest.FIELD_SUBMIT_DATE));
+		Path<Date> attribute = context.getRoot().get(PullRequest.FIELD_PATHS.get(PullRequest.FIELD_SUBMIT_DATE));
 		if (operator == PullRequestQueryLexer.IsBefore)
-			return context.getBuilder().lessThan(attribute, value.getTime());
+			return context.getBuilder().lessThan(attribute, value);
 		else
-			return context.getBuilder().greaterThan(attribute, value.getTime());
+			return context.getBuilder().greaterThan(attribute, value);
 	}
 
 	@Override

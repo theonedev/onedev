@@ -17,6 +17,8 @@ public class CodeCommentRelation extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PATH_REQUEST = "request";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequest request;

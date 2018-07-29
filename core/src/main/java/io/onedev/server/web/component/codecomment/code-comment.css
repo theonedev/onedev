@@ -1,60 +1,12 @@
-.code-comments td.filter {
-	width: 25%;
-	border: 2px solid #E0E0E0;
-	padding: 20px;
+.code-comments>.head>* {
+	margin-bottom: 20px;
 }
-.code-comments td.filter>.body>.shortcuts {
-	margin-bottom: 12px;
+.code-comments .new-indicator {
+	width: 4px;
+	padding: 0;
 }
-.code-comments td.spacing {
-	width: 20px;
-}
-.code-comments td.result {
-	border: 2px solid #E0E0E0;
-	text-align: left;
-}
-.code-comments td.comment {
-	padding: 20px 20px 0 20px;
-	border-left: 4px solid white;
-}
-.code-comments td.comment.new {
-	border-left: 4px solid #4667EE;
-}
-.code-comments td.comment>div {
-	padding-bottom: 20px;
-	border-bottom: 2px dotted #BBB;
-}
-.code-comments td.result tr:last-child td.comment>div {
-	border-bottom: none;
-}
-
-.code-comments td.comment>div>.title {
-	color: #888;
-	font-size: 16px;
-	margin-bottom: 8px;
-}
-.code-comments td.comment>div>.title>.middot:before {
-	margin: 0 8px 0 8px;
-	font-size: 20px;
-	line-height: 9px;
-}
-.code-comments td.comment>div>.content {
-	margin-left: 30px;
-}
-.code-comments td.comment>div>.last-activity {
-	color: #888;
-	margin-left: 20px;
-}
-.code-comments td.comment>div>.title a, .code-comments td.comment>div>.last-activity a {
-	color: #444;
-}
-
-.code-comments td.result .norecords-td {
-	padding: 20px;
-	font-size: 20px;
-}
-.code-comments .alert {
-	border-radius: 0;
+.code-comments tr.comment.new td.new-indicator {
+	background: #4667EE;
 }
 
 .code-comment>.outdated-context {
@@ -142,10 +94,6 @@
 	color: inherit;
 }
 .code-comment .markdown-rendered {
-	font-size: inherit;
-	line-height: inherit;
-}
-.code-comments .markdown-rendered {
 	font-size: inherit;
 	line-height: inherit;
 }

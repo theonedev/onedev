@@ -173,7 +173,7 @@ public class SuggestionUtils {
 				caret = text.length();
 			else
 				caret = -1;
-			InputSuggestion suggestion = new InputSuggestion(text, caret, true, null, entry.getValue()); 
+			InputSuggestion suggestion = new InputSuggestion(text, caret, null, entry.getValue()); 
 			if (escapeChars != null)
 				suggestion = suggestion.escape(escapeChars);
 			suggestions.add(suggestion);

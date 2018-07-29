@@ -27,8 +27,8 @@ import io.onedev.codeassist.CodeAssist;
 import io.onedev.codeassist.InputCompletion;
 import io.onedev.codeassist.InputStatus;
 import io.onedev.codeassist.InputSuggestion;
-import io.onedev.codeassist.ParentedElement;
-import io.onedev.codeassist.grammar.ElementSpec;
+import io.onedev.codeassist.parser.TerminalExpect;
+import io.onedev.codeassist.parser.ParseExpect;
 import io.onedev.utils.Range;
 import io.onedev.utils.StringUtils;
 
@@ -49,44 +49,39 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	
 	protected final String ruleName;
 	
-	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, String ruleName) {
-		this(parserClass, AntlrUtils.getLexerClass(parserClass), ruleName);
+	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, String ruleName, boolean findAllPaths) {
+		this(parserClass, AntlrUtils.getLexerClass(parserClass), ruleName, findAllPaths);
 	}
 	
 	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, 
-			Class<? extends Lexer> lexerClass, String ruleName) {
+			Class<? extends Lexer> lexerClass, String ruleName, boolean findAllPaths) {
 		this(parserClass, lexerClass, 
 				new String[]{AntlrUtils.getDefaultGrammarFile(lexerClass)}, 
-				AntlrUtils.getDefaultTokenFile(lexerClass), ruleName);
+				AntlrUtils.getDefaultTokenFile(lexerClass), ruleName, findAllPaths);
 	}
 	
 	public ANTLRAssistBehavior(Class<? extends Parser> parserClass, Class<? extends Lexer> lexerClass, 
-			String grammarFiles[], String tokenFile, String ruleName) {
+			String grammarFiles[], String tokenFile, String ruleName, boolean findAllPaths) {
 		this.lexerClass = lexerClass;
 		this.parserClass = parserClass;
 		
-		codeAssist = new CodeAssist(lexerClass, grammarFiles, tokenFile) {
+		codeAssist = new CodeAssist(lexerClass, grammarFiles, tokenFile, findAllPaths) {
 
 			@Override
-			protected List<InputSuggestion> suggest(ParentedElement element, String matchWith) {
-				return ANTLRAssistBehavior.this.suggest(element, matchWith);
+			protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
+				return ANTLRAssistBehavior.this.suggest(terminalExpect);
 			}
 
 			@Override
-			protected List<String> getHints(ParentedElement expectedElement, String matchWith) {
-				return ANTLRAssistBehavior.this.getHints(expectedElement, matchWith);
+			protected List<String> getHints(TerminalExpect terminalExpect) {
+				return ANTLRAssistBehavior.this.getHints(terminalExpect);
 			}
 
 			@Override
-			protected Optional<String> describe(ParentedElement expectedElement, String suggestedLiteral) {
-				return ANTLRAssistBehavior.this.describe(expectedElement, suggestedLiteral);
+			protected Optional<String> describe(TerminalExpect terminalExpect, String suggestedLiteral) {
+				return ANTLRAssistBehavior.this.describe(terminalExpect, suggestedLiteral);
 			}
 
-			@Override
-			protected int getEndOfMatch(ElementSpec spec, String content) {
-				return ANTLRAssistBehavior.this.getEndOfMatch(spec, content);
-			}
-			
 		};
 		this.ruleName = ruleName;
 	}
@@ -97,17 +92,6 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	@Override
 	protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
 		return codeAssist.suggest(inputStatus, ruleName);
-	}
-	
-	protected int getEndOfMatch(ElementSpec spec, String content) {
-		int endOfMatch = 0;
-		List<Token> tokens = codeAssist.getGrammar().lex(content);
-		if (!tokens.isEmpty() && tokens.get(0).getStartIndex() == 0) {   
-			endOfMatch = spec.getEndOfMatch(tokens);
-			if (endOfMatch > 0) // there exist an element match
-				endOfMatch = tokens.get(endOfMatch-1).getStopIndex()+1; // convert to char index
-		}
-		return endOfMatch;
 	}
 	
 	private Constructor<? extends Lexer> getLexerCtor() {
@@ -218,14 +202,14 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		}
 	}
 
-	protected abstract List<InputSuggestion> suggest(ParentedElement element, String matchWith);
+	protected abstract List<InputSuggestion> suggest(TerminalExpect terminalExpect);
 	
 	@Override
 	protected final List<String> getHints(InputStatus inputStatus) {
 		return codeAssist.getHints(inputStatus, ruleName);
 	}
 
-	protected List<String> getHints(ParentedElement expectedElement, String matchWith) {
+	protected List<String> getHints(TerminalExpect terminalExpect) {
 		return new ArrayList<>();
 	}
 	
@@ -240,7 +224,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	 * 			an optional containing description of the literal, or <tt>null</tt> to suppress the suggestion
 	 */
 	@Nullable
-	protected Optional<String> describe(ParentedElement expectedElement, String suggestedLiteral) {
+	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		if (StringUtils.isNotBlank(suggestedLiteral)) 
 			return Optional.absent();
 		else 

@@ -1,41 +1,26 @@
 <wicket:panel>
-	<table class="code-comments">
-		<tr>
-			<td class="filter">
-				<h4>Filter options</h4>
-				<hr/>
-				<div class="body">
-					<div class="btn-group shortcuts">
-						<a wicket:id="myComments" class="btn btn-sm btn-default">My</a>
-						<a wicket:id="allComments" class="btn btn-sm btn-default">All</a>
-					</div>
-					<form wicket:id="filterForm">
-						<div wicket:id="editor" class="no-autofocus"></div>
-						<button type="submit" class="btn btn-primary"><i class="fa fa-search"></i> Search</button>
-					</form>
+	<div class="code-comments">
+		<div class="head">
+			<form wicket:id="query" class="clearable-wrapper">
+				<div class="input-group no-autofocus">
+					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Query and order comments here"></input>
+					<span class="input-group-btn">
+						<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+					</span>
 				</div>
-			</td>
-			<td class="spacing">&nbsp;</td>
-			<td class="result">
-				<table wicket:id="comments"></table>
-			</td>
-		</tr>
-	</table>
-	<wicket:fragment wicket:id="commentFrag">
-		<div class="title">
-			<a wicket:id="avatar" class="avatar"></a>
-			<a wicket:id="user" class="user"></a>
-			commented on
-			<a wicket:id="file" class="file"><span wicket:id="label"></span></a>
-			<span wicket:id="date"></span>
-			<span class="middot"></span>
-			<a wicket:id="detail" class="detail">view detail</a>
+			</form>
+			<div class="others clearfix">
+				<div wicket:id="pageInfo" class="page-info pull-right"></div>
+			</div>
 		</div>
-		<div wicket:id="content" class="content"></div>
-		<div wicket:id="lastActivity" class="last-activity">
-			<span wicket:id="user"></span>	
-			<span wicket:id="description"></span>
-			<span wicket:id="date"></span>
+		<div class="body">
+			<div wicket:id="feedback"></div>
+			<table wicket:id="comments" class="table"></table>
 		</div>
-	</wicket:fragment>
+	</div>
+	<wicket:fragment wicket:id="lastActivityFrag">
+		<span wicket:id="user"></span>
+		<span wicket:id="description"></span> 
+		<span wicket:id="date"></span>
+	</wicket:fragment>	
 </wicket:panel>

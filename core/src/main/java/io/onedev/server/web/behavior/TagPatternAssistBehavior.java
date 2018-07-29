@@ -11,7 +11,6 @@ import com.google.common.collect.Lists;
 import io.onedev.codeassist.InputCompletion;
 import io.onedev.codeassist.InputStatus;
 import io.onedev.codeassist.InputSuggestion;
-import io.onedev.codeassist.Substitution;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -40,8 +39,7 @@ public class TagPatternAssistBehavior extends InputAssistBehavior {
 			int caret = suggestion.getCaret();
 			if (caret == -1)
 				caret = suggestion.getContent().length();
-			Substitution substitution = new Substitution(0, inputStatus.getContent().length(), suggestion.getContent());
-			completions.add(new InputCompletion(substitution, caret, null, suggestion.getMatch()));
+			completions.add(new InputCompletion(suggestion.getContent(), suggestion.getContent(), caret, null, suggestion.getMatch()));
 		}
 		return completions;
 	}

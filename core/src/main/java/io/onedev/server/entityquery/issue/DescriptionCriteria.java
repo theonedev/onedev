@@ -23,7 +23,7 @@ public class DescriptionCriteria extends IssueCriteria {
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
 		Expression<String> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_DESCRIPTION));
 		if (value != null)
-			return context.getBuilder().like(attribute, "%" + value + "%");
+			return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
 		else
 			return context.getBuilder().isNull(attribute);
 	}
