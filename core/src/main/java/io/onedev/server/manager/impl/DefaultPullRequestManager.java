@@ -100,6 +100,7 @@ import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.model.support.pullrequest.actiondata.ActionData;
 import io.onedev.server.model.support.pullrequest.actiondata.AddedReviewerData;
 import io.onedev.server.model.support.pullrequest.actiondata.ApprovedData;
@@ -997,9 +998,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: requestQuery.getSorts()) {
 			if (sort.getDirection() == Direction.ASCENDING)
-				orders.add(builder.asc(PullRequestQuery.getPath(root, PullRequest.FIELD_PATHS.get(sort.getField()))));
+				orders.add(builder.asc(PullRequestQuery.getPath(root, PullRequestConstants.ORDER_FIELDS.get(sort.getField()))));
 			else
-				orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequest.FIELD_PATHS.get(sort.getField()))));
+				orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequestConstants.ORDER_FIELDS.get(sort.getField()))));
 		}
 
 		Path<String> idPath = root.get("id");

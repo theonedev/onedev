@@ -23,6 +23,7 @@ import com.google.common.collect.Sets;
 import io.onedev.server.entityquery.issue.IssueCriteria;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -99,7 +100,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		milestoneChoice.setRequired(false);
 		add(milestoneChoice);
 		
-		Collection<String> excludedProperties = IssueFieldBeanUtils.getPropertyNames(fieldBeanClass, Sets.newHashSet(Issue.FIELD_STATE));
+		Collection<String> excludedProperties = IssueFieldBeanUtils.getPropertyNames(fieldBeanClass, Sets.newHashSet(IssueConstants.FIELD_STATE));
 		add(fieldEditor = new BeanContext(fieldBean.getClass(), excludedProperties).renderForEdit("fields", Model.of(fieldBean)));
 	}
 	

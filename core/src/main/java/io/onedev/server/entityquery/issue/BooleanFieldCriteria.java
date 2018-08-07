@@ -25,7 +25,7 @@ public class BooleanFieldCriteria extends FieldCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<String> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.VALUE);
+		Path<String> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.FIELD_ATTR_VALUE);
 		return context.getBuilder().equal(attribute, String.valueOf(value));
 	}
 

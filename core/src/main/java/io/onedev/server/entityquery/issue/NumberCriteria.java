@@ -6,6 +6,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.entityquery.issue.IssueQueryLexer;
 
 public class NumberCriteria extends IssueCriteria {
@@ -23,7 +24,7 @@ public class NumberCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<Long> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_NUMBER));
+		Path<Long> attribute = context.getRoot().get(IssueConstants.ATTR_NUMBER);
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)
@@ -49,7 +50,7 @@ public class NumberCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.FIELD_NUMBER) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(String.valueOf(value));
+		return IssueQuery.quote(IssueConstants.FIELD_NUMBER) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(String.valueOf(value));
 	}
 
 }

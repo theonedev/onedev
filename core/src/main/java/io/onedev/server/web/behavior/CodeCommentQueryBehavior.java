@@ -10,22 +10,21 @@ import org.apache.wicket.model.IModel;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import io.onedev.codeassist.FenceAware;
 import io.onedev.codeassist.InputSuggestion;
 import io.onedev.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.codeassist.parser.Element;
-import io.onedev.codeassist.parser.TerminalExpect;
 import io.onedev.codeassist.parser.ParseExpect;
+import io.onedev.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneDev;
 import io.onedev.server.entityquery.codecomment.CodeCommentQuery;
 import io.onedev.server.entityquery.codecomment.CodeCommentQueryParser;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.UserManager;
-import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.CodeCommentConstants;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -87,12 +86,10 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 						Project project = getProject();
 
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(CodeComment.FIELD_PATHS.keySet());
-							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
+							suggestions.addAll(getSuggestions(CodeCommentConstants.QUERY_FIELDS, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = Lists.newArrayList(CodeComment.FIELD_CREATE_DATE, 
-									CodeComment.FIELD_UPDATE_DATE);
-							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
+							suggestions.addAll(getSuggestions(new ArrayList<>(CodeCommentConstants.ORDER_FIELDS.keySet()), 
+									unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 							if (fieldElements.isEmpty()) {
@@ -105,10 +102,10 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 								int operator = CodeCommentQuery.getOperator(operatorName);							
 								try {
 									CodeCommentQuery.checkField(project, fieldName, operator);
-									if (fieldName.equals(CodeComment.FIELD_CREATE_DATE) || fieldName.equals(CodeComment.FIELD_UPDATE_DATE)) {
+									if (fieldName.equals(CodeCommentConstants.FIELD_CREATE_DATE) || fieldName.equals(CodeCommentConstants.FIELD_UPDATE_DATE)) {
 										suggestions.addAll(getSuggestions(DateUtils.RELAX_DATE_EXAMPLES, unfencedLowerCaseMatchWith, null));
 										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
-									} else if (fieldName.equals(CodeComment.FIELD_PATH)) {
+									} else if (fieldName.equals(CodeCommentConstants.FIELD_PATH)) {
 										suggestions.addAll(SuggestionUtils.suggestPath(projectModel.getObject(), unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 									} else {
 										return null;

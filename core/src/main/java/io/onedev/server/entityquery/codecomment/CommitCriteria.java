@@ -3,24 +3,27 @@ package io.onedev.server.entityquery.codecomment;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import io.onedev.server.entityquery.EntityCriteria;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.CodeCommentConstants;
 
 public class CommitCriteria extends EntityCriteria<CodeComment>  {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String value;
+	private final ObjectId value;
 	
-	public CommitCriteria(String value) {
+	public CommitCriteria(ObjectId value) {
 		this.value = value;
 	}
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<CodeComment> context) {
-		Path<?> attribute = CodeCommentQuery.getPath(context.getRoot(), CodeComment.FIELD_PATHS.get(CodeComment.FIELD_COMMIT));
+		Path<?> attribute = CodeCommentQuery.getPath(context.getRoot(), CodeCommentConstants.ATTR_COMMIT);
 		return context.getBuilder().equal(attribute, value);
 	}
 
@@ -36,7 +39,7 @@ public class CommitCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public String toString() {
-		return CodeCommentQuery.quote(CodeComment.FIELD_COMMIT) + " " + CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Is) + " " + CodeCommentQuery.quote(value);
+		return CodeCommentQuery.quote(CodeCommentConstants.FIELD_COMMIT) + " " + CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Is) + " " + CodeCommentQuery.quote(value.name());
 	}
 
 }

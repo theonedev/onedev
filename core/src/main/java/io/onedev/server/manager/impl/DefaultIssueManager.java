@@ -49,6 +49,7 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.IssueBoard;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -160,18 +161,18 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: issueQuery.getSorts()) {
-			if (Issue.FIELD_PATHS.containsKey(sort.getField())) {
+			if (IssueConstants.ORDER_FIELDS.containsKey(sort.getField())) {
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(IssueQuery.getPath(root, Issue.FIELD_PATHS.get(sort.getField()))));
+					orders.add(builder.asc(IssueQuery.getPath(root, IssueConstants.ORDER_FIELDS.get(sort.getField()))));
 				else
-					orders.add(builder.desc(IssueQuery.getPath(root, Issue.FIELD_PATHS.get(sort.getField()))));
+					orders.add(builder.desc(IssueQuery.getPath(root, IssueConstants.ORDER_FIELDS.get(sort.getField()))));
 			} else {
-				Join<Issue, IssueFieldUnary> join = root.join("fieldUnaries", JoinType.LEFT);
-				join.on(builder.equal(join.get(IssueFieldUnary.NAME), sort.getField()));
+				Join<Issue, IssueFieldUnary> join = root.join(IssueConstants.ATTR_FIELD_UNARIES, JoinType.LEFT);
+				join.on(builder.equal(join.get(IssueFieldUnary.FIELD_ATTR_NAME), sort.getField()));
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(join.get(IssueFieldUnary.ORDINAL)));
+					orders.add(builder.asc(join.get(IssueFieldUnary.FIELD_ATTR_ORDINAL)));
 				else
-					orders.add(builder.desc(join.get(IssueFieldUnary.ORDINAL)));
+					orders.add(builder.desc(join.get(IssueFieldUnary.FIELD_ATTR_ORDINAL)));
 			}
 		}
 
@@ -356,10 +357,8 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 				undefinedFields.add(name);
 		}
 		for (String fieldName: project.getIssueListFields()) {
-			if (!Issue.FIELD_PATHS.containsKey(fieldName)) {
-				if (project.getIssueWorkflow().getFieldSpec(fieldName) == null)
-					undefinedFields.add(fieldName);
-			}
+			if (!IssueConstants.DISPLAY_FIELDS.contains(fieldName) && project.getIssueWorkflow().getFieldSpec(fieldName) == null)
+				undefinedFields.add(fieldName);
 		}
 		for (NamedIssueQuery namedQuery: project.getSavedIssueQueries()) {
 			try {

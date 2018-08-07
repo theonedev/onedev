@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.IssueConstants;
 
 public abstract class FieldCriteria extends IssueCriteria {
 
@@ -24,7 +24,7 @@ public abstract class FieldCriteria extends IssueCriteria {
 	@Override
 	public Collection<String> getUndefinedFields(Project project) {
 		Set<String> undefinedFields = new HashSet<>();
-		if (!Issue.FIELD_PATHS.containsKey(fieldName) 
+		if (!IssueConstants.QUERY_FIELDS.contains(fieldName) 
 				&& project.getIssueWorkflow().getFieldSpec(fieldName) == null) {
 			undefinedFields.add(fieldName);
 		}

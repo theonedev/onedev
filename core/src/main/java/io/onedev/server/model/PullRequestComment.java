@@ -27,6 +27,8 @@ public class PullRequestComment extends AbstractEntity {
 	private static final long serialVersionUID = 1L;
 
 	public static final int DIFF_CONTEXT_SIZE = 3;
+	
+	public static final String ATTR_CONTENT = "content";
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

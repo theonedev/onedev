@@ -26,7 +26,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<?> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.VALUE);
+		Path<?> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.FIELD_ATTR_VALUE);
 		if (operator == IssueQueryLexer.IsEmpty)
 			return context.getBuilder().isNull(attribute);
 		else

@@ -1,16 +1,22 @@
 package io.onedev.server.entityquery;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.criteria.Path;
 
+import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.unbescape.java.JavaEscape;
 
 import com.google.common.base.Splitter;
 
 import io.onedev.server.exception.OneException;
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.DateUtils;
 import io.onedev.utils.WordUtils;
 
 public abstract class EntityQuery<T extends AbstractEntity> implements Serializable {
@@ -41,6 +47,24 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			return false;
 		else
 			throw new OneException("Invalid boolean: " + value);
+	}
+	
+	public static Date getDateValue(String value) {
+		Date dateValue = DateUtils.parseRelaxed(value);
+		if (dateValue == null)
+			throw new OneException("Unrecognized date: " + value);
+		return dateValue;
+	}
+	
+	public static ObjectId getCommitId(Project project, String value) {
+		try {
+			ObjectId commitId = project.getRepository().resolve(value);
+			if (commitId == null)
+				throw new RevisionSyntaxException("");
+			return commitId;								
+		} catch (RevisionSyntaxException | IOException e) {
+			throw new OneException("Invalid revision string: " + value);
+		}
 	}
 
 	public boolean needsLogin() {

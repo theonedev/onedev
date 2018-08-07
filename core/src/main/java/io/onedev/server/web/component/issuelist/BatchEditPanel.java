@@ -35,6 +35,7 @@ import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.RunTaskBehavior;
@@ -99,20 +100,20 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			public Boolean getObject() {
-				return selectedFields.contains(Issue.FIELD_MILESTONE);
+				return selectedFields.contains(IssueConstants.FIELD_MILESTONE);
 			}
 
 			@Override
 			public void setObject(Boolean object) {
 				if (object)
-					selectedFields.add(Issue.FIELD_MILESTONE);
+					selectedFields.add(IssueConstants.FIELD_MILESTONE);
 				else
-					selectedFields.remove(Issue.FIELD_MILESTONE);
+					selectedFields.remove(IssueConstants.FIELD_MILESTONE);
 			}
 			
 		}).add(newOnChangeBehavior(form)));
 		
-		List<String> customFieldNames = Lists.newArrayList(Issue.FIELD_STATE);
+		List<String> customFieldNames = Lists.newArrayList(IssueConstants.FIELD_STATE);
 		customFieldNames.addAll(getProject().getIssueWorkflow().getFieldNames());
 		form.add(new ListView<String>("customFields", customFieldNames) {
 
@@ -161,8 +162,8 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		}
 		
 		Set<String> excludedProperties = new HashSet<>();
-		if (!selectedFields.contains(Issue.FIELD_MILESTONE))
-			excludedProperties.add(Issue.FIELD_PATHS.get(Issue.FIELD_MILESTONE));
+		if (!selectedFields.contains(IssueConstants.FIELD_MILESTONE))
+			excludedProperties.add(IssueConstants.ATTR_MILESTONE);
 		
 		builtInFieldsEditor = BeanContext.editBean("builtInFieldsEditor", builtInFieldsBean, excludedProperties); 
 		form.add(builtInFieldsEditor);
@@ -207,11 +208,11 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
 						Optional<Milestone> milestone;
-						if (selectedFields.contains(Issue.FIELD_MILESTONE))
+						if (selectedFields.contains(IssueConstants.FIELD_MILESTONE))
 							milestone = Optional.fromNullable(getProject().getMilestone(builtInFieldsBean.getMilestone()));
 						else
 							milestone = null;
-						String state = (String) IssueFieldBeanUtils.getFieldValue(customFieldsBean, Issue.FIELD_STATE);
+						String state = (String) IssueFieldBeanUtils.getFieldValue(customFieldsBean, IssueConstants.FIELD_STATE);
 						
 						Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(customFieldsBean);
 						fieldValues.keySet().retainAll(selectedFields);

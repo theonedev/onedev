@@ -47,6 +47,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueField;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
@@ -441,7 +442,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		
 		for (String field: getProject().getIssueListFields()) {
 			switch (field) {
-			case Issue.FIELD_NUMBER:
+			case IssueConstants.FIELD_NUMBER:
 				columns.add(new AbstractColumn<Issue, Void>(Model.of("#")) {
 
 					@Override
@@ -451,8 +452,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.FIELD_STATE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_STATE)) {
+			case IssueConstants.FIELD_STATE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_STATE)) {
 
 					@Override
 					public String getCssClass() {
@@ -466,8 +467,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.FIELD_TITLE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_TITLE)) {
+			case IssueConstants.FIELD_TITLE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_TITLE)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
@@ -484,8 +485,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.FIELD_SUBMITTER:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_SUBMITTER)) {
+			case IssueConstants.FIELD_SUBMITTER:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_SUBMITTER)) {
 
 					@Override
 					public String getCssClass() {
@@ -504,8 +505,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.FIELD_SUBMIT_DATE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_SUBMIT_DATE)) {
+			case IssueConstants.FIELD_SUBMIT_DATE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_SUBMIT_DATE)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
@@ -514,8 +515,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.FIELD_UPDATE_DATE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_UPDATE_DATE)) {
+			case IssueConstants.FIELD_UPDATE_DATE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_UPDATE_DATE)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
@@ -524,8 +525,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.FIELD_MILESTONE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_MILESTONE)) {
+			case IssueConstants.FIELD_MILESTONE:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_MILESTONE)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
@@ -544,8 +545,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.FIELD_VOTE_COUNT:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_VOTE_COUNT)) {
+			case IssueConstants.FIELD_VOTE_COUNT:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_VOTE_COUNT)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
@@ -554,8 +555,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 				});
 				break;
-			case Issue.FIELD_COMMENT_COUNT:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(Issue.FIELD_COMMENT_COUNT)) {
+			case IssueConstants.FIELD_COMMENT_COUNT:
+				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_COMMENT_COUNT)) {
 
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,

@@ -7,6 +7,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.entityquery.issue.IssueQueryLexer;
 
 public class DescriptionCriteria extends IssueCriteria {
@@ -21,7 +22,7 @@ public class DescriptionCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Expression<String> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_DESCRIPTION));
+		Expression<String> attribute = context.getRoot().get(IssueConstants.ATTR_DESCRIPTION);
 		if (value != null)
 			return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
 		else
@@ -44,9 +45,9 @@ public class DescriptionCriteria extends IssueCriteria {
 	@Override
 	public String toString() {
 		if (value != null)
-			return IssueQuery.quote(Issue.FIELD_DESCRIPTION) + " " + IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " + IssueQuery.quote(value);
+			return IssueQuery.quote(IssueConstants.FIELD_DESCRIPTION) + " " + IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " + IssueQuery.quote(value);
 		else
-			return IssueQuery.quote(Issue.FIELD_DESCRIPTION) + " " + IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
+			return IssueQuery.quote(IssueConstants.FIELD_DESCRIPTION) + " " + IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
 	}
 
 }

@@ -17,8 +17,8 @@ import io.onedev.server.entityquery.issue.IssueCriteria;
 import io.onedev.server.entityquery.issue.OrCriteria;
 import io.onedev.server.entityquery.issue.StateCriteria;
 import io.onedev.server.exception.OneException;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.authorized.ProjectWriters;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.workflow.action.PressButton;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
@@ -305,7 +305,7 @@ public class IssueWorkflow implements Serializable {
 	
 	@Nullable
 	public InputSpec getFieldSpec(String fieldName) {
-		if (fieldName.equals(Issue.FIELD_STATE))
+		if (fieldName.equals(IssueConstants.FIELD_STATE))
 			return getFieldSpecOfState();
 		else
 			return getFieldSpecMap().get(fieldName);
@@ -405,7 +405,7 @@ public class IssueWorkflow implements Serializable {
 	
 	public InputSpec getFieldSpecOfState() {
 		ChoiceInput inputSpec = new ChoiceInput();
-		inputSpec.setName(Issue.FIELD_STATE);
+		inputSpec.setName(IssueConstants.FIELD_STATE);
 		inputSpec.setAllowEmpty(false);
 		SpecifiedChoices choicesProvider = new SpecifiedChoices();
 		for (StateSpec stateSpec: getStateSpecs()) {

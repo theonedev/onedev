@@ -28,7 +28,7 @@ public class NumberFieldCriteria extends FieldCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<Integer> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.ORDINAL);
+		Path<Integer> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.FIELD_ATTR_ORDINAL);
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)

@@ -55,6 +55,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentRelation;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.CodeCommentConstants;
 import io.onedev.server.model.support.TextRange;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -91,6 +92,16 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 			listenerRegistry.post(event);
 		} else {
 			dao.persist(comment);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void delete(CodeComment codeComment) {
+		super.delete(codeComment);
+		for (CodeCommentRelation relation: codeComment.getRelations()) {
+			PullRequest request = relation.getRequest();
+			request.setCommentCount(request.getCommentCount()-codeComment.getReplyCount()-1);
 		}
 	}
 
@@ -245,8 +256,8 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 			PullRequest request, QueryBuildContext<CodeComment> context) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (request != null) {
-			Join<?, ?> relations = context.getRoot().join(CodeComment.PATH_RELATIONS, JoinType.INNER);
-			relations.on(context.getBuilder().equal(relations.get(CodeCommentRelation.PATH_REQUEST), request));
+			Join<?, ?> relations = context.getRoot().join(CodeCommentConstants.ATTR_RELATIONS, JoinType.INNER);
+			relations.on(context.getBuilder().equal(relations.get(CodeCommentRelation.ATTR_REQUEST), request));
 		} else {
 			predicates.add(context.getBuilder().equal(context.getRoot().get("project"), project));
 		}
@@ -268,9 +279,9 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: requestQuery.getSorts()) {
 			if (sort.getDirection() == Direction.ASCENDING)
-				orders.add(builder.asc(CodeCommentQuery.getPath(root, CodeComment.FIELD_PATHS.get(sort.getField()))));
+				orders.add(builder.asc(CodeCommentQuery.getPath(root, CodeCommentConstants.ORDER_FIELDS.get(sort.getField()))));
 			else
-				orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeComment.FIELD_PATHS.get(sort.getField()))));
+				orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeCommentConstants.ORDER_FIELDS.get(sort.getField()))));
 		}
 
 		Path<String> idPath = root.get("id");

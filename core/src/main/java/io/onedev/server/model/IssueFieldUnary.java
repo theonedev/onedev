@@ -19,11 +19,11 @@ public class IssueFieldUnary extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String NAME = "name";
+	public static final String FIELD_ATTR_NAME = "name";
 	
-	public static final String VALUE = "value";
+	public static final String FIELD_ATTR_VALUE = "value";
 	
-	public static final String ORDINAL = "ordinal";
+	public static final String FIELD_ATTR_ORDINAL = "ordinal";
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

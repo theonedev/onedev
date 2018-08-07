@@ -15,6 +15,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
@@ -36,7 +37,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 		Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getIssue().getProject());
 		Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
 		IssueFieldBeanUtils.setState(fieldBean, getTargetState());
-		Collection<String> excludedFields = Sets.newHashSet(Issue.FIELD_STATE);
+		Collection<String> excludedFields = Sets.newHashSet(IssueConstants.FIELD_STATE);
 		for (String fieldName: getIssue().getProject().getIssueWorkflow().getFieldNames()) {
 			if (getIssue().isFieldVisible(fieldName, getIssue().getState()))
 				excludedFields.add(fieldName);

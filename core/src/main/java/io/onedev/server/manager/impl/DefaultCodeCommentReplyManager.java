@@ -5,8 +5,9 @@ import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
-import io.onedev.server.manager.CodeCommentManager;
 import io.onedev.server.manager.CodeCommentReplyManager;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeCommentRelation;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.CompareContext;
@@ -20,14 +21,10 @@ public class DefaultCodeCommentReplyManager extends AbstractEntityManager<CodeCo
 
 	private final ListenerRegistry listenerRegistry;
 	
-	private final CodeCommentManager codeCommentManager;
-	
 	@Inject
-	public DefaultCodeCommentReplyManager(Dao dao, ListenerRegistry listenerRegistry, 
-			CodeCommentManager codeCommentManager) {
+	public DefaultCodeCommentReplyManager(Dao dao, ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.listenerRegistry = listenerRegistry;
-		this.codeCommentManager = codeCommentManager;
 	}
 
 	@Transactional
@@ -37,10 +34,23 @@ public class DefaultCodeCommentReplyManager extends AbstractEntityManager<CodeCo
 		dao.persist(reply);
 		if (isNew) {
 			CodeCommentReplied event = new CodeCommentReplied(reply, request); 
-			reply.getComment().setCompareContext(compareContext);
+			CodeComment comment = reply.getComment();
+			comment.setCompareContext(compareContext);
+			comment.setReplyCount(comment.getReplyCount()+1);
+			for (CodeCommentRelation relation: comment.getRelations()) 
+				relation.getRequest().setCommentCount(relation.getRequest().getCommentCount()+1);
 			listenerRegistry.post(event);
-			codeCommentManager.save(reply.getComment());
 		}
+	}
+
+	@Transactional
+	@Override
+	public void delete(CodeCommentReply reply) {
+		super.delete(reply);
+		CodeComment comment = reply.getComment();
+		comment.setReplyCount(comment.getReplyCount()-1);
+		for (CodeCommentRelation relation: comment.getRelations())
+			relation.getRequest().setCommentCount(relation.getRequest().getCommentCount()-1);
 	}
 	
 }

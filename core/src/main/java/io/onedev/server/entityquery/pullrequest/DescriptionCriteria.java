@@ -6,6 +6,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
 
 public class DescriptionCriteria extends PullRequestCriteria {
@@ -20,7 +21,7 @@ public class DescriptionCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<String> attribute = context.getRoot().get(PullRequest.FIELD_PATHS.get(PullRequest.FIELD_DESCRIPTION));
+		Path<String> attribute = context.getRoot().get(PullRequestConstants.ATTR_DESCRIPTION);
 		return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
 	}
 
@@ -36,7 +37,7 @@ public class DescriptionCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequest.FIELD_DESCRIPTION) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " + PullRequestQuery.quote(value);
+		return PullRequestQuery.quote(PullRequestConstants.FIELD_DESCRIPTION) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " + PullRequestQuery.quote(value);
 	}
 
 }

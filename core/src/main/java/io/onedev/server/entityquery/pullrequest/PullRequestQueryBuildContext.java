@@ -1,9 +1,10 @@
 package io.onedev.server.entityquery.pullrequest;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Root;
+
+import com.google.common.base.Splitter;
 
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.PullRequest;
@@ -15,16 +16,8 @@ public class PullRequestQueryBuildContext extends QueryBuildContext<PullRequest>
 	}
 	
 	@Override
-	public Join<?, ?> newJoin(String joinPath) {
-		if (joinPath.startsWith(PullRequest.PATH_BUILDS + ".")) {
-			Join<?, ?> join = getRoot().join(PullRequest.PATH_BUILDS, JoinType.LEFT);
-			return join.join(joinPath.substring((PullRequest.PATH_BUILDS+".").length()), JoinType.LEFT);
-		} else if (joinPath.startsWith(PullRequest.PATH_REVIEWS + ".")) {
-			Join<?, ?> join = getRoot().join(PullRequest.PATH_REVIEWS, JoinType.LEFT);
-			return join.join(joinPath.substring((PullRequest.PATH_REVIEWS+".").length()), JoinType.LEFT);
-		} else {
-			return getRoot().join(joinPath, JoinType.LEFT);
-		}
+	public From<?, ?> newJoin(String joinName) {
+		return joinByAttrs(Splitter.on(".").splitToList(joinName));
 	}
 
 }

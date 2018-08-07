@@ -9,7 +9,7 @@ import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 
 public class DiscardedByCriteria extends PullRequestCriteria {
 
@@ -23,7 +23,7 @@ public class DiscardedByCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<User> attribute = PullRequestQuery.getPath(context.getRoot(), PullRequest.PATH_CLOSE_USER);
+		Path<User> attribute = PullRequestQuery.getPath(context.getRoot(), PullRequestConstants.ATTR_CLOSE_USER);
 		return context.getBuilder().equal(attribute, value);
 	}
 

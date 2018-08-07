@@ -1,6 +1,6 @@
 package io.onedev.server.entityquery.pullrequest;
 
-import javax.persistence.criteria.Join;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
@@ -9,7 +9,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
-import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 
 public class HasPendingBuildsCriteria extends PullRequestCriteria {
 
@@ -17,7 +17,7 @@ public class HasPendingBuildsCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Join<?, ?> join = context.getJoin(PullRequest.PATH_BUILDS + "." + PullRequestBuild.PATH_BUILD);
+		From<?, ?> join = context.getJoin(PullRequestConstants.ATTR_BUILDS + "." + PullRequestBuild.ATTR_BUILD);
 		Path<?> status = join.get(Build.STATUS);
 		
 		return context.getBuilder().or(

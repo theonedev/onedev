@@ -85,6 +85,7 @@ import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.issue.IssueBoard;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
@@ -223,12 +224,12 @@ public class Project extends AbstractEntity {
     private transient Optional<PullRequestQuerySetting> pullRequestQuerySettingOfCurrentUserHolder;
     
     public Project() {
-    	issueListFields.add(Issue.FIELD_NUMBER);
-    	issueListFields.add(Issue.FIELD_STATE);
-    	issueListFields.add(Issue.FIELD_TITLE);
+    	issueListFields.add(IssueConstants.FIELD_NUMBER);
+    	issueListFields.add(IssueConstants.FIELD_STATE);
+    	issueListFields.add(IssueConstants.FIELD_TITLE);
 		issueListFields.add("Type");
 		issueListFields.add("Priority");
-		issueListFields.add(Issue.FIELD_SUBMITTER);
+		issueListFields.add(IssueConstants.FIELD_SUBMITTER);
 		issueListFields.add("Assignee");
 		
 		savedIssueQueries.add(new NamedIssueQuery("Open", "open"));

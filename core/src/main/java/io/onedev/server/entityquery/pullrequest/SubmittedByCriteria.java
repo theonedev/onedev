@@ -9,6 +9,7 @@ import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
 
 public class SubmittedByCriteria extends PullRequestCriteria {
@@ -23,7 +24,7 @@ public class SubmittedByCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<User> attribute = context.getRoot().get(PullRequest.FIELD_PATHS.get(PullRequest.FIELD_SUBMITTER));
+		Path<User> attribute = context.getRoot().get(PullRequestConstants.ATTR_SUBMITTER);
 		return context.getBuilder().equal(attribute, value);
 	}
 

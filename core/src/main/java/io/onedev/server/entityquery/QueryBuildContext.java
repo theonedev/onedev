@@ -1,10 +1,12 @@
 package io.onedev.server.entityquery;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
+import javax.persistence.criteria.From;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 
 public abstract class QueryBuildContext<T> {
@@ -13,23 +15,30 @@ public abstract class QueryBuildContext<T> {
 	
 	private final CriteriaBuilder builder;
 	
-	private final Map<String, Join<?, ?>> joins = new HashMap<>();
+	private final Map<String, From<?, ?>> joins = new HashMap<>();
 	
 	public QueryBuildContext(Root<T> root, CriteriaBuilder builder) {
 		this.root = root;
 		this.builder = builder;
 	}
 	
-	public Join<?, ?> getJoin(String joinPath) {
-		Join<?, ?> join = joins.get(joinPath);
+	public From<?, ?> getJoin(String joinName) {
+		From<?, ?> join = joins.get(joinName);
 		if (join == null) {
-			join = newJoin(joinPath);
-			joins.put(joinPath, join);
+			join = newJoin(joinName);
+			joins.put(joinName, join);
 		}
 		return join;
 	}
 	
-	protected abstract Join<?, ?> newJoin(String joinPath);
+	protected From<?, ?> joinByAttrs(List<String> joinAttrs) {
+		From<?, ?> from = root;
+		for (String attr: joinAttrs)
+			from = from.join(attr, JoinType.LEFT);
+		return from;
+	}
+	
+	protected abstract From<?, ?> newJoin(String joinName);
 	
 	public Root<T> getRoot() {
 		return root;

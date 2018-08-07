@@ -7,7 +7,7 @@ import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
-import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 
 public class StateCriteria extends PullRequestCriteria {
 
@@ -21,8 +21,8 @@ public class StateCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<?> attribute = PullRequestQuery.getPath(context.getRoot(), PullRequest.PATH_CLOSE_STATUS);
-		if (value.equalsIgnoreCase(PullRequest.STATE_OPEN)) 
+		Path<?> attribute = PullRequestQuery.getPath(context.getRoot(), PullRequestConstants.ATTR_CLOSE_STATUS);
+		if (value.equalsIgnoreCase(PullRequestConstants.STATE_OPEN)) 
 			return context.getBuilder().isNull(attribute);
 		else
 			return context.getBuilder().equal(attribute, CloseInfo.Status.valueOf(value.toUpperCase()));
@@ -30,7 +30,7 @@ public class StateCriteria extends PullRequestCriteria {
 
 	@Override
 	public boolean matches(PullRequest request) {
-		if (value.equalsIgnoreCase(PullRequest.STATE_OPEN)) 
+		if (value.equalsIgnoreCase(PullRequestConstants.STATE_OPEN)) 
 			return request.getCloseInfo() == null;
 		else
 			return request.getCloseInfo() != null && request.getCloseInfo().getStatus().name().equalsIgnoreCase(value);
@@ -43,7 +43,7 @@ public class StateCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequest.FIELD_STATE) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " + PullRequestQuery.quote(value);
+		return PullRequestQuery.quote(PullRequestConstants.FIELD_STATE) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " + PullRequestQuery.quote(value);
 	}
 
 }

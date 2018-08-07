@@ -1,33 +1,39 @@
 package io.onedev.server.entityquery.issue;
 
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.IssueConstants;
-import io.onedev.server.entityquery.issue.IssueQueryLexer;
 
-public class TitleCriteria extends IssueCriteria {
+public class CommentCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 
 	private final String value;
 	
-	public TitleCriteria(String value) {
+	public CommentCriteria(String value) {
 		this.value = value;
 	}
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<String> attribute = context.getRoot().get(IssueConstants.ATTR_TITLE);
+		From<?, ?> join = context.getJoin(IssueConstants.FIELD_COMMENT);
+		Path<String> attribute = join.get(IssueComment.PATH_CONTENT);
 		return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
 	}
 
 	@Override
 	public boolean matches(Issue issue) {
-		return issue.getTitle().toLowerCase().contains(value.toLowerCase());
+		for (IssueComment comment: issue.getComments()) {
+			if (comment.getContent().toLowerCase().contains(value.toLowerCase()))
+				return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -37,7 +43,7 @@ public class TitleCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(IssueConstants.FIELD_TITLE) + " " + IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " + IssueQuery.quote(value);
+		return IssueQuery.quote(IssueConstants.FIELD_COMMENT) + " " + IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " + IssueQuery.quote(value);
 	}
 
 }

@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.pullrequests.requestdetail.activities.
 import java.util.Date;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
@@ -30,7 +31,14 @@ public class CommentedActivity implements PullRequestActivity {
 				return getComment();
 			}
 			
-		}, deleteCallback);
+		}, new DeleteCallback() {
+			
+			@Override
+			public void onDelete(AjaxRequestTarget target) {
+				OneDev.getInstance(PullRequestCommentManager.class).delete(getComment());
+				deleteCallback.onDelete(target);
+			}
+		});
 	}
 	
 	public PullRequestComment getComment() {

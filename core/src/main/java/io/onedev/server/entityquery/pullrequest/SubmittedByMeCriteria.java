@@ -8,6 +8,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.security.SecurityUtils;
 
@@ -17,7 +18,7 @@ public class SubmittedByMeCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<?> attribute = context.getRoot().get(PullRequest.FIELD_PATHS.get(PullRequest.FIELD_SUBMITTER));
+		Path<?> attribute = context.getRoot().get(PullRequestConstants.ATTR_SUBMITTER);
 		return context.getBuilder().equal(attribute, SecurityUtils.getUser());
 	}
 

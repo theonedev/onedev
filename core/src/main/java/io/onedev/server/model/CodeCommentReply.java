@@ -26,6 +26,8 @@ public class CodeCommentReply extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;
 	
+	public static final String ATTR_CONTENT = "content";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private CodeComment comment;

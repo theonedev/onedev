@@ -7,6 +7,7 @@ import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
 
 public class MergeStrategyCriteria extends PullRequestCriteria {
@@ -21,7 +22,7 @@ public class MergeStrategyCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<?> attribute = context.getRoot().get(PullRequest.FIELD_MERGE_STRATEGY);
+		Path<?> attribute = context.getRoot().get(PullRequestConstants.ATTR_MERGE_STRATEGY);
 		return context.getBuilder().equal(attribute, value);
 	}
 
@@ -37,7 +38,7 @@ public class MergeStrategyCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequest.FIELD_MERGE_STRATEGY) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " + PullRequestQuery.quote(value.toString());
+		return PullRequestQuery.quote(PullRequestConstants.FIELD_MERGE_STRATEGY) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " + PullRequestQuery.quote(value.toString());
 	}
 
 }

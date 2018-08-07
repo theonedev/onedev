@@ -1,5 +1,7 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.model.support.issue.IssueConstants.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,6 +31,7 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EditContext;
@@ -105,14 +108,12 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 						Project project = getProject();
 
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(Issue.FIELD_PATHS.keySet());
-							candidates.remove(Issue.FIELD_SUBMITTER);
+							List<String> candidates = new ArrayList<>(IssueConstants.QUERY_FIELDS);
 							for (InputSpec field: project.getIssueWorkflow().getFieldSpecs())
 								candidates.add(field.getName());
 							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = Lists.newArrayList(Issue.FIELD_VOTE_COUNT, Issue.FIELD_COMMENT_COUNT, Issue.FIELD_NUMBER, 
-									Issue.FIELD_SUBMIT_DATE, Issue.FIELD_UPDATE_DATE);
+							List<String> candidates = new ArrayList<>(IssueConstants.ORDER_FIELDS.keySet());
 							for (InputSpec field: project.getIssueWorkflow().getFieldSpecs()) {
 								if (field instanceof NumberInput || field instanceof ChoiceInput || field instanceof DateInput) 
 									candidates.add(field.getName());
@@ -131,8 +132,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								try {
 									IssueQuery.checkField(project, fieldName, IssueQuery.getOperator(operatorName));
 									InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
-									if (fieldSpec instanceof DateInput || fieldName.equals(Issue.FIELD_SUBMIT_DATE) 
-											|| fieldName.equals(Issue.FIELD_UPDATE_DATE)) {
+									if (fieldSpec instanceof DateInput || fieldName.equals(FIELD_SUBMIT_DATE) 
+											|| fieldName.equals(FIELD_UPDATE_DATE)) {
 										suggestions.addAll(getSuggestions(DateUtils.RELAX_DATE_EXAMPLES, unfencedLowerCaseMatchWith, null));
 										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
 									} else if (fieldSpec instanceof UserChoiceInput) {
@@ -148,7 +149,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldSpec instanceof GroupChoiceInput) {
 										List<String> candidates = OneDev.getInstance(GroupManager.class).findAll().stream().map(it->it.getName()).collect(Collectors.toList());
 										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
-									} else if (fieldName.equals(Issue.FIELD_STATE)) {
+									} else if (fieldName.equals(FIELD_STATE)) {
 										List<String> candidates = project.getIssueWorkflow().getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
 										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 									} else if (fieldSpec instanceof ChoiceInput) {
@@ -159,13 +160,13 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										} finally {
 											OneContext.pop();
 										}			
-									} else if (fieldName.equals(Issue.FIELD_MILESTONE)) {
+									} else if (fieldName.equals(FIELD_MILESTONE)) {
 										List<String> candidates = project.getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
 										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
-									} else if (fieldName.equals(Issue.FIELD_TITLE) || fieldName.equals(Issue.FIELD_DESCRIPTION) 
-											|| fieldName.equals(Issue.FIELD_VOTE_COUNT) || fieldName.equals(Issue.FIELD_COMMENT_COUNT) 
-											|| fieldName.equals(Issue.FIELD_NUMBER) || fieldSpec instanceof NumberInput 
-											|| fieldSpec instanceof TextInput) {
+									} else if (fieldName.equals(FIELD_TITLE) || fieldName.equals(FIELD_DESCRIPTION) 
+											|| fieldName.equals(FIELD_COMMENT) || fieldName.equals(FIELD_VOTE_COUNT) 
+											|| fieldName.equals(FIELD_COMMENT_COUNT) || fieldName.equals(FIELD_NUMBER) 
+											|| fieldSpec instanceof NumberInput || fieldSpec instanceof TextInput) {
 										return null;
 									}
 								} catch (OneException ex) {

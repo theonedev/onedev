@@ -6,6 +6,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.entityquery.issue.IssueQueryLexer;
 
 public class VoteCountCriteria extends IssueCriteria {
@@ -23,7 +24,7 @@ public class VoteCountCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<Integer> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_VOTE_COUNT));
+		Path<Integer> attribute = context.getRoot().get(IssueConstants.ATTR_VOTE_COUNT);
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)
@@ -49,7 +50,7 @@ public class VoteCountCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.FIELD_VOTE_COUNT) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(String.valueOf(value));
+		return IssueQuery.quote(IssueConstants.FIELD_VOTE_COUNT) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(String.valueOf(value));
 	}
 
 }

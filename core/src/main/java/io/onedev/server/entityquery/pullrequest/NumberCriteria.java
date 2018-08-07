@@ -6,6 +6,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
 
 public class NumberCriteria extends PullRequestCriteria {
@@ -23,7 +24,7 @@ public class NumberCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<Long> attribute = context.getRoot().get(PullRequest.FIELD_PATHS.get(PullRequest.FIELD_NUMBER));
+		Path<Long> attribute = context.getRoot().get(PullRequestConstants.ATTR_NUMBER);
 		if (operator == PullRequestQueryLexer.Is)
 			return context.getBuilder().equal(attribute, value);
 		else if (operator == PullRequestQueryLexer.IsGreaterThan)
@@ -49,7 +50,7 @@ public class NumberCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequest.FIELD_NUMBER) + " " + PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(String.valueOf(value));
+		return PullRequestQuery.quote(PullRequestConstants.FIELD_NUMBER) + " " + PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(String.valueOf(value));
 	}
 
 }

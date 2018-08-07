@@ -9,6 +9,7 @@ import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
 
 public class SourceProjectCriteria extends PullRequestCriteria {
@@ -23,7 +24,7 @@ public class SourceProjectCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<User> attribute = context.getRoot().get(PullRequest.FIELD_PATHS.get(PullRequest.FIELD_SOURCE_PROJECT));
+		Path<User> attribute = context.getRoot().get(PullRequestConstants.ATTR_SOURCE_PROJECT);
 		return context.getBuilder().equal(attribute, value);
 	}
 
@@ -39,7 +40,7 @@ public class SourceProjectCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequest.FIELD_SOURCE_PROJECT) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " + PullRequestQuery.quote(value.getName());
+		return PullRequestQuery.quote(PullRequestConstants.FIELD_SOURCE_PROJECT) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " + PullRequestQuery.quote(value.getName());
 	}
 
 }

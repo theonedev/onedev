@@ -30,7 +30,7 @@ public class StringFieldCriteria extends FieldCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<String> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.VALUE);
+		Path<String> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.FIELD_ATTR_VALUE);
 		if (operator == IssueQueryLexer.Is)
 			return context.getBuilder().equal(context.getBuilder().lower(attribute), value.toLowerCase());
 		else 

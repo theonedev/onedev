@@ -1,7 +1,5 @@
 package io.onedev.server.entityquery.pullrequest;
 
-import java.util.Date;
-
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
@@ -11,37 +9,38 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
 
-public class CloseDateCriteria extends PullRequestCriteria {
+public class CommentCountCriteria extends PullRequestCriteria {
 
 	private static final long serialVersionUID = 1L;
 
 	private final int operator;
 	
-	private final Date value;
+	private final long value;
 	
-	private final String rawValue;
-	
-	public CloseDateCriteria(Date value, String rawValue, int operator) {
+	public CommentCountCriteria(int value, int operator) {
 		this.operator = operator;
 		this.value = value;
-		this.rawValue = rawValue;
 	}
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<Date> attribute = PullRequestQuery.getPath(context.getRoot(), PullRequestConstants.ATTR_CLOSE_DATE);
-		if (operator == PullRequestQueryLexer.IsBefore)
-			return context.getBuilder().lessThan(attribute, value);
-		else
+		Path<Long> attribute = context.getRoot().get(PullRequestConstants.ATTR_COMMENT_COUNT);
+		if (operator == PullRequestQueryLexer.Is)
+			return context.getBuilder().equal(attribute, value);
+		else if (operator == PullRequestQueryLexer.IsGreaterThan)
 			return context.getBuilder().greaterThan(attribute, value);
+		else
+			return context.getBuilder().lessThan(attribute, value);
 	}
 
 	@Override
 	public boolean matches(PullRequest request) {
-		if (operator == PullRequestQueryLexer.IsBefore)
-			return request.getLastActivity().getDate().before(value);
+		if (operator == PullRequestQueryLexer.Is)
+			return request.getCommentCount() == value;
+		else if (operator == PullRequestQueryLexer.IsGreaterThan)
+			return request.getCommentCount() > value;
 		else
-			return request.getLastActivity().getDate().after(value);
+			return request.getCommentCount() < value;
 	}
 
 	@Override
@@ -51,7 +50,7 @@ public class CloseDateCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequestConstants.FIELD_CLOSE_DATE) + " " + PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(rawValue);
+		return PullRequestQuery.quote(PullRequestConstants.FIELD_COMMENT_COUNT) + " " + PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(String.valueOf(value));
 	}
 
 }

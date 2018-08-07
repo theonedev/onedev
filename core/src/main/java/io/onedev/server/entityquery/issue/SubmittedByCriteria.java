@@ -9,6 +9,7 @@ import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.entityquery.issue.IssueQueryLexer;
 
 public class SubmittedByCriteria extends IssueCriteria {
@@ -23,7 +24,7 @@ public class SubmittedByCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<User> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_SUBMITTER));
+		Path<User> attribute = context.getRoot().get(IssueConstants.ATTR_SUBMITTER);
 		return context.getBuilder().equal(attribute, value);
 	}
 

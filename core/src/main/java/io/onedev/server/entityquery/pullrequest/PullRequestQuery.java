@@ -1,6 +1,5 @@
 package io.onedev.server.entityquery.pullrequest;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,8 +12,6 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entityquery.EntityQuery;
@@ -37,7 +34,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 
 public class PullRequestQuery extends EntityQuery<PullRequest> {
 
@@ -143,15 +140,6 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							return new SubmittedByCriteria(getUser(value));
 						case PullRequestQueryLexer.DiscardedBy:
 							return new DiscardedByCriteria(getUser(value));
-						case PullRequestQueryLexer.ContainsCommit:
-							try {
-								ObjectId commitId = project.getRepository().resolve(value);
-								if (commitId == null)
-									throw new RevisionSyntaxException("");
-								return new ContainsCommitCriteria(commitId);								
-							} catch (RevisionSyntaxException | IOException e) {
-								throw new OneException("Invalid revision string: " + value);
-							}
 						default:
 							throw new OneException("Unexpected operator: " + ctx.operator.getText());
 						}
@@ -173,53 +161,59 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						switch (operator) {
 						case PullRequestQueryLexer.IsBefore:
 						case PullRequestQueryLexer.IsAfter:
-							Date dateValue = DateUtils.parseRelaxed(value);
-							if (dateValue == null)
-								throw new OneException("Unrecognized date: " + value);
+							Date dateValue = getDateValue(value);
 							switch (fieldName) {
-							case PullRequest.FIELD_SUBMIT_DATE:
+							case PullRequestConstants.FIELD_SUBMIT_DATE:
 								return new SubmitDateCriteria(dateValue, value, operator);
-							case PullRequest.FIELD_UPDATE_DATE:
+							case PullRequestConstants.FIELD_UPDATE_DATE:
 								return new UpdateDateCriteria(dateValue, value, operator);
-							case PullRequest.FIELD_CLOSE_DATE:
+							case PullRequestConstants.FIELD_CLOSE_DATE:
 								return new CloseDateCriteria(dateValue, value, operator);
 							default:
 								throw new IllegalStateException();
 							}
 						case PullRequestQueryLexer.Contains:
 							switch (fieldName) {
-							case PullRequest.FIELD_TITLE:
+							case PullRequestConstants.FIELD_TITLE:
 								return new TitleCriteria(value);
-							case PullRequest.FIELD_DESCRIPTION:
+							case PullRequestConstants.FIELD_DESCRIPTION:
 								return new DescriptionCriteria(value);
+							case PullRequestConstants.FIELD_COMMENT:
+								return new CommentCriteria(value);
+							case PullRequestConstants.FIELD_COMMIT:
+								return new CommitCriteria(getCommitId(project, value));
 							default:
 								throw new IllegalStateException();
 							}
 						case PullRequestQueryLexer.Is:
 							switch (fieldName) {
-							case PullRequest.FIELD_STATE:
+							case PullRequestConstants.FIELD_STATE:
 								return new StateCriteria(value);
-							case PullRequest.FIELD_NUMBER:
+							case PullRequestConstants.FIELD_NUMBER:
 								return new NumberCriteria(getIntValue(value), operator);
-							case PullRequest.FIELD_MERGE_STRATEGY:
+							case PullRequestConstants.FIELD_MERGE_STRATEGY:
 								return new MergeStrategyCriteria(MergeStrategy.from(value));
-							case PullRequest.FIELD_SOURCE_BRANCH:
+							case PullRequestConstants.FIELD_SOURCE_BRANCH:
 								return new SourceBranchCriteria(value);
-							case PullRequest.FIELD_SOURCE_PROJECT:
+							case PullRequestConstants.FIELD_SOURCE_PROJECT:
 								Project project = OneDev.getInstance(ProjectManager.class).find(value);
 								if (project == null)
 									throw new OneException("Unable to find project: " + value);
 								return new SourceProjectCriteria(project);
-							case PullRequest.FIELD_TARGET_BRANCH:
+							case PullRequestConstants.FIELD_TARGET_BRANCH:
 								return new TargetBranchCriteria(value);
+							case PullRequestConstants.FIELD_COMMENT_COUNT:
+								return new CommentCountCriteria(getIntValue(value), operator);
 							default: 
 								throw new IllegalStateException();
 							}
 						case PullRequestQueryLexer.IsLessThan:
 						case PullRequestQueryLexer.IsGreaterThan:
 							switch (fieldName) {
-							case PullRequest.FIELD_NUMBER:
+							case PullRequestConstants.FIELD_NUMBER:
 								return new NumberCriteria(getIntValue(value), operator);
+							case PullRequestConstants.FIELD_COMMENT_COUNT:
+								return new CommentCountCriteria(getIntValue(value), operator);
 							default:
 								throw new IllegalStateException();
 							}
@@ -257,13 +251,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 			List<EntitySort> requestSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (validate 
-						&& !fieldName.equals(PullRequest.FIELD_SUBMIT_DATE) 
-						&& !fieldName.equals(PullRequest.FIELD_UPDATE_DATE) 
-						&& !fieldName.equals(PullRequest.FIELD_CLOSE_DATE) 
-						&& !fieldName.equals(PullRequest.FIELD_NUMBER)) {
+				if (validate && !PullRequestConstants.ORDER_FIELDS.containsKey(fieldName))
 					throw new OneException("Can not order by field: " + fieldName);
-				}
 				
 				EntitySort requestSort = new EntitySort();
 				requestSort.setField(fieldName);
@@ -281,33 +270,38 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 	}
 	
 	public static void checkField(Project project, String fieldName, int operator) {
-		if (!PullRequest.FIELD_PATHS.containsKey(fieldName))
+		if (!PullRequestConstants.QUERY_FIELDS.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case PullRequestQueryLexer.IsBefore:
 		case PullRequestQueryLexer.IsAfter:
-			if (!fieldName.equals(PullRequest.FIELD_SUBMIT_DATE) 
-					&& !fieldName.equals(PullRequest.FIELD_UPDATE_DATE) 
-					&& !fieldName.equals(PullRequest.FIELD_CLOSE_DATE)) {
+			if (!fieldName.equals(PullRequestConstants.FIELD_SUBMIT_DATE) 
+					&& !fieldName.equals(PullRequestConstants.FIELD_UPDATE_DATE) 
+					&& !fieldName.equals(PullRequestConstants.FIELD_CLOSE_DATE)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case PullRequestQueryLexer.Contains:
-			if (!fieldName.equals(PullRequest.FIELD_TITLE) && !fieldName.equals(PullRequest.FIELD_DESCRIPTION))
+			if (!fieldName.equals(PullRequestConstants.FIELD_TITLE) 
+					&& !fieldName.equals(PullRequestConstants.FIELD_DESCRIPTION)
+					&& !fieldName.equals(PullRequestConstants.FIELD_COMMENT)
+					&& !fieldName.equals(PullRequestConstants.FIELD_COMMIT)) {
 				throw newOperatorException(fieldName, operator);
+			}
 			break;
 		case PullRequestQueryLexer.Is:
-			if (!fieldName.equals(PullRequest.FIELD_STATE) 
-					&& !fieldName.equals(PullRequest.FIELD_NUMBER)
-					&& !fieldName.equals(PullRequest.FIELD_TARGET_BRANCH)
-					&& !fieldName.equals(PullRequest.FIELD_SOURCE_PROJECT)
-					&& !fieldName.equals(PullRequest.FIELD_SOURCE_BRANCH)) {
+			if (!fieldName.equals(PullRequestConstants.FIELD_STATE) 
+					&& !fieldName.equals(PullRequestConstants.FIELD_NUMBER)
+					&& !fieldName.equals(PullRequestConstants.FIELD_TARGET_BRANCH)
+					&& !fieldName.equals(PullRequestConstants.FIELD_SOURCE_PROJECT)
+					&& !fieldName.equals(PullRequestConstants.FIELD_SOURCE_BRANCH)
+					&& !fieldName.equals(PullRequestConstants.FIELD_COMMENT_COUNT)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case PullRequestQueryLexer.IsLessThan:
 		case PullRequestQueryLexer.IsGreaterThan:
-			if (!fieldName.equals(PullRequest.FIELD_NUMBER))
+			if (!fieldName.equals(PullRequestConstants.FIELD_NUMBER) && !fieldName.equals(PullRequestConstants.FIELD_COMMENT_COUNT))
 				throw newOperatorException(fieldName, operator);
 			break;
 		}

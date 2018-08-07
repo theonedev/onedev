@@ -7,9 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -57,6 +55,7 @@ import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.jackson.RestView;
@@ -82,66 +81,6 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String REFS_PREFIX = "refs/pull/";
-	
-	public static final int MAX_CODE_COMMENTS = 1000;
-	 
-	public static final Map<String, String> FIELD_PATHS = new LinkedHashMap<>();
-	
-	public static final String FIELD_NUMBER = "Number";
-
-	public static final String FIELD_STATE = "State";
-	
-	public static final String FIELD_TARGET_BRANCH = "Target Branch";
-	
-	public static final String FIELD_SOURCE_PROJECT = "Source Project";
-	
-	public static final String FIELD_SOURCE_BRANCH = "Source Branch";
-	
-	public static final String FIELD_TITLE = "Title";
-	
-	public static final String FIELD_DESCRIPTION = "Description";
-	
-	public static final String FIELD_SUBMITTER = "Submitter";
-	
-	public static final String FIELD_SUBMIT_DATE = "Submit Date";
-	
-	public static final String FIELD_UPDATE_DATE = "Update Date";
-	
-	public static final String FIELD_CLOSE_DATE = "Close Date";
-	
-	public static final String FIELD_MERGE_STRATEGY = "Merge Strategy";
-	
-	public static final String PATH_CLOSE_STATUS = "closeInfo.status";
-	
-	public static final String PATH_CLOSE_USER = "closeInfo.user";
-	
-	public static final String PATH_LAST_MERGE_PREVIEW_MERGED = "lastMergePreview.merged";
-	
-	public static final String PATH_LAST_MERGE_PREVIEW_REQUEST_HEAD = "lastMergePreview.requestHead";
-	
-	public static final String PATH_ID = "id";
-	
-	public static final String STATE_OPEN = "Open";
-	
-	public static final String PATH_REVIEWS = "reviews";
-	
-	public static final String PATH_BUILDS = "builds";
-	
-	static {
-		FIELD_PATHS.put(FIELD_NUMBER, "number");
-		FIELD_PATHS.put(FIELD_TITLE, "title");
-		FIELD_PATHS.put(FIELD_SUBMITTER, "submitter");
-		FIELD_PATHS.put(FIELD_TARGET_BRANCH, "targetBranch");
-		FIELD_PATHS.put(FIELD_SOURCE_PROJECT, "sourceProject");
-		FIELD_PATHS.put(FIELD_SOURCE_BRANCH, "sourceBranch");
-		FIELD_PATHS.put(FIELD_DESCRIPTION, "description");
-		FIELD_PATHS.put(FIELD_SUBMIT_DATE, "submitDate");
-		FIELD_PATHS.put(FIELD_UPDATE_DATE, "lastActivity.date");
-		FIELD_PATHS.put(FIELD_CLOSE_DATE, "closeInfo.date");
-		FIELD_PATHS.put(FIELD_MERGE_STRATEGY, "mergeStrategy");
-	}
-	
 	@Embedded
 	private CloseInfo closeInfo;
 
@@ -208,6 +147,8 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	private String uuid = UUID.randomUUID().toString();
 	
 	private long number;
+	
+	private int commentCount;
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestUpdate> updates = new ArrayList<>();
@@ -537,19 +478,19 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	@JsonView(RestView.class)
 	public String getBaseRef() {
 		Preconditions.checkNotNull(getId());
-		return REFS_PREFIX + getNumber() + "/base";
+		return PullRequestConstants.REFS_PREFIX + getNumber() + "/base";
 	}
 
 	@JsonView(RestView.class)
 	public String getMergeRef() {
 		Preconditions.checkNotNull(getId());
-		return REFS_PREFIX + getNumber() + "/merge";
+		return PullRequestConstants.REFS_PREFIX + getNumber() + "/merge";
 	}
 
 	@JsonView(RestView.class)
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
-		return REFS_PREFIX + getNumber() + "/head";
+		return PullRequestConstants.REFS_PREFIX + getNumber() + "/head";
 	}
 	
 	/**
@@ -682,6 +623,14 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	public void setNumber(long number) {
 		this.number = number;
 		numberStr = String.valueOf(number);
+	}
+
+	public int getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(int commentCount) {
+		this.commentCount = commentCount;
 	}
 
 	public List<RevCommit> getCommits() {

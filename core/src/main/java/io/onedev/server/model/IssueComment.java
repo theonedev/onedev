@@ -18,6 +18,8 @@ public class IssueComment extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String PATH_CONTENT = "content";
+	
 	@ManyToOne
 	@JoinColumn(nullable=false)
 	private Issue issue;

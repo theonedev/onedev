@@ -9,7 +9,7 @@ query
 criteria
 	: CreatedByMe #OperatorCriteria
     | CreatedBy WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsBefore|IsAfter|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsBefore|IsAfter|IsGreaterThan|IsLessThan|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -39,7 +39,7 @@ OrderBy
 Is
 	: 'is'
 	;
-
+	
 Contains
 	: 'contains'
 	;
@@ -50,6 +50,14 @@ IsAfter
 
 IsBefore
 	: 'is before'
+	;
+	
+IsGreaterThan
+	: 'is' WS+ 'greater' WS+ 'than'
+	;
+	
+IsLessThan
+	: 'is' WS+ 'less' WS+ 'than'
 	;
 
 And

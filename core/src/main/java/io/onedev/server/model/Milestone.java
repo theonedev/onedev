@@ -32,7 +32,7 @@ public class Milestone extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String NAME = "name";
+	public static final String FIELD_ATTR_NAME = "name";
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)

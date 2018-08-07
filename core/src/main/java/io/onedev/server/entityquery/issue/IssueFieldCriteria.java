@@ -24,7 +24,7 @@ public class IssueFieldCriteria extends FieldCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<Long> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.ORDINAL);
+		Path<Long> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.FIELD_ATTR_ORDINAL);
 		return context.getBuilder().equal(attribute, value);
 	}
 

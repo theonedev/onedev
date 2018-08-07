@@ -2,14 +2,13 @@ package io.onedev.server.entityquery.issue;
 
 import java.util.Date;
 
-import javax.persistence.criteria.Join;
+import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
-import io.onedev.server.entityquery.issue.IssueQueryLexer;
 
 public class DateFieldCriteria extends FieldCriteria {
 
@@ -30,11 +29,11 @@ public class DateFieldCriteria extends FieldCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Join<?, ?> join = context.getJoin(getFieldName());
+		From<?, ?> join = context.getJoin(getFieldName());
 		if (operator == IssueQueryLexer.IsBefore)
-			return context.getBuilder().lessThan(join.get(IssueFieldUnary.ORDINAL), value.getTime());
+			return context.getBuilder().lessThan(join.get(IssueFieldUnary.FIELD_ATTR_ORDINAL), value.getTime());
 		else
-			return context.getBuilder().greaterThan(join.get(IssueFieldUnary.ORDINAL), value.getTime());
+			return context.getBuilder().greaterThan(join.get(IssueFieldUnary.FIELD_ATTR_ORDINAL), value.getTime());
 	}
 
 	@Override

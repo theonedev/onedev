@@ -7,6 +7,7 @@ import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.pullrequest.PullRequestCommentAdded;
 import io.onedev.server.manager.PullRequestCommentManager;
 import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -43,9 +44,20 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 			lastEvent.setDate(event.getDate());
 			lastEvent.setDescription("added comment");
 			lastEvent.setUser(event.getUser());
-			comment.getRequest().setLastActivity(lastEvent);
+			
+			PullRequest request = comment.getRequest();
+			request.setCommentCount(request.getCommentCount()+1);
+			request.setLastActivity(lastEvent);
 			pullRequestManager.save(event.getRequest());
 		}
+	}
+
+	@Transactional
+	@Override
+	public void delete(PullRequestComment comment) {
+		super.delete(comment);
+		PullRequest request = comment.getRequest();
+		request.setCommentCount(request.getCommentCount()-1);
 	}
 
 }

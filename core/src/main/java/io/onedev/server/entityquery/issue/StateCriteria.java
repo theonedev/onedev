@@ -11,6 +11,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.entityquery.issue.IssueQueryLexer;
 
 public class StateCriteria extends IssueCriteria {
@@ -25,7 +26,7 @@ public class StateCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<?> attribute = context.getRoot().get(Issue.FIELD_PATHS.get(Issue.FIELD_STATE));
+		Path<?> attribute = context.getRoot().get(IssueConstants.ATTR_STATE);
 		return context.getBuilder().equal(attribute, value);
 	}
 
@@ -46,7 +47,7 @@ public class StateCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(Issue.FIELD_STATE) + " " + IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(value);
+		return IssueQuery.quote(IssueConstants.FIELD_STATE) + " " + IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(value);
 	}
 
 	@Override

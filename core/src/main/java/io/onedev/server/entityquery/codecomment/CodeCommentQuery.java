@@ -1,6 +1,13 @@
 package io.onedev.server.entityquery.codecomment;
 
-import java.io.IOException;
+import static io.onedev.server.model.support.CodeCommentConstants.FIELD_COMMIT;
+import static io.onedev.server.model.support.CodeCommentConstants.FIELD_CONTENT;
+import static io.onedev.server.model.support.CodeCommentConstants.FIELD_CREATE_DATE;
+import static io.onedev.server.model.support.CodeCommentConstants.FIELD_PATH;
+import static io.onedev.server.model.support.CodeCommentConstants.FIELD_REPLY;
+import static io.onedev.server.model.support.CodeCommentConstants.FIELD_REPLY_COUNT;
+import static io.onedev.server.model.support.CodeCommentConstants.FIELD_UPDATE_DATE;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -13,8 +20,6 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entityquery.AndCriteriaHelper;
@@ -39,7 +44,7 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.model.support.CodeCommentConstants;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
@@ -124,37 +129,35 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						switch (operator) {
 						case CodeCommentQueryLexer.IsBefore:
 						case CodeCommentQueryLexer.IsAfter:
-							Date dateValue = DateUtils.parseRelaxed(value);
-							if (dateValue == null)
-								throw new OneException("Unrecognized date: " + value);
+							Date dateValue = getDateValue(value);
 							switch (fieldName) {
-							case CodeComment.FIELD_CREATE_DATE:
+							case FIELD_CREATE_DATE:
 								return new CreateDateCriteria(dateValue, value, operator);
-							case CodeComment.FIELD_UPDATE_DATE:
+							case FIELD_UPDATE_DATE:
 								return new UpdateDateCriteria(dateValue, value, operator);
 							default:
 								throw new IllegalStateException();
 							}
+						case CodeCommentQueryLexer.IsLessThan:
+						case CodeCommentQueryLexer.IsGreaterThan:
+							return new ReplyCountCriteria(getIntValue(value), operator);
 						case CodeCommentQueryLexer.Contains:
 							switch (fieldName) {
-							case CodeComment.FIELD_CONTENT:
+							case FIELD_CONTENT:
 								return new ContentCriteria(value);
+							case FIELD_REPLY:
+								return new ReplyCriteria(value);
 							default:
 								throw new IllegalStateException();
 							}
 						case CodeCommentQueryLexer.Is:
 							switch (fieldName) {
-							case CodeComment.FIELD_COMMIT:
-								try {
-									ObjectId commitId = project.getRepository().resolve(value);
-									if (commitId == null)
-										throw new RevisionSyntaxException("");
-									return new CommitCriteria(commitId.name());								
-								} catch (RevisionSyntaxException | IOException e) {
-									throw new OneException("Invalid revision string: " + value);
-								}
-							case CodeComment.FIELD_PATH:
+							case FIELD_COMMIT:
+								return new CommitCriteria(getCommitId(project, value));
+							case FIELD_PATH:
 								return new PathCriteria(value);
+							case FIELD_REPLY_COUNT:
+								return new ReplyCountCriteria(getIntValue(value), operator);
 							default: 
 								throw new IllegalStateException();
 							}
@@ -189,14 +192,11 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 				commentCriteria = null;
 			}
 
-			List<EntitySort> requestSorts = new ArrayList<>();
+			List<EntitySort> commentSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (validate 
-						&& !fieldName.equals(CodeComment.FIELD_CREATE_DATE) 
-						&& !fieldName.equals(CodeComment.FIELD_UPDATE_DATE)) {
+				if (validate && !CodeCommentConstants.ORDER_FIELDS.containsKey(fieldName)) 
 					throw new OneException("Can not order by field: " + fieldName);
-				}
 				
 				EntitySort commentSort = new EntitySort();
 				commentSort.setField(fieldName);
@@ -204,35 +204,36 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 					commentSort.setDirection(Direction.ASCENDING);
 				else
 					commentSort.setDirection(Direction.DESCENDING);
-				requestSorts.add(commentSort);
+				commentSorts.add(commentSort);
 			}
 			
-			return new CodeCommentQuery(commentCriteria, requestSorts);
+			return new CodeCommentQuery(commentCriteria, commentSorts);
 		} else {
 			return new CodeCommentQuery();
 		}
 	}
 	
 	public static void checkField(Project project, String fieldName, int operator) {
-		if (!CodeComment.FIELD_PATHS.containsKey(fieldName))
+		if (!CodeCommentConstants.QUERY_FIELDS.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case CodeCommentQueryLexer.IsBefore:
 		case CodeCommentQueryLexer.IsAfter:
-			if (!fieldName.equals(CodeComment.FIELD_CREATE_DATE) 
-					&& !fieldName.equals(CodeComment.FIELD_UPDATE_DATE)) {
+			if (!fieldName.equals(FIELD_CREATE_DATE) && !fieldName.equals(FIELD_UPDATE_DATE)) 
 				throw newOperatorException(fieldName, operator);
-			}
+			break;
+		case CodeCommentQueryLexer.IsGreaterThan:
+		case CodeCommentQueryLexer.IsLessThan:
+			if (!fieldName.equals(FIELD_REPLY_COUNT))
+				throw newOperatorException(fieldName, operator);
 			break;
 		case CodeCommentQueryLexer.Contains:
-			if (!fieldName.equals(CodeComment.FIELD_CONTENT))
+			if (!fieldName.equals(FIELD_CONTENT) && !fieldName.equals(FIELD_REPLY))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case CodeCommentQueryLexer.Is:
-			if (!fieldName.equals(CodeComment.FIELD_COMMIT) 
-					&& !fieldName.equals(CodeComment.FIELD_PATH)) {
+			if (!fieldName.equals(FIELD_COMMIT) && !fieldName.equals(FIELD_REPLY_COUNT) && !fieldName.equals(FIELD_PATH)) 
 				throw newOperatorException(fieldName, operator);
-			}
 			break;
 		}
 	}

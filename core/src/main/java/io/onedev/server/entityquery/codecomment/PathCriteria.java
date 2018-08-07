@@ -7,6 +7,7 @@ import io.onedev.server.entityquery.EntityCriteria;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.CodeCommentConstants;
 import io.onedev.utils.stringmatch.WildcardUtils;
 
 public class PathCriteria extends EntityCriteria<CodeComment>  {
@@ -21,7 +22,7 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<CodeComment> context) {
-		Path<String> attribute = CodeCommentQuery.getPath(context.getRoot(), CodeComment.FIELD_PATHS.get(CodeComment.FIELD_PATH));
+		Path<String> attribute = CodeCommentQuery.getPath(context.getRoot(), CodeCommentConstants.ATTR_PATH);
 		String normalized = value.toLowerCase().replace('*', '%');
 		if (normalized.endsWith("/"))
 			normalized += "%";
@@ -43,7 +44,7 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public String toString() {
-		return CodeCommentQuery.quote(CodeComment.FIELD_COMMIT) + " " + CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Is) + " " + CodeCommentQuery.quote(value);
+		return CodeCommentQuery.quote(CodeCommentConstants.FIELD_PATH) + " " + CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Is) + " " + CodeCommentQuery.quote(value);
 	}
 
 }

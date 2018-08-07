@@ -39,6 +39,7 @@ import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.issue.IssueField;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -65,42 +66,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 public class Issue extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
-	
-	public static final Map<String, String> FIELD_PATHS = new LinkedHashMap<>();
-	
-	public static final String FIELD_NUMBER = "Number";
-	
-	public static final String FIELD_STATE = "State";
-	
-	public static final String FIELD_TITLE = "Title";
-	
-	public static final String FIELD_DESCRIPTION = "Description";
-	
-	public static final String FIELD_SUBMITTER = "Submitter";
-	
-	public static final String FIELD_SUBMIT_DATE = "Submit Date";
-	
-	public static final String FIELD_VOTE_COUNT = "Vote Count";
-	
-	public static final String FIELD_COMMENT_COUNT = "Comment Count";
-	
-	public static final String FIELD_UPDATE_DATE = "Update Date";
-	
-	public static final String FIELD_MILESTONE = "Milestone";
-	
-	static {
-		FIELD_PATHS.put(FIELD_NUMBER, "number");
-		FIELD_PATHS.put(FIELD_STATE, "state");
-		FIELD_PATHS.put(FIELD_TITLE, "title");
-		FIELD_PATHS.put(FIELD_DESCRIPTION, "description");
-		FIELD_PATHS.put(FIELD_SUBMITTER, "submitter");
-		FIELD_PATHS.put(FIELD_SUBMIT_DATE, "submitDate");
-		FIELD_PATHS.put(FIELD_UPDATE_DATE, "lastActivity.date");
-		FIELD_PATHS.put(FIELD_VOTE_COUNT, "voteCount");
-		FIELD_PATHS.put(FIELD_COMMENT_COUNT, "commentCount");
-		FIELD_PATHS.put(FIELD_MILESTONE, "milestone");
-	}
-	
+
 	@Version
 	private long version;
 	
@@ -411,7 +377,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 		Serializable fieldBean = (Serializable) beanDescriptor.newBeanInstance();
 
 		for (PropertyDescriptor property: beanDescriptor.getPropertyDescriptors()) {
-			if (property.getDisplayName().equals(Issue.FIELD_STATE)) {
+			if (property.getDisplayName().equals(IssueConstants.FIELD_STATE)) {
 				property.setPropertyValue(fieldBean, getState());
 			} else {
 				IssueField field = getFields().get(property.getDisplayName());
@@ -469,7 +435,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 		if (fieldSpec != null) {
 			if (fieldSpec.getShowConditions() != null) {
 				for (ShowCondition condition: fieldSpec.getShowConditions()) {
-					if (condition.getInputName().equals(Issue.FIELD_STATE)) { 
+					if (condition.getInputName().equals(IssueConstants.FIELD_STATE)) { 
 						if (!condition.getValueMatcher().matches(state))
 							return false;
 					} else {

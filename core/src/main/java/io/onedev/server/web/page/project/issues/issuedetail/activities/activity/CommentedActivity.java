@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.issues.issuedetail.activities.activity
 
 import java.util.Date;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
@@ -29,7 +30,14 @@ public class CommentedActivity implements IssueActivity {
 				return getComment();
 			}
 			
-		}, deleteCallback);
+		}, new DeleteCallback() {
+			
+			@Override
+			public void onDelete(AjaxRequestTarget target) {
+				OneDev.getInstance(IssueCommentManager.class).delete(getComment());
+				deleteCallback.onDelete(target);
+			}
+		});
 	}
 	
 	public Long getCommentId() {

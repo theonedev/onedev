@@ -66,6 +66,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.issue.IssueField;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.security.SecurityUtils;
@@ -258,7 +259,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
 						IssueFieldBeanUtils.setState(fieldBean, transition.getToState());
 
-						Collection<String> excludedFields = Sets.newHashSet(Issue.FIELD_STATE);
+						Collection<String> excludedFields = Sets.newHashSet(IssueConstants.FIELD_STATE);
 						for (String fieldName: getProject().getIssueWorkflow().getFieldNames()) {
 							if (getIssue().isFieldVisible(fieldName, getIssue().getState()))
 								excludedFields.add(fieldName);
@@ -336,7 +337,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 		List<String> criterias = new ArrayList<>();
 		if (getIssue().getMilestone() != null)
-			criterias.add(IssueQuery.quote(Issue.FIELD_MILESTONE) + " is " + IssueQuery.quote(getIssue().getMilestoneName()));
+			criterias.add(IssueQuery.quote(IssueConstants.FIELD_MILESTONE) + " is " + IssueQuery.quote(getIssue().getMilestoneName()));
 		for (Map.Entry<String, IssueField> entry: getIssue().getFields().entrySet()) {
 			List<String> strings = entry.getValue().getValues();
 			if (strings.isEmpty()) {
@@ -543,7 +544,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject());
 				Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true); 
 				
-				Collection<String> excludedFields = Sets.newHashSet(Issue.FIELD_STATE);
+				Collection<String> excludedFields = Sets.newHashSet(IssueConstants.FIELD_STATE);
 				form.add(BeanContext.editBean("editor", fieldBean, IssueFieldBeanUtils.getPropertyNames(fieldBeanClass, excludedFields)));
 				
 				form.add(new AjaxButton("save") {

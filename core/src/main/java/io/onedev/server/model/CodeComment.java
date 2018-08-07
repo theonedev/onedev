@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -61,30 +60,6 @@ public class CodeComment extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public static final Map<String, String> FIELD_PATHS = new LinkedHashMap<>();
-	
-	public static final String FIELD_CONTENT = "Content";
-	
-	public static final String FIELD_PATH = "Path";
-	
-	public static final String FIELD_COMMIT = "Commit";
-	
-	public static final String FIELD_CREATE_DATE = "Create Date";
-	
-	public static final String FIELD_UPDATE_DATE = "Update Date";
-	
-	public static final String PATH_CREATOR = "user";
-	
-	public static final String PATH_RELATIONS = "relations";
-	
-	static {
-		FIELD_PATHS.put(FIELD_CONTENT, "content");
-		FIELD_PATHS.put(FIELD_PATH, "markPos.path");
-		FIELD_PATHS.put(FIELD_COMMIT, "markPos.commit");
-		FIELD_PATHS.put(FIELD_CREATE_DATE, "date");
-		FIELD_PATHS.put(FIELD_UPDATE_DATE, "lastActivity.date");
-	}
-	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Project project;
@@ -104,6 +79,8 @@ public class CodeComment extends AbstractEntity {
 
 	@Embedded
 	private LastActivity lastActivity;
+	
+	private int replyCount;
 
 	@Embedded
 	private MarkPos markPos;
@@ -162,6 +139,14 @@ public class CodeComment extends AbstractEntity {
 
 	public void setDate(Date date) {
 		this.date = date;
+	}
+
+	public int getReplyCount() {
+		return replyCount;
+	}
+
+	public void setReplyCount(int replyCount) {
+		this.replyCount = replyCount;
 	}
 
 	public MarkPos getMarkPos() {

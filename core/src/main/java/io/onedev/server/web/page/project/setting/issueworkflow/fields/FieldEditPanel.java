@@ -14,8 +14,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -147,7 +147,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	@Override
 	public List<String> getInputNames() {
 		List<String> inputNames = new ArrayList<>();
-		inputNames.add(Issue.FIELD_STATE);
+		inputNames.add(IssueConstants.FIELD_STATE);
 		int currentIndex = 0;
 		for (InputSpec field: getWorkflow().getFieldSpecs()) {
 			if (currentIndex != fieldIndex)
@@ -164,11 +164,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	
 	@Override
 	public boolean isReservedName(String inputName) {
-		for (String displayName: Issue.FIELD_PATHS.keySet()) {
-			if (displayName.equals(inputName))
-				return true;
-		}
-		return false;
+		return IssueConstants.ALL_FIELDS.contains(inputName);
 	}
 	
 }

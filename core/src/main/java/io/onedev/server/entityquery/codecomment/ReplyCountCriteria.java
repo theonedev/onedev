@@ -1,7 +1,5 @@
 package io.onedev.server.entityquery.codecomment;
 
-import java.util.Date;
-
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
@@ -11,26 +9,25 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.CodeCommentConstants;
 
-public class CreateDateCriteria extends EntityCriteria<CodeComment> {
+public class ReplyCountCriteria extends EntityCriteria<CodeComment> {
 
 	private static final long serialVersionUID = 1L;
 
 	private final int operator;
 	
-	private final Date value;
+	private final int value;
 	
-	private final String rawValue;
-	
-	public CreateDateCriteria(Date value, String rawValue, int operator) {
+	public ReplyCountCriteria(int value, int operator) {
 		this.operator = operator;
 		this.value = value;
-		this.rawValue = rawValue;
 	}
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<CodeComment> context) {
-		Path<Date> attribute = context.getRoot().get(CodeCommentConstants.ATTR_CREATE_DATE);
-		if (operator == CodeCommentQueryLexer.IsBefore)
+		Path<Integer> attribute = context.getRoot().get(CodeCommentConstants.ATTR_REPLY_COUNT);
+		if (operator == CodeCommentQueryLexer.Is)
+			return context.getBuilder().equal(attribute, value);
+		else if (operator == CodeCommentQueryLexer.IsLessThan)
 			return context.getBuilder().lessThan(attribute, value);
 		else
 			return context.getBuilder().greaterThan(attribute, value);
@@ -38,10 +35,12 @@ public class CreateDateCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public boolean matches(CodeComment comment) {
-		if (operator == CodeCommentQueryLexer.IsBefore)
-			return comment.getDate().before(value);
+		if (operator == CodeCommentQueryLexer.Is)
+			return comment.getReplyCount() == value;
+		else if (operator == CodeCommentQueryLexer.IsLessThan)
+			return comment.getReplyCount() < value;
 		else
-			return comment.getDate().after(value);
+			return comment.getReplyCount() > value;
 	}
 
 	@Override
@@ -51,7 +50,7 @@ public class CreateDateCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public String toString() {
-		return CodeCommentQuery.quote(CodeCommentConstants.FIELD_CREATE_DATE) + " " + CodeCommentQuery.getRuleName(operator) + " " + CodeCommentQuery.quote(rawValue);
+		return CodeCommentQuery.quote(CodeCommentConstants.FIELD_REPLY_COUNT) + " " + CodeCommentQuery.getRuleName(operator) + " " + CodeCommentQuery.quote(String.valueOf(value));
 	}
 
 }

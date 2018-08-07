@@ -5,14 +5,14 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 
 public class OpenCriteria extends PullRequestCriteria {
 
 	private static final long serialVersionUID = 1L;
 
 	private PullRequestCriteria getCriteria(Project project) {
-		return new StateCriteria(PullRequest.STATE_OPEN);
+		return new StateCriteria(PullRequestConstants.STATE_OPEN);
 	}
 	
 	@Override

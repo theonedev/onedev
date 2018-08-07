@@ -14,15 +14,15 @@ import io.onedev.server.manager.CodeCommentRelationInfoManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 
-public class ContainsCommitCriteria extends PullRequestCriteria {
+public class CommitCriteria extends PullRequestCriteria {
 
 	private static final long serialVersionUID = 1L;
 
 	private final ObjectId commitId;
 	
-	public ContainsCommitCriteria(ObjectId commitId) {
+	public CommitCriteria(ObjectId commitId) {
 		this.commitId = commitId;
 	}
 	
@@ -35,7 +35,7 @@ public class ContainsCommitCriteria extends PullRequestCriteria {
 				ids.add(request.getId());
 		}
 		if (!ids.isEmpty())
-			return context.getRoot().get(PullRequest.PATH_ID).in(ids);
+			return context.getRoot().get(PullRequestConstants.ATTR_ID).in(ids);
 		else
 			return context.getBuilder().disjunction();
 	}
@@ -56,7 +56,9 @@ public class ContainsCommitCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ContainsCommit) + " " + PullRequestQuery.quote(commitId.name());
+		return PullRequestQuery.quote(PullRequestConstants.FIELD_COMMIT) + " " 
+				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " 
+				+ PullRequestQuery.quote(commitId.name());
 	}
 
 }

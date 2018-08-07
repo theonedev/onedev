@@ -15,8 +15,8 @@ public class CodeCommentQueryBuildContext extends QueryBuildContext<CodeComment>
 	}
 	
 	@Override
-	public Join<?, ?> newJoin(String joinPath) {
-		return getRoot().join(joinPath, JoinType.LEFT);
+	public Join<?, ?> newJoin(String joinName) {
+		return getRoot().join(joinName, JoinType.LEFT);
 	}
 
 }

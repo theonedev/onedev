@@ -64,6 +64,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.ProjectAndBranch;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
@@ -625,7 +626,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						if (!pullRequestManager.findAllOpen(new ProjectAndBranch(getProject(), branch)).isEmpty()) {
 							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", ProjectBranchesPage.this);
 							String query = String.format("\"%s\" %s \"%s\" %s %s", 
-									PullRequest.FIELD_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 
+									PullRequestConstants.FIELD_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 
 									branch, PullRequestQuery.getRuleName(PullRequestQueryLexer.And), 
 									PullRequestQuery.getRuleName(PullRequestQueryLexer.Open));
 							PageParameters params = RequestListPage.paramsOf(getProject(), query);

@@ -10,6 +10,7 @@ import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.entityquery.issue.IssueQueryLexer;
 
 public class MilestoneCriteria extends IssueCriteria {
@@ -28,7 +29,7 @@ public class MilestoneCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context) {
-		Path<?> attribute = context.getJoin(Issue.FIELD_MILESTONE).get(Milestone.NAME);
+		Path<?> attribute = context.getJoin(IssueConstants.FIELD_MILESTONE).get(Milestone.FIELD_ATTR_NAME);
 		if (value != null)
 			return context.getBuilder().equal(attribute, value);
 		else
@@ -48,9 +49,9 @@ public class MilestoneCriteria extends IssueCriteria {
 	@Override
 	public String toString() {
 		if (value != null) 
-			return IssueQuery.quote(Issue.FIELD_MILESTONE) + " " + IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(value);
+			return IssueQuery.quote(IssueConstants.FIELD_MILESTONE) + " " + IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(value);
 		else
-			return IssueQuery.quote(Issue.FIELD_MILESTONE) + " " + IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
+			return IssueQuery.quote(IssueConstants.FIELD_MILESTONE) + " " + IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
 	}
 
 	@Override

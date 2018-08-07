@@ -32,6 +32,7 @@ import io.onedev.server.entityquery.issue.ChoiceFieldCriteria;
 import io.onedev.server.entityquery.issue.FieldOperatorCriteria;
 import io.onedev.server.entityquery.issue.IssueCriteria;
 import io.onedev.server.entityquery.issue.IssueQuery;
+import io.onedev.server.entityquery.issue.IssueQueryLexer;
 import io.onedev.server.entityquery.issue.MilestoneCriteria;
 import io.onedev.server.entityquery.issue.StateCriteria;
 import io.onedev.server.manager.IssueActionManager;
@@ -42,7 +43,7 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueBoard;
-import io.onedev.server.entityquery.issue.IssueQueryLexer;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.security.SecurityUtils;
@@ -74,7 +75,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				if (getMilestone() != null)
 					criterias.add(new MilestoneCriteria(getMilestone().getName()));
 				String identifyField = getBoard().getIdentifyField();
-				if (identifyField.equals(Issue.FIELD_STATE)) {
+				if (identifyField.equals(IssueConstants.FIELD_STATE)) {
 					criterias.add(new StateCriteria(getColumn()));
 				} else {
 					if (getColumn() != null) {
@@ -128,7 +129,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 								// move issue between board columns
 								IssueWorkflow workflow = getProject().getIssueWorkflow();
 								String identifyField = getBoard().getIdentifyField();
-								if (identifyField.equals(Issue.FIELD_STATE)) {
+								if (identifyField.equals(IssueConstants.FIELD_STATE)) {
 									issue = SerializationUtils.clone(issue);
 									for (TransitionSpec transition: workflow.getTransitionSpecs()) {
 										if (transition.canApplyTo(issue) && transition.getToState().equals(getColumn())) {
@@ -185,7 +186,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		String identifyField = getBoard().getIdentifyField();
 		if (getColumn() != null) {
 			title = getColumn();
-			if (identifyField.equals(Issue.FIELD_STATE)) {
+			if (identifyField.equals(IssueConstants.FIELD_STATE)) {
 				color = workflow.getStateSpec(getColumn()).getColor();
 			} else {
 				InputSpec field = workflow.getFieldSpec(identifyField);
@@ -274,7 +275,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				super.onConfigure();
 				setVisible(getQuery() != null 
 						&& SecurityUtils.getUser() != null
-						&& (!getBoard().getIdentifyField().equals(Issue.FIELD_STATE) 
+						&& (!getBoard().getIdentifyField().equals(IssueConstants.FIELD_STATE) 
 								|| getColumn().equals(getProject().getIssueWorkflow().getInitialStateSpec().getName())));
 			}
 			
@@ -328,7 +329,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					OneDev.getInstance(IssueActionManager.class).changeMilestone(issue, getMilestone());
 					markAccepted(target, issue, true);
 					checkMatched(target, issue);
-				} else if (fieldName.equals(Issue.FIELD_STATE)) {
+				} else if (fieldName.equals(IssueConstants.FIELD_STATE)) {
 					IssueWorkflow workflow = getProject().getIssueWorkflow();
 					boolean canTransiteIssue = false;
 					for (TransitionSpec transition: workflow.getTransitionSpecs()) {

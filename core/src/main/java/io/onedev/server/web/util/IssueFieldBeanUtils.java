@@ -14,8 +14,8 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -51,7 +51,7 @@ public class IssueFieldBeanUtils {
 	}
 	
 	public static void setState(Serializable fieldBean, String state) {
-		setFieldValue(fieldBean, Issue.FIELD_STATE, state);
+		setFieldValue(fieldBean, IssueConstants.FIELD_STATE, state);
 	}
 	
 	@Nullable

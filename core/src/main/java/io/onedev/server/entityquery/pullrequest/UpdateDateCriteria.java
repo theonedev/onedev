@@ -8,6 +8,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryLexer;
 
 public class UpdateDateCriteria extends PullRequestCriteria {
@@ -28,7 +29,7 @@ public class UpdateDateCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context) {
-		Path<Date> attribute = PullRequestQuery.getPath(context.getRoot(), PullRequest.FIELD_PATHS.get(PullRequest.FIELD_UPDATE_DATE));
+		Path<Date> attribute = PullRequestQuery.getPath(context.getRoot(), PullRequestConstants.ATTR_UPDATE_DATE);
 		if (operator == PullRequestQueryLexer.IsBefore)
 			return context.getBuilder().lessThan(attribute, value);
 		else
@@ -50,7 +51,7 @@ public class UpdateDateCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequest.FIELD_UPDATE_DATE) + " " + PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(rawValue);
+		return PullRequestQuery.quote(PullRequestConstants.FIELD_UPDATE_DATE) + " " + PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(rawValue);
 	}
 
 }
