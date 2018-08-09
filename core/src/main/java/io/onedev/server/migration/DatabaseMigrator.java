@@ -471,4 +471,269 @@ public class DatabaseMigrator {
 		}
 	}
 	
+	/*
+	 * Migrate from 1.0 to 2.0
+	 */
+	private void migrate16(File dataDir, Stack<Integer> versions) {
+		Map<String, Integer> codeCommentReplyCounts = new HashMap<>();
+		Map<String, String> userNames = new HashMap<>();
+		Map<String, Set<String>> requestCodeComments = new HashMap<>();
+		Map<String, Integer> requestCommentCounts = new HashMap<>();
+		Set<String> openRequests = new HashSet<>();
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element fullNameElement = element.element("fullName");
+					if (fullNameElement != null)
+						userNames.put(element.elementTextTrim("id"), fullNameElement.getText());
+					else
+						userNames.put(element.elementTextTrim("id"), element.elementText("name"));
+				}				
+			} else if (file.getName().startsWith("CodeCommentReplys.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String commentId = element.elementTextTrim("comment");
+					Integer replyCount = codeCommentReplyCounts.get(commentId);
+					if (replyCount == null)
+						replyCount = 0;
+					replyCount++;
+					codeCommentReplyCounts.put(commentId, replyCount);
+				}				
+			} else if (file.getName().startsWith("CodeCommentRelations.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String commentId = element.elementTextTrim("comment");
+					String requestId = element.elementTextTrim("request");
+					Set<String> codeComments = requestCodeComments.get(requestId);
+					if (codeComments == null) {
+						codeComments = new HashSet<>();
+						requestCodeComments.put(requestId, codeComments);
+					}
+					codeComments.add(commentId);
+				}				
+			} else if (file.getName().startsWith("PullRequestComments.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String commentId = element.elementTextTrim("request");
+					Integer commentCount = requestCommentCounts.get(commentId);
+					if (commentCount == null)
+						commentCount = 0;
+					commentCount++;
+					requestCommentCounts.put(commentId, commentCount);
+				}				
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.element("closeInfo") == null) {
+						openRequests.add(element.elementTextTrim("id"));
+					}
+				}				
+			}
+		}
+		
+		for (Map.Entry<String, Set<String>> entry: requestCodeComments.entrySet()) {
+			Integer commentCount = requestCommentCounts.get(entry.getKey());
+			if (commentCount == null)
+				commentCount = 0;
+			for (String commentId: entry.getValue()) {
+				commentCount++;
+				Integer replyCount = codeCommentReplyCounts.get(commentId);
+				if (replyCount != null)
+					commentCount += replyCount;
+			}
+			requestCommentCounts.put(entry.getKey(), commentCount);
+		}
+		
+		VersionedDocument requestReviewsDOM = new VersionedDocument();
+		Element requestReviewListElement = requestReviewsDOM.addElement("list");
+		
+		VersionedDocument configurationsDOM = new VersionedDocument();
+		Element configurationListElement = configurationsDOM.addElement("list");
+		Map<String, Map<String, Long>> projectConfigurations = new HashMap<>();
+		long configurationCount = 0;
+		
+		int reviewCount = 0;
+		
+		VersionedDocument requestBuildsDOM = new VersionedDocument();
+		Element requestBuildListElement = requestBuildsDOM.addElement("list");
+		int requestBuildCount = 0;
+		
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("BranchWatches.xml") 
+					|| file.getName().startsWith("PullRequestReferences.xml")
+					|| file.getName().startsWith("PullRequestStatusChanges.xml")
+					|| file.getName().startsWith("PullRequestTasks.xml")
+					|| file.getName().startsWith("ReviewInvitations.xml")
+					|| file.getName().startsWith("Reviews.xml")) {
+				FileUtils.deleteFile(file);
+			} else if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Integer replyCount = codeCommentReplyCounts.get(element.elementTextTrim("id"));
+					if (replyCount == null)
+						replyCount = 0;
+					element.addElement("replyCount").setText(String.valueOf(replyCount));
+					
+					Element lastEventElement = element.element("lastEvent");
+					if (lastEventElement != null) {
+						lastEventElement.setName("lastActivity");
+						lastEventElement.element("type").setName("description");
+						Element userElement = lastEventElement.element("user");
+						Element userNameElement = lastEventElement.element("userName");
+						if (userNameElement != null) {
+							if (userElement != null)
+								userElement.detach();
+						} else {
+							if (userElement != null) {
+								userElement.setName("userName");
+								userElement.setText(userNames.get(userElement.getTextTrim()));
+							} else {
+								lastEventElement.addElement("userName").setText("unknown");
+							}
+						}
+					} else {
+						Element lastActivityElement = element.addElement("lastActivity");
+						lastActivityElement.addElement("description").setText("created");
+						Element dateElement = lastActivityElement.addElement("date");
+						dateElement.addAttribute("class", "sql-timestamp");
+						dateElement.setText(element.elementText("date"));
+						Element userElement = element.element("user");
+						if (userElement != null)
+							lastActivityElement.addElement("userName").setText(userNames.get(userElement.getTextTrim()));
+						else
+							lastActivityElement.addElement("userName").setText(element.elementText("userName"));
+					}
+				}				
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Integer commentCount = requestCommentCounts.get(element.elementTextTrim("id"));
+					if (commentCount == null)
+						commentCount = 0;
+					element.addElement("commentCount").setText(String.valueOf(commentCount));
+					
+					Element lastCodeCommentEventDateElement = element.element("lastCodeCommentEventDate");
+					if (lastCodeCommentEventDateElement != null)
+						lastCodeCommentEventDateElement.setName("lastCodeCommentActivityDate");
+					
+					Element closeInfoElement = element.element("closeInfo");
+					if (closeInfoElement != null) {
+						Element closedByElement = closeInfoElement.element("closedBy");
+						if (closedByElement != null)
+							closedByElement.setName("user");
+						Element closedByNameElement = closeInfoElement.element("closedByName");
+						if (closedByNameElement != null)
+							closedByNameElement.setName("userName");
+						closeInfoElement.element("closeDate").setName("date");
+						closeInfoElement.element("closeStatus").setName("status");
+					}
+					Element lastEventElement = element.element("lastEvent");
+					if (lastEventElement != null) {
+						lastEventElement.setName("lastActivity");
+						lastEventElement.element("type").setName("description");
+						Element userElement = lastEventElement.element("user");
+						Element userNameElement = lastEventElement.element("userName");
+						if (userNameElement != null) {
+							if (userElement != null)
+								userElement.detach();
+						} else {
+							if (userElement != null) {
+								userElement.setName("userName");
+								userElement.setText(userNames.get(userElement.getTextTrim()));
+							} else {
+								lastEventElement.addElement("userName").setText("unknown");
+							}
+						}
+					} else {
+						Element lastActivityElement = element.addElement("lastActivity");
+						lastActivityElement.addElement("description").setText("submitted");
+						Element dateElement = lastActivityElement.addElement("date");
+						dateElement.addAttribute("class", "sql-timestamp");
+						dateElement.setText(element.elementText("submitDate"));
+						Element submitterElement = element.element("submitter");
+						if (submitterElement != null)
+							lastActivityElement.addElement("userName").setText(userNames.get(submitterElement.getTextTrim()));
+						else
+							lastActivityElement.addElement("userName").setText(element.elementText("submitterName"));
+					}
+				}				
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Configs.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.setName("io.onedev.server.model.Setting");
+					Element settingElement = element.element("setting");
+					if (settingElement != null)
+						settingElement.setName("value");
+				}
+				FileUtils.deleteFile(file);
+				dom.writeToFile(new File(file.getParentFile(), file.getName().replace("Config", "Setting")), false);
+			} else if (file.getName().startsWith("PullRequestWatchs.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element reasonElement = element.element("reason");
+					if (reasonElement != null)
+						reasonElement.detach();
+					Element ignoreElement = element.element("ignore");
+					ignoreElement.setName("watching");
+					ignoreElement.setText(String.valueOf(!Boolean.parseBoolean(ignoreElement.getTextTrim())));
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String project = element.elementTextTrim("id");
+					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
+						branchProtectionElement.element("verifyMerges").setName("buildMerges");
+						Element verificationsElement = branchProtectionElement.element("verifications");
+						verificationsElement.setName("configurations");
+						for (Element verificationElement: verificationsElement.elements()) {
+							String verification = verificationElement.getText();
+							Map<String, Long> configurations = projectConfigurations.get(project);
+							if (configurations == null) {
+								configurations = new HashMap<>();
+								projectConfigurations.put(project, configurations);
+							}
+							Long configurationId = configurations.get(verification);
+							if (configurationId == null) {
+								configurationId = ++configurationCount;
+								configurations.put(verification, configurationId);
+								Element configurationElement = configurationListElement.addElement("io.onedev.server.model.Configuration");
+								configurationElement.addAttribute("revision", "0.0");
+								configurationElement.addElement("id").setText(String.valueOf(configurationId));
+								configurationElement.addElement("project").setText(project);
+								configurationElement.addElement("name").setText(verification);
+							}
+							for (String request: openRequests) {
+								Element requestBuildElement = requestBuildListElement.addElement("io.onedev.server.model.PullRequestBuild");
+								requestBuildElement.addAttribute("revision", "0.0");
+								requestBuildElement.addElement("id").setText(String.valueOf(++requestBuildCount));
+								requestBuildElement.addElement("request").setText(request);
+								requestBuildElement.addElement("configuration").setText(String.valueOf(configurationId));
+							}
+						}
+						Element submitterElement = branchProtectionElement.element("submitter");
+						String submitterClass = submitterElement.attributeValue("class");
+						submitterClass = submitterClass.replace("io.onedev.server.model.support.submitter.", 
+								"io.onedev.server.model.support.ifsubmittedby.");
+						submitterElement.attribute("class").setValue(submitterClass);
+					}
+					for (Element tagProtectionElement: element.element("tagProtections").elements()) {
+						Element submitterElement = tagProtectionElement.element("submitter");
+						String submitterClass = submitterElement.attributeValue("class");
+						submitterClass = submitterClass.replace("io.onedev.server.model.support.submitter.", 
+								"io.onedev.server.model.support.ifsubmittedby.");
+						submitterElement.attribute("class").setValue(submitterClass);
+					}
+				}				
+				dom.writeToFile(file, false);
+			}
+		}
+
+		requestReviewsDOM.writeToFile(new File(dataDir, "PullRequestReviews.xml"), false);
+		configurationsDOM.writeToFile(new File(dataDir, "Configurations.xml"), false);
+		requestBuildsDOM.writeToFile(new File(dataDir, "PullRequestBuilds.xml"), false);
+	}
 }

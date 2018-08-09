@@ -186,24 +186,24 @@ public class Project extends AbstractEntity {
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
 	@Lob
-	@Column(nullable=false, length=65535)
-	private IssueWorkflow issueWorkflow = new IssueWorkflow();
+	@Column(length=65535)
+	private IssueWorkflow issueWorkflow;
 	
 	@Lob
-	@Column(nullable=false, length=65535)
-	private ArrayList<NamedIssueQuery> savedIssueQueries = new ArrayList<>();
+	@Column(length=65535)
+	private ArrayList<NamedIssueQuery> savedIssueQueries;
 
 	@Lob
-	@Column(nullable=false, length=65535)
-	private ArrayList<NamedPullRequestQuery> savedPullRequestQueries = new ArrayList<>();
+	@Column(length=65535)
+	private ArrayList<NamedPullRequestQuery> savedPullRequestQueries;
 	
 	@Lob
-	@Column(nullable=false, length=65535)
-	private ArrayList<String> issueListFields = new ArrayList<>();
+	@Column(length=65535)
+	private ArrayList<String> issueListFields;
 	
 	@Lob
-	@Column(nullable=false, length=65535)
-	private ArrayList<IssueBoard> issueBoards = new ArrayList<>();
+	@Column(length=65535)
+	private ArrayList<IssueBoard> issueBoards;
 	
 	private transient Repository repository;
 	
@@ -222,37 +222,6 @@ public class Project extends AbstractEntity {
     private transient Optional<IssueQuerySetting> issueQuerySettingOfCurrentUserHolder;
     
     private transient Optional<PullRequestQuerySetting> pullRequestQuerySettingOfCurrentUserHolder;
-    
-    public Project() {
-    	issueListFields.add(IssueConstants.FIELD_NUMBER);
-    	issueListFields.add(IssueConstants.FIELD_STATE);
-    	issueListFields.add(IssueConstants.FIELD_TITLE);
-		issueListFields.add("Type");
-		issueListFields.add("Priority");
-		issueListFields.add(IssueConstants.FIELD_SUBMITTER);
-		issueListFields.add("Assignee");
-		
-		savedIssueQueries.add(new NamedIssueQuery("Open", "open"));
-		savedIssueQueries.add(new NamedIssueQuery("My open", "open and mine"));
-		savedIssueQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
-		savedIssueQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-		savedIssueQueries.add(new NamedIssueQuery("Submitted by me", "\"Submitter\" is me"));
-		savedIssueQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
-		savedIssueQueries.add(new NamedIssueQuery("High Priority", "\"Priority\" is \"High\""));
-		savedIssueQueries.add(new NamedIssueQuery("Closed", "closed"));
-		savedIssueQueries.add(new NamedIssueQuery("All", "all"));
-		
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Open", "open"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("To be reviewed by me", "to be reviewed by me"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("To be changed by me", "submitted by me and someone requested for changes"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Request for changes by me", "requested for changes by me"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Approved by me", "approved by me"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted by me", "submitted by me"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Closed", "merged or discarded"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("All", "all"));
-    }
     
 	@Editable(order=100)
 	@ProjectName
@@ -867,6 +836,8 @@ public class Project extends AbstractEntity {
 	}
 
 	public IssueWorkflow getIssueWorkflow() {
+		if (issueWorkflow == null) 
+			issueWorkflow = new IssueWorkflow();
 		return issueWorkflow;
 	}
 
@@ -875,6 +846,18 @@ public class Project extends AbstractEntity {
 	}
 
 	public ArrayList<NamedIssueQuery> getSavedIssueQueries() {
+		if (savedIssueQueries == null) {
+			savedIssueQueries = new ArrayList<>();
+			savedIssueQueries.add(new NamedIssueQuery("Open", "open"));
+			savedIssueQueries.add(new NamedIssueQuery("My open", "open and mine"));
+			savedIssueQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
+			savedIssueQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+			savedIssueQueries.add(new NamedIssueQuery("Submitted by me", "\"Submitter\" is me"));
+			savedIssueQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
+			savedIssueQueries.add(new NamedIssueQuery("High Priority", "\"Priority\" is \"High\""));
+			savedIssueQueries.add(new NamedIssueQuery("Closed", "closed"));
+			savedIssueQueries.add(new NamedIssueQuery("All", "all"));
+		}
 		return savedIssueQueries;
 	}
 
@@ -883,6 +866,19 @@ public class Project extends AbstractEntity {
 	}
 	
 	public ArrayList<NamedPullRequestQuery> getSavedPullRequestQueries() {
+		if (savedPullRequestQueries == null) {
+			savedPullRequestQueries = new ArrayList<>();
+			savedPullRequestQueries.add(new NamedPullRequestQuery("Open", "open"));
+			savedPullRequestQueries.add(new NamedPullRequestQuery("To be reviewed by me", "to be reviewed by me"));
+			savedPullRequestQueries.add(new NamedPullRequestQuery("To be changed by me", "submitted by me and someone requested for changes"));
+			savedPullRequestQueries.add(new NamedPullRequestQuery("Request for changes by me", "requested for changes by me"));
+			savedPullRequestQueries.add(new NamedPullRequestQuery("Approved by me", "approved by me"));
+			savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted by me", "submitted by me"));
+			savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
+			savedPullRequestQueries.add(new NamedPullRequestQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+			savedPullRequestQueries.add(new NamedPullRequestQuery("Closed", "merged or discarded"));
+			savedPullRequestQueries.add(new NamedPullRequestQuery("All", "all"));
+		}
 		return savedPullRequestQueries;
 	}
 
@@ -909,6 +905,16 @@ public class Project extends AbstractEntity {
 	}
 	
 	public ArrayList<String> getIssueListFields() {
+		if (issueListFields == null) {
+			issueListFields = new ArrayList<>();
+	    	issueListFields.add(IssueConstants.FIELD_NUMBER);
+	    	issueListFields.add(IssueConstants.FIELD_STATE);
+	    	issueListFields.add(IssueConstants.FIELD_TITLE);
+			issueListFields.add("Type");
+			issueListFields.add("Priority");
+			issueListFields.add(IssueConstants.FIELD_SUBMITTER);
+			issueListFields.add("Assignee");
+		}
 		return issueListFields;
 	}
 
@@ -995,6 +1001,9 @@ public class Project extends AbstractEntity {
 	}
 
 	public ArrayList<IssueBoard> getIssueBoards() {
+		if (issueBoards == null) {
+			issueBoards = new ArrayList<>();
+		}
 		return issueBoards;
 	}
 
