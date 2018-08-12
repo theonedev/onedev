@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.layout;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -9,11 +11,13 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -72,6 +76,39 @@ public abstract class LayoutPage extends BasePage {
 				fragment.add(new ViewStateAwarePageLink<Void>("projects", ProjectListPage.class));
 				fragment.add(new ViewStateAwarePageLink<Void>("users", UserListPage.class).setVisible(SecurityUtils.isAdministrator()));
 				fragment.add(new ViewStateAwarePageLink<Void>("groups", GroupListPage.class).setVisible(SecurityUtils.isAdministrator()));
+				
+				fragment.add(new ListView<LayoutMenuContribution>("extensions", new LoadableDetachableModel<List<LayoutMenuContribution>>() {
+
+					@Override
+					protected List<LayoutMenuContribution> load() {
+						List<LayoutMenuContribution> extensions = new ArrayList<>();
+						for (LayoutMenuContribution contribution: OneDev.getExtensions(LayoutMenuContribution.class)) {
+							if (contribution.isAuthorized())
+								extensions.add(contribution);
+						}
+						Collections.sort(extensions, new Comparator<LayoutMenuContribution>() {
+
+							@Override
+							public int compare(LayoutMenuContribution o1, LayoutMenuContribution o2) {
+								return o1.getOrder() - o2.getOrder();
+							}
+							
+						});
+						return extensions;
+					}
+					
+				}) {
+
+					@Override
+					protected void populateItem(ListItem<LayoutMenuContribution> item) {
+						LayoutMenuContribution contribution = item.getModelObject();
+						Link<Void> link = new BookmarkablePageLink<Void>("link", contribution.getPageClass());
+						link.add(new Label("label", contribution.getLabel()));
+						item.add(link);
+					}
+					
+				});
+				
 				fragment.add(new ViewStateAwarePageLink<Void>("administration", SystemSettingPage.class).setVisible(SecurityUtils.isAdministrator()));
 				
 				Plugin product = AppLoader.getProduct();

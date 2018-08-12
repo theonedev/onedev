@@ -221,6 +221,8 @@ import io.onedev.server.web.editable.DefaultEditSupportRegistry;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
+import io.onedev.server.web.page.layout.LayoutMenuContribution;
+import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.util.avatar.AvatarManager;
 import io.onedev.server.web.util.avatar.DefaultAvatarManager;
@@ -442,6 +444,30 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentEventBroadcaster.class);
 		bind(PullRequestEventBroadcaster.class);
 		bind(IssueEventBroadcaster.class);
+		
+		contribute(LayoutMenuContribution.class, new LayoutMenuContribution() {
+			
+			@Override
+			public boolean isAuthorized() {
+				return false;
+			}
+			
+			@Override
+			public Class<? extends LayoutPage> getPageClass() {
+				throw new UnsupportedOperationException();
+			}
+			
+			@Override
+			public int getOrder() {
+				throw new UnsupportedOperationException();
+			}
+			
+			@Override
+			public String getLabel() {
+				throw new UnsupportedOperationException();
+			}
+			
+		});
 	}
 	
 	private void configurePersistence() {

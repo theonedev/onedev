@@ -12,12 +12,16 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.MergePreview;
+import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.EntityManager;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
     
     @Nullable 
     PullRequest findEffective(ProjectAndBranch target, ProjectAndBranch source);
+    
+    @Nullable 
+    PullRequest findOpen(ProjectAndBranch target, ProjectAndBranch source);
     
     Collection<PullRequest> findAllOpenTo(ProjectAndBranch target);
 
@@ -59,6 +63,8 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     void deleteRefs(PullRequest request);
     
     void open(PullRequest request);
+    
+    PullRequest open(ProjectAndBranch source, ProjectAndBranch target, MergeStrategy mergeStrategy, User submitter, String title);
     
     void delete(PullRequest request);
     

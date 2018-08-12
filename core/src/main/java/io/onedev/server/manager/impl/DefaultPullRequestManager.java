@@ -1035,4 +1035,42 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	
+	@Sessional
+	@Override
+	public PullRequest findOpen(ProjectAndBranch target, ProjectAndBranch source) {
+		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
+		criteria.add(ofTarget(target)).add(ofSource(source)).add(ofOpen());
+		return find(criteria);
+	}
+	
+	@Transactional
+	@Override
+	public PullRequest open(ProjectAndBranch source, ProjectAndBranch target, MergeStrategy mergeStrategy, 
+			User submitter, String title) {
+		ObjectId baseCommitId = GitUtils.getMergeBase(
+				target.getProject().getRepository(), target.getObjectId(), 
+				source.getProject().getRepository(), source.getObjectId(), 
+				GitUtils.branch2ref(source.getBranch()));
+		if (baseCommitId != null) {
+			PullRequest request = new PullRequest();
+			request.setTarget(target);
+			request.setSource(source);
+			request.setSubmitter(submitter);
+			request.setTitle(title);
+			request.setBaseCommitHash(baseCommitId.name());
+			request.setHeadCommitHash(source.getObjectName());
+			PullRequestUpdate update = new PullRequestUpdate();
+			request.addUpdate(update);
+			update.setRequest(request);
+			update.setHeadCommitHash(request.getHeadCommitHash());
+			update.setMergeBaseCommitHash(request.getBaseCommitHash());
+			request.setMergeStrategy(mergeStrategy);
+			open(request);
+			
+			return request;
+		} else {
+			throw new OneException("No merge base found");
+		}
+	}
+	
 }

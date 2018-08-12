@@ -97,14 +97,8 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("submitterName", user.getDisplayName());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Issue set reporter=null, reporterName=:reporterName "
-    			+ "where reporter=:reporter");
-    	query.setParameter("reporter", user);
-    	query.setParameter("reporterName", user.getDisplayName());
-    	query.executeUpdate();
-    	
     	query = getSession().createQuery("update PullRequest set closeInfo.user=null, "
-    			+ "closeInfo.userName=:closedByName where closeInfo.user=:user");
+    			+ "closeInfo.userName=:userName where closeInfo.user=:user");
     	query.setParameter("user", user);
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
@@ -129,7 +123,8 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
     	
-    	query = getSession().createQuery("update Issue set submitter=null, submitterName=:submitterName where submitter=:submitter");
+    	query = getSession().createQuery("update Issue set submitter=null, submitterName=:submitterName "
+    			+ "where submitter=:submitter");
     	query.setParameter("submitter", user);
     	query.setParameter("submitterName", user.getDisplayName());
     	query.executeUpdate();
@@ -157,7 +152,8 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 			}
 			project.getIssueWorkflow().onDeleteUser(user.getName());
 		}
-	}
+		
+    }
 
 	@Sessional
     @Override
