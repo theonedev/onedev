@@ -350,11 +350,6 @@
 			<version>${flexmark.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>jsyntax</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
