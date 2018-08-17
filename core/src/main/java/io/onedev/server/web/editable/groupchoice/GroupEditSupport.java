@@ -78,7 +78,7 @@ public class GroupEditSupport implements EditSupport {
         			
         		};
         	} else {
-        		throw new RuntimeException("Annotation 'GroupChoice' should be applied to property with type String or Collection<String>.");
+        		throw new RuntimeException("Annotation 'GroupChoice' should be applied to property with type String or Collection<String>");
         	}
         } else {
             return null;

@@ -54,7 +54,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
-import io.onedev.server.web.component.RequestStateLabel;
+import io.onedev.server.web.component.RequestStatusLabel;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -335,7 +335,7 @@ public class RequestListPage extends ProjectPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				cellItem.add(new RequestStateLabel(componentId, rowModel));
+				cellItem.add(new RequestStatusLabel(componentId, rowModel));
 			}
 
 		});

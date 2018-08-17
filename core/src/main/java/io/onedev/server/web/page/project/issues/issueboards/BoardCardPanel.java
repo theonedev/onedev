@@ -61,7 +61,7 @@ class BoardCardPanel extends GenericPanel<Issue> {
 		
 		RepeatingView avatarsView = new RepeatingView("avatars");
 		for (IssueField field: getIssue().getFields().values()) {
-			if (field.getType().equals(InputSpec.USER_CHOICE) && !field.getValues().isEmpty()) {
+			if (field.getType().equals(InputSpec.USER) && !field.getValues().isEmpty()) {
 				User user = OneDev.getInstance(UserManager.class)
 						.findByName(field.getValues().iterator().next());
 				if (user != null) {

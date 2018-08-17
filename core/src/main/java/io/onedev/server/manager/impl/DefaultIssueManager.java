@@ -1,14 +1,13 @@
 package io.onedev.server.manager.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -22,22 +21,28 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
+import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.OneDev;
 import io.onedev.server.entityquery.EntityQuery;
 import io.onedev.server.entityquery.EntitySort;
-import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.entityquery.EntitySort.Direction;
+import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.entityquery.issue.AndCriteria;
 import io.onedev.server.entityquery.issue.IssueCriteria;
 import io.onedev.server.entityquery.issue.IssueQuery;
 import io.onedev.server.entityquery.issue.IssueQueryBuildContext;
 import io.onedev.server.entityquery.issue.MilestoneCriteria;
+import io.onedev.server.event.RefUpdated;
+import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
@@ -58,6 +63,7 @@ import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -76,8 +82,6 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	
 	private final IssueQuerySettingManager issueQuerySettingManager;
 
-	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
-	
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldUnaryManager issueFieldUnaryManager, 
 			IssueQuerySettingManager issueQuerySettingManager, ListenerRegistry listenerRegistry) {
@@ -89,9 +93,9 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 	@Sessional
 	@Override
-	public Issue find(Project target, long number) {
+	public Issue find(Project project, long number) {
 		EntityCriteria<Issue> criteria = newCriteria();
-		criteria.add(Restrictions.eq("project", target));
+		criteria.add(Restrictions.eq("project", project));
 		criteria.add(Restrictions.eq("number", number));
 		return find(criteria);
 	}
@@ -112,37 +116,6 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		listenerRegistry.post(new IssueOpened(issue));
 	}
 
-	private long getNextNumber(Project project) {
-		AtomicLong nextNumber;
-		synchronized (nextNumbers) {
-			nextNumber = nextNumbers.get(project.getUUID());
-		}
-		if (nextNumber == null) {
-			long maxNumber;
-			Query<?> query = getSession().createQuery("select max(number) from Issue where project=:project");
-			query.setParameter("project", project);
-			Object result = query.uniqueResult();
-			if (result != null) {
-				maxNumber = (Long)result;
-			} else {
-				maxNumber = 0;
-			}
-			
-			/*
-			 * do not put the whole method in synchronized block to avoid possible deadlocks
-			 * if there are limited connections. 
-			 */
-			synchronized (nextNumbers) {
-				nextNumber = nextNumbers.get(project.getUUID());
-				if (nextNumber == null) {
-					nextNumber = new AtomicLong(maxNumber+1);
-					nextNumbers.put(project.getUUID(), nextNumber);
-				}
-			}
-		} 
-		return nextNumber.getAndIncrement();
-	}
-	
 	private Predicate[] getPredicates(io.onedev.server.entityquery.EntityCriteria<Issue> criteria, Project project, QueryBuildContext<Issue> context) {
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(context.getBuilder().equal(context.getRoot().get("project"), project));
@@ -319,19 +292,19 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 		
 		if (number != null) {
-			Issue issue = OneDev.getInstance(IssueManager.class).find(project, number);
+			Issue issue = find(project, number);
 			if (issue != null)
 				issues.add(issue);
-			EntityCriteria<Issue> criteria = EntityCriteria.of(Issue.class);
+			EntityCriteria<Issue> criteria = newCriteria();
 			criteria.add(Restrictions.eq("project", project));
 			criteria.add(Restrictions.and(
 					Restrictions.or(Restrictions.ilike("noSpaceTitle", "%" + term + "%"), Restrictions.ilike("numberStr", term + "%")), 
 					Restrictions.ne("number", number)
 				));
 			criteria.addOrder(Order.desc("number"));
-			issues.addAll(OneDev.getInstance(IssueManager.class).findRange(criteria, 0, count-issues.size()));
+			issues.addAll(findRange(criteria, 0, count-issues.size()));
 		} else {
-			EntityCriteria<Issue> criteria = EntityCriteria.of(Issue.class);
+			EntityCriteria<Issue> criteria = newCriteria();
 			criteria.add(Restrictions.eq("project", project));
 			if (StringUtils.isNotBlank(term)) {
 				criteria.add(Restrictions.or(
@@ -339,7 +312,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 						Restrictions.ilike("numberStr", (term.startsWith("#")? term.substring(1): term) + "%")));
 			}
 			criteria.addOrder(Order.desc("number"));
-			issues.addAll(OneDev.getInstance(IssueManager.class).findRange(criteria, 0, count));
+			issues.addAll(findRange(criteria, 0, count));
 		} 
 		return issues;
 	}
@@ -461,7 +434,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
 		Query query = getSession().createQuery("select distinct name, value from IssueFieldUnary where issue.project=:project and type=:choice");
 		query.setParameter("project", project);
-		query.setParameter("choice", InputSpec.CHOICE);
+		query.setParameter("choice", InputSpec.ENUMERATION);
 		Set<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
 		OneContext.push(new OneContext() {
 
@@ -629,7 +602,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		try {
 			Query query = getSession().createQuery("select distinct name, value, ordinal from IssueFieldUnary where issue.project=:project and type=:choice");
 			query.setParameter("project", project);
-			query.setParameter("choice", InputSpec.CHOICE);
+			query.setParameter("choice", InputSpec.ENUMERATION);
 
 			for (Object[] row: (List<Object[]>)query.getResultList()) {
 				String name = (String) row[0];
@@ -655,6 +628,49 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		
 	}
 
+	@Transactional
+	@Listen
+	public void on(RefUpdated event) {
+		if (!event.getNewCommitId().equals(ObjectId.zeroId())) {
+			Project project = event.getProject();
+			ObjectId oldCommitId;
+			if (!event.getOldCommitId().equals(ObjectId.zeroId()))
+				oldCommitId = event.getOldCommitId();
+			else 
+				oldCommitId = project.getObjectId(project.getDefaultBranch());
+			try (RevWalk revWalk = new RevWalk(project.getRepository())) {
+				revWalk.markStart(revWalk.parseCommit(event.getNewCommitId()));
+				revWalk.markUninteresting(revWalk.parseCommit(oldCommitId));
+				
+				RevCommit commit;
+				while ((commit = revWalk.next()) != null) {
+					for (Long issueNumber: IssueUtils.parseFixedIssues(commit.getFullMessage())) {
+						Issue issue = find(project, issueNumber);
+						if (issue != null) {
+							if (issue.getCommit() == null) {
+								issue.setCommit(commit.name());
+								listenerRegistry.post(new IssueCommitted(issue));
+							} else {
+								try {
+									RevCommit issueCommit = revWalk.parseCommit(ObjectId.fromString(issue.getCommit()));
+									if (issueCommit.getCommitTime() < commit.getCommitTime()) {
+										issue.setCommit(commit.name());
+										listenerRegistry.post(new IssueCommitted(issue));
+									}
+								} catch (MissingObjectException e) {
+									issue.setCommit(commit.name());
+									listenerRegistry.post(new IssueCommitted(issue));
+								}
+							}
+						}
+					}
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+	}
+	
 	/*
 	@Transactional
 	@Override

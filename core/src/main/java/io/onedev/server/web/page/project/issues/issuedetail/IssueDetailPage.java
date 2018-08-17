@@ -70,6 +70,7 @@ import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
@@ -100,7 +101,6 @@ import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.ConfirmOnClick;
-import io.onedev.server.web.util.IssueFieldBeanUtils;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.utils.StringUtils;
@@ -255,9 +255,9 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
-						Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject());
+						Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getProject());
 						Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
-						IssueFieldBeanUtils.setState(fieldBean, transition.getToState());
+						IssueUtils.setState(fieldBean, transition.getToState());
 
 						Collection<String> excludedFields = Sets.newHashSet(IssueConstants.FIELD_STATE);
 						for (String fieldName: getProject().getIssueWorkflow().getFieldNames()) {
@@ -276,7 +276,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						};
 						
 						BeanEditor editor = BeanContext.editBean("fields", fieldBean, 
-								IssueFieldBeanUtils.getPropertyNames(fieldBeanClass, excludedFields)); 
+								IssueUtils.getPropertyNames(fieldBeanClass, excludedFields)); 
 						form.add(editor);
 						
 						form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment"), false) {
@@ -304,7 +304,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 							protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 								super.onSubmit(target, form);
 
-								Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(fieldBean);
+								Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean);
 								getIssueChangeManager().changeState(getIssue(), transition.getToState(), fieldValues, comment);
 							
 								setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
@@ -328,7 +328,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					}
 					
 				};
-				link.add(new Label("label", transition.getOnAction().getButton().getName()));
+				link.add(new Label("label", transition.getTrigger().getButton().getName()));
 				transitionsView.add(link);
 			}
 		}
@@ -541,11 +541,11 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 				Fragment fragment = new Fragment(id, "fieldEditFrag", IssueDetailPage.this);
 				Form<?> form = new Form<Void>("form");
 
-				Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject());
+				Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getProject());
 				Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true); 
 				
 				Collection<String> excludedFields = Sets.newHashSet(IssueConstants.FIELD_STATE);
-				form.add(BeanContext.editBean("editor", fieldBean, IssueFieldBeanUtils.getPropertyNames(fieldBeanClass, excludedFields)));
+				form.add(BeanContext.editBean("editor", fieldBean, IssueUtils.getPropertyNames(fieldBeanClass, excludedFields)));
 				
 				form.add(new AjaxButton("save") {
 
@@ -553,7 +553,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 						
-						Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(fieldBean);
+						Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean);
 						OneDev.getInstance(IssueActionManager.class).changeFields(getIssue(), fieldValues);
 						modal.close();
 						target.add(fieldsContainer);

@@ -8,8 +8,18 @@
 		<a wicket:id="name" class="name"></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="issueFrag">
-		<div class="issue">
+		<div class="issue referenceable">
 			<a wicket:id="link"><span wicket:id="label"></span></a> <span wicket:id="state"></span>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="pullRequestFrag">
+		<div class="pull-request referenceable">
+			<a wicket:id="link"><span wicket:id="label"></span></a> <span wicket:id="status"></span>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="buildFrag">
+		<div class="build referenceable">
+			<a wicket:id="link"><span wicket:id="label"></span></a> <span wicket:id="status"></span>
 		</div>
 	</wicket:fragment>
 </wicket:panel>

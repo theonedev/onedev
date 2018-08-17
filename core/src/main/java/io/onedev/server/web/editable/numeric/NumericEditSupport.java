@@ -12,7 +12,9 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
+import io.onedev.server.web.editable.annotation.BuildChoice;
 import io.onedev.server.web.editable.annotation.IssueChoice;
+import io.onedev.server.web.editable.annotation.PullRequestChoice;
 
 @SuppressWarnings("serial")
 public class NumericEditSupport implements EditSupport {
@@ -23,7 +25,9 @@ public class NumericEditSupport implements EditSupport {
 		Class<?> propertyClass = propertyGetter.getReturnType();
 		if ((propertyClass == int.class || propertyClass == long.class 
 				|| propertyClass == Integer.class || propertyClass == Long.class) 
-				&& propertyGetter.getAnnotation(IssueChoice.class) == null) {
+				&& propertyGetter.getAnnotation(IssueChoice.class) == null
+				&& propertyGetter.getAnnotation(PullRequestChoice.class) == null
+				&& propertyGetter.getAnnotation(BuildChoice.class) == null) {
 			return new PropertyContext<Number>(descriptor) {
 
 				@Override

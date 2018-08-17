@@ -15,4 +15,13 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	@Nullable
 	Build find(Configuration configuration, String commit);
+	
+	@Nullable
+	Build find(Project project, long number);
+	
+	List<Build> query(Project project, String term, int count);
+	
+	@Nullable
+	Build findPrevious(Build build);
+	
 }

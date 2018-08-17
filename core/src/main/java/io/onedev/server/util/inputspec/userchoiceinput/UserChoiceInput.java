@@ -19,7 +19,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import jersey.repackaged.com.google.common.collect.Lists;
 
-@Editable(order=150, name=InputSpec.USER_CHOICE)
+@Editable(order=150, name=InputSpec.USER)
 public class UserChoiceInput extends InputSpec {
 	
 	private static final long serialVersionUID = 1L;

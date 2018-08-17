@@ -87,7 +87,7 @@ public class BuildStatusPanel extends GenericPanel<List<Build>> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new BuildResourceReference()));
+		response.render(CssHeaderItem.forReference(new BuildCssResourceReference()));
 	}
 	
 }

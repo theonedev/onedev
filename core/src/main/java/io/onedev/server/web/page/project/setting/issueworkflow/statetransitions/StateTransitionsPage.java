@@ -142,10 +142,10 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
-						Collections.swap(getWorkflow().getStateSpecs(), fromIndex+i, fromIndex+i+1);
+						Collections.swap(getWorkflow().getTransitionSpecs(), fromIndex+i, fromIndex+i+1);
 				} else {
 					for (int i=0; i<fromIndex-toIndex; i++) 
-						Collections.swap(getWorkflow().getStateSpecs(), fromIndex-i, fromIndex-i-1);
+						Collections.swap(getWorkflow().getTransitionSpecs(), fromIndex-i, fromIndex-i-1);
 				}
 				
 				getProject().setIssueWorkflow(getWorkflow());
@@ -241,7 +241,7 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 
 								@Override
 								public void onClick(AjaxRequestTarget target) {
-									getWorkflow().getStateSpecs().remove(index);
+									getWorkflow().getTransitionSpecs().remove(index);
 									getProject().setIssueWorkflow(getWorkflow());
 									OneDev.getInstance(ProjectManager.class).save(getProject());
 									target.add(transitionsTable);

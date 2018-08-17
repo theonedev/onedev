@@ -25,6 +25,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -32,7 +33,6 @@ import io.onedev.server.web.component.projectcomment.CommentInput;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.util.IssueFieldBeanUtils;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 
 @SuppressWarnings("serial")
@@ -56,7 +56,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 		Issue issue = newIssue();
 		
-		Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject());
+		Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getProject());
 		Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
 		titleInput = new TextField<String>("title", Model.of("")); 
 		titleInput.setRequired(true).setLabel(Model.of("Title"));
@@ -100,7 +100,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		milestoneChoice.setRequired(false);
 		add(milestoneChoice);
 		
-		Collection<String> excludedProperties = IssueFieldBeanUtils.getPropertyNames(fieldBeanClass, Sets.newHashSet(IssueConstants.FIELD_STATE));
+		Collection<String> excludedProperties = IssueUtils.getPropertyNames(fieldBeanClass, Sets.newHashSet(IssueConstants.FIELD_STATE));
 		add(fieldEditor = new BeanContext(fieldBean.getClass(), excludedProperties).renderForEdit("fields", Model.of(fieldBean)));
 	}
 	
@@ -151,7 +151,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			issue.setDescription(descriptionInput.getConvertedInput());
 			issue.setMilestone(getProject().getMilestone(milestoneChoice.getConvertedInput()));
 			
-			issue.setFieldValues(IssueFieldBeanUtils.getFieldValues(fieldEditor.getConvertedInput()));
+			issue.setFieldValues(IssueUtils.getFieldValues(fieldEditor.getConvertedInput()));
 			setConvertedInput(issue);
 		} catch (ConversionException e) {
 			error(newValidationError(e));

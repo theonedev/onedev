@@ -52,13 +52,15 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.inputspec.BuildChoiceInput;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.IssueChoiceInput;
+import io.onedev.server.util.inputspec.PullRequestChoiceInput;
 import io.onedev.server.util.inputspec.booleaninput.BooleanInput;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
-import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
 import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
@@ -252,11 +254,12 @@ public class IssueQuery extends EntityQuery<Issue> {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
 								InputSpec field = project.getIssueWorkflow().getFieldSpec(fieldName);
-								if (field instanceof IssueChoiceInput) {
+								if (field instanceof IssueChoiceInput || field instanceof BuildChoiceInput 
+										|| field instanceof PullRequestChoiceInput) {
 									value = value.trim();
 									if (value.startsWith("#"))
 										value = value.substring(1);
-									return new IssueFieldCriteria(fieldName, getIntValue(value));
+									return new ReferenceableFieldCriteria(fieldName, getIntValue(value));
 								} else if (field instanceof BooleanInput) {
 									return new BooleanFieldCriteria(fieldName, getBooleanValue(value));
 								} else if (field instanceof NumberInput) {
@@ -387,6 +390,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 					&& !fieldName.equals(FIELD_NUMBER)
 					&& !fieldName.equals(FIELD_MILESTONE)
 					&& !(fieldSpec instanceof IssueChoiceInput)
+					&& !(fieldSpec instanceof PullRequestChoiceInput)
+					&& !(fieldSpec instanceof BuildChoiceInput)
 					&& !(fieldSpec instanceof BooleanInput)
 					&& !(fieldSpec instanceof NumberInput) 
 					&& !(fieldSpec instanceof ChoiceInput) 

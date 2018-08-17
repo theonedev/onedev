@@ -19,13 +19,13 @@ import io.onedev.server.entityquery.issue.StateCriteria;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.model.support.authorized.ProjectWriters;
 import io.onedev.server.model.support.issue.IssueConstants;
-import io.onedev.server.model.support.issue.workflow.action.PressButton;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.IssueChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
-import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
@@ -191,20 +191,20 @@ public class IssueWorkflow implements Serializable {
 		TransitionSpec transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Open"));
 		transition.setToState("Closed");
-		PressButton pressButton = new PressButton();
+		PressButtonTrigger pressButton = new PressButtonTrigger();
 		pressButton.setName("Close");
 		pressButton.setAuthorized(new ProjectWriters());
-		transition.setOnAction(pressButton);
+		transition.setTrigger(pressButton);
 		
 		transitionSpecs.add(transition);
 		
 		transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Closed"));
 		transition.setToState("Open");
-		pressButton = new PressButton();
+		pressButton = new PressButtonTrigger();
 		pressButton.setName("Reopen");
 		pressButton.setAuthorized(new ProjectWriters());
-		transition.setOnAction(pressButton);
+		transition.setTrigger(pressButton);
 		
 		transitionSpecs.add(transition);
 	}
@@ -261,6 +261,19 @@ public class IssueWorkflow implements Serializable {
 	
 	public List<String> getFieldNames() {
 		return new ArrayList<>(getFieldSpecMap().keySet());
+	}
+	
+	public void onDeleteConfiguration(String configurationName) {
+		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) {
+			TransitionSpec transition = it.next();
+			if (transition.onDeleteConfiguration(configurationName))
+				it.remove();
+		}
+	}
+	
+	public void onRenameConfiguration(String oldName, String newName) {
+		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) 
+			it.next().onRenameConfiguration(oldName, newName);
 	}
 	
 	public void onDeleteState(String stateName) {

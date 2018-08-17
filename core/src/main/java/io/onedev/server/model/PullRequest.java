@@ -45,6 +45,7 @@ import io.onedev.server.event.pullrequest.PullRequestActionEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentAdded;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
@@ -57,6 +58,7 @@ import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.jackson.RestView;
 
@@ -182,6 +184,8 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	private transient Optional<MergePreview> mergePreviewOpt;
 	
 	private transient Boolean valid;
+	
+	private transient Collection<Issue> fixedIssues;
 	
 	/**
 	 * Get title of this merge request.
@@ -595,14 +599,6 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		this.reviews = reviews;
 	}
 
-	public String getNumberStr() {
-		return numberStr;
-	}
-
-	public String getNoSpaceTitle() {
-		return noSpaceTitle;
-	}
-
 	public long getVersion() {
 		return version;
 	}
@@ -818,6 +814,20 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	
 	public static String getWebSocketObservable(Long requestId) {
 		return PullRequest.class.getName() + ":" + requestId;
+	}
+	
+	public Collection<Issue> getFixedIssues() {
+		if (fixedIssues == null) {
+			fixedIssues = new HashSet<>();
+			for (RevCommit commit: getCommits()) {
+				for (Long issueNumber: IssueUtils.parseFixedIssues(commit.getFullMessage())) {
+					Issue issue = OneDev.getInstance(IssueManager.class).find(getTargetProject(), issueNumber);
+					if (issue != null)
+						fixedIssues.add(issue);
+				}
+			}
+		}
+		return fixedIssues;
 	}
 	
 	public static class ComparingInfo implements Serializable {

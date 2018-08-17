@@ -30,14 +30,15 @@ onedev.server.infiniteScroll = {
 		var $lastItem = $items.last();
 		
 		var pageSize = $container.data("pageSize");
-		if ($container.find(".loading-indicator").length == 0 && $container.data("hasMore") 
-				&& $lastItem.length != 0 && isInViewPort($lastItem)) {
+		if (!$container.data("appending") && $container.data("hasMore") && $lastItem.length != 0 && isInViewPort($lastItem)) {
 			$container.data("prevItems", $items.length);
 			$container.data("callback")($items.length, pageSize);
+			$container.data("appending", true);
 		}
 	}, 
 	onAppended: function(containerId) {
 		var $container = $("#" + containerId);
+		$container.data("appending", false);
 		var $items = onedev.server.infiniteScroll.getItems($container);
 		$container.data("hasMore", $items.length - $container.data("prevItems") >= $container.data("pageSize"));
 		onedev.server.infiniteScroll.check(containerId);

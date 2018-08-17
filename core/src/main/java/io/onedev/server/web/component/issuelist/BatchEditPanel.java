@@ -36,6 +36,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.IssueConstants;
+import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.RunTaskBehavior;
@@ -44,7 +45,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.util.IssueFieldBeanUtils;
 import io.onedev.server.web.util.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
@@ -145,7 +145,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		});
 		
 		builtInFieldsBean = new BuiltInFieldsBean();
-		Class<? extends Serializable> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getProject());
+		Class<? extends Serializable> fieldBeanClass = IssueUtils.defineBeanClass(getProject());
 		Issue issue = new Issue();
 		issue.setProject(getProject());
 		if (getIssueQuery() != null && getIssueQuery().getCriteria() != null) {
@@ -158,7 +158,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new RuntimeException(e);
 			}
-			IssueFieldBeanUtils.clearFields(customFieldsBean);
+			IssueUtils.clearFields(customFieldsBean);
 		}
 		
 		Set<String> excludedProperties = new HashSet<>();
@@ -212,9 +212,9 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 							milestone = Optional.fromNullable(getProject().getMilestone(builtInFieldsBean.getMilestone()));
 						else
 							milestone = null;
-						String state = (String) IssueFieldBeanUtils.getFieldValue(customFieldsBean, IssueConstants.FIELD_STATE);
+						String state = (String) IssueUtils.getFieldValue(customFieldsBean, IssueConstants.FIELD_STATE);
 						
-						Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(customFieldsBean);
+						Map<String, Object> fieldValues = IssueUtils.getFieldValues(customFieldsBean);
 						fieldValues.keySet().retainAll(selectedFields);
 						
 						OneDev.getInstance(IssueActionManager.class).batchUpdate(

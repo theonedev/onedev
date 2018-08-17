@@ -28,13 +28,13 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     Collection<PullRequest> findAllOpen(ProjectAndBranch sourceOrTarget);
     
     @Nullable
-    PullRequest find(Project target, long number);
+    PullRequest find(Project targetProject, long number);
     
 	@Nullable
 	PullRequest find(String uuid);
 	
 	@Nullable
-	PullRequest findLatest(Project project, User submitter);
+	PullRequest findLatest(Project targetProject, User submitter);
 	
 	Collection<PullRequest> findOpenByCommit(String commitHash);
     
@@ -72,11 +72,14 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	void restoreSourceBranch(PullRequest request, @Nullable String note);
 	
-	int countOpen(Project project);
+	int countOpen(Project targetProject);
 	
 	void checkQuality(PullRequest request);
 	
-	List<PullRequest> query(Project project, EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults);
+	List<PullRequest> query(Project targetProject, EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults);
 	
-	int count(Project project, EntityCriteria<PullRequest> requestCriteria);
+	int count(Project targetProject, EntityCriteria<PullRequest> requestCriteria);
+	
+	List<PullRequest> query(Project targetProject, String term, int count);
+	
 }

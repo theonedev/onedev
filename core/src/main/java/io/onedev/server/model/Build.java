@@ -1,6 +1,9 @@
 package io.onedev.server.model;
 
+import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +13,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.BuildManager;
+import io.onedev.server.manager.IssueManager;
+import io.onedev.server.util.IssueUtils;
 
 @Entity
 @Table(
@@ -23,10 +37,10 @@ public class Build extends AbstractEntity {
 	public static final String STATUS = "status";
 	
 	public enum Status {
-		SUCCESS("successful"), 
-		FAILURE("failed"), 
-		ERROR("in error"), 
-		RUNNING("running");
+		SUCCESS("Successful"), 
+		FAILURE("Failed"), 
+		ERROR("In error"), 
+		RUNNING("Running");
 		
 		private final String description;
 		
@@ -39,13 +53,25 @@ public class Build extends AbstractEntity {
 		}
 
 	};
-
+	
+	private long number;
+	
+	// used for number search in markdown editor
+	@Column(nullable=false)
+	private String numberStr;
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Configuration configuration;
 	
 	@Column(nullable=false)
 	private String commit;
+	
+	@Column(nullable=false)
+	private String commitShortMessage;
+	
+	@Column(nullable=false)
+	private String noSpaceCommitShortMessage;
 	
 	@Column(nullable=false)
 	private Status status; 
@@ -59,6 +85,8 @@ public class Build extends AbstractEntity {
 	@Column(nullable=false)
 	private String url;
 
+	private transient Collection<Issue> fixedIssues;
+	
 	public Configuration getConfiguration() {
 		return configuration;
 	}
@@ -83,6 +111,15 @@ public class Build extends AbstractEntity {
 		this.status = status;
 	}
 
+	public String getCommitShortMessage() {
+		return commitShortMessage;
+	}
+
+	public void setCommitShortMessage(String commitShortMessage) {
+		this.commitShortMessage = commitShortMessage;
+		noSpaceCommitShortMessage = StringUtils.deleteWhitespace(commitShortMessage);
+	}
+
 	public Date getDate() {
 		return date;
 	}
@@ -98,6 +135,15 @@ public class Build extends AbstractEntity {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
+	public long getNumber() {
+		return number;
+	}
+
+	public void setNumber(long number) {
+		this.number = number;
+		numberStr = String.valueOf(number);
+	}
 
 	public String getUrl() {
 		return url;
@@ -105,6 +151,42 @@ public class Build extends AbstractEntity {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+	
+	public Collection<Issue> getFixedIssues() {
+		if (fixedIssues == null) {
+			fixedIssues = new HashSet<>();
+			
+			ObjectId prevCommit;
+			Build prevBuild = OneDev.getInstance(BuildManager.class).findPrevious(this);
+			if (prevBuild != null) 
+				prevCommit = ObjectId.fromString(prevBuild.getCommit());
+			else if (getConfiguration().getBaseCommit() != null)
+				prevCommit = ObjectId.fromString(getConfiguration().getBaseCommit());
+			else
+				return fixedIssues;
+			
+			Project project = getConfiguration().getProject();
+			
+			IssueManager issueManager = OneDev.getInstance(IssueManager.class);
+			Repository repository = project.getRepository();
+			try (RevWalk revWalk = new RevWalk(repository)) {
+				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommit())));
+				revWalk.markUninteresting(revWalk.parseCommit(prevCommit));
+
+				RevCommit commit;
+				while ((commit = revWalk.next()) != null) {
+					for (Long issueNumber: IssueUtils.parseFixedIssues(commit.getFullMessage())) {
+						Issue issue = issueManager.find(project, issueNumber);
+						if (issue != null)
+							fixedIssues.add(issue);
+					}
+				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return fixedIssues;
 	}
 	
 }

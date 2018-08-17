@@ -13,9 +13,11 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.authorized.SpecifiedGroup;
 import io.onedev.server.model.support.authorized.SpecifiedUser;
 import io.onedev.server.model.support.issue.IssueField;
-import io.onedev.server.model.support.issue.workflow.action.IssueAction;
-import io.onedev.server.model.support.issue.workflow.action.PressButton;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.TransitionTrigger;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.BuildSuccessfulTrigger;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.PullRequestTrigger;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -38,7 +40,7 @@ public class TransitionSpec implements Serializable {
 	
 	private TransitionPrerequisite prerequisite;
 	
-	private IssueAction onAction;
+	private TransitionTrigger trigger;
 	
 	@Editable(order=50)
 	@NameOfEmptyValue("No description")
@@ -86,18 +88,18 @@ public class TransitionSpec implements Serializable {
 
 	@Editable(order=400, name="Do Transition When")
 	@NotNull(message="may not be empty")
-	public IssueAction getOnAction() {
-		return onAction;
+	public TransitionTrigger getTrigger() {
+		return trigger;
 	}
 
-	public void setOnAction(IssueAction onAction) {
-		this.onAction = onAction;
+	public void setTrigger(TransitionTrigger trigger) {
+		this.trigger = trigger;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		IssueAction onAction = getOnAction();
-		if (onAction instanceof PressButton) {
-			PressButton pressButton = (PressButton) onAction;
+		TransitionTrigger trigger = getTrigger();
+		if (trigger instanceof PressButtonTrigger) {
+			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
 			if (pressButton.getAuthorized() instanceof SpecifiedUser) {
 				SpecifiedUser specifiedUser = (SpecifiedUser) pressButton.getAuthorized();
 				if (specifiedUser.getUserName().equals(oldName))
@@ -107,9 +109,9 @@ public class TransitionSpec implements Serializable {
 	}
 	
 	public boolean onDeleteUser(String userName) {
-		IssueAction onAction = getOnAction();
-		if (onAction instanceof PressButton) {
-			PressButton pressButton = (PressButton) onAction;
+		TransitionTrigger trigger = getTrigger();
+		if (trigger instanceof PressButtonTrigger) {
+			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
 			if (pressButton.getAuthorized() instanceof SpecifiedUser) {
 				SpecifiedUser specifiedUser = (SpecifiedUser) pressButton.getAuthorized();
 				if (specifiedUser.getUserName().equals(userName))
@@ -119,10 +121,29 @@ public class TransitionSpec implements Serializable {
 		return false;
 	}
 	
+	public boolean onDeleteConfiguration(String configurationName) {
+		TransitionTrigger trigger = getTrigger();
+		if (trigger instanceof BuildSuccessfulTrigger) {
+			BuildSuccessfulTrigger buildSuccessfulTrigger = (BuildSuccessfulTrigger) trigger;
+			if (buildSuccessfulTrigger.getConfiguration().equals(configurationName))
+				return true;
+		}
+		return false;
+	}
+	
+	public void onRenameConfiguration(String oldName, String newName) {
+		TransitionTrigger trigger = getTrigger();
+		if (trigger instanceof BuildSuccessfulTrigger) {
+			BuildSuccessfulTrigger buildSuccessfulTrigger = (BuildSuccessfulTrigger) trigger;
+			if (buildSuccessfulTrigger.getConfiguration().equals(oldName))
+				buildSuccessfulTrigger.setConfiguration(newName);
+		}
+	}
+	
 	public void onRenameGroup(String oldName, String newName) {
-		IssueAction onAction = getOnAction();
-		if (onAction instanceof PressButton) {
-			PressButton pressButton = (PressButton) onAction;
+		TransitionTrigger trigger = getTrigger();
+		if (trigger instanceof PressButtonTrigger) {
+			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
 			if (pressButton.getAuthorized() instanceof SpecifiedGroup) {
 				SpecifiedGroup specifiedGroup = (SpecifiedGroup) pressButton.getAuthorized();
 				if (specifiedGroup.getGroupName().equals(oldName))
@@ -132,9 +153,9 @@ public class TransitionSpec implements Serializable {
 	}
 	
 	public boolean onDeleteGroup(String groupName) {
-		IssueAction onAction = getOnAction();
-		if (onAction instanceof PressButton) {
-			PressButton pressButton = (PressButton) onAction;
+		TransitionTrigger trigger = getTrigger();
+		if (trigger instanceof PressButtonTrigger) {
+			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
 			if (pressButton.getAuthorized() instanceof SpecifiedGroup) {
 				SpecifiedGroup specifiedGroup = (SpecifiedGroup) pressButton.getAuthorized();
 				if (specifiedGroup.getGroupName().equals(groupName))
@@ -147,10 +168,30 @@ public class TransitionSpec implements Serializable {
 	public void onFieldRename(String oldName, String newName) {
 		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(oldName))
 			getPrerequisite().setInputName(newName);
+		if (getTrigger() instanceof BuildSuccessfulTrigger) {
+			BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) getTrigger();
+			if (oldName.equals(trigger.getBuildField()))
+				trigger.setBuildField(newName);
+		} else if (getTrigger() instanceof PullRequestTrigger) {
+			PullRequestTrigger trigger = (PullRequestTrigger) getTrigger();
+			if (oldName.equals(trigger.getPullRequestField()))
+				trigger.setPullRequestField(newName);
+		}
 	}
 	
 	public boolean onFieldDelete(String fieldName) {
-		return getPrerequisite() != null && getPrerequisite().getInputName().equals(fieldName);
+		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(fieldName)) 
+			return true;
+		if (getTrigger() instanceof BuildSuccessfulTrigger) {
+			BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) getTrigger();
+			if (fieldName.equals(trigger.getBuildField()))
+				return true;
+		} else if (getTrigger() instanceof PullRequestTrigger) {
+			PullRequestTrigger trigger = (PullRequestTrigger) getTrigger();
+			if (fieldName.equals(trigger.getPullRequestField()))
+				return true;
+		}
+		return false;
 	}
 	
 	@SuppressWarnings("unused")
@@ -168,8 +209,8 @@ public class TransitionSpec implements Serializable {
 	}
 
 	public boolean canApplyTo(Issue issue) {
-		if (getFromStates().contains(issue.getState()) && getOnAction().getButton() != null && SecurityUtils.getUser() != null
-				&& getOnAction().getButton().getAuthorized().matches(issue.getProject(), SecurityUtils.getUser())) {
+		if (getFromStates().contains(issue.getState()) && getTrigger().getButton() != null && SecurityUtils.getUser() != null
+				&& getTrigger().getButton().getAuthorized().matches(issue.getProject(), SecurityUtils.getUser())) {
 			if (getPrerequisite() == null) {
 				return true;
 			} else {

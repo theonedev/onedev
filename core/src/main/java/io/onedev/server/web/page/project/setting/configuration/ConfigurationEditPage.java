@@ -19,22 +19,26 @@ public class ConfigurationEditPage extends ProjectSettingPage {
 
 	private static final String PARAM_CONFIGURATION = "configuration";
 	
-	private final Configuration configuration;
+	private final Long configurationId;
 	
 	private final String oldName;
 	
 	public ConfigurationEditPage(PageParameters params) {
 		super(params);
 		
-		Long configurationId = params.get(PARAM_CONFIGURATION).toLong();
-		configuration = OneDev.getInstance(ConfigurationManager.class).load(configurationId);
-		oldName = configuration.getName();
+		configurationId = params.get(PARAM_CONFIGURATION).toLong();
+		oldName = getConfiguration().getName();
+	}
+
+	private Configuration getConfiguration() {
+		return OneDev.getInstance(ConfigurationManager.class).load(configurationId);
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
+		Configuration configuration = getConfiguration();
 		BeanEditor editor = BeanContext.editBean("editor", configuration);
 
 		Form<?> form = new Form<Void>("form") {
@@ -50,8 +54,9 @@ public class ConfigurationEditPage extends ProjectSettingPage {
 							.addError("This name has already been used by another configuration in the project");
 				} 
 				if (!editor.hasErrors(true)) {
-					configuration.setProject(getProject());
-					configurationManager.save(configuration, oldName);
+					Configuration reloaded = getConfiguration();
+					editor.getBeanDescriptor().copyProperties(configuration, reloaded);
+					configurationManager.save(reloaded, oldName);
 					setResponsePage(ConfigurationListPage.class, ConfigurationListPage.paramsOf(getProject()));
 					Session.get().success("Configuration updated");
 				}

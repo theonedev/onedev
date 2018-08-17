@@ -45,13 +45,19 @@ public abstract class InputSpec implements Serializable {
 	
 	public static final String NUMBER = "Number";
 	
-	public static final String CHOICE = "Enumeration";
+	public static final String COMMIT = "Commit";
 	
-	public static final String USER_CHOICE = "User choice";
+	public static final String ENUMERATION = "Enumeration";
 	
-	public static final String GROUP_CHOICE = "Group choice";
+	public static final String USER = "User";
 	
-	public static final String ISSUE_CHOICE = "Issue choice";
+	public static final String GROUP = "Group";
+	
+	public static final String ISSUE = "Issue";
+	
+	public static final String BUILD = "Build";
+
+	public static final String PULLREQUEST = "Pull request";
 	
 	private String name;
 

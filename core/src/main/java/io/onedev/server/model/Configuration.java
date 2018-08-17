@@ -17,6 +17,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.util.validation.annotation.CommitHash;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Entity
@@ -35,6 +36,8 @@ public class Configuration extends AbstractEntity {
 	private Project project;
 	
 	private String name;
+	
+	private String baseCommit;
 
 	@OneToMany(mappedBy="configuration", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestBuild> pullRequestBuilds = new ArrayList<>();
@@ -50,7 +53,7 @@ public class Configuration extends AbstractEntity {
 		this.project = project;
 	}
 
-	@Editable
+	@Editable(order=100)
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -58,6 +61,16 @@ public class Configuration extends AbstractEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Editable(order=200)
+	@CommitHash
+	public String getBaseCommit() {
+		return baseCommit;
+	}
+
+	public void setBaseCommit(String baseCommit) {
+		this.baseCommit = baseCommit;
 	}
 
 	public Collection<PullRequestBuild> getPullRequestBuilds() {

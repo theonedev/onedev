@@ -1,6 +1,15 @@
 package io.onedev.server.web.behavior;
 
-import static io.onedev.server.model.support.issue.IssueConstants.*;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_COMMENT;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_COMMENT_COUNT;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_DESCRIPTION;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_MILESTONE;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_NUMBER;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_STATE;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_SUBMIT_DATE;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_TITLE;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_UPDATE_DATE;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_VOTE_COUNT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,30 +28,36 @@ import io.onedev.codeassist.FenceAware;
 import io.onedev.codeassist.InputSuggestion;
 import io.onedev.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.codeassist.parser.Element;
-import io.onedev.codeassist.parser.TerminalExpect;
 import io.onedev.codeassist.parser.ParseExpect;
+import io.onedev.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneDev;
 import io.onedev.server.entityquery.issue.IssueQuery;
 import io.onedev.server.entityquery.issue.IssueQueryParser;
 import io.onedev.server.exception.OneException;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.UserManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.inputspec.BuildChoiceInput;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.IssueChoiceInput;
+import io.onedev.server.util.inputspec.PullRequestChoiceInput;
 import io.onedev.server.util.inputspec.booleaninput.BooleanInput;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
-import io.onedev.server.util.inputspec.issuechoiceinput.IssueChoiceInput;
 import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
@@ -142,6 +157,18 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										List<Issue> issues = OneDev.getInstance(IssueManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
 										for (Issue issue: issues) {
 											InputSuggestion suggestion = new InputSuggestion("#" + issue.getNumber(), StringUtils.abbreviate(issue.getTitle(), MAX_ISSUE_TITLE_LEN), null);
+											suggestions.add(suggestion);
+										}
+									} else if (fieldSpec instanceof BuildChoiceInput) {
+										List<Build> builds = OneDev.getInstance(BuildManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
+										for (Build build: builds) {
+											InputSuggestion suggestion = new InputSuggestion("#" + build.getNumber(), StringUtils.abbreviate(build.getCommitShortMessage(), MAX_ISSUE_TITLE_LEN), null);
+											suggestions.add(suggestion);
+										}
+									} else if (fieldSpec instanceof PullRequestChoiceInput) {
+										List<PullRequest> requests = OneDev.getInstance(PullRequestManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
+										for (PullRequest request: requests) {
+											InputSuggestion suggestion = new InputSuggestion("#" + request.getNumber(), StringUtils.abbreviate(request.getTitle(), MAX_ISSUE_TITLE_LEN), null);
 											suggestions.add(suggestion);
 										}
 									} else if (fieldSpec instanceof BooleanInput) {

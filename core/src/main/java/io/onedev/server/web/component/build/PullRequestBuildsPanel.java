@@ -8,8 +8,8 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
@@ -77,18 +77,14 @@ public class PullRequestBuildsPanel extends GenericPanel<PullRequest> {
 				WebMarkupContainer result = new WebMarkupContainer("result");
 				String tooltip;
 				if (build.getBuild() != null) {
-					if (build.getBuild().getDescription() != null) {
-						if (build.getBuild().getUrl() != null) {
-							Fragment fragment = new Fragment("content", "linkFrag", PullRequestBuildsPanel.this);
-							ExternalLink link = new ExternalLink("link", build.getBuild().getUrl());
-							link.add(new Label("label", build.getBuild().getDescription()));
-							fragment.add(link);
-							item.add(fragment);
-						} else {
-							item.add(new Label("content", build.getBuild().getDescription()));
-						}
+					if (build.getBuild().getUrl() != null) {
+						Fragment fragment = new Fragment("content", "linkFrag", PullRequestBuildsPanel.this);
+						ExternalLink link = new ExternalLink("link", build.getBuild().getUrl());
+						link.add(new Label("label", build.getBuild().getDescription()));
+						fragment.add(link);
+						item.add(fragment);
 					} else {
-						item.add(new Label("content").setVisible(false));
+						item.add(new Label("content", build.getBuild().getDescription()));
 					}
 					if (build.getBuild().getStatus() == Status.SUCCESS) {
 						result.add(AttributeAppender.append("class", "success fa fa-check"));
@@ -135,7 +131,7 @@ public class PullRequestBuildsPanel extends GenericPanel<PullRequest> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new BuildResourceReference()));
+		response.render(CssHeaderItem.forReference(new BuildCssResourceReference()));
 	}
 
 }

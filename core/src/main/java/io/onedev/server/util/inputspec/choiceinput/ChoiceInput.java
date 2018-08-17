@@ -20,7 +20,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
-@Editable(order=145, name=InputSpec.CHOICE)
+@Editable(order=145, name=InputSpec.ENUMERATION)
 public class ChoiceInput extends InputSpec {
 	
 	private static final long serialVersionUID = 1L;

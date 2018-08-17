@@ -1,6 +1,7 @@
 package io.onedev.server.manager.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -12,14 +13,22 @@ import org.apache.wicket.util.lang.Objects;
 
 import com.google.common.base.Optional;
 
+import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.issue.IssueActionEvent;
+import io.onedev.server.event.issue.IssueCommitted;
+import io.onedev.server.event.pullrequest.PullRequestActionEvent;
+import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.Milestone;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.changedata.BatchUpdateData;
@@ -27,6 +36,15 @@ import io.onedev.server.model.support.issue.changedata.FieldChangeData;
 import io.onedev.server.model.support.issue.changedata.MilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.StateChangeData;
 import io.onedev.server.model.support.issue.changedata.TitleChangeData;
+import io.onedev.server.model.support.issue.workflow.TransitionSpec;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.BuildSuccessfulTrigger;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.CommitTrigger;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.DiscardPullRequest;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.MergePullRequest;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.OpenPullRequest;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.PullRequestTrigger;
+import io.onedev.server.model.support.pullrequest.actiondata.DiscardedData;
+import io.onedev.server.model.support.pullrequest.actiondata.MergedData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -190,6 +208,71 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 			save(change);
 			
 			listenerRegistry.post(new IssueActionEvent(change));
+		}
+	}
+	
+	@Transactional
+	@Listen
+	public void on(BuildEvent event) {
+		Configuration configuration = event.getBuild().getConfiguration();
+		for (TransitionSpec transition: event.getBuild().getConfiguration().getProject().getIssueWorkflow().getTransitionSpecs()) {
+			if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
+				BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
+				if (trigger.getConfiguration().equals(configuration.getName()) 
+						&& event.getBuild().getStatus() == Build.Status.SUCCESS) {
+					for (Issue issue: event.getBuild().getFixedIssues()) {
+						if (transition.getFromStates().contains(issue.getState())) { 
+							Map<String, Object> fieldValues = new HashMap<>();
+							if (trigger.getBuildField() != null)
+								fieldValues.put(trigger.getBuildField(), event.getBuild().getNumber());
+							changeState(issue, transition.getToState(), fieldValues, null);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	private void on(PullRequest request, Class<? extends PullRequestTrigger> triggerClass) {
+		for (TransitionSpec transition: request.getTargetProject().getIssueWorkflow().getTransitionSpecs()) {
+			if (transition.getTrigger().getClass() == triggerClass) {
+				PullRequestTrigger trigger = (PullRequestTrigger) transition.getTrigger();
+				if (trigger.getBranch().equals(request.getTargetBranch())) {
+					for (Issue issue: request.getFixedIssues()) {
+						if (transition.getFromStates().contains(issue.getState())) {
+							Map<String, Object> fieldValues = new HashMap<>();
+							if (trigger.getPullRequestField() != null)
+								fieldValues.put(trigger.getPullRequestField(), request.getNumber());
+							changeState(issue, transition.getToState(), fieldValues, null);
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	@Transactional
+	@Listen
+	public void on(PullRequestActionEvent event) {
+		if (event.getAction().getData() instanceof MergedData)
+			on(event.getRequest(), MergePullRequest.class);
+		else if (event.getAction().getData() instanceof DiscardedData)
+			on(event.getRequest(), DiscardPullRequest.class);
+	}
+	
+	@Transactional
+	@Listen
+	public void on(PullRequestOpened event) {
+		on(event.getRequest(), OpenPullRequest.class);
+	}
+	
+	@Transactional
+	@Listen
+	public void on(IssueCommitted event) {
+		Issue issue = event.getIssue();
+		for (TransitionSpec transition: issue.getProject().getIssueWorkflow().getTransitionSpecs()) {
+			if (transition.getTrigger() instanceof CommitTrigger && transition.getFromStates().contains(issue.getState())) 
+				changeState(issue, transition.getToState(), new HashMap<>(), null);
 		}
 	}
 	

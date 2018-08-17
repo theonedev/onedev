@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -60,11 +59,12 @@ import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
 import io.onedev.server.entityquery.EntityQuery;
 import io.onedev.server.entityquery.EntitySort;
-import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.entityquery.EntitySort.Direction;
+import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.entityquery.pullrequest.PullRequestQuery;
 import io.onedev.server.entityquery.pullrequest.PullRequestQueryBuildContext;
 import io.onedev.server.event.RefUpdated;
+import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestActionEvent;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
@@ -158,8 +158,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	private final ConfigurationManager configurationManager;
 	
 	private final BuildManager buildManager;
-	
-	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
 	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
@@ -340,37 +338,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			}
 			
 		});
-	}
-	
-	private long getNextNumber(Project project) {
-		AtomicLong nextNumber;
-		synchronized (nextNumbers) {
-			nextNumber = nextNumbers.get(project.getUUID());
-		}
-		if (nextNumber == null) {
-			long maxNumber;
-			Query<?> query = getSession().createQuery("select max(number) from PullRequest where targetProject=:project");
-			query.setParameter("project", project);
-			Object result = query.uniqueResult();
-			if (result != null) {
-				maxNumber = (Long)result;
-			} else {
-				maxNumber = 0;
-			}
-			
-			/*
-			 * do not put the whole method in synchronized block to avoid possible deadlocks
-			 * if there are limited connections. 
-			 */
-			synchronized (nextNumbers) {
-				nextNumber = nextNumbers.get(project.getUUID());
-				if (nextNumber == null) {
-					nextNumber = new AtomicLong(maxNumber+1);
-					nextNumbers.put(project.getUUID(), nextNumber);
-				}
-			}
-		} 
-		return nextNumber.getAndIncrement();
 	}
 	
 	@Transactional
@@ -611,10 +578,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public PullRequest findLatest(Project project, User submitter) {
+	public PullRequest findLatest(Project targetProject, User submitter) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
-		criteria.add(Restrictions.or(ofSourceProject(project), ofTargetProject(project)));
+		criteria.add(Restrictions.or(ofSourceProject(targetProject), ofTargetProject(targetProject)));
 		criteria.add(ofSubmitter(submitter));
 		criteria.addOrder(Order.desc("id"));
 		return find(criteria);
@@ -640,20 +607,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Sessional
 	@Override
-	public int countOpen(Project project) {
+	public int countOpen(Project targetProject) {
 		EntityCriteria<PullRequest> criteria = newCriteria();
 		criteria.add(PullRequest.CriterionHelper.ofOpen());
-		criteria.add(PullRequest.CriterionHelper.ofTargetProject(project));
+		criteria.add(PullRequest.CriterionHelper.ofTargetProject(targetProject));
 		return count(criteria);
-	}
-
-	@Sessional
-	@Override
-	public PullRequest find(Project target, long number) {
-		EntityCriteria<PullRequest> criteria = newCriteria();
-		criteria.add(Restrictions.eq("targetProject", target));
-		criteria.add(Restrictions.eq("number", number));
-		return find(criteria);
 	}
 
 	@Sessional
@@ -676,11 +634,15 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 	}
 	
-	@Transactional
 	@Listen
-	public void on(PullRequestBuildEvent event) {
-		if (event.getBuild().getStatus() != Build.Status.RUNNING)
-			checkAsync(event.getRequest());
+	@Transactional
+	public void on(BuildEvent event) {
+		Build build = event.getBuild();
+		for (PullRequest request: findOpenByCommit(build.getCommit())) { 
+			listenerRegistry.post(new PullRequestBuildEvent(request, build));
+			if (build.getStatus() != Build.Status.RUNNING)
+				checkAsync(request);
+		}
 	}
 	
 	@Listen
@@ -978,22 +940,24 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		return findAll(criteria);
 	}
 	
-	private Predicate[] getPredicates(io.onedev.server.entityquery.EntityCriteria<PullRequest> criteria, Project project, QueryBuildContext<PullRequest> context) {
+	private Predicate[] getPredicates(io.onedev.server.entityquery.EntityCriteria<PullRequest> criteria, 
+			Project targetProject, QueryBuildContext<PullRequest> context) {
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(context.getBuilder().equal(context.getRoot().get("targetProject"), project));
+		predicates.add(context.getBuilder().equal(context.getRoot().get("targetProject"), targetProject));
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(project, context));
+			predicates.add(criteria.getPredicate(targetProject, context));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
-	private CriteriaQuery<PullRequest> buildCriteriaQuery(Session session, Project project, EntityQuery<PullRequest> requestQuery) {
+	private CriteriaQuery<PullRequest> buildCriteriaQuery(Session session, Project targetProject, 
+			EntityQuery<PullRequest> requestQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<PullRequest> query = builder.createQuery(PullRequest.class);
 		Root<PullRequest> root = query.from(PullRequest.class);
 		query.select(root).distinct(true);
 		
 		QueryBuildContext<PullRequest> context = new PullRequestQueryBuildContext(root, builder);
-		query.where(getPredicates(requestQuery.getCriteria(), project, context));
+		query.where(getPredicates(requestQuery.getCriteria(), targetProject, context));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: requestQuery.getSorts()) {
@@ -1013,8 +977,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Sessional
 	@Override
-	public List<PullRequest> query(Project project, EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults) {
-		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), project, requestQuery);
+	public List<PullRequest> query(Project targetProject, EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults) {
+		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), targetProject, requestQuery);
 		Query<PullRequest> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
@@ -1023,13 +987,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public int count(Project project, io.onedev.server.entityquery.EntityCriteria<PullRequest> requestCriteria) {
+	public int count(Project targetProject, io.onedev.server.entityquery.EntityCriteria<PullRequest> requestCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 
 		QueryBuildContext<PullRequest> context = new PullRequestQueryBuildContext(root, builder);
-		criteriaQuery.where(getPredicates(requestCriteria, project, context));
+		criteriaQuery.where(getPredicates(requestCriteria, targetProject, context));
 
 		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
@@ -1071,6 +1035,56 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		} else {
 			throw new OneException("No merge base found");
 		}
+	}
+	
+	@Sessional
+	@Override
+	public PullRequest find(Project targetProject, long number) {
+		EntityCriteria<PullRequest> criteria = newCriteria();
+		criteria.add(Restrictions.eq("targetProject", targetProject));
+		criteria.add(Restrictions.eq("number", number));
+		return find(criteria);
+	}
+	
+	@Sessional
+	@Override
+	public List<PullRequest> query(Project targetProject, String term, int count) {
+		List<PullRequest> requests = new ArrayList<>();
+		
+		Long number = null;
+		String numberStr = term;
+		if (numberStr != null) {
+			numberStr = numberStr.trim();
+			if (numberStr.startsWith("#"))
+				numberStr = numberStr.substring(1);
+			if (StringUtils.isNumeric(numberStr))
+				number = Long.valueOf(numberStr);
+		}
+		
+		if (number != null) {
+			PullRequest request = find(targetProject, number);
+			if (request != null)
+				requests.add(request);
+			EntityCriteria<PullRequest> criteria = newCriteria();
+			criteria.add(Restrictions.eq("targetProject", targetProject));
+			criteria.add(Restrictions.and(
+					Restrictions.or(Restrictions.ilike("noSpaceTitle", "%" + term + "%"), Restrictions.ilike("numberStr", term + "%")), 
+					Restrictions.ne("number", number)
+				));
+			criteria.addOrder(Order.desc("number"));
+			requests.addAll(findRange(criteria, 0, count-requests.size()));
+		} else {
+			EntityCriteria<PullRequest> criteria = newCriteria();
+			criteria.add(Restrictions.eq("targetProject", targetProject));
+			if (StringUtils.isNotBlank(term)) {
+				criteria.add(Restrictions.or(
+						Restrictions.ilike("noSpaceTitle", "%" + term + "%"), 
+						Restrictions.ilike("numberStr", (term.startsWith("#")? term.substring(1): term) + "%")));
+			}
+			criteria.addOrder(Order.desc("number"));
+			requests.addAll(findRange(criteria, 0, count));
+		} 
+		return requests;
 	}
 	
 }

@@ -90,6 +90,7 @@ public class CommitStatusResource {
     		build = new Build();
     		build.setConfiguration(configuration);
         	build.setCommit(commit);
+        	build.setCommitShortMessage(project.getRevCommit(commit).getShortMessage());
     	}
     	build.setStatus(Build.Status.valueOf(status));
     	build.setDate(new Date());

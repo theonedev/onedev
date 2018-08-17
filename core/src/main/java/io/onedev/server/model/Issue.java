@@ -76,6 +76,8 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@Column(nullable=false)
 	private String title;
 	
+	private String commit;
+	
 	@Lob
 	@Column(length=65535)
 	private String description;
@@ -185,12 +187,12 @@ public class Issue extends AbstractEntity implements Referenceable {
 		numberStr = String.valueOf(number);
 	}
 
-	public String getNumberStr() {
-		return numberStr;
+	public String getCommit() {
+		return commit;
 	}
 
-	public void setNumberStr(String numberStr) {
-		this.numberStr = numberStr;
+	public void setCommit(String commit) {
+		this.commit = commit;
 	}
 
 	public User getSubmitter() {

@@ -48,18 +48,14 @@ public class BuildDetailPanel extends GenericPanel<List<Build>> {
 				
 				item.add(new Label("configuration", build.getConfiguration().getName()));
 				
-				if (build.getDescription() != null) {
-					if (build.getUrl() != null) {
-						Fragment fragment = new Fragment("content", "linkFrag", BuildDetailPanel.this);
-						ExternalLink link = new ExternalLink("link", build.getUrl());
-						link.add(new Label("label", build.getDescription())); 
-						fragment.add(link);
-						item.add(fragment);
-					} else {
-						item.add(new Label("content", build.getDescription()));
-					}
+				if (build.getUrl() != null) {
+					Fragment fragment = new Fragment("content", "linkFrag", BuildDetailPanel.this);
+					ExternalLink link = new ExternalLink("link", build.getUrl());
+					link.add(new Label("label", build.getDescription())); 
+					fragment.add(link);
+					item.add(fragment);
 				} else {
-					item.add(new WebMarkupContainer("content").setVisible(false));
+					item.add(new Label("content", build.getDescription()));
 				}
 			}
 			
@@ -74,7 +70,7 @@ public class BuildDetailPanel extends GenericPanel<List<Build>> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new BuildResourceReference()));
+		response.render(CssHeaderItem.forReference(new BuildCssResourceReference()));
 	}
 	
 }

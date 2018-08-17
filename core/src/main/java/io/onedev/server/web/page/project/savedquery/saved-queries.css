@@ -20,7 +20,7 @@
 	display: none;
 }
 .saved-queries>.body .watch-status:before {
-	font-size: 10px;
+	line-height: 12px;
 }
 
 .edit-saved-queries th {

@@ -70,9 +70,9 @@ public class FieldChangeData implements ActionData {
 	}
 	
 	private void extractUsersAndGroups(IssueField field) {
-		if (field.getType().equals(InputSpec.USER_CHOICE) && !field.getValues().isEmpty()) 
+		if (field.getType().equals(InputSpec.USER) && !field.getValues().isEmpty()) 
 			newUserNames.put(field.getName(), field.getValues().iterator().next());
-		if (field.getType().equals(InputSpec.GROUP_CHOICE) && !field.getValues().isEmpty()) 
+		if (field.getType().equals(InputSpec.GROUP) && !field.getValues().isEmpty()) 
 			newGroupNames.put(field.getName(), field.getValues().iterator().next());
 	}
 

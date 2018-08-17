@@ -1,8 +1,9 @@
-.field-values .issue a {
+.field-values .referenceable a {
 	margin-right: 4px;
 }
-.field-values .issue .issue-state {
+.field-values .referenceable .referenceable-status {
 	font-size: 11px;
+	padding: 2px 4px;
 }
 .field-values .has-color {
 	margin-bottom: 8px;

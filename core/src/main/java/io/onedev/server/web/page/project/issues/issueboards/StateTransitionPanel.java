@@ -16,11 +16,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.IssueConstants;
+import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.util.IssueFieldBeanUtils;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
@@ -34,9 +34,9 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Class<?> fieldBeanClass = IssueFieldBeanUtils.defineBeanClass(getIssue().getProject());
+		Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getIssue().getProject());
 		Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
-		IssueFieldBeanUtils.setState(fieldBean, getTargetState());
+		IssueUtils.setState(fieldBean, getTargetState());
 		Collection<String> excludedFields = Sets.newHashSet(IssueConstants.FIELD_STATE);
 		for (String fieldName: getIssue().getProject().getIssueWorkflow().getFieldNames()) {
 			if (getIssue().isFieldVisible(fieldName, getIssue().getState()))
@@ -50,7 +50,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 		form.add(new Label("state", getTargetState()));
 		
 		BeanEditor editor = BeanContext.editBean("editor", fieldBean, 
-				IssueFieldBeanUtils.getPropertyNames(fieldBeanClass, excludedFields)); 
+				IssueUtils.getPropertyNames(fieldBeanClass, excludedFields)); 
 		form.add(editor);
 		
 		form.add(new AjaxButton("ok") {
@@ -59,7 +59,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				Map<String, Object> fieldValues = IssueFieldBeanUtils.getFieldValues(fieldBean);
+				Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean);
 				OneDev.getInstance(IssueActionManager.class).changeState(getIssue(), getTargetState(), fieldValues, null);
 				onSaved(target);
 			}

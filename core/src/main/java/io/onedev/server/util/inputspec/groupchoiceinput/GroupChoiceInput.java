@@ -18,7 +18,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import jersey.repackaged.com.google.common.collect.Lists;
 
-@Editable(order=160, name=InputSpec.GROUP_CHOICE)
+@Editable(order=160, name=InputSpec.GROUP)
 public class GroupChoiceInput extends InputSpec {
 	
 	private static final long serialVersionUID = 1L;
