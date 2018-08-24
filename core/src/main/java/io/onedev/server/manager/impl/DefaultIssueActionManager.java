@@ -225,6 +225,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 							Map<String, Object> fieldValues = new HashMap<>();
 							if (trigger.getBuildField() != null)
 								fieldValues.put(trigger.getBuildField(), event.getBuild().getNumber());
+							issue.removeFields(transition.getRemoveFields());
 							changeState(issue, transition.getToState(), fieldValues, null);
 						}
 					}
@@ -243,6 +244,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 							Map<String, Object> fieldValues = new HashMap<>();
 							if (trigger.getPullRequestField() != null)
 								fieldValues.put(trigger.getPullRequestField(), request.getNumber());
+							issue.removeFields(transition.getRemoveFields());
 							changeState(issue, transition.getToState(), fieldValues, null);
 						}
 					}
@@ -271,8 +273,10 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 	public void on(IssueCommitted event) {
 		Issue issue = event.getIssue();
 		for (TransitionSpec transition: issue.getProject().getIssueWorkflow().getTransitionSpecs()) {
-			if (transition.getTrigger() instanceof CommitTrigger && transition.getFromStates().contains(issue.getState())) 
+			if (transition.getTrigger() instanceof CommitTrigger && transition.getFromStates().contains(issue.getState())) {
+				issue.removeFields(transition.getRemoveFields());
 				changeState(issue, transition.getToState(), new HashMap<>(), null);
+			}
 		}
 	}
 	

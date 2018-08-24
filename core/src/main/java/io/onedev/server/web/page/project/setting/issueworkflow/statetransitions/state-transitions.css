@@ -28,7 +28,9 @@
 .floating.state-transition .property-authorized .value {
 	white-space: nowrap;
 } 
-.floating.state-transition .property-prerequisite .property-fieldName td.name {
+.floating.state-transition .property-prerequisite .property-inputName td.name, 
+.floating.state-transition .property-buttonLabel td.name, 
+.floating.state-transition .property-promptFields td.name {
 	border-right: none;
 	text-align: left;
 }

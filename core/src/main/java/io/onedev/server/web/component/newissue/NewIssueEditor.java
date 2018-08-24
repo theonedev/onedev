@@ -18,12 +18,9 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.google.common.collect.Sets;
-
 import io.onedev.server.entityquery.issue.IssueCriteria;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.inputspec.InputContext;
@@ -100,8 +97,9 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		milestoneChoice.setRequired(false);
 		add(milestoneChoice);
 		
-		Collection<String> excludedProperties = IssueUtils.getPropertyNames(fieldBeanClass, Sets.newHashSet(IssueConstants.FIELD_STATE));
-		add(fieldEditor = new BeanContext(fieldBean.getClass(), excludedProperties).renderForEdit("fields", Model.of(fieldBean)));
+		Collection<String> properties = IssueUtils.getPropertyNames(fieldBeanClass, 
+				getProject().getIssueWorkflow().getPromptFieldsUponIssueOpen());
+		add(fieldEditor = new BeanContext(fieldBean.getClass(), properties, false).renderForEdit("fields", Model.of(fieldBean)));
 	}
 	
 	protected abstract Project getProject();
@@ -151,7 +149,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			issue.setDescription(descriptionInput.getConvertedInput());
 			issue.setMilestone(getProject().getMilestone(milestoneChoice.getConvertedInput()));
 			
-			issue.setFieldValues(IssueUtils.getFieldValues(fieldEditor.getConvertedInput()));
+			Collection<String> fieldNames = getProject().getIssueWorkflow().getPromptFieldsUponIssueOpen(); 
+			issue.setFieldValues(IssueUtils.getFieldValues(fieldEditor.getConvertedInput(), fieldNames));
 			setConvertedInput(issue);
 		} catch (ConversionException e) {
 			error(newValidationError(e));

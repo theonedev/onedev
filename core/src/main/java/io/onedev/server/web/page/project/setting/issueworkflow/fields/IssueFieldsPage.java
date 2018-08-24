@@ -42,6 +42,7 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
+import io.onedev.utils.StringUtils;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
@@ -100,6 +101,16 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
 				InputSpec field = rowModel.getObject();
 				cellItem.add(new ColumnFragment(componentId, rowModel, EditableUtils.getDisplayName(field.getClass()), false));
+			}
+		});		
+		
+		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Prompt upon issue open")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+				InputSpec field = rowModel.getObject();
+				String label = StringUtils.describe(getWorkflow().getPromptFieldsUponIssueOpen().contains(field.getName()));
+				cellItem.add(new ColumnFragment(componentId, rowModel, label, false));
 			}
 		});		
 		
@@ -186,8 +197,7 @@ public class IssueFieldsPage extends IssueWorkflowPage {
 						protected Component newBody(String id) {
 							SideFloating sideFloating = this;
 							Fragment fragment = new Fragment(id, "viewFieldFrag", IssueFieldsPage.this);
-							getField().setupShowConditionsForDisplay();
-							fragment.add(BeanContext.viewBean("viewer", getField(), Sets.newHashSet("name")));
+							fragment.add(BeanContext.viewBean("viewer", getField(), Sets.newHashSet("name"), true));
 							fragment.add(new ModalLink("edit") {
 
 								@Override

@@ -46,7 +46,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
@@ -65,10 +64,11 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.IssueConstants;
+import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.inputspec.InputContext;
@@ -247,89 +247,86 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 		});
 		for (TransitionSpec transition: transitions) {
-			if (transition.canApplyTo(getIssue())) {
-				AjaxLink<Void> link = new AjaxLink<Void>(transitionsView.newChildId()) {
+			if (transition.canTransite(getIssue()) && transition.getTrigger() instanceof PressButtonTrigger) {
+				PressButtonTrigger trigger = (PressButtonTrigger) transition.getTrigger();
+				if (trigger.isAuthorized()) {
+					AjaxLink<Void> link = new AjaxLink<Void>(transitionsView.newChildId()) {
 
-					private String comment;
-					
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
-						Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getProject());
-						Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
-						IssueUtils.setState(fieldBean, transition.getToState());
+						private String comment;
+						
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueDetailPage.this);
+							Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getProject());
+							Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
 
-						Collection<String> excludedFields = Sets.newHashSet(IssueConstants.FIELD_STATE);
-						for (String fieldName: getProject().getIssueWorkflow().getFieldNames()) {
-							if (getIssue().isFieldVisible(fieldName, getIssue().getState()))
-								excludedFields.add(fieldName);
+							Form<?> form = new Form<Void>("form") {
+
+								@Override
+								protected void onError() {
+									super.onError();
+									RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+								}
+								
+							};
+							
+							Collection<String> propertyNames = IssueUtils.getPropertyNames(fieldBeanClass, trigger.getPromptFields());
+							BeanEditor editor = BeanContext.editBean("fields", fieldBean, propertyNames, false); 
+							form.add(editor);
+							
+							form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment"), false) {
+
+								@Override
+								protected AttachmentSupport getAttachmentSupport() {
+									return new ProjectAttachmentSupport(getProject(), getIssue().getUUID());
+								}
+
+								@Override
+								protected Project getProject() {
+									return getIssue().getProject();
+								}
+								
+								@Override
+								protected List<AttributeModifier> getInputModifiers() {
+									return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
+								}
+								
+							});
+
+							form.add(new AjaxButton("save") {
+
+								@Override
+								protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+									super.onSubmit(target, form);
+
+									getIssue().removeFields(transition.getRemoveFields());
+									Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean, trigger.getPromptFields());
+									getIssueChangeManager().changeState(getIssue(), transition.getToState(), fieldValues, comment);
+								
+									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
+								}
+								
+							});
+							
+							form.add(new AjaxLink<Void>("cancel") {
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									newEmptyActionOptions(target);
+								}
+								
+							});
+							fragment.add(form);
+							
+							fragment.setOutputMarkupId(true);
+							IssueDetailPage.this.replace(fragment);
+							target.add(fragment);
 						}
-
-						Form<?> form = new Form<Void>("form") {
-
-							@Override
-							protected void onError() {
-								super.onError();
-								RequestCycle.get().find(AjaxRequestTarget.class).add(this);
-							}
-							
-						};
 						
-						BeanEditor editor = BeanContext.editBean("fields", fieldBean, 
-								IssueUtils.getPropertyNames(fieldBeanClass, excludedFields)); 
-						form.add(editor);
-						
-						form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment"), false) {
-
-							@Override
-							protected AttachmentSupport getAttachmentSupport() {
-								return new ProjectAttachmentSupport(getProject(), getIssue().getUUID());
-							}
-
-							@Override
-							protected Project getProject() {
-								return getIssue().getProject();
-							}
-							
-							@Override
-							protected List<AttributeModifier> getInputModifiers() {
-								return Lists.newArrayList(AttributeModifier.replace("placeholder", "Leave a comment"));
-							}
-							
-						});
-
-						form.add(new AjaxButton("save") {
-
-							@Override
-							protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-								super.onSubmit(target, form);
-
-								Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean);
-								getIssueChangeManager().changeState(getIssue(), transition.getToState(), fieldValues, comment);
-							
-								setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
-							}
-							
-						});
-						
-						form.add(new AjaxLink<Void>("cancel") {
-
-							@Override
-							public void onClick(AjaxRequestTarget target) {
-								newEmptyActionOptions(target);
-							}
-							
-						});
-						fragment.add(form);
-						
-						fragment.setOutputMarkupId(true);
-						IssueDetailPage.this.replace(fragment);
-						target.add(fragment);
-					}
-					
-				};
-				link.add(new Label("label", transition.getTrigger().getButton().getName()));
-				transitionsView.add(link);
+					};
+					link.add(new Label("label", trigger.getButtonLabel()));
+					transitionsView.add(link);
+				}
 			}
 		}
 		
@@ -493,7 +490,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			protected List<IssueField> load() {
 				List<IssueField> fields = new ArrayList<>();
 				for (IssueField field: getIssue().getFields().values()) {
-					if (getIssue().isFieldVisible(field.getName(), getIssue().getState()))
+					if (getIssue().isFieldVisible(field.getName()))
 						fields.add(field);
 				}
 				return fields;
@@ -543,9 +540,9 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 				Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getProject());
 				Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true); 
-				
-				Collection<String> excludedFields = Sets.newHashSet(IssueConstants.FIELD_STATE);
-				form.add(BeanContext.editBean("editor", fieldBean, IssueUtils.getPropertyNames(fieldBeanClass, excludedFields)));
+
+				Collection<String> propertyNames = IssueUtils.getPropertyNames(fieldBeanClass, getIssue().getFieldNames());
+				form.add(BeanContext.editBean("editor", fieldBean, propertyNames, false));
 				
 				form.add(new AjaxButton("save") {
 
@@ -553,7 +550,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 						
-						Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean);
+						Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean, getIssue().getFieldNames());
 						OneDev.getInstance(IssueActionManager.class).changeFields(getIssue(), fieldValues);
 						modal.close();
 						target.add(fieldsContainer);

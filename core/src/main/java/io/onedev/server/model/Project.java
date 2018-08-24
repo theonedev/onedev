@@ -848,13 +848,14 @@ public class Project extends AbstractEntity {
 	public ArrayList<NamedIssueQuery> getSavedIssueQueries() {
 		if (savedIssueQueries == null) {
 			savedIssueQueries = new ArrayList<>();
-			savedIssueQueries.add(new NamedIssueQuery("Open", "open"));
-			savedIssueQueries.add(new NamedIssueQuery("My open", "open and mine"));
+			savedIssueQueries.add(new NamedIssueQuery("Outstanding", "outstanding"));
+			savedIssueQueries.add(new NamedIssueQuery("My outstanding", "outstanding and mine"));
 			savedIssueQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
 			savedIssueQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-			savedIssueQueries.add(new NamedIssueQuery("Submitted by me", "\"Submitter\" is me"));
+			savedIssueQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
 			savedIssueQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
 			savedIssueQueries.add(new NamedIssueQuery("High Priority", "\"Priority\" is \"High\""));
+			savedIssueQueries.add(new NamedIssueQuery("Unassigned outstanding", "outstanding and \"Assignee\" is empty"));
 			savedIssueQueries.add(new NamedIssueQuery("Closed", "closed"));
 			savedIssueQueries.add(new NamedIssueQuery("All", "all"));
 		}

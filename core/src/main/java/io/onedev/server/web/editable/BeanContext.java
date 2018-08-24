@@ -20,11 +20,11 @@ public class BeanContext implements Serializable {
 	private final BeanDescriptor descriptor;
 	
 	public BeanContext(Class<?> beanClass) {
-		descriptor = new BeanDescriptor(beanClass, Sets.newHashSet());
+		descriptor = new BeanDescriptor(beanClass, Sets.newHashSet(), true);
 	}
 	
-	public BeanContext(Class<?> beanClass, Collection<String> excludedProperties) {
-		descriptor = new BeanDescriptor(beanClass, excludedProperties);
+	public BeanContext(Class<?> beanClass, Collection<String> properties, boolean excluded) {
+		descriptor = new BeanDescriptor(beanClass, properties, excluded);
 	}
 	
 	public BeanContext(BeanDescriptor descriptor) {
@@ -75,23 +75,23 @@ public class BeanContext implements Serializable {
 	}
 
 	public static BeanEditor editModel(String componentId, IModel<? extends Serializable> beanModel) {
-		return editModel(componentId, beanModel, Sets.newHashSet());
+		return editModel(componentId, beanModel, Sets.newHashSet(), true);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static BeanEditor editModel(String componentId, 
-			IModel<? extends Serializable> beanModel, Set<String> excludedProperties) {
+			IModel<? extends Serializable> beanModel, Set<String> properties, boolean excluded) {
 		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
-		BeanContext beanContext = new BeanContext(beanClass, excludedProperties);
+		BeanContext beanContext = new BeanContext(beanClass, properties, excluded);
 		return beanContext.renderForEdit(componentId, (IModel<Serializable>)beanModel);
 	}
 	
 	public static BeanEditor editBean(String componentId, Serializable bean) {
-		return editBean(componentId, bean, Sets.newHashSet());
+		return editBean(componentId, bean, Sets.newHashSet(), true);
 	}
 	
 	public static BeanEditor editBean(String componentId, final Serializable bean, 
-			Collection<String> excludedProperties) {
+			Collection<String> properties, boolean excluded) {
 		IModel<Serializable> beanModel = new IModel<Serializable>() {
 
 			@Override
@@ -110,27 +110,27 @@ public class BeanContext implements Serializable {
 			
 		};
 		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
-		BeanContext beanContext = new BeanContext(beanClass, excludedProperties);
+		BeanContext beanContext = new BeanContext(beanClass, properties, excluded);
 		beanModel = beanContext.wrapAsSelfUpdating(beanModel);
 		return beanContext.renderForEdit(componentId, beanModel);
 	}
 
 	public static Component viewModel(String componentId, IModel<Serializable> beanModel) {
-		return viewModel(componentId, beanModel, new HashSet<>());
+		return viewModel(componentId, beanModel, new HashSet<>(), true);
 	}
 			
 	public static Component viewModel(String componentId, IModel<Serializable> beanModel, 
-			Set<String> excludedProperties) {
-		BeanContext editContext = new BeanContext(beanModel.getObject().getClass(), excludedProperties);
+			Set<String> properties, boolean excluded) {
+		BeanContext editContext = new BeanContext(beanModel.getObject().getClass(), properties, excluded);
 		return editContext.renderForView(componentId, beanModel);
 	}
 	
-	public static Component viewBean(String componentId, Serializable bean, Set<String> excludedProperties) {
-		return viewModel(componentId, Model.of(bean), excludedProperties);
+	public static Component viewBean(String componentId, Serializable bean, Set<String> properties, boolean excluded) {
+		return viewModel(componentId, Model.of(bean), properties, excluded);
 	}
 	
 	public static Component viewBean(String componentId, Serializable bean) {
-		return viewBean(componentId, bean, new HashSet<>());
+		return viewBean(componentId, bean, new HashSet<>(), true);
 	}
 	
 }

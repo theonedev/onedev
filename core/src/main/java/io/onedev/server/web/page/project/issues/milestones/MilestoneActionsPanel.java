@@ -73,7 +73,7 @@ abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 							
 							MilestoneCloseOption option = new MilestoneCloseOption();
 							option.setMilestoneToClose(getMilestone().getName());
-							form.add(BeanContext.editBean("editor", option, Sets.newHashSet("milestoneToClose")));
+							form.add(BeanContext.editBean("editor", option, Sets.newHashSet("milestoneToClose"), true));
 							
 							form.add(new AjaxLink<Void>("close") {
 
@@ -176,7 +176,7 @@ abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 							
 							MilestoneDeleteOption option = new MilestoneDeleteOption();
 							option.setMilestoneToDelete(getMilestone().getName());
-							form.add(BeanContext.editBean("editor", option, Sets.newHashSet("milestoneToDelete")));
+							form.add(BeanContext.editBean("editor", option, Sets.newHashSet("milestoneToDelete"), true));
 							
 							form.add(new AjaxLink<Void>("close") {
 

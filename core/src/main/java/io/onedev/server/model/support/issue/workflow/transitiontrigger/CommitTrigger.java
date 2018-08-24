@@ -7,9 +7,4 @@ public class CommitTrigger implements TransitionTrigger {
 
 	private static final long serialVersionUID = 1L;
 
-	@Override
-	public Button getButton() {
-		return null;
-	}
-	
 }

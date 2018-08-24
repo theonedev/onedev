@@ -10,7 +10,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.editable.BeanContext;
-import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 public class TokenGeneratePage extends UserPage {
@@ -36,13 +35,13 @@ public class TokenGeneratePage extends UserPage {
 				token = new String(Base64.encode((getUser().getName() + ":" + bean.getPassword()).getBytes()));
 				
 				bean.setPassword(null);
-				replace(BeanContext.editBean("editor", bean, Sets.newHashSet()));
+				replace(BeanContext.editBean("editor", bean));
 			}
 
 		};
 		add(form);
 		
-		form.add(BeanContext.editBean("editor", bean, Sets.newHashSet()));
+		form.add(BeanContext.editBean("editor", bean));
 		
 		add(new Label("token", new AbstractReadOnlyModel<String>() {
 

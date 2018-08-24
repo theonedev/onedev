@@ -2,6 +2,7 @@ package io.onedev.server.model.support.issue.workflow;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -14,11 +15,11 @@ import io.onedev.server.model.support.authorized.SpecifiedGroup;
 import io.onedev.server.model.support.authorized.SpecifiedUser;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
-import io.onedev.server.model.support.issue.workflow.transitiontrigger.TransitionTrigger;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PullRequestTrigger;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.TransitionTrigger;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
@@ -41,6 +42,8 @@ public class TransitionSpec implements Serializable {
 	private TransitionPrerequisite prerequisite;
 	
 	private TransitionTrigger trigger;
+	
+	private List<String> removeFields = new ArrayList<>();
 	
 	@Editable(order=50)
 	@NameOfEmptyValue("No description")
@@ -94,6 +97,26 @@ public class TransitionSpec implements Serializable {
 
 	public void setTrigger(TransitionTrigger trigger) {
 		this.trigger = trigger;
+	}
+	
+	@Editable(order=1000, description="Optionally select fields to remove when this transition happens")
+	@ChoiceProvider("getFieldChoices")
+	@NameOfEmptyValue("No fields to remove")
+	public List<String> getRemoveFields() {
+		return removeFields;
+	}
+
+	public void setRemoveFields(List<String> removeFields) {
+		this.removeFields = removeFields;
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<String> getFieldChoices() {
+		List<String> fields = new ArrayList<>();
+		IssueWorkflowPage page = (IssueWorkflowPage) WicketUtils.getPage();
+		for (InputSpec field: page.getWorkflow().getFieldSpecs())
+			fields.add(field.getName());
+		return fields;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
@@ -165,7 +188,7 @@ public class TransitionSpec implements Serializable {
 		return false;
 	}
 	
-	public void onFieldRename(String oldName, String newName) {
+	public void onRenameField(String oldName, String newName) {
 		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(oldName))
 			getPrerequisite().setInputName(newName);
 		if (getTrigger() instanceof BuildSuccessfulTrigger) {
@@ -176,10 +199,20 @@ public class TransitionSpec implements Serializable {
 			PullRequestTrigger trigger = (PullRequestTrigger) getTrigger();
 			if (oldName.equals(trigger.getPullRequestField()))
 				trigger.setPullRequestField(newName);
+		} else if (getTrigger() instanceof PressButtonTrigger) {
+			PressButtonTrigger trigger = (PressButtonTrigger) getTrigger();
+			for (int i=0; i<trigger.getPromptFields().size(); i++) {
+				if (trigger.getPromptFields().get(i).equals(oldName))
+					trigger.getPromptFields().set(i, newName);
+			}
+		}
+		for (int i=0; i<getRemoveFields().size(); i++) {
+			if (getRemoveFields().get(i).equals(oldName))
+				getRemoveFields().set(i, newName);
 		}
 	}
 	
-	public boolean onFieldDelete(String fieldName) {
+	public boolean onDeleteField(String fieldName) {
 		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(fieldName)) 
 			return true;
 		if (getTrigger() instanceof BuildSuccessfulTrigger) {
@@ -190,7 +223,18 @@ public class TransitionSpec implements Serializable {
 			PullRequestTrigger trigger = (PullRequestTrigger) getTrigger();
 			if (fieldName.equals(trigger.getPullRequestField()))
 				return true;
+		} else if (getTrigger() instanceof PressButtonTrigger) {
+			PressButtonTrigger trigger = (PressButtonTrigger) getTrigger();
+			for (Iterator<String> it = trigger.getPromptFields().iterator(); it.hasNext();) {
+				if (it.next().equals(fieldName))
+					it.remove();
+			}
 		}
+		for (Iterator<String> it = getRemoveFields().iterator(); it.hasNext();) {
+			if (it.next().equals(fieldName))
+				it.remove();
+		}
+		
 		return false;
 	}
 	
@@ -208,9 +252,8 @@ public class TransitionSpec implements Serializable {
 		return StringUtils.join(getFromStates()) + "-->" + getToState();		
 	}
 
-	public boolean canApplyTo(Issue issue) {
-		if (getFromStates().contains(issue.getState()) && getTrigger().getButton() != null && SecurityUtils.getUser() != null
-				&& getTrigger().getButton().getAuthorized().matches(issue.getProject(), SecurityUtils.getUser())) {
+	public boolean canTransite(Issue issue) {
+		if (getFromStates().contains(issue.getState())) {
 			if (getPrerequisite() == null) {
 				return true;
 			} else {

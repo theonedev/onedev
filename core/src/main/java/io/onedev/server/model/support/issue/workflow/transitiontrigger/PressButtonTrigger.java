@@ -1,37 +1,46 @@
 package io.onedev.server.model.support.issue.workflow.transitiontrigger;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.support.authorized.Authorized;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
+import io.onedev.server.web.util.WicketUtils;
 
-@Editable(order=100, name="Button")
-public class PressButtonTrigger implements TransitionTrigger, Button {
+@Editable(order=100, name="Button is pressed")
+public class PressButtonTrigger implements TransitionTrigger {
 
 	private static final long serialVersionUID = 1L;
 
-	private String name;
+	private String buttonLabel;
 
 	private Authorized authorized;
 	
+	private List<String> promptFields;
+	
 	@Editable(order=100)
 	@NotEmpty
-	@OmitName
-	@Override
-	public String getName() {
-		return name;
+	public String getButtonLabel() {
+		return buttonLabel;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setButtonLabel(String buttonLabel) {
+		this.buttonLabel = buttonLabel;
 	}
 
-	@Editable(order=200, name="Is pressed by")
+	@Editable(order=200, name="Authorization")
 	@NotNull(message="may not be empty")
-	@Override
 	public Authorized getAuthorized() {
 		return authorized;
 	}
@@ -40,9 +49,43 @@ public class PressButtonTrigger implements TransitionTrigger, Button {
 		this.authorized = authorized;
 	}
 
-	@Override
-	public Button getButton() {
-		return this;
+	@Editable(order=500, description="Optionally select fields to prompt when this button is pressed")
+	@ChoiceProvider("getFieldChoices")
+	@NameOfEmptyValue("No fields to prompt")
+	public List<String> getPromptFields() {
+		return promptFields;
 	}
 
+	public void setPromptFields(List<String> promptFields) {
+		this.promptFields = promptFields;
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<String> getFieldChoices() {
+		List<String> fields = new ArrayList<>();
+		IssueWorkflowPage page = (IssueWorkflowPage) WicketUtils.getPage();
+		for (InputSpec field: page.getWorkflow().getFieldSpecs())
+			fields.add(field.getName());
+		return fields;
+	}
+
+	public void onRenameField(String oldName, String newName) {
+		for (int i=0; i<getPromptFields().size(); i++) {
+			if (getPromptFields().get(i).equals(oldName))
+				getPromptFields().set(i, newName);
+		}
+	}
+	
+	public void onDeleteField(String fieldName) {
+		for (Iterator<String> it = getPromptFields().iterator(); it.hasNext();) {
+			if (it.next().equals(fieldName))
+				it.remove();
+		}
+	}	
+	
+	public boolean isAuthorized() {
+		ProjectPage page = (ProjectPage) WicketUtils.getPage();
+		return SecurityUtils.getUser() != null && getAuthorized().matches(page.getProject(), SecurityUtils.getUser());		
+	}
+	
 }

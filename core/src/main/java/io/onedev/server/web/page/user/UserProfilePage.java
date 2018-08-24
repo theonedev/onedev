@@ -56,7 +56,7 @@ public class UserProfilePage extends UserPage {
 					editor.getBeanDescriptor().copyProperties(object, getUser());
 				}
 				
-			}, Sets.newHashSet("password"));
+			}, Sets.newHashSet("password"), true);
 			
 			Form<?> form = new Form<Void>("form") {
 
@@ -108,7 +108,7 @@ public class UserProfilePage extends UserPage {
 		} else {
 			User user = new User();
 			new BeanDescriptor(User.class).copyProperties(getUser(), user);
-			add(BeanContext.viewBean("content", user, Sets.newHashSet("password")));
+			add(BeanContext.viewBean("content", user, Sets.newHashSet("password"), true));
 		}
 
 	}

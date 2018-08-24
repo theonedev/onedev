@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -12,14 +11,11 @@ import java.util.StringTokenizer;
 import javax.annotation.Nullable;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -40,9 +36,7 @@ public class IssueUtils {
 	public static Class<? extends Serializable> defineBeanClass(Project project) {
 		String className = BEAN_PREFIX + project.getId();
 		IssueWorkflow workflow = project.getIssueWorkflow();
-		List<InputSpec> fieldSpecs = Lists.newArrayList(workflow.getFieldSpecOfState());
-		fieldSpecs.addAll(workflow.getFieldSpecs());
-		return (Class<? extends Serializable>) InputSpec.defineClass(className, fieldSpecs);
+		return (Class<? extends Serializable>) InputSpec.defineClass(className, workflow.getFieldSpecs());
 	}
 	
 	@Nullable
@@ -56,26 +50,6 @@ public class IssueUtils {
 		}
 	}
 	
-	public static void setState(Serializable fieldBean, String state) {
-		setFieldValue(fieldBean, IssueConstants.FIELD_STATE, state);
-	}
-	
-	@Nullable
-	public static Object getFieldValue(Serializable fieldBean, String fieldName) {
-		for (PropertyDescriptor property: new BeanDescriptor(fieldBean.getClass()).getPropertyDescriptors()) {
-			if (fieldName.equals(property.getDisplayName()))
-				return property.getPropertyValue(fieldBean);
-		}
-		throw new OneException("Unable to find property for field: " + fieldName);
-	}
-	
-	public static void setFieldValue(Serializable fieldBean, String fieldName, Object fieldValue) {
-		for (PropertyDescriptor property: new BeanDescriptor(fieldBean.getClass()).getPropertyDescriptors()) {
-			if (property.getDisplayName().equals(fieldName))
-				property.setPropertyValue(fieldBean, fieldValue);
-		}
-	}
-	
 	public static Collection<String> getPropertyNames(Class<?> fieldBeanClass, Collection<String> fieldNames) {
 		Collection<String> propertyNames = new HashSet<>();
 		for (PropertyDescriptor property: new BeanDescriptor(fieldBeanClass).getPropertyDescriptors()) {
@@ -85,11 +59,13 @@ public class IssueUtils {
 		return propertyNames;
 	}
 	
-	public static Map<String, Object> getFieldValues(Serializable fieldBean) {
+	public static Map<String, Object> getFieldValues(Serializable fieldBean, Collection<String> fieldNames) {
 		Map<String, Object> fieldValues = new HashMap<>();
 		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
-		for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors())
-			fieldValues.put(propertyDescriptor.getDisplayName(), propertyDescriptor.getPropertyValue(fieldBean));
+		for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
+			if (fieldNames.contains(propertyDescriptor.getDisplayName()))
+				fieldValues.put(propertyDescriptor.getDisplayName(), propertyDescriptor.getPropertyValue(fieldBean));
+		}
 		
 		return fieldValues;
 	}

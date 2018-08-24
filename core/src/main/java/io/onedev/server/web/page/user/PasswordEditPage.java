@@ -43,13 +43,13 @@ public class PasswordEditPage extends UserPage {
 				Session.get().success("Password has been changed");
 
 				bean.setOldPassword(null);
-				replace(BeanContext.editBean("editor", bean, excludedProperties));
+				replace(BeanContext.editBean("editor", bean, excludedProperties, true));
 			}
 
 		};
 		add(form);
 		
-		form.add(BeanContext.editBean("editor", bean, excludedProperties));
+		form.add(BeanContext.editBean("editor", bean, excludedProperties, true));
 	}
 	
 	@Override

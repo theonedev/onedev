@@ -31,11 +31,6 @@ public abstract class PullRequestTrigger implements TransitionTrigger {
 		this.branch = branch;
 	}
 
-	@Override
-	public Button getButton() {
-		return null;
-	}
-	
 	@Editable(order=200, description="Optionally specify an issue field of \"pull request choice\" type to store the pull request information")
 	@ChoiceProvider("getPullRequestFieldChoices")
 	public String getPullRequestField() {

@@ -42,11 +42,6 @@ public class BuildSuccessfulTrigger implements TransitionTrigger {
 		this.buildField = buildField;
 	}
 
-	@Override
-	public Button getButton() {
-		return null;
-	}
-	
 	@SuppressWarnings("unused")
 	private static List<String> getBuildFieldChoices() {
 		List<String> choices = new ArrayList<>();

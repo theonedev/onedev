@@ -8,7 +8,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.entityquery.issue.IssueQueryLexer;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 
-public class OpenCriteria extends IssueCriteria {
+public class OutstandingCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 
@@ -33,7 +33,7 @@ public class OpenCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.getRuleName(IssueQueryLexer.Open);
+		return IssueQuery.getRuleName(IssueQueryLexer.Outstanding);
 	}
 
 }

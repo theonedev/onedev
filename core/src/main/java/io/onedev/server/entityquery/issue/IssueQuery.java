@@ -163,8 +163,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 						switch (ctx.operator.getType()) {
 						case IssueQueryLexer.Mine:
 							return new MineCriteria();
-						case IssueQueryLexer.Open:
-							return new OpenCriteria();
+						case IssueQueryLexer.Outstanding:
+							return new OutstandingCriteria();
 						case IssueQueryLexer.Closed:
 							return new ClosedCriteria();
 						case IssueQueryLexer.SubmittedByMe:

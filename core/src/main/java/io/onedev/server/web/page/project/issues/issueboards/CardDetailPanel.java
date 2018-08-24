@@ -1,6 +1,11 @@
 package io.onedev.server.web.page.project.issues.issueboards;
 
-import static io.onedev.server.model.support.issue.IssueConstants.*;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_COMMENT_COUNT;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_MILESTONE;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_STATE;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_SUBMITTER;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_SUBMIT_DATE;
+import static io.onedev.server.model.support.issue.IssueConstants.FIELD_VOTE_COUNT;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,7 +29,6 @@ import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueField;
-import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.avatar.AvatarLink;
@@ -55,12 +59,11 @@ abstract class CardDetailPanel extends GenericPanel<Issue> {
 		
 		add(new Label("title", getIssue().getTitle()));
 
-		IssueWorkflow workflow = getIssue().getProject().getIssueWorkflow();
 		List<String> fieldNames = Lists.newArrayList(FIELD_STATE);
 		fieldNames.add(FIELD_SUBMITTER);
 		fieldNames.add(FIELD_SUBMIT_DATE);
-		for (String fieldName: workflow.getFieldNames()) {
-			if (getIssue().isFieldVisible(fieldName, getIssue().getState()))
+		for (String fieldName: getIssue().getFieldNames()) {
+			if (getIssue().isFieldVisible(fieldName))
 				fieldNames.add(fieldName);
 		}
 		fieldNames.add(FIELD_MILESTONE);

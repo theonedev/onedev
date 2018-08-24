@@ -92,6 +92,27 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		
 		form.add(new NotificationPanel("feedback", form));
 		
+		form.add(new CheckBox("stateCheck", new IModel<Boolean>() {
+
+			@Override
+			public void detach() {
+			}
+
+			@Override
+			public Boolean getObject() {
+				return selectedFields.contains(IssueConstants.FIELD_STATE);
+			}
+
+			@Override
+			public void setObject(Boolean object) {
+				if (object)
+					selectedFields.add(IssueConstants.FIELD_STATE);
+				else
+					selectedFields.remove(IssueConstants.FIELD_STATE);
+			}
+			
+		}).add(newOnChangeBehavior(form)));
+		
 		form.add(new CheckBox("milestoneCheck", new IModel<Boolean>() {
 
 			@Override
@@ -113,8 +134,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			
 		}).add(newOnChangeBehavior(form)));
 		
-		List<String> customFieldNames = Lists.newArrayList(IssueConstants.FIELD_STATE);
-		customFieldNames.addAll(getProject().getIssueWorkflow().getFieldNames());
+		List<String> customFieldNames = getProject().getIssueWorkflow().getFieldNames();
 		form.add(new ListView<String>("customFields", customFieldNames) {
 
 			@Override
@@ -162,10 +182,12 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		}
 		
 		Set<String> excludedProperties = new HashSet<>();
+		if (!selectedFields.contains(IssueConstants.FIELD_STATE))
+			excludedProperties.add(IssueConstants.ATTR_STATE);
 		if (!selectedFields.contains(IssueConstants.FIELD_MILESTONE))
 			excludedProperties.add(IssueConstants.ATTR_MILESTONE);
 		
-		builtInFieldsEditor = BeanContext.editBean("builtInFieldsEditor", builtInFieldsBean, excludedProperties); 
+		builtInFieldsEditor = BeanContext.editBean("builtInFieldsEditor", builtInFieldsBean, excludedProperties, true); 
 		form.add(builtInFieldsEditor);
 
 		excludedProperties = new HashSet<>();
@@ -174,7 +196,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 				excludedProperties.add(property.getPropertyName());
 		}
 		
-		customFieldsEditor = BeanContext.editBean("customFieldsEditor", customFieldsBean, excludedProperties); 
+		customFieldsEditor = BeanContext.editBean("customFieldsEditor", customFieldsBean, excludedProperties, true); 
 		form.add(customFieldsEditor);				
 
 		form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment"), false) {
@@ -207,15 +229,19 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 					
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
+						String state;
+						if (selectedFields.contains(IssueConstants.FIELD_STATE))
+							state = builtInFieldsBean.getState();
+						else
+							state = null;
+						
 						Optional<Milestone> milestone;
 						if (selectedFields.contains(IssueConstants.FIELD_MILESTONE))
 							milestone = Optional.fromNullable(getProject().getMilestone(builtInFieldsBean.getMilestone()));
 						else
 							milestone = null;
-						String state = (String) IssueUtils.getFieldValue(customFieldsBean, IssueConstants.FIELD_STATE);
 						
-						Map<String, Object> fieldValues = IssueUtils.getFieldValues(customFieldsBean);
-						fieldValues.keySet().retainAll(selectedFields);
+						Map<String, Object> fieldValues = IssueUtils.getFieldValues(customFieldsBean, selectedFields);
 						
 						OneDev.getInstance(IssueActionManager.class).batchUpdate(
 								getIssueIterator(), state, milestone, fieldValues, comment);

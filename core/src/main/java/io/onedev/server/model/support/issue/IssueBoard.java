@@ -41,7 +41,7 @@ public class IssueBoard implements Serializable {
 	
 	private String baseQuery;
 	
-	private String backlogBaseQuery = "open";
+	private String backlogBaseQuery = "outstanding";
 	
 	private String identifyField;
 	

@@ -64,7 +64,7 @@ public class GroupProfilePage extends GroupPage {
 					editor.getBeanDescriptor().copyProperties(object, getGroup());
 				}
 				
-			}, Sets.newHashSet("administrator", "canCreateProjects"));
+			}, Sets.newHashSet("administrator", "canCreateProjects"), true);
 
 			Form<?> form = new Form<Void>("form") {
 

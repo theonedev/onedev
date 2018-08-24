@@ -18,7 +18,9 @@ import io.onedev.server.entityquery.issue.OrCriteria;
 import io.onedev.server.entityquery.issue.StateCriteria;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.model.support.authorized.ProjectWriters;
-import io.onedev.server.model.support.issue.IssueConstants;
+import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
+import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueIsEmpty;
+import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueIsNotEmpty;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.IssueChoiceInput;
@@ -29,7 +31,6 @@ import io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider.Specifie
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
-import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ProjectReaders;
 
 public class IssueWorkflow implements Serializable {
 	
@@ -42,7 +43,9 @@ public class IssueWorkflow implements Serializable {
 	private List<TransitionSpec> transitionSpecs = new ArrayList<>();
 	
 	private List<InputSpec> fieldSpecs = new ArrayList<>();
-
+	
+	private List<String> promptFieldsUponIssueOpen = new ArrayList<>();
+	
 	private boolean reconciled = true;
 	
 	private transient Map<String, InputSpec> fieldSpecMap;
@@ -109,9 +112,7 @@ public class IssueWorkflow implements Serializable {
 		fieldSpecs.add(priority);
 
 		UserChoiceInput assignee = new UserChoiceInput();
-		assignee.setAllowEmpty(true);
-		assignee.setNameOfEmptyValue("No assignee");
-		assignee.setChoiceProvider(new ProjectReaders());
+		assignee.setChoiceProvider(new io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ProjectWriters());
 		assignee.setName("Assignee");
 		
 		fieldSpecs.add(assignee);
@@ -141,38 +142,19 @@ public class IssueWorkflow implements Serializable {
 		specifiedDefaultValue.setValue("Fixed");
 		resolution.setDefaultValueProvider(specifiedDefaultValue);
 
-		List<ShowCondition> showConditions = new ArrayList<>();
-		ShowCondition showCondition = new ShowCondition();
-		showCondition.setInputName("State");
-		ValueIsOneOf valueIsOneOf = new ValueIsOneOf();
-		valueIsOneOf.setValues(Lists.newArrayList("Closed"));
-		showCondition.setValueMatcher(valueIsOneOf);
-		showConditions.add(showCondition);
-		resolution.setShowConditions(showConditions);
-		
 		fieldSpecs.add(resolution);
 
-		IssueChoiceInput duplicateIssue = new IssueChoiceInput();
-		duplicateIssue.setName("Duplicate With");
+		IssueChoiceInput duplicateWith = new IssueChoiceInput();
+		duplicateWith.setName("Duplicate With");
 		
-		showConditions = new ArrayList<>();
-		showCondition = new ShowCondition();
-		showCondition.setInputName("State");
-		valueIsOneOf = new ValueIsOneOf();
-		valueIsOneOf.setValues(Lists.newArrayList("Closed"));
-		showCondition.setValueMatcher(valueIsOneOf);
-		showConditions.add(showCondition);
-		
-		showCondition = new ShowCondition();
+		ShowCondition showCondition = new ShowCondition();
 		showCondition.setInputName("Resolution");
-		valueIsOneOf = new ValueIsOneOf();
+		ValueIsOneOf valueIsOneOf = new ValueIsOneOf();
 		valueIsOneOf.setValues(Lists.newArrayList("Duplicated"));
 		showCondition.setValueMatcher(valueIsOneOf);
-		showConditions.add(showCondition);
+		duplicateWith.setShowCondition(showCondition);
 		
-		duplicateIssue.setShowConditions(showConditions);
-		
-		fieldSpecs.add(duplicateIssue);
+		fieldSpecs.add(duplicateWith);
 		
 		StateSpec open = new StateSpec();
 		open.setName("Open");
@@ -180,6 +162,13 @@ public class IssueWorkflow implements Serializable {
 		open.setColor("#f0ad4e");
 		
 		stateSpecs.add(open);
+		
+		StateSpec assigned = new StateSpec();
+		assigned.setName("Assigned");
+		assigned.setCategory(StateSpec.Category.OPEN);
+		assigned.setColor("#9900ff");
+		
+		stateSpecs.add(assigned);
 		
 		StateSpec closed = new StateSpec();
 		closed.setColor("#5cb85c");
@@ -190,10 +179,22 @@ public class IssueWorkflow implements Serializable {
 		
 		TransitionSpec transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Open"));
-		transition.setToState("Closed");
+		transition.setToState("Assigned");
 		PressButtonTrigger pressButton = new PressButtonTrigger();
-		pressButton.setName("Close");
+		pressButton.setButtonLabel("Assign");
 		pressButton.setAuthorized(new ProjectWriters());
+		pressButton.setPromptFields(Lists.newArrayList("Assignee"));
+		transition.setTrigger(pressButton);
+		
+		transitionSpecs.add(transition);
+		
+		transition = new TransitionSpec();
+		transition.setFromStates(Lists.newArrayList("Open", "Assigned"));
+		transition.setToState("Closed");
+		pressButton = new PressButtonTrigger();
+		pressButton.setButtonLabel("Close");
+		pressButton.setAuthorized(new ProjectWriters());
+		pressButton.setPromptFields(Lists.newArrayList("Resolution", "Duplicate With"));
 		transition.setTrigger(pressButton);
 		
 		transitionSpecs.add(transition);
@@ -201,12 +202,33 @@ public class IssueWorkflow implements Serializable {
 		transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Closed"));
 		transition.setToState("Open");
+		transition.setPrerequisite(new TransitionPrerequisite());
+		transition.getPrerequisite().setInputName("Assignee");
+		transition.getPrerequisite().setValueMatcher(new ValueIsEmpty());
 		pressButton = new PressButtonTrigger();
-		pressButton.setName("Reopen");
+		pressButton.setButtonLabel("Reopen");
+		transition.setRemoveFields(Lists.newArrayList("Resolution", "Duplicate With"));
 		pressButton.setAuthorized(new ProjectWriters());
 		transition.setTrigger(pressButton);
 		
 		transitionSpecs.add(transition);
+		
+		transition = new TransitionSpec();
+		transition.setFromStates(Lists.newArrayList("Closed"));
+		transition.setToState("Assigned");
+		transition.setPrerequisite(new TransitionPrerequisite());
+		transition.getPrerequisite().setInputName("Assignee");
+		transition.getPrerequisite().setValueMatcher(new ValueIsNotEmpty());
+		pressButton = new PressButtonTrigger();
+		pressButton.setButtonLabel("Reopen");
+		transition.setRemoveFields(Lists.newArrayList("Resolution", "Duplicate With"));
+		pressButton.setAuthorized(new ProjectWriters());
+		transition.setTrigger(pressButton);
+		
+		transitionSpecs.add(transition);
+		
+		promptFieldsUponIssueOpen.add("Type");
+		promptFieldsUponIssueOpen.add("Priority");
 	}
 	
 	public List<StateSpec> getStateSpecs() {
@@ -231,6 +253,14 @@ public class IssueWorkflow implements Serializable {
 
 	public void setFieldSpecs(List<InputSpec> fieldSpecs) {
 		this.fieldSpecs = fieldSpecs;
+	}
+
+	public List<String> getPromptFieldsUponIssueOpen() {
+		return promptFieldsUponIssueOpen;
+	}
+
+	public void setPromptFieldsUponIssueOpen(List<String> promptFieldsUponIssueOpen) {
+		this.promptFieldsUponIssueOpen = promptFieldsUponIssueOpen;
 	}
 
 	public boolean isReconciled() {
@@ -318,10 +348,7 @@ public class IssueWorkflow implements Serializable {
 	
 	@Nullable
 	public InputSpec getFieldSpec(String fieldName) {
-		if (fieldName.equals(IssueConstants.FIELD_STATE))
-			return getFieldSpecOfState();
-		else
-			return getFieldSpecMap().get(fieldName);
+		return getFieldSpecMap().get(fieldName);
 	}
 
 	public int getFieldSpecIndex(String fieldName) {
@@ -333,18 +360,21 @@ public class IssueWorkflow implements Serializable {
 	}
 	
 	public void onRenameField(String oldName, String newName) {
+		for (int i=0; i<getPromptFieldsUponIssueOpen().size(); i++) {
+			if (getPromptFieldsUponIssueOpen().get(i).equals(oldName))
+				getPromptFieldsUponIssueOpen().set(i, newName);
+		}
 		for (TransitionSpec transition: getTransitionSpecs())
-			transition.onFieldRename(oldName, newName);
+			transition.onRenameField(oldName, newName);
 		for (InputSpec field: getFieldSpecs())
 			field.onRenameInput(oldName, newName);
 	}
 	
 	public void onDeleteField(String fieldName) {
 		for (Iterator<TransitionSpec> it = getTransitionSpecs().iterator(); it.hasNext();) { 
-			if (it.next().onFieldDelete(fieldName))
+			if (it.next().onDeleteField(fieldName))
 				it.remove();
 		}
-		
 		Set<String> deletedFields = new HashSet<>();
 		for (Iterator<InputSpec> it = getFieldSpecs().iterator(); it.hasNext();) {
 			InputSpec field = it.next();
@@ -414,21 +444,6 @@ public class IssueWorkflow implements Serializable {
 			return getStateSpecs().iterator().next();
 		else
 			throw new OneException("No any issue state is defined");
-	}
-	
-	public InputSpec getFieldSpecOfState() {
-		ChoiceInput inputSpec = new ChoiceInput();
-		inputSpec.setName(IssueConstants.FIELD_STATE);
-		inputSpec.setAllowEmpty(false);
-		SpecifiedChoices choicesProvider = new SpecifiedChoices();
-		for (StateSpec stateSpec: getStateSpecs()) {
-			Choice choice = new Choice();
-			choice.setValue(stateSpec.getName());
-			choice.setColor(stateSpec.getColor());
-			choicesProvider.getChoices().add(choice);
-		}
-		inputSpec.setChoiceProvider(choicesProvider);
-		return inputSpec;
 	}
 	
 	public IssueCriteria getCategoryCriteria(StateSpec.Category category) {

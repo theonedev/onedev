@@ -39,6 +39,7 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.page.project.setting.issueworkflow.IssueWorkflowPage;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
@@ -101,6 +102,16 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), rowModel.getObject().getToState()));
+			}
+			
+		});		
+		
+		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("Do Transition When")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
+				String label = EditableUtils.getDisplayName(rowModel.getObject().getTrigger().getClass());
+				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), label));
 			}
 			
 		});		
@@ -203,7 +214,7 @@ public class StateTransitionsPage extends IssueWorkflowPage {
 						protected Component newBody(String id) {
 							SideFloating sideFloating = this;
 							Fragment fragment = new Fragment(id, "viewTransitionFrag", StateTransitionsPage.this);
-							fragment.add(BeanContext.viewBean("viewer", getTransition(), Sets.newHashSet("name")));
+							fragment.add(BeanContext.viewBean("viewer", getTransition(), Sets.newHashSet("name"), true));
 							fragment.add(new ModalLink("edit") {
 
 								@Override

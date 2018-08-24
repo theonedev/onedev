@@ -7,7 +7,7 @@ query
     ;
 
 criteria
-    : operator=(Mine|Open|Closed|SubmittedByMe)	#OperatorCriteria
+    : operator=(Mine|Outstanding|Closed|SubmittedByMe)	#OperatorCriteria
     | SubmittedBy WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
@@ -29,8 +29,8 @@ All
 	: 'all'
 	;
 	
-Open
-	: 'open'
+Outstanding
+	: 'outstanding'
 	;
 	
 Closed

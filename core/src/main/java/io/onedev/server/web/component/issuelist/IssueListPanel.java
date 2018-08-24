@@ -581,7 +581,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 							@Override
 							protected IssueField getField() {
 								Issue issue = rowModel.getObject();
-								if (issue.isFieldVisible(field, issue.getState()))
+								if (issue.isFieldVisible(field))
 									return issue.getFields().get(field);
 								else
 									return null;

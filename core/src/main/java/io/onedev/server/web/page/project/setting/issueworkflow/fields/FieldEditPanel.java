@@ -46,10 +46,8 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 		super.onInitialize();
 		
 		FieldBean bean = new FieldBean();
-		if (fieldIndex != -1) {
+		if (fieldIndex != -1) 
 			bean.setField(SerializationUtils.clone(getWorkflow().getFieldSpecs().get(fieldIndex)));
-			bean.getField().setupShowConditionsForDisplay();
-		}
 
 		Form<?> form = new Form<Void>("form") {
 
@@ -99,16 +97,18 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 				}
 
 				if (!editor.hasErrors(true)) {
-					bean.getField().setupShowConditionsForStorage();
 					if (fieldIndex != -1) {
 						InputSpec oldField = getWorkflow().getFieldSpecs().get(fieldIndex);
 						if (!field.getName().equals(oldField.getName())) 
 							getWorkflow().onRenameField(oldField.getName(), field.getName());
 						getWorkflow().getFieldSpecs().set(fieldIndex, bean.getField());
+						getWorkflow().getPromptFieldsUponIssueOpen().remove(oldField.getName());
 						getWorkflow().setReconciled(false);
 					} else {
-						getWorkflow().getFieldSpecs().add(bean.getField());
+						getWorkflow().getFieldSpecs().add(field);
 					}
+					if (bean.isPromptUponIssueOpen())
+						getWorkflow().getPromptFieldsUponIssueOpen().add(field.getName());
 					getProject().setIssueWorkflow(getWorkflow());
 					OneDev.getInstance(ProjectManager.class).save(getProject());
 					onSave(target);
@@ -147,7 +147,6 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	@Override
 	public List<String> getInputNames() {
 		List<String> inputNames = new ArrayList<>();
-		inputNames.add(IssueConstants.FIELD_STATE);
 		int currentIndex = 0;
 		for (InputSpec field: getWorkflow().getFieldSpecs()) {
 			if (currentIndex != fieldIndex)

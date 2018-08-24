@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -39,11 +40,9 @@ import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.issue.IssueField;
-import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -315,6 +314,10 @@ public class Issue extends AbstractEntity implements Referenceable {
 		}
 	}
 	
+	public Collection<String> getFieldNames() {
+		return getFieldUnaries().stream().map(it->it.getName()).collect(Collectors.toSet());
+	}
+	
 	public Map<String, IssueField> getFields() {
 		Map<String, IssueField> fields = new LinkedHashMap<>();
 
@@ -379,17 +382,20 @@ public class Issue extends AbstractEntity implements Referenceable {
 		Serializable fieldBean = (Serializable) beanDescriptor.newBeanInstance();
 
 		for (PropertyDescriptor property: beanDescriptor.getPropertyDescriptors()) {
-			if (property.getDisplayName().equals(IssueConstants.FIELD_STATE)) {
-				property.setPropertyValue(fieldBean, getState());
-			} else {
-				IssueField field = getFields().get(property.getDisplayName());
-				if (field != null)
-					property.setPropertyValue(fieldBean, field.getValue(getProject()));
-				else if (!withDefaultValue)
-					property.setPropertyValue(fieldBean, null);
-			}
+			IssueField field = getFields().get(property.getDisplayName());
+			if (field != null)
+				property.setPropertyValue(fieldBean, field.getValue(getProject()));
+			else if (!withDefaultValue)
+				property.setPropertyValue(fieldBean, null);
 		}
 		return fieldBean;
+	}
+	
+	public void removeFields(Collection<String> fieldNames) {
+		for (Iterator<IssueFieldUnary> it = getFieldUnaries().iterator(); it.hasNext();) {
+			if (fieldNames.contains(it.next().getName()))
+				it.remove();
+		}
 	}
 	
 	public void setFieldValues(Map<String, Object> fieldValues) {
@@ -431,31 +437,22 @@ public class Issue extends AbstractEntity implements Referenceable {
 		}
 	}
 
-	public boolean isFieldVisible(String fieldName, String state) {
+	public boolean isFieldVisible(String fieldName) {
 		IssueWorkflow workflow = getProject().getIssueWorkflow();
 		InputSpec fieldSpec = workflow.getFieldSpec(fieldName);
 		if (fieldSpec != null) {
-			if (fieldSpec.getShowConditions() != null) {
-				for (ShowCondition condition: fieldSpec.getShowConditions()) {
-					if (condition.getInputName().equals(IssueConstants.FIELD_STATE)) { 
-						if (!condition.getValueMatcher().matches(state))
-							return false;
-					} else {
-						IssueField dependentField = getFields().get(condition.getInputName());
-						if (dependentField != null) {
-							String value;
-							if (!dependentField.getValues().isEmpty())
-								value = dependentField.getValues().iterator().next();
-							else
-								value = null;
-							if (!condition.getValueMatcher().matches(value))
-								return false;
-						} else {
-							return false;
-						}
-					}
+			if (fieldSpec.getShowCondition() != null) {
+				IssueField dependentField = getFields().get(fieldSpec.getShowCondition().getInputName());
+				if (dependentField != null) {
+					String value;
+					if (!dependentField.getValues().isEmpty())
+						value = dependentField.getValues().iterator().next();
+					else
+						value = null;
+					return fieldSpec.getShowCondition().getValueMatcher().matches(value);
+				} else {
+					return false;
 				}
-				return true;
 			} else {
 				return true;
 			}

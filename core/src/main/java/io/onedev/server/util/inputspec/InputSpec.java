@@ -1,9 +1,7 @@
 package io.onedev.server.util.inputspec;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,8 +23,6 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.page.project.setting.issueworkflow.fields.ShowConditionListWrapper;
-import io.onedev.server.web.page.project.setting.issueworkflow.fields.ShowConditionOuterWrapper;
 
 @Editable
 public abstract class InputSpec implements Serializable {
@@ -69,10 +65,7 @@ public abstract class InputSpec implements Serializable {
 	
 	private String nameOfEmptyValue;
 	
-	private List<ShowCondition> showConditions;
-	
-	// Added to edit/view show conditions in a user-friendly way
-	private transient ShowConditionListWrapper showConditionListWrapper;
+	private ShowCondition showCondition;
 	
 	@Editable(order=10)
 	@InputName
@@ -105,22 +98,14 @@ public abstract class InputSpec implements Serializable {
 		this.allowMultiple = allowMultiple;
 	}
 
-	public List<ShowCondition> getShowConditions() {
-		return showConditions;
-	}
-
-	public void setShowConditions(List<ShowCondition> showConditions) {
-		this.showConditions = showConditions;
-	}
-
 	@Editable(order=40, name="Show Conditionally", description="resource.input.showCondition")
 	@NameOfEmptyValue("Always")
-	public ShowConditionListWrapper getShowConditionListWrapper() {
-		return showConditionListWrapper;
+	public ShowCondition getShowCondition() {
+		return showCondition;
 	}
 
-	public void setShowConditionListWrapper(ShowConditionListWrapper showConditionListWrapper) {
-		this.showConditionListWrapper = showConditionListWrapper;
+	public void setShowCondition(ShowCondition showCondition) {
+		this.showCondition = showCondition;
 	}
 	
 	@Editable(order=50, name="Allow Empty Value", description="resource.input.allowEmpty")
@@ -188,7 +173,7 @@ public abstract class InputSpec implements Serializable {
 			buffer.append("    @Editable(name=\"" + escape(name) + 
 					"\", order=" + index + ")\n");
 		}
-		if (showConditions != null) 
+		if (showCondition != null) 
 			buffer.append("    @ShowCondition(\"isInput" + index + "Visible\")\n");
 		if (getNameOfEmptyValue() != null)
 			buffer.append("    @NameOfEmptyValue(\"" + escape(getNameOfEmptyValue()) + "\")");
@@ -214,14 +199,10 @@ public abstract class InputSpec implements Serializable {
 		buffer.append("    }\n");
 		buffer.append("\n");
 		
-		if (showConditions != null) {
+		if (showCondition != null) {
 			buffer.append("    private static boolean isInput" + index + "Visible() {\n");
-			literalBytes = getLiteral(SerializationUtils.serialize((Serializable) showConditions));
-			buffer.append("        for (condition in SerializationUtils.deserialize(" + literalBytes + ")) {\n");
-			buffer.append("            if (!condition.isVisible())\n");
-			buffer.append("                return false;\n");
-			buffer.append("        }\n");
-			buffer.append("        return true;\n");
+			literalBytes = getLiteral(SerializationUtils.serialize(showCondition));
+			buffer.append("        return SerializationUtils.deserialize(" + literalBytes + ").isVisible();\n");
 			buffer.append("    }\n");
 			buffer.append("\n");
 		}
@@ -239,47 +220,16 @@ public abstract class InputSpec implements Serializable {
 		}
 	}
 
-	public void setupShowConditionsForDisplay() {
-		if (showConditions != null) {
-			showConditionListWrapper = new ShowConditionListWrapper();
-			for (ShowCondition condition: showConditions) {
-				ShowConditionOuterWrapper outerWrapper = new ShowConditionOuterWrapper();
-				outerWrapper.getInnerWrapper().setCondition(condition);
-				showConditionListWrapper.getOuterWrappers().add(outerWrapper);
-			}
-		} else {
-			showConditionListWrapper = null;
-		}
-	}
-	
-	public void setupShowConditionsForStorage() {
-		if (showConditionListWrapper != null) {
-			showConditions = new ArrayList<>();
-			for (ShowConditionOuterWrapper outerWrapper: showConditionListWrapper.getOuterWrappers()) 
-				showConditions.add(outerWrapper.getInnerWrapper().getCondition());
-		} else {
-			showConditions = null;
-		}
-	}
-	
 	public void onRenameInput(String oldName, String newName) {
-		if (showConditions != null) {
-			for (ShowCondition condition: showConditions) {
-				if (oldName.equals(condition.getInputName()))
-					condition.setInputName(newName);
-			}
+		if (showCondition != null) {
+			if (oldName.equals(showCondition.getInputName()))
+				showCondition.setInputName(newName);
 		}
 	}
 	
 	public boolean onDeleteInput(String inputName) {
-		if (showConditions != null) {
-			for (Iterator<ShowCondition> it = showConditions.iterator(); it.hasNext();) {
-				if (inputName.equals(it.next().getInputName()))
-					it.remove();
-			}
-			if (showConditions.isEmpty())
-				showConditions = null;
-		} 
+		if (showCondition != null && showCondition.getInputName().equals(inputName))
+			showCondition = null;
 		return false;
 	}
 	

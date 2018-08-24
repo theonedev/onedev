@@ -13,6 +13,7 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class BooleanEditSupport implements EditSupport {
@@ -32,7 +33,7 @@ public class BooleanEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 							if (model.getObject() != null) {
-								return new Label(id, model.getObject().toString());
+								return new Label(id, StringUtils.describe(model.getObject()));
 							} else {
 								NameOfEmptyValue nameOfEmptyValue = propertyDescriptor.getPropertyGetter().getAnnotation(NameOfEmptyValue.class);
 								if (nameOfEmptyValue != null)

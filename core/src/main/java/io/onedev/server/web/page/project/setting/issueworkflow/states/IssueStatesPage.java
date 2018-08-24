@@ -221,7 +221,7 @@ public class IssueStatesPage extends IssueWorkflowPage {
 			protected Component newBody(String id) {
 				SideFloating sideFloating = this;
 				Fragment fragment = new Fragment(id, "viewStateFrag", IssueStatesPage.this);
-				fragment.add(BeanContext.viewBean("viewer", getState(), Sets.newHashSet("name")));
+				fragment.add(BeanContext.viewBean("viewer", getState(), Sets.newHashSet("name"), true));
 				fragment.add(new ModalLink("edit") {
 
 					@Override

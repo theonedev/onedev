@@ -1,12 +1,11 @@
 package io.onedev.server.web.page.project.issues.issueboards;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
@@ -46,6 +45,7 @@ import io.onedev.server.model.support.issue.IssueBoard;
 import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
+import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
@@ -132,7 +132,10 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 								if (identifyField.equals(IssueConstants.FIELD_STATE)) {
 									issue = SerializationUtils.clone(issue);
 									for (TransitionSpec transition: workflow.getTransitionSpecs()) {
-										if (transition.canApplyTo(issue) && transition.getToState().equals(getColumn())) {
+										if (transition.canTransite(issue) 
+												&& transition.getTrigger() instanceof PressButtonTrigger
+												&& ((PressButtonTrigger)transition.getTrigger()).isAuthorized()
+												&& transition.getToState().equals(getColumn())) {
 											issue.setState(getColumn());
 											break;
 										}
@@ -331,24 +334,21 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					checkMatched(target, issue);
 				} else if (fieldName.equals(IssueConstants.FIELD_STATE)) {
 					IssueWorkflow workflow = getProject().getIssueWorkflow();
-					boolean canTransiteIssue = false;
+					AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);
 					for (TransitionSpec transition: workflow.getTransitionSpecs()) {
-						if (transition.canApplyTo(issue) && transition.getToState().equals(getColumn())) {
-							canTransiteIssue = true;
+						if (transition.canTransite(issue) 
+								&& transition.getTrigger() instanceof PressButtonTrigger 
+								&& ((PressButtonTrigger)transition.getTrigger()).isAuthorized() 
+								&& transition.getToState().equals(getColumn())) {
+							transitionRef.set(transition);
 							break;
 						}
 					}
-					if (!canTransiteIssue) 
+					if (transitionRef.get() == null) 
 						throw new UnauthorizedException("Permission denied");
 					
-					Collection<String> fieldNames = workflow.getFieldNames();
-					for (Iterator<String> it = fieldNames.iterator(); it.hasNext();) {
-						String each = it.next();
-						if (issue.isFieldVisible(each, issue.getState()) || !issue.isFieldVisible(each, getColumn()))
-							it.remove();
-					}
-					
-					if (!fieldNames.isEmpty()) {
+					PressButtonTrigger trigger = (PressButtonTrigger) transitionRef.get().getTrigger();
+					if (!trigger.getPromptFields().isEmpty()) {
 						new ModalPanel(target) {
 
 							@Override
@@ -374,8 +374,8 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 									}
 
 									@Override
-									protected String getTargetState() {
-										return getColumn();
+									protected TransitionSpec getTransition() {
+										return transitionRef.get();
 									}
 									
 								};
