@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -12,6 +14,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
@@ -56,7 +59,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	private WatchStatus getProjectWatchStatus(T namedQuery) {
 		QuerySetting<T> querySetting = getQuerySetting();
 		if (querySetting != null)
-			return querySetting.getProjectWatchStatus(namedQuery);
+			return querySetting.getQueryWatchSupport().getProjectWatchStatus(namedQuery);
 		else
 			return WatchStatus.DEFAULT;
 	}
@@ -64,7 +67,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	private WatchStatus getUserWatchStatus(T namedQuery) {
 		QuerySetting<T> querySetting = getQuerySetting();
 		if (querySetting != null)
-			return querySetting.getUserWatchStatus(namedQuery);
+			return querySetting.getQueryWatchSupport().getUserWatchStatus(namedQuery);
 		else
 			return WatchStatus.DEFAULT;
 	}
@@ -227,7 +230,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					protected void onWatchStatusChange(AjaxRequestTarget target, WatchStatus watchStatus) {
 						target.add(this);
 						QuerySetting<T> querySetting = getQuerySetting();
-						querySetting.setUserWatchStatus(namedQuery, watchStatus);
+						querySetting.getQueryWatchSupport().setUserWatchStatus(namedQuery, watchStatus);
 						onSaveQuerySetting(querySetting);
 						
 					}
@@ -235,6 +238,12 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					@Override
 					protected WatchStatus getWatchStatus() {
 						return getUserWatchStatus(namedQuery);
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getQuerySetting().getQueryWatchSupport() != null);
 					}
 					
 				});
@@ -280,7 +289,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 						target.add(this);
 
 						QuerySetting<T> querySetting = getQuerySetting();
-						querySetting.setProjectWatchStatus(namedQuery, watchStatus);
+						querySetting.getQueryWatchSupport().setProjectWatchStatus(namedQuery, watchStatus);
 						onSaveQuerySetting(querySetting);
 					}
 					
@@ -292,7 +301,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.getUser() != null);
+						setVisible(SecurityUtils.getUser() != null && getQuerySetting().getQueryWatchSupport() != null);
 					}
 					
 				});
@@ -306,6 +315,16 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			}
 			
 		});		
+		
+		add(new WebMarkupContainer("watchHint") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getQuerySetting() != null && getQuerySetting().getQueryWatchSupport() != null);
+			}
+			
+		});
 		setOutputMarkupId(true);
 	}
 	
@@ -382,6 +401,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	
 	protected abstract Link<Void> newQueryLink(String componentId, T namedQuery);
 	
+	@Nullable
 	protected abstract QuerySetting<T> getQuerySetting();
 	
 	protected abstract ArrayList<T> getProjectQueries();

@@ -1,7 +1,6 @@
 package io.onedev.server.model;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -15,14 +14,14 @@ import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.QueryWatchSupport;
-import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.model.support.codecomment.NamedCodeCommentQuery;
 
 @Entity
 @Table(
 		indexes={@Index(columnList="g_project_id"), @Index(columnList="g_user_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"g_project_id", "g_user_id"})}
 )
-public class IssueQuerySetting extends QuerySetting<NamedIssueQuery> {
+public class CodeCommentQuerySetting extends QuerySetting<NamedCodeCommentQuery> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -36,15 +35,8 @@ public class IssueQuerySetting extends QuerySetting<NamedIssueQuery> {
 
 	@Lob
 	@Column(nullable=false, length=65535)
-	private ArrayList<NamedIssueQuery> userQueries = new ArrayList<>();
+	private ArrayList<NamedCodeCommentQuery> userQueries = new ArrayList<>();
 
-	@Lob
-	@Column(nullable=false, length=65535)
-	private LinkedHashMap<String, Boolean> userQueryWatches = new LinkedHashMap<>();
-	
-	@Column(nullable=false, length=65535)
-	private LinkedHashMap<String, Boolean> projectQueryWatches = new LinkedHashMap<>();
-	
 	@Override
 	public Project getProject() {
 		return project;
@@ -64,38 +56,18 @@ public class IssueQuerySetting extends QuerySetting<NamedIssueQuery> {
 	}
 
 	@Override
-	public ArrayList<NamedIssueQuery> getUserQueries() {
+	public ArrayList<NamedCodeCommentQuery> getUserQueries() {
 		return userQueries;
 	}
 
 	@Override
-	public void setUserQueries(ArrayList<NamedIssueQuery> userQueries) {
+	public void setUserQueries(ArrayList<NamedCodeCommentQuery> userQueries) {
 		this.userQueries = userQueries;
-	}
-	
-	public void setUserQueryWatches(LinkedHashMap<String, Boolean> userQueryWatches) {
-		this.userQueryWatches = userQueryWatches;
-	}
-
-	public void setProjectQueryWatches(LinkedHashMap<String, Boolean> projectQueryWatches) {
-		this.projectQueryWatches = projectQueryWatches;
 	}
 
 	@Override
-	public QueryWatchSupport<NamedIssueQuery> getQueryWatchSupport() {
-		return new QueryWatchSupport<NamedIssueQuery>() {
-
-			@Override
-			public LinkedHashMap<String, Boolean> getUserQueryWatches() {
-				return userQueryWatches;
-			}
-
-			@Override
-			public LinkedHashMap<String, Boolean> getProjectQueryWatches() {
-				return projectQueryWatches;
-			}
-			
-		};
+	public QueryWatchSupport<NamedCodeCommentQuery> getQueryWatchSupport() {
+		return null;
 	}
-
+	
 }

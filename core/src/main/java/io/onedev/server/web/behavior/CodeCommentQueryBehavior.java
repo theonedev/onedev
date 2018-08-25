@@ -24,7 +24,7 @@ import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CodeCommentConstants;
+import io.onedev.server.model.support.codecomment.CodeCommentConstants;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;

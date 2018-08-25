@@ -21,7 +21,7 @@ public abstract class QueryWatchBuilder<T extends AbstractEntity> {
 	public QueryWatchBuilder() {
 		for (QuerySetting<?> querySetting: getQuerySettings()) {
 			boolean watched = false;
-			for (Map.Entry<String, Boolean> entry: querySetting.getUserQueryWatches().entrySet()) {
+			for (Map.Entry<String, Boolean> entry: querySetting.getQueryWatchSupport().getUserQueryWatches().entrySet()) {
 				if (matches(querySetting.getUserQuery(entry.getKey()))) {
 					watches.putIfAbsent(querySetting.getUser(), entry.getValue());
 					watched = true;
@@ -29,7 +29,7 @@ public abstract class QueryWatchBuilder<T extends AbstractEntity> {
 				}
 			}
 			if (!watched) {
-				for (Map.Entry<String, Boolean> entry: querySetting.getProjectQueryWatches().entrySet()) {
+				for (Map.Entry<String, Boolean> entry: querySetting.getQueryWatchSupport().getProjectQueryWatches().entrySet()) {
 					if (matches(getSavedProjectQuery(entry.getKey()))) {
 						watches.putIfAbsent(querySetting.getUser(), entry.getValue());
 						watched = true;

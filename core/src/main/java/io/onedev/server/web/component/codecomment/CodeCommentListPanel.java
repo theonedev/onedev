@@ -6,8 +6,10 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -24,7 +26,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -52,10 +54,11 @@ import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetai
 import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
-public abstract class CodeCommentListPanel extends Panel {
+public abstract class CodeCommentListPanel extends GenericPanel<String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(RequestListPage.class);
 	
@@ -66,13 +69,13 @@ public abstract class CodeCommentListPanel extends Panel {
 		@Override
 		protected CodeCommentQuery load() {
 			try {
-				CodeCommentQuery parsedQuery = CodeCommentQuery.parse(getProject(), query, true);
+				CodeCommentQuery parsedQuery = CodeCommentQuery.parse(getProject(), getQuery(), true);
 				if (SecurityUtils.getUser() == null && parsedQuery.needsLogin())  
 					error("Please login to perform this query");
 				else
 					return parsedQuery;
 			} catch (Exception e) {
-				logger.error("Error parsing code comment query: " + query, e);
+				logger.error("Error parsing code comment query: " + getQuery(), e);
 				error(e.getMessage());
 			}
 			return null;
@@ -80,24 +83,52 @@ public abstract class CodeCommentListPanel extends Panel {
 		
 	};
 	
-	private String query;
-	
 	private DataTable<CodeComment, Void> commentsTable;
 	
-	public CodeCommentListPanel(String id, String query) {
-		super(id);
-		this.query = query;
+	public CodeCommentListPanel(String id, IModel<String> queryModel) {
+		super(id, queryModel);
 	}
 
 	private CodeCommentManager getCodeCommentManager() {
 		return OneDev.getInstance(CodeCommentManager.class);
 	}
 	
+	private String getQuery() {
+		return getModelObject();
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		TextField<String> input = new TextField<String>("input", Model.of(query));
+		Component querySave;
+		add(querySave = new AjaxLink<Void>("saveQuery") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(StringUtils.isNotBlank(getQuery()));
+				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				configure();
+				if (!isEnabled()) {
+					tag.put("disabled", "disabled");
+					tag.put("title", "Input query to save");
+				}
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				getQuerySaveSupport().onSaveQuery(target);
+			}		
+			
+		});
+		
+		TextField<String> input = new TextField<String>("input", getModel());
 		input.add(new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
@@ -110,7 +141,8 @@ public abstract class CodeCommentListPanel extends Panel {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				query = input.getModelObject();
+				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
+					target.add(querySave);
 			}
 			
 		});
@@ -285,10 +317,6 @@ public abstract class CodeCommentListPanel extends Panel {
 		response.render(CssHeaderItem.forReference(new CodeCommentCssResourceReference()));
 	}
 
-	public String getQuery() {
-		return query;
-	}
-
 	@Override
 	protected void onDetach() {
 		parsedQueryModel.detach();
@@ -301,6 +329,9 @@ public abstract class CodeCommentListPanel extends Panel {
 
 	protected abstract void onQueryUpdated(AjaxRequestTarget target);
 
+	@Nullable
+	protected abstract QuerySaveSupport getQuerySaveSupport();
+	
 	@Nullable
 	protected abstract PullRequest getPullRequest();
 }

@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.issuelist;
+package io.onedev.server.web.util;
 
 import java.io.Serializable;
 

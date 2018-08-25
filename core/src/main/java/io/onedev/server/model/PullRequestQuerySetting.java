@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QueryWatchSupport;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 
 @Entity
@@ -72,22 +73,29 @@ public class PullRequestQuerySetting extends QuerySetting<NamedPullRequestQuery>
 		this.userQueries = userQueries;
 	}
 	
-	@Override
-	public LinkedHashMap<String, Boolean> getUserQueryWatches() {
-		return userQueryWatches;
-	}
-
 	public void setUserQueryWatches(LinkedHashMap<String, Boolean> userQueryWatches) {
 		this.userQueryWatches = userQueryWatches;
 	}
 
-	@Override
-	public LinkedHashMap<String, Boolean> getProjectQueryWatches() {
-		return projectQueryWatches;
-	}
-
 	public void setProjectQueryWatches(LinkedHashMap<String, Boolean> projectQueryWatches) {
 		this.projectQueryWatches = projectQueryWatches;
+	}
+
+	@Override
+	public QueryWatchSupport<NamedPullRequestQuery> getQueryWatchSupport() {
+		return new QueryWatchSupport<NamedPullRequestQuery>() {
+
+			@Override
+			public LinkedHashMap<String, Boolean> getUserQueryWatches() {
+				return userQueryWatches;
+			}
+
+			@Override
+			public LinkedHashMap<String, Boolean> getProjectQueryWatches() {
+				return projectQueryWatches;
+			}
+			
+		};
 	}
 
 }

@@ -1,4 +1,4 @@
-package io.onedev.server.model.support;
+package io.onedev.server.model.support.codecomment;
 
 import java.util.LinkedHashMap;
 import java.util.List;

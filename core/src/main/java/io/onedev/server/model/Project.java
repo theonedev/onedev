@@ -75,6 +75,7 @@ import io.onedev.server.git.Submodule;
 import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.manager.CodeCommentQuerySettingManager;
 import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.PullRequestQuerySettingManager;
@@ -84,6 +85,7 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
 import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.support.codecomment.NamedCodeCommentQuery;
 import io.onedev.server.model.support.issue.IssueBoard;
 import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
@@ -183,6 +185,9 @@ public class Project extends AbstractEntity {
 	private Collection<PullRequestQuerySetting> pullRequestQuerySettings = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<CodeCommentQuerySetting> codeCommentQuerySettings = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
 	@Lob
@@ -196,6 +201,10 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(length=65535)
 	private ArrayList<NamedPullRequestQuery> savedPullRequestQueries;
+	
+	@Lob
+	@Column(length=65535)
+	private ArrayList<NamedCodeCommentQuery> savedCodeCommentQueries;
 	
 	@Lob
 	@Column(length=65535)
@@ -222,6 +231,8 @@ public class Project extends AbstractEntity {
     private transient Optional<IssueQuerySetting> issueQuerySettingOfCurrentUserHolder;
     
     private transient Optional<PullRequestQuerySetting> pullRequestQuerySettingOfCurrentUserHolder;
+    
+    private transient Optional<CodeCommentQuerySetting> codeCommentQuerySettingOfCurrentUserHolder;
     
 	@Editable(order=100)
 	@ProjectName
@@ -905,6 +916,30 @@ public class Project extends AbstractEntity {
 		return null;
 	}
 	
+	@Nullable
+	public NamedCodeCommentQuery getSavedCodeCommentQuery(String name) {
+		for (NamedCodeCommentQuery namedQuery: getSavedCodeCommentQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
+	
+	public ArrayList<NamedCodeCommentQuery> getSavedCodeCommentQueries() {
+		if (savedCodeCommentQueries == null) {
+			savedCodeCommentQueries = new ArrayList<>();
+			savedCodeCommentQueries.add(new NamedCodeCommentQuery("All", "all"));
+			savedCodeCommentQueries.add(new NamedCodeCommentQuery("Created by me", "created by me"));
+			savedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is after \"last week\""));
+			savedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+		}
+		return savedCodeCommentQueries;
+	}
+
+	public void setSavedCodeCommentQueries(ArrayList<NamedCodeCommentQuery> savedCodeCommentQueries) {
+		this.savedCodeCommentQueries = savedCodeCommentQueries;
+	}
+	
 	public ArrayList<String> getIssueListFields() {
 		if (issueListFields == null) {
 			issueListFields = new ArrayList<>();
@@ -939,6 +974,14 @@ public class Project extends AbstractEntity {
 		this.pullRequestQuerySettings = pullRequestQuerySettings;
 	}
 
+	public Collection<CodeCommentQuerySetting> getCodeCommentQuerySettings() {
+		return codeCommentQuerySettings;
+	}
+
+	public void setCodeCommentQuerySettings(Collection<CodeCommentQuerySetting> codeCommentQuerySettings) {
+		this.codeCommentQuerySettings = codeCommentQuerySettings;
+	}
+	
 	public long getVersion() {
 		return version;
 	}
@@ -1120,6 +1163,25 @@ public class Project extends AbstractEntity {
 			}
 		}
 		return pullRequestQuerySettingOfCurrentUserHolder.orNull();
+	}
+	
+	@Nullable
+	public CodeCommentQuerySetting getCodeCommentQuerySettingOfCurrentUser() {
+		if (codeCommentQuerySettingOfCurrentUserHolder == null) {
+			User user = SecurityUtils.getUser();
+			if (user != null) {
+				CodeCommentQuerySetting setting = OneDev.getInstance(CodeCommentQuerySettingManager.class).find(this, user);
+				if (setting == null) {
+					setting = new CodeCommentQuerySetting();
+					setting.setProject(this);
+					setting.setUser(user);
+				}
+				codeCommentQuerySettingOfCurrentUserHolder = Optional.of(setting);
+			} else {
+				codeCommentQuerySettingOfCurrentUserHolder = Optional.absent();
+			}
+		}
+		return codeCommentQuerySettingOfCurrentUserHolder.orNull();
 	}
 	
 	@Nullable

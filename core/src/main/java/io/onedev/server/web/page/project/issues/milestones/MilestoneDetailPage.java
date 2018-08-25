@@ -24,9 +24,9 @@ import io.onedev.server.web.component.MilestoneDueLabel;
 import io.onedev.server.web.component.MilestoneStatusLabel;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.issuelist.IssueListPanel;
-import io.onedev.server.web.component.issuelist.QuerySaveSupport;
 import io.onedev.server.web.page.project.issues.IssuesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
 public class MilestoneDetailPage extends IssuesPage {

@@ -91,6 +91,7 @@ import io.onedev.server.manager.BatchWorkManager;
 import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.CodeCommentManager;
+import io.onedev.server.manager.CodeCommentQuerySettingManager;
 import io.onedev.server.manager.CodeCommentRelationInfoManager;
 import io.onedev.server.manager.CodeCommentRelationManager;
 import io.onedev.server.manager.CodeCommentReplyManager;
@@ -132,6 +133,7 @@ import io.onedev.server.manager.impl.DefaultBuildManager;
 import io.onedev.server.manager.impl.DefaultCacheManager;
 import io.onedev.server.manager.impl.DefaultCodeCommentManager;
 import io.onedev.server.manager.impl.DefaultCodeCommentNotificationManager;
+import io.onedev.server.manager.impl.DefaultCodeCommentQuerySettingManager;
 import io.onedev.server.manager.impl.DefaultCodeCommentRelationInfoManager;
 import io.onedev.server.manager.impl.DefaultCodeCommentRelationManager;
 import io.onedev.server.manager.impl.DefaultCodeCommentReplyManager;
@@ -330,6 +332,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(IssueCommentManager.class).to(DefaultIssueCommentManager.class);
 		bind(IssueQuerySettingManager.class).to(DefaultIssueQuerySettingManager.class);
 		bind(PullRequestQuerySettingManager.class).to(DefaultPullRequestQuerySettingManager.class);
+		bind(CodeCommentQuerySettingManager.class).to(DefaultCodeCommentQuerySettingManager.class);
 
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);

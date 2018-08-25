@@ -9,7 +9,7 @@ import io.onedev.server.entityquery.EntityCriteria;
 import io.onedev.server.entityquery.QueryBuildContext;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.CodeCommentConstants;
+import io.onedev.server.model.support.codecomment.CodeCommentConstants;
 import io.onedev.server.security.SecurityUtils;
 
 public class CreatedByMeCriteria extends EntityCriteria<CodeComment> {

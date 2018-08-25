@@ -37,11 +37,11 @@ public class DefaultPullRequestQuerySettingManager extends AbstractEntityManager
 	@Transactional
 	@Override
 	public void save(PullRequestQuerySetting setting) {
-		setting.getUserQueryWatches().keySet().retainAll(
+		setting.getQueryWatchSupport().getUserQueryWatches().keySet().retainAll(
 				setting.getUserQueries().stream().map(it->it.getName()).collect(Collectors.toSet()));
-		setting.getProjectQueryWatches().keySet().retainAll(
+		setting.getQueryWatchSupport().getProjectQueryWatches().keySet().retainAll(
 				setting.getProject().getSavedIssueQueries().stream().map(it->it.getName()).collect(Collectors.toSet()));
-		if (setting.getProjectQueryWatches().isEmpty() && setting.getUserQueries().isEmpty()) {
+		if (setting.getQueryWatchSupport().getProjectQueryWatches().isEmpty() && setting.getUserQueries().isEmpty()) {
 			if (!setting.isNew())
 				delete(setting);
 		} else {

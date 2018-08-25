@@ -22,13 +22,13 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.web.component.issuelist.IssueListPanel;
-import io.onedev.server.web.component.issuelist.QuerySaveSupport;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.issues.IssuesPage;
 import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
 import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
 public class IssueListPage extends IssuesPage {

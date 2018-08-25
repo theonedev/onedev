@@ -1,12 +1,12 @@
 package io.onedev.server.entityquery.codecomment;
 
-import static io.onedev.server.model.support.CodeCommentConstants.FIELD_COMMIT;
-import static io.onedev.server.model.support.CodeCommentConstants.FIELD_CONTENT;
-import static io.onedev.server.model.support.CodeCommentConstants.FIELD_CREATE_DATE;
-import static io.onedev.server.model.support.CodeCommentConstants.FIELD_PATH;
-import static io.onedev.server.model.support.CodeCommentConstants.FIELD_REPLY;
-import static io.onedev.server.model.support.CodeCommentConstants.FIELD_REPLY_COUNT;
-import static io.onedev.server.model.support.CodeCommentConstants.FIELD_UPDATE_DATE;
+import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_COMMIT;
+import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_CONTENT;
+import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_CREATE_DATE;
+import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_PATH;
+import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_REPLY;
+import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_REPLY_COUNT;
+import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_UPDATE_DATE;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -44,7 +44,7 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.CodeCommentConstants;
+import io.onedev.server.model.support.codecomment.CodeCommentConstants;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
 

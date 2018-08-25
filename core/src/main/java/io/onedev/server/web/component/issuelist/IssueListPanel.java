@@ -66,6 +66,7 @@ import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
