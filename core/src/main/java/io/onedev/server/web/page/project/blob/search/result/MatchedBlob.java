@@ -3,7 +3,7 @@ package io.onedev.server.web.page.project.blob.search.result;
 import java.io.Serializable;
 import java.util.List;
 
-import io.onedev.server.codesearch.hit.QueryHit;
+import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.utils.Range;
 
 public class MatchedBlob implements Serializable {

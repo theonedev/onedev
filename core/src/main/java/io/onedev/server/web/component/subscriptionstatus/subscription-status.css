@@ -1,0 +1,39 @@
+.subscription-status:BEFORE {
+	font-family: "Glyphicons Halflings";
+	font-size: 14px;
+}
+.subscription-status.subscribed:BEFORE {
+	content: "\e038";
+}
+.subscription-status.not-subscribed:BEFORE {
+	content: "\e036";
+}
+
+.floating .subscription-status {
+	padding: 16px 0;
+}
+.floating .subscription-status a {
+	display: block;
+	color: #333;
+	padding: 8px 8px 8px 28px;
+	text-decoration: none;
+	position: relative;
+}
+.floating .subscription-status a.active:before {
+	font-family: "FontAwesome";
+	content: "\f00c";
+	position: absolute;
+	left: 8px;
+}
+.floating .subscription-status a .title {
+	font-weight: bold;
+}
+.floating .subscription-status a .description {
+	font-size: 13px;
+	color: #666;
+	margin-top: 4px;
+}
+
+.floating .subscription-status a:hover {
+	background: #F5F5F5;
+}

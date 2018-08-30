@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QuerySubscriptionSupport;
 import io.onedev.server.model.support.QueryWatchSupport;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 
@@ -96,6 +97,11 @@ public class PullRequestQuerySetting extends QuerySetting<NamedPullRequestQuery>
 			}
 			
 		};
+	}
+
+	@Override
+	public QuerySubscriptionSupport<NamedPullRequestQuery> getQuerySubscriptionSupport() {
+		return null;
 	}
 
 }

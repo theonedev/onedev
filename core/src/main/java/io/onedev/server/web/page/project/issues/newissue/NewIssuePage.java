@@ -11,12 +11,12 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.issue.IssueCriteria;
-import io.onedev.server.entityquery.issue.IssueQuery;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.issue.IssueCriteria;
+import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.newissue.NewIssueEditor;

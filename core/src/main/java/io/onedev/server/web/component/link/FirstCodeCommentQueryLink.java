@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.entityquery.codecomment.CodeCommentQuery;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.codecomment.NamedCodeCommentQuery;
+import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.comments.ProjectCodeCommentsPage;
 

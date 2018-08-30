@@ -38,11 +38,11 @@ import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.codecomment.CodeCommentQuery;
 import io.onedev.server.manager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
@@ -170,15 +170,15 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 
 			@Override
 			public Iterator<? extends CodeComment> iterator(long first, long count) {
-				return getCodeCommentManager().query(getProject(), getPullRequest(), parsedQueryModel.getObject(), 
-						(int)first, (int)count).iterator();
+				return getCodeCommentManager().query(getProject(), getPullRequest(), SecurityUtils.getUser(), 
+						parsedQueryModel.getObject(), (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
 				CodeCommentQuery parsedQuery = parsedQueryModel.getObject();
 				if (parsedQuery != null)
-					return getCodeCommentManager().count(getProject(), getPullRequest(), parsedQuery.getCriteria());
+					return getCodeCommentManager().count(getProject(), getPullRequest(), SecurityUtils.getUser(), parsedQuery.getCriteria());
 				else
 					return 0;
 			}

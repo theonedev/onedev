@@ -35,6 +35,7 @@ import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.FirstCodeCommentQueryLink;
+import io.onedev.server.web.component.link.FirstCommitQueryLink;
 import io.onedev.server.web.component.link.FirstIssueQueryLink;
 import io.onedev.server.web.component.link.FirstPullRequestQueryLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -139,7 +140,20 @@ public abstract class ProjectPage extends LayoutPage {
 				List<PageTab> tabs = new ArrayList<>();
 				tabs.add(new ProjectTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, ProjectBlobPage.class));
 				tabs.add(new ProjectTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0,
-						ProjectCommitsPage.class, CommitDetailPage.class));
+						ProjectCommitsPage.class, CommitDetailPage.class) {
+					
+					@Override
+					public Component render(String componentId) {
+						return new ProjectTabLink(componentId, this) {
+
+							@Override
+							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+								return new FirstCommitQueryLink(linkId, getProject());
+							}
+						};
+					}
+					
+				});
 				tabs.add(new ProjectTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
 						0, ProjectBranchesPage.class));
 				tabs.add(new ProjectTab(Model.of("Tags"), "fa fa-fw fa-tag", 

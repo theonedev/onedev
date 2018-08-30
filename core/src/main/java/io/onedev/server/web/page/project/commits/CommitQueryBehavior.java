@@ -21,6 +21,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.git.NameAndEmail;
 import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.search.commit.CommitQueryParser;
 import io.onedev.server.util.Constants;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;

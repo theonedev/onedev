@@ -12,6 +12,7 @@ import io.onedev.codeassist.InputStatus;
 import io.onedev.codeassist.InputSuggestion;
 import io.onedev.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.codeassist.parser.TerminalExpect;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
 
 public class TestCodeCommentQueryGrammar {
 

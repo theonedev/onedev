@@ -12,13 +12,13 @@
 	content: "Watch if involved";
 }
 .watch-status.watch:BEFORE {
-	content: "\f0a2";
+	content: "\f06e";
 }
 .watch-status.watch:AFTER {
 	content: "Watch";
 }
 .watch-status.do-not-watch:BEFORE {
-	content: "\f1f7";
+	content: "\f070";
 }
 .watch-status.do-not-watch:AFTER {
 	content: "Do not watch";

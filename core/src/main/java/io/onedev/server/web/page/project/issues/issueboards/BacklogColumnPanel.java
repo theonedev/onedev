@@ -21,13 +21,13 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.issue.IssueCriteria;
-import io.onedev.server.entityquery.issue.IssueQuery;
-import io.onedev.server.entityquery.issue.MilestoneCriteria;
 import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.issue.IssueCriteria;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -105,7 +105,7 @@ abstract class BacklogColumnPanel extends Panel {
 			@Override
 			protected String load() {
 				return String.valueOf(OneDev.getInstance(IssueManager.class)
-						.count(getProject(), getQuery().getCriteria()));
+						.count(getProject(), SecurityUtils.getUser(), getQuery().getCriteria()));
 			}
 			
 		}) {
@@ -127,7 +127,7 @@ abstract class BacklogColumnPanel extends Panel {
 				if (!SecurityUtils.canModify(issue)) 
 					throw new UnauthorizedException("Permission denied");
 				OneDev.getInstance(IssueActionManager.class).changeMilestone(issue, null);
-				if (getQuery().matches(issue)) {
+				if (getQuery().matches(issue, SecurityUtils.getUser())) {
 					target.add(BacklogColumnPanel.this);
 				} else {
 					new ModalPanel(target) {
@@ -173,7 +173,7 @@ abstract class BacklogColumnPanel extends Panel {
 						issue = SerializationUtils.clone(issue);
 						issue.setMilestone(null);
 					}
-					if (getQuery().matches(issue)) {
+					if (getQuery().matches(issue, SecurityUtils.getUser())) {
 						String script = String.format("$('#%s').addClass('issue-droppable');", getMarkupId());
 						issueDragging.getHandler().appendJavaScript(script);
 					}
@@ -184,7 +184,7 @@ abstract class BacklogColumnPanel extends Panel {
 			@Override
 			protected List<Issue> queryIssues(int offset, int count) {
 				if (getQuery() != null) 
-					return OneDev.getInstance(IssueManager.class).query(getProject(), getQuery(), offset, count);
+					return OneDev.getInstance(IssueManager.class).query(getProject(), SecurityUtils.getUser(), getQuery(), offset, count);
 				else 
 					return new ArrayList<>();
 			}

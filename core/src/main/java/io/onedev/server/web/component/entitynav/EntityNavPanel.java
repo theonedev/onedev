@@ -13,8 +13,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.protocol.http.WebSession;
 
-import io.onedev.server.entityquery.EntityQuery;
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.utils.ReflectionUtils;
 import io.onedev.utils.WordUtils;
@@ -63,7 +64,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				int offset = getPosition().getOffset() - 1;
 				List<T> entities = query(query, offset, 1);
 				if (!entities.isEmpty()) {
-					if (!query.matches(getEntity()))
+					if (!query.matches(getEntity(), SecurityUtils.getUser()))
 						count--;
 					QueryPosition prevPosition = new QueryPosition(getPosition().getQuery(), count, offset);
 					navTo(entities.get(0), prevPosition);
@@ -94,7 +95,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				EntityQuery<T> query = parse(getPosition().getQuery());
 				int offset = getPosition().getOffset();
 				int count = getPosition().getCount();
-				if (query.matches(getEntity())) 
+				if (query.matches(getEntity(), SecurityUtils.getUser())) 
 					offset++;
 				else
 					count--;

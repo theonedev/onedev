@@ -1,25 +1,31 @@
 <wicket:extend>
-	<div id="repo-commits">
-		<div class="head">
-			<form wicket:id="query" class="query no-autofocus clearable-wrapper">
-				<div class="input-group">
-					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Filter by branch, tag, commit id, file path, date, user or commit message"></input>
-					<span class="input-group-btn">
-						<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
-					</span>
+	<div id="project-commits" class="query-save-support">
+		<div wicket:id="side" class="side"></div>
+		<div class="main">
+			<div class="head">
+				<form wicket:id="query" class="query no-autofocus clearable-wrapper">
+					<div class="input-group">
+						<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control" placeholder="Filter by branch, tag, commit id, file path, date, user or commit message"></input>
+						<span class="input-group-btn">
+							<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
+						</span>
+					</div>
+				</form>
+				<div class="others clearfix">
+					<a wicket:id="saveQuery" class="save-query pull-left"><i class="fa fa-save"></i> Save Query</a>
 				</div>
-			</form>
-			<div wicket:id="feedback"></div>
-		</div>
-		<div wicket:id="body" class="body">
-			<ul class="list list-unstyled">
-				<li wicket:id="commits"></li>
-			</ul>
-			<div wicket:id="noCommits" class="no-records">No commits found</div>
-		</div>
-		<div wicket:id="commitsFoot" class="foot">
-			<a wicket:id="more" class="btn btn-default">More commits</a>
-			<div wicket:id="tooMany" class="alert alert-warning">Too many commits to load</div>
+				<div wicket:id="feedback"></div>
+			</div>
+			<div wicket:id="body" class="body">
+				<ul class="list list-unstyled">
+					<li wicket:id="commits"></li>
+				</ul>
+				<div wicket:id="noCommits" class="no-records">No commits found</div>
+			</div>
+			<div wicket:id="commitsFoot" class="foot">
+				<a wicket:id="more" class="btn btn-default">More commits</a>
+				<div wicket:id="tooMany" class="alert alert-warning">Too many commits to load</div>
+			</div>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="commitFrag">

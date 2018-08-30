@@ -1,64 +1,65 @@
-#repo-commits {
+#project-commits>.main {
 	position: relative;
 }
-#repo-commits>.head>.query {
+#project-commits>.main>.head>.query {
 	margin-bottom: 20px;
 }
-#repo-commits>.body .no-commits {
+
+#project-commits>.main>.body .no-commits {
 	font-size: 16px;
 }
-#repo-commits>.body li {
+#project-commits>.main>.body li {
 	padding: 4px 0;
 }
-#repo-commits>.body li.commit>.avatar {
+#project-commits>.main>.body li.commit>.avatar {
 	margin-top: 4px;
 }
-#repo-commits>.body .label {
+#project-commits>.main>.body .label {
 	margin: 3px 0 0 4px;
 }
-#repo-commits>.body a {
+#project-commits>.main>.body a {
 	color: #555;
 }
-#repo-commits>.body a.summary {
+#project-commits>.main>.body a.summary {
 	font-weight: bold;
 	font-size: 15px;
 }
-#repo-commits>.body .detail {
+#project-commits>.main>.body .detail {
 	padding-left: 8px; 
 	padding-right: 8px;
 }
-#repo-commits>.body li.commit:hover, #repo-commits>.body li.commit.hover {
+#project-commits>.main>.body li.commit:hover, #project-commits>.main>.body li.commit.hover {
 	background: #F7ECB9;
 }
-#repo-commits>.body .commit-message .highlight {
+#project-commits>.main>.body .commit-message .highlight {
 	background: yellow;
 }
-#repo-commits>.body li.commit .contribution {
+#project-commits>.main>.body li.commit .contribution {
 	font-size: 12px;
 }
-#repo-commits>.body .message-and-labels {
+#project-commits>.main>.body .message-and-labels {
 	margin-bottom: 4px;
 }
-#repo-commits>.body .actions {
+#project-commits>.main>.body .actions {
 	margin: 6px 0 0 8px;
 }
-#repo-commits>.body .hash {
+#project-commits>.main>.body .hash {
 	margin-top: 6px;
 }
-#repo-commits>.body .actions .compare {
+#project-commits>.main>.body .actions .compare {
 	color: #777;
 }
-#repo-commits>.body>.list {
+#project-commits>.main>.body>.list {
 	margin-bottom: 0;
 }
-#repo-commits>.foot {
+#project-commits>.main>.foot {
 	text-align: center;
 }
-#repo-commits>.foot>.alert, #repo-commits>.foot>.btn {
+#project-commits>.main>.foot>.alert, #project-commits>.main>.foot>.btn {
 	margin-top: 8px;
 	margin-bottom: 0;
 }
-#repo-commits li.date {
+#project-commits>.main li.date {
 	font-size: 18px;
 	margin-top: 12px;
 	text-align: left;

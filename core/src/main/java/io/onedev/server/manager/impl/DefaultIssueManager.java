@@ -32,15 +32,6 @@ import org.hibernate.query.Query;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.entityquery.EntityQuery;
-import io.onedev.server.entityquery.EntitySort;
-import io.onedev.server.entityquery.EntitySort.Direction;
-import io.onedev.server.entityquery.QueryBuildContext;
-import io.onedev.server.entityquery.issue.AndCriteria;
-import io.onedev.server.entityquery.issue.IssueCriteria;
-import io.onedev.server.entityquery.issue.IssueQuery;
-import io.onedev.server.entityquery.issue.IssueQueryBuildContext;
-import io.onedev.server.entityquery.issue.MilestoneCriteria;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.issue.IssueOpened;
@@ -52,6 +43,7 @@ import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.IssueBoard;
 import io.onedev.server.model.support.issue.IssueConstants;
@@ -62,6 +54,15 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.issue.AndCriteria;
+import io.onedev.server.search.entity.issue.IssueCriteria;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryBuildContext;
+import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.OneContext;
@@ -116,21 +117,21 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		listenerRegistry.post(new IssueOpened(issue));
 	}
 
-	private Predicate[] getPredicates(io.onedev.server.entityquery.EntityCriteria<Issue> criteria, Project project, QueryBuildContext<Issue> context) {
+	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Issue> criteria, Project project, QueryBuildContext<Issue> context, User user) {
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(context.getBuilder().equal(context.getRoot().get("project"), project));
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(project, context));
+			predicates.add(criteria.getPredicate(project, context, user));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
-	private CriteriaQuery<Issue> buildCriteriaQuery(Session session, Project project, EntityQuery<Issue> issueQuery) {
+	private CriteriaQuery<Issue> buildCriteriaQuery(Session session, Project project, EntityQuery<Issue> issueQuery, User user) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Issue> query = builder.createQuery(Issue.class);
 		Root<Issue> root = query.from(Issue.class);
 		
 		QueryBuildContext<Issue> context = new IssueQueryBuildContext(root, builder);
-		query.where(getPredicates(issueQuery.getCriteria(), project, context));
+		query.where(getPredicates(issueQuery.getCriteria(), project, context, user));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: issueQuery.getSorts()) {
@@ -159,8 +160,8 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 	@Sessional
 	@Override
-	public List<Issue> query(Project project, io.onedev.server.entityquery.EntityQuery<Issue> issueQuery, int firstResult, int maxResults) {
-		CriteriaQuery<Issue> criteriaQuery = buildCriteriaQuery(getSession(), project, issueQuery);
+	public List<Issue> query(Project project, User user, io.onedev.server.search.entity.EntityQuery<Issue> issueQuery, int firstResult, int maxResults) {
+		CriteriaQuery<Issue> criteriaQuery = buildCriteriaQuery(getSession(), project, issueQuery, user);
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
@@ -173,33 +174,33 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	
 	@Sessional
 	@Override
-	public int count(Project project, IssueCriteria issueCriteria) {
+	public int count(Project project, User user, IssueCriteria issueCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 
 		QueryBuildContext<Issue> context = new IssueQueryBuildContext(root, builder);
-		criteriaQuery.where(getPredicates(issueCriteria, project, context));
+		criteriaQuery.where(getPredicates(issueCriteria, project, context, user));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 
 	@Override
-	public int count(Milestone milestone, @Nullable StateSpec.Category category) {
+	public int count(Milestone milestone, User user, @Nullable StateSpec.Category category) {
 		if (category != null) {
 			IssueCriteria criteria = milestone.getProject().getIssueWorkflow().getCategoryCriteria(category);
 			if (criteria != null) {
 				List<IssueCriteria> criterias = new ArrayList<>();
 				criterias.add(new MilestoneCriteria(milestone.getName()));
 				criterias.add(criteria);
-				return count(milestone.getProject(), new AndCriteria(criterias));
+				return count(milestone.getProject(), user, new AndCriteria(criterias));
 			} else {
 				return 0;
 			}
 		} else {
 			IssueCriteria criteria = new MilestoneCriteria(milestone.getName());
-			return count(milestone.getProject(), criteria);
+			return count(milestone.getProject(), user, criteria);
 		}
 	}
 

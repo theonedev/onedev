@@ -1,16 +1,6 @@
 .code-comments>.head>* {
 	margin-bottom: 20px;
 }
-.code-comments>.head>.others>* {
-	margin-right: 16px;
-	color: #666;
-}
-.code-comments>.head>.others a[disabled] {
-	text-decoration: none;
-	color: #999;
-	cursor: default;
-}
-
 .code-comments .new-indicator {
 	width: 4px;
 	padding: 0;

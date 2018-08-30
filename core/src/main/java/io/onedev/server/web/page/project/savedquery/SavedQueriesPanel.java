@@ -33,6 +33,7 @@ import io.onedev.server.model.support.WatchStatus;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.subscriptionstatus.SubscriptionStatusLink;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
@@ -70,6 +71,22 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			return querySetting.getQueryWatchSupport().getUserWatchStatus(namedQuery);
 		else
 			return WatchStatus.DEFAULT;
+	}
+	
+	private boolean getProjectSubscriptionStatus(T namedQuery) {
+		QuerySetting<T> querySetting = getQuerySetting();
+		if (querySetting != null)
+			return querySetting.getQuerySubscriptionSupport().getProjectQuerySubscriptions().contains(namedQuery.getName());
+		else
+			return false;
+	}
+	
+	private boolean getUserSubscriptionStatus(T namedQuery) {
+		QuerySetting<T> querySetting = getQuerySetting();
+		if (querySetting != null)
+			return querySetting.getQuerySubscriptionSupport().getUserQuerySubscriptions().contains(namedQuery.getName());
+		else
+			return false;
 	}
 	
 	private Project getProject() {
@@ -247,6 +264,35 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					}
 					
 				});
+				
+				item.add(new SubscriptionStatusLink("subscriptionStatus") {
+					
+					@Override
+					protected void onSubscriptionStatusChange(AjaxRequestTarget target, boolean subscriptionStatus) {
+						target.add(this);
+						QuerySetting<T> querySetting = getQuerySetting();
+						if (subscriptionStatus)
+							querySetting.getQuerySubscriptionSupport().getUserQuerySubscriptions().add(namedQuery.getName());
+						else
+							querySetting.getQuerySubscriptionSupport().getUserQuerySubscriptions().remove(namedQuery.getName());
+							
+						onSaveQuerySetting(querySetting);
+						
+					}
+					
+					@Override
+					protected boolean getSubscriptionStatus() {
+						return getUserSubscriptionStatus(namedQuery);
+					}
+					
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(getQuerySetting().getQuerySubscriptionSupport() != null);
+					}
+					
+				});
+				
 			}
 
 			@Override
@@ -306,6 +352,32 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					
 				});
 				
+				item.add(new SubscriptionStatusLink("subscriptionStatus") {
+					
+					@Override
+					protected void onSubscriptionStatusChange(AjaxRequestTarget target, boolean subscriptionStatus) {
+						target.add(this);
+
+						QuerySetting<T> querySetting = getQuerySetting();
+						if (subscriptionStatus)
+							querySetting.getQuerySubscriptionSupport().getProjectQuerySubscriptions().add(namedQuery.getName());
+						else
+							querySetting.getQuerySubscriptionSupport().getProjectQuerySubscriptions().remove(namedQuery.getName());
+						onSaveQuerySetting(querySetting);
+					}
+					
+					@Override
+					protected boolean getSubscriptionStatus() {
+						return getProjectSubscriptionStatus(namedQuery);
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(SecurityUtils.getUser() != null && getQuerySetting().getQuerySubscriptionSupport() != null);
+					}
+					
+				});
 			}
 			
 			@Override

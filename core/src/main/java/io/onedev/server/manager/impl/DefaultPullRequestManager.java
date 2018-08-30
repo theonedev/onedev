@@ -57,12 +57,6 @@ import com.google.common.base.Throwables;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.EntityQuery;
-import io.onedev.server.entityquery.EntitySort;
-import io.onedev.server.entityquery.EntitySort.Direction;
-import io.onedev.server.entityquery.QueryBuildContext;
-import io.onedev.server.entityquery.pullrequest.PullRequestQuery;
-import io.onedev.server.entityquery.pullrequest.PullRequestQueryBuildContext;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestActionEvent;
@@ -118,6 +112,12 @@ import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.persistence.dao.EntityRemoved;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.search.entity.pullrequest.PullRequestQueryBuildContext;
 import io.onedev.server.security.ProjectPrivilege;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPermission;
@@ -940,16 +940,16 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		return findAll(criteria);
 	}
 	
-	private Predicate[] getPredicates(io.onedev.server.entityquery.EntityCriteria<PullRequest> criteria, 
-			Project targetProject, QueryBuildContext<PullRequest> context) {
+	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 
+			Project targetProject, User user, QueryBuildContext<PullRequest> context) {
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(context.getBuilder().equal(context.getRoot().get("targetProject"), targetProject));
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(targetProject, context));
+			predicates.add(criteria.getPredicate(targetProject, context, user));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
-	private CriteriaQuery<PullRequest> buildCriteriaQuery(Session session, Project targetProject, 
+	private CriteriaQuery<PullRequest> buildCriteriaQuery(Session session, Project targetProject, User user,
 			EntityQuery<PullRequest> requestQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<PullRequest> query = builder.createQuery(PullRequest.class);
@@ -957,7 +957,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		query.select(root).distinct(true);
 		
 		QueryBuildContext<PullRequest> context = new PullRequestQueryBuildContext(root, builder);
-		query.where(getPredicates(requestQuery.getCriteria(), targetProject, context));
+		query.where(getPredicates(requestQuery.getCriteria(), targetProject, user, context));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: requestQuery.getSorts()) {
@@ -977,8 +977,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Sessional
 	@Override
-	public List<PullRequest> query(Project targetProject, EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults) {
-		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), targetProject, requestQuery);
+	public List<PullRequest> query(Project targetProject, User user, EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults) {
+		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), targetProject, user, requestQuery);
 		Query<PullRequest> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
@@ -987,13 +987,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public int count(Project targetProject, io.onedev.server.entityquery.EntityCriteria<PullRequest> requestCriteria) {
+	public int count(Project targetProject, User user, io.onedev.server.search.entity.EntityCriteria<PullRequest> requestCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 
 		QueryBuildContext<PullRequest> context = new PullRequestQueryBuildContext(root, builder);
-		criteriaQuery.where(getPredicates(requestCriteria, targetProject, context));
+		criteriaQuery.where(getPredicates(requestCriteria, targetProject, user, context));
 
 		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

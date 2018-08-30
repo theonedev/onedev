@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.QuerySubscriptionSupport;
 import io.onedev.server.model.support.QueryWatchSupport;
 import io.onedev.server.model.support.codecomment.NamedCodeCommentQuery;
 
@@ -67,6 +68,11 @@ public class CodeCommentQuerySetting extends QuerySetting<NamedCodeCommentQuery>
 
 	@Override
 	public QueryWatchSupport<NamedCodeCommentQuery> getQueryWatchSupport() {
+		return null;
+	}
+
+	@Override
+	public QuerySubscriptionSupport<NamedCodeCommentQuery> getQuerySubscriptionSupport() {
 		return null;
 	}
 	

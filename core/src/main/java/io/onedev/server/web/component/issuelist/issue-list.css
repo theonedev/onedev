@@ -16,11 +16,6 @@
 	margin-right: 16px;
 	color: #666;
 }
-.issue-list>.head>.others a[disabled] {
-	text-decoration: none;
-	color: #999;
-	cursor: default;
-}
 .issue-list>.body td.submitter,
 .issue-list>.body th.custom-field, 
 .issue-list>.body td.custom-field {

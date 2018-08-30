@@ -6,9 +6,9 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.entityquery.issue.IssueCriteria;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.web.component.milestoneprogress.MilestoneProgressBar;
 
 @SuppressWarnings("serial")

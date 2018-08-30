@@ -16,10 +16,10 @@
 .saved-queries>.body>:last-child {
 	margin-bottom: 0;
 }
-.saved-queries>.body .watch-status:after {
+.saved-queries>.body .watch-status:after, .saved-queries>.body .subscription-status:after {
 	display: none;
 }
-.saved-queries>.body .watch-status:before {
+.saved-queries>.body .watch-status:before, .saved-queries>.body .subscription-status:before {
 	line-height: 12px;
 }
 
@@ -31,4 +31,30 @@
 }
 .edit-saved-queries tfoot {
 	display: none;
+}
+
+.query-save-support {
+	display: table;
+	width: 100%;
+}
+.query-save-support>div {
+	display: table-cell;
+}
+.query-save-support>.side {
+	width: 240px;
+	border: 1px solid #E0E0E0;
+	padding: 20px; 
+	border-radius: 4px;
+}
+.query-save-support>.main {
+	padding-left: 20px;
+	vertical-align: top;
+}
+.query-save-support>.main .save-query {
+	color: #666;
+}
+.query-save-support>.main .save-query[disabled] {
+	text-decoration: none;
+	color: #999;
+	cursor: default;
 }

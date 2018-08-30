@@ -10,9 +10,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.Listen;
-import io.onedev.server.entityquery.EntityQuery;
-import io.onedev.server.entityquery.QueryWatchBuilder;
-import io.onedev.server.entityquery.issue.IssueQuery;
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.issue.IssueActionEvent;
 import io.onedev.server.event.issue.IssueCommented;
@@ -31,6 +28,9 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.QueryWatchBuilder;
+import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.markdown.MentionParser;
 import jersey.repackaged.com.google.common.collect.Lists;
 

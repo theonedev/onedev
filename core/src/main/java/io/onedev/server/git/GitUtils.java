@@ -3,8 +3,10 @@ package io.onedev.server.git;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -40,6 +42,7 @@ import org.eclipse.jgit.revwalk.RevWalkUtils;
 import org.eclipse.jgit.revwalk.filter.RevFilter;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.SystemReader;
 import org.eclipse.jgit.util.io.NullOutputStream;
 
@@ -473,6 +476,25 @@ public class GitUtils {
     	} catch (IOException e) {
     		throw new RuntimeException(e);
 		}
+    }
+    
+    public static Collection<String> getChangedFiles(Repository repository, ObjectId oldCommitId, ObjectId newCommitId) {
+		Collection<String> changedFiles = new HashSet<>();
+		try (	RevWalk revWalk = new RevWalk(repository);
+				TreeWalk treeWalk = new TreeWalk(repository)) {
+			treeWalk.setFilter(TreeFilter.ANY_DIFF);
+			treeWalk.setRecursive(true);
+			RevCommit oldCommit = revWalk.parseCommit(oldCommitId);
+			RevCommit newCommit = revWalk.parseCommit(newCommitId);
+			treeWalk.addTree(oldCommit.getTree());
+			treeWalk.addTree(newCommit.getTree());
+			while (treeWalk.next()) {
+				changedFiles.add(treeWalk.getPathString());
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return changedFiles;
     }
 
     public static boolean isValid(File gitDir) {

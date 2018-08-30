@@ -1,0 +1,119 @@
+grammar CommitQuery;
+
+query
+	: WS* (ALL | criteria (WS+ criteria)*) WS* EOF
+	;
+
+criteria
+	: revisionCriteria 
+	| beforeCriteria 
+	| afterCriteria 
+	| committerCriteria 
+	| authorCriteria 
+	| pathCriteria
+	| messageCriteria
+	;
+
+revisionCriteria
+	: ((UNTIL|SINCE) WS+)? ((BRANCH|TAG|REVISION) Value | DefaultBranch)
+	;
+	
+beforeCriteria
+	: BEFORE Value
+	;
+
+afterCriteria
+	: AFTER Value
+	;
+
+committerCriteria
+	: COMMITTER Value
+	| CommittedByMe
+	;
+
+authorCriteria
+	: AUTHOR Value
+	| AuthoredByMe
+	;
+
+pathCriteria
+	: PATH Value
+	;
+
+messageCriteria
+	: MESSAGE Value
+	;
+
+SINCE
+	: 'since'
+	;
+	
+UNTIL
+	: 'until'
+	;
+	
+BRANCH
+	: 'branch'
+	;
+	
+TAG
+	: 'tag'
+	;
+	
+REVISION
+	: 'revision'
+	;
+	
+BEFORE
+	: 'before'
+	;
+	
+AFTER
+	: 'after'
+	;
+	
+COMMITTER
+	: 'committer'
+	;
+	
+AUTHOR
+	: 'author'
+	;
+	
+PATH
+	: 'path'
+	;
+	
+MESSAGE
+	: 'message'
+	;
+	
+AuthoredByMe
+	: 'authored-by-me'
+	;		
+	
+CommittedByMe
+	: 'committed-by-me'
+	;
+
+DefaultBranch
+	: 'default-branch'
+	;
+	
+ALL
+	: 'all'
+	;
+	
+WS
+	: ' '
+	;
+
+Value
+	: '(' (ESCAPE|~[()\\])+? ')'
+	;
+
+fragment
+
+ESCAPE
+	: '\\'[()\\]
+	;

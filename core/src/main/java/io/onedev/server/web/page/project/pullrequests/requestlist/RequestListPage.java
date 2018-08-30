@@ -40,7 +40,6 @@ import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.pullrequest.PullRequestQuery;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.PullRequestManager;
@@ -50,6 +49,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestQuerySetting;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
@@ -389,14 +389,14 @@ public class RequestListPage extends ProjectPage {
 
 			@Override
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
-				return getPullRequestManager().query(getProject(), parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+				return getPullRequestManager().query(getProject(), getLoginUser(), parsedQueryModel.getObject(), (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
 				PullRequestQuery parsedQuery = parsedQueryModel.getObject();
 				if (parsedQuery != null)
-					return getPullRequestManager().count(getProject(), parsedQuery.getCriteria());
+					return getPullRequestManager().count(getProject(), getLoginUser(), parsedQuery.getCriteria());
 				else
 					return 0;
 			}

@@ -19,6 +19,7 @@ import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 
@@ -64,7 +65,7 @@ abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 
 					@Override
 					protected Component newContent(String id) {
-						if (OneDev.getInstance(IssueManager.class).count(getMilestone(), StateSpec.Category.OPEN) != 0) {
+						if (OneDev.getInstance(IssueManager.class).count(getMilestone(), SecurityUtils.getUser(), StateSpec.Category.OPEN) != 0) {
 							Fragment fragment = new Fragment(id, "confirmCloseWithOpenIssuesFrag", MilestoneActionsPanel.this);
 							Form<?> form = new Form<Void>("form");
 							form.setOutputMarkupId(true);
@@ -167,7 +168,7 @@ abstract class MilestoneActionsPanel extends GenericPanel<Milestone> {
 					
 					@Override
 					protected Component newContent(String id) {
-						if (OneDev.getInstance(IssueManager.class).count(getMilestone(), null) != 0) {
+						if (OneDev.getInstance(IssueManager.class).count(getMilestone(), SecurityUtils.getUser(), null) != 0) {
 							Fragment fragment = new Fragment(id, "confirmDeleteWithIssuesFrag", MilestoneActionsPanel.this);
 							Form<?> form = new Form<Void>("form");
 							form.setOutputMarkupId(true);

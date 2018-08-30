@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.entityquery.pullrequest.PullRequestQuery;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
 

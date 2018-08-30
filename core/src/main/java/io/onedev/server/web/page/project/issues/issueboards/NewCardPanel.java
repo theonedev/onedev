@@ -8,10 +8,11 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.issue.IssueCriteria;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.issue.IssueCriteria;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.newissue.NewIssueEditor;
 
@@ -52,7 +53,7 @@ abstract class NewCardPanel extends Panel {
 				super.onSubmit(target, form);
 				Issue issue = editor.getConvertedInput();
 				OneDev.getInstance(IssueManager.class).open(issue);
-				if (getTemplate().matches(issue)) {
+				if (getTemplate().matches(issue, SecurityUtils.getUser())) {
 					onAdded(target, issue);
 				} else {
 					new ModalPanel(target) {

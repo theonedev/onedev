@@ -21,7 +21,7 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 		} else {
 			Project project = OneContext.get().getProject();
 			try {
-				io.onedev.server.entityquery.issue.IssueQuery.parse(project, value, true);
+				io.onedev.server.search.entity.issue.IssueQuery.parse(project, value, true);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

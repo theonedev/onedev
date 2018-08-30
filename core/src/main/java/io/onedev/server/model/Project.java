@@ -76,6 +76,7 @@ import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.manager.CodeCommentQuerySettingManager;
+import io.onedev.server.manager.CommitQuerySettingManager;
 import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.PullRequestQuerySettingManager;
@@ -84,6 +85,7 @@ import io.onedev.server.manager.StorageManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
+import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.codecomment.NamedCodeCommentQuery;
 import io.onedev.server.model.support.issue.IssueBoard;
@@ -182,6 +184,9 @@ public class Project extends AbstractEntity {
 	private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<CommitQuerySetting> commitQuerySettings = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestQuerySetting> pullRequestQuerySettings = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
@@ -198,6 +203,10 @@ public class Project extends AbstractEntity {
 	@Column(length=65535)
 	private ArrayList<NamedIssueQuery> savedIssueQueries;
 
+	@Lob
+	@Column(length=65535)
+	private ArrayList<NamedCommitQuery> savedCommitQueries;
+	
 	@Lob
 	@Column(length=65535)
 	private ArrayList<NamedPullRequestQuery> savedPullRequestQueries;
@@ -233,6 +242,8 @@ public class Project extends AbstractEntity {
     private transient Optional<PullRequestQuerySetting> pullRequestQuerySettingOfCurrentUserHolder;
     
     private transient Optional<CodeCommentQuerySetting> codeCommentQuerySettingOfCurrentUserHolder;
+    
+    private transient Optional<CommitQuerySetting> commitQuerySettingOfCurrentUserHolder;
     
 	@Editable(order=100)
 	@ProjectName
@@ -877,6 +888,22 @@ public class Project extends AbstractEntity {
 		this.savedIssueQueries = savedIssueQueries;
 	}
 	
+	public ArrayList<NamedCommitQuery> getSavedCommitQueries() {
+		if (savedCommitQueries == null) {
+			savedCommitQueries = new ArrayList<>();
+			savedCommitQueries.add(new NamedCommitQuery("All", "all"));
+			savedCommitQueries.add(new NamedCommitQuery("Default branch", "default-branch"));
+			savedCommitQueries.add(new NamedCommitQuery("Authored by me", "authored-by-me"));
+			savedCommitQueries.add(new NamedCommitQuery("Committed by me", "committed-by-me"));
+			savedCommitQueries.add(new NamedCommitQuery("Committed recently", "after(last week)"));
+		}
+		return savedCommitQueries;
+	}
+
+	public void setSavedCommitQueries(ArrayList<NamedCommitQuery> savedCommitQueries) {
+		this.savedCommitQueries = savedCommitQueries;
+	}
+	
 	public ArrayList<NamedPullRequestQuery> getSavedPullRequestQueries() {
 		if (savedPullRequestQueries == null) {
 			savedPullRequestQueries = new ArrayList<>();
@@ -907,6 +934,15 @@ public class Project extends AbstractEntity {
 		return null;
 	}
 
+	@Nullable
+	public NamedCommitQuery getSavedCommitQuery(String name) {
+		for (NamedCommitQuery namedQuery: getSavedCommitQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
+	
 	@Nullable
 	public NamedPullRequestQuery getSavedPullRequestQuery(String name) {
 		for (NamedPullRequestQuery namedQuery: getSavedPullRequestQueries()) {
@@ -964,6 +1000,14 @@ public class Project extends AbstractEntity {
 
 	public void setIssueQuerySettings(Collection<IssueQuerySetting> issueQuerySettings) {
 		this.issueQuerySettings = issueQuerySettings;
+	}
+
+	public Collection<CommitQuerySetting> getCommitQuerySettings() {
+		return commitQuerySettings;
+	}
+
+	public void setCommitQuerySettings(Collection<CommitQuerySetting> commitQuerySettings) {
+		this.commitQuerySettings = commitQuerySettings;
 	}
 
 	public Collection<PullRequestQuerySetting> getPullRequestQuerySettings() {
@@ -1144,6 +1188,24 @@ public class Project extends AbstractEntity {
 			}
 		}
 		return issueQuerySettingOfCurrentUserHolder.orNull();
+	}
+	
+	public CommitQuerySetting getCommitQuerySettingOfCurrentUser() {
+		if (commitQuerySettingOfCurrentUserHolder == null) {
+			User user = SecurityUtils.getUser();
+			if (user != null) {
+				CommitQuerySetting setting = OneDev.getInstance(CommitQuerySettingManager.class).find(this, user);
+				if (setting == null) {
+					setting = new CommitQuerySetting();
+					setting.setProject(this);
+					setting.setUser(user);
+				}
+				commitQuerySettingOfCurrentUserHolder = Optional.of(setting);
+			} else {
+				commitQuerySettingOfCurrentUserHolder = Optional.absent();
+			}
+		}
+		return commitQuerySettingOfCurrentUserHolder.orNull();
 	}
 	
 	@Nullable

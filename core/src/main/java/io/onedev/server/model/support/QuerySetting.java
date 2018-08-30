@@ -26,6 +26,9 @@ public abstract class QuerySetting<T extends NamedQuery> extends AbstractEntity 
 	public abstract QueryWatchSupport<T> getQueryWatchSupport();
 
 	@Nullable
+	public abstract QuerySubscriptionSupport<T> getQuerySubscriptionSupport();
+	
+	@Nullable
 	public T getUserQuery(String name) {
 		for (T namedQuery: getUserQueries()) {
 			if (namedQuery.getName().equals(name))

@@ -14,13 +14,13 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.issue.IssueQuery;
 import io.onedev.server.manager.IssueQuerySettingManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.component.issuelist.IssueListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.issues.IssuesPage;

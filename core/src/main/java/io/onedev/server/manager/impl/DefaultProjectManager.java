@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -23,9 +22,6 @@ import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -320,21 +316,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			cmd.fromRev(oldObjectId.name()).toRev(newObjectId.name());
 			return cmd.call();
 		} else {
-			Set<String> changedFiles = new HashSet<>();
-			try (TreeWalk treeWalk = new TreeWalk(project.getRepository())) {
-				treeWalk.setFilter(TreeFilter.ANY_DIFF);
-				treeWalk.setRecursive(true);
-				RevCommit oldCommit = project.getRevCommit(oldObjectId);
-				RevCommit newCommit = project.getRevCommit(newObjectId);
-				treeWalk.addTree(oldCommit.getTree());
-				treeWalk.addTree(newCommit.getTree());
-				while (treeWalk.next()) {
-					changedFiles.add(treeWalk.getPathString());
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			return changedFiles;
+			return GitUtils.getChangedFiles(project.getRepository(), oldObjectId, newObjectId);
 		}
 	}
 	

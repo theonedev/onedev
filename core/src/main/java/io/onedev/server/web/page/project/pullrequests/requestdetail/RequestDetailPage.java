@@ -66,8 +66,6 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.EntityQuery;
-import io.onedev.server.entityquery.pullrequest.PullRequestQuery;
 import io.onedev.server.manager.PullRequestActionManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.PullRequestUpdateManager;
@@ -84,6 +82,8 @@ import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.build.PullRequestBuildsPanel;
@@ -430,7 +430,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 
 			@Override
 			protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count) {
-				return getPullRequestManager().query(getProject(), query, offset, count);
+				return getPullRequestManager().query(getProject(), getLoginUser(), query, offset, count);
 			}
 			
 		});

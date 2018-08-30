@@ -39,12 +39,6 @@ import com.google.common.collect.Lists;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.entityquery.EntityQuery;
-import io.onedev.server.entityquery.EntitySort;
-import io.onedev.server.entityquery.EntitySort.Direction;
-import io.onedev.server.entityquery.QueryBuildContext;
-import io.onedev.server.entityquery.codecomment.CodeCommentQuery;
-import io.onedev.server.entityquery.codecomment.CodeCommentQueryBuildContext;
 import io.onedev.server.event.codecomment.CodeCommentAdded;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.git.GitUtils;
@@ -55,6 +49,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentRelation;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.TextRange;
 import io.onedev.server.model.support.codecomment.CodeCommentConstants;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -62,6 +57,12 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryBuildContext;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 
@@ -252,8 +253,8 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 
 	}
 
-	private Predicate[] getPredicates(io.onedev.server.entityquery.EntityCriteria<CodeComment> criteria, Project project, 
-			PullRequest request, QueryBuildContext<CodeComment> context) {
+	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<CodeComment> criteria, Project project, 
+			PullRequest request, QueryBuildContext<CodeComment> context, User user) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (request != null) {
 			Join<?, ?> relations = context.getRoot().join(CodeCommentConstants.ATTR_RELATIONS, JoinType.INNER);
@@ -262,22 +263,22 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 			predicates.add(context.getBuilder().equal(context.getRoot().get("project"), project));
 		}
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(project, context));
+			predicates.add(criteria.getPredicate(project, context, user));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
 	private CriteriaQuery<CodeComment> buildCriteriaQuery(Session session, Project project, PullRequest request, 
-			EntityQuery<CodeComment> requestQuery) {
+			EntityQuery<CodeComment> commentQuery, User user) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<CodeComment> query = builder.createQuery(CodeComment.class);
 		Root<CodeComment> root = query.from(CodeComment.class);
 		query.select(root).distinct(true);
 		
 		QueryBuildContext<CodeComment> context = new CodeCommentQueryBuildContext(root, builder);
-		query.where(getPredicates(requestQuery.getCriteria(), project, request, context));
+		query.where(getPredicates(commentQuery.getCriteria(), project, request, context, user));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
-		for (EntitySort sort: requestQuery.getSorts()) {
+		for (EntitySort sort: commentQuery.getSorts()) {
 			if (sort.getDirection() == Direction.ASCENDING)
 				orders.add(builder.asc(CodeCommentQuery.getPath(root, CodeCommentConstants.ORDER_FIELDS.get(sort.getField()))));
 			else
@@ -294,9 +295,9 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 
 	@Sessional
 	@Override
-	public List<CodeComment> query(Project project, PullRequest request, EntityQuery<CodeComment> commentQuery, 
+	public List<CodeComment> query(Project project, PullRequest request, User user, EntityQuery<CodeComment> commentQuery, 
 			int firstResult, int maxResults) {
-		CriteriaQuery<CodeComment> criteriaQuery = buildCriteriaQuery(getSession(), project, request, commentQuery);
+		CriteriaQuery<CodeComment> criteriaQuery = buildCriteriaQuery(getSession(), project, request, commentQuery, user);
 		Query<CodeComment> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
@@ -305,14 +306,14 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	
 	@Sessional
 	@Override
-	public int count(Project project, PullRequest request, 
-			io.onedev.server.entityquery.EntityCriteria<CodeComment> commentCriteria) {
+	public int count(Project project, PullRequest request, User user, 
+			io.onedev.server.search.entity.EntityCriteria<CodeComment> commentCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<CodeComment> root = criteriaQuery.from(CodeComment.class);
 
 		QueryBuildContext<CodeComment> context = new CodeCommentQueryBuildContext(root, builder);
-		criteriaQuery.where(getPredicates(commentCriteria, project, request, context));
+		criteriaQuery.where(getPredicates(commentCriteria, project, request, context, user));
 
 		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

@@ -49,8 +49,6 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.EntityQuery;
-import io.onedev.server.entityquery.issue.IssueQuery;
 import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueVoteManager;
@@ -69,6 +67,8 @@ import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.inputspec.InputContext;
@@ -441,7 +441,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 			@Override
 			protected List<Issue> query(EntityQuery<Issue> query, int offset, int count) {
-				return getIssueManager().query(getProject(), query, offset, count);
+				return getIssueManager().query(getProject(), getLoginUser(), query, offset, count);
 			}
 			
 		});

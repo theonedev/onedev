@@ -8,18 +8,14 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.BailErrorStrategy;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
@@ -28,6 +24,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
@@ -44,20 +41,29 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Joiner;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.OneException;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.manager.BuildManager;
+import io.onedev.server.manager.CommitQuerySettingManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.CommitQuerySetting;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.ProjectAndRevision;
+import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.search.commit.CommitQueryParser.CriteriaContext;
+import io.onedev.server.search.commit.CommitQueryParser.QueryContext;
+import io.onedev.server.search.commit.CommitQueryUtils;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Constants;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.avatar.ContributorAvatars;
@@ -67,12 +73,13 @@ import io.onedev.server.web.component.commitgraph.CommitGraphUtils;
 import io.onedev.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.commits.CommitQueryParser.CriteriaContext;
-import io.onedev.server.web.page.project.commits.CommitQueryParser.FuzzyCriteriaContext;
-import io.onedev.server.web.page.project.commits.CommitQueryParser.QueryContext;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
+import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
+import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.util.ajaxlistener.ShowGlobalLoadingIndicatorImmediatelyListener;
 import io.onedev.server.web.util.model.CommitRefsModel;
 import io.onedev.utils.StringUtils;
@@ -121,50 +128,11 @@ public class ProjectCommitsPage extends ProjectPage {
 				command.ignoreCase(true);
 				
 				if (state.page > MAX_PAGES)
-					throw new RuntimeException("Page should be no more than " + MAX_PAGES);
+					throw new OneException("Page should be no more than " + MAX_PAGES);
 				
 				command.count(state.page*COUNT);
 
-				QueryContext queryContext = getQueryContext();
-				if (queryContext != null) {
-					for (CriteriaContext criteria: queryContext.criteria()) {
-						if (criteria.authorCriteria() != null) {
-							String value = criteria.authorCriteria().Value().getText();
-							value = StringUtils.replace(unescape(removeParens(value)), "*", ".*");
-							command.authors().add(value);
-						} else if (criteria.committerCriteria() != null) {
-							String value = criteria.committerCriteria().Value().getText();
-							value = StringUtils.replace(unescape(removeParens(value)), "*", ".*");
-							command.committers().add(value);
-						} else if (criteria.pathCriteria() != null) {
-							command.paths().add(unescape(removeParens(criteria.pathCriteria().Value().getText())));
-						} else if (criteria.beforeCriteria() != null) {
-							command.before(removeParens(criteria.beforeCriteria().Value().getText()));
-						} else if (criteria.afterCriteria() != null) {
-							command.after(removeParens(criteria.afterCriteria().Value().getText()));
-						} 
-					}
-					command.messages(getMessages(queryContext));
-					
-					boolean ranged = false;
-					for (Revision revision: getRevisions(queryContext)) {
-						if (revision.since) {
-							command.revisions().add("^" + revision.value);
-							ranged = true;
-						} else if (revision.until) {
-							command.revisions().add(revision.value);
-							ranged = true;
-						} else if (getProject().getBranchRef(revision.value) != null) {
-							ranged = true;
-							command.revisions().add(revision.value);
-						} else {
-							command.revisions().add(revision.value);
-						}
-					}
-					if (command.revisions().size() == 1 && !ranged) {
-						command.count(1);
-					}
-				}
+				CommitQueryUtils.fill(getProject(), getQueryContext(), command);
 				
 				if (command.revisions().isEmpty() && state.compareWith != null)
 					command.revisions(Lists.newArrayList(state.compareWith));
@@ -221,10 +189,6 @@ public class ProjectCommitsPage extends ProjectPage {
 			state.page = page.intValue();		
 	}
 
-	private String unescape(String text) {
-		return text.replace("\\(", "(").replace("\\)", ")").replace("\\\\", "\\");
-	}
-	
 	@SuppressWarnings("deprecation")
 	private Component replaceItem(AjaxRequestTarget target, int index) {
 		Component item = commitsView.get(index);
@@ -234,11 +198,128 @@ public class ProjectCommitsPage extends ProjectPage {
 		return newItem;
 	}
 	
+	private CommitQuerySettingManager getCommitQuerySettingManager() {
+		return OneDev.getInstance(CommitQuerySettingManager.class);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 
-		TextField<String> queryInput = new TextField<String>("input", Model.of(state.query));
+		Component side;
+		add(side = new SavedQueriesPanel<NamedCommitQuery>("side") {
+
+			@Override
+			protected NamedQueriesBean<NamedCommitQuery> newNamedQueriesBean() {
+				return new NamedCommitQueriesBean();
+			}
+
+			@Override
+			protected boolean needsLogin(NamedCommitQuery namedQuery) {
+				return CommitQueryUtils.needsLogin(namedQuery.getQuery());
+			}
+
+			@Override
+			protected Link<Void> newQueryLink(String componentId, NamedCommitQuery namedQuery) {
+				State state = new State();
+				state.query = namedQuery.getQuery();
+				return new BookmarkablePageLink<Void>(componentId, ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(getProject(), state));
+			}
+
+			@Override
+			protected QuerySetting<NamedCommitQuery> getQuerySetting() {
+				return getProject().getCommitQuerySettingOfCurrentUser();
+			}
+
+			@Override
+			protected ArrayList<NamedCommitQuery> getProjectQueries() {
+				return getProject().getSavedCommitQueries();
+			}
+
+			@Override
+			protected void onSaveQuerySetting(QuerySetting<NamedCommitQuery> querySetting) {
+				getCommitQuerySettingManager().save((CommitQuerySetting) querySetting);
+			}
+
+			@Override
+			protected void onSaveProjectQueries(ArrayList<NamedCommitQuery> projectQueries) {
+				getProject().setSavedCommitQueries(projectQueries);
+				OneDev.getInstance(ProjectManager.class).save(getProject());
+			}
+			
+		});
+		
+		Component querySave;
+		add(querySave = new AjaxLink<Void>("saveQuery") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setEnabled(StringUtils.isNotBlank(state.query));
+				setVisible(SecurityUtils.getUser() != null);
+			}
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				configure();
+				if (!isEnabled()) {
+					tag.put("disabled", "disabled");
+					tag.put("title", "Input query to save");
+				}
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				new ModalPanel(target)  {
+
+					@Override
+					protected Component newContent(String id) {
+						return new SaveQueryPanel(id) {
+
+							@Override
+							protected void onSaveForMine(AjaxRequestTarget target, String name) {
+								CommitQuerySetting setting = getProject().getCommitQuerySettingOfCurrentUser();
+								NamedCommitQuery namedQuery = setting.getUserQuery(name);
+								if (namedQuery == null) {
+									namedQuery = new NamedCommitQuery(name, state.query);
+									setting.getUserQueries().add(namedQuery);
+								} else {
+									namedQuery.setQuery(state.query);
+								}
+								getCommitQuerySettingManager().save(setting);
+								target.add(side);
+								close();
+							}
+
+							@Override
+							protected void onSaveForAll(AjaxRequestTarget target, String name) {
+								NamedCommitQuery namedQuery = getProject().getSavedCommitQuery(name);
+								if (namedQuery == null) {
+									namedQuery = new NamedCommitQuery(name, state.query);
+									getProject().getSavedCommitQueries().add(namedQuery);
+								} else {
+									namedQuery.setQuery(state.query);
+								}
+								OneDev.getInstance(ProjectManager.class).save(getProject());
+								target.add(side);
+								close();
+							}
+
+							@Override
+							protected void onCancel(AjaxRequestTarget target) {
+								close();
+							}
+							
+						};
+					}
+					
+				};
+			}		
+			
+		});
+		
+		TextField<String> input = new TextField<String>("input", Model.of(state.query));
 		
 		queryForm = new Form<Void>("query") {
 
@@ -248,8 +329,8 @@ public class ProjectCommitsPage extends ProjectPage {
 
 				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
 				try {
-					String query = queryInput.getModelObject();
-					queryContext = Optional.fromNullable(parse(query)); // validate query
+					String query = input.getModelObject();
+					queryContext = Optional.fromNullable(CommitQueryUtils.parse(query)); // validate query
 					state.query = query;
 					updateCommits(target);
 				} catch (Exception e) {
@@ -271,7 +352,18 @@ public class ProjectCommitsPage extends ProjectPage {
 
 		};
 		
-		queryForm.add(queryInput.add(new CommitQueryBehavior(projectModel)));
+		input.add(new CommitQueryBehavior(projectModel));
+		input.add(new AjaxFormComponentUpdatingBehavior("input"){
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				state.query = input.getModelObject();
+				if (SecurityUtils.getUser() != null)
+					target.add(querySave);
+			}
+			
+		});
+		queryForm.add(input);
 		
 		queryForm.add(new AjaxButton("submit") {});
 		queryForm.setOutputMarkupId(true);
@@ -343,7 +435,7 @@ public class ProjectCommitsPage extends ProjectPage {
 						addCommitClass(item, commitIndex++);
 					commitsView.add(item);
 					target.add(item);
-					builder.append(String.format("$('#repo-commits>.body>.list').append(\"<li id='%s'></li>\");", 
+					builder.append(String.format("$('#project-commits>.body>.list').append(\"<li id='%s'></li>\");", 
 							item.getMarkupId()));
 				}
 				target.prependJavaScript(builder);
@@ -430,9 +522,9 @@ public class ProjectCommitsPage extends ProjectPage {
 				@Override
 				protected List<Pattern> load() {
 					List<Pattern> patterns =  new ArrayList<>();
-					QueryContext queryContext = getQueryContext();
-					if (queryContext != null) {
-						for (String message: getMessages(queryContext)) {
+					QueryContext query = getQueryContext();
+					if (query != null) {
+						for (String message: CommitQueryUtils.getMessages(query)) {
 							patterns.add(Pattern.compile(message, Pattern.CASE_INSENSITIVE));
 						}
 					}
@@ -616,99 +708,14 @@ public class ProjectCommitsPage extends ProjectPage {
 		List<RevCommit> current;
 	}
 	
-	private String removeParens(String value) {
-		if (value.startsWith("("))
-			value = value.substring(1);
-		if (value.endsWith(")"))
-			value = value.substring(0, value.length()-1);
-		return value;
-	}
-	
-	private List<String> getMessages(QueryContext queryContext) {
-		List<String> messages = new ArrayList<>();
-		List<String> fuzzyMessages = new ArrayList<>();
-		for (CriteriaContext criteria: queryContext.criteria()) {
-			if (criteria.messageCriteria() != null) {
-				String message = unescape(removeParens(criteria.messageCriteria().Value().getText()));
-				messages.add(StringUtils.replace(message, "*", ".*"));
-			} else {
-				FuzzyCriteriaContext fuzzyCriteria = criteria.fuzzyCriteria();
-				if (fuzzyCriteria != null && fuzzyCriteria.UNTIL() == null 
-						&& fuzzyCriteria.SINCE() == null 
-						&& getProject().getObjectId(fuzzyCriteria.getText(), false) == null) {
-					fuzzyMessages.add(fuzzyCriteria.getText());
-				}
-			}
-		}
-		if (!fuzzyMessages.isEmpty()) 
-			messages.add(Joiner.on(".*").join(fuzzyMessages));
-		return messages;
-	}
-	
-	private List<Revision> getRevisions(QueryContext queryContext) {
-		List<Revision> revisions = new ArrayList<>();
-		for (CriteriaContext criteria: queryContext.criteria()) {
-			if (criteria.revisionCriteria() != null) {
-				Revision revision = new Revision();
-				revision.value = unescape(removeParens(criteria.revisionCriteria().Value().getText()));
-				if (criteria.revisionCriteria().SINCE() != null)
-					revision.since = true;
-				else if (criteria.revisionCriteria().UNTIL() != null)
-					revision.until = true;
-				revisions.add(revision);
-			} else {
-				FuzzyCriteriaContext fuzzyCriteria = criteria.fuzzyCriteria();
-				if (fuzzyCriteria != null && getProject().getObjectId(fuzzyCriteria.FuzzyValue().getText(), false) != null) {
-					Revision revision = new Revision();
-					revision.value = fuzzyCriteria.FuzzyValue().getText();
-					if (fuzzyCriteria.SINCE() != null)
-						revision.since = true;
-					else if (fuzzyCriteria.UNTIL() != null)
-						revision.until = true;
-					revisions.add(revision);
-				}
-			}
-		}
-		return revisions;
-	}
 	
 	@Nullable
 	private QueryContext getQueryContext() {
 		if (queryContext == null)
-			queryContext = Optional.fromNullable(parse(state.query));
+			queryContext = Optional.fromNullable(CommitQueryUtils.parse(state.query));
 		return queryContext.orNull();
 	}
-	
-	@Nullable
-	private QueryContext parse(@Nullable String query) {
-		if (query != null) {
-			ANTLRInputStream is = new ANTLRInputStream(query); 
-			CommitQueryLexer lexer = new CommitQueryLexer(is);
-			lexer.removeErrorListeners();
-			lexer.addErrorListener(new BaseErrorListener() {
-
-				@Override
-				public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
-						int charPositionInLine, String msg, RecognitionException e) {
-					if (e != null) {
-						logger.error("Error lexing commit query", e);
-					} else if (msg != null) {
-						logger.error("Error lexing commit query: " + msg);
-					}
-					throw new RuntimeException("Malformed commit query");
-				}
-				
-			});
-			CommonTokenStream tokens = new CommonTokenStream(lexer);
-			CommitQueryParser parser = new CommitQueryParser(tokens);
-			parser.removeErrorListeners();
-			parser.setErrorHandler(new BailErrorStrategy());
-			return parser.query();
-		} else {
-			return null;
-		}
-	}
-	
+		
 	public static class State implements Serializable {
 
 		private static final long serialVersionUID = 1L;
@@ -718,16 +725,6 @@ public class ProjectCommitsPage extends ProjectPage {
 		public String query;
 		
 		public int page = 1;
-		
-	}
-
-	private static class Revision implements Serializable {
-		
-		public boolean since;
-		
-		public boolean until;
-		
-		public String value;
 		
 	}
 }

@@ -40,13 +40,13 @@ import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.issue.IssueQuery;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueField;
+import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -386,14 +386,14 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 
 			@Override
 			public Iterator<? extends Issue> iterator(long first, long count) {
-				return getIssueManager().query(getProject(), parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+				return getIssueManager().query(getProject(), SecurityUtils.getUser(), parsedQueryModel.getObject(), (int)first, (int)count).iterator();
 			}
 
 			@Override
 			public long size() {
 				IssueQuery parsedQuery = parsedQueryModel.getObject();
 				if (parsedQuery != null)
-					return getIssueManager().count(getProject(), parsedQuery.getCriteria());
+					return getIssueManager().count(getProject(), SecurityUtils.getUser(), parsedQuery.getCriteria());
 				else
 					return 0;
 			}

@@ -2,6 +2,8 @@ package io.onedev.server.manager;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Issue;
@@ -15,6 +17,8 @@ import io.onedev.server.model.PullRequestAction;
 public interface UrlManager {
 	
 	String urlFor(Project project);
+	
+	String urlFor(Project project, ObjectId commitId);
 	
 	String urlFor(PullRequest request);
 	

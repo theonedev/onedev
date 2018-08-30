@@ -27,13 +27,6 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entityquery.issue.ChoiceFieldCriteria;
-import io.onedev.server.entityquery.issue.FieldOperatorCriteria;
-import io.onedev.server.entityquery.issue.IssueCriteria;
-import io.onedev.server.entityquery.issue.IssueQuery;
-import io.onedev.server.entityquery.issue.IssueQueryLexer;
-import io.onedev.server.entityquery.issue.MilestoneCriteria;
-import io.onedev.server.entityquery.issue.StateCriteria;
 import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.UserManager;
@@ -46,6 +39,13 @@ import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.search.entity.issue.ChoiceFieldCriteria;
+import io.onedev.server.search.entity.issue.FieldOperatorCriteria;
+import io.onedev.server.search.entity.issue.IssueCriteria;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
+import io.onedev.server.search.entity.issue.MilestoneCriteria;
+import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
@@ -149,7 +149,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 								issue = SerializationUtils.clone(issue);
 								issue.setMilestone(getMilestone());
 							}
-							if (getQuery().matches(issue)) {
+							if (getQuery().matches(issue, SecurityUtils.getUser())) {
 								String script = String.format("$('#%s').addClass('issue-droppable');", getMarkupId());
 								issueDragging.getHandler().appendJavaScript(script);
 							}
@@ -160,7 +160,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					@Override
 					protected List<Issue> queryIssues(int offset, int count) {
 						if (getQuery() != null) 
-							return OneDev.getInstance(IssueManager.class).query(getProject(), getQuery(), offset, count);
+							return OneDev.getInstance(IssueManager.class).query(getProject(), SecurityUtils.getUser(), getQuery(), offset, count);
 						else 
 							return new ArrayList<>();
 					}
@@ -231,7 +231,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 
 			@Override
 			protected String load() {
-				return String.valueOf(OneDev.getInstance(IssueManager.class).count(getProject(), getQuery().getCriteria()));
+				return String.valueOf(OneDev.getInstance(IssueManager.class).count(getProject(), SecurityUtils.getUser(), getQuery().getCriteria()));
 			}
 			
 		}) {
@@ -292,7 +292,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 			}
 			
 			private void checkMatched(AjaxRequestTarget target, Issue issue) {
-				if (getQuery().matches(issue)) {
+				if (getQuery().matches(issue, SecurityUtils.getUser())) {
 					target.add(BoardColumnPanel.this);
 				} else {
 					new ModalPanel(target) {

@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.mapper.parameter.PageParametersEncoder;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Splitter;
 
@@ -108,6 +109,11 @@ public class DefaultUrlManager implements UrlManager {
 	@Override
 	public String urlFor(IssueAction change) {
 		return urlFor(change.getIssue()) + "#" + change.getAnchor();
+	}
+
+	@Override
+	public String urlFor(Project project, ObjectId commitId) {
+		return urlFor(project) + "/commits/" + commitId.name();
 	}
 
 }
