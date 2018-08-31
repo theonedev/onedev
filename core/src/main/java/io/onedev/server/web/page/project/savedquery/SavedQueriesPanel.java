@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.servlet.http.Cookie;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -24,6 +25,9 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.http.WebRequest;
+import org.apache.wicket.request.http.WebResponse;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.model.Project;
@@ -45,6 +49,10 @@ import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 @SuppressWarnings("serial")
 public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
+	private static final String CONTENT_ID = "content";
+	
+	private static final String COOKIE_PREFIX = "savedQueries.collapsed.";
+	
 	public SavedQueriesPanel(String id) {
 		super(id);
 	}
@@ -100,11 +108,40 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 		response.render(CssHeaderItem.forReference(new SavedQueriesCssResourceReference()));
 	}
 
+	private String getCookieName() {
+		return COOKIE_PREFIX + getPage().getClass().getSimpleName();
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ModalLink("edit") {
+		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
+		Cookie cookie = request.getCookie(getCookieName());
+		if (cookie != null && "yes".equals(cookie.getValue()))
+			add(newCollapsed());
+		else
+			add(newExpanded());
+	}
+	
+	private Component newExpanded() {
+		Fragment fragment = new Fragment(CONTENT_ID, "expandedFrag", this);
+		fragment.add(new AjaxLink<Void>("collapse") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+				Cookie cookie = new Cookie(getCookieName(), "yes");
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
+				Component content = newCollapsed();
+				SavedQueriesPanel.this.replace(content);
+				target.add(content);
+			}
+			
+		});
+		
+		fragment.add(new ModalLink("edit") {
 
 			private static final String TAB_PANEL_ID = "tabPanel";
 			
@@ -225,7 +262,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			
 		});
 		
-		add(new ListView<T>("userQueries", new LoadableDetachableModel<List<T>>() {
+		fragment.add(new ListView<T>("userQueries", new LoadableDetachableModel<List<T>>() {
 
 			@Override
 			protected List<T> load() {
@@ -303,7 +340,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 		});
 		
-		add(new ListView<T>("projectQueries", new LoadableDetachableModel<List<T>>() {
+		fragment.add(new ListView<T>("projectQueries", new LoadableDetachableModel<List<T>>() {
 
 			@Override
 			protected List<T> load() {
@@ -388,7 +425,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			
 		});		
 		
-		add(new WebMarkupContainer("watchHint") {
+		fragment.add(new WebMarkupContainer("watchHint") {
 
 			@Override
 			protected void onConfigure() {
@@ -397,7 +434,30 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			}
 			
 		});
-		setOutputMarkupId(true);
+
+		fragment.setOutputMarkupId(true);
+		
+		return fragment;
+	}
+	
+	private Component newCollapsed() {
+		Fragment fragment = new Fragment(CONTENT_ID, "collapsedFrag", this);
+		fragment.add(new AjaxLink<Void>("expand") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+				Cookie cookie = new Cookie(getCookieName(), "no");
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
+				Component content = newExpanded();
+				SavedQueriesPanel.this.replace(content);
+				target.add(content);
+			}
+			
+		});
+		fragment.setOutputMarkupId(true);
+		return fragment;
 	}
 	
 	private abstract class NamedQueriesEditor extends Fragment {

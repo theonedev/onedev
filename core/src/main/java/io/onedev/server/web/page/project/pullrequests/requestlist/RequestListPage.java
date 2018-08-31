@@ -21,6 +21,7 @@ import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvid
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -66,6 +67,7 @@ import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.VisibleVisitor;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
@@ -164,8 +166,20 @@ public class RequestListPage extends ProjectPage {
 			
 		});
 		
+		WebMarkupContainer others = new WebMarkupContainer("others") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(visitChildren(Component.class, new VisibleVisitor()) != null);
+			}
+			
+		};
+		
+		add(others);
+		
 		Component querySave;
-		add(querySave = new AjaxLink<Void>("saveQuery") {
+		others.add(querySave = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
@@ -446,7 +460,7 @@ public class RequestListPage extends ProjectPage {
 			}
 		});
 		
-		add(new NavigatorLabel("pageInfo", requestsTable) {
+		others.add(new NavigatorLabel("pageInfo", requestsTable) {
 
 			@Override
 			protected void onConfigure() {

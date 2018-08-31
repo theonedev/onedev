@@ -21,6 +21,7 @@ import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvid
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -67,6 +68,7 @@ import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.VisibleVisitor;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
@@ -140,8 +142,19 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		WebMarkupContainer others = new WebMarkupContainer("others") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(visitChildren(Component.class, new VisibleVisitor()) != null);
+			}
+			
+		};
+		add(others);
+		
 		Component querySave;
-		add(querySave = new AjaxLink<Void>("saveQuery") {
+		others.add(querySave = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
@@ -200,7 +213,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		});
 		add(form);
 		
-		add(new ModalLink("displayFields") {
+		others.add(new ModalLink("displayFields") {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
@@ -277,7 +290,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			
 		});
 		
-		add(batchEditSelected = new ModalLink("batchEditSelected") {
+		others.add(batchEditSelected = new ModalLink("batchEditSelected") {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
@@ -330,7 +343,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 
 		batchEditSelected.setOutputMarkupPlaceholderTag(true);
 		
-		add(new ModalLink("batchEditAll") {
+		others.add(new ModalLink("batchEditAll") {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
@@ -613,7 +626,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			}
 		});
 		
-		add(new NavigatorLabel("pageInfo", issuesTable) {
+		others.add(new NavigatorLabel("pageInfo", issuesTable) {
 
 			@Override
 			protected void onConfigure() {

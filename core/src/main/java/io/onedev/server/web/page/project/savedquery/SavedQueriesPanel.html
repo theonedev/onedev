@@ -1,36 +1,42 @@
 <wicket:panel>
-	<div class="saved-queries">
-		<div class="head clearfix">
-			<h4 class="pull-left title">Saved Queries</h4>
-			<div class="pull-left actions">
-				<a wicket:id="edit" title="Edit saved queries"><i class="fa fa-pencil"></i></a>
+	<div wicket:id="content" class="saved-queries"></div>
+	<wicket:fragment wicket:id="expandedFrag">
+		<div class="expanded">
+			<div class="head">
+				<h4 class="title">Saved Queries</h4>
+				<div class="actions">
+					<a wicket:id="edit" title="Edit saved queries"><i class="fa fa-pencil"></i></a>
+					<a wicket:id="collapse" class="collapse" title="Collapse"><i class="fa fa-arrow-left"></i></a>
+				</div>
+			</div>
+			<hr>
+			<div class="body">
+				<wicket:enclosure child="userQueries">
+				<div wicket:id="userQueries">
+					<span class="btn-group">
+						<a wicket:id="link" class="btn btn-sm btn-default"><span wicket:id="label"></span></a><a wicket:id="subscriptionStatus" class="subscription-status btn btn-default btn-sm"></a><a wicket:id="watchStatus" class="watch-status btn btn-default btn-sm"></a>
+					</span>
+				</div>
+				<hr/>
+				</wicket:enclosure>
+				<div wicket:id="projectQueries">
+					<span class="btn-group">
+						<a wicket:id="link" class="btn btn-sm btn-default"><span wicket:id="label"></span></a><a wicket:id="subscriptionStatus" class="subscription-status btn btn-default btn-sm"></a><a wicket:id="watchStatus" class="watch-status btn btn-default btn-sm"></a>
+					</span>
+				</div>
+				<div wicket:id="watchHint" class="help-block">
+					<b><i class="fa fa-lightbulb-o"></i> Tips:</b> You may watch/unwatch specified queries above. 
+					The first matching query will take effect
+				</div>
 			</div>
 		</div>
-		<hr>
-		<div class="body">
-			<wicket:enclosure child="userQueries">
-			<div wicket:id="userQueries">
-				<span class="btn-group">
-					<a wicket:id="link" class="btn btn-sm btn-default"><span wicket:id="label"></span></a>
-					<a wicket:id="subscriptionStatus" class="subscription-status btn btn-default btn-sm"></a>
-					<a wicket:id="watchStatus" class="watch-status btn btn-default btn-sm"></a>
-				</span>
-			</div>
-			<hr/>
-			</wicket:enclosure>
-			<div wicket:id="projectQueries">
-				<span class="btn-group">
-					<a wicket:id="link" class="btn btn-sm btn-default"><span wicket:id="label"></span></a>
-					<a wicket:id="subscriptionStatus" class="subscription-status btn btn-default btn-sm"></a>
-					<a wicket:id="watchStatus" class="watch-status btn btn-default btn-sm"></a>
-				</span>
-			</div>
-			<div wicket:id="watchHint" class="help-block">
-				<b><i class="fa fa-lightbulb-o"></i> Tips:</b> You may watch/unwatch specified queries above. 
-				The first matching query will take effect
-			</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="collapsedFrag">
+		<div class="collapsed">
+			<a wicket:id="expand" title="Expand"><i class="fa fa-arrow-right"></i></a>
+			<h4>Saved Queries</h4>
 		</div>
-	</div>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="editSavedQueriesFrag">
 		<div class="modal-header">
 			<button wicket:id="close" type="button" class="close">&times;</button>

@@ -1,21 +1,3 @@
-#request-list {
-	display: table;
-	width: 100%;
-}
-#request-list>div {
-	display: table-cell;
-}
-#request-list>.side {
-	width: 240px;
-	border: 1px solid #E0E0E0;
-	padding: 20px; 
-	border-radius: 4px;
-}
-#request-list>.main {
-	padding-left: 20px;
-	vertical-align: top;
-}
-
 #request-list>.main>.head {
 	position: relative;
 }

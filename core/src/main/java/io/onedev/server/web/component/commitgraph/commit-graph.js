@@ -1,10 +1,10 @@
-onedev.server.commitgraph = {
+onedev.server.commitGraph = {
 	render: function(containerId, commits) {
 		var $container = $("#" + containerId);
 		$container.prepend("<svg class='commit-graph'></svg>");
 		var $graph = $container.children("svg");
-		onedev.server.commitgraph.populateData($graph, commits);
-		onedev.server.commitgraph.drawGraph($graph);
+		onedev.server.commitGraph.populateData($graph, commits);
+		onedev.server.commitGraph.drawGraph($graph);
 
 		var paper = Snap($graph[0]);
 		function getCommitDot(e) {
@@ -429,7 +429,7 @@ $(function() {
 			return;
 		e.stopPropagation();
 		$(".commit-graph").each(function() {
-			onedev.server.commitgraph.drawGraph($(this));
+			onedev.server.commitGraph.drawGraph($(this));
 		});
 	});		
 });

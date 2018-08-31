@@ -2,6 +2,10 @@
 	font-family: "Glyphicons Halflings";
 	font-size: 14px;
 }
+.subscription-status {
+	padding-top: 8px;
+	padding-bottom: 2px;
+}
 .subscription-status.subscribed:BEFORE {
 	content: "\e038";
 }

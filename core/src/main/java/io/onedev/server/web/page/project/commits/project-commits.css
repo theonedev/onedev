@@ -1,7 +1,7 @@
 #project-commits>.main {
 	position: relative;
 }
-#project-commits>.main>.head>.query {
+#project-commits>.main>.head>* {
 	margin-bottom: 20px;
 }
 

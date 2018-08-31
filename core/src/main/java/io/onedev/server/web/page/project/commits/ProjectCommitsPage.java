@@ -80,6 +80,7 @@ import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
 import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
+import io.onedev.server.web.util.VisibleVisitor;
 import io.onedev.server.web.util.ajaxlistener.ShowGlobalLoadingIndicatorImmediatelyListener;
 import io.onedev.server.web.util.model.CommitRefsModel;
 import io.onedev.utils.StringUtils;
@@ -249,8 +250,19 @@ public class ProjectCommitsPage extends ProjectPage {
 			
 		});
 		
+		WebMarkupContainer others = new WebMarkupContainer("others") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(visitChildren(Component.class, new VisibleVisitor()) != null);
+			}
+			
+		};
+		add(others);
+		
 		Component querySave;
-		add(querySave = new AjaxLink<Void>("saveQuery") {
+		others.add(querySave = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
@@ -369,10 +381,11 @@ public class ProjectCommitsPage extends ProjectPage {
 		queryForm.setOutputMarkupId(true);
 		add(queryForm);
 		
-		add(feedback = new NotificationPanel("feedback", queryForm));
+		feedback = new NotificationPanel("feedback", queryForm);
 		feedback.setOutputMarkupPlaceholderTag(true);
 		
 		body = new WebMarkupContainer("body");
+		body.add(feedback);
 		body.setOutputMarkupId(true);
 		add(body);
 		body.add(commitsView = newCommitsView());
@@ -435,7 +448,7 @@ public class ProjectCommitsPage extends ProjectPage {
 						addCommitClass(item, commitIndex++);
 					commitsView.add(item);
 					target.add(item);
-					builder.append(String.format("$('#project-commits>.body>.list').append(\"<li id='%s'></li>\");", 
+					builder.append(String.format("$('#project-commits>.main>.body>.list').append(\"<li id='%s'></li>\");", 
 							item.getMarkupId()));
 				}
 				target.prependJavaScript(builder);
@@ -653,7 +666,7 @@ public class ProjectCommitsPage extends ProjectPage {
 	
 	private String renderCommitGraph() {
 		String jsonOfCommits = CommitGraphUtils.asJSON(commitsModel.getObject().current);
-		return String.format("onedev.server.commitgraph.render('%s', %s);", body.getMarkupId(), jsonOfCommits);
+		return String.format("onedev.server.commitGraph.render('%s', %s);", body.getMarkupId(), jsonOfCommits);
 	}
 
 	@Override
