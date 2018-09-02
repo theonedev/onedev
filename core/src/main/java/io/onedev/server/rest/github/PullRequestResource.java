@@ -62,7 +62,7 @@ public class PullRequestResource {
 			@PathParam("pullRequestNumber") Long pullRequestNumber, @Context UriInfo uriInfo) {
 		Project project = getProject(projectName);
 
-		if (!SecurityUtils.canRead(project))
+		if (!SecurityUtils.canReadCode(project.getFacade()))
     		throw new UnauthorizedException("Unauthorized access to project '" + projectName + "'");
 		
 		PullRequest request = Preconditions.checkNotNull(pullRequestManager.find(project, pullRequestNumber));
@@ -77,7 +77,7 @@ public class PullRequestResource {
 			@PathParam("pullRequestNumber") Long pullRequestNumber) {
 		Project project = getProject(projectName);
 
-		if (!SecurityUtils.canRead(project))
+		if (!SecurityUtils.canReadCode(project.getFacade()))
     		throw new UnauthorizedException("Unauthorized access to project '" + projectName + "'");
 		
 		PullRequest request = pullRequestManager.find(project, pullRequestNumber);
@@ -189,7 +189,7 @@ public class PullRequestResource {
     		@QueryParam("page") Integer page, @Context UriInfo uriInfo) {
 		Project project = getProject(projectName);
 
-		if (!SecurityUtils.canRead(project))
+		if (!SecurityUtils.canReadCode(project.getFacade()))
     		throw new UnauthorizedException("Unauthorized access to project '" + projectName + "'");
 		
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);

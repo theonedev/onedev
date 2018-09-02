@@ -12,8 +12,10 @@
 			<table wicket:id="configurations" class="configurations table table-hover"></table>
 		</div>
 	</div>
+	<wicket:fragment wicket:id="nameFrag">
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="actionFrag">
-		<a wicket:id="edit" title="Edit this configuration"><i class="fa fa-pencil"></i></a>
 		<a wicket:id="delete" title="Delete this configuration"><i class="fa fa-trash"></i></a>
 	</wicket:fragment>
 </wicket:extend>

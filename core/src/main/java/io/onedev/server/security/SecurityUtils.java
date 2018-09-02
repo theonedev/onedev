@@ -2,7 +2,7 @@ package io.onedev.server.security;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -19,149 +19,61 @@ import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestAction;
-import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.security.permission.CreateProjects;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.PublicPermission;
+import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UserAdministration;
-import io.onedev.server.util.facade.GroupAuthorizationFacade;
-import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserAuthorizationFacade;
+import io.onedev.server.util.facade.TeamFacade;
 import io.onedev.server.util.facade.UserFacade;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static Collection<UserFacade> getAuthorizedUsers(ProjectFacade project, ProjectPrivilege privilege) {
-		CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
 		Collection<UserFacade> authorizedUsers = new HashSet<>();
-		if (project.isPublicRead() && privilege == ProjectPrivilege.READ) {
-			for (UserFacade user: cacheManager.getUsers().values())
-				authorizedUsers.add(user);
+		CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
+		if (project.getDefaultPrivilege() != null && project.getDefaultPrivilege().implies(privilege)) {
+			authorizedUsers.addAll(cacheManager.getUsers().values());
 		} else {
-			authorizedUsers.add(OneDev.getInstance(UserManager.class).getRoot().getFacade());
+			for (UserFacade user: cacheManager.getUsers().values()) {
+				if (user.isRoot() || user.isAdministrator())
+					authorizedUsers.add(user);
+			}
 
-			Set<Long> authorizedGroupIds = new HashSet<>();
-			for (GroupFacade group: cacheManager.getGroups().values()) {
-				if (group.isAdministrator()) 
-					authorizedGroupIds.add(group.getId());
-			}
-			for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
-				if (authorization.getProjectId().equals(project.getId()) && authorization.getPrivilege().implies(privilege))
-					authorizedGroupIds.add(authorization.getGroupId());
-			}
+			Collection<Long> authorizedTeamIds = 
+					getAuthorizedTeams(project, privilege).stream().map(it->it.getId()).collect(Collectors.toSet());
 			for (MembershipFacade membership: cacheManager.getMemberships().values()) {
-				if (authorizedGroupIds.contains(membership.getGroupId()))
+				if (authorizedTeamIds.contains(membership.getTeamId()))
 					authorizedUsers.add(cacheManager.getUser(membership.getUserId()));
 			}
-
-			for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
-				if (authorization.getProjectId().equals(project.getId()) 
-						&& authorization.getPrivilege().implies(privilege)) {
-					authorizedUsers.add(cacheManager.getUser(authorization.getUserId()));
-				}
-			}
 		}
-		
+
 		return authorizedUsers;
 	}
-
-	public static boolean canModify(PullRequest request) {
-		Project project = request.getTargetProject();
-		if (canManage(project)) {
-			return true;
-		} else {
-			User currentUser = getUser();
-			return currentUser != null && currentUser.equals(request.getSubmitter());
-		}
-	}
-
-	public static boolean canModify(Issue issue) {
-		Project project = issue.getProject();
-		if (canManage(project)) {
-			return true;
-		} else {
-			User currentUser = getUser();
-			return currentUser != null && currentUser.equals(issue.getSubmitter());
-		}
-	}
 	
+	public static Collection<TeamFacade> getAuthorizedTeams(ProjectFacade project, ProjectPrivilege privilege) {
+		CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
+		Collection<TeamFacade> authorizedTeams = new HashSet<>();
+		for (TeamFacade team: cacheManager.getTeams().values()) {
+			if (team.getProjectId().equals(project.getId()) && team.getPrivilege().implies(privilege))
+				authorizedTeams.add(team);
+		}
+		return authorizedTeams;
+	}
+
 	public static User getUser() {
 		return OneDev.getInstance(UserManager.class).getCurrent();
 	}
 	
-	public static boolean canModify(PullRequestReview review) {
-		Project project = review.getRequest().getTargetProject();
-		if (canManage(project)) {
-			return true;
-		} else {
-			return review.getUser().equals(getUser());
-		}
-	}
-	
-	public static boolean canModify(CodeComment comment) {
-		User currentUser = getUser();
-		if (currentUser == null) {
-			return false;
-		} else {
-			return currentUser.equals(comment.getUser()) || canManage(comment.getProject());
-		}
-	}
-
-	public static boolean canModify(CodeCommentReply reply) {
-		User currentUser = getUser();
-		if (currentUser == null) {
-			return false;
-		} else {
-			return currentUser.equals(reply.getUser()) || canManage(reply.getComment().getProject());
-		}
-	}
-	
-	public static boolean canModify(PullRequestComment comment) {
-		User currentUser = getUser();
-		if (currentUser == null) {
-			return false;
-		} else {
-			return currentUser.equals(comment.getUser()) || canManage(comment.getRequest().getTargetProject());
-		}
-	}
-	
-	public static boolean canModify(IssueComment comment) {
-		User currentUser = getUser();
-		if (currentUser == null) {
-			return false;
-		} else {
-			return currentUser.equals(comment.getUser()) || canManage(comment.getIssue().getProject());
-		}
-	}
-	
-	public static boolean canModify(PullRequestAction action) {
-		User currentUser = getUser();
-		if (currentUser == null) {
-			return false;
-		} else {
-			return currentUser.equals(action.getUser()) || canModify(action.getRequest());
-		}
-	}
-	
-	public static boolean canModify(IssueAction action) {
-		User currentUser = getUser();
-		if (currentUser == null) {
-			return false;
-		} else {
-			return currentUser.equals(action.getUser()) || canModify(action.getIssue());
-		}
-	}
-	
 	public static boolean canDeleteBranch(Project project, String branchName) {
-		if (canWrite(project)) {
+		if (canWriteCode(project.getFacade())) {
 			BranchProtection protection = project.getBranchProtection(branchName, getUser());
 			return protection == null || !protection.isNoDeletion();
 		} else {
@@ -171,7 +83,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	@Nullable
 	public static boolean canCreateTag(Project project, String tagName) {
-		if (canWrite(project)) {
+		if (canWriteCode(project.getFacade())) {
 			TagProtection protection = project.getTagProtection(tagName, getUser());
 			return protection == null || !protection.isNoCreation();
 		} else {
@@ -181,7 +93,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	@Nullable
 	public static boolean canCreateBranch(Project project, String branchName) {
-		if (canWrite(project)) {
+		if (canWriteCode(project.getFacade())) {
 			BranchProtection protection = project.getBranchProtection(branchName, getUser());
 			return protection == null || !protection.isNoCreation();
 		} else {
@@ -190,20 +102,16 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canModify(Project project, String branch, String file) {
-		return canWrite(project) && !OneDev.getInstance(ProjectManager.class)
+		return canWriteCode(project.getFacade()) && !OneDev.getInstance(ProjectManager.class)
 				.isModificationNeedsQualityCheck(getUser(), project, branch, file); 
 	}
 	
 	public static boolean canPush(Project project, String branchName, ObjectId oldObjectId, ObjectId newObjectId) {
-		return canWrite(project) && !OneDev.getInstance(ProjectManager.class)
+		return canWriteCode(project.getFacade()) && !OneDev.getInstance(ProjectManager.class)
 				.isPushNeedsQualityCheck(getUser(), project, branchName, oldObjectId, newObjectId, null); 
 	}
 	
-	public static boolean canManage(User user) {
-		return canManage(user.getFacade());
-	}
-	
-	public static boolean canManage(UserFacade user) {
+	public static boolean canAdministrate(UserFacade user) {
 		return getSubject().isPermitted(new UserAdministration(user));
 	}
 	
@@ -211,36 +119,72 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(new CreateProjects());
 	}
 	
-	public static boolean canAccessPublic() {
-		return getSubject().isPermitted(new PublicPermission());
+	public static boolean canReadIssues(ProjectFacade project) {
+		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.ISSUE_READ));
 	}
 	
-	public static boolean canRead(Project project) {
-		return canRead(project.getFacade());
+	public static boolean canReadCode(ProjectFacade project) {
+		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.CODE_READ));
 	}
 	
-	public static boolean canRead(ProjectFacade project) {
-		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.READ));
+	public static boolean canWriteCode(ProjectFacade project) {
+		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.CODE_WRITE));
 	}
 	
-	public static boolean canWrite(Project project) {
-		return canWrite(project.getFacade());
-	}
-
-	public static boolean canWrite(ProjectFacade project) {
-		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.WRITE));
-	}
-	
-	public static boolean canManage(Project project) {
-		return canManage(project.getFacade());
-	}
-	
-	public static boolean canManage(ProjectFacade project) {
-		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.ADMIN));
+	public static boolean canAdministrate(ProjectFacade project) {
+		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.PROJECT_ADMINISTRATION));
 	}
 	
 	public static boolean isAdministrator() {
 		return getSubject().isPermitted(new SystemAdministration());
+	}
+	
+	public static boolean canModifyOrDelete(CodeComment comment) {
+		User user = SecurityUtils.getUser();
+		return user != null && user.equals(comment.getUser()) 
+				|| canWriteCode(comment.getProject().getFacade());
+	}
+	
+	public static boolean canModifyOrDelete(CodeCommentReply reply) {
+		User user = SecurityUtils.getUser();
+		return user != null && user.equals(reply.getUser()) 
+				|| canWriteCode(reply.getComment().getProject().getFacade());
+	}
+	
+	public static boolean canModifyOrDelete(PullRequestComment comment) {
+		User user = SecurityUtils.getUser();
+		return user != null && user.equals(comment.getUser()) 
+				|| canWriteCode(comment.getRequest().getTargetProject().getFacade());
+	}
+	
+	public static boolean canModifyOrDelete(IssueComment comment) {
+		User user = SecurityUtils.getUser();
+		return user != null && user.equals(comment.getUser()) 
+				|| canWriteCode(comment.getIssue().getProject().getFacade());
+	}
+	
+	public static boolean canModifyOrDelete(PullRequestAction action) {
+		User user = SecurityUtils.getUser();
+		return user != null && user.equals(action.getUser()) 
+				|| canWriteCode(action.getRequest().getTargetProject().getFacade());
+	}
+	
+	public static boolean canModifyOrDelete(IssueAction action) {
+		User user = SecurityUtils.getUser();
+		return user != null && user.equals(action.getUser()) 
+				|| canWriteCode(action.getIssue().getProject().getFacade());
+	}
+
+	public static boolean canModify(PullRequest request) {
+		User user = SecurityUtils.getUser();
+		return user != null && user.equals(request.getSubmitter()) 
+				|| canWriteCode(request.getTargetProject().getFacade());
+	}
+	
+	public static boolean canModify(Issue issue) {
+		User user = SecurityUtils.getUser();
+		return user != null && user.equals(issue.getSubmitter()) 
+				|| canWriteCode(issue.getProject().getFacade());
 	}
 	
 }

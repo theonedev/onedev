@@ -3,10 +3,14 @@ package io.onedev.server.web.page.user;
 import java.io.Serializable;
 
 import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
+import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
@@ -28,6 +32,10 @@ public class UserProfilePage extends UserPage {
 	
 	private String oldName;
 	
+	private CheckBox administratorInput;
+	
+	private CheckBox canCreateProjectsInput;
+	
 	public UserProfilePage(PageParameters params) {
 		super(params);
 	}
@@ -36,7 +44,7 @@ public class UserProfilePage extends UserPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (SecurityUtils.canManage(getUser())) {
+		if (SecurityUtils.canAdministrate(getUser().getFacade())) {
 			Fragment fragment = new Fragment("content", "editFrag", this);
 			editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 
@@ -56,7 +64,7 @@ public class UserProfilePage extends UserPage {
 					editor.getBeanDescriptor().copyProperties(object, getUser());
 				}
 				
-			}, Sets.newHashSet("password"), true);
+			}, Sets.newHashSet("password", "administrator", "canCreateProjects"), true);
 			
 			Form<?> form = new Form<Void>("form") {
 
@@ -77,6 +85,10 @@ public class UserProfilePage extends UserPage {
 								.addError("This email has already been used by another user.");
 					} 
 					if (!editor.hasErrors(true)) {
+						if (SecurityUtils.isAdministrator()) {
+							user.setAdministrator(administratorInput.getModelObject());
+							user.setCanCreateProjects(canCreateProjectsInput.getModelObject());
+						}
 						userManager.save(user, oldName);
 						Session.get().success("Profile updated");
 						setResponsePage(UserProfilePage.class, UserProfilePage.paramsOf(user));
@@ -85,6 +97,44 @@ public class UserProfilePage extends UserPage {
 				
 			};	
 			form.add(editor);
+			
+			administratorInput = new CheckBox("administrator", Model.of(getUser().isAdministrator() || getUser().isRoot())) {
+				
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(SecurityUtils.isAdministrator() 
+							&& !getUser().isRoot() 
+							&& !getUser().equals(getLoginUser()));
+				}
+				
+			};
+			administratorInput.add(new OnChangeAjaxBehavior() {
+
+				@Override
+				protected void onUpdate(AjaxRequestTarget target) {
+					if (administratorInput.getModelObject())
+						canCreateProjectsInput.setModelObject(true);
+					target.add(canCreateProjectsInput);
+				}
+				
+			});
+			form.add(administratorInput);
+			
+			canCreateProjectsInput = new CheckBox("canCreateProjects", Model.of(getUser().isCanCreateProjects())) {
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(SecurityUtils.isAdministrator() 
+							&& !getUser().isRoot()
+							&& !getUser().equals(getLoginUser()));
+					setEnabled(!administratorInput.getModelObject());
+				}
+				
+			};
+			canCreateProjectsInput.setOutputMarkupId(true);
+			form.add(canCreateProjectsInput);			
 			
 			form.add(new Link<Void>("delete") {
 

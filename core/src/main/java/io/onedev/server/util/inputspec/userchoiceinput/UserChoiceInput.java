@@ -11,8 +11,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.GroupUsers;
-import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ProjectReaders;
+import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.IssueReaders;
+import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.TeamUsers;
 import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -24,7 +24,7 @@ public class UserChoiceInput extends InputSpec {
 	
 	private static final long serialVersionUID = 1L;
 
-	private ChoiceProvider choiceProvider = new ProjectReaders();
+	private ChoiceProvider choiceProvider = new IssueReaders();
 
 	private DefaultValueProvider defaultValueProvider;
 	
@@ -101,10 +101,10 @@ public class UserChoiceInput extends InputSpec {
 
 	@Override
 	public void onRenameGroup(String oldName, String newName) {
-		if (choiceProvider instanceof GroupUsers) {
-			GroupUsers groupUsers = (GroupUsers) choiceProvider;
-			if (groupUsers.getGroupName().equals(oldName))
-				groupUsers.setGroupName(newName);
+		if (choiceProvider instanceof TeamUsers) {
+			TeamUsers groupUsers = (TeamUsers) choiceProvider;
+			if (groupUsers.getTeamName().equals(oldName))
+				groupUsers.setTeamName(newName);
 		}
 	}
 
@@ -112,9 +112,9 @@ public class UserChoiceInput extends InputSpec {
 	public boolean onDeleteGroup(String groupName) {
 		if (super.onDeleteGroup(groupName))
 			return true;
-		if (choiceProvider instanceof GroupUsers) {
-			GroupUsers groupUsers = (GroupUsers) choiceProvider;
-			if (groupUsers.getGroupName().equals(groupName))
+		if (choiceProvider instanceof TeamUsers) {
+			TeamUsers groupUsers = (TeamUsers) choiceProvider;
+			if (groupUsers.getTeamName().equals(groupName))
 				return true;
 		}
 		return false;

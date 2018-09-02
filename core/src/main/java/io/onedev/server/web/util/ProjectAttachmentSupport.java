@@ -87,7 +87,7 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 
 	@Override
 	public String saveAttachment(String suggestedAttachmentName, InputStream attachmentStream) {
-		Preconditions.checkState(SecurityUtils.canRead(getProject()));
+		Preconditions.checkState(SecurityUtils.canReadCode(getProject()));
 		
 		String attachmentName = suggestedAttachmentName;
 		File attachmentDir = getAttachmentDir();

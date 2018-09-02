@@ -24,11 +24,11 @@ import org.slf4j.LoggerFactory;
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.TeamManager;
 import io.onedev.server.manager.MembershipManager;
 import io.onedev.server.manager.UserManager;
-import io.onedev.server.model.Group;
 import io.onedev.server.model.Membership;
+import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -36,13 +36,11 @@ import io.onedev.server.security.authenticator.Authenticated;
 import io.onedev.server.security.authenticator.Authenticator;
 import io.onedev.server.security.permission.CreateProjects;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.PublicPermission;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UserAdministration;
-import io.onedev.server.util.facade.GroupAuthorizationFacade;
-import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.facade.MembershipFacade;
-import io.onedev.server.util.facade.UserAuthorizationFacade;
+import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.facade.TeamFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.utils.StringUtils;
 
@@ -61,11 +59,11 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     
     private final MembershipManager membershipManager;
     
-    private final GroupManager groupManager;
+    private final TeamManager teamManager;
     
 	@Inject
     public OneAuthorizingRealm(UserManager userManager, CacheManager cacheManager, SettingManager configManager, 
-    		MembershipManager membershipManager, GroupManager groupManager) {
+    		MembershipManager membershipManager, TeamManager teamManager) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(AppLoader.getInstance(PasswordService.class));
 		setCredentialsMatcher(passwordMatcher);
@@ -74,9 +72,18 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     	this.cacheManager = cacheManager;
     	this.configManager = configManager;
     	this.membershipManager = membershipManager;
-    	this.groupManager = groupManager;
+    	this.teamManager = teamManager;
     }
 
+	private Collection<Permission> getDefaultPermissions() {
+		Collection<Permission> defaultPermissions = new ArrayList<>();
+		for (ProjectFacade project: cacheManager.getProjects().values()) {
+			if (project.getDefaultPrivilege() != null)
+				defaultPermissions.add(new ProjectPermission(project, project.getDefaultPrivilege()));
+		}
+		return defaultPermissions;
+	}
+	
 	@Sessional
 	protected Collection<Permission> getObjectPermissionsInSession(Long userId) {
 		Collection<Permission> permissions = new ArrayList<>();
@@ -85,36 +92,20 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
         if (userId != 0L) 
             user = cacheManager.getUser(userId);
         if (user != null) {
-			permissions.add(new PublicPermission());
-        	if (user.isRoot()) 
+			permissions.addAll(getDefaultPermissions());
+        	if (user.isRoot() || user.isAdministrator()) 
         		permissions.add(new SystemAdministration());
+        	if (user.isCanCreateProjects())
+        		permissions.add(new CreateProjects());
         	permissions.add(new UserAdministration(user));
         	for (MembershipFacade membership: cacheManager.getMemberships().values()) {
         		if (membership.getUserId().equals(userId)) {
-        			GroupFacade group = cacheManager.getGroup(membership.getGroupId());
-            		if (group.isAdministrator())
-            			permissions.add(new SystemAdministration());
-            		if (group.isCanCreateProjects())
-            			permissions.add(new CreateProjects());
-            		for (GroupAuthorizationFacade authorization: 
-            				cacheManager.getGroupAuthorizations().values()) {
-            			if (authorization.getGroupId().equals(group.getId())) {
-                			permissions.add(new ProjectPermission(
-                					cacheManager.getProject(authorization.getProjectId()), 
-                					authorization.getPrivilege()));
-            			}
-            		}
-        		}
-        	}
-        	for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
-        		if (authorization.getUserId().equals(userId)) {
-            		permissions.add(new ProjectPermission(
-            				cacheManager.getProject(authorization.getProjectId()), 
-            				authorization.getPrivilege()));
+        			TeamFacade team = cacheManager.getTeam(membership.getTeamId());
+        			permissions.add(new ProjectPermission(cacheManager.getProject(team.getProjectId()), team.getPrivilege()));
         		}
         	}
         } else if (configManager.getSecuritySetting().isEnableAnonymousAccess()) {
-			permissions.add(new PublicPermission());
+			permissions.addAll(getDefaultPermissions());
         }
 		return permissions;
 	}
@@ -170,30 +161,32 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     				if (authenticated.getFullName() != null)
     					user.setFullName(authenticated.getFullName());
 
-    				Collection<String> existingGroupNames = new HashSet<>();
-    				for (Membership membership: user.getMemberships()) 
-    					existingGroupNames.add(membership.getGroup().getName());
-    				if (!authenticated.getGroupNames().isEmpty()) {
-    					Collection<String> retrievedGroupNames = new HashSet<>();
-    					for (String groupName: authenticated.getGroupNames()) {
-    						Group group = groupManager.find(groupName);
-    						if (group != null) {
-    							if (!existingGroupNames.contains(groupName)) {
+    				Collection<String> existingTeamFQNs = new HashSet<>();
+    				for (Membership membership: user.getMemberships()) { 
+    					Team team = membership.getTeam();
+    					existingTeamFQNs.add(team.getFQN());
+    				}
+    				if (!authenticated.getTeamFQNs().isEmpty()) {
+    					Collection<String> retrievedTeamFQNs = new HashSet<>();
+    					for (String teamFQN: authenticated.getTeamFQNs()) {
+    						Team team = teamManager.findByFQN(teamFQN);
+    						if (team != null) {
+    							if (!existingTeamFQNs.contains(teamFQN)) {
     								Membership membership = new Membership();
-    								membership.setGroup(group);
+    								membership.setTeam(team);
     								membership.setUser(user);
     								membershipManager.save(membership);
     								user.getMemberships().add(membership);
-    								existingGroupNames.add(groupName);
+    								existingTeamFQNs.add(teamFQN);
     							}
-    							retrievedGroupNames.add(groupName);
+    							retrievedTeamFQNs.add(teamFQN);
     						} else {
-    							logger.debug("Group '{}' from external authenticator is not defined", groupName);
+    							logger.debug("Team '{}' from external authenticator is not defined", teamFQN);
     						}
     					}
         				for (Iterator<Membership> it = user.getMemberships().iterator(); it.hasNext();) {
         					Membership membership = it.next();
-        					if (!retrievedGroupNames.contains(membership.getGroup().getName())) {
+        					if (!retrievedTeamFQNs.contains(membership.getTeam().getFQN())) {
         						it.remove();
         						membershipManager.delete(membership);
         					}
@@ -209,20 +202,6 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     				if (authenticated.getFullName() != null)
     					user.setFullName(authenticated.getFullName());
     				userManager.save(user);
-    				if (authenticated.getGroupNames().isEmpty()) {
-    					for (String groupName: authenticator.getDefaultGroupNames()) {
-    						Group group = groupManager.find(groupName);
-    						if (group != null) {
-    							Membership membership = new Membership();
-    							membership.setGroup(group);
-    							membership.setUser(user);
-    							user.getMemberships().add(membership);
-    							membershipManager.save(membership);
-    						} else {
-    							logger.warn("Default group '{}' of external authenticator is not defined", groupName);
-    						}
-    					}
-    				}
     			}
         	} else {
         		user = null;

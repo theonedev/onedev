@@ -270,7 +270,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getProject()));
+				setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
 			}
 			
 		});
@@ -280,15 +280,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			query = parsedQueryModel.getObject().toString();
 		else
 			query = null;
-		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject(), query)) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canRead(getProject()));
-			}
-			
-		});
+		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject(), query)));
 		
 		others.add(batchEditSelected = new ModalLink("batchEditSelected") {
 
@@ -386,7 +378,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getProject()) && issuesTable.getItemCount() != 0);
+				setVisible(SecurityUtils.canWriteCode(getProject().getFacade()) && issuesTable.getItemCount() != 0);
 			}
 			
 		});
@@ -443,7 +435,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			}
 			
 		});
-		if (SecurityUtils.canManage(getProject())) {
+		if (SecurityUtils.canWriteCode(getProject().getFacade())) {
 			columns.add(selectionColumn = new SelectionColumn<Issue, Void>() {
 
 				@Override

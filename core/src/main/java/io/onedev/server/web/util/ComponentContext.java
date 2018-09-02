@@ -1,7 +1,6 @@
 package io.onedev.server.web.util;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 
 import com.google.common.base.Preconditions;
 
@@ -9,7 +8,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.web.page.project.ProjectPage;
 
 public class ComponentContext extends OneContext {
 
@@ -21,9 +19,9 @@ public class ComponentContext extends OneContext {
 
 	@Override
 	public Project getProject() {
-		Page page = component.getPage();
-		if (page instanceof ProjectPage) 
-			return ((ProjectPage)page).getProject();
+		ProjectAware projectAware = component.findParent(ProjectAware.class);
+		if (projectAware != null) 
+			return projectAware.getProject();
 		else
 			return null;
 	}

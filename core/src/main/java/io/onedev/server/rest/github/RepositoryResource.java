@@ -38,14 +38,14 @@ public class RepositoryResource {
     public Response get(@PathParam("name") String name) {
     	Project project = projectManager.find(name);
     	
-    	if (!SecurityUtils.canRead(project)) {
+    	if (!SecurityUtils.canReadCode(project.getFacade())) {
 			throw new UnauthorizedException("Unauthorized access to project " + project.getName());
     	} else {
     		Map<String, Object> entity = new HashMap<>();
     		Map<String, String> permissionsMap = new HashMap<>();
     		entity.put("name", project.getName());
-    		permissionsMap.put("admin", String.valueOf(SecurityUtils.canManage(project)));
-    		permissionsMap.put("push", String.valueOf(SecurityUtils.canWrite(project)));
+    		permissionsMap.put("admin", String.valueOf(SecurityUtils.canAdministrate(project.getFacade())));
+    		permissionsMap.put("push", String.valueOf(SecurityUtils.canWriteCode(project.getFacade())));
     		permissionsMap.put("pull", "true");
     		entity.put("permissions", permissionsMap);
     		

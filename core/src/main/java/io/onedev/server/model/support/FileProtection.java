@@ -4,10 +4,8 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.PathPattern;
-import io.onedev.server.web.editable.annotation.ReviewRequirementSpec;
 
 @Editable
 public class FileProtection implements Serializable {
@@ -16,9 +14,7 @@ public class FileProtection implements Serializable {
 
 	private String path;
 	
-	private String reviewRequirementSpec;
-	
-	private transient ReviewRequirement reviewRequirement;
+	private String reviewRequirement;
 	
 	@Editable(order=100, description="Specify path to be protected. Wildcard can be used in the path "
 			+ "to match multiple files")
@@ -34,20 +30,14 @@ public class FileProtection implements Serializable {
 
 	@Editable(order=200, name="Reviewers", description="Optionally specify required reviewers if specified path is "
 			+ "changed. Note that the user submitting the change is considered to reviewed the change automatically")
-	@ReviewRequirementSpec
+	@io.onedev.server.web.editable.annotation.ReviewRequirement
 	@NotEmpty
-	public String getReviewRequirementSpec() {
-		return reviewRequirementSpec;
+	public String getReviewRequirement() {
+		return reviewRequirement;
 	}
 
-	public void setReviewRequirementSpec(String reviewRequirementSpec) {
-		this.reviewRequirementSpec = reviewRequirementSpec;
-	}
-	
-	public ReviewRequirement getReviewRequirement() {
-		if (reviewRequirement == null)
-			reviewRequirement = new ReviewRequirement(reviewRequirementSpec);
-		return reviewRequirement;
+	public void setReviewRequirement(String reviewRequirement) {
+		this.reviewRequirement = reviewRequirement;
 	}
 	
 }

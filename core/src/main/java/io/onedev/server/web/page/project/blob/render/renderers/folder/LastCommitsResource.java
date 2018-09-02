@@ -49,7 +49,7 @@ class LastCommitsResource extends AbstractResource {
 	@Override
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
-		final Long repoId = params.get(PARAM_REPO).toLong();
+		final Long projectId = params.get(PARAM_REPO).toLong();
 		final String revision = params.get(PARAM_REVISION).toString();
 		final String path = params.get(PARAM_PATH).toOptionalString();
 
@@ -59,12 +59,12 @@ class LastCommitsResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				Project repo = OneDev.getInstance(Dao.class).load(Project.class, repoId);
+				Project project = OneDev.getInstance(Dao.class).load(Project.class, projectId);
 				
-				if (!SecurityUtils.canRead(repo))
+				if (!SecurityUtils.canReadCode(project.getFacade()))
 					throw new UnauthorizedException();
 				
-				LastCommitsOfChildren lastCommits = repo.getLastCommitsOfChildren(revision, path);
+				LastCommitsOfChildren lastCommits = project.getLastCommitsOfChildren(revision, path);
 				
 				UserManager userManager = OneDev.getInstance(UserManager.class);
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
@@ -74,7 +74,7 @@ class LastCommitsResource extends AbstractResource {
 					LastCommitInfo info = new LastCommitInfo();
 
 					LastCommitsOfChildren.Value value = entry.getValue();
-					PageParameters params = CommitDetailPage.paramsOf(repo, value.getId().name());
+					PageParameters params = CommitDetailPage.paramsOf(project, value.getId().name());
 					info.url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 					info.summary = StringEscapeUtils.escapeHtml4(value.getSummary());
 					info.when = DateUtils.formatAge(value.getCommitDate());

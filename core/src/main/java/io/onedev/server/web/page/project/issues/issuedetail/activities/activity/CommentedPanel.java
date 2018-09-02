@@ -61,8 +61,8 @@ class CommentedPanel extends GenericPanel<IssueComment> {
 			}
 
 			@Override
-			protected boolean canManageComment() {
-				return SecurityUtils.canModify(CommentedPanel.this.getComment().getIssue());
+			protected boolean canModifyOrDeleteComment() {
+				return SecurityUtils.canModifyOrDelete(CommentedPanel.this.getComment());
 			}
 
 			@Override

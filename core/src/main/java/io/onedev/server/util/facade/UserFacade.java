@@ -15,6 +15,10 @@ public class UserFacade extends EntityFacade {
 	
 	private final String email;
 	
+	private final boolean administrator;
+	
+	private final boolean canCreateProjects;
+	
 	private final String uuid;
 	
 	public UserFacade(User user) {
@@ -23,6 +27,8 @@ public class UserFacade extends EntityFacade {
 		name = user.getName();
 		fullName = user.getFullName();
 		email = user.getEmail();
+		administrator = user.isAdministrator();
+		canCreateProjects = user.isCanCreateProjects();
 		uuid = user.getUUID();
 	}
 
@@ -38,6 +44,14 @@ public class UserFacade extends EntityFacade {
 		return email;
 	}
 	
+	public boolean isAdministrator() {
+		return administrator;
+	}
+
+	public boolean isCanCreateProjects() {
+		return canCreateProjects;
+	}
+
 	public String getUUID() {
 		return uuid;
 	}

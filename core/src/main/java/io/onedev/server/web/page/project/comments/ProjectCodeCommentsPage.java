@@ -20,6 +20,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.codecomment.NamedCodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -189,6 +190,11 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 		});
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
+	}
+	
 	public static PageParameters paramsOf(Project project, @Nullable String query) {
 		PageParameters params = paramsOf(project);
 		if (query != null)

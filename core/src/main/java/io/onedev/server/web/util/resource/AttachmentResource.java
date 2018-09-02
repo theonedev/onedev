@@ -46,7 +46,7 @@ public class AttachmentResource extends AbstractResource {
 		if (project == null) 
 			throw new EntityNotFoundException("Unable to find project " + projectName);
 		
-		if (!SecurityUtils.canRead(project)) 
+		if (!SecurityUtils.canReadCode(project.getFacade())) 
 			throw new UnauthorizedException();
 
 		String storage = params.get(PARAM_UUID).toString();

@@ -57,6 +57,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Column(unique=true)
 	private String email;
 	
+	private boolean administrator;
+	
+	private boolean canCreateProjects = true;
+	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
 	
@@ -69,9 +73,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<Membership> memberships = new ArrayList<>();
-	
-	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<UserAuthorization> authorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReview> reviews = new ArrayList<>();
@@ -163,6 +164,24 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.email = email;
 	}
 
+	@Editable(order=400)
+	public boolean isAdministrator() {
+		return administrator;
+	}
+
+	public void setAdministrator(boolean administrator) {
+		this.administrator = administrator;
+	}
+
+	@Editable(order=500)
+	public boolean isCanCreateProjects() {
+		return canCreateProjects;
+	}
+
+	public void setCanCreateProjects(boolean canCreateProjects) {
+		this.canCreateProjects = canCreateProjects;
+	}
+
 	public Collection<Membership> getMemberships() {
 		return memberships;
 	}
@@ -196,14 +215,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public long getVersion() {
 		return version;
-	}
-
-	public Collection<UserAuthorization> getAuthorizations() {
-		return authorizations;
-	}
-
-	public void setAuthorizedProjects(Collection<UserAuthorization> authorizations) {
-		this.authorizations = authorizations;
 	}
 
 	public Collection<IssueQuerySetting> getIssueQuerySettings() {

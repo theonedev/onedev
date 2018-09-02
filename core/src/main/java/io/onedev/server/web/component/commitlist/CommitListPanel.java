@@ -212,7 +212,7 @@ public class CommitListPanel extends Panel {
 		response.render(CssHeaderItem.forReference(new CommitListResourceReference()));
 		
 		String jsonOfCommits = CommitGraphUtils.asJSON(commitsModel.getObject());
-		String script = String.format("onedev.server.commitgraph.render('%s', %s);", container.getMarkupId(), jsonOfCommits);
+		String script = String.format("onedev.server.commitGraph.render('%s', %s);", container.getMarkupId(), jsonOfCommits);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

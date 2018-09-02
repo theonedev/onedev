@@ -58,7 +58,7 @@ class OpenedPanel extends GenericPanel<Issue> {
 			}
 
 			@Override
-			protected boolean canManageComment() {
+			protected boolean canModifyOrDeleteComment() {
 				return SecurityUtils.canModify(getIssue());
 			}
 

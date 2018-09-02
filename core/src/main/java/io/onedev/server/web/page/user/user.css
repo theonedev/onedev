@@ -27,15 +27,12 @@
 	margin-right: 8px;
 }
 
-#user .authorization.list a.other-sources {
-	margin-left: 4px;
-	color: #DCB508;
-	vertical-align: middle;
-}
-
-#user .membership.list .head .select2-container, 
-#user .authorization.list .head .select2-container {
+#user .project.list .head .select2-container {
 	width: 240px;
+} 
+#user .project.list table a {
+	color: #666;
+	margin-left: 4px;
 } 
 
 .user.list .actions a {

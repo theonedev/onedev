@@ -90,7 +90,7 @@ public class MilestoneEditPage extends IssuesPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canManage(getProject());
+		return SecurityUtils.canAdministrate(getProject().getFacade());
 	}
 	
 }

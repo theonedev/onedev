@@ -18,23 +18,20 @@ import com.google.common.collect.HashBiMap;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.lifecycle.SystemStarted;
 import io.onedev.server.manager.CacheManager;
-import io.onedev.server.model.Group;
-import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
-import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityPersisted;
 import io.onedev.server.persistence.dao.EntityRemoved;
-import io.onedev.server.util.facade.GroupAuthorizationFacade;
-import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserAuthorizationFacade;
+import io.onedev.server.util.facade.TeamFacade;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.utils.Pair;
 
 @Singleton
 public class DefaultCacheManager implements CacheManager {
@@ -57,23 +54,15 @@ public class DefaultCacheManager implements CacheManager {
 	
 	private final ReadWriteLock projectsLock = new ReentrantReadWriteLock();
 	
-	private final Map<Long, GroupFacade> groups = new HashMap<>();
+	private final Map<Long, TeamFacade> teams = new HashMap<>();
 	
-	private final BiMap<String, Long> groupIdsByName = HashBiMap.create();
+	private final BiMap<Pair<Long, String>, Long> teamIds = HashBiMap.create();
 	
-	private final ReadWriteLock groupsLock = new ReentrantReadWriteLock();
+	private final ReadWriteLock teamsLock = new ReentrantReadWriteLock();
 	
 	private final Map<Long, MembershipFacade> memberships = new HashMap<>();
 	
 	private final ReadWriteLock membershipsLock = new ReentrantReadWriteLock();
-	
-	private final Map<Long, GroupAuthorizationFacade> groupAuthorizations = new HashMap<>(); 
-	
-	private final ReadWriteLock groupAuthorizationsLock = new ReentrantReadWriteLock();
-	
-	private final Map<Long, UserAuthorizationFacade> userAuthorizations = new HashMap<>();
-	
-	private final ReadWriteLock userAuthorizationsLock = new ReentrantReadWriteLock();
 
 	@Inject
 	public DefaultCacheManager(Dao dao) {
@@ -94,16 +83,12 @@ public class DefaultCacheManager implements CacheManager {
 			if (user.getEmail() != null)
 				userIdsByEmail.inverse().put(user.getId(), user.getEmail());
 		}
-		for (Group group: dao.findAll(Group.class)) {
-			groups.put(group.getId(), group.getFacade());
-			groupIdsByName.inverse().put(group.getId(), group.getName());
+		for (Team team: dao.findAll(Team.class)) {
+			teams.put(team.getId(), team.getFacade());
+			teamIds.inverse().put(team.getId(), new Pair<>(team.getProject().getId(), team.getName()));
 		}
 		for (Membership membership: dao.findAll(Membership.class))
 			memberships.put(membership.getId(), membership.getFacade());
-		for (GroupAuthorization groupAuthorization: dao.findAll(GroupAuthorization.class))
-			groupAuthorizations.put(groupAuthorization.getId(), groupAuthorization.getFacade());
-		for (UserAuthorization userAuthorization: dao.findAll(UserAuthorization.class))
-			userAuthorizations.put(userAuthorization.getId(), userAuthorization.getFacade());
 	}
 	
 	@Transactional
@@ -115,14 +100,10 @@ public class DefaultCacheManager implements CacheManager {
 			facade = ((Project) event.getEntity()).getFacade();
 		} else if (event.getEntity() instanceof User) {
 			facade = ((User) event.getEntity()).getFacade();
-		} else if (event.getEntity() instanceof Group) {
-			facade = ((Group) event.getEntity()).getFacade();
+		} else if (event.getEntity() instanceof Team) {
+			facade = ((Team) event.getEntity()).getFacade();
 		} else if (event.getEntity() instanceof Membership) {
 			facade = ((Membership) event.getEntity()).getFacade();
-		} else if (event.getEntity() instanceof UserAuthorization) {
-			facade = ((UserAuthorization) event.getEntity()).getFacade();
-		} else if (event.getEntity() instanceof GroupAuthorization) {
-			facade = ((GroupAuthorization) event.getEntity()).getFacade();
 		} else {
 			facade = null;
 		}
@@ -151,14 +132,14 @@ public class DefaultCacheManager implements CacheManager {
 					} finally {
 						usersLock.writeLock().unlock();
 					}
-				} else if (facade instanceof GroupFacade) {
-					GroupFacade group = (GroupFacade) facade;
-					groupsLock.writeLock().lock();
+				} else if (facade instanceof TeamFacade) {
+					TeamFacade team = (TeamFacade) facade;
+					teamsLock.writeLock().lock();
 					try {
-						groups.put(group.getId(), group);
-						groupIdsByName.inverse().put(group.getId(), group.getName());
+						teams.put(team.getId(), team);
+						teamIds.inverse().put(team.getId(), new Pair<>(team.getProjectId(), team.getName()));
 					} finally {
-						groupsLock.writeLock().unlock();
+						teamsLock.writeLock().unlock();
 					}
 				} else if (facade instanceof MembershipFacade) {
 					MembershipFacade membership = (MembershipFacade) facade;
@@ -168,23 +149,7 @@ public class DefaultCacheManager implements CacheManager {
 					} finally {
 						membershipsLock.writeLock().unlock();
 					}
-				} else if (facade instanceof UserAuthorizationFacade) {
-					UserAuthorizationFacade userAuthorization = (UserAuthorizationFacade) facade;
-					userAuthorizationsLock.writeLock().lock();
-					try {
-						userAuthorizations.put(userAuthorization.getId(), userAuthorization);
-					} finally {
-						userAuthorizationsLock.writeLock().unlock();
-					}
-				} else if (facade instanceof GroupAuthorizationFacade) {
-					GroupAuthorizationFacade groupAuthorization = (GroupAuthorizationFacade) facade;
-					groupAuthorizationsLock.writeLock().lock();
-					try {
-						groupAuthorizations.put(groupAuthorization.getId(), groupAuthorization);
-					} finally {
-						groupAuthorizationsLock.writeLock().unlock();
-					}
-				}
+				} 
 			}
 			
 		});
@@ -209,23 +174,25 @@ public class DefaultCacheManager implements CacheManager {
 					} finally {
 						projectsLock.writeLock().unlock();
 					}
-					userAuthorizationsLock.writeLock().lock();
+					teamsLock.writeLock().lock();
 					try {
-						for (Iterator<Map.Entry<Long, UserAuthorizationFacade>> it = userAuthorizations.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getProjectId().equals(id))
+						for (Iterator<Map.Entry<Long, TeamFacade>> it = teams.entrySet().iterator(); it.hasNext();) {
+							TeamFacade team = it.next().getValue();
+							if (team.getProjectId().equals(id))
 								it.remove();
+							teamIds.inverse().remove(team.getId());
+							membershipsLock.writeLock().lock();
+							try {
+								for (Iterator<Map.Entry<Long, MembershipFacade>> it2 = memberships.entrySet().iterator(); it2.hasNext();) {
+									if (it2.next().getValue().getTeamId().equals(team.getId()))
+										it2.remove();
+								}
+							} finally {
+								membershipsLock.writeLock().unlock();
+							}
 						}
 					} finally {
-						userAuthorizationsLock.writeLock().unlock();
-					}
-					groupAuthorizationsLock.writeLock().lock();
-					try {
-						for (Iterator<Map.Entry<Long, GroupAuthorizationFacade>> it = groupAuthorizations.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getProjectId().equals(id))
-								it.remove();
-						}
-					} finally {
-						groupAuthorizationsLock.writeLock().unlock();
+						teamsLock.writeLock().unlock();
 					}
 				} else if (User.class.isAssignableFrom(clazz)) {
 					usersLock.writeLock().lock();
@@ -236,15 +203,6 @@ public class DefaultCacheManager implements CacheManager {
 					} finally {
 						usersLock.writeLock().unlock();
 					}
-					userAuthorizationsLock.writeLock().lock();
-					try {
-						for (Iterator<Map.Entry<Long, UserAuthorizationFacade>> it = userAuthorizations.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getUserId().equals(id))
-								it.remove();
-						}
-					} finally {
-						userAuthorizationsLock.writeLock().unlock();
-					}
 					membershipsLock.writeLock().lock();
 					try {
 						for (Iterator<Map.Entry<Long, MembershipFacade>> it = memberships.entrySet().iterator(); it.hasNext();) {
@@ -254,27 +212,18 @@ public class DefaultCacheManager implements CacheManager {
 					} finally {
 						membershipsLock.writeLock().unlock();
 					}
-				} else if (Group.class.isAssignableFrom(clazz)) {
-					groupsLock.writeLock().lock();
+				} else if (Team.class.isAssignableFrom(clazz)) {
+					teamsLock.writeLock().lock();
 					try {
-						groups.remove(id);
-						groupIdsByName.inverse().remove(id);
+						teams.remove(id);
+						teamIds.inverse().remove(id);
 					} finally {
-						groupsLock.writeLock().unlock();
-					}
-					groupAuthorizationsLock.writeLock().lock();
-					try {
-						for (Iterator<Map.Entry<Long, GroupAuthorizationFacade>> it = groupAuthorizations.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getGroupId().equals(id))
-								it.remove();
-						}
-					} finally {
-						groupAuthorizationsLock.writeLock().unlock();
+						teamsLock.writeLock().unlock();
 					}
 					membershipsLock.writeLock().lock();
 					try {
 						for (Iterator<Map.Entry<Long, MembershipFacade>> it = memberships.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getGroupId().equals(id))
+							if (it.next().getValue().getTeamId().equals(id))
 								it.remove();
 						}
 					} finally {
@@ -287,21 +236,7 @@ public class DefaultCacheManager implements CacheManager {
 					} finally {
 						membershipsLock.writeLock().unlock();
 					}
-				} else if (UserAuthorization.class.isAssignableFrom(clazz)) {
-					userAuthorizationsLock.writeLock().lock();
-					try {
-						userAuthorizations.remove(id);
-					} finally {
-						userAuthorizationsLock.writeLock().unlock();
-					}
-				} else if (GroupAuthorization.class.isAssignableFrom(clazz)) {
-					groupAuthorizationsLock.writeLock().lock();
-					try {
-						groupAuthorizations.remove(id);
-					} finally {
-						groupAuthorizationsLock.writeLock().unlock();
-					}
-				}					
+				}
 			}
 			
 		});
@@ -328,12 +263,12 @@ public class DefaultCacheManager implements CacheManager {
 	}
 
 	@Override
-	public Map<Long, GroupFacade> getGroups() {
-		groupsLock.readLock().lock();
+	public Map<Long, TeamFacade> getTeams() {
+		teamsLock.readLock().lock();
 		try {
-			return new HashMap<>(groups);
+			return new HashMap<>(teams);
 		} finally {
-			groupsLock.readLock().unlock();
+			teamsLock.readLock().unlock();
 		}
 	}
 
@@ -344,26 +279,6 @@ public class DefaultCacheManager implements CacheManager {
 			return new HashMap<>(memberships);
 		} finally {
 			membershipsLock.readLock().unlock();
-		}
-	}
-
-	@Override
-	public Map<Long, UserAuthorizationFacade> getUserAuthorizations() {
-		userAuthorizationsLock.readLock().lock();
-		try {
-			return new HashMap<>(userAuthorizations);
-		} finally {
-			userAuthorizationsLock.readLock().unlock();
-		}
-	}
-
-	@Override
-	public Map<Long, GroupAuthorizationFacade> getGroupAuthorizations() {
-		groupAuthorizationsLock.readLock().lock();
-		try {
-			return new HashMap<>(groupAuthorizations);
-		} finally {
-			groupAuthorizationsLock.readLock().unlock();
 		}
 	}
 
@@ -428,22 +343,22 @@ public class DefaultCacheManager implements CacheManager {
 	}
 	
 	@Override
-	public Long getGroupIdByName(String name) {
-		groupsLock.readLock().lock();
+	public Long getTeamId(Long projectId, String name) {
+		teamsLock.readLock().lock();
 		try {
-			return groupIdsByName.get(name);
+			return teamIds.get(new Pair<>(projectId, name));
 		} finally {
-			groupsLock.readLock().unlock();
+			teamsLock.readLock().unlock();
 		}
 	}
 	
 	@Override
-	public GroupFacade getGroup(Long id) {
-		groupsLock.readLock().lock();
+	public TeamFacade getTeam(Long id) {
+		teamsLock.readLock().lock();
 		try {
-			return groups.get(id);
+			return teams.get(id);
 		} finally {
-			groupsLock.readLock().unlock();
+			teamsLock.readLock().unlock();
 		}
 	}
 
@@ -454,26 +369,6 @@ public class DefaultCacheManager implements CacheManager {
 			return memberships.get(id);
 		} finally {
 			membershipsLock.readLock().unlock();
-		}
-	}
-
-	@Override
-	public UserAuthorizationFacade getUserAuthorization(Long id) {
-		userAuthorizationsLock.readLock().lock();
-		try {
-			return userAuthorizations.get(id);
-		} finally {
-			userAuthorizationsLock.readLock().unlock();
-		}
-	}
-
-	@Override
-	public GroupAuthorizationFacade getGroupAuthorization(Long id) {
-		groupAuthorizationsLock.readLock().lock();
-		try {
-			return groupAuthorizations.get(id);
-		} finally {
-			groupAuthorizationsLock.readLock().unlock();
 		}
 	}
 

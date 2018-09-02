@@ -40,7 +40,6 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.group.GroupListPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
@@ -75,7 +74,6 @@ public abstract class LayoutPage extends BasePage {
 				Fragment fragment = new Fragment(id, "navFrag", LayoutPage.this);
 				fragment.add(new ViewStateAwarePageLink<Void>("projects", ProjectListPage.class));
 				fragment.add(new ViewStateAwarePageLink<Void>("users", UserListPage.class).setVisible(SecurityUtils.isAdministrator()));
-				fragment.add(new ViewStateAwarePageLink<Void>("groups", GroupListPage.class).setVisible(SecurityUtils.isAdministrator()));
 				
 				fragment.add(new ListView<LayoutMenuContribution>("extensions", new LoadableDetachableModel<List<LayoutMenuContribution>>() {
 
@@ -190,7 +188,7 @@ public abstract class LayoutPage extends BasePage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAccessPublic();
+		return getLoginUser() != null || OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableAnonymousAccess();
 	}
 
 	@Override

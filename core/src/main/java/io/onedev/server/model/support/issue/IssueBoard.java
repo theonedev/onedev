@@ -22,7 +22,7 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
+import io.onedev.server.util.inputspec.teamchoiceinput.TeamChoiceInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -108,7 +108,7 @@ public class IssueBoard implements Serializable {
 		Project project = OneContext.get().getProject();
 		choices.add(IssueConstants.FIELD_STATE);
 		for (InputSpec fieldSpec: project.getIssueWorkflow().getFieldSpecs()) {
-			if (!fieldSpec.isAllowMultiple() && (fieldSpec instanceof ChoiceInput || fieldSpec instanceof UserChoiceInput || fieldSpec instanceof GroupChoiceInput))
+			if (!fieldSpec.isAllowMultiple() && (fieldSpec instanceof ChoiceInput || fieldSpec instanceof UserChoiceInput || fieldSpec instanceof TeamChoiceInput))
 				choices.add(fieldSpec.getName());
 		}
 		return choices;

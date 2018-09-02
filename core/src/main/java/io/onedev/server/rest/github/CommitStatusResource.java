@@ -69,7 +69,7 @@ public class CommitStatusResource {
     		Map<String, String> commitStatus, @Context UriInfo uriInfo) {
 
 		Project project = getProject(projectName);
-    	if (!SecurityUtils.canWrite(project))
+    	if (!SecurityUtils.canWriteCode(project.getFacade()))
     		throw new UnauthorizedException();
     	
     	String context = commitStatus.get("context");

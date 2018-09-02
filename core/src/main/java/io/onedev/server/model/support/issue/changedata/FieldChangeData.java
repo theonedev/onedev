@@ -9,10 +9,11 @@ import java.util.Map;
 import org.apache.wicket.Component;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.TeamManager;
 import io.onedev.server.manager.UserManager;
-import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueAction;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CommentSupport;
 import io.onedev.server.model.support.DiffSupport;
@@ -31,7 +32,7 @@ public class FieldChangeData implements ActionData {
 	
 	protected final Map<String, String> newUserNames = new HashMap<>();
 	
-	protected final Map<String, String> newGroupNames = new HashMap<>();
+	protected final Map<String, String> newTeamNames = new HashMap<>();
 	
 	public FieldChangeData(Map<String, IssueField> oldFields, Map<String, IssueField> newFields) {
 		oldFields = copyNonEmptyFields(oldFields);
@@ -72,8 +73,8 @@ public class FieldChangeData implements ActionData {
 	private void extractUsersAndGroups(IssueField field) {
 		if (field.getType().equals(InputSpec.USER) && !field.getValues().isEmpty()) 
 			newUserNames.put(field.getName(), field.getValues().iterator().next());
-		if (field.getType().equals(InputSpec.GROUP) && !field.getValues().isEmpty()) 
-			newGroupNames.put(field.getName(), field.getValues().iterator().next());
+		if (field.getType().equals(InputSpec.TEAM) && !field.getValues().isEmpty()) 
+			newTeamNames.put(field.getName(), field.getValues().iterator().next());
 	}
 
 	private String describe(IssueField field) {
@@ -132,7 +133,7 @@ public class FieldChangeData implements ActionData {
 	}
 
 	@Override
-	public Map<String, User> getNewUsers() {
+	public Map<String, User> getNewUsers(Project project) {
 		Map<String, User> newUsers = new HashMap<>();
 		for (Map.Entry<String, String> entry: newUserNames.entrySet()) {
 			User user = OneDev.getInstance(UserManager.class).findByName(entry.getValue());
@@ -143,14 +144,14 @@ public class FieldChangeData implements ActionData {
 	}
 
 	@Override
-	public Map<String, Group> getNewGroups() {
-		Map<String, Group> newGroups = new HashMap<>();
-		for (Map.Entry<String, String> entry: newGroupNames.entrySet()) {
-			Group group = OneDev.getInstance(GroupManager.class).find(entry.getValue());
-			if (group != null)
-				newGroups.put(entry.getKey(), group);
+	public Map<String, Team> getNewTeams(Project project) {
+		Map<String, Team> newTeams = new HashMap<>();
+		for (Map.Entry<String, String> entry: newTeamNames.entrySet()) {
+			Team team = OneDev.getInstance(TeamManager.class).find(project, entry.getValue());
+			if (team != null)
+				newTeams.put(entry.getKey(), team);
 		}
-		return newGroups;
+		return newTeams;
 	}
 
 }

@@ -26,6 +26,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.git.Contribution;
 import io.onedev.server.git.Contributor;
 import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Constants;
 import io.onedev.server.util.Day;
 import io.onedev.server.web.component.avatar.AvatarLink;
@@ -161,6 +162,11 @@ public class ProjectContribsPage extends ProjectStatsPage {
 			}
 			
 		});
+	}
+	
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
 	}
 	
 	@Override

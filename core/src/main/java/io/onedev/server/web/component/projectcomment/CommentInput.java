@@ -15,8 +15,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.security.ProjectPrivilege;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.AtWhoReferenceSupport;
@@ -39,7 +39,7 @@ public abstract class CommentInput extends MarkdownEditor {
 			@Override
 			public List<UserFacade> findUsers(String query, int count) {
 				List<UserFacade> users = new ArrayList<>(
-						SecurityUtils.getAuthorizedUsers(getProject().getFacade(), ProjectPrivilege.READ));
+						SecurityUtils.getAuthorizedUsers(getProject().getFacade(), ProjectPrivilege.ISSUE_READ));
 				users.sort(Comparator.comparing(UserFacade::getDisplayName));
 				
 				users = MatchScoreUtils.filterAndSort(users, new MatchScoreProvider<UserFacade>() {

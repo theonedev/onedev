@@ -50,6 +50,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.search.code.CommitIndexed;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.avatar.ContributorAvatars;
@@ -564,4 +565,9 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		return observables;
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
+	}
+	
 }

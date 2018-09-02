@@ -22,7 +22,7 @@ public class UserAdministration implements Permission {
 			UserAdministration userAdmin = (UserAdministration) p;
 			return user.equals(userAdmin.getUser());
 		} else {
-			return p instanceof PublicPermission;
+			return false;
 		}
 	}
 	

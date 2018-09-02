@@ -802,6 +802,11 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 	}
 
 	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
+	}
+	
+	@Override
 	public String getCommentUrl(CodeComment comment) {
 		RevisionComparePage.State state = new RevisionComparePage.State();
 		mark = comment.getMarkPos();

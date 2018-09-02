@@ -41,24 +41,26 @@ import io.onedev.server.git.command.ListChangedFilesCommand;
 import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.manager.MembershipManager;
 import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.UserAuthorizationManager;
+import io.onedev.server.manager.TeamManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Membership;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
-import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.security.ProjectPrivilege;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.facade.GroupAuthorizationFacade;
+import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserAuthorizationFacade;
+import io.onedev.server.util.facade.TeamFacade;
+import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.StringUtils;
 
@@ -71,7 +73,9 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	
     private final CommitInfoManager commitInfoManager;
     
-    private final UserAuthorizationManager userAuthorizationManager;
+    private final TeamManager teamManager;
+    
+    private final MembershipManager membershipManager;
     
     private final BuildManager buildManager;
     
@@ -83,12 +87,14 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	
     @Inject
     public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager, ListenerRegistry listenerRegistry, 
-    		UserAuthorizationManager userAuthorizationManager, BuildManager buildManager, CacheManager cacheManager) {
+    		TeamManager teamManager, MembershipManager membershipManager, BuildManager buildManager, 
+    		CacheManager cacheManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
         this.listenerRegistry = listenerRegistry;
-        this.userAuthorizationManager = userAuthorizationManager;
+        this.teamManager = teamManager;
+        this.membershipManager = membershipManager;
         this.buildManager = buildManager;
         this.cacheManager = cacheManager;
         
@@ -135,11 +141,15 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     	dao.persist(project);
     	
     	if (isNew) {
-    		UserAuthorization authorization = new UserAuthorization();
-    		authorization.setPrivilege(ProjectPrivilege.ADMIN);
-    		authorization.setProject(project);
-    		authorization.setUser(SecurityUtils.getUser());
-    		userAuthorizationManager.save(authorization);
+    		Team team = new Team();
+    		team.setProject(project);
+    		team.setName("Administrators");
+    		team.setPrivilege(ProjectPrivilege.PROJECT_ADMINISTRATION);
+    		teamManager.save(team);
+    		Membership membership = new Membership();
+    		membership.setTeam(team);
+    		membership.setUser(SecurityUtils.getUser());
+    		membershipManager.save(membership);
     	}
     	
     	if (oldName != null && !project.getName().equals(oldName))
@@ -285,24 +295,17 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		if (SecurityUtils.isAdministrator()) {
 			projects.addAll(cacheManager.getProjects().values());
 		} else {
-			for (ProjectFacade project: cacheManager.getProjects().values()) {
-				if (project.isPublicRead())
-					projects.add(project);
-			}
 			if (user != null) {
-				Collection<Long> groupIds = new HashSet<>();
 				for (MembershipFacade membership: cacheManager.getMemberships().values()) {
-					if (membership.getUserId().equals(user.getId())) 
-						groupIds.add(membership.getGroupId());
+					if (membership.getUserId().equals(user.getId())) {
+						TeamFacade team = cacheManager.getTeam(membership.getTeamId());
+						projects.add(cacheManager.getProject(team.getProjectId()));
+					}
 				}
-				for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
-					if (groupIds.contains(authorization.getGroupId()))
-						projects.add(cacheManager.getProject(authorization.getProjectId()));
-				}
-				for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
-					if (authorization.getUserId().equals(user.getId()))
-						projects.add(cacheManager.getProject(authorization.getProjectId()));
-				}
+			}
+			for (ProjectFacade project: cacheManager.getProjects().values()) {
+				if (project.getDefaultPrivilege() != null)
+					projects.add(project);
 			}
 		}
 		
@@ -324,16 +327,14 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	public boolean isModificationNeedsQualityCheck(User user, Project project, String branch, @Nullable String file) {
 		BranchProtection branchProtection = project.getBranchProtection(branch, user);
 		if (branchProtection != null) {
-			if (branchProtection.getReviewRequirement() != null 
-					&& !branchProtection.getReviewRequirement().matches(user)) {
+			if (!ReviewRequirement.parse(project, branchProtection.getReviewRequirement()).matches(user)) 
 				return true;
-			}
 			if (!branchProtection.getConfigurations().isEmpty())
 				return true;
 			
 			if (file != null) {
 				FileProtection fileProtection = branchProtection.getFileProtection(file);
-				if (fileProtection != null && !fileProtection.getReviewRequirement().matches(user))
+				if (fileProtection != null && !ReviewRequirement.parse(project, fileProtection.getReviewRequirement()).matches(user))
 					return true;
 			}
 		}			
@@ -345,10 +346,8 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
 		BranchProtection branchProtection = project.getBranchProtection(branch, user);
 		if (branchProtection != null) {
-			if (branchProtection.getReviewRequirement() != null 
-					&& !branchProtection.getReviewRequirement().matches(user)) {
+			if (!ReviewRequirement.parse(project, branchProtection.getReviewRequirement()).matches(user)) 
 				return true;
-			}
 
 			List<Build> builds = buildManager.findAll(project, newObjectId.name());
 			if (!builds.stream().map(it->it.getConfiguration().getName()).collect(Collectors.toSet())
@@ -358,7 +357,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			
 			for (String changedFile: getChangedFiles(project, oldObjectId, newObjectId, gitEnvs)) {
 				FileProtection fileProtection = branchProtection.getFileProtection(changedFile);
-				if (fileProtection != null && !fileProtection.getReviewRequirement().matches(user))
+				if (fileProtection != null && !ReviewRequirement.parse(project, fileProtection.getReviewRequirement()).matches(user))
 					return true;
 			}
 		}

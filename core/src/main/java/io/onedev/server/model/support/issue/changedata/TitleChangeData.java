@@ -6,8 +6,9 @@ import java.util.Map;
 
 import org.apache.wicket.Component;
 
-import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueAction;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CommentSupport;
 import io.onedev.server.model.support.DiffSupport;
@@ -72,12 +73,12 @@ public class TitleChangeData implements ActionData {
 	}
 	
 	@Override
-	public Map<String, User> getNewUsers() {
+	public Map<String, User> getNewUsers(Project project) {
 		return new HashMap<>();
 	}
 
 	@Override
-	public Map<String, Group> getNewGroups() {
+	public Map<String, Team> getNewTeams(Project project) {
 		return new HashMap<>();
 	}
 	

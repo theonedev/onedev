@@ -95,6 +95,7 @@ import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -129,8 +130,8 @@ public class Project extends AbstractEntity {
 	@Column(length=65535)
 	private String description;
 	
-	private boolean publicRead;
-
+	private ProjectPrivilege defaultPrivilege;
+	
 	@Lob
 	@Column(length=65535, name="COMMIT_MSG_TRANSFORM")
 	private CommitMessageTransformSetting commitMessageTransformSetting;
@@ -168,15 +169,12 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Issue> issues = new ArrayList<>();
 	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<Team> teams = new ArrayList<>();
+	
     @OneToMany(mappedBy="forkedFrom")
 	private Collection<Project> forks = new ArrayList<>();
     
-	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<GroupAuthorization> groupAuthorizations = new ArrayList<>();
-	
-	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<UserAuthorization> userAuthorizations = new ArrayList<>();
-	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<CodeComment> codeComments = new ArrayList<>();
 	
@@ -266,13 +264,14 @@ public class Project extends AbstractEntity {
 		this.description = description;
 	}
 
-	@Editable(order=300, name="Public", description="Whether or not code of this project can be accessed by everyone")
-    public boolean isPublicRead() {
-		return publicRead;
+	@Editable(order=300, description="Optionally specify default privilege for users not "
+			+ "joining any teams of the project")
+	public ProjectPrivilege getDefaultPrivilege() {
+		return defaultPrivilege;
 	}
 
-	public void setPublicRead(boolean publicRead) {
-		this.publicRead = publicRead;
+	public void setDefaultPrivilege(ProjectPrivilege defaultPrivilege) {
+		this.defaultPrivilege = defaultPrivilege;
 	}
 
 	@Nullable
@@ -331,6 +330,14 @@ public class Project extends AbstractEntity {
 
 	public void setOutgoingRequests(Collection<PullRequest> outgoingRequests) {
 		this.outgoingRequests = outgoingRequests;
+	}
+
+	public Collection<Team> getTeams() {
+		return teams;
+	}
+
+	public void setTeams(Collection<Team> teams) {
+		this.teams = teams;
 	}
 
 	public Project getForkedFrom() {
@@ -833,22 +840,6 @@ public class Project extends AbstractEntity {
     	});
     }
     
-	public Collection<GroupAuthorization> getGroupAuthorizations() {
-		return groupAuthorizations;
-	}
-
-	public void setGroupAuthorizations(Collection<GroupAuthorization> groupAuthorizations) {
-		this.groupAuthorizations = groupAuthorizations;
-	}
-
-	public Collection<UserAuthorization> getUserAuthorizations() {
-		return userAuthorizations;
-	}
-
-	public void setAuthorizedUsers(Collection<UserAuthorization> userAuthorizations) {
-		this.userAuthorizations = userAuthorizations;
-	}
-
 	public Collection<CodeComment> getCodeComments() {
 		return codeComments;
 	}

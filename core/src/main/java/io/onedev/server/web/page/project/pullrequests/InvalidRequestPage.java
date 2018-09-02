@@ -58,7 +58,7 @@ public class InvalidRequestPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canModify(requestModel.getObject()));
+				setVisible(SecurityUtils.canAdministrate(requestModel.getObject().getTargetProject().getFacade()));
 			}
 			
 		}.add(new ConfirmOnClick("Do you really want to delete pull request #" + requestModel.getObject().getNumber() + "?")));
@@ -76,6 +76,11 @@ public class InvalidRequestPage extends ProjectPage {
 		super.onDetach();
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
+	}
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

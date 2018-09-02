@@ -470,7 +470,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 	
 	private WebMarkupContainer newManageContainer() {
 		WebMarkupContainer container = new WebMarkupContainer("manage");
-		container.setVisible(SecurityUtils.canModify(getPullRequest()));
+		container.setVisible(SecurityUtils.canAdministrate(getPullRequest().getTargetProject().getFacade()));
 		container.add(new Link<Void>("synchronize") {
 
 			@Override
@@ -1105,6 +1105,11 @@ public abstract class RequestDetailPage extends ProjectPage {
 		super.renderHead(response);
 		
 		response.render(JavaScriptHeaderItem.forReference(new RequestDetailResourceReference()));
+	}
+	
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
 	}
 	
 	private class RequestTab extends PageTab {

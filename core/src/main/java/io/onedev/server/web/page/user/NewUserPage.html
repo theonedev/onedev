@@ -2,6 +2,18 @@
 	<div class="new-user">
 		<form wicket:id="form" class="leave-confirm">
 			<div wicket:id="editor"></div>
+			<div class="form-group">
+				<label>
+			    	<input wicket:id="administrator" type="checkbox"/> Is Administrator
+			    </label>
+				<div class="help-block">Check this to if the user is allowed to fork/create projects</div>
+			</div>			
+			<div class="form-group">
+				<label>
+			    	<input wicket:id="canCreateProjects" class="can-create-projects" type="checkbox"/> Can Create Projects
+			    </label>
+			    <div class="help-block">Check this to if the user is allowed to fork/create projects</div>
+			</div>			
 			<div class="actions clearfix">
 				<input class="btn btn-primary dirty-aware pull-left" value="Create" type="submit"></input>
 				<div class="checkbox pull-left">

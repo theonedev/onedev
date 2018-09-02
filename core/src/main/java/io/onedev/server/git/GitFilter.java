@@ -138,7 +138,7 @@ public class GitFilter implements Filter {
 		File gitDir = storageManager.getProjectGitDir(project.getId());
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
-			if (!SecurityUtils.canRead(project))
+			if (!SecurityUtils.canReadCode(project.getFacade()))
 				throw new UnauthorizedException("You do not have permission to pull from this project.");
 			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 				
@@ -156,7 +156,7 @@ public class GitFilter implements Filter {
 				
 			}).get();
 		} else {
-			if (!SecurityUtils.canWrite(project)) {
+			if (!SecurityUtils.canWriteCode(project.getFacade())) {
 				throw new UnauthorizedException("You do not have permission to push to this project.");
 			}
 			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
@@ -198,12 +198,12 @@ public class GitFilter implements Filter {
 		File gitDir = storageManager.getProjectGitDir(project.getId());
 
 		if (service.contains("upload")) {
-			if (!SecurityUtils.canRead(project)) 
+			if (!SecurityUtils.canReadCode(project.getFacade())) 
 				throw new UnauthorizedException("You do not have permission to pull from this project.");
 			writeInitial(response, service);
 			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
 		} else {
-			if (!SecurityUtils.canWrite(project)) {
+			if (!SecurityUtils.canWriteCode(project.getFacade())) {
 				throw new UnauthorizedException("You do not have permission to push to this project.");
 			}
 			writeInitial(response, service);

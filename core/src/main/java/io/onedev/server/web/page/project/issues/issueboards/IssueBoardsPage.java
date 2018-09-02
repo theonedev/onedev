@@ -241,7 +241,7 @@ public class IssueBoardsPage extends IssuesPage {
 			Fragment fragment = new Fragment("content", "hasBoardsFrag", this);
 
 			Form<?> form = new Form<Void>("query");
-			if (!SecurityUtils.canManage(getProject()))
+			if (!SecurityUtils.canAdministrate(getProject().getFacade()))
 				form.add(AttributeAppender.append("style", "margin-right: 0;"));
 			
 			form.add(new DropdownLink("boardMenu") {
@@ -260,7 +260,7 @@ public class IssueBoardsPage extends IssuesPage {
 
 						@Override
 						protected void populateItem(ListItem<IssueBoard> item) {
-							item.add(new WebMarkupContainer("dragHandle").setVisible(SecurityUtils.canManage(getProject())));
+							item.add(new WebMarkupContainer("dragHandle").setVisible(SecurityUtils.canAdministrate(getProject().getFacade())));
 							
 							PageParameters params = IssueBoardsPage.paramsOf(
 									getProject(), item.getModelObject(), getMilestone(), 
@@ -275,7 +275,7 @@ public class IssueBoardsPage extends IssuesPage {
 								@Override
 								protected void onConfigure() {
 									super.onConfigure();
-									setVisible(SecurityUtils.canManage(getProject()));
+									setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
 								}
 								
 							});
@@ -298,7 +298,7 @@ public class IssueBoardsPage extends IssuesPage {
 								@Override
 								protected void onConfigure() {
 									super.onConfigure();
-									setVisible(SecurityUtils.canManage(getProject()));
+									setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
 								}
 								
 							}.add(new ConfirmOnClick("Do you really want to delete board '" + item.getModelObject().getName() + "'?") ));
@@ -471,7 +471,7 @@ public class IssueBoardsPage extends IssuesPage {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(SecurityUtils.canManage(getProject()));
+					setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
 				}
 				
 			});
@@ -536,7 +536,7 @@ public class IssueBoardsPage extends IssuesPage {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(SecurityUtils.canManage(getProject()));
+					setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
 				}
 				
 			});

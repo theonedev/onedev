@@ -7,8 +7,9 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
-import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueAction;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.CommentSupport;
 import io.onedev.server.model.support.DiffSupport;
@@ -25,8 +26,8 @@ public interface ActionData extends Serializable {
 	@Nullable
 	CommentSupport getCommentSupport();
 	
-	Map<String, User> getNewUsers();
+	Map<String, User> getNewUsers(Project project);
 	
-	Map<String, Group> getNewGroups();
+	Map<String, Team> getNewTeams(Project project);
 	
 }

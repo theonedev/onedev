@@ -721,6 +721,10 @@ public class ProjectCommitsPage extends ProjectPage {
 		List<RevCommit> current;
 	}
 	
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
+	}
 	
 	@Nullable
 	private QueryContext getQueryContext() {

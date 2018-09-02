@@ -35,14 +35,14 @@ public class BuildResource {
     @Path("/{buildId}")
     public Build get(@PathParam("buildId") Long buildId) {
     	Build build = buildManager.load(buildId);
-    	if (!SecurityUtils.canRead(build.getConfiguration().getProject()))
+    	if (!SecurityUtils.canReadCode(build.getConfiguration().getProject().getFacade()))
     		throw new UnauthorizedException();
     	return build;
     }
     
     @POST
     public void save(@NotNull(message="may not be empty") @Valid Build build) {
-    	if (!SecurityUtils.canWrite(build.getConfiguration().getProject()))
+    	if (!SecurityUtils.canWriteCode(build.getConfiguration().getProject().getFacade()))
     		throw new UnauthorizedException();
 		
     	buildManager.save(build);

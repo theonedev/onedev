@@ -124,7 +124,7 @@ abstract class BacklogColumnPanel extends Panel {
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				Issue issue = OneDev.getInstance(IssueManager.class).load(params.getParameterValue("issue").toLong());
-				if (!SecurityUtils.canModify(issue)) 
+				if (!SecurityUtils.canAdministrate(issue.getProject().getFacade())) 
 					throw new UnauthorizedException("Permission denied");
 				OneDev.getInstance(IssueActionManager.class).changeMilestone(issue, null);
 				if (getQuery().matches(issue, SecurityUtils.getUser())) {
@@ -169,7 +169,7 @@ abstract class BacklogColumnPanel extends Panel {
 				if (getQuery() != null && event.getPayload() instanceof IssueDragging) {
 					IssueDragging issueDragging = (IssueDragging) event.getPayload();
 					Issue issue = issueDragging.getIssue();
-					if (SecurityUtils.canModify(issue)) {
+					if (SecurityUtils.canAdministrate(issue.getProject().getFacade())) {
 						issue = SerializationUtils.clone(issue);
 						issue.setMilestone(null);
 					}

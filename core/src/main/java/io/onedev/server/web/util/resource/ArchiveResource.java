@@ -61,7 +61,7 @@ public class ArchiveResource extends AbstractResource {
 			throw new IllegalArgumentException("format parameter should be specified either zip or tar.gz");
 		}
 		
-		if (!SecurityUtils.canRead(project)) 
+		if (!SecurityUtils.canReadCode(project.getFacade())) 
 			throw new UnauthorizedException();
 
 		ResourceResponse response = new ResourceResponse();

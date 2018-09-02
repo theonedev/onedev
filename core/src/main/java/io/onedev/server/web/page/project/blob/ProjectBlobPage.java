@@ -414,7 +414,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 				Project project = getProject();
 				if ((state.mode == Mode.VIEW || state.mode == Mode.BLAME) 
 						&& isOnBranch() && state.blobIdent.isTree() 
-						&& SecurityUtils.canWrite(project)) {
+						&& SecurityUtils.canWriteCode(project.getFacade())) {
 					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 					setEnabled(!projectManager.isModificationNeedsQualityCheck(
 							getLoginUser(), project, state.blobIdent.revision, null));
@@ -1186,6 +1186,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 				prevCommitId = e.getOldCommitId();
 			}
 		}
+	}
+
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
 	}
 
 }

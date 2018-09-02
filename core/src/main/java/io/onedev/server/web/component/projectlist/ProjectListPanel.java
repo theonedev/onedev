@@ -36,8 +36,8 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
+import io.onedev.server.web.component.link.ProjectLink;
 import io.onedev.server.web.component.link.UserLink;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 
@@ -68,8 +68,7 @@ public class ProjectListPanel extends Panel {
 					IModel<ProjectFacade> rowModel) {
 				Fragment fragment = new Fragment(componentId, "projectFrag", ProjectListPanel.this);
 				Project project = OneDev.getInstance(ProjectManager.class).load(rowModel.getObject().getId());
-				Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, 
-						ProjectBlobPage.paramsOf(project)); 
+				Link<Void> link = new ProjectLink("link", project); 
 				link.add(new Label("name", project.getName()));
 				fragment.add(link);
 				cellItem.add(fragment);

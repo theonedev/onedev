@@ -6,7 +6,7 @@ public class CreateProjects implements Permission {
 
 	@Override
 	public boolean implies(Permission p) {
-		return p instanceof CreateProjects || p instanceof PublicPermission;
+		return p instanceof CreateProjects;
 	}
 
 }

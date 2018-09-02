@@ -42,6 +42,7 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class UserListPage extends LayoutPage {
@@ -119,6 +120,27 @@ public class UserListPage extends LayoutPage {
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
 					IModel<User> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getEmail()));
+			}
+		});
+		
+		columns.add(new AbstractColumn<User, Void>(Model.of("Administrator")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
+					IModel<User> rowModel) {
+				User user = rowModel.getObject();
+				cellItem.add(new Label(componentId, StringUtils.describe(user.isRoot() || user.isAdministrator())));
+			}
+		});
+		
+		columns.add(new AbstractColumn<User, Void>(Model.of("Can Create Projects")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId,
+					IModel<User> rowModel) {
+				User user = rowModel.getObject();
+				cellItem.add(new Label(componentId, 
+						StringUtils.describe(user.isRoot() || user.isAdministrator() || user.isCanCreateProjects())));
 			}
 		});
 		

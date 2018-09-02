@@ -129,7 +129,7 @@ public abstract class CodeCommentPanel extends Panel {
 		}, null));
 
 		WebMarkupContainer foot = new WebMarkupContainer("foot");
-		foot.setVisible(SecurityUtils.canModify(getComment()));
+		foot.setVisible(SecurityUtils.canModifyOrDelete(getComment()));
 		foot.add(new AjaxLink<Void>("edit") {
 
 			@Override
@@ -273,7 +273,7 @@ public abstract class CodeCommentPanel extends Panel {
 		}, null));			
 		
 		WebMarkupContainer foot = new WebMarkupContainer("foot");
-		foot.setVisible(SecurityUtils.canModify(reply));
+		foot.setVisible(SecurityUtils.canModifyOrDelete(reply));
 		
 		foot.add(new AjaxLink<Void>("edit") {
 

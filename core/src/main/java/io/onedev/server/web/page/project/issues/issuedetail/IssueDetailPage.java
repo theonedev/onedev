@@ -356,15 +356,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		else
 			query = null;
 		
-		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject(), query)) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canRead(getProject()));
-			}
-			
-		});
+		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject(), query)));
 		
 		newEmptyActionOptions(null);
 		
@@ -479,7 +471,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			
 		};
 		deleteLink.add(new ConfirmOnClick("Do you really want to delete this issue?"));
-		deleteLink.setVisible(SecurityUtils.canModify(getIssue()));
+		deleteLink.setVisible(SecurityUtils.canAdministrate(getIssue().getProject().getFacade()));
 		add(deleteLink);		
 	}
 	
@@ -589,7 +581,10 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canModify(getIssue()));
+				User user = getLoginUser();
+				String initialState = getProject().getIssueWorkflow().getInitialStateSpec().getName();
+				setVisible(SecurityUtils.canWriteCode(getIssue().getProject().getFacade())
+						|| user != null && user.equals(getIssue().getSubmitter()) && getIssue().getState().equals(initialState));
 			}
 			
 		});		
@@ -681,7 +676,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canModify(getIssue()));
+				setVisible(SecurityUtils.canWriteCode(getIssue().getProject().getFacade()));
 			}
 			
 		});

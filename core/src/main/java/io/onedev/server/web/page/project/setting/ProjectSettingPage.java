@@ -13,7 +13,6 @@ import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
 import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
 import io.onedev.server.web.page.project.setting.configuration.ConfigurationEditPage;
@@ -24,6 +23,9 @@ import io.onedev.server.web.page.project.setting.issueworkflow.fields.IssueField
 import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
 import io.onedev.server.web.page.project.setting.issueworkflow.statetransitions.StateTransitionsPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
+import io.onedev.server.web.page.project.setting.team.NewTeamPage;
+import io.onedev.server.web.page.project.setting.team.TeamEditPage;
+import io.onedev.server.web.page.project.setting.team.TeamListPage;
 
 @SuppressWarnings("serial")
 public abstract class ProjectSettingPage extends ProjectPage {
@@ -34,7 +36,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canManage(getProject());
+		return SecurityUtils.canAdministrate(getProject().getFacade());
 	}
 	
 	@Override
@@ -47,7 +49,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 			protected List<? extends Tab> newTabs() {
 				List<PageTab> tabs = new ArrayList<>();
 				tabs.add(new ProjectSettingTab("General Setting", "fa fa-fw fa-sliders", GeneralSettingPage.class));
-				tabs.add(new ProjectSettingTab("Authorizations", "fa fa-fw fa-user", ProjectAuthorizationsPage.class));
+				tabs.add(new ProjectSettingTab("Teams", "fa fa-fw fa-group", TeamListPage.class, NewTeamPage.class, TeamEditPage.class));
 				tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
 				tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));
 				tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-comments", CommitMessageTransformPage.class));

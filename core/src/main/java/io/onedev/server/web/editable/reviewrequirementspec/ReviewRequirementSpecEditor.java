@@ -8,7 +8,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.reviewrequirementspec.ReviewRequirementSpecInput;
+import io.onedev.server.web.component.reviewrequirement.ReviewRequirementInput;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -18,7 +18,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 @SuppressWarnings("serial")
 public class ReviewRequirementSpecEditor extends PropertyEditor<String> {
 	
-	private ReviewRequirementSpecInput input;
+	private ReviewRequirementInput input;
 	
 	public ReviewRequirementSpecEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
@@ -28,7 +28,7 @@ public class ReviewRequirementSpecEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
-    	input = new ReviewRequirementSpecInput("input", new AbstractReadOnlyModel<Project>() {
+    	input = new ReviewRequirementInput("input", new AbstractReadOnlyModel<Project>() {
 
 			@Override
 			public Project getObject() {

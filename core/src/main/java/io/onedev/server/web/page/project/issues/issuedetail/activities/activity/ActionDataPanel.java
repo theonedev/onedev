@@ -62,8 +62,8 @@ public abstract class ActionDataPanel extends Panel {
 				}
 
 				@Override
-				protected boolean canManageComment() {
-					return SecurityUtils.canModify(getAction());
+				protected boolean canModifyOrDeleteComment() {
+					return SecurityUtils.canModifyOrDelete(getAction());
 				}
 
 				@Override

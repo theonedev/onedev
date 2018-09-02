@@ -41,6 +41,7 @@ import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.ProjectAndRevision;
 import io.onedev.server.search.code.CommitIndexed;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.TooltipBehavior;
 import io.onedev.server.web.component.commitlist.CommitListPanel;
@@ -651,6 +652,11 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		super.onDetach();
 	}
 
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
+	}
+	
 	public static class State implements Serializable {
 
 		private static final long serialVersionUID = 1L;

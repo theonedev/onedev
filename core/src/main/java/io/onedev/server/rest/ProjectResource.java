@@ -55,7 +55,7 @@ public class ProjectResource {
 
     	Collection<Project> projects = projectManager.findRange(criteria, (page-1)*perPage, perPage);
 		for (Project project: projects) {
-			if (!SecurityUtils.canRead(project))
+			if (!SecurityUtils.canReadIssues(project.getFacade()))
 				throw new UnauthorizedException("Unable to access project '" + project.getName() + "'");
 		}
 		
@@ -70,7 +70,7 @@ public class ProjectResource {
     @GET
     public Project get(@PathParam("projectId") Long projectId) {
     	Project project = projectManager.load(projectId);
-    	if (!SecurityUtils.canRead(project))
+    	if (!SecurityUtils.canReadIssues(project.getFacade()))
 			throw new UnauthorizedException("Unauthorized access to project " + project.getName());
     	else
     		return project;

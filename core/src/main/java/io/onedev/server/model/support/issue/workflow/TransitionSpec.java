@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.support.authorized.SpecifiedGroup;
+import io.onedev.server.model.support.authorized.SpecifiedTeam;
 import io.onedev.server.model.support.authorized.SpecifiedUser;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
@@ -167,10 +167,10 @@ public class TransitionSpec implements Serializable {
 		TransitionTrigger trigger = getTrigger();
 		if (trigger instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			if (pressButton.getAuthorized() instanceof SpecifiedGroup) {
-				SpecifiedGroup specifiedGroup = (SpecifiedGroup) pressButton.getAuthorized();
-				if (specifiedGroup.getGroupName().equals(oldName))
-					specifiedGroup.setGroupName(newName);
+			if (pressButton.getAuthorized() instanceof SpecifiedTeam) {
+				SpecifiedTeam specifiedGroup = (SpecifiedTeam) pressButton.getAuthorized();
+				if (specifiedGroup.getTeamName().equals(oldName))
+					specifiedGroup.setTeamName(newName);
 			}
 		}
 	}
@@ -179,9 +179,9 @@ public class TransitionSpec implements Serializable {
 		TransitionTrigger trigger = getTrigger();
 		if (trigger instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			if (pressButton.getAuthorized() instanceof SpecifiedGroup) {
-				SpecifiedGroup specifiedGroup = (SpecifiedGroup) pressButton.getAuthorized();
-				if (specifiedGroup.getGroupName().equals(groupName))
+			if (pressButton.getAuthorized() instanceof SpecifiedTeam) {
+				SpecifiedTeam specifiedGroup = (SpecifiedTeam) pressButton.getAuthorized();
+				if (specifiedGroup.getTeamName().equals(groupName))
 					return true;
 			}
 		}

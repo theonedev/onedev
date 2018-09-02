@@ -14,13 +14,13 @@ import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.web.editable.annotation.BranchPattern;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Color;
-import io.onedev.server.web.editable.annotation.GroupChoice;
+import io.onedev.server.web.editable.annotation.TeamChoice;
 import io.onedev.server.web.editable.annotation.IssueQuery;
 import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.editable.annotation.PathPattern;
-import io.onedev.server.web.editable.annotation.ReviewRequirementSpec;
+import io.onedev.server.web.editable.annotation.ReviewRequirement;
 import io.onedev.server.web.editable.annotation.Script;
 import io.onedev.server.web.editable.annotation.TagPattern;
 import io.onedev.server.web.editable.annotation.UserChoice;
@@ -40,10 +40,10 @@ public class StringEditSupport implements EditSupport {
 				&& descriptor.getPropertyGetter().getAnnotation(BranchPattern.class) == null
 				&& descriptor.getPropertyGetter().getAnnotation(TagPattern.class) == null
 				&& descriptor.getPropertyGetter().getAnnotation(IssueQuery.class) == null
-				&& descriptor.getPropertyGetter().getAnnotation(GroupChoice.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(TeamChoice.class) == null
 				&& descriptor.getPropertyGetter().getAnnotation(UserChoice.class) == null
 				&& descriptor.getPropertyGetter().getAnnotation(PathPattern.class) == null
-				&& descriptor.getPropertyGetter().getAnnotation(ReviewRequirementSpec.class) == null) {
+				&& descriptor.getPropertyGetter().getAnnotation(ReviewRequirement.class) == null) {
 			return new PropertyContext<String>(descriptor) {
 
 				@Override

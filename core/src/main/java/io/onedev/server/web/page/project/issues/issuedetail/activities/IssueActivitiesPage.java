@@ -61,8 +61,8 @@ public class IssueActivitiesPage extends IssueDetailPage {
 		for (IssueComment comment: getIssue().getComments())  
 			activities.add(new CommentedActivity(comment));
 		
-		for (IssueAction change: getIssue().getChanges())
-			activities.add(new ActionActivity(change));
+		for (IssueAction action: getIssue().getActions())
+			activities.add(new ActionActivity(action));
 		
 		activities.sort((o1, o2) -> {
 			if (o1.getDate().getTime()<o2.getDate().getTime())

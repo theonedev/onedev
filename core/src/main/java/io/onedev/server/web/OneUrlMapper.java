@@ -17,11 +17,6 @@ import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
-import io.onedev.server.web.page.group.GroupAuthorizationsPage;
-import io.onedev.server.web.page.group.GroupListPage;
-import io.onedev.server.web.page.group.GroupMembershipsPage;
-import io.onedev.server.web.page.group.GroupProfilePage;
-import io.onedev.server.web.page.group.NewGroupPage;
 import io.onedev.server.web.page.init.ServerInitPage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.NoCommitsPage;
@@ -49,7 +44,6 @@ import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.Requ
 import io.onedev.server.web.page.project.pullrequests.requestdetail.codecomments.RequestCodeCommentsPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.mergepreview.MergePreviewPage;
 import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
-import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
 import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
 import io.onedev.server.web.page.project.setting.configuration.ConfigurationEditPage;
@@ -60,6 +54,9 @@ import io.onedev.server.web.page.project.setting.issueworkflow.fields.IssueField
 import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
 import io.onedev.server.web.page.project.setting.issueworkflow.statetransitions.StateTransitionsPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
+import io.onedev.server.web.page.project.setting.team.NewTeamPage;
+import io.onedev.server.web.page.project.setting.team.TeamEditPage;
+import io.onedev.server.web.page.project.setting.team.TeamListPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
@@ -70,11 +67,10 @@ import io.onedev.server.web.page.security.RegisterPage;
 import io.onedev.server.web.page.test.TestPage;
 import io.onedev.server.web.page.user.AvatarEditPage;
 import io.onedev.server.web.page.user.NewUserPage;
+import io.onedev.server.web.page.user.ParticipatedProjectsPage;
 import io.onedev.server.web.page.user.PasswordEditPage;
 import io.onedev.server.web.page.user.TokenGeneratePage;
-import io.onedev.server.web.page.user.UserAuthorizationsPage;
 import io.onedev.server.web.page.user.UserListPage;
-import io.onedev.server.web.page.user.UserMembershipsPage;
 import io.onedev.server.web.page.user.UserProfilePage;
 import io.onedev.server.web.util.mapper.OnePageMapper;
 import io.onedev.server.web.util.mapper.OneResourceMapper;
@@ -89,7 +85,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("init", ServerInitPage.class));
 		addAdministrationPages();
 		addUserPages();
-		addGroupPages();
 		addProjectPages();
 		addSecurityPages();
 		
@@ -128,21 +123,12 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("users", UserListPage.class));
 		add(new OnePageMapper("users/new", NewUserPage.class));
 		add(new OnePageMapper("users/${user}/profile", UserProfilePage.class));
-		add(new OnePageMapper("users/${user}/groups", UserMembershipsPage.class));
-		add(new OnePageMapper("users/${user}/authorizations", UserAuthorizationsPage.class));
 		add(new OnePageMapper("users/${user}/avatar", AvatarEditPage.class));
 		add(new OnePageMapper("users/${user}/password", PasswordEditPage.class));
 		add(new OnePageMapper("users/${user}/token", TokenGeneratePage.class));
+		add(new OnePageMapper("users/${user}/participated-projects", ParticipatedProjectsPage.class));
 	}
 
-	private void addGroupPages() {
-		add(new OnePageMapper("groups", GroupListPage.class));
-		add(new OnePageMapper("groups/new", NewGroupPage.class));
-		add(new OnePageMapper("groups/${group}/profile", GroupProfilePage.class));
-		add(new OnePageMapper("groups/${group}/members", GroupMembershipsPage.class));
-		add(new OnePageMapper("groups/${group}/authorizations", GroupAuthorizationsPage.class));
-	}
-	
 	private void addProjectPages() {
 		add(new OnePageMapper("projects", ProjectListPage.class) {
 			
@@ -217,7 +203,9 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/milestones/new", NewMilestonePage.class));
 		
 		add(new OnePageMapper("projects/${project}/settings/general", GeneralSettingPage.class));
-		add(new OnePageMapper("projects/${project}/settings/authorizations", ProjectAuthorizationsPage.class));
+		add(new OnePageMapper("projects/${project}/settings/teams", TeamListPage.class));
+		add(new OnePageMapper("projects/${project}/settings/teams/new", NewTeamPage.class));
+		add(new OnePageMapper("projects/${project}/settings/teams/${team}", TeamEditPage.class));
 		add(new OnePageMapper("projects/${project}/settings/branch-protection", BranchProtectionPage.class));
 		add(new OnePageMapper("projects/${project}/settings/tag-protection", TagProtectionPage.class));
 		add(new OnePageMapper("projects/${project}/settings/commit-message-transform", CommitMessageTransformPage.class));

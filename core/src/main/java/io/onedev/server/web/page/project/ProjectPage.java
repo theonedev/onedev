@@ -63,9 +63,10 @@ import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.ProjectStatsPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
+import io.onedev.server.web.util.ProjectAware;
 
 @SuppressWarnings("serial")
-public abstract class ProjectPage extends LayoutPage {
+public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	private static final String PARAM_PROJECT = "project";
 	
@@ -112,6 +113,7 @@ public abstract class ProjectPage extends LayoutPage {
 		projectModel.setObject(project);
 		
 		if (!(this instanceof NoCommitsPage) 
+				&& SecurityUtils.canReadCode(getProject().getFacade())
 				&& !(this instanceof ProjectSettingPage) 
 				&& getProject().getDefaultBranch() == null) { 
 			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
@@ -138,42 +140,44 @@ public abstract class ProjectPage extends LayoutPage {
 			@Override
 			protected List<? extends Tab> newTabs() {
 				List<PageTab> tabs = new ArrayList<>();
-				tabs.add(new ProjectTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, ProjectBlobPage.class));
-				tabs.add(new ProjectTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0,
-						ProjectCommitsPage.class, CommitDetailPage.class) {
-					
-					@Override
-					public Component render(String componentId) {
-						return new ProjectTabLink(componentId, this) {
+				if (SecurityUtils.canReadCode(getProject().getFacade())) {
+					tabs.add(new ProjectTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, ProjectBlobPage.class));
+					tabs.add(new ProjectTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0,
+							ProjectCommitsPage.class, CommitDetailPage.class) {
+						
+						@Override
+						public Component render(String componentId) {
+							return new ProjectTabLink(componentId, this) {
 
-							@Override
-							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-								return new FirstCommitQueryLink(linkId, getProject());
-							}
-						};
-					}
+								@Override
+								protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+									return new FirstCommitQueryLink(linkId, getProject());
+								}
+							};
+						}
+						
+					});
+					tabs.add(new ProjectTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
+							0, ProjectBranchesPage.class));
+					tabs.add(new ProjectTab(Model.of("Tags"), "fa fa-fw fa-tag", 
+							0, ProjectTagsPage.class));
 					
-				});
-				tabs.add(new ProjectTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
-						0, ProjectBranchesPage.class));
-				tabs.add(new ProjectTab(Model.of("Tags"), "fa fa-fw fa-tag", 
-						0, ProjectTagsPage.class));
-				
-				tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
-						0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class, InvalidRequestPage.class) {
-					
-					@Override
-					public Component render(String componentId) {
-						return new ProjectTabLink(componentId, this) {
+					tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
+							0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class, InvalidRequestPage.class) {
+						
+						@Override
+						public Component render(String componentId) {
+							return new ProjectTabLink(componentId, this) {
 
-							@Override
-							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-								return new FirstPullRequestQueryLink(linkId, getProject());
-							}
-						};
-					}
-					
-				});
+								@Override
+								protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+									return new FirstPullRequestQueryLink(linkId, getProject());
+								}
+							};
+						}
+						
+					});
+				}
 				
 				tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, IssuesPage.class, 
 						IssueDetailPage.class, NewIssuePage.class) {
@@ -191,28 +195,30 @@ public abstract class ProjectPage extends LayoutPage {
 					
 				});
 				
-				tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
-						0, ProjectCodeCommentsPage.class) {
+				if (SecurityUtils.canReadCode(getProject().getFacade())) {
+					tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
+							0, ProjectCodeCommentsPage.class) {
 
-					@Override
-					public Component render(String componentId) {
-						return new ProjectTabLink(componentId, this) {
+						@Override
+						public Component render(String componentId) {
+							return new ProjectTabLink(componentId, this) {
 
-							@Override
-							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-								return new FirstCodeCommentQueryLink(linkId, getProject());
-							}
-						};
-					}
+								@Override
+								protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+									return new FirstCodeCommentQueryLink(linkId, getProject());
+								}
+							};
+						}
+						
+					});
 					
-				});
+					tabs.add(new ProjectTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
+					
+					tabs.add(new ProjectTab(Model.of("Statistics"), "fa fa-fw fa-bar-chart", 0, ProjectContribsPage.class, 
+							ProjectStatsPage.class));
+				}
 				
-				tabs.add(new ProjectTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
-				
-				tabs.add(new ProjectTab(Model.of("Statistics"), "fa fa-fw fa-bar-chart", 0, ProjectContribsPage.class, 
-						ProjectStatsPage.class));
-				
-				if (SecurityUtils.canManage(getProject()))
+				if (SecurityUtils.canAdministrate(getProject().getFacade()))
 					tabs.add(new ProjectTab(Model.of("Setting"), "fa fa-fw fa-cog", 0, GeneralSettingPage.class, ProjectSettingPage.class));
 				
 				return tabs;
@@ -229,9 +235,10 @@ public abstract class ProjectPage extends LayoutPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canRead(getProject());
+		return SecurityUtils.canReadIssues(getProject().getFacade());
 	}
 	
+	@Override
 	public Project getProject() {
 		return projectModel.getObject();
 	}

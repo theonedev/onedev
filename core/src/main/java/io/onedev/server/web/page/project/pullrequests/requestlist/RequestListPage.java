@@ -286,7 +286,7 @@ public class RequestListPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canRead(getProject()));
+				setVisible(SecurityUtils.canReadCode(getProject().getFacade()));
 			}
 			
 		});		
@@ -476,6 +476,11 @@ public class RequestListPage extends ProjectPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new RequestListResourceReference()));
+	}
+	
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable String query) {

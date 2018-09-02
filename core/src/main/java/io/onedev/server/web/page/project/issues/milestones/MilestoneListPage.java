@@ -140,7 +140,7 @@ public class MilestoneListPage extends IssuesPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getProject()));
+				setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
 			}
 			
 		});
@@ -185,7 +185,7 @@ public class MilestoneListPage extends IssuesPage {
 			}
 		});
 		
-		if (SecurityUtils.canManage(getProject())) {
+		if (SecurityUtils.canAdministrate(getProject().getFacade())) {
 			columns.add(new AbstractColumn<Milestone, Void>(Model.of("Actions")) {
 
 				@Override

@@ -45,7 +45,7 @@ public abstract class IssuesPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (SecurityUtils.canManage(getProject())) {
+		if (SecurityUtils.canAdministrate(getProject().getFacade())) {
 			add(new ModalLink("reconcile") {
 
 				@Override

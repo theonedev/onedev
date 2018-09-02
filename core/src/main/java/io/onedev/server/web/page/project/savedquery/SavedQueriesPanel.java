@@ -148,7 +148,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				if (SecurityUtils.canManage(getProject())) {
+				if (SecurityUtils.canAdministrate(getProject().getFacade())) {
 					setVisible(!getUserQueries().isEmpty() || !getProjectQueries().isEmpty());
 				} else {
 					setVisible(SecurityUtils.getUser() != null && !getUserQueries().isEmpty());
@@ -220,7 +220,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				}
 				
 				ArrayList<T> projectQueries = getProjectQueries();
-				if (SecurityUtils.canManage(getProject()) && !projectQueries.isEmpty()) {
+				if (SecurityUtils.canAdministrate(getProject().getFacade()) && !projectQueries.isEmpty()) {
 					tabs.add(new AjaxActionTab(Model.of("For All Users")) {
 
 						@Override

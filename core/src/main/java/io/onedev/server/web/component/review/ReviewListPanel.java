@@ -29,7 +29,6 @@ import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.JsoupUtils;
@@ -198,10 +197,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 					protected void onConfigure() {
 						super.onConfigure();
 						
-						PullRequest request = getPullRequest();
-						User currentUser = SecurityUtils.getUser();
-						setVisible(currentUser != null && currentUser.equals(request.getSubmitter())
-										|| SecurityUtils.canManage(request.getTargetProject()));
+						setVisible(SecurityUtils.canModify(getPullRequest()) && !request.isMerged());
 					}
 					
 				});
@@ -215,8 +211,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				PullRequest request = getPullRequest();
-				setVisible(SecurityUtils.canModify(request) && !request.isMerged());
+				setVisible(!getPullRequest().isMerged() && SecurityUtils.canModify(getPullRequest()));
 			}
 		                                                                                                                              
 			@Override

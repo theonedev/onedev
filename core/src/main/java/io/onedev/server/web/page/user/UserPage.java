@@ -62,7 +62,7 @@ public abstract class UserPage extends LayoutPage {
 					}
 					
 				};
-				if (!SecurityUtils.canManage(getUser())) {
+				if (!SecurityUtils.canAdministrate(getUser().getFacade())) {
 					avatarLink.setEnabled(false);
 				}
 				avatarLink.add(new Avatar("avatar", userModel.getObject()));
@@ -76,16 +76,14 @@ public abstract class UserPage extends LayoutPage {
 				List<PageTab> tabs = new ArrayList<>();
 				
 				tabs.add(new UserTab("Profile", "fa fa-fw fa-list-alt", UserProfilePage.class));
-				if (SecurityUtils.canManage(getUser())) {
+				if (SecurityUtils.canAdministrate(getUser().getFacade())) {
 					tabs.add(new UserTab("Edit Avatar", "fa fa-fw fa-picture-o", AvatarEditPage.class));
 					
 					if (StringUtils.isNotBlank(getUser().getPassword()))
 						tabs.add(new UserTab("Change Password", "fa fa-fw fa-key", PasswordEditPage.class));
 					tabs.add(new UserTab("Access Token", "fa fa-fw fa-key", TokenGeneratePage.class));
 				}
-				tabs.add(new UserTab("Belonging Groups", "fa fa-fw fa-group", UserMembershipsPage.class));
-				if (SecurityUtils.isAdministrator()) 
-					tabs.add(new UserTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", UserAuthorizationsPage.class));
+				tabs.add(new UserTab("Participated Projects", "fa fa-ext fa-fw fa-repo", ParticipatedProjectsPage.class));
 				
 				return tabs;
 			}

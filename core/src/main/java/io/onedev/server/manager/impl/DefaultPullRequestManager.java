@@ -79,13 +79,13 @@ import io.onedev.server.manager.PullRequestUpdateManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Configuration;
-import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAction;
 import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
@@ -118,13 +118,12 @@ import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryBuildContext;
-import io.onedev.server.security.ProjectPrivilege;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.BatchWorker;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.reviewrequirement.InvalidReviewRuleException;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.utils.concurrent.Prioritized;
 
@@ -680,9 +679,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void checkQuality(PullRequest request) {
 		BranchProtection branchProtection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
 		if (branchProtection != null) {
-			ReviewRequirement reviewRequirement = branchProtection.getReviewRequirement();
-			if (reviewRequirement != null) 
-				checkReviews(reviewRequirement, request.getLatestUpdate());
+			checkReviews(ReviewRequirement.parse(request.getTargetProject(), branchProtection.getReviewRequirement()), request.getLatestUpdate());
 
 			if (branchProtection.getConfigurations() != null)
 				checkBuilds(request, branchProtection.getConfigurations(), branchProtection.isBuildMerges());
@@ -696,19 +693,19 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					FileProtection fileProtection = branchProtection.getFileProtection(file);
 					if (fileProtection != null && !checkedFileProtections.contains(fileProtection)) {
 						checkedFileProtections.add(fileProtection);
-						checkReviews(fileProtection.getReviewRequirement(), update);
+						checkReviews(ReviewRequirement.parse(request.getTargetProject(), fileProtection.getReviewRequirement()), update);
 					}
 				}
 			}
-		}
-		
-		ProjectFacade project = request.getTargetProject().getFacade();
-		Permission writePermission = new ProjectPermission(project, ProjectPrivilege.WRITE); 
-		if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(writePermission)) {
-			Collection<User> writers = new ArrayList<>();
-			for (UserFacade facade: SecurityUtils.getAuthorizedUsers(project, ProjectPrivilege.WRITE)) 
-				writers.add(userManager.load(facade.getId()));
-			checkReviews(writers, 1, request.getLatestUpdate());
+			
+			ProjectFacade project = request.getTargetProject().getFacade();
+			Permission writeCode = new ProjectPermission(project, ProjectPrivilege.CODE_WRITE); 
+			if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(writeCode)) {
+				Collection<User> writers = new ArrayList<>();
+				for (UserFacade facade: SecurityUtils.getAuthorizedUsers(project, ProjectPrivilege.CODE_WRITE)) 
+					writers.add(userManager.load(facade.getId()));
+				checkReviews(writers, 1, request.getLatestUpdate());
+			}
 		}
 	}
 
@@ -774,10 +771,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			}
 		}
 		
-		for (Map.Entry<Group, Integer> entry: reviewRequirement.getGroups().entrySet()) {
-			Group group = entry.getKey();
+		for (Map.Entry<Team, Integer> entry: reviewRequirement.getTeams().entrySet()) {
+			Team team = entry.getKey();
 			int requiredCount = entry.getValue();
-			checkReviews(group.getMembers(), requiredCount, update);
+			checkReviews(team.getMembers(), requiredCount, update);
 		}
 	}
 	
@@ -867,7 +864,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			String errorMessage = String.format("Impossible to provide required number of reviewers "
 					+ "(candidates: %s, required number of reviewers: %d, pull request: #%d)", 
 					reviewers, missingCount, update.getRequest().getNumber());
-			throw new InvalidReviewRuleException(errorMessage);
+			throw new OneException(errorMessage);
 		}
 	}
 	

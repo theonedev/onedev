@@ -6,19 +6,19 @@ public class MembershipFacade extends EntityFacade {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Long groupId;
+	private final Long teamId;
 	
 	private final Long userId;
 	
 	public MembershipFacade(Membership membership) {
 		super(membership.getId());
 		
-		groupId = membership.getGroup().getId();
+		teamId = membership.getTeam().getId();
 		userId = membership.getUser().getId();
 	}
 
-	public Long getGroupId() {
-		return groupId;
+	public Long getTeamId() {
+		return teamId;
 	}
 
 	public Long getUserId() {

@@ -466,7 +466,7 @@ public class ProjectBranchesPage extends ProjectPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.canManage(getProject()) 
+						setVisible(SecurityUtils.canAdministrate(getProject().getFacade()) 
 								&& !branch.equals(getProject().getDefaultBranch()));
 					}
 					
@@ -676,7 +676,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						super.onConfigure();
 
 						Project project = getProject();
-						if (SecurityUtils.canWrite(project)) {
+						if (SecurityUtils.canWriteCode(project.getFacade())) {
 							if (project.getDefaultBranch().equals(branch)) {
 								setEnabled(false);
 							} else {
@@ -785,6 +785,11 @@ public class ProjectBranchesPage extends ProjectPage {
 		target.add(branchesContainer);
 		target.add(noBranchesContainer);
 		target.add(pagingNavigator);
+	}
+
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
 	}
 
 }

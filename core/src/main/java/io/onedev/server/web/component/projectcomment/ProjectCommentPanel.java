@@ -71,7 +71,7 @@ public abstract class ProjectCommentPanel extends Panel {
 		}
 		
 		WebMarkupContainer actions = new WebMarkupContainer("actions");
-		actions.setVisible(canManageComment());
+		actions.setVisible(canModifyOrDeleteComment());
 		actions.add(new AjaxLink<Void>("edit") {
 
 			@Override
@@ -201,7 +201,7 @@ public abstract class ProjectCommentPanel extends Panel {
 	
 	protected abstract AttachmentSupport getAttachmentSupport();
 	
-	protected abstract boolean canManageComment();
+	protected abstract boolean canModifyOrDeleteComment();
 	
 	@Nullable
 	protected abstract String getRequiredLabel();

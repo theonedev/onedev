@@ -1,56 +1,31 @@
 package io.onedev.server.security.permission;
 
 public enum ProjectPrivilege {
-
-	ReadCode("Read code") {
-
-		@Override
-		public boolean implies(ProjectPrivilege privilege) {
-			return privilege == ReadCode;
-		}
-		
-	},
-	WriteCode("Write code") {
+	ISSUE_READ("Issue read") {
 
 		@Override
 		public boolean implies(ProjectPrivilege privilege) {
-			return privilege == WriteCode || ReadCode.implies(privilege);
+			return privilege == ISSUE_READ;
 		}
 		
 	},
-	ReadIssues("Read issues") {
+	CODE_READ("Code read") {
 
 		@Override
 		public boolean implies(ProjectPrivilege privilege) {
-			return privilege == ReadIssues;
+			return privilege == CODE_READ || ISSUE_READ.implies(privilege);
 		}
 		
 	},
-	CreateIssues("Create issues") {
+	CODE_WRITE("Code write") {
 
 		@Override
 		public boolean implies(ProjectPrivilege privilege) {
-			return privilege == CreateIssues || ReadIssues.implies(privilege);
+			return privilege == CODE_WRITE || CODE_READ.implies(privilege);
 		}
 		
 	},
-	EditIssues("Edit issues") {
-
-		@Override
-		public boolean implies(ProjectPrivilege privilege) {
-			return privilege == EditIssues || CreateIssues.implies(privilege);
-		}
-		
-	},
-	DeleteIssues("Delete issues") {
-
-		@Override
-		public boolean implies(ProjectPrivilege privilege) {
-			return privilege == DeleteIssues || EditIssues.implies(privilege);
-		}
-		
-	},
-	ProjectAdministration("Project Administration") {
+	PROJECT_ADMINISTRATION("Project administration") {
 
 		@Override
 		public boolean implies(ProjectPrivilege privilege) {

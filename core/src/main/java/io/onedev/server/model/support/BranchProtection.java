@@ -4,26 +4,23 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.google.common.base.Preconditions;
-
-import io.onedev.server.model.Group;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.ifsubmittedby.Anyone;
 import io.onedev.server.model.support.ifsubmittedby.IfSubmittedBy;
-import io.onedev.server.model.support.ifsubmittedby.SpecifiedGroup;
+import io.onedev.server.model.support.ifsubmittedby.SpecifiedTeam;
 import io.onedev.server.model.support.ifsubmittedby.SpecifiedUser;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.web.editable.annotation.BranchPattern;
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ReviewRequirementSpec;
 import io.onedev.server.web.editable.annotation.ConfigurationChoice;
+import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.utils.PathUtils;
 
 @Editable
@@ -43,13 +40,11 @@ public class BranchProtection implements Serializable {
 	
 	private boolean noCreation = true;
 	
-	private String reviewRequirementSpec;
+	private String reviewRequirement;
 	
 	private List<String> configurations = new ArrayList<>();
 	
 	private boolean buildMerges;
-	
-	private transient Optional<ReviewRequirement> reviewRequirementOpt;
 	
 	private List<FileProtection> fileProtections = new ArrayList<>();
 
@@ -113,13 +108,13 @@ public class BranchProtection implements Serializable {
 
 	@Editable(order=400, name="Required Reviewers", description="Optionally specify required reviewers for changes of "
 			+ "specified branch. OneDev assumes that the user submitting the change has completed the review already")
-	@ReviewRequirementSpec
-	public String getReviewRequirementSpec() {
-		return reviewRequirementSpec;
+	@io.onedev.server.web.editable.annotation.ReviewRequirement
+	public String getReviewRequirement() {
+		return reviewRequirement;
 	}
 
-	public void setReviewRequirementSpec(String reviewRequirementSpec) {
-		this.reviewRequirementSpec = reviewRequirementSpec;
+	public void setReviewRequirement(String reviewRequirement) {
+		this.reviewRequirement = reviewRequirement;
 	}
 
 	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")
@@ -162,65 +157,46 @@ public class BranchProtection implements Serializable {
 		return null;
 	}
 	
-	@Nullable
-	public ReviewRequirement getReviewRequirement() {
-		if (reviewRequirementOpt == null) {
-			if (reviewRequirementSpec != null)
-				reviewRequirementOpt = Optional.of(new ReviewRequirement(reviewRequirementSpec));
-			else
-				reviewRequirementOpt = Optional.empty();
-		}
-		return reviewRequirementOpt.orElse(null);
-	}
-	
-	public void onRenameGroup(String oldName, String newName) {
-		if (getSubmitter() instanceof SpecifiedGroup) {
-			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
-			if (specifiedGroup.getGroupName().equals(oldName))
-				specifiedGroup.setGroupName(newName);
+	public void onRenameTeam(Project project, String oldName, String newName) {
+		if (getSubmitter() instanceof SpecifiedTeam) {
+			SpecifiedTeam specifiedTeam = (SpecifiedTeam) getSubmitter();
+			if (specifiedTeam.getTeamName().equals(oldName))
+				specifiedTeam.setTeamName(newName);
 		}
 		
-		ReviewRequirement reviewRequirement = getReviewRequirement();
-		if (reviewRequirement != null) {
-			for (Group group: reviewRequirement.getGroups().keySet()) {
-				if (group.getName().equals(oldName))
-					group.setName(newName);
-			}
-			setReviewRequirementSpec(reviewRequirement.toSpec());
+		ReviewRequirement reviewRequirement = ReviewRequirement.parse(project, this.reviewRequirement);
+		for (Team team: reviewRequirement.getTeams().keySet()) {
+			if (team.getName().equals(oldName))
+				team.setName(newName);
 		}
+		setReviewRequirement(reviewRequirement.toString());
 		
 		for (FileProtection fileProtection: getFileProtections()) {
-			reviewRequirement = fileProtection.getReviewRequirement();
-			for (Group group: reviewRequirement.getGroups().keySet()) {
-				if (group.getName().equals(oldName))
-					group.setName(newName);
+			reviewRequirement = ReviewRequirement.parse(project, fileProtection.getReviewRequirement()); 
+			for (Team team: reviewRequirement.getTeams().keySet()) {
+				if (team.getName().equals(oldName))
+					team.setName(newName);
 			}
-			String spec = reviewRequirement.toSpec();
-			Preconditions.checkState(spec != null);
-			fileProtection.setReviewRequirementSpec(spec);
+			fileProtection.setReviewRequirement(reviewRequirement.toString());
 		}
 	}
 	
-	public boolean onDeleteGroup(String groupName) {
-		if (getSubmitter() instanceof SpecifiedGroup) {
-			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
-			if (specifiedGroup.getGroupName().equals(groupName))
+	public boolean onDeleteTeam(Project project, String teamName) {
+		if (getSubmitter() instanceof SpecifiedTeam) {
+			SpecifiedTeam specifiedTeam = (SpecifiedTeam) getSubmitter();
+			if (specifiedTeam.getTeamName().equals(teamName))
 				return true;
 		}
 		
-		ReviewRequirement reviewRequirement = getReviewRequirement();
-		if (reviewRequirement != null) {
-			for (Group group: reviewRequirement.getGroups().keySet()) {
-				if (group.getName().equals(groupName))
-					return true;
-			}
+		for (Team team: ReviewRequirement.parse(project, this.reviewRequirement).getTeams().keySet()) {
+			if (team.getName().equals(teamName))
+				return true;
 		}
 		
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection protection = it.next();
-			reviewRequirement = protection.getReviewRequirement();
-			for (Group group: reviewRequirement.getGroups().keySet()) {
-				if (group.getName().equals(groupName)) {
+			for (Team team: ReviewRequirement.parse(project, protection.getReviewRequirement()).getTeams().keySet()) {
+				if (team.getName().equals(teamName)) {
 					it.remove();
 					break;
 				}
@@ -240,53 +216,45 @@ public class BranchProtection implements Serializable {
 		getConfigurations().remove(configurationName);
 	}
 	
-	public void onRenameUser(String oldName, String newName) {
+	public void onRenameUser(Project project, String oldName, String newName) {
 		if (getSubmitter() instanceof SpecifiedUser) {
 			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
 			if (specifiedUser.getUserName().equals(oldName))
 				specifiedUser.setUserName(newName);
 		}
 		
-		ReviewRequirement reviewRequirement = getReviewRequirement();
-		if (reviewRequirement != null) {
-			for (User user: reviewRequirement.getUsers()) {
-				if (user.getName().equals(oldName))
-					user.setName(newName);
-			}
-			setReviewRequirementSpec(reviewRequirement.toSpec());
+		ReviewRequirement reviewRequirement = ReviewRequirement.parse(project, this.reviewRequirement);
+		for (User user: reviewRequirement.getUsers()) {
+			if (user.getName().equals(oldName))
+				user.setName(newName);
 		}
+		setReviewRequirement(reviewRequirement.toString());
 		
 		for (FileProtection fileProtection: getFileProtections()) {
-			reviewRequirement = fileProtection.getReviewRequirement();
+			reviewRequirement = ReviewRequirement.parse(project, fileProtection.getReviewRequirement());
 			for (User user: reviewRequirement.getUsers()) {
 				if (user.getName().equals(oldName))
 					user.setName(newName);
 			}
-			String spec = reviewRequirement.toSpec();
-			Preconditions.checkState(spec != null);
-			fileProtection.setReviewRequirementSpec(spec);
+			fileProtection.setReviewRequirement(reviewRequirement.toString());
 		}	
 	}
 	
-	public boolean onDeleteUser(String userName) {
+	public boolean onDeleteUser(Project project, String userName) {
 		if (getSubmitter() instanceof SpecifiedUser) {
 			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
 			if (specifiedUser.getUserName().equals(userName))
 				return true;
 		}
 		
-		ReviewRequirement reviewRequirement = getReviewRequirement();
-		if (reviewRequirement != null) {
-			for (User user: reviewRequirement.getUsers()) {
-				if (user.getName().equals(userName))
-					return true;
-			}
+		for (User user: ReviewRequirement.parse(project, this.reviewRequirement).getUsers()) {
+			if (user.getName().equals(userName))
+				return true;
 		}
 		
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection protection = it.next();
-			reviewRequirement = protection.getReviewRequirement();
-			for (User user: reviewRequirement.getUsers()) {
+			for (User user: ReviewRequirement.parse(project, protection.getReviewRequirement()).getUsers()) {
 				if (user.getName().equals(userName)) {
 					it.remove();
 					break;

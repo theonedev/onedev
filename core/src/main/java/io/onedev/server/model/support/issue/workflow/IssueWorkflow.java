@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.exception.OneException;
-import io.onedev.server.model.support.authorized.ProjectWriters;
+import io.onedev.server.model.support.authorized.CodeWriters;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueIsEmpty;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueIsNotEmpty;
@@ -112,7 +112,7 @@ public class IssueWorkflow implements Serializable {
 		fieldSpecs.add(priority);
 
 		UserChoiceInput assignee = new UserChoiceInput();
-		assignee.setChoiceProvider(new io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ProjectWriters());
+		assignee.setChoiceProvider(new io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.CodeWriters());
 		assignee.setName("Assignee");
 		
 		fieldSpecs.add(assignee);
@@ -182,7 +182,7 @@ public class IssueWorkflow implements Serializable {
 		transition.setToState("Assigned");
 		PressButtonTrigger pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Assign");
-		pressButton.setAuthorized(new ProjectWriters());
+		pressButton.setAuthorized(new CodeWriters());
 		pressButton.setPromptFields(Lists.newArrayList("Assignee"));
 		transition.setTrigger(pressButton);
 		
@@ -193,7 +193,7 @@ public class IssueWorkflow implements Serializable {
 		transition.setToState("Closed");
 		pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Close");
-		pressButton.setAuthorized(new ProjectWriters());
+		pressButton.setAuthorized(new CodeWriters());
 		pressButton.setPromptFields(Lists.newArrayList("Resolution", "Duplicate With"));
 		transition.setTrigger(pressButton);
 		
@@ -208,7 +208,7 @@ public class IssueWorkflow implements Serializable {
 		pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Reopen");
 		transition.setRemoveFields(Lists.newArrayList("Resolution", "Duplicate With"));
-		pressButton.setAuthorized(new ProjectWriters());
+		pressButton.setAuthorized(new CodeWriters());
 		transition.setTrigger(pressButton);
 		
 		transitionSpecs.add(transition);
@@ -222,7 +222,7 @@ public class IssueWorkflow implements Serializable {
 		pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Reopen");
 		transition.setRemoveFields(Lists.newArrayList("Resolution", "Duplicate With"));
-		pressButton.setAuthorized(new ProjectWriters());
+		pressButton.setAuthorized(new CodeWriters());
 		transition.setTrigger(pressButton);
 		
 		transitionSpecs.add(transition);

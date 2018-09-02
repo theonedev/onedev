@@ -146,7 +146,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> {
 			
 		});
 		ContentVersionSupport contentVersionSupport;
-		if (SecurityUtils.canModify(getIssue())) {
+		if (SecurityUtils.canAdministrate(getIssue().getProject().getFacade())) {
 			contentVersionSupport = new ContentVersionSupport() {
 
 				@Override

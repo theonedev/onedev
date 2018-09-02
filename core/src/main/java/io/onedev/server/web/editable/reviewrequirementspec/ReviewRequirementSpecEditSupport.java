@@ -12,7 +12,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.ReviewRequirementSpec;
+import io.onedev.server.web.editable.annotation.ReviewRequirement;
 
 @SuppressWarnings("serial")
 public class ReviewRequirementSpecEditSupport implements EditSupport {
@@ -20,7 +20,7 @@ public class ReviewRequirementSpecEditSupport implements EditSupport {
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Method propertyGetter = descriptor.getPropertyGetter();
-        if (propertyGetter.getAnnotation(ReviewRequirementSpec.class) != null) {
+        if (propertyGetter.getAnnotation(ReviewRequirement.class) != null) {
         	if (propertyGetter.getReturnType() != String.class) {
 	    		throw new RuntimeException("Annotation 'ReviewRequirementSpec' should be applied to property "
 	    				+ "with type 'String'.");

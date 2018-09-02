@@ -20,10 +20,10 @@ import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.manager.UrlManager;
 import io.onedev.server.manager.UserInfoManager;
-import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.IssueWatch;
+import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
@@ -126,12 +126,12 @@ public class DefaultIssueNotificationManager {
 
 		if (event instanceof IssueActionEvent) {
 			IssueAction issueAction = ((IssueActionEvent) event).getAction();
-			for (Group group: issueAction.getData().getNewGroups().values()) {
-				for (User member: group.getMembers())
+			for (Team team: issueAction.getData().getNewTeams(issue.getProject()).values()) {
+				for (User member: team.getMembers())
 					watch(issue, member, true);
 			}
 			String url = urlManager.urlFor(issue);
-			for (Map.Entry<String, User> entry: issueAction.getData().getNewUsers().entrySet()) {
+			for (Map.Entry<String, User> entry: issueAction.getData().getNewUsers(issue.getProject()).entrySet()) {
 				String subject = String.format("You are designated as \"%s\" of issue #%d: %s", 
 						entry.getKey(), issue.getNumber(), issue.getTitle());
 				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);

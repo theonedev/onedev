@@ -7,6 +7,7 @@ import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.security.permission.ProjectPrivilege;
 
 public class ProjectFacade extends EntityFacade {
 	
@@ -14,23 +15,23 @@ public class ProjectFacade extends EntityFacade {
 	
 	private final String name;
 	
+	private final ProjectPrivilege defaultPrivilege;
+	
 	private final String uuid;
 	
-	private final boolean publicRead;
-
 	public ProjectFacade(Project project) {
 		super(project.getId());
 		name = project.getName();
+		defaultPrivilege = project.getDefaultPrivilege();
 		uuid = project.getUUID();
-		publicRead = project.isPublicRead();
 	}
 	
 	public String getName() {
 		return name;
 	}
 
-	public boolean isPublicRead() {
-		return publicRead;
+	public ProjectPrivilege getDefaultPrivilege() {
+		return defaultPrivilege;
 	}
 
 	public String getUUID() {

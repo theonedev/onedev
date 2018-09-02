@@ -140,11 +140,11 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 											break;
 										}
 									}
-								} else if (SecurityUtils.canModify(issue)) {
+								} else if (SecurityUtils.canAdministrate(issue.getProject().getFacade())) {
 									issue = SerializationUtils.clone(issue);
 									issue.setFieldValue(identifyField, getColumn());
 								}
-							} else if (SecurityUtils.canModify(issue)) { 
+							} else if (SecurityUtils.canAdministrate(issue.getProject().getFacade())) { 
 								// move issue between backlog column and board column
 								issue = SerializationUtils.clone(issue);
 								issue.setMilestone(getMilestone());
@@ -326,7 +326,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				String fieldName = getBoard().getIdentifyField();
 				if (issue.getMilestone() == null && getMilestone() != null) { 
 					// move a backlog issue to board 
-					if (!SecurityUtils.canModify(issue)) 
+					if (!SecurityUtils.canAdministrate(issue.getProject().getFacade())) 
 						throw new UnauthorizedException("Permission denied");
 					
 					OneDev.getInstance(IssueActionManager.class).changeMilestone(issue, getMilestone());
@@ -388,7 +388,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 						checkMatched(target, issue);
 					}
 				} else {
-					if (!SecurityUtils.canModify(issue)) 
+					if (!SecurityUtils.canAdministrate(issue.getProject().getFacade())) 
 						throw new UnauthorizedException("Permission denied");
 
 					Map<String, Object> fieldValues = new HashMap<>();

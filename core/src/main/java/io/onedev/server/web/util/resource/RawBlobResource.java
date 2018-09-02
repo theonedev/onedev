@@ -75,7 +75,7 @@ public class RawBlobResource extends AbstractResource {
 		if (StringUtils.isBlank(path))
 			throw new IllegalArgumentException("path parameter has to be specified");
 
-		if (!SecurityUtils.canRead(project))
+		if (!SecurityUtils.canReadCode(project.getFacade()))
 			throw new UnauthorizedException();
 
 		final Blob blob = project.getBlob(new BlobIdent(revision, path, 0));

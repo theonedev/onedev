@@ -51,7 +51,7 @@ public class ReviewResource {
     @Path("/{id}")
     public PullRequestReview get(@PathParam("id") Long id) {
     	PullRequestReview review = reviewManager.load(id);
-    	if (!SecurityUtils.canRead(review.getRequest().getTargetProject()))
+    	if (!SecurityUtils.canReadCode(review.getRequest().getTargetProject().getFacade()))
     		throw new UnauthorizedException();
     	return review;
     }
@@ -61,7 +61,7 @@ public class ReviewResource {
     public void delete(@PathParam("id") Long id) {
     	PullRequestReview review = reviewManager.load(id);
     	User currentUser = userManager.getCurrent();
-    	if (review.getUser().equals(currentUser) || SecurityUtils.canManage(review.getRequest().getTargetProject())) 
+    	if (review.getUser().equals(currentUser) || SecurityUtils.canWriteCode(review.getRequest().getTargetProject().getFacade())) 
     		reviewManager.delete(review);
     	else
     		throw new UnauthorizedException();
@@ -90,7 +90,7 @@ public class ReviewResource {
 
     	Collection<PullRequestReview> reviews = reviewManager.findRange(criteria, (page-1)*perPage, perPage);
 		for (PullRequestReview review: reviews) {
-			if (!SecurityUtils.canRead(review.getRequest().getTargetProject())) {
+			if (!SecurityUtils.canReadCode(review.getRequest().getTargetProject().getFacade())) {
 				throw new UnauthorizedException("Unable to access pull request reviews of project '" 
 						+ review.getRequest().getTargetProject().getName() + "'");
 			}
@@ -105,7 +105,7 @@ public class ReviewResource {
     @Transactional
     @POST
     public Long save(@NotNull(message="may not be empty") @Valid PullRequestReview review) {
-    	if (!SecurityUtils.canRead(review.getRequest().getTargetProject()) 
+    	if (!SecurityUtils.canReadCode(review.getRequest().getTargetProject().getFacade()) 
     			|| !review.getUser().equals(userManager.getCurrent()) && !SecurityUtils.isAdministrator()) {
     		throw new UnauthorizedException();
     	}

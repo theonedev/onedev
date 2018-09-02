@@ -54,7 +54,7 @@ public class PasswordEditPage extends UserPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canManage(getUser());
+		return SecurityUtils.canAdministrate(getUser().getFacade());
 	}
 	
 }

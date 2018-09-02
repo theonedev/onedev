@@ -5,6 +5,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -18,6 +19,7 @@ import org.quartz.ScheduleBuilder;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.launcher.loader.Listen;
@@ -93,7 +95,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (administrator == null) {
 			administrator = new User();
 			administrator.setId(User.ROOT_ID);
-			manualConfigs.add(new ManualConfig("Create Administator User", administrator) {
+			Set<String> excludedProperties = Sets.newHashSet("administrator", "canCreateProjects"); 
+			manualConfigs.add(new ManualConfig("Create Administator User", administrator, excludedProperties) {
 
 				@Override
 				public Skippable getSkippable() {

@@ -12,76 +12,88 @@ import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import io.onedev.server.util.reviewrequirement.ReviewRequirementSpecLexer;
-import io.onedev.server.util.reviewrequirement.ReviewRequirementSpecParser;
-import io.onedev.server.util.reviewrequirement.ReviewRequirementSpecParser.CountContext;
-import io.onedev.server.util.reviewrequirement.ReviewRequirementSpecParser.CriteriaContext;
-import io.onedev.server.util.reviewrequirement.ReviewRequirementSpecParser.SpecContext;
+import io.onedev.server.util.reviewrequirement.ReviewRequirementParser.CountContext;
+import io.onedev.server.util.reviewrequirement.ReviewRequirementParser.CriteriaContext;
+import io.onedev.server.util.reviewrequirement.ReviewRequirementParser.RequirementContext;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.GroupManager;
+import io.onedev.server.exception.OneException;
+import io.onedev.server.manager.TeamManager;
 import io.onedev.server.manager.UserManager;
-import io.onedev.server.model.Group;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 
 public class ReviewRequirement {
 	
-	private final List<User> users = new ArrayList<>();
+	private final List<User> users;
 	
-	private final Map<Group, Integer> groups = new LinkedHashMap<>();
+	private final Map<Team, Integer> teams;
 	
-	public ReviewRequirement(String spec) {
-		SpecContext specContext = parse(spec);
+	public ReviewRequirement(List<User> users, Map<Team, Integer> teams) {
+		this.users = users;
+		this.teams = teams;
+	}
+	
+	public static ReviewRequirement parse(Project project, String requirementString) {
+		List<User> users = new ArrayList<>();
+		Map<Team, Integer> teams = new LinkedHashMap<>();
 		
-		for (CriteriaContext criteriaContext: specContext.criteria()) {
-			if (criteriaContext.userCriteria() != null) {
-				String userName = getBracedValue(criteriaContext.userCriteria().Value());
-				User user = OneDev.getInstance(UserManager.class).findByName(userName);
-				if (user != null) {
-					if (!users.contains(user)) { 
-						users.add(user);
-					} else {
-						throw new InvalidReviewRuleException("User '" + userName + "' is included multiple times");
-					}
-				} else {
-					throw new InvalidReviewRuleException("Unable to find user '" + userName + "'");
-				}
-			} else if (criteriaContext.groupCriteria() != null) {
-				String groupName = getBracedValue(criteriaContext.groupCriteria().Value());
-				Group group = OneDev.getInstance(GroupManager.class).find(groupName);
-				if (group != null) {
-					if (!groups.containsKey(group)) {
-						CountContext countContext = criteriaContext.groupCriteria().count();
-						if (countContext != null) {
-							if (countContext.DIGIT() != null)
-								groups.put(group, Integer.parseInt(countContext.DIGIT().getText()));
-							else
-								groups.put(group, 0);
+		if (requirementString != null) {
+			RequirementContext requirement = parse(requirementString);
+			
+			for (CriteriaContext criteria: requirement.criteria()) {
+				if (criteria.userCriteria() != null) {
+					String userName = getBracedValue(criteria.userCriteria().Value());
+					User user = OneDev.getInstance(UserManager.class).findByName(userName);
+					if (user != null) {
+						if (!users.contains(user)) { 
+							users.add(user);
 						} else {
-							groups.put(group, 1);
+							throw new OneException("User '" + userName + "' is included multiple times");
 						}
 					} else {
-						throw new InvalidReviewRuleException("Group '" + groupName + "' is included multiple times");
+						throw new OneException("Unable to find user '" + userName + "'");
 					}
-				} else {
-					throw new InvalidReviewRuleException("Unable to find group '" + groupName + "'");
+				} else if (criteria.teamCriteria() != null) {
+					String teamName = getBracedValue(criteria.teamCriteria().Value());
+					Team team = OneDev.getInstance(TeamManager.class).find(project, teamName);
+					if (team!= null) {
+						if (!teams.containsKey(team)) {
+							CountContext count = criteria.teamCriteria().count();
+							if (count != null) {
+								if (count.DIGIT() != null)
+									teams.put(team, Integer.parseInt(count.DIGIT().getText()));
+								else
+									teams.put(team, 0);
+							} else {
+								teams.put(team, 1);
+							}
+						} else {
+							throw new OneException("Team '" + teamName + "' is included multiple times");
+						}
+					} else {
+						throw new OneException("Unable to find team '" + teamName + "'");
+					}
 				}
-			}
+			}			
 		}
+		
+		return new ReviewRequirement(users, teams);
 	}
 
-	public static SpecContext parse(String spec) {
-		ANTLRInputStream is = new ANTLRInputStream(spec); 
-		ReviewRequirementSpecLexer lexer = new ReviewRequirementSpecLexer(is);
+	public static RequirementContext parse(String requirementString) {
+		ANTLRInputStream is = new ANTLRInputStream(requirementString); 
+		ReviewRequirementLexer lexer = new ReviewRequirementLexer(is);
 		lexer.removeErrorListeners();
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		ReviewRequirementSpecParser parser = new ReviewRequirementSpecParser(tokens);
+		ReviewRequirementParser parser = new ReviewRequirementParser(tokens);
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
-		return parser.spec();
+		return parser.requirement();
 	}
 	
-	private String getBracedValue(TerminalNode terminal) {
+	private static String getBracedValue(TerminalNode terminal) {
 		String value = terminal.getText().substring(1);
 		return value.substring(0, value.length()-1).trim();
 	}
@@ -90,8 +102,8 @@ public class ReviewRequirement {
 		return users;
 	}
 
-	public Map<Group, Integer> getGroups() {
-		return groups;
+	public Map<Team, Integer> getTeams() {
+		return teams;
 	}
 	
 	public boolean matches(User user) {
@@ -99,25 +111,26 @@ public class ReviewRequirement {
 			if (!eachUser.equals(user))
 				return false;
 		}
-		for (Map.Entry<Group, Integer> entry: groups.entrySet()) {
-			Group group = entry.getKey();
+		for (Map.Entry<Team, Integer> entry: teams.entrySet()) {
+			Team team = entry.getKey();
 			int requiredCount = entry.getValue();
-			if (requiredCount == 0 || requiredCount > group.getMembers().size())
-				requiredCount = group.getMembers().size();
+			if (requiredCount == 0 || requiredCount > team.getMembers().size())
+				requiredCount = team.getMembers().size();
 
-			if (requiredCount > 1 || requiredCount == 1 && !group.getMembers().contains(user))
+			if (requiredCount > 1 || requiredCount == 1 && !team.getMembers().contains(user))
 				return false;
 		}
 		return true;
 	}
 	
 	@Nullable
-	public String toSpec() {
+	@Override
+	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (User user: users)
 			builder.append("user(").append(user.getName()).append(") ");
-		for (Map.Entry<Group, Integer> entry: groups.entrySet()) {
-			builder.append("group(").append(entry.getKey().getName()).append(")");
+		for (Map.Entry<Team, Integer> entry: teams.entrySet()) {
+			builder.append("team(").append(entry.getKey().getName()).append(")");
 			if (entry.getValue() == 0)
 				builder.append(":all");
 			else if (entry.getValue() != 1)

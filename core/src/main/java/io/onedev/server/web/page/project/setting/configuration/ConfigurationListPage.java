@@ -15,6 +15,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -101,8 +102,15 @@ public class ConfigurationListPage extends ProjectSettingPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Configuration>> cellItem, String componentId,
 					IModel<Configuration> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
+				Fragment fragment = new Fragment(componentId, "nameFrag", ConfigurationListPage.this);
+				Configuration configuration = rowModel.getObject();
+				Link<Void> link = new BookmarkablePageLink<Void>("link", ConfigurationEditPage.class, 
+						ConfigurationEditPage.paramsOf(configuration));
+				link.add(new Label("label", configuration.getName()));
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
+			
 		});
 		
 		columns.add(new AbstractColumn<Configuration, Void>(Model.of("Actions")) {
@@ -111,15 +119,6 @@ public class ConfigurationListPage extends ProjectSettingPage {
 			public void populateItem(Item<ICellPopulator<Configuration>> cellItem, String componentId, IModel<Configuration> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", ConfigurationListPage.this);
 				fragment.add(AttributeAppender.append("class", "actions"));
-				
-				fragment.add(new Link<Void>("edit") {
-
-					@Override
-					public void onClick() {
-						setResponsePage(ConfigurationEditPage.class, ConfigurationEditPage.paramsOf(rowModel.getObject()));
-					}
-
-				});
 				
 				Configuration configuration = rowModel.getObject();
 				

@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.support.ifsubmittedby.Anyone;
 import io.onedev.server.model.support.ifsubmittedby.IfSubmittedBy;
-import io.onedev.server.model.support.ifsubmittedby.SpecifiedGroup;
+import io.onedev.server.model.support.ifsubmittedby.SpecifiedTeam;
 import io.onedev.server.model.support.ifsubmittedby.SpecifiedUser;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.TagPattern;
@@ -88,17 +88,17 @@ public class TagProtection implements Serializable {
 	}
 
 	public void onRenameGroup(String oldName, String newName) {
-		if (getSubmitter() instanceof SpecifiedGroup) {
-			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
-			if (specifiedGroup.getGroupName().equals(oldName))
-				specifiedGroup.setGroupName(newName);
+		if (getSubmitter() instanceof SpecifiedTeam) {
+			SpecifiedTeam specifiedGroup = (SpecifiedTeam) getSubmitter();
+			if (specifiedGroup.getTeamName().equals(oldName))
+				specifiedGroup.setTeamName(newName);
 		}
 	}
 	
 	public boolean onDeleteGroup(String groupName) {
-		if (getSubmitter() instanceof SpecifiedGroup) {
-			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
-			if (specifiedGroup.getGroupName().equals(groupName))
+		if (getSubmitter() instanceof SpecifiedTeam) {
+			SpecifiedTeam specifiedGroup = (SpecifiedTeam) getSubmitter();
+			if (specifiedGroup.getTeamName().equals(groupName))
 				return true;
 		}
 		return false;

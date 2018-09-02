@@ -2,7 +2,6 @@ package io.onedev.server.security.permission;
 
 import org.apache.shiro.authz.Permission;
 
-import io.onedev.server.security.ProjectPrivilege;
 import io.onedev.server.util.facade.ProjectFacade;
 
 public class ProjectPermission implements Permission {
@@ -30,7 +29,7 @@ public class ProjectPermission implements Permission {
 			ProjectPermission projectPermission = (ProjectPermission) p;
 			return project.equals(projectPermission.getProject()) && privilege.implies(projectPermission.getPrivilege());
 		} else {
-			return p instanceof PublicPermission;
+			return false;
 		}
 	}
 

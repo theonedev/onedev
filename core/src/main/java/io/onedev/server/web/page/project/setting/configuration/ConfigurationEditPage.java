@@ -4,6 +4,7 @@ import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -13,6 +14,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+import io.onedev.server.web.util.ConfirmOnClick;
 
 @SuppressWarnings("serial")
 public class ConfigurationEditPage extends ProjectSettingPage {
@@ -30,8 +32,12 @@ public class ConfigurationEditPage extends ProjectSettingPage {
 		oldName = getConfiguration().getName();
 	}
 
+	private ConfigurationManager getConfigurationManager() {
+		return OneDev.getInstance(ConfigurationManager.class);
+	}
+	
 	private Configuration getConfiguration() {
-		return OneDev.getInstance(ConfigurationManager.class).load(configurationId);
+		return getConfigurationManager().load(configurationId);
 	}
 	
 	@Override
@@ -47,8 +53,7 @@ public class ConfigurationEditPage extends ProjectSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				ConfigurationManager configurationManager = OneDev.getInstance(ConfigurationManager.class);
-				Configuration configurationWithSameName = configurationManager.find(getProject(), configuration.getName());
+				Configuration configurationWithSameName = getConfigurationManager().find(getProject(), configuration.getName());
 				if (configurationWithSameName != null && !configurationWithSameName.equals(configuration)) {
 					editor.getErrorContext(new PathSegment.Property("name"))
 							.addError("This name has already been used by another configuration in the project");
@@ -56,7 +61,7 @@ public class ConfigurationEditPage extends ProjectSettingPage {
 				if (!editor.hasErrors(true)) {
 					Configuration reloaded = getConfiguration();
 					editor.getBeanDescriptor().copyProperties(configuration, reloaded);
-					configurationManager.save(reloaded, oldName);
+					getConfigurationManager().save(reloaded, oldName);
 					setResponsePage(ConfigurationListPage.class, ConfigurationListPage.paramsOf(getProject()));
 					Session.get().success("Configuration updated");
 				}
@@ -64,6 +69,17 @@ public class ConfigurationEditPage extends ProjectSettingPage {
 			
 		};	
 		form.add(editor);
+		
+		form.add(new Link<Void>("delete") {
+
+			@Override
+			public void onClick() {
+				getConfigurationManager().delete(getConfiguration());
+				setResponsePage(ConfigurationListPage.class, ConfigurationListPage.paramsOf(getProject()));
+			}
+
+		}.add(new ConfirmOnClick("Do you really want to delete this configuration?")));
+		
 		add(form);
 	}
 
