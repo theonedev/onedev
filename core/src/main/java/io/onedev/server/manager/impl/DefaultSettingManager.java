@@ -7,11 +7,11 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.DataManager;
-import io.onedev.server.migration.VersionedDocument;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
+import io.onedev.server.model.support.authenticator.Authenticator;
 import io.onedev.server.model.support.setting.BackupSetting;
 import io.onedev.server.model.support.setting.MailSetting;
 import io.onedev.server.model.support.setting.SecuritySetting;
@@ -21,7 +21,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.security.authenticator.Authenticator;
 import io.onedev.utils.license.LicenseDetail;
 
 @Singleton
@@ -173,11 +172,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
         } else {
             setting = load(authenticatorId);
         }
-        VersionedDocument dom = (VersionedDocument) setting.getValue();
-        if (dom != null)
-        	return (Authenticator) dom.toBean();
-        else
-        	return null;
+        return (Authenticator) setting.getValue();
 	}
 
 	@Transactional
@@ -188,10 +183,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 			setting = new Setting();
 			setting.setKey(Key.AUTHENTICATOR);
 		}
-		if (authenticator != null)
-			setting.setValue(VersionedDocument.fromBean(authenticator));
-		else
-			setting.setValue(null);
+		setting.setValue(authenticator);
 		dao.persist(setting);
 	}
 

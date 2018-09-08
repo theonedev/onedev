@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.ifsubmittedby;
+package io.onedev.server.model.support.usermatcher;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -12,8 +12,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.UserChoice;
 
-@Editable(order=200, name="User")
-public class SpecifiedUser implements IfSubmittedBy {
+@Editable(order=500, name="User")
+public class SpecifiedUser implements UserMatcher {
 
 	private static final long serialVersionUID = 1L;
 	

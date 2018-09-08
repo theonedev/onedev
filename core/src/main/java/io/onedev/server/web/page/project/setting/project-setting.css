@@ -28,6 +28,9 @@
 #project-setting .panel-list .panel-heading input {
 	vertical-align: text-top;
 }
+#project-setting .panel-list input[type="checkbox"]+label {
+	font-weight: normal;
+}
 #project-setting .panel-list .add-new {
 	display: block; 
 	padding: 16px; 
@@ -42,11 +45,6 @@
 	text-decoration: none; 
 	background-color: #EBEBEB; 
 	border-color: #ADADAD;
-}
-#project-setting .panel-list .bean.list td.path, 
-#project-setting .panel-list .bean.list td.reviewerNames,
-#project-setting .panel-list .bean.list td.reviewAppointment {
-	width: 45%;
 }
 
 #project-setting .disabled .panel {

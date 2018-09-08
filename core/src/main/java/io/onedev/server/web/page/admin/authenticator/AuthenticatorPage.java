@@ -22,7 +22,7 @@ import com.google.common.base.Joiner;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
-import io.onedev.server.security.authenticator.Authenticated;
+import io.onedev.server.model.support.authenticator.Authenticated;
 import io.onedev.server.web.behavior.testform.TestFormBehavior;
 import io.onedev.server.web.behavior.testform.TestResult;
 import io.onedev.server.web.component.modal.ModalPanel;

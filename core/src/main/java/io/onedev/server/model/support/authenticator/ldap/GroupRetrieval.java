@@ -1,4 +1,4 @@
-package io.onedev.server.security.authenticator.ldap;
+package io.onedev.server.model.support.authenticator.ldap;
 
 import java.io.Serializable;
 

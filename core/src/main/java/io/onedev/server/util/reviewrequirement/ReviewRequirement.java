@@ -106,7 +106,7 @@ public class ReviewRequirement {
 		return teams;
 	}
 	
-	public boolean matches(User user) {
+	public boolean satisfied(User user) {
 		for (User eachUser: users) {
 			if (!eachUser.equals(user))
 				return false;

@@ -6,6 +6,8 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -72,13 +74,23 @@ abstract class BranchProtectionPanel extends Panel {
 			
 		});
 		
-		add(new AjaxCheckBox("enable", Model.of(protection.isEnabled())) {
+		AjaxCheckBox enableCheck;
+		add(enableCheck = new AjaxCheckBox("enable", Model.of(protection.isEnabled())) {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				protection.setEnabled(!protection.isEnabled());
 				onSave(target, protection);
 				target.add(BranchProtectionPanel.this);
+			}
+			
+		});
+		add(new WebMarkupContainer("enableLabel") {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				tag.put("for", enableCheck.getMarkupId(true));
 			}
 			
 		});

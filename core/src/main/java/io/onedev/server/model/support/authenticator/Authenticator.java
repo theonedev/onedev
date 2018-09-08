@@ -1,4 +1,4 @@
-package io.onedev.server.security.authenticator;
+package io.onedev.server.model.support.authenticator;
 
 import java.io.Serializable;
 

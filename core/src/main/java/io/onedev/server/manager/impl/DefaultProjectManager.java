@@ -327,14 +327,14 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	public boolean isModificationNeedsQualityCheck(User user, Project project, String branch, @Nullable String file) {
 		BranchProtection branchProtection = project.getBranchProtection(branch, user);
 		if (branchProtection != null) {
-			if (!ReviewRequirement.parse(project, branchProtection.getReviewRequirement()).matches(user)) 
+			if (!ReviewRequirement.parse(project, branchProtection.getReviewRequirement()).satisfied(user)) 
 				return true;
 			if (!branchProtection.getConfigurations().isEmpty())
 				return true;
 			
 			if (file != null) {
 				FileProtection fileProtection = branchProtection.getFileProtection(file);
-				if (fileProtection != null && !ReviewRequirement.parse(project, fileProtection.getReviewRequirement()).matches(user))
+				if (fileProtection != null && !ReviewRequirement.parse(project, fileProtection.getReviewRequirement()).satisfied(user))
 					return true;
 			}
 		}			
@@ -346,7 +346,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
 		BranchProtection branchProtection = project.getBranchProtection(branch, user);
 		if (branchProtection != null) {
-			if (!ReviewRequirement.parse(project, branchProtection.getReviewRequirement()).matches(user)) 
+			if (!ReviewRequirement.parse(project, branchProtection.getReviewRequirement()).satisfied(user)) 
 				return true;
 
 			List<Build> builds = buildManager.findAll(project, newObjectId.name());
@@ -357,7 +357,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			
 			for (String changedFile: getChangedFiles(project, oldObjectId, newObjectId, gitEnvs)) {
 				FileProtection fileProtection = branchProtection.getFileProtection(changedFile);
-				if (fileProtection != null && !ReviewRequirement.parse(project, fileProtection.getReviewRequirement()).matches(user))
+				if (fileProtection != null && !ReviewRequirement.parse(project, fileProtection.getReviewRequirement()).satisfied(user))
 					return true;
 			}
 		}

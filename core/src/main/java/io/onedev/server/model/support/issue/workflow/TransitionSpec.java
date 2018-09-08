@@ -11,14 +11,14 @@ import javax.validation.constraints.Size;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.support.authorized.SpecifiedTeam;
-import io.onedev.server.model.support.authorized.SpecifiedUser;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PullRequestTrigger;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.TransitionTrigger;
+import io.onedev.server.model.support.usermatcher.SpecifiedTeam;
+import io.onedev.server.model.support.usermatcher.SpecifiedUser;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;

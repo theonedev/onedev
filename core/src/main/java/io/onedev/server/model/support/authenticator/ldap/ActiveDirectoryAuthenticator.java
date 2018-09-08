@@ -1,4 +1,4 @@
-package io.onedev.server.security.authenticator.ldap;
+package io.onedev.server.model.support.authenticator.ldap;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -19,6 +19,11 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 		return super.getLdapUrl();
 	}
 
+	@Override
+	public void setLdapUrl(String ldapUrl) {
+		super.setLdapUrl(ldapUrl);
+	}
+
 	@Editable(order=300, description=""
 			+ "To authenticate user against Active Directory and retrieve associated attributes and groups, OneDev "
 			+ "would have to first authenticate itself against the Active Directory server and OneDev does that by "
@@ -30,6 +35,11 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 		return super.getManagerDN();
 	}
 
+	@Override
+	public void setManagerDN(String managerDN) {
+		super.setManagerDN(managerDN);
+	}
+
 	@Editable(order=500, description=
 		"Specifies the base node for user search. For example: <i>cn=Users, dc=example, dc=com</i>")
 	@NotEmpty
@@ -39,18 +49,18 @@ public class ActiveDirectoryAuthenticator extends LdapAuthenticator {
 	}
 
 	@Override
+	public void setUserSearchBase(String userSearchBase) {
+		super.setUserSearchBase(userSearchBase);
+	}
+
+	@Override
 	public String getUserSearchFilter() {
 		return "(&(sAMAccountName={0})(objectclass=user))";
 	}
     
 	@Override
-	public String getUserFullNameAttribute() {
-		return super.getUserFullNameAttribute();
-	}
-
-	@Override
-	public String getUserEmailAttribute() {
-		return super.getUserEmailAttribute();
+	public void setUserSearchFilter(String userSearchFilter) {
+		super.setUserSearchFilter(userSearchFilter);
 	}
 
 	@Editable(order=1000, description=""

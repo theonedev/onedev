@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.authorized;
+package io.onedev.server.model.support.usermatcher;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -13,8 +13,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.TeamChoice;
 import io.onedev.server.web.editable.annotation.OmitName;
 
-@Editable(order=300, name="Team")
-public class SpecifiedTeam implements Authorized {
+@Editable(order=600, name="Team")
+public class SpecifiedTeam implements UserMatcher {
 
 	private static final long serialVersionUID = 1L;
 

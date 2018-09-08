@@ -6,10 +6,10 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.model.support.ifsubmittedby.Anyone;
-import io.onedev.server.model.support.ifsubmittedby.IfSubmittedBy;
-import io.onedev.server.model.support.ifsubmittedby.SpecifiedTeam;
-import io.onedev.server.model.support.ifsubmittedby.SpecifiedUser;
+import io.onedev.server.model.support.usermatcher.Anyone;
+import io.onedev.server.model.support.usermatcher.SpecifiedTeam;
+import io.onedev.server.model.support.usermatcher.SpecifiedUser;
+import io.onedev.server.model.support.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.TagPattern;
 
@@ -22,7 +22,7 @@ public class TagProtection implements Serializable {
 	
 	private String tag;
 	
-	private IfSubmittedBy submitter = new Anyone();
+	private UserMatcher submitter = new Anyone();
 	
 	private boolean noUpdate = true;
 	
@@ -52,11 +52,11 @@ public class TagProtection implements Serializable {
 	@Editable(order=150, name="If Performed By", description="This protection rule will apply "
 			+ "only if the action is performed by specified users here")
 	@NotNull(message="may not be empty")
-	public IfSubmittedBy getSubmitter() {
+	public UserMatcher getSubmitter() {
 		return submitter;
 	}
 
-	public void setSubmitter(IfSubmittedBy submitter) {
+	public void setSubmitter(UserMatcher submitter) {
 		this.submitter = submitter;
 	}
 

@@ -14,11 +14,11 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.exception.OneException;
-import io.onedev.server.model.support.authorized.CodeWriters;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueIsEmpty;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.ValueIsNotEmpty;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.usermatcher.CodeWriters;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.OrCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;

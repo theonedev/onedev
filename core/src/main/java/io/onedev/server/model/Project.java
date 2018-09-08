@@ -1080,9 +1080,8 @@ public class Project extends AbstractEntity {
 	}
 
 	public ArrayList<IssueBoard> getIssueBoards() {
-		if (issueBoards == null) {
+		if (issueBoards == null)
 			issueBoards = new ArrayList<>();
-		}
 		return issueBoards;
 	}
 

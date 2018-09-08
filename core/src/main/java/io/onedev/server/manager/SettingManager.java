@@ -3,12 +3,12 @@ package io.onedev.server.manager;
 import javax.annotation.Nullable;
 
 import io.onedev.server.model.Setting;
+import io.onedev.server.model.support.authenticator.Authenticator;
 import io.onedev.server.model.support.setting.BackupSetting;
 import io.onedev.server.model.support.setting.MailSetting;
 import io.onedev.server.model.support.setting.SecuritySetting;
 import io.onedev.server.model.support.setting.SystemSetting;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.security.authenticator.Authenticator;
 import io.onedev.utils.license.LicenseDetail;
 
 public interface SettingManager extends EntityManager<Setting> {

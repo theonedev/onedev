@@ -1,4 +1,4 @@
-package io.onedev.server.security.authenticator.ldap;
+package io.onedev.server.model.support.authenticator.ldap;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,8 +28,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.server.security.authenticator.Authenticated;
-import io.onedev.server.security.authenticator.Authenticator;
+import io.onedev.server.model.support.authenticator.Authenticated;
+import io.onedev.server.model.support.authenticator.Authenticator;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.utils.StringUtils;

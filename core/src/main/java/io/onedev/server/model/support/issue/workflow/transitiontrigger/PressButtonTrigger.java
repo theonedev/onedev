@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.model.support.authorized.Authorized;
+import io.onedev.server.model.support.usermatcher.UserMatcher;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
@@ -25,7 +25,7 @@ public class PressButtonTrigger implements TransitionTrigger {
 
 	private String buttonLabel;
 
-	private Authorized authorized;
+	private UserMatcher authorized;
 	
 	private List<String> promptFields;
 	
@@ -41,11 +41,11 @@ public class PressButtonTrigger implements TransitionTrigger {
 
 	@Editable(order=200, name="Authorization")
 	@NotNull(message="may not be empty")
-	public Authorized getAuthorized() {
+	public UserMatcher getAuthorized() {
 		return authorized;
 	}
 	
-	public void setAuthorized(Authorized authorized) {
+	public void setAuthorized(UserMatcher authorized) {
 		this.authorized = authorized;
 	}
 

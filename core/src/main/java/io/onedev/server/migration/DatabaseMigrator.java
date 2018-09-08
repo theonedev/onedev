@@ -2,6 +2,7 @@ package io.onedev.server.migration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -480,6 +481,12 @@ public class DatabaseMigrator {
 		Map<String, Set<String>> requestCodeComments = new HashMap<>();
 		Map<String, Integer> requestCommentCounts = new HashMap<>();
 		Set<String> openRequests = new HashSet<>();
+		Map<String, String> reviewRequirements = new HashMap<>(); 
+		Map<String, String[]> groups= new HashMap<>();
+		Map<String, String[]> groupMemberships = new HashMap<>();
+		Map<String, String[]> userAuthorizations = new HashMap<>();
+		Map<String, String[]> groupAuthorizations = new HashMap<>();
+		 
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("Users.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
@@ -529,6 +536,60 @@ public class DatabaseMigrator {
 						openRequests.add(element.elementTextTrim("id"));
 					}
 				}				
+			} else if (file.getName().startsWith("Groups.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String id = element.elementTextTrim("id");
+					groups.put(id, new String[] {
+							element.elementTextTrim("name"), 
+							element.elementTextTrim("administrator"), 
+							element.elementTextTrim("canCreateProjects")});
+				}				
+			} else if (file.getName().startsWith("GroupAuthorizations.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String id = element.elementTextTrim("id");
+					groupAuthorizations.put(id, new String[] {
+							element.elementTextTrim("project"), 
+							element.elementTextTrim("group"), 
+							element.elementTextTrim("privilege")});
+				}				
+			} else if (file.getName().startsWith("UserAuthorizations.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String id = element.elementTextTrim("id");
+					userAuthorizations.put(id, new String[] {
+							element.elementTextTrim("project"),
+							element.elementTextTrim("user"),
+							element.elementTextTrim("privilege")							
+					});
+				}				
+			} else if (file.getName().startsWith("Memberships.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String id = element.elementTextTrim("id");
+					groupMemberships.put(id, new String[] {
+							element.elementTextTrim("group"),
+							element.elementTextTrim("user")							
+					});
+				}				
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String projectId = element.elementTextTrim("id");
+					StringBuilder builder = new StringBuilder();
+					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
+						Element reviewRequirementSpecElement = branchProtectionElement.element("reviewRequirementSpec");
+						if (reviewRequirementSpecElement != null) 
+							builder.append(reviewRequirementSpecElement.getText()).append(";");
+						
+						for (Element fileProtectionElement: branchProtectionElement.element("fileProtections").elements()) {
+							reviewRequirementSpecElement = fileProtectionElement.element("reviewRequirementSpec");
+							builder.append(reviewRequirementSpecElement.getText()).append(";");
+						}
+					}
+					reviewRequirements.put(projectId, builder.toString());
+				}				
 			}
 		}
 		
@@ -559,14 +620,147 @@ public class DatabaseMigrator {
 		Element requestBuildListElement = requestBuildsDOM.addElement("list");
 		int requestBuildCount = 0;
 		
+		VersionedDocument teamsDOM = new VersionedDocument();
+		Element teamListElement = teamsDOM.addElement("list");
+		int teamCount = 0;
+		
+		VersionedDocument membershipsDOM = new VersionedDocument();
+		Element membershipListElement = membershipsDOM.addElement("list");
+		int membershipCount = 0;
+		
+		Map<String, String[]> teams = new HashMap<>();
+		Map<String, String[]> teamMemberships = new HashMap<>();
+		
+		for (Map.Entry<String, String[]> groupEntry: groups.entrySet()) {
+			String groupId = groupEntry.getKey();
+			String groupName = groupEntry.getValue()[0];
+			for (Map.Entry<String, String> reviewRequirementEntry: reviewRequirements.entrySet()) {
+				String projectId = reviewRequirementEntry.getKey();
+				String privilege = null;
+				for (Map.Entry<String, String[]> groupAuthorizationEntry: groupAuthorizations.entrySet()) {
+					if (groupAuthorizationEntry.getValue()[0].equals(projectId) 
+							&& groupAuthorizationEntry.getValue()[1].equals(groupId)) {
+						privilege = groupAuthorizationEntry.getValue()[2];
+						break;
+					}
+				}
+				if (privilege == null && reviewRequirementEntry.getValue().contains("group(" + groupName + ")"))
+					privilege = "READ";
+				if (privilege != null) {
+					String teamId = String.valueOf(++teamCount);
+					Element teamElement = teamListElement.addElement("io.onedev.server.model.Team");
+					teamElement.addAttribute("revision", "0.0");
+					teamElement.addElement("id").setText(teamId);
+					teamElement.addElement("project").setText(projectId);
+					teamElement.addElement("name").setText(groupName);
+					if (privilege.equals("READ"))
+						teamElement.addElement("privilege").setText("CODE_READ");
+					else if (privilege.equals("WRITE"))
+						teamElement.addElement("privilege").setText("CODE_WRITE");
+					else
+						teamElement.addElement("privilege").setText("PROJECT_ADMINISTRATION");
+
+					teams.put(String.valueOf(teamId), new String[] {projectId, groupName});
+					
+					for (Map.Entry<String, String[]> membershipEntry: groupMemberships.entrySet()) {
+						if (membershipEntry.getValue()[0].equals(groupId)) {
+							String userId = membershipEntry.getValue()[1];
+							Element membershipElement = membershipListElement.addElement("io.onedev.server.model.Membership");
+							String membershipId = String.valueOf(++membershipCount);
+							membershipElement.addAttribute("revision", "0.0");
+							membershipElement.addElement("id").setText(membershipId);
+							membershipElement.addElement("team").setText(teamId);
+							membershipElement.addElement("user").setText(userId);
+							teamMemberships.put(membershipId, new String[] {teamId, userId});
+						}
+					}
+				}
+			}
+		}
+		
+		for (Map.Entry<String, String[]> userAuthorizationEntry: userAuthorizations.entrySet()) {
+			String projectId = userAuthorizationEntry.getValue()[0];
+			String userId = userAuthorizationEntry.getValue()[1];
+			String privilege = userAuthorizationEntry.getValue()[2];
+			String teamName;
+			if (privilege.equals("READ"))
+				teamName = "Code readers";
+			else if (privilege.equals("WRITE"))
+				teamName = "Code writers";
+			else
+				teamName = "Project administrators";
+			String teamId = null;
+			for (Map.Entry<String, String[]> teamEntry: teams.entrySet()) {
+				if (teamEntry.getValue()[0].equals(projectId) && teamEntry.getValue()[1].equals(teamName)) {
+					teamId = teamEntry.getKey();
+					break;
+				}
+			}
+			if (teamId == null) {
+				teamId = String.valueOf(++teamCount);
+				Element teamElement = teamListElement.addElement("io.onedev.server.model.Team");
+				teamElement.addAttribute("revision", "0.0");
+				teamElement.addElement("id").setText(teamId);
+				teamElement.addElement("project").setText(projectId);
+				teamElement.addElement("name").setText(teamName);
+				if (privilege.equals("READ"))
+					teamElement.addElement("privilege").setText("CODE_READ");
+				else if (privilege.equals("WRITE"))
+					teamElement.addElement("privilege").setText("CODE_WRITE");
+				else
+					teamElement.addElement("privilege").setText("PROJECT_ADMINISTRATION");
+				teams.put(teamId, new String[] {projectId, teamName});
+			} 
+			
+			boolean found = false;
+			for (Map.Entry<String, String[]> membershipEntry: teamMemberships.entrySet()) {
+				if (membershipEntry.getValue()[0].equals(teamId) && membershipEntry.getValue()[1].equals(userId)) {
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				Element membershipElement = membershipListElement.addElement("io.onedev.server.model.Membership");
+				membershipElement.addAttribute("revision", "0.0");
+				String membershipId = String.valueOf(++membershipCount);
+				membershipElement.addElement("id").setText(membershipId);
+				membershipElement.addElement("team").setText(teamId);
+				membershipElement.addElement("user").setText(userId);
+				teamMemberships.put(membershipId, new String[] {teamId, userId});			
+			}
+		}
+		
 		for (File file: dataDir.listFiles()) {
 			if (file.getName().startsWith("BranchWatches.xml") 
 					|| file.getName().startsWith("PullRequestReferences.xml")
 					|| file.getName().startsWith("PullRequestStatusChanges.xml")
 					|| file.getName().startsWith("PullRequestTasks.xml")
 					|| file.getName().startsWith("ReviewInvitations.xml")
-					|| file.getName().startsWith("Reviews.xml")) {
+					|| file.getName().startsWith("Reviews.xml")
+					|| file.getName().startsWith("Groups.xml")
+					|| file.getName().startsWith("GroupAuthorizations.xml")
+					|| file.getName().startsWith("UserAuthorizations.xml")
+					|| file.getName().startsWith("Memberships.xml")) {
 				FileUtils.deleteFile(file);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					String userId = element.elementTextTrim("id");
+					boolean canCreateProjects = false;
+					boolean administrator = false;
+					for (Map.Entry<String, String[]> entry: groupMemberships.entrySet()) {
+						if (entry.getValue()[1].equals(userId)) {
+							String groupId = entry.getValue()[0];
+							if (groups.get(groupId)[1].equals("true"))
+								administrator = true;
+							if (groups.get(groupId)[2].equals("true")) 
+								canCreateProjects = true;
+						}
+					}
+					element.addElement("administrator").setText(String.valueOf(administrator));
+					element.addElement("canCreateProjects").setText(String.valueOf(canCreateProjects));
+				}
+				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("CodeComments.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
@@ -661,12 +855,33 @@ public class DatabaseMigrator {
 				}				
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Configs.xml")) {
-				VersionedDocument dom = VersionedDocument.fromFile(file);
+				String content;
+				try {
+					content = FileUtils.readFileToString(file, Charsets.UTF_8);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				content = StringUtils.replace(content, "io.onedev.server.security.authenticator.", 
+						"io.onedev.server.model.support.authenticator.");
+				VersionedDocument dom = VersionedDocument.fromXML(content);
 				for (Element element: dom.getRootElement().elements()) {
 					element.setName("io.onedev.server.model.Setting");
 					Element settingElement = element.element("setting");
-					if (settingElement != null)
+					if (settingElement != null) {
 						settingElement.setName("value");
+						if (element.elementTextTrim("key").equals("AUTHENTICATOR")) {
+							Element authenticatorElement = settingElement.elementIterator().next();
+							settingElement.addAttribute("class", authenticatorElement.getName());
+							for (Element fieldElement: authenticatorElement.elements()) {
+								if (!fieldElement.getName().equals("defaultGroupNames")) {
+									fieldElement.detach();
+									settingElement.add(fieldElement);
+								}
+							}
+							authenticatorElement.detach();
+							settingElement.addElement("canCreateProjects").setText("true");
+						}
+					}
 				}
 				FileUtils.deleteFile(file);
 				dom.writeToFile(new File(file.getParentFile(), file.getName().replace("Config", "Setting")), false);
@@ -685,6 +900,11 @@ public class DatabaseMigrator {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
 					String project = element.elementTextTrim("id");
+					Element publicReadElement = element.element("publicRead");
+					if (publicReadElement.getTextTrim().equals("true")) 
+						element.addElement("defaultPrivilege").setText("CODE_READ");
+					publicReadElement.detach();
+					
 					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
 						branchProtectionElement.element("verifyMerges").setName("buildMerges");
 						Element verificationsElement = branchProtectionElement.element("verifications");
@@ -717,15 +937,39 @@ public class DatabaseMigrator {
 						Element submitterElement = branchProtectionElement.element("submitter");
 						String submitterClass = submitterElement.attributeValue("class");
 						submitterClass = submitterClass.replace("io.onedev.server.model.support.submitter.", 
-								"io.onedev.server.model.support.ifsubmittedby.");
+								"io.onedev.server.model.support.usermatcher.");
+						submitterClass = submitterClass.replace("SpecifiedGroup", "SpecifiedTeam");
 						submitterElement.attribute("class").setValue(submitterClass);
+						Element groupNameElement = submitterElement.element("groupName");
+						if (groupNameElement != null)
+							groupNameElement.setName("teamName");
+						
+						Element reviewRequirementSpecElement = branchProtectionElement.element("reviewRequirementSpec");
+						if (reviewRequirementSpecElement != null) {
+							reviewRequirementSpecElement.setName("reviewRequirement");
+							String reviewRequirement = reviewRequirementSpecElement.getText();
+							reviewRequirement = reviewRequirement.replace("group(", "team(");
+							reviewRequirementSpecElement.setText(reviewRequirement);
+						}
+						
+						for (Element fileProtectionElement: branchProtectionElement.element("fileProtections").elements()) {
+							reviewRequirementSpecElement = fileProtectionElement.element("reviewRequirementSpec");
+							reviewRequirementSpecElement.setName("reviewRequirement");
+							String reviewRequirement = reviewRequirementSpecElement.getText();
+							reviewRequirement = reviewRequirement.replace("group(", "team(");
+							reviewRequirementSpecElement.setText(reviewRequirement);
+						}
 					}
 					for (Element tagProtectionElement: element.element("tagProtections").elements()) {
 						Element submitterElement = tagProtectionElement.element("submitter");
 						String submitterClass = submitterElement.attributeValue("class");
 						submitterClass = submitterClass.replace("io.onedev.server.model.support.submitter.", 
-								"io.onedev.server.model.support.ifsubmittedby.");
+								"io.onedev.server.model.support.usermatcher.");
+						submitterClass = submitterClass.replace("SpecifiedGroup", "SpecifiedTeam");
 						submitterElement.attribute("class").setValue(submitterClass);
+						Element groupNameElement = submitterElement.element("groupName");
+						if (groupNameElement != null)
+							groupNameElement.setName("teamName");
 					}
 				}				
 				dom.writeToFile(file, false);
@@ -735,5 +979,7 @@ public class DatabaseMigrator {
 		requestReviewsDOM.writeToFile(new File(dataDir, "PullRequestReviews.xml"), false);
 		configurationsDOM.writeToFile(new File(dataDir, "Configurations.xml"), false);
 		requestBuildsDOM.writeToFile(new File(dataDir, "PullRequestBuilds.xml"), false);
+		teamsDOM.writeToFile(new File(dataDir, "Teams.xml"), false);
+		membershipsDOM.writeToFile(new File(dataDir, "Memberships.xml"), false);
 	}
 }

@@ -13,14 +13,15 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.ifsubmittedby.Anyone;
-import io.onedev.server.model.support.ifsubmittedby.IfSubmittedBy;
-import io.onedev.server.model.support.ifsubmittedby.SpecifiedTeam;
-import io.onedev.server.model.support.ifsubmittedby.SpecifiedUser;
+import io.onedev.server.model.support.usermatcher.Anyone;
+import io.onedev.server.model.support.usermatcher.SpecifiedTeam;
+import io.onedev.server.model.support.usermatcher.SpecifiedUser;
+import io.onedev.server.model.support.usermatcher.UserMatcher;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.web.editable.annotation.BranchPattern;
 import io.onedev.server.web.editable.annotation.ConfigurationChoice;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.utils.PathUtils;
 
 @Editable
@@ -32,7 +33,7 @@ public class BranchProtection implements Serializable {
 	
 	private String branch;
 	
-	private IfSubmittedBy submitter = new Anyone();
+	private UserMatcher submitter = new Anyone();
 	
 	private boolean noForcedPush = true;
 	
@@ -71,11 +72,11 @@ public class BranchProtection implements Serializable {
 	@Editable(order=150, name="If Submitted By", description="This protection rule will apply "
 			+ "only if the change is submitted by specified users here")
 	@NotNull(message="may not be empty")
-	public IfSubmittedBy getSubmitter() {
+	public UserMatcher getSubmitter() {
 		return submitter;
 	}
 
-	public void setSubmitter(IfSubmittedBy submitter) {
+	public void setSubmitter(UserMatcher submitter) {
 		this.submitter = submitter;
 	}
 
@@ -109,6 +110,7 @@ public class BranchProtection implements Serializable {
 	@Editable(order=400, name="Required Reviewers", description="Optionally specify required reviewers for changes of "
 			+ "specified branch. OneDev assumes that the user submitting the change has completed the review already")
 	@io.onedev.server.web.editable.annotation.ReviewRequirement
+	@NameOfEmptyValue("No one")
 	public String getReviewRequirement() {
 		return reviewRequirement;
 	}
@@ -119,6 +121,7 @@ public class BranchProtection implements Serializable {
 
 	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")
 	@ConfigurationChoice
+	@NameOfEmptyValue("No any")
 	public List<String> getConfigurations() {
 		return configurations;
 	}
