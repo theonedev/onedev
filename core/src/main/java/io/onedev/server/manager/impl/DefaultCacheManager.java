@@ -27,6 +27,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityPersisted;
 import io.onedev.server.persistence.dao.EntityRemoved;
+import io.onedev.server.util.facade.EntityFacade;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.TeamFacade;
@@ -94,7 +95,7 @@ public class DefaultCacheManager implements CacheManager {
 	@Transactional
 	@Listen
 	public void on(EntityPersisted event) {
-		Object facade;
+		EntityFacade facade;
 		
 		if (event.getEntity() instanceof Project) {
 			facade = ((Project) event.getEntity()).getFacade();
@@ -178,17 +179,18 @@ public class DefaultCacheManager implements CacheManager {
 					try {
 						for (Iterator<Map.Entry<Long, TeamFacade>> it = teams.entrySet().iterator(); it.hasNext();) {
 							TeamFacade team = it.next().getValue();
-							if (team.getProjectId().equals(id))
+							if (team.getProjectId().equals(id)) {
 								it.remove();
-							teamIds.inverse().remove(team.getId());
-							membershipsLock.writeLock().lock();
-							try {
-								for (Iterator<Map.Entry<Long, MembershipFacade>> it2 = memberships.entrySet().iterator(); it2.hasNext();) {
-									if (it2.next().getValue().getTeamId().equals(team.getId()))
-										it2.remove();
+								teamIds.inverse().remove(team.getId());
+								membershipsLock.writeLock().lock();
+								try {
+									for (Iterator<Map.Entry<Long, MembershipFacade>> it2 = memberships.entrySet().iterator(); it2.hasNext();) {
+										if (it2.next().getValue().getTeamId().equals(team.getId()))
+											it2.remove();
+									}
+								} finally {
+									membershipsLock.writeLock().unlock();
 								}
-							} finally {
-								membershipsLock.writeLock().unlock();
 							}
 						}
 					} finally {
