@@ -222,7 +222,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			protected List<Build> load() {
-				return OneDev.getInstance(BuildManager.class).findAll(getProject(), getCommit().name());
+				return OneDev.getInstance(BuildManager.class).query(getProject(), getCommit().name());
 			}
 			
 		}));

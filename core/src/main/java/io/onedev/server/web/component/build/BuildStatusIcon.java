@@ -11,9 +11,9 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 
 @SuppressWarnings("serial")
-public class BuildStatusPanel extends GenericPanel<Build> {
+public class BuildStatusIcon extends GenericPanel<Build> {
 
-	public BuildStatusPanel(String id, IModel<Build> model) {
+	public BuildStatusIcon(String id, IModel<Build> model) {
 		super(id, model);
 	}
 

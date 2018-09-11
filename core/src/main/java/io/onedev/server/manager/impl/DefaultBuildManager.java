@@ -7,14 +7,17 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Criteria;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
 import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.server.OneDev;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.build.BuildStarted;
 import io.onedev.server.manager.BuildManager;
+import io.onedev.server.manager.ConfigurationManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Project;
@@ -52,22 +55,22 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		criteria.add(Restrictions.lt("id", build.getId()));
 		criteria.add(Restrictions.eq("configuration", build.getConfiguration()));
 		criteria.addOrder(Order.desc("id"));
-		List<Build> builds = findRange(criteria, 0, 1);
+		List<Build> builds = query(criteria, 0, 1);
 		return !builds.isEmpty()?builds.iterator().next():null;
 	}
 	
 	@Sessional
 	@Override
-	public List<Build> findAll(Project project, String commit) {
+	public List<Build> query(Project project, String commit) {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.createCriteria("configuration").add(Restrictions.eq("project", project));
 		criteria.add(Restrictions.eq("commit", commit));
 		criteria.addOrder(Order.asc("id"));
-		return findAll(criteria);
+		return query(criteria);
 	}
 
 	@Override
-	public Build find(Configuration configuration, String commit) {
+	public Build findByCommit(Configuration configuration, String commit) {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.eq("configuration", configuration));
 		criteria.add(Restrictions.eq("commit", commit));
@@ -76,9 +79,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 	@Override
 	public void save(Build build) {
-		if (build.isNew())
-			build.setNumber(getNextNumber(build.getConfiguration().getProject()));
-		
 		super.save(build);
 		
 		if (build.getStatus() == Build.Status.RUNNING) 
@@ -89,10 +89,11 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	@Sessional
 	@Override
-	public Build find(Project project, long number) {
+	public Build findByName(Configuration configuration, String name) {
 		EntityCriteria<Build> criteria = newCriteria();
-		criteria.createCriteria("configuration").add(Restrictions.eq("project", project));
-		criteria.add(Restrictions.eq("number", number));
+		criteria.add(Restrictions.eq("configuration", configuration));
+		criteria.add(Restrictions.eq("name", name));
+		criteria.addOrder(Order.desc("id"));
 		return find(criteria);
 	}
 	
@@ -101,62 +102,55 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	public List<Build> query(Project project, String term, int count) {
 		List<Build> builds = new ArrayList<>();
 		
-		Long number = null;
-		String numberStr = term;
-		if (numberStr != null) {
-			numberStr = numberStr.trim();
-			if (numberStr.startsWith("#"))
-				numberStr = numberStr.substring(1);
-			if (StringUtils.isNumeric(numberStr))
-				number = Long.valueOf(numberStr);
-		}
-		
-		if (number != null) {
-			Build build = find(project, number);
-			if (build != null)
-				builds.add(build);
-			EntityCriteria<Build> criteria = newCriteria();
-			criteria.createCriteria("configuration").add(Restrictions.eq("project", project));
-			criteria.add(Restrictions.and(
-					Restrictions.or(Restrictions.ilike("noSpaceCommitShortMessage", "%" + term + "%"), Restrictions.ilike("numberStr", term + "%")), 
-					Restrictions.ne("number", number)
-				));
-			criteria.addOrder(Order.desc("number"));
-			builds.addAll(findRange(criteria, 0, count-builds.size()));
-		} else {
-			EntityCriteria<Build> criteria = newCriteria();
-			criteria.createCriteria("configuration").add(Restrictions.eq("project", project));
-			if (StringUtils.isNotBlank(term)) {
-				criteria.add(Restrictions.or(
-						Restrictions.ilike("noSpaceCommitShortMessage", "%" + term + "%"), 
-						Restrictions.ilike("numberStr", (term.startsWith("#")? term.substring(1): term) + "%")));
+		EntityCriteria<Build> criteria = newCriteria();
+		Criteria configurationCriteria = criteria.createCriteria("configuration");
+		configurationCriteria.add(Restrictions.eq("project", project));
+		if (term != null) {
+			if (term.contains(Build.FQN_SEPARATOR)) {
+				String configurationTerm = StringUtils.substringBefore(term, Build.FQN_SEPARATOR);
+				String nameTerm = StringUtils.substringAfter(term, Build.FQN_SEPARATOR);
+				configurationCriteria.add(Restrictions.ilike("name", "%" + configurationTerm + "%"));
+				criteria.add(Restrictions.ilike("name", "%" + nameTerm + "%"));
+			} else {
+				criteria.add(Restrictions.ilike("name", "%" + term + "%"));
 			}
-			criteria.addOrder(Order.desc("number"));
-			builds.addAll(findRange(criteria, 0, count));
-		} 
+		}
+		criteria.addOrder(Order.desc("id"));
+		builds.addAll(query(criteria, 0, count-builds.size()));
 		return builds;
 	}
 
 	@Sessional
 	@Override
-	public Build find(String uuid) {
+	public Build findByUUID(String uuid) {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.eq("uuid", uuid));
 		return find(criteria);
 	}
 	
 	@Override
-	public List<Build> findAllAfter(Project project, String buildUUID, int count) {
+	public List<Build> queryAfter(Project project, String afterBuildUUID, int count) {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.createCriteria("configuration").add(Restrictions.eq("project", project));
 		criteria.addOrder(Order.asc("id"));
-		if (buildUUID != null) {
-			Build build = find(buildUUID);
-			if (build != null) {
+		if (afterBuildUUID != null) {
+			Build build = findByUUID(afterBuildUUID);
+			if (build != null)
 				criteria.add(Restrictions.gt("id", build.getId()));
-			}
 		}
-		return findRange(criteria, 0, count);
+		return query(criteria, 0, count);
 	}
-	
+
+	@Sessional
+	@Override
+	public Build findByFQN(Project project, String fqn) {
+		String configurationName = StringUtils.substringBefore(fqn, Build.FQN_SEPARATOR);
+		String buildName = StringUtils.substringAfter(fqn, Build.FQN_SEPARATOR);
+		Configuration configuration = OneDev.getInstance(ConfigurationManager.class).find(project, configurationName);
+		if (configuration != null)
+			return OneDev.getInstance(BuildManager.class).findByName(configuration, buildName);
+		else
+			return null;
+	}
+
 }

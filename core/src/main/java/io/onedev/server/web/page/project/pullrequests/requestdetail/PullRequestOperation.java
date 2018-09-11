@@ -113,7 +113,7 @@ public enum PullRequestOperation {
 							|| request.getSource().getObjectName().equals(preview.getMerged()))
 					&& SecurityUtils.canModify(request)
 					&& SecurityUtils.canDeleteBranch(request.getSourceProject(), request.getSourceBranch())
-					&& pullRequestManager.findAllOpenTo(request.getSource()).isEmpty();
+					&& pullRequestManager.queryOpenTo(request.getSource()).isEmpty();
 		}
 
 	}, 

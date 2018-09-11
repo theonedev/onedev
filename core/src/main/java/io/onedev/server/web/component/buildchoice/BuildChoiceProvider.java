@@ -39,9 +39,8 @@ public class BuildChoiceProvider extends ChoiceProvider<Build> {
 	public void toJson(Build choice, JSONWriter writer) throws JSONException {
 		writer
 			.key("id").value(choice.getId())
-			.key("number").value(choice.getNumber())
-			.key("configuration").value(HtmlEscape.escapeHtml5(choice.getConfiguration().getName()))
-			.key("commitShortMessage").value(HtmlEscape.escapeHtml5(choice.getCommitShortMessage()));
+			.key("name").value(choice.getName())
+			.key("configuration").value(HtmlEscape.escapeHtml5(choice.getConfiguration().getName()));
 	}
 
 	@Override

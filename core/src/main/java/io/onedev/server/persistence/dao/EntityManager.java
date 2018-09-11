@@ -67,11 +67,11 @@ public interface EntityManager<T extends AbstractEntity> {
 	 * @return
 	 * 			a list of execution result of the detached criteria
 	 */
-	List<T> findRange(EntityCriteria<T> criteria, int firstResult, int maxResults);
+	List<T> query(EntityCriteria<T> criteria, int firstResult, int maxResults);
 	
-	List<T> findAll(EntityCriteria<T> criteria);
+	List<T> query(EntityCriteria<T> criteria);
 	
-	List<T> findAll();
+	List<T> query();
 	
 	EntityCriteria<T> newCriteria();
 	

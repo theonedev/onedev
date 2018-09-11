@@ -29,7 +29,7 @@ import io.onedev.server.manager.IssueInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.build.BuildStatusPanel;
+import io.onedev.server.web.component.build.BuildStatusIcon;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
 
 @SuppressWarnings("serial")
@@ -41,7 +41,7 @@ public class FixedInBuildsPage extends IssueDetailPage {
 		protected List<Build> load() {
 			Map<Configuration, Build> buildMap = new HashMap<>();
 			for (String buildUUID: OneDev.getInstance(IssueInfoManager.class).getFixedInBuildUUIDs(getProject(), getIssue().getUUID())) {
-				Build build = OneDev.getInstance(BuildManager.class).find(buildUUID);
+				Build build = OneDev.getInstance(BuildManager.class).findByUUID(buildUUID);
 				Build existingBuild = buildMap.get(build.getConfiguration());
 				if (existingBuild == null || existingBuild.getDate().before(build.getDate()))
 					buildMap.put(build.getConfiguration(), build);
@@ -83,25 +83,14 @@ public class FixedInBuildsPage extends IssueDetailPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
 					IModel<Build> rowModel) {
-				cellItem.add(new Label(componentId, "#" + rowModel.getObject().getNumber()));
-			}
-		});
-		
-		columns.add(new AbstractColumn<Build, Void>(Model.of("Description")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-					IModel<Build> rowModel) {
-				Fragment fragment = new Fragment(componentId, "descriptionFrag", FixedInBuildsPage.this);
-
-				fragment.add(new BuildStatusPanel("status", rowModel));
-				ExternalLink link = new ExternalLink("description", rowModel.getObject().getUrl());
-				link.add(new Label("label", rowModel.getObject().getDescription()));
+				Fragment fragment = new Fragment(componentId, "buildFrag", FixedInBuildsPage.this);
+				fragment.add(new BuildStatusIcon("status", rowModel));
+				ExternalLink link = new ExternalLink("link", rowModel.getObject().getUrl());
+				link.add(new Label("label", rowModel.getObject().getName()));
 				fragment.add(link);
 				
 				cellItem.add(fragment);
 			}
-			
 		});
 		
 		columns.add(new AbstractColumn<Build, Void>(Model.of("Date")) {

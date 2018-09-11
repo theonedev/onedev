@@ -89,18 +89,18 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 	}
 
 	@Override
-	public List<T> findRange(EntityCriteria<T> criteria, int firstResult, int maxResults) {
-		return dao.findRange(criteria, firstResult, maxResults);
+	public List<T> query(EntityCriteria<T> criteria, int firstResult, int maxResults) {
+		return dao.query(criteria, firstResult, maxResults);
 	}
 
 	@Override
-	public List<T> findAll(EntityCriteria<T> criteria) {
-		return dao.findAll(criteria);
+	public List<T> query(EntityCriteria<T> criteria) {
+		return dao.query(criteria);
 	}
 
 	@Override
-	public List<T> findAll() {
-		return dao.findAll(entityClass);
+	public List<T> query() {
+		return dao.query(entityClass);
 	}
 
 	@Override

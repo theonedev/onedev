@@ -270,7 +270,7 @@ public class ProjectTagsPage extends ProjectPage {
 
 					@Override
 					protected List<Build> load() {
-						return OneDev.getInstance(BuildManager.class).findAll(getProject(), commitHash);
+						return OneDev.getInstance(BuildManager.class).query(getProject(), commitHash);
 					}
 					
 				}));

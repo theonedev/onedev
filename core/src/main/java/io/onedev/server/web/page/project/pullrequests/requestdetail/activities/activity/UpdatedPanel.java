@@ -90,7 +90,7 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 
 					@Override
 					protected List<Build> load() {
-						return OneDev.getInstance(BuildManager.class).findAll(projectModel.getObject(), commitHash);
+						return OneDev.getInstance(BuildManager.class).query(projectModel.getObject(), commitHash);
 					}
 					
 				}));

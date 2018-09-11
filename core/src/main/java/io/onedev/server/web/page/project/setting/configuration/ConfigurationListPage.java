@@ -142,7 +142,7 @@ public class ConfigurationListPage extends ProjectSettingPage {
 			public Iterator<? extends Configuration> iterator(long first, long count) {
 				EntityCriteria<Configuration> criteria = getCriteria();
 				criteria.addOrder(Order.asc("name"));
-				return OneDev.getInstance(ConfigurationManager.class).findRange(criteria, (int)first, (int)count).iterator();
+				return OneDev.getInstance(ConfigurationManager.class).query(criteria, (int)first, (int)count).iterator();
 			}
 
 			@Override

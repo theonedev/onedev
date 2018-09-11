@@ -18,6 +18,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.validation.annotation.CommitHash;
+import io.onedev.server.util.validation.annotation.ConfigurationName;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Entity
@@ -54,6 +55,7 @@ public class Configuration extends AbstractEntity {
 	}
 
 	@Editable(order=100)
+	@ConfigurationName
 	@NotEmpty
 	public String getName() {
 		return name;

@@ -158,7 +158,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 			
 		});
 		
-		List<PullRequestUpdate> unprocessedPullRequestUpdates = pullRequestUpdateManager.findAllAfter(
+		List<PullRequestUpdate> unprocessedPullRequestUpdates = pullRequestUpdateManager.queryAfter(
 				project, lastPullRequestUpdateUUID, BATCH_SIZE); 
 		for (PullRequestUpdate update: unprocessedPullRequestUpdates) {
 			env.executeInTransaction(new TransactionalExecutable() {
@@ -219,7 +219,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 			
 		});
 		
-		List<CodeComment> unprocessedCodeComments = codeCommentManager.findAllAfter(project, 
+		List<CodeComment> unprocessedCodeComments = codeCommentManager.queryAfter(project, 
 				lastCodeCommentUUID, BATCH_SIZE);
 		for (CodeComment comment: unprocessedCodeComments) {
 			if (comment.isValid()) {
@@ -347,7 +347,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (Project project: projectManager.findAll()) {
+		for (Project project: projectManager.query()) {
 			checkVersion(project.getId().toString());
 			batchWorkManager.submit(getBatchWorker(project.getId()), new Prioritized(PRIORITY));
 		}

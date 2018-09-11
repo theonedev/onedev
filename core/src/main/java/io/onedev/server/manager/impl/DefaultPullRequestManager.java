@@ -556,7 +556,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			Criterion criterion = Restrictions.and(
 					ofOpen(), 
 					Restrictions.or(ofSource(projectAndBranch), ofTarget(projectAndBranch)));
-			for (PullRequest request: findAll(EntityCriteria.of(PullRequest.class).add(criterion))) {
+			for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) {
 				check(request);
 			}
 		}
@@ -588,20 +588,20 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public Collection<PullRequest> findAllOpenTo(ProjectAndBranch target) {
+	public Collection<PullRequest> queryOpenTo(ProjectAndBranch target) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofTarget(target));
 		criteria.add(ofOpen());
-		return findAll(criteria);
+		return query(criteria);
 	}
 
 	@Sessional
 	@Override
-	public Collection<PullRequest> findAllOpen(ProjectAndBranch sourceOrTarget) {
+	public Collection<PullRequest> queryOpen(ProjectAndBranch sourceOrTarget) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(ofOpen());
 		criteria.add(Restrictions.or(ofSource(sourceOrTarget), ofTarget(sourceOrTarget)));
-		return findAll(criteria);
+		return query(criteria);
 	}
 
 	@Sessional
@@ -637,7 +637,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	public void on(BuildEvent event) {
 		Build build = event.getBuild();
-		for (PullRequest request: findOpenByCommit(build.getCommit())) { 
+		for (PullRequest request: queryOpenByCommit(build.getCommit())) { 
 			listenerRegistry.post(new PullRequestBuildEvent(request, build));
 			if (build.getStatus() != Build.Status.RUNNING)
 				checkAsync(request);
@@ -723,7 +723,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		
 		Map<Configuration, Build> builds = new HashMap<>();
 		if (commit != null) {
-			for (Build build: buildManager.findAll(request.getTargetProject(), commit)) 
+			for (Build build: buildManager.query(request.getTargetProject(), commit)) 
 				builds.put(build.getConfiguration(), build);
 		}
 		Collection<Configuration> configurations = new HashSet<>();
@@ -927,14 +927,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Transactional
 	@Override
-	public Collection<PullRequest> findOpenByCommit(String commitHash) {
+	public Collection<PullRequest> queryOpenByCommit(String commitHash) {
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 		criteria.add(PullRequest.CriterionHelper.ofOpen());
 		Criterion verifyCommitCriterion = Restrictions.or(
 				Restrictions.eq("headCommitHash", commitHash), 
 				Restrictions.eq("lastMergePreview.merged", commitHash));
 		criteria.add(verifyCommitCriterion);
-		return findAll(criteria);
+		return query(criteria);
 	}
 	
 	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 
@@ -1069,7 +1069,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					Restrictions.ne("number", number)
 				));
 			criteria.addOrder(Order.desc("number"));
-			requests.addAll(findRange(criteria, 0, count-requests.size()));
+			requests.addAll(query(criteria, 0, count-requests.size()));
 		} else {
 			EntityCriteria<PullRequest> criteria = newCriteria();
 			criteria.add(Restrictions.eq("targetProject", targetProject));
@@ -1079,7 +1079,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 						Restrictions.ilike("numberStr", (term.startsWith("#")? term.substring(1): term) + "%")));
 			}
 			criteria.addOrder(Order.desc("number"));
-			requests.addAll(findRange(criteria, 0, count));
+			requests.addAll(query(criteria, 0, count));
 		} 
 		return requests;
 	}

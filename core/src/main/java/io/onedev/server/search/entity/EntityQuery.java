@@ -107,17 +107,17 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		}
 	}
 	
-	public static String getRuleName(String[] lexerRuleNames, int rule) {
+	public static String getLexerRuleName(String[] lexerRuleNames, int rule) {
 		return WordUtils.uncamel(lexerRuleNames[rule-1]).toLowerCase();
 	}
 	
-	public static int getOperator(String[] lexerRuleNames, String operatorName) {
+	public static int getLexerRule(String[] lexerRuleNames, String lexerRuleName) {
 		for (int i=0; i<lexerRuleNames.length; i++) {
-			String ruleName = lexerRuleNames[i];
-			if (WordUtils.uncamel(ruleName).toLowerCase().equals(operatorName))
+			String each = lexerRuleNames[i];
+			if (WordUtils.uncamel(each).toLowerCase().equals(lexerRuleName))
 				return i+1;
 		}
-		throw new OneException("Unable to find operator: " + operatorName);
+		throw new OneException("Unable to find lexer rule: " + lexerRuleName);
 	}
 		
 }

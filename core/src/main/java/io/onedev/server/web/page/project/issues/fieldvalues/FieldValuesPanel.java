@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.issues.fieldvalues;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -32,9 +33,9 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.web.component.BuildStatusLabel;
 import io.onedev.server.web.component.RequestStatusLabel;
 import io.onedev.server.web.component.avatar.AvatarLink;
+import io.onedev.server.web.component.build.BuildStatusIcon;
 import io.onedev.server.web.component.issuestate.IssueStateLabel;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.editable.EditableUtils;
@@ -47,6 +48,8 @@ import io.onedev.utils.ColorUtils;
 @SuppressWarnings("serial")
 public abstract class FieldValuesPanel extends Panel implements EditContext {
 
+	private static final int MAX_BUILD_NAME_LEN = 30;
+	
 	public FieldValuesPanel(String id) {
 		super(id);
 	}
@@ -80,19 +83,19 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 							issueFrag.add(new IssueStateLabel("state", Model.of(issue)));
 							item.add(issueFrag);
 						} else {
-							item.add(new Label("values", "#" + value));
+							item.add(new Label("value", "#" + value));
 						}
 					} else if (getField().getType().equals(InputSpec.BUILD)) {
-						Build build = OneDev.getInstance(BuildManager.class).find(project, Long.valueOf(value));
+						Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(value));
 						if (build != null) {
 							Fragment buildFrag = new Fragment("value", "buildFrag", FieldValuesPanel.this);
 							ExternalLink link = new ExternalLink("link", build.getUrl());
-							link.add(new Label("label", "#" + build.getNumber()));
+							link.add(new Label("label", StringUtils.abbreviate(build.getName(), MAX_BUILD_NAME_LEN)));
 							buildFrag.add(link);
-							buildFrag.add(new BuildStatusLabel("status", Model.of(build)));
+							buildFrag.add(new BuildStatusIcon("status", Model.of(build)));
 							item.add(buildFrag);
 						} else {
-							item.add(new Label("values", "#" + value));
+							item.add(new Label("value", "#" + value));
 						}
 					} else if (getField().getType().equals(InputSpec.PULLREQUEST)) {
 						PullRequest request = OneDev.getInstance(PullRequestManager.class).find(project, Long.valueOf(value));
@@ -104,7 +107,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 							requestFrag.add(new RequestStatusLabel("status", Model.of(request)));
 							item.add(requestFrag);
 						} else {
-							item.add(new Label("values", "#" + value));
+							item.add(new Label("value", "#" + value));
 						}
 					} else {
 						Label label = new Label("value", value);

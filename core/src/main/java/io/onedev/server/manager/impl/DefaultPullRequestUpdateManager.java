@@ -106,17 +106,17 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 
 	@Sessional
 	@Override
-	public List<PullRequestUpdate> findAllAfter(Project project, String updateUUID, int count) {
+	public List<PullRequestUpdate> queryAfter(Project project, String afterUpdateUUID, int count) {
 		EntityCriteria<PullRequestUpdate> criteria = newCriteria();
 		criteria.createCriteria("request").add(Restrictions.eq("targetProject", project));
 		criteria.addOrder(Order.asc("id"));
-		if (updateUUID != null) {
-			PullRequestUpdate update = find(updateUUID);
+		if (afterUpdateUUID != null) {
+			PullRequestUpdate update = find(afterUpdateUUID);
 			if (update != null) {
 				criteria.add(Restrictions.gt("id", update.getId()));
 			}
 		}
-		return findRange(criteria, 0, count);
+		return query(criteria, 0, count);
 	}
 
 }

@@ -303,7 +303,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 					Restrictions.ne("number", number)
 				));
 			criteria.addOrder(Order.desc("number"));
-			issues.addAll(findRange(criteria, 0, count-issues.size()));
+			issues.addAll(query(criteria, 0, count-issues.size()));
 		} else {
 			EntityCriteria<Issue> criteria = newCriteria();
 			criteria.add(Restrictions.eq("project", project));
@@ -313,7 +313,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 						Restrictions.ilike("numberStr", (term.startsWith("#")? term.substring(1): term) + "%")));
 			}
 			criteria.addOrder(Order.desc("number"));
-			issues.addAll(findRange(criteria, 0, count));
+			issues.addAll(query(criteria, 0, count));
 		} 
 		return issues;
 	}

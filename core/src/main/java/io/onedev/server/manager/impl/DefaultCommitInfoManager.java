@@ -1045,7 +1045,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (Project project: projectManager.findAll()) {
+		for (Project project: projectManager.query()) {
 			checkVersion(project.getId().toString());
 			collect(project);
 		}

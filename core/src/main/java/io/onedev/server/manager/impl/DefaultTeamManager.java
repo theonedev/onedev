@@ -41,7 +41,7 @@ public class DefaultTeamManager extends AbstractEntityManager<Team> implements T
 	@Override
 	public void save(Team team, String oldName) {
 		if (oldName != null && !oldName.equals(team.getName())) {
-			for (Project project: projectManager.findAll()) {
+			for (Project project: projectManager.query()) {
 				for (BranchProtection protection: project.getBranchProtections()) 
 					protection.onRenameTeam(project, oldName, team.getName());
 				for (TagProtection protection: project.getTagProtections())
@@ -57,7 +57,7 @@ public class DefaultTeamManager extends AbstractEntityManager<Team> implements T
 	@Transactional
 	@Override
 	public void delete(Team group) {
-		for (Project project: projectManager.findAll()) {
+		for (Project project: projectManager.query()) {
 			for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) { 
 				if (it.next().onDeleteTeam(project, group.getName()))
 					it.remove();
@@ -94,7 +94,7 @@ public class DefaultTeamManager extends AbstractEntityManager<Team> implements T
 	
 	@Sessional
 	@Override
-	public Team findByFQN(String teamFQN) {
+	public Team find(String teamFQN) {
 		return find(StringUtils.substringBefore(teamFQN, Team.FQN_SEPARATOR), 
 				StringUtils.substringAfter(teamFQN, Team.FQN_SEPARATOR));
 	}

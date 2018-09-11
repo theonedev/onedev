@@ -8,7 +8,8 @@ query
 
 criteria
     : operator=(Mine|Outstanding|Closed|SubmittedByMe)	#OperatorCriteria
-    | SubmittedBy WS+ criteriaValue=Quoted #OperatorValueCriteria
+    | operator=(SubmittedBy|FixedInBuild) WS+ criteriaValue=Quoted #OperatorValueCriteria
+    | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
@@ -17,6 +18,10 @@ criteria
     | LParens WS* criteria WS* RParens #ParensCriteria
     ;
 
+revisionCriteria
+	: revisionType=(Build|Branch|Tag|Commit) WS+ revisionValue=Quoted 
+	;
+	
 order
 	: orderField=Quoted WS* (WS+ direction=(Asc|Desc))?
 	;
@@ -43,6 +48,14 @@ OrderBy
 
 SubmittedBy
 	: 'submitted' WS+ 'by'
+	;
+	
+FixedInBuild
+	: 'fixed' WS+ 'in' WS+ 'build'
+	;							
+	
+FixedBetween
+	: 'fixed' WS+ 'between' 
 	;
 
 SubmittedByMe
@@ -81,6 +94,22 @@ IsEmpty
 	: 'is' WS+ 'empty'
 	;
 
+Build
+	: 'build'
+	;
+	
+Branch
+	: 'branch'
+	;
+	
+Tag
+	: 'tag'
+	;
+	
+Commit
+	: 'commit'
+	;
+		
 And
 	: 'and'
 	;

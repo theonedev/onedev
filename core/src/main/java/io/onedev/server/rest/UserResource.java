@@ -41,7 +41,7 @@ public class UserResource {
 	@ValidQueryParams
 	@GET
 	public Response query(@QueryParam("name") String name, @Email @QueryParam("email") String email, 
-			@QueryParam("per_page") Integer perPage, @QueryParam("page") Integer page, @Context UriInfo uriInfo) {
+			@QueryParam("offset") Integer offset, @QueryParam("count") Integer count, @Context UriInfo uriInfo) {
     	if (!SecurityUtils.isAdministrator())
     		throw new UnauthorizedException("Unauthorized access to user profiles");
     	
@@ -51,20 +51,15 @@ public class UserResource {
 		if (email != null)
 			criteria.add(Restrictions.eq("email", email));
 		
-    	if (page == null)
-    		page = 1;
+    	if (offset == null)
+    		offset = 0;
     	
-    	if (perPage == null || perPage > RestConstants.PAGE_SIZE) 
-    		perPage = RestConstants.PAGE_SIZE;
+    	if (count == null || count > RestConstants.PAGE_SIZE) 
+    		count = RestConstants.PAGE_SIZE;
 
-    	int totalCount = userManager.count(criteria);
-
-    	Collection<User> users = userManager.findRange(criteria, (page-1)*perPage, perPage);
+    	Collection<User> users = userManager.query(criteria, offset, count);
 		
-		return Response
-				.ok(users, RestConstants.JSON_UTF8)
-				.links(PageUtils.getNavLinks(uriInfo, totalCount, perPage, page))
-				.build();
+		return Response.ok(users, RestConstants.JSON_UTF8).build();
 	}
 	
     @GET

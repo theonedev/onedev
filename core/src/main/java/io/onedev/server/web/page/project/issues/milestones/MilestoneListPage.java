@@ -220,7 +220,7 @@ public class MilestoneListPage extends IssuesPage {
 			public Iterator<? extends Milestone> iterator(long first, long count) {
 				EntityCriteria<Milestone> criteria = getCriteria(closed);
 				criteria.addOrder(sort.getOrder());
-				return OneDev.getInstance(Dao.class).findRange(criteria, (int)first, (int)count).iterator();
+				return OneDev.getInstance(Dao.class).query(criteria, (int)first, (int)count).iterator();
 			}
 
 			@Override

@@ -190,7 +190,7 @@ public class UserListPage extends LayoutPage {
 			public Iterator<? extends User> iterator(long first, long count) {
 				EntityCriteria<User> criteria = getCriteria();
 				criteria.addOrder(Order.asc("name"));
-				return OneDev.getInstance(UserManager.class).findRange(criteria, (int)first, (int)count).iterator();
+				return OneDev.getInstance(UserManager.class).query(criteria, (int)first, (int)count).iterator();
 			}
 
 			@Override

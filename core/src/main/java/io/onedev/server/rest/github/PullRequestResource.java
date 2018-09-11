@@ -211,7 +211,7 @@ public class PullRequestResource {
     	int totalCount = pullRequestManager.count(criteria);
 
     	List<Map<String, Object>> entity = new ArrayList<>();
-		for (PullRequest request: pullRequestManager.findRange(criteria, (page-1)*perPage, perPage)) {
+		for (PullRequest request: pullRequestManager.query(criteria, (page-1)*perPage, perPage)) {
 			entity.add(getRequestMap(request, uriInfo));
 		}
 

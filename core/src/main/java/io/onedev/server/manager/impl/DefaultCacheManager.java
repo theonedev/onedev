@@ -73,21 +73,21 @@ public class DefaultCacheManager implements CacheManager {
 	@Listen
 	public void on(SystemStarted event) {
 		logger.info("Caching meta data...");
-		for (Project project: dao.findAll(Project.class)) {
+		for (Project project: dao.query(Project.class)) {
 			projects.put(project.getId(), project.getFacade());
 			projectIdsByName.inverse().put(project.getId(), project.getName());
 		}
-		for (User user: dao.findAll(User.class)) {
+		for (User user: dao.query(User.class)) {
 			users.put(user.getId(), user.getFacade());
 			userIdsByName.inverse().put(user.getId(), user.getName());
 			if (user.getEmail() != null)
 				userIdsByEmail.inverse().put(user.getId(), user.getEmail());
 		}
-		for (Team team: dao.findAll(Team.class)) {
+		for (Team team: dao.query(Team.class)) {
 			teams.put(team.getId(), team.getFacade());
 			teamIds.inverse().put(team.getId(), new Pair<>(team.getProject().getId(), team.getName()));
 		}
-		for (Membership membership: dao.findAll(Membership.class))
+		for (Membership membership: dao.query(Membership.class))
 			memberships.put(membership.getId(), membership.getFacade());
 	}
 	

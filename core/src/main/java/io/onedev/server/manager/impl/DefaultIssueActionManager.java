@@ -224,7 +224,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 						if (transition.getFromStates().contains(issue.getState())) { 
 							Map<String, Object> fieldValues = new HashMap<>();
 							if (trigger.getBuildField() != null)
-								fieldValues.put(trigger.getBuildField(), event.getBuild().getNumber());
+								fieldValues.put(trigger.getBuildField(), event.getBuild().getName());
 							issue.removeFields(transition.getRemoveFields());
 							changeState(issue, transition.getToState(), fieldValues, null);
 						}

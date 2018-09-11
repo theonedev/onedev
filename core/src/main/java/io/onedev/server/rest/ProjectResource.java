@@ -39,30 +39,25 @@ public class ProjectResource {
 	
 	@ValidQueryParams
 	@GET
-    public Response query(@QueryParam("name") String projectName, @QueryParam("per_page") Integer perPage, 
-    		@QueryParam("page") Integer page, @Context UriInfo uriInfo) {
+    public Response query(@QueryParam("name") String projectName, @QueryParam("offset") Integer offset, 
+    		@QueryParam("count") Integer count, @Context UriInfo uriInfo) {
 		EntityCriteria<Project> criteria = projectManager.newCriteria();
 		if (projectName != null)
 			criteria.add(Restrictions.eq("name", projectName));
 		
-    	if (page == null)
-    		page = 1;
+    	if (offset == null)
+    		offset = 0;
     	
-    	if (perPage == null || perPage > RestConstants.PAGE_SIZE) 
-    		perPage = RestConstants.PAGE_SIZE;
+    	if (count == null || count > RestConstants.PAGE_SIZE) 
+    		count = RestConstants.PAGE_SIZE;
 
-    	int totalCount = projectManager.count(criteria);
-
-    	Collection<Project> projects = projectManager.findRange(criteria, (page-1)*perPage, perPage);
+    	Collection<Project> projects = projectManager.query(criteria, offset, count);
 		for (Project project: projects) {
 			if (!SecurityUtils.canReadIssues(project.getFacade()))
 				throw new UnauthorizedException("Unable to access project '" + project.getName() + "'");
 		}
 		
-		return Response
-				.ok(projects, RestConstants.JSON_UTF8)
-				.links(PageUtils.getNavLinks(uriInfo, totalCount, perPage, page))
-				.build();
+		return Response.ok(projects, RestConstants.JSON_UTF8).build();
 		
     }
     

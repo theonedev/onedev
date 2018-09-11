@@ -616,7 +616,7 @@ public class ProjectCommitsPage extends ProjectPage {
 
 				@Override
 				protected List<Build> load() {
-					return OneDev.getInstance(BuildManager.class).findAll(getProject(), commit.name());
+					return OneDev.getInstance(BuildManager.class).query(getProject(), commit.name());
 				}
 				
 			}));

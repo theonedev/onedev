@@ -23,9 +23,9 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     @Nullable 
     PullRequest findOpen(ProjectAndBranch target, ProjectAndBranch source);
     
-    Collection<PullRequest> findAllOpenTo(ProjectAndBranch target);
+    Collection<PullRequest> queryOpenTo(ProjectAndBranch target);
 
-    Collection<PullRequest> findAllOpen(ProjectAndBranch sourceOrTarget);
+    Collection<PullRequest> queryOpen(ProjectAndBranch sourceOrTarget);
     
     @Nullable
     PullRequest find(Project targetProject, long number);
@@ -36,7 +36,7 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	@Nullable
 	PullRequest findLatest(Project targetProject, User submitter);
 	
-	Collection<PullRequest> findOpenByCommit(String commitHash);
+	Collection<PullRequest> queryOpenByCommit(String commitHash);
     
     void discard(PullRequest request, @Nullable String note);
     
