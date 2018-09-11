@@ -32,7 +32,7 @@ public class BuildSuccessfulTrigger implements TransitionTrigger {
 		this.configuration = configuration;
 	}
 
-	@Editable(order=200, description="Optionally specify an issue field of \"build choice\" type to store the build information")
+	@Editable(order=200, description="Optionally specify a field of \"build choice\" type to store the build information")
 	@ChoiceProvider("getBuildFieldChoices")
 	public String getBuildField() {
 		return buildField;

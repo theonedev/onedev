@@ -23,5 +23,10 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	@Nullable
 	Build findPrevious(Build build);
+
+	@Nullable
+	Build find(String uuid);
+	
+	List<Build> findAllAfter(Project project, @Nullable String commentUUID, int count);
 	
 }

@@ -32,7 +32,7 @@ import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.build.BuildStatusPanel;
+import io.onedev.server.web.component.build.BuildsStatusPanel;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -115,7 +115,7 @@ public class MergePreviewPage extends RequestDetailPage {
 			fragment.add(hashLink);
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getMerged())));
 			fragment.add(new WebMarkupContainer("copyMergedCommit").add(new CopyClipboardBehavior(Model.of(preview.getMerged()))));
-			fragment.add(new BuildStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+			fragment.add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 				@Override
 				protected List<Build> load() {

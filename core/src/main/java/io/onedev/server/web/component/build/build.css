@@ -9,7 +9,7 @@ a.build {
 .build-detail table td {
 	padding: 4px 12px;
 }
-.build-detail table td.result {
+.build-detail table td.status {
 	padding-right: 4px;
 }
 .build-detail table td.configuration {
@@ -30,27 +30,20 @@ a.build {
 	vertical-align: text-top;
 }
 
-.pullrequest-builds td.result {
-	width: 12px;
-}
-
 .pullrequest-builds tr td {
 	padding: 2px 12px;
 }
 
-.pullrequest-builds td.result {
+.pullrequest-builds td.status {
 	padding-left: 0;
 	padding-right: 8px;
 	font-size: 16px;
+	width: 12px;
 }
 .pullrequest-builds td.configuration {
 	padding-left: 0;
 }
 
-.floating .build-result {
-	padding: 8px;
-	font-weight: bold;
-}
 span.build-status {
 	cursor: default;
 }

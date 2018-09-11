@@ -136,5 +136,27 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		} 
 		return builds;
 	}
+
+	@Sessional
+	@Override
+	public Build find(String uuid) {
+		EntityCriteria<Build> criteria = newCriteria();
+		criteria.add(Restrictions.eq("uuid", uuid));
+		return find(criteria);
+	}
+	
+	@Override
+	public List<Build> findAllAfter(Project project, String buildUUID, int count) {
+		EntityCriteria<Build> criteria = newCriteria();
+		criteria.createCriteria("configuration").add(Restrictions.eq("project", project));
+		criteria.addOrder(Order.asc("id"));
+		if (buildUUID != null) {
+			Build build = find(buildUUID);
+			if (build != null) {
+				criteria.add(Restrictions.gt("id", build.getId()));
+			}
+		}
+		return findRange(criteria, 0, count);
+	}
 	
 }
