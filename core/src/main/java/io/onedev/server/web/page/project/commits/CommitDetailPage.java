@@ -54,7 +54,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.avatar.ContributorAvatars;
-import io.onedev.server.web.component.build.BuildStatusPanel;
+import io.onedev.server.web.component.build.BuildsStatusPanel;
 import io.onedev.server.web.component.commitmessage.CommitMessageLabel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createbranch.CreateBranchLink;
@@ -218,7 +218,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent(), true));
 
-		add(new BuildStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+		add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 			@Override
 			protected List<Build> load() {

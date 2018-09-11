@@ -70,7 +70,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branchchoice.BranchChoiceProvider;
 import io.onedev.server.web.component.branchchoice.BranchSingleChoice;
-import io.onedev.server.web.component.build.BuildStatusPanel;
+import io.onedev.server.web.component.build.BuildsStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -446,7 +446,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId());
 				
 				String lastCommitHash = lastCommit.name();
-				item.add(new BuildStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+				item.add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 					@Override
 					protected List<Build> load() {

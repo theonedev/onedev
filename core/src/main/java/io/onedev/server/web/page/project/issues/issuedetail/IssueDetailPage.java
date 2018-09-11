@@ -50,6 +50,7 @@ import com.google.common.collect.Lists;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueActionManager;
+import io.onedev.server.manager.IssueInfoManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueVoteManager;
 import io.onedev.server.manager.IssueWatchManager;
@@ -96,6 +97,8 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.issuedetail.changedfiles.FileChangesPage;
+import io.onedev.server.web.page.project.issues.issuedetail.changedfiles.FixedInBuildsPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
@@ -362,6 +365,10 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new IssueTab("Activities", IssueActivitiesPage.class));
+		if (getIssue().getCommit() != null) 
+			tabs.add(new IssueTab("File Changes", FileChangesPage.class));
+		if (!OneDev.getInstance(IssueInfoManager.class).getFixedInBuildUUIDs(getProject(), getIssue().getUUID()).isEmpty())		
+			tabs.add(new IssueTab("Fixed In Builds", FixedInBuildsPage.class));
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
 		
