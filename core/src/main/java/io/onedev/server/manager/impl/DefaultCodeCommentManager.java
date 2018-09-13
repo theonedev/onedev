@@ -122,33 +122,33 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	
 	@Sessional
 	@Override
-	public List<CodeComment> findAllAfter(Project project, String commentUUID, int count) {
+	public List<CodeComment> queryAfter(Project project, String afterCommentUUID, int count) {
 		EntityCriteria<CodeComment> criteria = newCriteria();
 		criteria.add(Restrictions.eq("project", project));
 		criteria.addOrder(Order.asc("id"));
-		if (commentUUID != null) {
-			CodeComment comment = find(commentUUID);
+		if (afterCommentUUID != null) {
+			CodeComment comment = find(afterCommentUUID);
 			if (comment != null) {
 				criteria.add(Restrictions.gt("id", comment.getId()));
 			}
 		}
-		return findRange(criteria, 0, count);
+		return query(criteria, 0, count);
 	}
 
 	@Sessional
 	@Override
-	public Collection<CodeComment> findAll(Project project, ObjectId commitId, String path) {
+	public Collection<CodeComment> query(Project project, ObjectId commitId, String path) {
 		EntityCriteria<CodeComment> criteria = newCriteria();
 		criteria.add(Restrictions.eq("project", project));
 		criteria.add(Restrictions.eq("markPos.commit", commitId.name()));
 		if (path != null)
 			criteria.add(Restrictions.eq("markPos.path", path));
-		return findAll(criteria);
+		return query(criteria);
 	}
 
 	@Sessional
 	@Override
-	public Collection<CodeComment> findAll(Project project, ObjectId... commitIds) {
+	public Collection<CodeComment> query(Project project, ObjectId... commitIds) {
 		Preconditions.checkArgument(commitIds.length > 0);
 		
 		EntityCriteria<CodeComment> criteria = newCriteria();
@@ -158,7 +158,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 			criterions.add(Restrictions.eq("markPos.commit", commitId.name()));
 		}
 		criteria.add(Restrictions.or(criterions.toArray(new Criterion[criterions.size()])));
-		return findAll(criteria);
+		return query(criteria);
 	}
 	
 	@Override
@@ -169,7 +169,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		for (String possibleHistoryPath: commitInfoManager.getHistoryPaths(project, path)) {
 			EntityCriteria<CodeComment> criteria = EntityCriteria.of(CodeComment.class);
 			criteria.add(Restrictions.eq("markPos.path", possibleHistoryPath));
-			for (CodeComment comment: findAll(criteria)) {
+			for (CodeComment comment: query(criteria)) {
 				if (comment.getMarkPos().getCommit().equals(commitId.name()) && possibleHistoryPath.equals(path)) {
 					comments.put(comment, comment.getMarkPos().getRange());
 				} else {

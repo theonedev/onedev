@@ -12,6 +12,7 @@ import static io.onedev.server.model.support.issue.IssueConstants.FIELD_TITLE;
 import static io.onedev.server.model.support.issue.IssueConstants.FIELD_UPDATE_DATE;
 import static io.onedev.server.model.support.issue.IssueConstants.FIELD_VOTE_COUNT;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -28,10 +29,14 @@ import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.eclipse.jgit.errors.RevisionSyntaxException;
+import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.UserManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -43,6 +48,7 @@ import io.onedev.server.search.entity.issue.IssueQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.FieldOperatorCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.FieldOperatorValueCriteriaContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.FixedBetweenCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.NotCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.OperatorCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.OperatorValueCriteriaContext;
@@ -50,6 +56,7 @@ import io.onedev.server.search.entity.issue.IssueQueryParser.OrCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.OrderContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.QueryContext;
+import io.onedev.server.search.entity.issue.IssueQueryParser.RevisionCriteriaContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.BuildChoiceInput;
@@ -192,10 +199,50 @@ public class IssueQuery extends EntityQuery<Issue> {
 					
 					public IssueCriteria visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
-						User user = OneDev.getInstance(UserManager.class).findByName(value);
-						if (user == null)
-							throw new OneException("Unable to find user with login: " + value);
-						return new SubmittedByCriteria(user);
+						if (ctx.SubmittedBy() != null) {
+							User user = OneDev.getInstance(UserManager.class).findByName(value);
+							if (user == null)
+								throw new OneException("Unable to find user with login: " + value);
+							return new SubmittedByCriteria(user);
+						} else if (ctx.FixedInBuild() != null) {
+							Build build = OneDev.getInstance(BuildManager.class).findByFQN(project, value);
+							if (build != null)
+								return new FixedInCriteria(build);
+							else
+								throw new OneException("Unable to find build with FQN: " + value);
+						} else {
+							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
+						}
+					}
+					
+					private ObjectId getCommitId(RevisionCriteriaContext revision) {
+						String value = getValue(revision.Quoted().getText());
+						if (revision.Build() != null) {
+							Build build = OneDev.getInstance(BuildManager.class).findByFQN(project, value);
+							if (build != null)
+								return ObjectId.fromString(build.getCommit());
+							else
+								throw new OneException("Unable to find build with FQN: " + value);
+						} else {
+							try {
+								return project.getRepository().resolve(value);
+							} catch (RevisionSyntaxException | IOException e) {
+								throw new OneException("Invalid revision: " + value);
+							}
+						}
+					}
+					
+					public IssueCriteria visitFixedBetweenCriteria(FixedBetweenCriteriaContext ctx) {
+						RevisionCriteriaContext sinceRevision = ctx.revisionCriteria(0);
+						int sinceType = sinceRevision.revisionType.getType();
+						String sinceValue = getValue(sinceRevision.Quoted().getText());
+						ObjectId sinceCommitId = getCommitId(sinceRevision);
+						
+						RevisionCriteriaContext untilRevision = ctx.revisionCriteria(1);
+						int untilType = untilRevision.revisionType.getType();
+						String untilValue = getValue(untilRevision.Quoted().getText());
+						ObjectId untilCommitId = getCommitId(untilRevision);
+						return new FixedBetweenCriteria(sinceType, sinceValue, sinceCommitId, untilType, untilValue, untilCommitId);
 					}
 					
 					@Override
@@ -424,11 +471,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 	}
 	
 	public static String getRuleName(int rule) {
-		return getRuleName(IssueQueryLexer.ruleNames, rule);
+		return getLexerRuleName(IssueQueryLexer.ruleNames, rule);
 	}
 	
 	public static int getOperator(String operatorName) {
-		return getOperator(IssueQueryLexer.ruleNames, operatorName);
+		return getLexerRule(IssueQueryLexer.ruleNames, operatorName);
 	}
 	
 	@Override

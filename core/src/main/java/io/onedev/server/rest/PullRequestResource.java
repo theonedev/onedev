@@ -21,6 +21,7 @@ import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.jersey.ValidQueryParams;
 import io.onedev.server.security.SecurityUtils;
@@ -31,10 +32,6 @@ import io.onedev.server.security.SecurityUtils;
 @Singleton
 public class PullRequestResource {
 
-	private static final String OPEN = "open";
-	
-	private static final String CLOSED = "closed";
-	
 	private final PullRequestManager pullRequestManager;
 	
 	@Inject
@@ -54,12 +51,13 @@ public class PullRequestResource {
     @ValidQueryParams
     @GET
     public Response query(
-    		@QueryParam("targetProject") String targetProjectId, @QueryParam("targetBranch") String targetBranch,
-    		@QueryParam("sourceProject") String sourceProjectId, @QueryParam("sourceBranch") String sourceBranch,
+    		@QueryParam("targetProject") Long targetProjectId, @QueryParam("targetBranch") String targetBranch,
+    		@QueryParam("sourceProject") Long sourceProjectId, @QueryParam("sourceBranch") String sourceBranch,
     		@QueryParam("number") Long number, @QueryParam("submitter") String submitterId, 
-    		@QueryParam("status") String status, @QueryParam("beginDate") Date beginDate, 
-    		@QueryParam("endDate") Date endDate, @QueryParam("per_page") Integer perPage, 
-    		@QueryParam("page") Integer page, @Context UriInfo uriInfo) {
+    		@QueryParam("submittedBefore") Date submittedBefore, @QueryParam("submittedAfter") Date submittedAfter,   
+    		@QueryParam("status") String status, @QueryParam("closeUser") Long closeUserId, 
+    		@QueryParam("closedBefore") Date closedBefore, @QueryParam("closedAfter") Date closedAfter,   
+    		@QueryParam("offset") Integer offset, @QueryParam("count") Integer count, @Context UriInfo uriInfo) {
     	
     	EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
 
@@ -75,28 +73,34 @@ public class PullRequestResource {
 		
     	if (number != null)
     		criteria.add(Restrictions.eq("number", number));
-    	
-		if (OPEN.equalsIgnoreCase(status)) 
-			criteria.add(PullRequest.CriterionHelper.ofOpen());
-		else if (CLOSED.equalsIgnoreCase(status)) 
-			criteria.add(PullRequest.CriterionHelper.ofClosed());
-		
+
 		if (submitterId != null)
 			criteria.add(Restrictions.eq("submitter.id", submitterId));
-		if (beginDate != null)
-			criteria.add(Restrictions.ge("submitDate", beginDate));
-		if (endDate != null)
-			criteria.add(Restrictions.le("submitDate", endDate));
+		if (submittedBefore != null)
+			criteria.add(Restrictions.le("submitDate", submittedBefore));
+		if (submittedAfter != null)
+			criteria.add(Restrictions.ge("submitDate", submittedAfter));
 
-    	if (page == null)
-    		page = 1;
+		if (status != null) {
+	    	if ("OPEN".equals(status))
+	    		criteria.add(Restrictions.isNull("closeInfo"));
+	    	else
+	    		criteria.add(Restrictions.eq("closeInfo.status", CloseInfo.Status.valueOf(status)));
+		}
+    	if (closeUserId != null)
+    		criteria.add(Restrictions.eq("closeInfo.user.id", closeUserId));
+		if (closedBefore != null)
+			criteria.add(Restrictions.le("closeInfo.date", closedBefore));
+		if (closedAfter != null)
+			criteria.add(Restrictions.ge("closeInfo.date", closedAfter));
+		
+    	if (offset == null)
+    		offset = 0;
     	
-    	if (perPage == null || perPage > RestConstants.PAGE_SIZE) 
-    		perPage = RestConstants.PAGE_SIZE;
+    	if (count == null || count > RestConstants.PAGE_SIZE) 
+    		count = RestConstants.PAGE_SIZE;
 
-    	int totalCount = pullRequestManager.count(criteria);
-
-    	Collection<PullRequest> requests = pullRequestManager.findRange(criteria, (page-1)*perPage, perPage);
+    	Collection<PullRequest> requests = pullRequestManager.query(criteria, offset, count);
 		for (PullRequest request: requests) {
 	    	if (!SecurityUtils.canReadCode(request.getTargetProject().getFacade())) {
 	    		throw new UnauthorizedException("Unable to access pull requests of project '" 
@@ -104,10 +108,7 @@ public class PullRequestResource {
 	    	}
 		}
 
-		return Response
-				.ok(requests, RestConstants.JSON_UTF8)
-				.links(PageUtils.getNavLinks(uriInfo, totalCount, perPage, page))
-				.build();
+		return Response.ok(requests, RestConstants.JSON_UTF8).build();
     }
     
 }

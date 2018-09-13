@@ -27,6 +27,6 @@ public interface TeamManager extends EntityManager<Team> {
 	Team find(String projectName, String teamName);
 	
 	@Nullable
-	Team findByFQN(String teamFQN);
+	Team find(String teamFQN);
 	
 }

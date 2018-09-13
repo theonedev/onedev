@@ -22,5 +22,5 @@ public interface PullRequestUpdateManager extends EntityManager<PullRequestUpdat
 	@Nullable
 	PullRequestUpdate find(String uuid);
 	
-	List<PullRequestUpdate> findAllAfter(Project project, @Nullable String updateUUID, int count);
+	List<PullRequestUpdate> queryAfter(Project project, @Nullable String afterUpdateUUID, int count);
 }

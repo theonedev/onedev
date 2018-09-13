@@ -8,6 +8,7 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface ConfigurationManager extends EntityManager<Configuration> {
 
+	@Nullable
 	Configuration find(Project project, String name);
 	
 	void save(Configuration configuration, @Nullable String oldName);

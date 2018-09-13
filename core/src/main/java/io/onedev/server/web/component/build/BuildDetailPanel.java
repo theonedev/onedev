@@ -23,13 +23,13 @@ public class BuildDetailPanel extends GenericPanel<List<Build>> {
 
 			@Override
 			protected void populateItem(ListItem<Build> item) {
-				item.add(new BuildStatusPanel("status", item.getModel()));
+				item.add(new BuildStatusIcon("status", item.getModel()));
 
 				Build build = item.getModelObject();
 				item.add(new Label("configuration", build.getConfiguration().getName()));
 				
-				ExternalLink link = new ExternalLink("description", build.getUrl());
-				link.add(new Label("label", build.getDescription())); 
+				ExternalLink link = new ExternalLink("name", build.getUrl());
+				link.add(new Label("label", build.getName())); 
 				item.add(link);
 			}
 			

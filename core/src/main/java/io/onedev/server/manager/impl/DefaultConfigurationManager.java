@@ -42,7 +42,7 @@ public class DefaultConfigurationManager extends AbstractEntityManager<Configura
 	public void save(Configuration configuration, String oldName) {
 		super.save(configuration);
     	if (oldName != null && !oldName.equals(configuration.getName())) {
-    		for (Project project: projectManager.findAll()) {
+    		for (Project project: projectManager.query()) {
     			for (BranchProtection protection: project.getBranchProtections())
     				protection.onRenameConfiguration(oldName, configuration.getName());
     			project.getIssueWorkflow().onRenameConfiguration(oldName, configuration.getName());
@@ -54,7 +54,7 @@ public class DefaultConfigurationManager extends AbstractEntityManager<Configura
 	@Override
 	public void delete(Configuration configuration) {
 		super.delete(configuration);
-		for (Project project: projectManager.findAll()) {
+		for (Project project: projectManager.query()) {
 			for (BranchProtection protection: project.getBranchProtections())
 				protection.onDeleteConfiguration(configuration.getName());
 			project.getIssueWorkflow().onDeleteConfiguration(configuration.getName());

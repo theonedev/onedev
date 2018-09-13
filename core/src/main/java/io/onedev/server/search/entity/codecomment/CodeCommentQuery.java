@@ -246,11 +246,11 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 	}
 	
 	public static String getRuleName(int rule) {
-		return getRuleName(CodeCommentQueryLexer.ruleNames, rule);
+		return getLexerRuleName(CodeCommentQueryLexer.ruleNames, rule);
 	}
 	
 	public static int getOperator(String operatorName) {
-		return getOperator(CodeCommentQueryLexer.ruleNames, operatorName);
+		return getLexerRule(CodeCommentQueryLexer.ruleNames, operatorName);
 	}
 	
 	@Override

@@ -31,6 +31,7 @@ import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Project;
 import io.onedev.server.rest.RestConstants;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.utils.StringUtils;
 
 @Path("/repos/projects")
 @Consumes(MediaType.WILDCARD)
@@ -85,16 +86,15 @@ public class CommitStatusResource {
     	String status = commitStatus.get("state").toUpperCase();
     	if (status.equals("PENDING"))
     		status = "RUNNING";
-    	Build build = buildManager.find(configuration, commit);
+    	Build build = buildManager.findByCommit(configuration, commit);
     	if (build == null) {
     		build = new Build();
     		build.setConfiguration(configuration);
         	build.setCommit(commit);
-        	build.setCommitShortMessage(project.getRevCommit(commit).getShortMessage());
     	}
+    	build.setName(StringUtils.substringBefore(commitStatus.get("description"), ":"));
     	build.setStatus(Build.Status.valueOf(status));
     	build.setDate(new Date());
-    	build.setDescription(commitStatus.get("description"));
     	build.setUrl(commitStatus.get("target_url"));
     	buildManager.save(build);
     	UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();

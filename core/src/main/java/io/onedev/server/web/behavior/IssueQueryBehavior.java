@@ -33,22 +33,23 @@ import io.onedev.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.BuildManager;
-import io.onedev.server.manager.TeamManager;
+import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.PullRequestManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.manager.TeamManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParser;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.BuildChoiceInput;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -63,6 +64,7 @@ import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.utils.Range;
 
 @SuppressWarnings("serial")
@@ -102,7 +104,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 					private List<InputSuggestion> getUserSuggestions(String matchWith) {
 						List<InputSuggestion> suggestions = new ArrayList<>();
-						for (User user: OneDev.getInstance(UserManager.class).findAll()) {
+						for (UserFacade user: OneDev.getInstance(CacheManager.class).getUsers().values()) {
 							Range match = Range.match(user.getName(), matchWith, true, false, true);
 							if (match != null) {
 								String description;
@@ -112,6 +114,21 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									description = null;
 								suggestions.add(new InputSuggestion(user.getName(), description, match).escape("\"\\"));
 							}
+						}
+						return suggestions;
+					}
+					
+					private List<InputSuggestion> getBuildSuggestions(String matchWith) {
+						List<InputSuggestion> suggestions = new ArrayList<>();
+						for (Build build: OneDev.getInstance(BuildManager.class).query(getProject(), matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
+							if (matchWith.contains(Build.FQN_SEPARATOR)) 
+								matchWith = StringUtils.substringAfter(matchWith, Build.FQN_SEPARATOR);
+							Range match = Range.match(build.getName(), matchWith, true, false, true);
+							if (match != null) {
+								int offset = build.getConfiguration().getName().length()+1;
+								match = new Range(match.getFrom() + offset, match.getTo() + offset);
+							}
+							suggestions.add(new InputSuggestion(build.getFQN(), null, match).escape("\"\\"));
 						}
 						return suggestions;
 					}
@@ -134,18 +151,36 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									candidates.add(field.getName());
 							}
 							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
+						} else if ("revisionValue".equals(spec.getLabel())) {
+							String revisionType = terminalExpect.getState()
+									.findMatchedElementsByLabel("revisionType", true).iterator().next().getMatchedText();
+							switch (revisionType) {
+							case "branch":
+								suggestions.addAll(SuggestionUtils.suggestBranch(project, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
+								break;
+							case "tag":
+								suggestions.addAll(SuggestionUtils.suggestTag(project, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
+								break;
+							case "build":
+								suggestions.addAll(getBuildSuggestions(unfencedLowerCaseMatchWith));
+								break;
+							}
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+							Preconditions.checkState(operatorElements.size() == 1);
+							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
+							int operator = IssueQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								suggestions.addAll(getUserSuggestions(unfencedLowerCaseMatchWith));
+								if (operator == IssueQueryLexer.SubmittedBy)
+									suggestions.addAll(getUserSuggestions(unfencedLowerCaseMatchWith));
+								else
+									suggestions.addAll(getBuildSuggestions(unfencedLowerCaseMatchWith));
 							} else {
 								String fieldName = IssueQuery.getValue(fieldElements.get(0).getMatchedText());
-								List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
-								Preconditions.checkState(operatorElements.size() == 1);
-								String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 								
 								try {
-									IssueQuery.checkField(project, fieldName, IssueQuery.getOperator(operatorName));
+									IssueQuery.checkField(project, fieldName, operator);
 									InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
 									if (fieldSpec instanceof DateInput || fieldName.equals(FIELD_SUBMIT_DATE) 
 											|| fieldName.equals(FIELD_UPDATE_DATE)) {
@@ -162,7 +197,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldSpec instanceof BuildChoiceInput) {
 										List<Build> builds = OneDev.getInstance(BuildManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
 										for (Build build: builds) {
-											InputSuggestion suggestion = new InputSuggestion("#" + build.getNumber(), StringUtils.abbreviate(build.getCommitShortMessage(), MAX_ISSUE_TITLE_LEN), null);
+											InputSuggestion suggestion = new InputSuggestion(build.getName(), null, null);
 											suggestions.add(suggestion);
 										}
 									} else if (fieldSpec instanceof PullRequestChoiceInput) {
@@ -174,7 +209,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldSpec instanceof BooleanInput) {
 										suggestions.addAll(getSuggestions(Lists.newArrayList("true", "false"), unfencedLowerCaseMatchWith, null));
 									} else if (fieldSpec instanceof TeamChoiceInput) {
-										List<String> candidates = OneDev.getInstance(TeamManager.class).findAll().stream().map(it->it.getName()).collect(Collectors.toList());
+										List<String> candidates = OneDev.getInstance(TeamManager.class).query().stream().map(it->it.getName()).collect(Collectors.toList());
 										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 									} else if (fieldName.equals(FIELD_STATE)) {
 										List<String> candidates = project.getIssueWorkflow().getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());

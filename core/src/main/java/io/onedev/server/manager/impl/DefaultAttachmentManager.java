@@ -100,7 +100,7 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 	@Override
 	public void execute() {
 		try {
-			for (Project project: dao.findAll(Project.class)) {
+			for (Project project: dao.query(Project.class)) {
 				File tempDir = getTempAttachmentDir(storageManager.getProjectAttachmentDir(project.getId()));
 				if (tempDir.exists()) {
 					for (File file: tempDir.listFiles()) {

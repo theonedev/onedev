@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -15,7 +16,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -28,12 +28,15 @@ import io.onedev.server.util.IssueUtils;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_configuration_id"), @Index(columnList="commit"), @Index(columnList="uuid")},
+		indexes={@Index(columnList="g_configuration_id"), @Index(columnList="commit"), 
+				@Index(columnList="uuid"), @Index(columnList="name")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"g_configuration_id", "commit"})}
 )
 public class Build extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String FQN_SEPARATOR = ":";
 
 	public static final String STATUS = "status";
 	
@@ -55,33 +58,21 @@ public class Build extends AbstractEntity {
 
 	};
 	
-	private long number;
-	
-	// used for number search in markdown editor
-	@Column(nullable=false)
-	private String numberStr;
-	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Configuration configuration;
 	
 	@Column(nullable=false)
+	private String name;
+	
+	@Column(nullable=false)
 	private String commit;
-	
-	@Column(nullable=false)
-	private String commitShortMessage;
-	
-	@Column(nullable=false)
-	private String noSpaceCommitShortMessage;
 	
 	@Column(nullable=false)
 	private Status status; 
 	
 	@Column(nullable=false)
 	private Date date;
-	
-	@Column(nullable=false)
-	private String description;
 	
 	@Column(nullable=false)
 	private String url;
@@ -97,6 +88,14 @@ public class Build extends AbstractEntity {
 
 	public void setConfiguration(Configuration configuration) {
 		this.configuration = configuration;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getCommit() {
@@ -115,38 +114,12 @@ public class Build extends AbstractEntity {
 		this.status = status;
 	}
 
-	public String getCommitShortMessage() {
-		return commitShortMessage;
-	}
-
-	public void setCommitShortMessage(String commitShortMessage) {
-		this.commitShortMessage = commitShortMessage;
-		noSpaceCommitShortMessage = StringUtils.deleteWhitespace(commitShortMessage);
-	}
-
 	public Date getDate() {
 		return date;
 	}
 
 	public void setDate(Date date) {
 		this.date = date;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	
-	public long getNumber() {
-		return number;
-	}
-
-	public void setNumber(long number) {
-		this.number = number;
-		numberStr = String.valueOf(number);
 	}
 
 	public String getUrl() {
@@ -165,42 +138,51 @@ public class Build extends AbstractEntity {
 		this.uuid = uuid;
 	}
 
+	public String getFQN() {
+		return getConfiguration().getName() + FQN_SEPARATOR + getName();
+	}
+	
 	public Collection<Issue> getFixedIssues() {
 		if (fixedIssues == null) {
 			fixedIssues = new HashSet<>();
-			
-			ObjectId prevCommit;
-			Build prevBuild = OneDev.getInstance(BuildManager.class).findPrevious(this);
-			if (prevBuild != null) 
-				prevCommit = ObjectId.fromString(prevBuild.getCommit());
-			else if (getConfiguration().getBaseCommit() != null)
-				prevCommit = ObjectId.fromString(getConfiguration().getBaseCommit());
-			else
-				prevCommit = null;
-			
-			if (prevCommit != null) {
-				Project project = getConfiguration().getProject();
-				
-				IssueManager issueManager = OneDev.getInstance(IssueManager.class);
-				Repository repository = project.getRepository();
-				try (RevWalk revWalk = new RevWalk(repository)) {
-					revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommit())));
-					revWalk.markUninteresting(revWalk.parseCommit(prevCommit));
-
-					RevCommit commit;
-					while ((commit = revWalk.next()) != null) {
-						for (Long issueNumber: IssueUtils.parseFixedIssues(commit.getFullMessage())) {
-							Issue issue = issueManager.find(project, issueNumber);
-							if (issue != null)
-								fixedIssues.add(issue);
-						}
-					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+			IssueManager issueManager = OneDev.getInstance(IssueManager.class);
+			for (Long issueNumber: getFixedIssueNumbers()) {
+				Issue issue = issueManager.find(getConfiguration().getProject(), issueNumber);
+				if (issue != null)
+					fixedIssues.add(issue);
 			}
 		}
 		return fixedIssues;
+	}
+	
+	public Collection<Long> getFixedIssueNumbers() {
+		Set<Long> fixedIssueNumbers = new HashSet<>();
+			
+		ObjectId prevCommit;
+		Build prevBuild = OneDev.getInstance(BuildManager.class).findPrevious(this);
+		if (prevBuild != null) 
+			prevCommit = ObjectId.fromString(prevBuild.getCommit());
+		else if (getConfiguration().getBaseCommit() != null)
+			prevCommit = ObjectId.fromString(getConfiguration().getBaseCommit());
+		else
+			prevCommit = null;
+		
+		if (prevCommit != null) {
+			Project project = getConfiguration().getProject();
+			
+			Repository repository = project.getRepository();
+			try (RevWalk revWalk = new RevWalk(repository)) {
+				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommit())));
+				revWalk.markUninteresting(revWalk.parseCommit(prevCommit));
+
+				RevCommit commit;
+				while ((commit = revWalk.next()) != null) 
+					fixedIssueNumbers.addAll(IssueUtils.parseFixedIssues(commit.getFullMessage()));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		}
+		return fixedIssueNumbers;
 	}
 	
 }

@@ -450,7 +450,7 @@ public class ProjectBranchesPage extends ProjectPage {
 
 					@Override
 					protected List<Build> load() {
-						return OneDev.getInstance(BuildManager.class).findAll(getProject(), lastCommitHash);
+						return OneDev.getInstance(BuildManager.class).query(getProject(), lastCommitHash);
 					}
 					
 				}));
@@ -623,7 +623,7 @@ public class ProjectBranchesPage extends ProjectPage {
 					protected Component newContent(String id, ModalPanel modal) {
 						Fragment fragment = new Fragment(id, "confirmDeleteBranchFrag", ProjectBranchesPage.this);
 						PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
-						if (!pullRequestManager.findAllOpen(new ProjectAndBranch(getProject(), branch)).isEmpty()) {
+						if (!pullRequestManager.queryOpen(new ProjectAndBranch(getProject(), branch)).isEmpty()) {
 							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", ProjectBranchesPage.this);
 							String query = String.format("\"%s\" %s \"%s\" %s %s", 
 									PullRequestConstants.FIELD_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 

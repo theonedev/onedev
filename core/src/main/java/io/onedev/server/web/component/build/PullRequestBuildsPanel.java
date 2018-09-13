@@ -73,7 +73,7 @@ public class PullRequestBuildsPanel extends GenericPanel<PullRequest> {
 				item.add(new Label("configuration", build.getConfiguration().getName()));
 				
 				if (build.getBuild() != null) {
-					item.add(new BuildStatusPanel("status", new AbstractReadOnlyModel<Build>() {
+					item.add(new BuildStatusIcon("status", new AbstractReadOnlyModel<Build>() {
 
 						@Override
 						public Build getObject() {
@@ -82,15 +82,15 @@ public class PullRequestBuildsPanel extends GenericPanel<PullRequest> {
 						
 					}));
 					
-					ExternalLink link = new ExternalLink("description", build.getBuild().getUrl());
-					link.add(new Label("label", build.getBuild().getDescription()));
+					ExternalLink link = new ExternalLink("name", build.getBuild().getUrl());
+					link.add(new Label("label", build.getBuild().getName()));
 					item.add(link);
 				} else {
 					WebMarkupContainer status = new WebMarkupContainer("status");
 					status.add(AttributeAppender.append("class", "awaiting fa fa-clock-o"));
 					status.add(AttributeAppender.append("title", "Waiting for build"));
 					item.add(status);
-					WebMarkupContainer description = new WebMarkupContainer("description");
+					WebMarkupContainer description = new WebMarkupContainer("name");
 					description.add(new WebMarkupContainer("label"));
 					item.add(description.setVisible(false));
 				}

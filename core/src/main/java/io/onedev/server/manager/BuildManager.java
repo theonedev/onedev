@@ -11,13 +11,16 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface BuildManager extends EntityManager<Build> {
 	
-	List<Build> findAll(Project project, String commit);
+	List<Build> query(Project project, String commit);
 	
 	@Nullable
-	Build find(Configuration configuration, String commit);
+	Build findByCommit(Configuration configuration, String commit);
 	
 	@Nullable
-	Build find(Project project, long number);
+	Build findByName(Configuration configuration, String name);
+
+	@Nullable
+	Build findByFQN(Project project, String fqn);
 	
 	List<Build> query(Project project, String term, int count);
 	
@@ -25,8 +28,8 @@ public interface BuildManager extends EntityManager<Build> {
 	Build findPrevious(Build build);
 
 	@Nullable
-	Build find(String uuid);
+	Build findByUUID(String uuid);
 	
-	List<Build> findAllAfter(Project project, @Nullable String commentUUID, int count);
+	List<Build> queryAfter(Project project, @Nullable String afterCommentUUID, int count);
 	
 }

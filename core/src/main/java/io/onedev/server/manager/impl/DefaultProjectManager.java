@@ -262,7 +262,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 
 	@Listen
 	public void on(SystemStarted event) {
-		for (Project project: findAll())
+		for (Project project: query())
 			checkGit(project.getGitDir());
 	}
 
@@ -349,7 +349,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			if (!ReviewRequirement.parse(project, branchProtection.getReviewRequirement()).satisfied(user)) 
 				return true;
 
-			List<Build> builds = buildManager.findAll(project, newObjectId.name());
+			List<Build> builds = buildManager.query(project, newObjectId.name());
 			if (!builds.stream().map(it->it.getConfiguration().getName()).collect(Collectors.toSet())
 					.containsAll(branchProtection.getConfigurations())) {
 				return true;

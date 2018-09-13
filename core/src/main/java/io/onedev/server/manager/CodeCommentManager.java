@@ -19,16 +19,16 @@ import io.onedev.server.search.entity.EntityQuery;
 
 public interface CodeCommentManager extends EntityManager<CodeComment> {
 	
-	Collection<CodeComment> findAll(Project project, ObjectId commitId, @Nullable String path);
+	Collection<CodeComment> query(Project project, ObjectId commitId, @Nullable String path);
 	
-	Collection<CodeComment> findAll(Project project, ObjectId...commitIds);
+	Collection<CodeComment> query(Project project, ObjectId...commitIds);
 	
 	@Nullable
 	CodeComment find(String uuid);
 	
 	Map<CodeComment, TextRange> findHistory(Project project, ObjectId commitId, String path);
 		
-	List<CodeComment> findAllAfter(Project project, @Nullable String commentUUID, int count);
+	List<CodeComment> queryAfter(Project project, @Nullable String afterCommentUUID, int count);
 	
 	void save(CodeComment comment, @Nullable PullRequest request);
 

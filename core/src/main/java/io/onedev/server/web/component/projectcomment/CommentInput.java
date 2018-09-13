@@ -75,7 +75,7 @@ public abstract class CommentInput extends MarkdownEditor {
 							Restrictions.ilike("numberStr", query, MatchMode.START)));
 				}
 				criteria.addOrder(Order.desc("number"));
-				return OneDev.getInstance(Dao.class).findRange(criteria, 0, count);
+				return OneDev.getInstance(Dao.class).query(criteria, 0, count);
 			}
 
 			@Override
@@ -89,7 +89,7 @@ public abstract class CommentInput extends MarkdownEditor {
 							Restrictions.ilike("numberStr", query, MatchMode.START)));
 				}
 				criteria.addOrder(Order.desc("number"));
-				return OneDev.getInstance(Dao.class).findRange(criteria, 0, count);
+				return OneDev.getInstance(Dao.class).query(criteria, 0, count);
 			}
 			
 		};

@@ -368,7 +368,7 @@ public class RevisionDiffPanel extends Panel {
 				CodeCommentManager codeCommentManager = OneDev.getInstance(CodeCommentManager.class);
 				PullRequest request = requestModel.getObject();
 				for(CodeComment comment: 
-						codeCommentManager.findAll(projectModel.getObject(), getOldCommitId(), getNewCommitId())) {
+						codeCommentManager.query(projectModel.getObject(), getOldCommitId(), getNewCommitId())) {
 					if (request == null || request.getRequestComparingInfo(comment.getComparingInfo()) != null)
 						comments.add(comment);
 				}

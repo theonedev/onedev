@@ -6,6 +6,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -32,7 +34,7 @@ public class BuildEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
-						            return new Label(id, "#" + model.getObject());
+						            return new Label(id, OneDev.getInstance(BuildManager.class).load(model.getObject()));
 						        } else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						        }

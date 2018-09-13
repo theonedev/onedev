@@ -315,11 +315,11 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 	}
 	
 	public static String getRuleName(int rule) {
-		return getRuleName(PullRequestQueryLexer.ruleNames, rule);
+		return getLexerRuleName(PullRequestQueryLexer.ruleNames, rule);
 	}
 	
 	public static int getOperator(String operatorName) {
-		return getOperator(PullRequestQueryLexer.ruleNames, operatorName);
+		return getLexerRule(PullRequestQueryLexer.ruleNames, operatorName);
 	}
 	
 	@Override

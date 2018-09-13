@@ -69,7 +69,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 
 					private List<InputSuggestion> getUserSuggestions(String matchWith) {
 						List<InputSuggestion> suggestions = new ArrayList<>();
-						for (User user: OneDev.getInstance(UserManager.class).findAll()) {
+						for (User user: OneDev.getInstance(UserManager.class).query()) {
 							Range match = Range.match(user.getName(), matchWith, true, false, true);
 							if (match != null) {
 								String description;
@@ -119,7 +119,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 									} else if (fieldName.equals(PullRequestConstants.FIELD_SOURCE_PROJECT)) {
 										List<String> candidates = new ArrayList<>();
-										for (Project each: OneDev.getInstance(ProjectManager.class).findAll())
+										for (Project each: OneDev.getInstance(ProjectManager.class).query())
 											candidates.add(each.getName());
 										suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 									} else if (fieldName.equals(PullRequestConstants.FIELD_TARGET_BRANCH) 

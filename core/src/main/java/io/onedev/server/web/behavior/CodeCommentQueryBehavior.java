@@ -65,7 +65,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 
 					private List<InputSuggestion> getUserSuggestions(String matchWith) {
 						List<InputSuggestion> suggestions = new ArrayList<>();
-						for (User user: OneDev.getInstance(UserManager.class).findAll()) {
+						for (User user: OneDev.getInstance(UserManager.class).query()) {
 							Range match = Range.match(user.getName(), matchWith, true, false, true);
 							if (match != null) {
 								String description;

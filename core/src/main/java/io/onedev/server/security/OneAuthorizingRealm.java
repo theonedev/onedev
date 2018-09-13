@@ -169,7 +169,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     				if (!authenticated.getTeamFQNs().isEmpty()) {
     					Collection<String> retrievedTeamFQNs = new HashSet<>();
     					for (String teamFQN: authenticated.getTeamFQNs()) {
-    						Team team = teamManager.findByFQN(teamFQN);
+    						Team team = teamManager.find(teamFQN);
     						if (team != null) {
     							if (!existingTeamFQNs.contains(teamFQN)) {
     								Membership membership = new Membership();

@@ -65,7 +65,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	}
 
     	if (oldName != null && !oldName.equals(user.getName())) {
-    		for (Project project: projectManager.findAll()) {
+    		for (Project project: projectManager.query()) {
     			for (BranchProtection protection: project.getBranchProtections())
     				protection.onRenameUser(project, oldName, user.getName());
     			for (TagProtection protection: project.getTagProtections())
@@ -141,7 +141,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	
 		dao.remove(user);
 
-		for (Project project: projectManager.findAll()) {
+		for (Project project: projectManager.query()) {
 			for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) { 
 				if (it.next().onDeleteUser(project, user.getName()))
 					it.remove();
@@ -194,7 +194,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 
 	@Listen
 	public void on(SystemStarted event) {
-		for (User user: findAll()) {
+		for (User user: query()) {
 			// Fix a critical issue that password of self-registered users are not hashed
 			if (StringUtils.isNotBlank(user.getPassword()) && !user.getPassword().startsWith("$2a$10") 
 					&& !user.getPassword().startsWith("@hash^prefix@")) {

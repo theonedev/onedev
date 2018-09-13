@@ -37,11 +37,11 @@ public class BuildChoiceEditor extends PropertyEditor<Long> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Build request;
+		Build build;
 		if (getModelObject() != null)
-			request = OneDev.getInstance(BuildManager.class).find(getProject(), getModelObject());
+			build = OneDev.getInstance(BuildManager.class).get(getModelObject());
 		else
-			request = null;
+			build = null;
 		
 		BuildChoiceProvider choiceProvider = new BuildChoiceProvider(new AbstractReadOnlyModel<Project>() {
 
@@ -51,7 +51,7 @@ public class BuildChoiceEditor extends PropertyEditor<Long> {
 			}
     		
     	});
-    	input = new BuildSingleChoice("input", Model.of(request), choiceProvider) {
+    	input = new BuildSingleChoice("input", Model.of(build), choiceProvider) {
 
     		@Override
 			protected void onInitialize() {
@@ -86,7 +86,7 @@ public class BuildChoiceEditor extends PropertyEditor<Long> {
 	protected Long convertInputToValue() throws ConversionException {
 		Build build = input.getConvertedInput();
 		if (build != null)
-			return build.getNumber();
+			return build.getId();
 		else
 			return null;
 	}

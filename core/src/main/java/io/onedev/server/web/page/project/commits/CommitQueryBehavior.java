@@ -153,9 +153,6 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
 		String description;
 		switch (suggestedLiteral) {
-		case "revision":
-			description = "any revision string"; 
-			break;
 		case "committer":
 			description = "committed by";
 			break;

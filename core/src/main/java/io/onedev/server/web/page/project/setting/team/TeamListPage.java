@@ -157,7 +157,7 @@ public class TeamListPage extends ProjectSettingPage {
 			public Iterator<? extends Team> iterator(long first, long count) {
 				EntityCriteria<Team> criteria = getCriteria();
 				criteria.addOrder(Order.asc("name"));
-				return OneDev.getInstance(TeamManager.class).findRange(criteria, (int)first, (int)count).iterator();
+				return OneDev.getInstance(TeamManager.class).query(criteria, (int)first, (int)count).iterator();
 			}
 
 			@Override

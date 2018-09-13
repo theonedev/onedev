@@ -132,7 +132,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager implemen
 			
 		});
 		
-		List<Build> unprocessedBuilds = buildManager.findAllAfter(project, lastBuildUUID, BATCH_SIZE); 
+		List<Build> unprocessedBuilds = buildManager.queryAfter(project, lastBuildUUID, BATCH_SIZE); 
 		for (Build build: unprocessedBuilds) {
 			env.executeInTransaction(new TransactionalExecutable() {
 
@@ -199,7 +199,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager implemen
 	@Sessional
 	@Listen
 	public void on(SystemStarted event) {
-		for (Project project: projectManager.findAll()) {
+		for (Project project: projectManager.query()) {
 			checkVersion(project.getId().toString());
 			batchWorkManager.submit(getBatchWorker(project.getId()), new Prioritized(PRIORITY));
 		}

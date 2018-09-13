@@ -119,7 +119,7 @@ public class MergePreviewPage extends RequestDetailPage {
 
 				@Override
 				protected List<Build> load() {
-					return OneDev.getInstance(BuildManager.class).findAll(getProject(), preview.getMerged());
+					return OneDev.getInstance(BuildManager.class).query(getProject(), preview.getMerged());
 				}
 				
 			}));
