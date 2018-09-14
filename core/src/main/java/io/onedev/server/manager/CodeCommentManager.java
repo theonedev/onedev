@@ -23,12 +23,9 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 	
 	Collection<CodeComment> query(Project project, ObjectId...commitIds);
 	
-	@Nullable
-	CodeComment find(String uuid);
-	
 	Map<CodeComment, TextRange> findHistory(Project project, ObjectId commitId, String path);
 		
-	List<CodeComment> queryAfter(Project project, @Nullable String afterCommentUUID, int count);
+	List<CodeComment> queryAfter(Project project, @Nullable Long afterCommentId, int count);
 	
 	void save(CodeComment comment, @Nullable PullRequest request);
 

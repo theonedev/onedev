@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -44,13 +45,16 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.BuildInfoManager;
+import io.onedev.server.manager.CodeCommentRelationInfoManager;
+import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.IssueActionManager;
-import io.onedev.server.manager.IssueInfoManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueVoteManager;
 import io.onedev.server.manager.IssueWatchManager;
@@ -97,8 +101,9 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issues.issuedetail.changedfiles.FileChangesPage;
-import io.onedev.server.web.page.project.issues.issuedetail.changedfiles.FixedInBuildsPage;
+import io.onedev.server.web.page.project.issues.issuedetail.fixbuilds.FixBuildsPage;
+import io.onedev.server.web.page.project.issues.issuedetail.fixcommits.FixCommitsPage;
+import io.onedev.server.web.page.project.issues.issuedetail.reviewrequests.ReviewRequestsPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
@@ -365,10 +370,22 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new IssueTab("Activities", IssueActivitiesPage.class));
-		if (getIssue().getCommit() != null) 
-			tabs.add(new IssueTab("File Changes", FileChangesPage.class));
-		if (!OneDev.getInstance(IssueInfoManager.class).getFixedInBuildUUIDs(getProject(), getIssue().getUUID()).isEmpty())		
-			tabs.add(new IssueTab("Fixed In Builds", FixedInBuildsPage.class));
+		
+		if (SecurityUtils.canReadCode(getProject().getFacade())) {
+			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
+			Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
+			if (!fixCommits.isEmpty())		
+				tabs.add(new IssueTab("Fix Commits", FixCommitsPage.class));
+			BuildInfoManager buildInfoManager = OneDev.getInstance(BuildInfoManager.class);
+			if (!buildInfoManager.getFixBuildIds(getProject(), getIssue().getNumber()).isEmpty())		
+				tabs.add(new IssueTab("Fix Builds", FixBuildsPage.class));
+			CodeCommentRelationInfoManager codeCommentRelationInfoManager = OneDev.getInstance(CodeCommentRelationInfoManager.class); 
+			Collection<Long> pullRequestIds = new HashSet<>();
+			for (ObjectId commit: fixCommits) 
+				pullRequestIds.addAll(codeCommentRelationInfoManager.getPullRequestIds(getProject(), commit));		
+			if (!pullRequestIds.isEmpty())
+				tabs.add(new IssueTab("Pull Requests", ReviewRequestsPage.class));
+		}
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
 		

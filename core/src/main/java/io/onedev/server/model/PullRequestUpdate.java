@@ -7,7 +7,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,7 +35,7 @@ import io.onedev.server.git.command.ListFileChangesCommand;
 import io.onedev.server.manager.impl.DefaultCodeCommentRelationManager;
 
 @Entity
-@Table(indexes={@Index(columnList="g_request_id"), @Index(columnList="uuid"), @Index(columnList="date")})
+@Table(indexes={@Index(columnList="g_request_id"), @Index(columnList="date")})
 public class PullRequestUpdate extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -55,9 +54,6 @@ public class PullRequestUpdate extends AbstractEntity {
 
 	@Column(nullable=false)
 	private Date date = new Date();
-	
-	@Column(nullable=false)
-	private String uuid = UUID.randomUUID().toString();
 	
 	private transient List<RevCommit> commits;
 	
@@ -217,14 +213,6 @@ public class PullRequestUpdate extends AbstractEntity {
 			return request.getBaseCommit();
 	}
 	
-	public String getUUID() {
-		return uuid;
-	}
-
-	public void setUUID(String uuid) {
-		this.uuid = uuid;
-	}
-
 	/**
 	 * Get commits belonging to this update, reversely ordered by commit traversing. The list of commit will remain 
 	 * unchanged even if tip of target branch changes. This assumption is key to our caching of code comment to

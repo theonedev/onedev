@@ -33,7 +33,7 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.web.component.RequestStatusLabel;
+import io.onedev.server.web.component.RequestStateLabel;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.build.BuildStatusIcon;
 import io.onedev.server.web.component.issuestate.IssueStateLabel;
@@ -104,7 +104,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 							Link<Void> link = new BookmarkablePageLink<Void>("link", RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(request, null));
 							link.add(new Label("label", "#" + request.getNumber()));
 							requestFrag.add(link);
-							requestFrag.add(new RequestStatusLabel("status", Model.of(request)));
+							requestFrag.add(new RequestStateLabel("status", Model.of(request)));
 							item.add(requestFrag);
 						} else {
 							item.add(new Label("value", "#" + value));

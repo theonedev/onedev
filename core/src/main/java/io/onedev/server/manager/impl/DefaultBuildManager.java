@@ -54,6 +54,10 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.lt("id", build.getId()));
 		criteria.add(Restrictions.eq("configuration", build.getConfiguration()));
+		if (build.getRef() != null)
+			criteria.add(Restrictions.eq("ref", build.getRef()));
+		else
+			criteria.add(Restrictions.isNull("ref"));
 		criteria.addOrder(Order.desc("id"));
 		List<Build> builds = query(criteria, 0, 1);
 		return !builds.isEmpty()?builds.iterator().next():null;
@@ -120,24 +124,13 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		return builds;
 	}
 
-	@Sessional
 	@Override
-	public Build findByUUID(String uuid) {
-		EntityCriteria<Build> criteria = newCriteria();
-		criteria.add(Restrictions.eq("uuid", uuid));
-		return find(criteria);
-	}
-	
-	@Override
-	public List<Build> queryAfter(Project project, String afterBuildUUID, int count) {
+	public List<Build> queryAfter(Project project, Long afterBuildId, int count) {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.createCriteria("configuration").add(Restrictions.eq("project", project));
 		criteria.addOrder(Order.asc("id"));
-		if (afterBuildUUID != null) {
-			Build build = findByUUID(afterBuildUUID);
-			if (build != null)
-				criteria.add(Restrictions.gt("id", build.getId()));
-		}
+		if (afterBuildId != null)
+			criteria.add(Restrictions.gt("id", afterBuildId));
 		return query(criteria, 0, count);
 	}
 

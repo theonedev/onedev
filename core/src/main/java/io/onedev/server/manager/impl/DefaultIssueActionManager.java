@@ -220,13 +220,11 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 				BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
 				if (trigger.getConfiguration().equals(configuration.getName()) 
 						&& event.getBuild().getStatus() == Build.Status.SUCCESS) {
-					for (Issue issue: event.getBuild().getFixedIssues()) {
-						if (transition.getFromStates().contains(issue.getState())) { 
-							Map<String, Object> fieldValues = new HashMap<>();
-							if (trigger.getBuildField() != null)
-								fieldValues.put(trigger.getBuildField(), event.getBuild().getName());
+					for (Long issueNumber: event.getBuild().getFixedIssueNumbers(null)) {
+						Issue issue = issueManager.find(configuration.getProject(), issueNumber);
+						if (issue != null && transition.getFromStates().contains(issue.getState())) { 
 							issue.removeFields(transition.getRemoveFields());
-							changeState(issue, transition.getToState(), fieldValues, null);
+							changeState(issue, transition.getToState(), new HashMap<>(), null);
 						}
 					}
 				}
@@ -241,11 +239,8 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 				if (trigger.getBranch().equals(request.getTargetBranch())) {
 					for (Issue issue: request.getFixedIssues()) {
 						if (transition.getFromStates().contains(issue.getState())) {
-							Map<String, Object> fieldValues = new HashMap<>();
-							if (trigger.getPullRequestField() != null)
-								fieldValues.put(trigger.getPullRequestField(), request.getNumber());
 							issue.removeFields(transition.getRemoveFields());
-							changeState(issue, transition.getToState(), fieldValues, null);
+							changeState(issue, transition.getToState(), new HashMap<>(), null);
 						}
 					}
 				}

@@ -148,18 +148,17 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 		Store codeCommentStore = getStore(env, CODE_COMMENT_STORE);
 		Store pullRequestStore = getStore(env, PULL_REQUEST_STORE);
 
-		String lastPullRequestUpdateUUID = env.computeInTransaction(new TransactionalComputable<String>() {
+		Long lastPullRequestUpdateId = env.computeInTransaction(new TransactionalComputable<Long>() {
 			
 			@Override
-			public String compute(Transaction txn) {
-				byte[] value = readBytes(defaultStore, txn, LAST_PULL_REQUEST_UPDATE_KEY);
-				return value!=null?new String(value):null;									
+			public Long compute(Transaction txn) {
+				return readLong(defaultStore, txn, LAST_PULL_REQUEST_UPDATE_KEY, 0);
 			}
 			
 		});
 		
 		List<PullRequestUpdate> unprocessedPullRequestUpdates = pullRequestUpdateManager.queryAfter(
-				project, lastPullRequestUpdateUUID, BATCH_SIZE); 
+				project, lastPullRequestUpdateId, BATCH_SIZE); 
 		for (PullRequestUpdate update: unprocessedPullRequestUpdates) {
 			env.executeInTransaction(new TransactionalExecutable() {
 
@@ -172,18 +171,17 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 							commit.copyRawTo(keyBytes, 0);
 							ByteIterable commitKey = new ArrayByteIterable(keyBytes);
 							
-							Set<String> pullRequestUUIDs = getPullRequestUUIDs(pullRequestStore, txn, commitKey);
-							pullRequestUUIDs.add(update.getRequest().getUUID());
+							Collection<Long> pullRequestIds = readLongCollection(pullRequestStore, txn, commitKey);
+							pullRequestIds.add(update.getRequest().getId());
+
+							writeCollection(pullRequestStore, txn, commitKey, pullRequestIds);
 							
-							pullRequestStore.put(txn, commitKey, 
-									new ArrayByteIterable(SerializationUtils.serialize((Serializable) pullRequestUUIDs)));
-							
-							Map<String, ComparingInfo> comments = getCodeCommentComparingInfos(codeCommentStore, txn, commitKey);
-							Set<String> uuidsToRemove = new HashSet<>();
-							for (Map.Entry<String, ComparingInfo> entry: comments.entrySet()) {
+							Map<Long, ComparingInfo> comments = getCodeCommentComparingInfos(codeCommentStore, txn, commitKey);
+							Set<Long> commentIdsToRemove = new HashSet<>();
+							for (Map.Entry<Long, ComparingInfo> entry: comments.entrySet()) {
 								if (request.getRequestComparingInfo(entry.getValue()) != null) {
-									String uuid = entry.getKey();
-									CodeComment comment = codeCommentManager.find(uuid);
+									Long commentId = entry.getKey();
+									CodeComment comment = codeCommentManager.get(commentId);
 									if (comment != null) {
 										if (codeCommentRelationManager.find(request, comment) == null) {
 											CodeCommentRelation relation = new CodeCommentRelation();
@@ -192,35 +190,34 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 											codeCommentRelationManager.save(relation);
 										}
 									} else {
-										uuidsToRemove.add(uuid);
+										commentIdsToRemove.add(commentId);
 									}
 								}
 							}
-							if (!uuidsToRemove.isEmpty()) {
-								comments.keySet().removeAll(uuidsToRemove);
+							if (!commentIdsToRemove.isEmpty()) {
+								comments.keySet().removeAll(commentIdsToRemove);
 								codeCommentStore.put(txn, commitKey, 
 										new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
 							}
 						}
 					}
-					defaultStore.put(txn, LAST_PULL_REQUEST_UPDATE_KEY, new StringByteIterable(update.getUUID()));
+					defaultStore.put(txn, LAST_PULL_REQUEST_UPDATE_KEY, new LongByteIterable(update.getId()));
 				}
 				
 			});
 		}
 		
-		String lastCodeCommentUUID = env.computeInTransaction(new TransactionalComputable<String>() {
+		Long lastCodeCommentId = env.computeInTransaction(new TransactionalComputable<Long>() {
 			
 			@Override
-			public String compute(final Transaction txn) {
-				byte[] value = readBytes(defaultStore, txn, LAST_CODE_COMMENT_KEY);
-				return value!=null?new String(value):null;									
+			public Long compute(final Transaction txn) {
+				return readLong(defaultStore, txn, LAST_CODE_COMMENT_KEY, 0);
 			}
 			
 		});
 		
 		List<CodeComment> unprocessedCodeComments = codeCommentManager.queryAfter(project, 
-				lastCodeCommentUUID, BATCH_SIZE);
+				lastCodeCommentId, BATCH_SIZE);
 		for (CodeComment comment: unprocessedCodeComments) {
 			if (comment.isValid()) {
 				env.executeInTransaction(new TransactionalExecutable() {
@@ -231,16 +228,16 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 						commitId.copyRawTo(keyBytes, 0);
 						ByteIterable commitKey = new ArrayByteIterable(keyBytes);
 						
-						Map<String, ComparingInfo> comments = getCodeCommentComparingInfos(codeCommentStore, txn, commitKey);
-						comments.put(comment.getUUID(), comment.getComparingInfo());
+						Map<Long, ComparingInfo> comments = getCodeCommentComparingInfos(codeCommentStore, txn, commitKey);
+						comments.put(comment.getId(), comment.getComparingInfo());
 						codeCommentStore.put(txn, commitKey, 
 								new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
 
-						Set<String> pullRequestUUIDs = getPullRequestUUIDs(pullRequestStore, txn, commitKey);
+						Collection<Long> pullRequestIds = readLongCollection(pullRequestStore, txn, commitKey);
 						
-						Set<String> uuidsToRemove = new HashSet<>();
-						for (String uuid: pullRequestUUIDs) {
-							PullRequest request = pullRequestManager.find(uuid);
+						Set<Long> pullRequestIdsToRemove = new HashSet<>();
+						for (Long pullRequestId: pullRequestIds) {
+							PullRequest request = pullRequestManager.get(pullRequestId);
 							if (request != null && request.isValid()) {
 								if (request.getRequestComparingInfo(comment.getComparingInfo()) != null 
 										&& codeCommentRelationManager.find(request, comment) == null) {
@@ -250,13 +247,12 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 									codeCommentRelationManager.save(relation);
 								}
 							} else {
-								uuidsToRemove.add(uuid);
+								pullRequestIdsToRemove.add(pullRequestId);
 							}
 						}
-						if (!uuidsToRemove.isEmpty()) {
-							pullRequestUUIDs.removeAll(uuidsToRemove);
-							pullRequestStore.put(txn, commitKey, 
-									new ArrayByteIterable(SerializationUtils.serialize((Serializable) pullRequestUUIDs)));
+						if (!pullRequestIdsToRemove.isEmpty()) {
+							pullRequestIds.removeAll(pullRequestIdsToRemove);
+							writeCollection(pullRequestStore, txn, commitKey, pullRequestIds);
 						}
 					}
 					
@@ -267,7 +263,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 						if (!comment.getMarkPos().getCommit().equals(compareCommit)
 								&& project.getRepository().hasObject(ObjectId.fromString(compareCommit)))
 							associateCommentWithCommit(txn, comment.getCompareContext().getCompareCommit());
-						defaultStore.put(txn, LAST_CODE_COMMENT_KEY, new StringByteIterable(comment.getUUID()));
+						defaultStore.put(txn, LAST_CODE_COMMENT_KEY, new LongByteIterable(comment.getId()));
 					}
 					
 				});
@@ -277,29 +273,19 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 		return unprocessedPullRequestUpdates.size() == BATCH_SIZE || unprocessedCodeComments.size() == BATCH_SIZE;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private Set<String> getPullRequestUUIDs(Store store, Transaction txn, ByteIterable commitKey) {
-		byte[] valueBytes = readBytes(store, txn, commitKey);
-		if (valueBytes != null) {
-			return (Set<String>) SerializationUtils.deserialize(valueBytes);
-		} else {
-			return new HashSet<>();
-		}
-	}
-	
 	@Override
-	public Set<String> getPullRequestUUIDs(Project project, ObjectId commitId) {
+	public Collection<Long> getPullRequestIds(Project project, ObjectId commitId) {
 		byte[] commitKey = new byte[20];
 		commitId.copyRawTo(commitKey, 0);
 
 		Environment env = getEnv(project.getId().toString());
 		Store store = getStore(env, PULL_REQUEST_STORE);
 		
-		return env.computeInTransaction(new TransactionalComputable<Set<String>>() {
+		return env.computeInTransaction(new TransactionalComputable<Collection<Long>>() {
 			
 			@Override
-			public Set<String> compute(Transaction txn) {
-				return getPullRequestUUIDs(store, txn, new ArrayByteIterable(commitKey));
+			public Collection<Long> compute(Transaction txn) {
+				return readLongCollection(store, txn, new ArrayByteIterable(commitKey));
 			}
 			
 		});
@@ -307,10 +293,10 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Map<String, ComparingInfo> getCodeCommentComparingInfos(Store store, Transaction txn, ByteIterable commitKey) {
+	private Map<Long, ComparingInfo> getCodeCommentComparingInfos(Store store, Transaction txn, ByteIterable commitKey) {
 		byte[] valueBytes = readBytes(store, txn, commitKey);
 		if (valueBytes != null) {
-			return (Map<String, ComparingInfo>) SerializationUtils.deserialize(valueBytes);
+			return (Map<Long, ComparingInfo>) SerializationUtils.deserialize(valueBytes);
 		} else {
 			return new HashMap<>();
 		}

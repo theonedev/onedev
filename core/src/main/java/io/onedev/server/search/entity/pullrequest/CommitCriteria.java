@@ -1,8 +1,6 @@
 package io.onedev.server.search.entity.pullrequest;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.persistence.criteria.Predicate;
 
@@ -10,7 +8,6 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.CodeCommentRelationInfoManager;
-import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -29,25 +26,20 @@ public class CommitCriteria extends PullRequestCriteria {
 	
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context, User user) {
-		Collection<Long> ids = new HashSet<>();
-		for (String uuid: getUUIDs(project, commitId)) {
-			PullRequest request = OneDev.getInstance(PullRequestManager.class).find(uuid);
-			if (request != null)
-				ids.add(request.getId());
-		}
-		if (!ids.isEmpty())
-			return context.getRoot().get(PullRequestConstants.ATTR_ID).in(ids);
+		Collection<Long> pullRequestIds = getPullRequestIds(project, commitId);
+		if (!pullRequestIds.isEmpty())
+			return context.getRoot().get(PullRequestConstants.ATTR_ID).in(pullRequestIds);
 		else
 			return context.getBuilder().disjunction();
 	}
 	
-	private Set<String> getUUIDs(Project project, ObjectId commitId) {
-		return OneDev.getInstance(CodeCommentRelationInfoManager.class).getPullRequestUUIDs(project, commitId);		
+	private Collection<Long> getPullRequestIds(Project project, ObjectId commitId) {
+		return OneDev.getInstance(CodeCommentRelationInfoManager.class).getPullRequestIds(project, commitId);		
 	}
 	
 	@Override
 	public boolean matches(PullRequest request, User user) {
-		return getUUIDs(request.getTargetProject(), commitId).contains(request.getUUID());
+		return getPullRequestIds(request.getTargetProject(), commitId).contains(request.getId());
 	}
 
 	@Override

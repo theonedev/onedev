@@ -62,6 +62,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.EntityRemoved;
 import io.onedev.server.util.BatchWorker;
 import io.onedev.server.util.Day;
+import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.utils.FileUtils;
@@ -98,6 +99,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	private static final String DEFAULT_STORE = "default";
 	
 	private static final String COMMITS_STORE = "commits";
+	
+	private static final String FIX_COMMITS_STORE = "fixCommits";
 	
 	private static final String EDITS_STORE = "edits";
 
@@ -309,7 +312,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		Store indexToPathStore = getStore(env, INDEX_TO_PATH_STORE);
 		Store emailToIndexStore = getStore(env, EMAIL_TO_INDEX_STORE);
 		Store indexToUserStore = getStore(env, INDEX_TO_USER_STORE);
-		Store dailyContributionsStore = getStore(env, DAILY_CONTRIBUTIONS_STORE);		
+		Store dailyContributionsStore = getStore(env, DAILY_CONTRIBUTIONS_STORE);	
+		Store fixCommitsStore = getStore(env, FIX_COMMITS_STORE);
 		
 		Repository repository = project.getRepository();
 
@@ -372,6 +376,18 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 									commitsStore.put(txn, parentCommitKey, new ArrayByteIterable(newParentCommitBytes));
 								}
 								
+								for (Long issueNumber: IssueUtils.parseFixedIssues(nextCommit.getFullMessage())) {
+									ByteIterable issueKey = new LongByteIterable(issueNumber);
+									Collection<ObjectId> fixCommits = getFixCommits(fixCommitsStore, txn, issueKey);
+									fixCommits.add(nextCommit);
+									byte[] fixCommitBytes = new byte[fixCommits.size()*20];
+									int index = 0;
+									for (ObjectId fixCommit: fixCommits) {
+										fixCommit.copyRawTo(fixCommitBytes, index);
+										index += 20;
+									}
+									fixCommitsStore.put(txn, issueKey, new ArrayByteIterable(fixCommitBytes));
+								}
 							}								
 							nextCommit = revWalk.next();
 						}
@@ -1368,6 +1384,32 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		int user;
 		
 		int path;
+	}
+
+	private Collection<ObjectId> getFixCommits(Store store, Transaction txn, ByteIterable issueKey) {
+		Collection<ObjectId> fixCommits = new HashSet<>();
+		byte[] bytes = readBytes(store, txn, issueKey);
+		if (bytes != null) {
+			for (int i=0; i<bytes.length/20; i++)
+				fixCommits.add(ObjectId.fromRaw(bytes, i*20));
+		} 
+		return fixCommits;
+	}
+	
+	@Override
+	public Collection<ObjectId> getFixCommits(Project project, Long issueNumber) {
+		Environment env = getEnv(project.getId().toString());
+		Store store = getStore(env, FIX_COMMITS_STORE);
+		
+		return env.computeInTransaction(new TransactionalComputable<Collection<ObjectId>>() {
+			
+			@Override
+			public Collection<ObjectId> compute(Transaction txn) {
+				return getFixCommits(store, txn, new LongByteIterable(issueNumber));
+			}
+			
+		});
+		
 	}
 
 }

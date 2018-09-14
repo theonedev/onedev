@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issues.issuedetail.changedfiles;
+package io.onedev.server.web.page.project.issues.issuedetail.fixbuilds;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +25,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.BuildManager;
-import io.onedev.server.manager.IssueInfoManager;
+import io.onedev.server.manager.BuildInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.util.DateUtils;
@@ -33,17 +33,17 @@ import io.onedev.server.web.component.build.BuildStatusIcon;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
 
 @SuppressWarnings("serial")
-public class FixedInBuildsPage extends IssueDetailPage {
+public class FixBuildsPage extends IssueDetailPage {
 
 	private final IModel<List<Build>> buildsModel = new LoadableDetachableModel<List<Build>>() {
 
 		@Override
 		protected List<Build> load() {
 			Map<Configuration, Build> buildMap = new HashMap<>();
-			for (String buildUUID: OneDev.getInstance(IssueInfoManager.class).getFixedInBuildUUIDs(getProject(), getIssue().getUUID())) {
-				Build build = OneDev.getInstance(BuildManager.class).findByUUID(buildUUID);
+			for (Long buildId: OneDev.getInstance(BuildInfoManager.class).getFixBuildIds(getProject(), getIssue().getNumber())) {
+				Build build = OneDev.getInstance(BuildManager.class).get(buildId);
 				Build existingBuild = buildMap.get(build.getConfiguration());
-				if (existingBuild == null || existingBuild.getDate().before(build.getDate()))
+				if (existingBuild == null || existingBuild.getId() < build.getId())
 					buildMap.put(build.getConfiguration(), build);
 			}
 			List<Build> buildList = new ArrayList<>(buildMap.values());
@@ -53,7 +53,7 @@ public class FixedInBuildsPage extends IssueDetailPage {
 		
 	};
 	
-	public FixedInBuildsPage(PageParameters params) {
+	public FixBuildsPage(PageParameters params) {
 		super(params);
 	}
 
@@ -83,7 +83,7 @@ public class FixedInBuildsPage extends IssueDetailPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
 					IModel<Build> rowModel) {
-				Fragment fragment = new Fragment(componentId, "buildFrag", FixedInBuildsPage.this);
+				Fragment fragment = new Fragment(componentId, "buildFrag", FixBuildsPage.this);
 				fragment.add(new BuildStatusIcon("status", rowModel));
 				ExternalLink link = new ExternalLink("link", rowModel.getObject().getUrl());
 				link.add(new Label("label", rowModel.getObject().getName()));

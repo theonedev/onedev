@@ -59,8 +59,8 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryBuildContext;
 import io.onedev.server.util.diff.DiffUtils;
@@ -106,14 +106,6 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		}
 	}
 
-	@Sessional
-	@Override
-	public CodeComment find(String uuid) {
-		EntityCriteria<CodeComment> criteria = newCriteria();
-		criteria.add(Restrictions.eq("uuid", uuid));
-		return find(criteria);
-	}
-	
 	@Transactional
 	@Listen
 	public void on(CodeCommentEvent event) {
@@ -122,16 +114,12 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	
 	@Sessional
 	@Override
-	public List<CodeComment> queryAfter(Project project, String afterCommentUUID, int count) {
+	public List<CodeComment> queryAfter(Project project, Long afterCommentId, int count) {
 		EntityCriteria<CodeComment> criteria = newCriteria();
 		criteria.add(Restrictions.eq("project", project));
 		criteria.addOrder(Order.asc("id"));
-		if (afterCommentUUID != null) {
-			CodeComment comment = find(afterCommentUUID);
-			if (comment != null) {
-				criteria.add(Restrictions.gt("id", comment.getId()));
-			}
-		}
+		if (afterCommentId != null) 
+			criteria.add(Restrictions.gt("id", afterCommentId));
 		return query(criteria, 0, count);
 	}
 

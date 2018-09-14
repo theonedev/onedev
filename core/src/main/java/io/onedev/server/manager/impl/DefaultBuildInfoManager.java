@@ -1,29 +1,25 @@
 package io.onedev.server.manager.impl;
 
 import java.io.File;
-import java.io.Serializable;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.lifecycle.SystemStarted;
 import io.onedev.server.manager.BatchWorkManager;
+import io.onedev.server.manager.BuildInfoManager;
 import io.onedev.server.manager.BuildManager;
-import io.onedev.server.manager.IssueInfoManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -34,7 +30,6 @@ import io.onedev.server.persistence.dao.EntityRemoved;
 import io.onedev.server.util.BatchWorker;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.concurrent.Prioritized;
-import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
@@ -43,19 +38,19 @@ import jetbrains.exodus.env.TransactionalComputable;
 import jetbrains.exodus.env.TransactionalExecutable;
 
 @Singleton
-public class DefaultIssueInfoManager extends AbstractEnvironmentManager implements IssueInfoManager {
+public class DefaultBuildInfoManager extends AbstractEnvironmentManager implements BuildInfoManager {
 
 	private static final int INFO_VERSION = 6;
 	
 	private static final int BATCH_SIZE = 5000;
 	
-	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueInfoManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultBuildInfoManager.class);
 	
-	private static final String INFO_DIR = "issue";
+	private static final String INFO_DIR = "build";
 	
 	private static final String DEFAULT_STORE = "default";
 	
-	private static final String ISSUE_STORE = "issue";
+	private static final String FIX_BUILDS_STORE = "fixBuilds";
 	
 	private static final ByteIterable LAST_BUILD_KEY = new StringByteIterable("lastBuild");
 	
@@ -74,7 +69,7 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager implemen
 	private final Dao dao;
 	
 	@Inject
-	public DefaultIssueInfoManager(Dao dao, ProjectManager projectManager, StorageManager storageManager, 
+	public DefaultBuildInfoManager(Dao dao, ProjectManager projectManager, StorageManager storageManager, 
 			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork, BuildManager buildManager) {
 		this.projectManager = projectManager;
 		this.storageManager = storageManager;
@@ -116,36 +111,45 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager implemen
 	}
 	
 	private boolean collect(Project project) {
-		logger.debug("Collecting issue info in project '{}'...", project);
+		logger.debug("Collecting build info in project '{}'...", project);
 		
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
-		Store issueStore = getStore(env, ISSUE_STORE);
+		Store fixBuildsStore = getStore(env, FIX_BUILDS_STORE);
 
-		String lastBuildUUID = env.computeInTransaction(new TransactionalComputable<String>() {
+		Long lastBuildId = env.computeInTransaction(new TransactionalComputable<Long>() {
 			
 			@Override
-			public String compute(Transaction txn) {
-				byte[] value = readBytes(defaultStore, txn, LAST_BUILD_KEY);
-				return value!=null?new String(value):null;									
+			public Long compute(Transaction txn) {
+				return readLong(defaultStore, txn, LAST_BUILD_KEY, 0);
 			}
 			
 		});
 		
-		List<Build> unprocessedBuilds = buildManager.queryAfter(project, lastBuildUUID, BATCH_SIZE); 
-		for (Build build: unprocessedBuilds) {
+		List<Build> unprocessedBuilds = buildManager.queryAfter(project, lastBuildId, BATCH_SIZE); 
+		for (int i=0; i<unprocessedBuilds.size(); i++) {
+			int index = i;
 			env.executeInTransaction(new TransactionalExecutable() {
 
 				@Override
 				public void execute(Transaction txn) {
-					for (Issue issue: build.getFixedIssues()) {
-						ByteIterable issueKey = new StringByteIterable(issue.getUUID());
-						Set<String> fixedInBuildUUIDs = getFixedInBuildUUIDs(issueStore, txn, issueKey);
-						fixedInBuildUUIDs.add(build.getUUID());
-						issueStore.put(txn, issueKey, 
-								new ArrayByteIterable(SerializationUtils.serialize((Serializable) fixedInBuildUUIDs)));
+					Build build = unprocessedBuilds.get(index);
+					Build prevBuild = null;
+					for (int j=index-1; j>=0; j--) {
+						Build prevBuildInProject = unprocessedBuilds.get(j);
+						if (prevBuildInProject.getConfiguration().equals(build.getConfiguration())
+								&& Objects.equals(build.getRef(), prevBuildInProject.getRef())) {
+							prevBuild = prevBuildInProject;
+							break;
+						}
 					}
-					defaultStore.put(txn, LAST_BUILD_KEY, new StringByteIterable(build.getUUID()));
+					for (Long issueNumber: build.getFixedIssueNumbers(prevBuild)) {
+						ByteIterable issueKey = new LongByteIterable(issueNumber);
+						Collection<Long> fixBuildIds = readLongCollection(fixBuildsStore, txn, issueKey);
+						fixBuildIds.add(build.getId());
+						writeCollection(fixBuildsStore, txn, issueKey, fixBuildIds);
+					}
+					defaultStore.put(txn, LAST_BUILD_KEY, new LongByteIterable(build.getId()));
 				}
 				
 			});
@@ -154,26 +158,16 @@ public class DefaultIssueInfoManager extends AbstractEnvironmentManager implemen
 		return unprocessedBuilds.size() == BATCH_SIZE;
 	}
 	
-	@SuppressWarnings("unchecked")
-	private Set<String> getFixedInBuildUUIDs(Store store, Transaction txn, ByteIterable issueKey) {
-		byte[] valueBytes = readBytes(store, txn, issueKey);
-		if (valueBytes != null) {
-			return (Set<String>) SerializationUtils.deserialize(valueBytes);
-		} else {
-			return new HashSet<>();
-		}
-	}
-	
 	@Override
-	public Set<String> getFixedInBuildUUIDs(Project project, String issueUUID) {
+	public Collection<Long> getFixBuildIds(Project project, Long issueNumber) {
 		Environment env = getEnv(project.getId().toString());
-		Store store = getStore(env, ISSUE_STORE);
+		Store store = getStore(env, FIX_BUILDS_STORE);
 		
-		return env.computeInTransaction(new TransactionalComputable<Set<String>>() {
+		return env.computeInTransaction(new TransactionalComputable<Collection<Long>>() {
 			
 			@Override
-			public Set<String> compute(Transaction txn) {
-				return getFixedInBuildUUIDs(store, txn, new StringByteIterable(issueUUID));
+			public Collection<Long> compute(Transaction txn) {
+				return readLongCollection(store, txn, new LongByteIterable(issueNumber));
 			}
 			
 		});

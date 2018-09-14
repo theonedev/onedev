@@ -27,9 +27,6 @@ public interface BuildManager extends EntityManager<Build> {
 	@Nullable
 	Build findPrevious(Build build);
 
-	@Nullable
-	Build findByUUID(String uuid);
-	
-	List<Build> queryAfter(Project project, @Nullable String afterCommentUUID, int count);
+	List<Build> queryAfter(Project project, Long afterBuildId, int count);
 	
 }

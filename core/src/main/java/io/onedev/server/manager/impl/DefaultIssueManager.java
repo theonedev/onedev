@@ -1,6 +1,5 @@
 package io.onedev.server.manager.impl;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -21,19 +20,12 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jgit.errors.MissingObjectException;
-import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
-import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.event.RefUpdated;
-import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
@@ -56,15 +48,14 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.issue.AndCriteria;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryBuildContext;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -629,49 +620,6 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		
 	}
 
-	@Transactional
-	@Listen
-	public void on(RefUpdated event) {
-		if (!event.getNewCommitId().equals(ObjectId.zeroId())) {
-			Project project = event.getProject();
-			ObjectId oldCommitId;
-			if (!event.getOldCommitId().equals(ObjectId.zeroId()))
-				oldCommitId = event.getOldCommitId();
-			else 
-				oldCommitId = project.getObjectId(project.getDefaultBranch());
-			try (RevWalk revWalk = new RevWalk(project.getRepository())) {
-				revWalk.markStart(revWalk.parseCommit(event.getNewCommitId()));
-				revWalk.markUninteresting(revWalk.parseCommit(oldCommitId));
-				
-				RevCommit commit;
-				while ((commit = revWalk.next()) != null) {
-					for (Long issueNumber: IssueUtils.parseFixedIssues(commit.getFullMessage())) {
-						Issue issue = find(project, issueNumber);
-						if (issue != null) {
-							if (issue.getCommit() == null) {
-								issue.setCommit(commit.name());
-								listenerRegistry.post(new IssueCommitted(issue));
-							} else {
-								try {
-									RevCommit issueCommit = revWalk.parseCommit(ObjectId.fromString(issue.getCommit()));
-									if (issueCommit.getCommitTime() < commit.getCommitTime()) {
-										issue.setCommit(commit.name());
-										listenerRegistry.post(new IssueCommitted(issue));
-									}
-								} catch (MissingObjectException e) {
-									issue.setCommit(commit.name());
-									listenerRegistry.post(new IssueCommitted(issue));
-								}
-							}
-						}
-					}
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
-	
 	/*
 	@Transactional
 	@Override

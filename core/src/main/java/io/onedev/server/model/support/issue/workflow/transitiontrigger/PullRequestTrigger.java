@@ -1,16 +1,9 @@
 package io.onedev.server.model.support.issue.workflow.transitiontrigger;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.BranchChoice;
-import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.util.WicketUtils;
 
 public abstract class PullRequestTrigger implements TransitionTrigger {
 
@@ -18,8 +11,6 @@ public abstract class PullRequestTrigger implements TransitionTrigger {
 
 	private String branch;
 	
-	private String pullRequestField;
-
 	@Editable(name="Target Branch")
 	@BranchChoice
 	@NotEmpty
@@ -31,25 +22,4 @@ public abstract class PullRequestTrigger implements TransitionTrigger {
 		this.branch = branch;
 	}
 
-	@Editable(order=200, description="Optionally specify a field of \"pull request choice\" type to store the pull request information")
-	@ChoiceProvider("getPullRequestFieldChoices")
-	public String getPullRequestField() {
-		return pullRequestField;
-	}
-
-	public void setPullRequestField(String pullRequestField) {
-		this.pullRequestField = pullRequestField;
-	}
-	
-	@SuppressWarnings("unused")
-	private static List<String> getPullRequestFieldChoices() {
-		List<String> choices = new ArrayList<>();
-		ProjectPage page = (ProjectPage) WicketUtils.getPage();
-		for (InputSpec field: page.getProject().getIssueWorkflow().getFieldSpecs()) {
-			if (field.getType().equals(InputSpec.PULLREQUEST))
-				choices.add(field.getName());
-		}
-		return choices;
-	}
-	
 }

@@ -4,9 +4,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -23,13 +22,11 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.BuildManager;
-import io.onedev.server.manager.IssueManager;
 import io.onedev.server.util.IssueUtils;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_configuration_id"), @Index(columnList="commit"), 
-				@Index(columnList="uuid"), @Index(columnList="name")},
+		indexes={@Index(columnList="g_configuration_id"), @Index(columnList="commit"), @Index(columnList="name")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"g_configuration_id", "commit"})}
 )
 public class Build extends AbstractEntity {
@@ -62,6 +59,8 @@ public class Build extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Configuration configuration;
 	
+	private String ref;
+	
 	@Column(nullable=false)
 	private String name;
 	
@@ -77,10 +76,7 @@ public class Build extends AbstractEntity {
 	@Column(nullable=false)
 	private String url;
 	
-	@Column(nullable=false)
-	private String uuid = UUID.randomUUID().toString();
-
-	private transient Collection<Issue> fixedIssues;
+	private transient Collection<Long> fixedIssueNumbers;
 	
 	public Configuration getConfiguration() {
 		return configuration;
@@ -96,6 +92,14 @@ public class Build extends AbstractEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getRef() {
+		return ref;
+	}
+
+	public void setRef(String ref) {
+		this.ref = ref;
 	}
 
 	public String getCommit() {
@@ -130,56 +134,38 @@ public class Build extends AbstractEntity {
 		this.url = url;
 	}
 	
-	public String getUUID() {
-		return uuid;
-	}
-
-	public void setUUID(String uuid) {
-		this.uuid = uuid;
-	}
-
 	public String getFQN() {
 		return getConfiguration().getName() + FQN_SEPARATOR + getName();
 	}
 	
-	public Collection<Issue> getFixedIssues() {
-		if (fixedIssues == null) {
-			fixedIssues = new HashSet<>();
-			IssueManager issueManager = OneDev.getInstance(IssueManager.class);
-			for (Long issueNumber: getFixedIssueNumbers()) {
-				Issue issue = issueManager.find(getConfiguration().getProject(), issueNumber);
-				if (issue != null)
-					fixedIssues.add(issue);
-			}
-		}
-		return fixedIssues;
-	}
-	
-	public Collection<Long> getFixedIssueNumbers() {
-		Set<Long> fixedIssueNumbers = new HashSet<>();
-			
-		ObjectId prevCommit;
-		Build prevBuild = OneDev.getInstance(BuildManager.class).findPrevious(this);
-		if (prevBuild != null) 
-			prevCommit = ObjectId.fromString(prevBuild.getCommit());
-		else if (getConfiguration().getBaseCommit() != null)
-			prevCommit = ObjectId.fromString(getConfiguration().getBaseCommit());
-		else
-			prevCommit = null;
-		
-		if (prevCommit != null) {
-			Project project = getConfiguration().getProject();
-			
-			Repository repository = project.getRepository();
-			try (RevWalk revWalk = new RevWalk(repository)) {
-				revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommit())));
-				revWalk.markUninteresting(revWalk.parseCommit(prevCommit));
+	public Collection<Long> getFixedIssueNumbers(@Nullable Build prevBuild) {
+		if (fixedIssueNumbers == null) {
+			fixedIssueNumbers = new HashSet<>();
 
-				RevCommit commit;
-				while ((commit = revWalk.next()) != null) 
-					fixedIssueNumbers.addAll(IssueUtils.parseFixedIssues(commit.getFullMessage()));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			ObjectId prevCommit;
+			if (prevBuild == null)
+				prevBuild = OneDev.getInstance(BuildManager.class).findPrevious(this);
+			if (prevBuild != null) 
+				prevCommit = ObjectId.fromString(prevBuild.getCommit());
+			else if (getConfiguration().getBaseCommit() != null)
+				prevCommit = ObjectId.fromString(getConfiguration().getBaseCommit());
+			else
+				prevCommit = null;
+			
+			if (prevCommit != null) {
+				Project project = getConfiguration().getProject();
+				
+				Repository repository = project.getRepository();
+				try (RevWalk revWalk = new RevWalk(repository)) {
+					revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommit())));
+					revWalk.markUninteresting(revWalk.parseCommit(prevCommit));
+	
+					RevCommit commit;
+					while ((commit = revWalk.next()) != null) 
+						fixedIssueNumbers.addAll(IssueUtils.parseFixedIssues(commit.getFullMessage()));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 		return fixedIssueNumbers;

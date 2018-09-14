@@ -114,8 +114,8 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.persistence.dao.EntityRemoved;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryBuildContext;
 import io.onedev.server.security.SecurityUtils;
@@ -611,14 +611,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		criteria.add(PullRequest.CriterionHelper.ofOpen());
 		criteria.add(PullRequest.CriterionHelper.ofTargetProject(targetProject));
 		return count(criteria);
-	}
-
-	@Sessional
-	@Override
-	public PullRequest find(String uuid) {
-		EntityCriteria<PullRequest> criteria = newCriteria();
-		criteria.add(Restrictions.eq("uuid", uuid));
-		return find(criteria);
 	}
 
 	@Transactional

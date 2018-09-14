@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -147,9 +149,29 @@ public abstract class AbstractEnvironmentManager {
 			return defaultValue;
 	}
 	
+	protected Collection<Long> readLongCollection(Store store, Transaction txn, ByteIterable key) {
+		Collection<Long> collection = new HashSet<>();
+		byte[] bytes = readBytes(store, txn, key);
+		if (bytes != null) {
+			for (int i=0; i<bytes.length/Long.BYTES; i++) 
+				collection.add(ByteBuffer.wrap(bytes, i*Long.BYTES, Long.BYTES).getLong());
+		} 
+		return collection;
+	}
+	
 	protected void writeLong(Store store, Transaction txn, ByteIterable key, long value) {
 		byte[] bytes = ByteBuffer.allocate(Long.BYTES).putLong(value).array();
 		store.put(txn, key, new ArrayByteIterable(bytes));
+	}
+	
+	protected void writeCollection(Store store, Transaction txn, ByteIterable key, Collection<Long> collection) {
+		ByteBuffer buffer = ByteBuffer.allocate(collection.size()*Long.BYTES);
+		int index = 0;
+		for (Long value: collection) {
+			buffer.putLong(index, value);
+			index += Long.BYTES;
+		}
+		store.put(txn, key, new ArrayByteIterable(buffer.array()));
 	}
 	
 	protected void writeBoolean(Store store, Transaction txn, ByteIterable key, boolean value) {

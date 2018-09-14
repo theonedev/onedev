@@ -59,8 +59,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList="number"), @Index(columnList="numberStr"), 
 				@Index(columnList="submitDate"), @Index(columnList="g_submitter_id"),
 				@Index(columnList="voteCount"), @Index(columnList="commentCount"),
-				@Index(columnList="g_milestone_id"), @Index(columnList="LAST_ACT_DATE"), 
-				@Index(columnList="uuid")})
+				@Index(columnList="g_milestone_id"), @Index(columnList="LAST_ACT_DATE")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class Issue extends AbstractEntity implements Referenceable {
@@ -75,8 +74,6 @@ public class Issue extends AbstractEntity implements Referenceable {
 	
 	@Column(nullable=false)
 	private String title;
-	
-	private String commit;
 	
 	@Lob
 	@Column(length=65535)
@@ -185,14 +182,6 @@ public class Issue extends AbstractEntity implements Referenceable {
 	public void setNumber(long number) {
 		this.number = number;
 		numberStr = String.valueOf(number);
-	}
-
-	public String getCommit() {
-		return commit;
-	}
-
-	public void setCommit(String commit) {
-		this.commit = commit;
 	}
 
 	public User getSubmitter() {

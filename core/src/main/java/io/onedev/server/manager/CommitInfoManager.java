@@ -94,5 +94,7 @@ public interface CommitInfoManager {
 	 * 			line statistics data
 	 */
 	LineStats getLineStats(Project project);
-	
+
+	Collection<ObjectId> getFixCommits(Project project, Long issueNumber);
+
 }

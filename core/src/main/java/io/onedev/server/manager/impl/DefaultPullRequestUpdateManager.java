@@ -98,24 +98,12 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 
 	@Sessional
 	@Override
-	public PullRequestUpdate find(String uuid) {
-		EntityCriteria<PullRequestUpdate> criteria = newCriteria();
-		criteria.add(Restrictions.eq("uuid", uuid));
-		return find(criteria);
-	}
-
-	@Sessional
-	@Override
-	public List<PullRequestUpdate> queryAfter(Project project, String afterUpdateUUID, int count) {
+	public List<PullRequestUpdate> queryAfter(Project project, Long afterUpdateId, int count) {
 		EntityCriteria<PullRequestUpdate> criteria = newCriteria();
 		criteria.createCriteria("request").add(Restrictions.eq("targetProject", project));
 		criteria.addOrder(Order.asc("id"));
-		if (afterUpdateUUID != null) {
-			PullRequestUpdate update = find(afterUpdateUUID);
-			if (update != null) {
-				criteria.add(Restrictions.gt("id", update.getId()));
-			}
-		}
+		if (afterUpdateId != null) 
+			criteria.add(Restrictions.gt("id", afterUpdateId));
 		return query(criteria, 0, count);
 	}
 

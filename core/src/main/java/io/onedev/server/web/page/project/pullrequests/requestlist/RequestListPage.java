@@ -35,13 +35,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.FileMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.git.BlobIdent;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.PullRequestQuerySettingManager;
@@ -55,11 +53,11 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
-import io.onedev.server.web.component.RequestStatusLabel;
+import io.onedev.server.web.component.RequestStateLabel;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.link.BranchLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.pullrequests.newrequest.NewRequestPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
 import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
@@ -349,32 +347,22 @@ public class RequestListPage extends ProjectPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				cellItem.add(new RequestStatusLabel(componentId, rowModel));
+				cellItem.add(new RequestStateLabel(componentId, rowModel));
 			}
 
 		});
 		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Target Branch")) {
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Source")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				PullRequest request = rowModel.getObject();
-				PageParameters params = ProjectBlobPage.paramsOf(getProject(), 
-						new BlobIdent(request.getTargetBranch(), null, FileMode.TREE.getBits()));
-				cellItem.add(new BookmarkablePageLink<Void>(componentId, ProjectBlobPage.class, params) {
-
-					@Override
-					public IModel<?> getBody() {
-						return Model.of(rowModel.getObject().getTargetBranch());
-					}
-					
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						tag.setName("a");
-					}
-					
-				});
+				if (rowModel.getObject().getSource() != null) {
+					Fragment fragment = new Fragment(componentId, "sourceFrag", RequestListPage.this);
+					fragment.add(new BranchLink("link", rowModel.getObject().getSource(), rowModel.getObject()));
+					cellItem.add(fragment);
+				} else {
+					cellItem.add(new Label(componentId, "<i>Unknown</i>").setEscapeModelStrings(false));
+				}
 			}
 
 		});

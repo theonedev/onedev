@@ -15,7 +15,6 @@ import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.transitionprerequisite.TransitionPrerequisite;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
-import io.onedev.server.model.support.issue.workflow.transitiontrigger.PullRequestTrigger;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.TransitionTrigger;
 import io.onedev.server.model.support.usermatcher.SpecifiedTeam;
 import io.onedev.server.model.support.usermatcher.SpecifiedUser;
@@ -191,15 +190,7 @@ public class TransitionSpec implements Serializable {
 	public void onRenameField(String oldName, String newName) {
 		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(oldName))
 			getPrerequisite().setInputName(newName);
-		if (getTrigger() instanceof BuildSuccessfulTrigger) {
-			BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) getTrigger();
-			if (oldName.equals(trigger.getBuildField()))
-				trigger.setBuildField(newName);
-		} else if (getTrigger() instanceof PullRequestTrigger) {
-			PullRequestTrigger trigger = (PullRequestTrigger) getTrigger();
-			if (oldName.equals(trigger.getPullRequestField()))
-				trigger.setPullRequestField(newName);
-		} else if (getTrigger() instanceof PressButtonTrigger) {
+		if (getTrigger() instanceof PressButtonTrigger) {
 			PressButtonTrigger trigger = (PressButtonTrigger) getTrigger();
 			for (int i=0; i<trigger.getPromptFields().size(); i++) {
 				if (trigger.getPromptFields().get(i).equals(oldName))
@@ -215,15 +206,7 @@ public class TransitionSpec implements Serializable {
 	public boolean onDeleteField(String fieldName) {
 		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(fieldName)) 
 			return true;
-		if (getTrigger() instanceof BuildSuccessfulTrigger) {
-			BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) getTrigger();
-			if (fieldName.equals(trigger.getBuildField()))
-				return true;
-		} else if (getTrigger() instanceof PullRequestTrigger) {
-			PullRequestTrigger trigger = (PullRequestTrigger) getTrigger();
-			if (fieldName.equals(trigger.getPullRequestField()))
-				return true;
-		} else if (getTrigger() instanceof PressButtonTrigger) {
+		if (getTrigger() instanceof PressButtonTrigger) {
 			PressButtonTrigger trigger = (PressButtonTrigger) getTrigger();
 			for (Iterator<String> it = trigger.getPromptFields().iterator(); it.hasNext();) {
 				if (it.next().equals(fieldName))

@@ -11,11 +11,11 @@ import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 
 @SuppressWarnings("serial")
-public class RequestStatusLabel extends Label {
+public class RequestStateLabel extends Label {
 
 	private final IModel<PullRequest> requestModel;
 	
-	public RequestStatusLabel(String id, IModel<PullRequest> requestModel) {
+	public RequestStateLabel(String id, IModel<PullRequest> requestModel) {
 		super(id, new LoadableDetachableModel<String>() {
 
 			@Override
