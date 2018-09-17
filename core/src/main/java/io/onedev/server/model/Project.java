@@ -75,6 +75,7 @@ import io.onedev.server.git.Submodule;
 import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.manager.BuildQuerySettingManager;
 import io.onedev.server.manager.CodeCommentQuerySettingManager;
 import io.onedev.server.manager.CommitQuerySettingManager;
 import io.onedev.server.manager.IssueQuerySettingManager;
@@ -87,6 +88,7 @@ import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.codecomment.NamedCodeCommentQuery;
 import io.onedev.server.model.support.issue.IssueBoard;
 import io.onedev.server.model.support.issue.IssueConstants;
@@ -191,6 +193,9 @@ public class Project extends AbstractEntity {
 	private Collection<CodeCommentQuerySetting> codeCommentQuerySettings = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<BuildQuerySetting> buildQuerySettings = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
 	@Lob
@@ -212,6 +217,10 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(length=65535)
 	private ArrayList<NamedCodeCommentQuery> savedCodeCommentQueries;
+	
+	@Lob
+	@Column(length=65535)
+	private ArrayList<NamedBuildQuery> savedBuildQueries;
 	
 	@Lob
 	@Column(length=65535)
@@ -240,6 +249,8 @@ public class Project extends AbstractEntity {
     private transient Optional<PullRequestQuerySetting> pullRequestQuerySettingOfCurrentUserHolder;
     
     private transient Optional<CodeCommentQuerySetting> codeCommentQuerySettingOfCurrentUserHolder;
+    
+    private transient Optional<BuildQuerySetting> buildQuerySettingOfCurrentUserHolder;
     
     private transient Optional<CommitQuerySetting> commitQuerySettingOfCurrentUserHolder;
     
@@ -952,6 +963,15 @@ public class Project extends AbstractEntity {
 		return null;
 	}
 	
+	@Nullable
+	public NamedBuildQuery getSavedBuildQuery(String name) {
+		for (NamedBuildQuery namedQuery: getSavedBuildQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
+	
 	public ArrayList<NamedCodeCommentQuery> getSavedCodeCommentQueries() {
 		if (savedCodeCommentQueries == null) {
 			savedCodeCommentQueries = new ArrayList<>();
@@ -967,6 +987,23 @@ public class Project extends AbstractEntity {
 		this.savedCodeCommentQueries = savedCodeCommentQueries;
 	}
 	
+	public ArrayList<NamedBuildQuery> getSavedBuildQueries() {
+		if (savedBuildQueries == null) {
+			savedBuildQueries = new ArrayList<>();
+			savedBuildQueries.add(new NamedBuildQuery("All", "all"));
+			savedBuildQueries.add(new NamedBuildQuery("Successful", "successful"));
+			savedBuildQueries.add(new NamedBuildQuery("Failed", "failed"));
+			savedBuildQueries.add(new NamedBuildQuery("In error", "in error"));
+			savedBuildQueries.add(new NamedBuildQuery("Running", "running"));
+			savedBuildQueries.add(new NamedBuildQuery("Build recently", "\"Build Date\" is after \"last week\""));
+		}
+		return savedBuildQueries;
+	}
+
+	public void setSavedBuildQueries(ArrayList<NamedBuildQuery> savedBuildQueries) {
+		this.savedBuildQueries = savedBuildQueries;
+	}
+
 	public ArrayList<String> getIssueListFields() {
 		if (issueListFields == null) {
 			issueListFields = new ArrayList<>();
@@ -1017,6 +1054,14 @@ public class Project extends AbstractEntity {
 		this.codeCommentQuerySettings = codeCommentQuerySettings;
 	}
 	
+	public Collection<BuildQuerySetting> getBuildQuerySettings() {
+		return buildQuerySettings;
+	}
+
+	public void setBuildQuerySettings(Collection<BuildQuerySetting> buildQuerySettings) {
+		this.buildQuerySettings = buildQuerySettings;
+	}
+
 	public long getVersion() {
 		return version;
 	}
@@ -1234,6 +1279,25 @@ public class Project extends AbstractEntity {
 			}
 		}
 		return codeCommentQuerySettingOfCurrentUserHolder.orNull();
+	}
+	
+	@Nullable
+	public BuildQuerySetting getBuildQuerySettingOfCurrentUser() {
+		if (buildQuerySettingOfCurrentUserHolder == null) {
+			User user = SecurityUtils.getUser();
+			if (user != null) {
+				BuildQuerySetting setting = OneDev.getInstance(BuildQuerySettingManager.class).find(this, user);
+				if (setting == null) {
+					setting = new BuildQuerySetting();
+					setting.setProject(this);
+					setting.setUser(user);
+				}
+				buildQuerySettingOfCurrentUserHolder = Optional.of(setting);
+			} else {
+				buildQuerySettingOfCurrentUserHolder = Optional.absent();
+			}
+		}
+		return buildQuerySettingOfCurrentUserHolder.orNull();
 	}
 	
 	@Nullable

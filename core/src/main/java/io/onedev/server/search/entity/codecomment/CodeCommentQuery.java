@@ -1,6 +1,5 @@
 package io.onedev.server.search.entity.codecomment;
 
-import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_COMMIT;
 import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_CONTENT;
 import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_CREATE_DATE;
 import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_PATH;
@@ -21,10 +20,17 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryBaseVisitor;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser;
+import io.onedev.server.exception.OneException;
+import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.codecomment.CodeCommentConstants;
+import io.onedev.server.search.entity.AndCriteriaHelper;
+import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.NotCriteriaHelper;
+import io.onedev.server.search.entity.OrCriteriaHelper;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.FieldOperatorValueCriteriaContext;
@@ -35,19 +41,6 @@ import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrCrite
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrderContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.QueryContext;
-import io.onedev.server.exception.OneException;
-import io.onedev.server.manager.UserManager;
-import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.codecomment.CodeCommentConstants;
-import io.onedev.server.search.entity.AndCriteriaHelper;
-import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.NotCriteriaHelper;
-import io.onedev.server.search.entity.OrCriteriaHelper;
-import io.onedev.server.search.entity.EntitySort.Direction;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
@@ -103,17 +96,14 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						return new CreatedByMeCriteria();
 					}
 					
-					private User getUser(String value) {
-						User user = OneDev.getInstance(UserManager.class).findByName(value);
-						if (user == null)
-							throw new OneException("Unable to find user with login: " + value);
-						return user;
-					}
-					
 					@Override
 					public EntityCriteria<CodeComment> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
+						int operator = ctx.operator.getType();
 						String value = getValue(ctx.Quoted().getText());
-						return new CreatedByCriteria(getUser(value));
+						if (operator == CodeCommentQueryLexer.CreatedBy)
+							return new CreatedByCriteria(getUser(value));
+						else
+							return new OnCommitCriteria(getCommitId(project, value));
 					}
 					
 					@Override
@@ -155,8 +145,6 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 							}
 						case CodeCommentQueryLexer.Is:
 							switch (fieldName) {
-							case FIELD_COMMIT:
-								return new CommitCriteria(getCommitId(project, value));
 							case FIELD_PATH:
 								return new PathCriteria(value);
 							case FIELD_REPLY_COUNT:
@@ -235,7 +223,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 				throw newOperatorException(fieldName, operator);
 			break;
 		case CodeCommentQueryLexer.Is:
-			if (!fieldName.equals(FIELD_COMMIT) && !fieldName.equals(FIELD_REPLY_COUNT) && !fieldName.equals(FIELD_PATH)) 
+			if (!fieldName.equals(FIELD_REPLY_COUNT) && !fieldName.equals(FIELD_PATH)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		}

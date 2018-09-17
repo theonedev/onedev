@@ -22,8 +22,6 @@ public class CodeCommentConstants {
 	
 	public static final String ATTR_REPLY_COUNT = "replyCount";
 	
-	public static final String FIELD_COMMIT = "Commit";
-	
 	public static final String ATTR_COMMIT = "markPos.commit";
 	
 	public static final String FIELD_CREATE_DATE = "Create Date";
@@ -41,7 +39,7 @@ public class CodeCommentConstants {
 	public static final String ATTR_REPLIES = "replies";
 
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			FIELD_CONTENT, FIELD_REPLY, FIELD_PATH, FIELD_COMMIT, FIELD_CREATE_DATE, FIELD_UPDATE_DATE, FIELD_REPLY_COUNT);
+			FIELD_CONTENT, FIELD_REPLY, FIELD_PATH, FIELD_CREATE_DATE, FIELD_UPDATE_DATE, FIELD_REPLY_COUNT);
 
 	public static final Map<String, String> ORDER_FIELDS = new LinkedHashMap<>();
 	

@@ -19,6 +19,7 @@ import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.shiro.authz.UnauthorizedException;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -66,7 +67,7 @@ public class CommitStatusResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/{projectName}/statuses/{commit}")
     @POST
-    public Response save(@PathParam("projectName") String projectName, @PathParam("commit") String commit, 
+    public Response save(@PathParam("projectName") String projectName, @PathParam("commit") String commitHash, 
     		Map<String, String> commitStatus, @Context UriInfo uriInfo) {
 
 		Project project = getProject(projectName);
@@ -83,16 +84,17 @@ public class CommitStatusResource {
     		throw new OneException(message);
     	}
     	
+    	ObjectId commit = ObjectId.fromString(commitHash);
     	String status = commitStatus.get("state").toUpperCase();
     	if (status.equals("PENDING"))
     		status = "RUNNING";
-    	Build build = buildManager.findByCommit(configuration, commit);
+    	Build build = buildManager.findByCommit(configuration, commit.name());
     	if (build == null) {
     		build = new Build();
     		build.setConfiguration(configuration);
-        	build.setCommit(commit);
+        	build.setCommitHash(commit.name());
     	}
-    	build.setName(StringUtils.substringBefore(commitStatus.get("description"), ":"));
+    	build.setVersion(StringUtils.substringBefore(commitStatus.get("description"), ":"));
     	build.setStatus(Build.Status.valueOf(status));
     	build.setDate(new Date());
     	build.setUrl(commitStatus.get("target_url"));

@@ -17,6 +17,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.util.facade.ConfigurationFacade;
 import io.onedev.server.util.validation.annotation.CommitHash;
 import io.onedev.server.util.validation.annotation.ConfigurationName;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -31,6 +32,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 public class Configuration extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
+
+	public static final String ATTR_PROJECT = "project";
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -89,6 +92,10 @@ public class Configuration extends AbstractEntity {
 
 	public void setBuilds(Collection<Build> builds) {
 		this.builds = builds;
+	}
+	
+	public ConfigurationFacade getFacade() {
+		return new ConfigurationFacade(this);
 	}
 	
 }

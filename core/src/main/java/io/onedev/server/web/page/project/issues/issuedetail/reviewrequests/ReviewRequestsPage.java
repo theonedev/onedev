@@ -3,10 +3,8 @@ package io.onedev.server.web.page.project.issues.issuedetail.reviewrequests;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.wicket.extensions.ajax.markup.html.repeater.data.table.AjaxFallbackHeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -24,14 +22,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CodeCommentRelationInfoManager;
-import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.web.component.RequestStateLabel;
+import io.onedev.server.web.component.RequestStatusLabel;
 import io.onedev.server.web.component.link.BranchLink;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
 import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
@@ -43,16 +38,13 @@ public class ReviewRequestsPage extends IssueDetailPage {
 
 		@Override
 		protected List<PullRequest> load() {
-			Set<PullRequest> requestSet = new HashSet<>();
-			for (ObjectId fixCommit: OneDev.getInstance(CommitInfoManager.class).getFixCommits(getProject(), getIssue().getNumber())) {
-				for (Long requestId: OneDev.getInstance(CodeCommentRelationInfoManager.class).getPullRequestIds(getProject(), fixCommit)) {
-					PullRequest request = OneDev.getInstance(PullRequestManager.class).get(requestId);
-					if (request != null)
-						requestSet.add(request);
-				}
+			List<PullRequest> requests = new ArrayList<>();
+			for (Long requestId: getPullRequestIds()) {
+				PullRequest request = OneDev.getInstance(PullRequestManager.class).get(requestId);
+				if (request != null && !requests.contains(request))
+					requests.add(request);
 			}
-			List<PullRequest> requestList = new ArrayList<>(requestSet);
-			Collections.sort(requestList, new Comparator<PullRequest>() {
+			Collections.sort(requests, new Comparator<PullRequest>() {
 
 				@Override
 				public int compare(PullRequest o1, PullRequest o2) {
@@ -60,7 +52,7 @@ public class ReviewRequestsPage extends IssueDetailPage {
 				}
 				
 			});
-			return requestList;
+			return requests;
 		}
 		
 	};
@@ -110,7 +102,7 @@ public class ReviewRequestsPage extends IssueDetailPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId,
 					IModel<PullRequest> rowModel) {
-				cellItem.add(new RequestStateLabel(componentId, rowModel));
+				cellItem.add(new RequestStatusLabel(componentId, rowModel));
 			}
 			
 		});

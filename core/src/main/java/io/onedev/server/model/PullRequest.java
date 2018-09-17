@@ -637,14 +637,14 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	
 	@Nullable
 	public String getCommitMessage() {
-		if (mergeStrategy == MergeStrategy.SQUASH_MERGE) {
+		if (mergeStrategy == MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS) {
 			String commitMessage = getTitle() + "\n\n";
 			if (getDescription() != null)
 				commitMessage += getDescription() + "\n\n";
 			commitMessage += String.format("Squash pull request #%d of project '%s'", 
 					getNumber(), getTargetProject().getName());
 			return commitMessage;
-		} else if (mergeStrategy == MergeStrategy.ALWAYS_MERGE || mergeStrategy == MergeStrategy.MERGE_IF_NECESSARY) {
+		} else if (mergeStrategy == MergeStrategy.CREATE_MERGE_COMMIT || mergeStrategy == MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY) {
 			return String.format("Merge pull request #%d of project '%s'", getNumber(), getTargetProject().getName());
 		} else {
 			throw new IllegalStateException("Unexpected merge strategy: " + mergeStrategy);

@@ -8,7 +8,7 @@ query
 
 criteria
 	: CreatedByMe #OperatorCriteria
-    | CreatedBy WS+ criteriaValue=Quoted #OperatorValueCriteria
+    | operator=(CreatedBy|OnCommit) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsBefore|IsAfter|IsGreaterThan|IsLessThan|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -25,15 +25,19 @@ All
 	;
 
 CreatedByMe
-	: 'created by me'
+	: 'created' WS+ 'by' WS+ 'me'
 	;
 	
 CreatedBy
-	: 'created by'
+	: 'created' WS+ 'by'
 	;
 	
+OnCommit
+	: 'on' WS+ 'commit'
+	;	
+	
 OrderBy
-    : 'order by'
+    : 'order' WS+ 'by'
     ;
 
 Is
@@ -45,11 +49,11 @@ Contains
 	;
 
 IsAfter
-	: 'is after'
+	: 'is' WS+ 'after'
 	;
 
 IsBefore
-	: 'is before'
+	: 'is' WS+ 'before'
 	;
 	
 IsGreaterThan

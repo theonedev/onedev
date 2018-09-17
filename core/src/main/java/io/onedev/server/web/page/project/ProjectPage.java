@@ -34,6 +34,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.link.FirstBuildQueryLink;
 import io.onedev.server.web.component.link.FirstCodeCommentQueryLink;
 import io.onedev.server.web.component.link.FirstCommitQueryLink;
 import io.onedev.server.web.component.link.FirstIssueQueryLink;
@@ -45,6 +46,7 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
+import io.onedev.server.web.page.project.builds.BuildListPage;
 import io.onedev.server.web.page.project.comments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
@@ -195,6 +197,21 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					
 				});
 				
+				tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-cubes", 0, BuildListPage.class) {
+
+					@Override
+					public Component render(String componentId) {
+						return new ProjectTabLink(componentId, this) {
+
+							@Override
+							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+								return new FirstBuildQueryLink(linkId, getProject());
+							}
+						};
+					}
+					
+				});
+				
 				if (SecurityUtils.canReadCode(getProject().getFacade())) {
 					tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
 							0, ProjectCodeCommentsPage.class) {
@@ -211,9 +228,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 						}
 						
 					});
-					
 					tabs.add(new ProjectTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
-					
 					tabs.add(new ProjectTab(Model.of("Statistics"), "fa fa-fw fa-bar-chart", 0, ProjectContribsPage.class, 
 							ProjectStatsPage.class));
 				}

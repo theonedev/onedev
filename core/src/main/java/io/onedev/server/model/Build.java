@@ -20,14 +20,17 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
+import com.google.common.base.Optional;
+
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.BuildManager;
+import io.onedev.server.manager.BuildInfoManager;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.facade.BuildFacade;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_configuration_id"), @Index(columnList="commit"), @Index(columnList="name")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_configuration_id", "commit"})}
+		indexes={@Index(columnList="g_configuration_id"), @Index(columnList="commitHash"), @Index(columnList="version")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_configuration_id", "commitHash"})}
 )
 public class Build extends AbstractEntity {
 
@@ -59,13 +62,11 @@ public class Build extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Configuration configuration;
 	
-	private String ref;
+	@Column(nullable=false)
+	private String version;
 	
 	@Column(nullable=false)
-	private String name;
-	
-	@Column(nullable=false)
-	private String commit;
+	private String commitHash;
 	
 	@Column(nullable=false)
 	private Status status; 
@@ -76,7 +77,7 @@ public class Build extends AbstractEntity {
 	@Column(nullable=false)
 	private String url;
 	
-	private transient Collection<Long> fixedIssueNumbers;
+	private transient Optional<Collection<Long>> fixedIssueNumbers;
 	
 	public Configuration getConfiguration() {
 		return configuration;
@@ -86,28 +87,20 @@ public class Build extends AbstractEntity {
 		this.configuration = configuration;
 	}
 
-	public String getName() {
-		return name;
+	public String getVersion() {
+		return version;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setVersion(String version) {
+		this.version = version;
 	}
 
-	public String getRef() {
-		return ref;
+	public String getCommitHash() {
+		return commitHash;
 	}
 
-	public void setRef(String ref) {
-		this.ref = ref;
-	}
-
-	public String getCommit() {
-		return commit;
-	}
-
-	public void setCommit(String commit) {
-		this.commit = commit;
+	public void setCommitHash(String commitHash) {
+		this.commitHash = commitHash;
 	}
 
 	public Status getStatus() {
@@ -135,40 +128,44 @@ public class Build extends AbstractEntity {
 	}
 	
 	public String getFQN() {
-		return getConfiguration().getName() + FQN_SEPARATOR + getName();
+		return getConfiguration().getName() + FQN_SEPARATOR + getVersion();
 	}
 	
-	public Collection<Long> getFixedIssueNumbers(@Nullable Build prevBuild) {
+	/**
+	 * Get fixed issue numbers
+	 * 
+	 * @return
+	 * 			<tt>null</tt> if fixed issue numbers information is not available yet 
+	 */
+	@Nullable
+	public Collection<Long> getFixedIssueNumbers() {
 		if (fixedIssueNumbers == null) {
-			fixedIssueNumbers = new HashSet<>();
+			Project project = getConfiguration().getProject();
+			Collection<ObjectId> prevCommits = OneDev.getInstance(BuildInfoManager.class).getPrevCommits(project, getId());
+			if (prevCommits != null) {
+				fixedIssueNumbers = Optional.of(new HashSet<>());
+				if (!prevCommits.isEmpty()) {
+					Repository repository = project.getRepository();
+					try (RevWalk revWalk = new RevWalk(repository)) {
+						revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommitHash())));
+						for (ObjectId prevCommit: prevCommits)
+							revWalk.markUninteresting(revWalk.parseCommit(prevCommit));
 
-			ObjectId prevCommit;
-			if (prevBuild == null)
-				prevBuild = OneDev.getInstance(BuildManager.class).findPrevious(this);
-			if (prevBuild != null) 
-				prevCommit = ObjectId.fromString(prevBuild.getCommit());
-			else if (getConfiguration().getBaseCommit() != null)
-				prevCommit = ObjectId.fromString(getConfiguration().getBaseCommit());
-			else
-				prevCommit = null;
-			
-			if (prevCommit != null) {
-				Project project = getConfiguration().getProject();
-				
-				Repository repository = project.getRepository();
-				try (RevWalk revWalk = new RevWalk(repository)) {
-					revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommit())));
-					revWalk.markUninteresting(revWalk.parseCommit(prevCommit));
-	
-					RevCommit commit;
-					while ((commit = revWalk.next()) != null) 
-						fixedIssueNumbers.addAll(IssueUtils.parseFixedIssues(commit.getFullMessage()));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+						RevCommit commit;
+						while ((commit = revWalk.next()) != null) 
+							fixedIssueNumbers.get().addAll(IssueUtils.parseFixedIssues(commit.getFullMessage()));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
 				}
+			} else {
+				fixedIssueNumbers = Optional.absent();
 			}
 		}
-		return fixedIssueNumbers;
+		return fixedIssueNumbers.orNull();
 	}
 	
+	public BuildFacade getFacade() {
+		return new BuildFacade(getId(), getConfiguration().getId(), getCommitHash());
+	}
 }

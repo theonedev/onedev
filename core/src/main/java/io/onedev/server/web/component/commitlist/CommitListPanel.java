@@ -36,7 +36,7 @@ import io.onedev.server.util.Constants;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.avatar.ContributorAvatars;
-import io.onedev.server.web.component.build.BuildsStatusPanel;
+import io.onedev.server.web.component.buildstatus.BuildsStatusPanel;
 import io.onedev.server.web.component.commitgraph.CommitGraphResourceReference;
 import io.onedev.server.web.component.commitgraph.CommitGraphUtils;
 import io.onedev.server.web.component.commitmessage.ExpandableCommitMessagePanel;
@@ -148,13 +148,12 @@ public class CommitListPanel extends Panel {
 					fragment.add(new ContributorPanel("contribution", 
 							commit.getAuthorIdent(), commit.getCommitterIdent(), true));
 
-					String commitHash = commit.name();
 					fragment.add(new BuildsStatusPanel("buildStatus", 
 							new LoadableDetachableModel<List<Build>>() {
 
 						@Override
 						protected List<Build> load() {
-							return OneDev.getInstance(BuildManager.class).query(projectModel.getObject(), commitHash);
+							return OneDev.getInstance(BuildManager.class).query(projectModel.getObject(), commit.name());
 						}
 						
 					}));

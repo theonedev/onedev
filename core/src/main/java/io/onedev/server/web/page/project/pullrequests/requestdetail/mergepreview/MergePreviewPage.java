@@ -32,7 +32,7 @@ import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.build.BuildsStatusPanel;
+import io.onedev.server.web.component.buildstatus.BuildsStatusPanel;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;

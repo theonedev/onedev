@@ -29,11 +29,11 @@ import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.PullRequestUpdateManager;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.CodeComment.ComparingInfo;
 import io.onedev.server.model.CodeCommentRelation;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.model.CodeComment.ComparingInfo;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -167,14 +167,12 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 					PullRequest request = update.getRequest();
 					if (request.isValid()) {
 						for (ObjectId commit: update.getCommits()) {
-							byte[] keyBytes = new byte[20];
-							commit.copyRawTo(keyBytes, 0);
-							ByteIterable commitKey = new ArrayByteIterable(keyBytes);
+							ByteIterable commitKey = new CommitByteIterable(commit);
 							
-							Collection<Long> pullRequestIds = readLongCollection(pullRequestStore, txn, commitKey);
+							Collection<Long> pullRequestIds = readLongs(pullRequestStore, txn, commitKey);
 							pullRequestIds.add(update.getRequest().getId());
 
-							writeCollection(pullRequestStore, txn, commitKey, pullRequestIds);
+							writeLongs(pullRequestStore, txn, commitKey, pullRequestIds);
 							
 							Map<Long, ComparingInfo> comments = getCodeCommentComparingInfos(codeCommentStore, txn, commitKey);
 							Set<Long> commentIdsToRemove = new HashSet<>();
@@ -224,16 +222,14 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 
 					private void associateCommentWithCommit(Transaction txn, String commit) {
 						ObjectId commitId = ObjectId.fromString(commit);
-						byte[] keyBytes = new byte[20];
-						commitId.copyRawTo(keyBytes, 0);
-						ByteIterable commitKey = new ArrayByteIterable(keyBytes);
+						ByteIterable commitKey = new CommitByteIterable(commitId);
 						
 						Map<Long, ComparingInfo> comments = getCodeCommentComparingInfos(codeCommentStore, txn, commitKey);
 						comments.put(comment.getId(), comment.getComparingInfo());
 						codeCommentStore.put(txn, commitKey, 
 								new ArrayByteIterable(SerializationUtils.serialize((Serializable) comments)));
 
-						Collection<Long> pullRequestIds = readLongCollection(pullRequestStore, txn, commitKey);
+						Collection<Long> pullRequestIds = readLongs(pullRequestStore, txn, commitKey);
 						
 						Set<Long> pullRequestIdsToRemove = new HashSet<>();
 						for (Long pullRequestId: pullRequestIds) {
@@ -252,7 +248,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 						}
 						if (!pullRequestIdsToRemove.isEmpty()) {
 							pullRequestIds.removeAll(pullRequestIdsToRemove);
-							writeCollection(pullRequestStore, txn, commitKey, pullRequestIds);
+							writeLongs(pullRequestStore, txn, commitKey, pullRequestIds);
 						}
 					}
 					
@@ -275,9 +271,6 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	
 	@Override
 	public Collection<Long> getPullRequestIds(Project project, ObjectId commitId) {
-		byte[] commitKey = new byte[20];
-		commitId.copyRawTo(commitKey, 0);
-
 		Environment env = getEnv(project.getId().toString());
 		Store store = getStore(env, PULL_REQUEST_STORE);
 		
@@ -285,7 +278,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 			
 			@Override
 			public Collection<Long> compute(Transaction txn) {
-				return readLongCollection(store, txn, new ArrayByteIterable(commitKey));
+				return readLongs(store, txn, new CommitByteIterable(commitId));
 			}
 			
 		});

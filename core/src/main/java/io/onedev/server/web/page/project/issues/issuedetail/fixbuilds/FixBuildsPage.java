@@ -1,138 +1,92 @@
 package io.onedev.server.web.page.project.issues.issuedetail.fixbuilds;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
-import org.apache.wicket.extensions.ajax.markup.html.repeater.data.table.AjaxFallbackHeadersToolbar;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.ExternalLink;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
+import javax.annotation.Nullable;
+
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.manager.BuildManager;
-import io.onedev.server.manager.BuildInfoManager;
-import io.onedev.server.model.Build;
-import io.onedev.server.model.Configuration;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.build.BuildStatusIcon;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.search.entity.build.FixedIssueCriteria;
+import io.onedev.server.web.component.buildlist.BuildListPanel;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
+import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
 public class FixBuildsPage extends IssueDetailPage {
 
-	private final IModel<List<Build>> buildsModel = new LoadableDetachableModel<List<Build>>() {
-
-		@Override
-		protected List<Build> load() {
-			Map<Configuration, Build> buildMap = new HashMap<>();
-			for (Long buildId: OneDev.getInstance(BuildInfoManager.class).getFixBuildIds(getProject(), getIssue().getNumber())) {
-				Build build = OneDev.getInstance(BuildManager.class).get(buildId);
-				Build existingBuild = buildMap.get(build.getConfiguration());
-				if (existingBuild == null || existingBuild.getId() < build.getId())
-					buildMap.put(build.getConfiguration(), build);
-			}
-			List<Build> buildList = new ArrayList<>(buildMap.values());
-			Collections.sort(buildList);
-			return buildList;
-		}
-		
-	};
+	private static final String PARAM_QUERY = "query";
+	
+	private static final String PARAM_CURRENT_PAGE = "currentPage";
+	
+	private String query;
 	
 	public FixBuildsPage(PageParameters params) {
 		super(params);
-	}
-
-	@Override
-	protected void onDetach() {
-		buildsModel.detach();
-		super.onDetach();
+		query = params.get(PARAM_QUERY).toString();
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<IColumn<Build, Void>> columns = new ArrayList<>();
-		
-		columns.add(new AbstractColumn<Build, Void>(Model.of("Configuration")) {
-
+		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
+			
 			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-					IModel<Build> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getConfiguration().getName()));
-			}
-		});
-		
-		columns.add(new AbstractColumn<Build, Void>(Model.of("Build")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-					IModel<Build> rowModel) {
-				Fragment fragment = new Fragment(componentId, "buildFrag", FixBuildsPage.this);
-				fragment.add(new BuildStatusIcon("status", rowModel));
-				ExternalLink link = new ExternalLink("link", rowModel.getObject().getUrl());
-				link.add(new Label("label", rowModel.getObject().getName()));
-				fragment.add(link);
-				
-				cellItem.add(fragment);
-			}
-		});
-		
-		columns.add(new AbstractColumn<Build, Void>(Model.of("Date")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-					IModel<Build> rowModel) {
-				cellItem.add(new Label(componentId, DateUtils.formatDateTime(rowModel.getObject().getDate())));
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = paramsOf(getIssue(), getPosition(), query);
+				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				return params;
 			}
 			
-		});
-		
-		SortableDataProvider<Build, Void> dataProvider = new SortableDataProvider<Build, Void>() {
-
 			@Override
-			public Iterator<? extends Build> iterator(long first, long count) {
-				return buildsModel.getObject().iterator();
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
 			}
-
-			@Override
-			public long size() {
-				return buildsModel.getObject().size();
-			}
-
-			@Override
-			public IModel<Build> model(Build object) {
-				Long id = object.getId();
-				return new LoadableDetachableModel<Build>() {
-
-					@Override
-					protected Build load() {
-						return OneDev.getInstance(BuildManager.class).load(id);
-					}
-					
-				};
-			}
+			
 		};
 		
-		DataTable<Build, Void> buildsTable = new DataTable<Build, Void>("builds", columns, dataProvider, Integer.MAX_VALUE);
-		buildsTable.addTopToolbar(new AjaxFallbackHeadersToolbar<Void>(buildsTable, dataProvider));
-		buildsTable.addBottomToolbar(new NoRecordsToolbar(buildsTable));
-		add(buildsTable);
+		add(new BuildListPanel("builds", new PropertyModel<String>(this, "query")) {
+
+			@Override
+			protected Project getProject() {
+				return FixBuildsPage.this.getProject();
+			}
+
+			@Override
+			protected BuildQuery getBaseQuery() {
+				return new BuildQuery(new FixedIssueCriteria(getIssue()), new ArrayList<>());
+			}
+
+			@Override
+			protected PagingHistorySupport getPagingHistorySupport() {
+				return pagingHistorySupport;
+			}
+
+			@Override
+			protected void onQueryUpdated(AjaxRequestTarget target) {
+				setResponsePage(FixBuildsPage.class, FixBuildsPage.paramsOf(getIssue(), getPosition(), query));
+			}
+
+			@Override
+			protected QuerySaveSupport getQuerySaveSupport() {
+				return null;
+			}
+
+		});
 	}
 
+	public static PageParameters paramsOf(Issue issue, @Nullable QueryPosition position, @Nullable String query) {
+		PageParameters params = paramsOf(issue, position);
+		if (query != null)
+			params.add(PARAM_QUERY, query);
+		return params;
+	}
+	
 }

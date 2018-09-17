@@ -14,9 +14,15 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryBaseVisitor;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser;
+import io.onedev.server.exception.OneException;
+import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.CriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.FieldOperatorValueCriteriaContext;
@@ -27,17 +33,6 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OrCrite
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OrderContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.QueryContext;
-import io.onedev.server.exception.OneException;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.UserManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.model.support.pullrequest.PullRequestConstants;
-import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.search.entity.EntitySort;
-import io.onedev.server.search.entity.EntitySort.Direction;
 
 public class PullRequestQuery extends EntityQuery<PullRequest> {
 
@@ -122,13 +117,6 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						}
 					}
 					
-					private User getUser(String value) {
-						User user = OneDev.getInstance(UserManager.class).findByName(value);
-						if (user == null)
-							throw new OneException("Unable to find user with login: " + value);
-						return user;
-					}
-					
 					@Override
 					public PullRequestCriteria visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
@@ -143,6 +131,10 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							return new SubmittedByCriteria(getUser(value));
 						case PullRequestQueryLexer.DiscardedBy:
 							return new DiscardedByCriteria(getUser(value));
+						case PullRequestQueryLexer.IncludesCommit:
+							return new IncludesCommitCriteria(getCommitId(project, value));
+						case PullRequestQueryLexer.IncludesIssue:
+							return new IncludesIssueCriteria(getIssue(project, value));
 						default:
 							throw new OneException("Unexpected operator: " + ctx.operator.getText());
 						}
@@ -183,19 +175,15 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 								return new DescriptionCriteria(value);
 							case PullRequestConstants.FIELD_COMMENT:
 								return new CommentCriteria(value);
-							case PullRequestConstants.FIELD_COMMIT:
-								return new CommitCriteria(getCommitId(project, value));
 							default:
 								throw new IllegalStateException();
 							}
 						case PullRequestQueryLexer.Is:
 							switch (fieldName) {
-							case PullRequestConstants.FIELD_STATE:
-								return new StateCriteria(value);
 							case PullRequestConstants.FIELD_NUMBER:
 								return new NumberCriteria(getIntValue(value), operator);
 							case PullRequestConstants.FIELD_MERGE_STRATEGY:
-								return new MergeStrategyCriteria(MergeStrategy.from(value));
+								return new MergeStrategyCriteria(MergeStrategy.fromString(value));
 							case PullRequestConstants.FIELD_SOURCE_BRANCH:
 								return new SourceBranchCriteria(value);
 							case PullRequestConstants.FIELD_SOURCE_PROJECT:
@@ -287,14 +275,13 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		case PullRequestQueryLexer.Contains:
 			if (!fieldName.equals(PullRequestConstants.FIELD_TITLE) 
 					&& !fieldName.equals(PullRequestConstants.FIELD_DESCRIPTION)
-					&& !fieldName.equals(PullRequestConstants.FIELD_COMMENT)
-					&& !fieldName.equals(PullRequestConstants.FIELD_COMMIT)) {
+					&& !fieldName.equals(PullRequestConstants.FIELD_COMMENT)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case PullRequestQueryLexer.Is:
-			if (!fieldName.equals(PullRequestConstants.FIELD_STATE) 
-					&& !fieldName.equals(PullRequestConstants.FIELD_NUMBER)
+			if (!fieldName.equals(PullRequestConstants.FIELD_NUMBER)
+					&& !fieldName.equals(PullRequestConstants.FIELD_MERGE_STRATEGY)
 					&& !fieldName.equals(PullRequestConstants.FIELD_TARGET_BRANCH)
 					&& !fieldName.equals(PullRequestConstants.FIELD_SOURCE_PROJECT)
 					&& !fieldName.equals(PullRequestConstants.FIELD_SOURCE_BRANCH)

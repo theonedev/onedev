@@ -86,7 +86,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					error("Please login to perform this query");
 				} else { 
 					if (SecurityUtils.getUser() == null && getBaseQuery().needsLogin())
-						error("Please login to show the issues");
+						error("Please login to show issues");
 					else
 						return IssueQuery.merge(getBaseQuery(), additionalQuery);
 				}
@@ -410,7 +410,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 
 					@Override
 					protected Issue load() {
-						return OneDev.getInstance(IssueManager.class).load(issueId);
+						return getIssueManager().load(issueId);
 					}
 					
 				};

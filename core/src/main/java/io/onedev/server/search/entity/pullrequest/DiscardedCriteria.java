@@ -13,7 +13,7 @@ public class DiscardedCriteria extends PullRequestCriteria {
 	private static final long serialVersionUID = 1L;
 
 	private PullRequestCriteria getCriteria(Project project) {
-		return new StateCriteria(CloseInfo.Status.DISCARDED.toString());
+		return new StatusCriteria(CloseInfo.Status.DISCARDED.toString());
 	}
 	
 	@Override

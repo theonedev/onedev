@@ -3,7 +3,6 @@ package io.onedev.server.manager;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -32,26 +31,13 @@ public interface CommitInfoManager {
 	 *  
 	 * @param project
 	 * 			project to get descendant commits
-	 * @param ancestor
-	 * 			for which commit to get descendants
+	 * @param ancestors
+	 * 			for which commits to get descendants
 	 * @return
 	 * 			descendant commits
 	 */
-	Set<ObjectId> getDescendants(Project project, ObjectId ancestor);
+	Collection<ObjectId> getDescendants(Project project, Collection<ObjectId> ancestors);
 	
-	/**
-	 * Given a parent commit, get all its child commits. The result might be incomplete if some commits 
-	 * have not be collected yet
-	 *  
-	 * @param project
-	 * 			project to get descendant commits
-	 * @param parent
-	 * 			for which commit to get children
-	 * @return
-	 * 			child commits
-	 */
-	Set<ObjectId> getChildren(Project project, ObjectId parent);
-
 	void cloneInfo(Project from, Project to);
 	
 	Collection<String> getHistoryPaths(Project project, String path);

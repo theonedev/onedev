@@ -24,6 +24,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import org.apache.commons.lang.SerializationUtils;
@@ -42,6 +43,7 @@ import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -59,7 +61,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList="number"), @Index(columnList="numberStr"), 
 				@Index(columnList="submitDate"), @Index(columnList="g_submitter_id"),
 				@Index(columnList="voteCount"), @Index(columnList="commentCount"),
-				@Index(columnList="g_milestone_id"), @Index(columnList="LAST_ACT_DATE")})
+				@Index(columnList="g_milestone_id"), @Index(columnList="LAST_ACT_DATE")}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"g_project_id", "number"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class Issue extends AbstractEntity implements Referenceable {
@@ -451,4 +454,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 		}
 	}
 
+	public IssueFacade getFacade() {
+		return new IssueFacade(getId(), getProject().getId(), getNumber());
+	}
 }

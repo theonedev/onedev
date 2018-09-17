@@ -1,9 +1,12 @@
 package io.onedev.server.manager.impl;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -20,15 +23,16 @@ import io.onedev.server.event.issue.IssueActionEvent;
 import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.pullrequest.PullRequestActionEvent;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.IssueActionManager;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.changedata.BatchUpdateData;
@@ -45,6 +49,7 @@ import io.onedev.server.model.support.issue.workflow.transitiontrigger.OpenPullR
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PullRequestTrigger;
 import io.onedev.server.model.support.pullrequest.actiondata.DiscardedData;
 import io.onedev.server.model.support.pullrequest.actiondata.MergedData;
+import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -60,25 +65,35 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 	
 	private final ListenerRegistry listenerRegistry;
 	
+	private final UnitOfWork unitOfWork;
+	
+	private final ExecutorService executorService;
+	
+	private final BuildManager buildManager;
+	
 	@Inject
-	public DefaultIssueActionManager(Dao dao, IssueManager issueManager,  
-			IssueFieldUnaryManager issueFieldUnaryManager, ListenerRegistry listenerRegistry) {
+	public DefaultIssueActionManager(Dao dao, IssueManager issueManager, UnitOfWork unitOfWork,
+			IssueFieldUnaryManager issueFieldUnaryManager, ListenerRegistry listenerRegistry, 
+			ExecutorService executorService, BuildManager buildManager) {
 		super(dao);
 		this.issueManager = issueManager;
 		this.issueFieldUnaryManager = issueFieldUnaryManager;
 		this.listenerRegistry = listenerRegistry;
+		this.unitOfWork = unitOfWork;
+		this.executorService = executorService;
+		this.buildManager = buildManager;
 	}
 
 	@Transactional
 	@Override
-	public void changeTitle(Issue issue, String title) {
+	public void changeTitle(Issue issue, String title, @Nullable User user) {
 		String prevTitle = issue.getTitle();
 		if (!title.equals(prevTitle)) {
 			issue.setTitle(title);
 			LastActivity lastActivity = new LastActivity();
 			lastActivity.setDescription("changed title");
 			lastActivity.setDate(new Date());
-			lastActivity.setUser(SecurityUtils.getUser());
+			lastActivity.setUser(user);
 			issue.setLastActivity(lastActivity);
 			issueManager.save(issue);
 			
@@ -95,7 +110,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 	
 	@Transactional
 	@Override
-	public void changeMilestone(Issue issue, @Nullable Milestone milestone) {
+	public void changeMilestone(Issue issue, @Nullable Milestone milestone, @Nullable User user) {
 		Milestone prevMilestone = issue.getMilestone();
 		if (!Objects.equal(prevMilestone, milestone)) {
 			issue.setMilestone(milestone);
@@ -109,7 +124,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 			IssueAction change = new IssueAction();
 			change.setIssue(issue);
 			change.setDate(new Date());
-			change.setUser(SecurityUtils.getUser());
+			change.setUser(user);
 			change.setData(new MilestoneChangeData(prevMilestone, issue.getMilestone()));
 			save(change);
 			
@@ -119,7 +134,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 	
 	@Transactional
 	@Override
-	public void changeFields(Issue issue, Map<String, Object> fieldValues) {
+	public void changeFields(Issue issue, Map<String, Object> fieldValues, @Nullable User user) {
 		Map<String, IssueField> prevFields = issue.getFields(); 
 		issue.setFieldValues(fieldValues);
 		if (!prevFields.equals(issue.getFields())) {
@@ -128,7 +143,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 			LastActivity lastActivity = new LastActivity();
 			lastActivity.setDescription("changed fields");
 			lastActivity.setDate(new Date());
-			lastActivity.setUser(SecurityUtils.getUser());
+			lastActivity.setUser(user);
 			issue.setLastActivity(lastActivity);
 			issueManager.save(issue);
 			
@@ -145,7 +160,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 	
 	@Transactional
 	@Override
-	public void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment) {
+	public void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment, @Nullable User user) {
 		String prevState = issue.getState();
 		if (!prevState.equals(state)) {
 			Map<String, IssueField> prevFields = issue.getFields();
@@ -158,7 +173,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 			LastActivity lastActivity = new LastActivity();
 			lastActivity.setDescription("changed state to \"" + issue.getState() + "\"");
 			lastActivity.setDate(new Date());
-			lastActivity.setUser(SecurityUtils.getUser());
+			lastActivity.setUser(user);
 			issue.setLastActivity(lastActivity);
 			issueManager.save(issue);
 			
@@ -178,7 +193,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 	@Override
 	public void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, 
 			@Nullable Optional<Milestone> milestone, Map<String, Object> fieldValues, 
-			@Nullable String comment) {
+			@Nullable String comment, @Nullable User user) {
 		while (issues.hasNext()) {
 			Issue issue = issues.next();
 			String prevState = issue.getState();
@@ -214,19 +229,54 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 	@Transactional
 	@Listen
 	public void on(BuildEvent event) {
-		Configuration configuration = event.getBuild().getConfiguration();
 		for (TransitionSpec transition: event.getBuild().getConfiguration().getProject().getIssueWorkflow().getTransitionSpecs()) {
 			if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
 				BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
-				if (trigger.getConfiguration().equals(configuration.getName()) 
+				if (trigger.getConfiguration().equals(event.getBuild().getConfiguration().getName()) 
 						&& event.getBuild().getStatus() == Build.Status.SUCCESS) {
-					for (Long issueNumber: event.getBuild().getFixedIssueNumbers(null)) {
-						Issue issue = issueManager.find(configuration.getProject(), issueNumber);
-						if (issue != null && transition.getFromStates().contains(issue.getState())) { 
-							issue.removeFields(transition.getRemoveFields());
-							changeState(issue, transition.getToState(), new HashMap<>(), null);
+					Long buildId = event.getBuild().getId();
+					
+					/* 
+					 * Below logic is carefully written to make sure database connection is not occupied 
+					 * while waiting to avoid deadlocks
+					 */
+					executorService.execute(new Runnable() {
+
+						@Override
+						public void run() {
+							while (true) {
+								if (unitOfWork.call(new Callable<Boolean>() {
+
+									@Override
+									public Boolean call() {
+										Build build = buildManager.load(buildId);
+										Collection<Long> fixedIssueNumbers = build.getFixedIssueNumbers();
+										if (fixedIssueNumbers != null) {
+											for (Long issueNumber: fixedIssueNumbers) {
+												Issue issue = issueManager.find(build.getConfiguration().getProject(), issueNumber);
+												if (issue != null && transition.getFromStates().contains(issue.getState())) { 
+													issue.removeFields(transition.getRemoveFields());
+													changeState(issue, transition.getToState(), new HashMap<>(), null, null);
+												}
+											}
+											return true;
+										} else {
+											return false;
+										}
+									}
+									
+								})) {
+									break;
+								} else {
+									try {
+										Thread.sleep(1000);
+									} catch (InterruptedException e) {
+									}
+								}
+							}
 						}
-					}
+						
+					});
 				}
 			}
 		}
@@ -240,7 +290,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 					for (Issue issue: request.getFixedIssues()) {
 						if (transition.getFromStates().contains(issue.getState())) {
 							issue.removeFields(transition.getRemoveFields());
-							changeState(issue, transition.getToState(), new HashMap<>(), null);
+							changeState(issue, transition.getToState(), new HashMap<>(), null, null);
 						}
 					}
 				}
@@ -270,7 +320,7 @@ public class DefaultIssueActionManager extends AbstractEntityManager<IssueAction
 		for (TransitionSpec transition: issue.getProject().getIssueWorkflow().getTransitionSpecs()) {
 			if (transition.getTrigger() instanceof CommitTrigger && transition.getFromStates().contains(issue.getState())) {
 				issue.removeFields(transition.getRemoveFields());
-				changeState(issue, transition.getToState(), new HashMap<>(), null);
+				changeState(issue, transition.getToState(), new HashMap<>(), null, null);
 			}
 		}
 	}

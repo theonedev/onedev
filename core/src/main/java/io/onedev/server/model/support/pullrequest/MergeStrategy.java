@@ -7,17 +7,12 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.exception.OneException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.PullRequest;
+import io.onedev.utils.WordUtils;
 
 public enum MergeStrategy {
-	ALWAYS_MERGE("Add all commits from source branch to target branch with a merge commit.") {
-
-		@Override
-		public String toString() {
-			return "Create Merge Commit";
-		}
+	CREATE_MERGE_COMMIT("Add all commits from source branch to target branch with a merge commit.") {
 
 		@Override
 		public ObjectId merge(PullRequest request) {
@@ -30,12 +25,7 @@ public enum MergeStrategy {
 		}
 		
 	}, 
-	MERGE_IF_NECESSARY("Only create merge commit if target branch can not be fast-forwarded to source branch") {
-
-		@Override
-		public String toString() {
-			return "Create Merge Commit If Necessary";
-		}
+	CREATE_MERGE_COMMIT_IF_NECESSARY("Only create merge commit if target branch can not be fast-forwarded to source branch") {
 
 		@Override
 		public ObjectId merge(PullRequest request) {
@@ -52,12 +42,7 @@ public enum MergeStrategy {
 		}
 		
 	},
-	SQUASH_MERGE("Squash all commits from source branch into a single commit in target branch") {
-
-		@Override
-		public String toString() {
-			return "Squash Source Branch Commits";
-		}
+	SQUASH_SOURCE_BRANCH_COMMITS("Squash all commits from source branch into a single commit in target branch") {
 
 		@Override
 		public ObjectId merge(PullRequest request) {
@@ -70,12 +55,7 @@ public enum MergeStrategy {
 		}
 		
 	},
-	REBASE_MERGE("Rebase all commits from source branch onto target branch") {
-
-		@Override
-		public String toString() {
-			return "Rebase Source Branch Commits";
-		}
+	REBASE_SOURCE_BRANCH_COMMITS("Rebase all commits from source branch onto target branch") {
 
 		@Override
 		public ObjectId merge(PullRequest request) {
@@ -88,11 +68,6 @@ public enum MergeStrategy {
 		
 	},
 	DO_NOT_MERGE("Do not merge now, only for review") {
-
-		@Override
-		public String toString() {
-			return "Do Not Merge";
-		}
 
 		@Override
 		public ObjectId merge(PullRequest request) {
@@ -111,12 +86,13 @@ public enum MergeStrategy {
 		return description;
 	}
 	
-	public static MergeStrategy from(String displayName) {
-		for (MergeStrategy each: MergeStrategy.values()) {
-			if (each.toString().equals(displayName))
-				return each;
-		}
-		throw new OneException("Unable to find merge strategy with display name: " + displayName);
+	@Override
+	public String toString() {
+		return WordUtils.toWords(name());
+	}
+	
+	public static MergeStrategy fromString(String displayName) {
+		return MergeStrategy.valueOf(WordUtils.toUnderscored(displayName));
 	}
 
 	@Nullable

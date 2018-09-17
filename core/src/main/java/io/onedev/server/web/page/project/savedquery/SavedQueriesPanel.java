@@ -122,6 +122,8 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			add(newCollapsed());
 		else
 			add(newExpanded());
+		
+		setOutputMarkupId(true);
 	}
 	
 	private Component newExpanded() {

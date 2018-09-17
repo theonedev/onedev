@@ -8,7 +8,7 @@ query
 
 criteria
 	: operator=(Open|Merged|Discarded|SubmittedByMe|ToBeReviewedByMe|RequestedForChangesByMe|ApprovedByMe|DiscardedByMe|SomeoneRequestedForChanges|HasPendingReviews|HasFailedBuilds|HasPendingBuilds|HasMergeConflicts) #OperatorCriteria
-    | operator=(ToBeReviewedBy|ApprovedBy|RequestedForChangesBy|SubmittedBy|DiscardedBy) WS+ criteriaValue=Quoted #OperatorValueCriteria
+    | operator=(ToBeReviewedBy|ApprovedBy|RequestedForChangesBy|SubmittedBy|DiscardedBy|IncludesCommit|IncludesIssue) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -96,6 +96,14 @@ DiscardedBy
     : 'discarded' WS+ 'by'
     ;
     
+IncludesCommit
+	: 'includes' WS+ 'commit'
+	;    
+    
+IncludesIssue
+	: 'includes' WS+ 'issue'
+	;    
+	
 OrderBy
     : 'order' WS+ 'by'
     ;

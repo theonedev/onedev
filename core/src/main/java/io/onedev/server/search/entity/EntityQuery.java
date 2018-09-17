@@ -13,8 +13,16 @@ import org.unbescape.java.JavaEscape;
 
 import com.google.common.base.Splitter;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
+import io.onedev.server.manager.BuildManager;
+import io.onedev.server.manager.ConfigurationManager;
+import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Configuration;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
@@ -41,6 +49,21 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		}
 	}
 	
+	public static long getLongValue(String value) {
+		try {
+			return Long.parseLong(value);
+		} catch (NumberFormatException e) {
+			throw new OneException("Invalid number: " + value);
+		}
+	}
+	
+	public static User getUser(String loginName) {
+		User user = OneDev.getInstance(UserManager.class).findByName(loginName);
+		if (user == null)
+			throw new OneException("Unable to find user with login: " + loginName);
+		return user;
+	}
+	
 	public static boolean getBooleanValue(String value) {
 		if (value.equals("true"))
 			return true;
@@ -57,17 +80,43 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		return dateValue;
 	}
 	
-	public static ObjectId getCommitId(Project project, String value) {
+	public static ObjectId getCommitId(Project project, String revision) {
 		try {
-			ObjectId commitId = project.getRepository().resolve(value);
+			ObjectId commitId = project.getRepository().resolve(revision);
 			if (commitId == null)
 				throw new RevisionSyntaxException("");
 			return commitId;								
 		} catch (RevisionSyntaxException | IOException e) {
-			throw new OneException("Invalid revision string: " + value);
+			throw new OneException("Invalid revision string: " + revision);
 		}
 	}
 
+	public static Configuration getConfiguration(Project project, String name) {
+		Configuration configuration = OneDev.getInstance(ConfigurationManager.class).find(project, name);
+		if (configuration != null)
+			return configuration;
+		else
+			throw new OneException("Unable to find configuration: " + name);
+	}
+	
+	public static Issue getIssue(Project project, String numberStr) {
+		if (numberStr.startsWith("#"))
+			numberStr = numberStr.substring(1);
+		Issue issue = OneDev.getInstance(IssueManager.class).find(project, getLongValue(numberStr));
+		if (issue != null)
+			return issue;
+		else
+			throw new OneException("Unable to find issue: #" + numberStr);
+	}
+	
+	public static Build getBuild(Project project, String fqn) {
+		Build build = OneDev.getInstance(BuildManager.class).findByFQN(project, fqn);
+		if (build != null)
+			return build;
+		else
+			throw new OneException("Unable to find build with FQN: " + fqn);
+	}
+	
 	public boolean needsLogin() {
 		return getCriteria() != null && getCriteria().needsLogin();
 	}

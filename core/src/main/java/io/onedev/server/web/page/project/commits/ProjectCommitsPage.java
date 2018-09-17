@@ -67,7 +67,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Constants;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.avatar.ContributorAvatars;
-import io.onedev.server.web.component.build.BuildsStatusPanel;
+import io.onedev.server.web.component.buildstatus.BuildsStatusPanel;
 import io.onedev.server.web.component.commitgraph.CommitGraphResourceReference;
 import io.onedev.server.web.component.commitgraph.CommitGraphUtils;
 import io.onedev.server.web.component.commitmessage.ExpandableCommitMessagePanel;

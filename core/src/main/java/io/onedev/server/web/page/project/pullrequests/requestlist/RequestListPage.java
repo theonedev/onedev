@@ -53,7 +53,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
-import io.onedev.server.web.component.RequestStateLabel;
+import io.onedev.server.web.component.RequestStatusLabel;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.link.BranchLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -343,11 +343,11 @@ public class RequestListPage extends ProjectPage {
 
 		});
 		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("State")) {
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Status")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				cellItem.add(new RequestStateLabel(componentId, rowModel));
+				cellItem.add(new RequestStatusLabel(componentId, rowModel));
 			}
 
 		});

@@ -36,11 +36,11 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.MilestoneSort;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.component.MilestoneDueLabel;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
+import io.onedev.server.web.component.milestone.MilestoneDueLabel;
 import io.onedev.server.web.page.project.issues.IssuesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 

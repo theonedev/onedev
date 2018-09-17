@@ -56,7 +56,7 @@ import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.component.branchpicker.AffinalBranchPicker;
-import io.onedev.server.web.component.build.PullRequestBuildsPanel;
+import io.onedev.server.web.component.buildstatus.PullRequestBuildsPanel;
 import io.onedev.server.web.component.commitlist.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
@@ -180,7 +180,7 @@ public class NewRequestPage extends ProjectPage implements CommentSupport {
 				update.setHeadCommitHash(request.getHeadCommitHash());
 				update.setMergeBaseCommitHash(request.getBaseCommitHash());
 
-				request.setMergeStrategy(MergeStrategy.MERGE_IF_NECESSARY);
+				request.setMergeStrategy(MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY);
 				
 				OneDev.getInstance(PullRequestManager.class).checkQuality(request);
 			}

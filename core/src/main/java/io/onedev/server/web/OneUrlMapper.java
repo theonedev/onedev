@@ -23,6 +23,7 @@ import io.onedev.server.web.page.project.NoCommitsPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
+import io.onedev.server.web.page.project.builds.BuildListPage;
 import io.onedev.server.web.page.project.comments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
@@ -207,6 +208,8 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/milestones/${milestone}", MilestoneDetailPage.class));
 		add(new OnePageMapper("projects/${project}/milestones/${milestone}/edit", MilestoneEditPage.class));
 		add(new OnePageMapper("projects/${project}/milestones/new", NewMilestonePage.class));
+		
+		add(new OnePageMapper("projects/${project}/builds", BuildListPage.class));
 		
 		add(new OnePageMapper("projects/${project}/settings/general", GeneralSettingPage.class));
 		add(new OnePageMapper("projects/${project}/settings/teams", TeamListPage.class));

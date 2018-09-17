@@ -103,7 +103,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 							List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
 							candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
 							candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
-							suggestions.addAll(getSuggestions(candidates, unfencedLowerCaseMatchWith, null));
+							suggestions.addAll(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith, null));
 							CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
 							break;
 						case CommitQueryParser.PATH:

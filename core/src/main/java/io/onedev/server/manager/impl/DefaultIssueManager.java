@@ -100,7 +100,10 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		lastActivity.setUser(issue.getSubmitter());
 		lastActivity.setDate(issue.getSubmitDate());
 		issue.setLastActivity(lastActivity);
-		issue.setNumber(getNextNumber(issue.getProject()));
+		
+		Query<?> query = getSession().createQuery("select max(number) from Issue where project=:project");
+		query.setParameter("project", issue.getProject());
+		issue.setNumber(getNextNumber(issue.getProject(), query));
 		save(issue);
 
 		issueFieldUnaryManager.saveFields(issue);
@@ -290,7 +293,10 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			EntityCriteria<Issue> criteria = newCriteria();
 			criteria.add(Restrictions.eq("project", project));
 			criteria.add(Restrictions.and(
-					Restrictions.or(Restrictions.ilike("noSpaceTitle", "%" + term + "%"), Restrictions.ilike("numberStr", term + "%")), 
+					Restrictions.or(
+							Restrictions.ilike("title", "%" + term + "%"),
+							Restrictions.ilike("noSpaceTitle", "%" + term + "%"), 
+							Restrictions.ilike("numberStr", term + "%")), 
 					Restrictions.ne("number", number)
 				));
 			criteria.addOrder(Order.desc("number"));
@@ -300,6 +306,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			criteria.add(Restrictions.eq("project", project));
 			if (StringUtils.isNotBlank(term)) {
 				criteria.add(Restrictions.or(
+						Restrictions.ilike("title", "%" + term + "%"), 
 						Restrictions.ilike("noSpaceTitle", "%" + term + "%"), 
 						Restrictions.ilike("numberStr", (term.startsWith("#")? term.substring(1): term) + "%")));
 			}
@@ -619,37 +626,5 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 		
 	}
-
-	/*
-	@Transactional
-	@Override
-	public void test() {
-		Project project = OneDev.getInstance(ProjectManager.class).load(1L);
-		Milestone m1 = OneDev.getInstance(MilestoneManager.class).load(1L);
-		Milestone m2 = OneDev.getInstance(MilestoneManager.class).load(2L);
-		User user = OneDev.getInstance(UserManager.class).load(1L);
-		for (int i=1; i<=100000; i++) {
-			Issue issue = new Issue();
-			issue.setProject(project);
-			if (i<=50000)
-				issue.setMilestone(m1);
-			else
-				issue.setMilestone(m2);
-			issue.setTitle("issue " + i);
-			issue.setSubmitter(user);
-			issue.setSubmitDate(new Date());
-			issue.setBoardPosition(1);
-			issue.setState("Open");
-			LastActivity lastActivity = new LastActivity();
-			lastActivity.setAction("submitted");
-			lastActivity.setUser(issue.getSubmitter());
-			lastActivity.setDate(issue.getSubmitDate());
-			issue.setLastActivity(lastActivity);
-			issue.setNumber(getNextNumber(issue.getProject()));
-			issue.setLastActivity(lastActivity);
-			save(issue);
-		}
-	}
-	*/
 
 }

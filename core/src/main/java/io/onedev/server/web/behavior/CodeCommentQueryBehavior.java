@@ -17,18 +17,15 @@ import io.onedev.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.codeassist.parser.Element;
 import io.onedev.codeassist.parser.ParseExpect;
 import io.onedev.codeassist.parser.TerminalExpect;
-import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.codecomment.CodeCommentConstants;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
+import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
-import io.onedev.utils.Range;
 
 @SuppressWarnings("serial")
 public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
@@ -63,22 +60,6 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 			if (spec.getRuleName().equals("Quoted")) {
 				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
 
-					private List<InputSuggestion> getUserSuggestions(String matchWith) {
-						List<InputSuggestion> suggestions = new ArrayList<>();
-						for (User user: OneDev.getInstance(UserManager.class).query()) {
-							Range match = Range.match(user.getName(), matchWith, true, false, true);
-							if (match != null) {
-								String description;
-								if (!user.getDisplayName().equals(user.getName()))
-									description = user.getDisplayName();
-								else
-									description = null;
-								suggestions.add(new InputSuggestion(user.getName(), description, match).escape(ESCAPE_CHARS));
-							}
-						}
-						return suggestions;
-					}
-					
 					@Override
 					protected List<InputSuggestion> match(String unfencedMatchWith) {
 						String unfencedLowerCaseMatchWith = unfencedMatchWith.toLowerCase();
@@ -86,24 +67,27 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 						Project project = getProject();
 
 						if ("criteriaField".equals(spec.getLabel())) {
-							suggestions.addAll(getSuggestions(CodeCommentConstants.QUERY_FIELDS, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
+							suggestions.addAll(SuggestionUtils.suggest(CodeCommentConstants.QUERY_FIELDS, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 						} else if ("orderField".equals(spec.getLabel())) {
-							suggestions.addAll(getSuggestions(new ArrayList<>(CodeCommentConstants.ORDER_FIELDS.keySet()), 
+							suggestions.addAll(SuggestionUtils.suggest(new ArrayList<>(CodeCommentConstants.ORDER_FIELDS.keySet()), 
 									unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+							Preconditions.checkState(operatorElements.size() == 1);
+							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
+							int operator = CodeCommentQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								suggestions.addAll(getUserSuggestions(unfencedLowerCaseMatchWith));
+								if (operator == CodeCommentQueryLexer.CreatedBy	)
+									suggestions.addAll(SuggestionUtils.suggestUser(unfencedLowerCaseMatchWith, ESCAPE_CHARS));
+								else
+									return null;
 							} else {
 								String fieldName = CodeCommentQuery.getValue(fieldElements.get(0).getMatchedText());
-								List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
-								Preconditions.checkState(operatorElements.size() == 1);
-								String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
-								int operator = CodeCommentQuery.getOperator(operatorName);							
 								try {
 									CodeCommentQuery.checkField(project, fieldName, operator);
 									if (fieldName.equals(CodeCommentConstants.FIELD_CREATE_DATE) || fieldName.equals(CodeCommentConstants.FIELD_UPDATE_DATE)) {
-										suggestions.addAll(getSuggestions(DateUtils.RELAX_DATE_EXAMPLES, unfencedLowerCaseMatchWith, null));
+										suggestions.addAll(SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, unfencedLowerCaseMatchWith, null));
 										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
 									} else if (fieldName.equals(CodeCommentConstants.FIELD_PATH)) {
 										suggestions.addAll(SuggestionUtils.suggestPath(projectModel.getObject(), unfencedLowerCaseMatchWith, ESCAPE_CHARS));

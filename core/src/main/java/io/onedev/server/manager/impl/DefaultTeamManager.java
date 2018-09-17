@@ -5,7 +5,8 @@ import java.util.Iterator;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.server.manager.CacheManager;
+import org.hibernate.criterion.Restrictions;
+
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.TeamManager;
@@ -17,6 +18,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.utils.StringUtils;
 
 @Singleton
@@ -24,16 +26,12 @@ public class DefaultTeamManager extends AbstractEntityManager<Team> implements T
 
 	private final ProjectManager projectManager;
 	
-	private final CacheManager cacheManager;
-	
 	private final IssueFieldUnaryManager issueFieldManager;
 	
 	@Inject
-	public DefaultTeamManager(Dao dao, ProjectManager projectManager, 
-			CacheManager cacheManager, IssueFieldUnaryManager issueFieldManager) {
+	public DefaultTeamManager(Dao dao, ProjectManager projectManager, IssueFieldUnaryManager issueFieldManager) {
 		super(dao);
 		this.projectManager = projectManager;
-		this.cacheManager = cacheManager;
 		this.issueFieldManager = issueFieldManager;
 	}
 
@@ -75,11 +73,10 @@ public class DefaultTeamManager extends AbstractEntityManager<Team> implements T
 	@Sessional
 	@Override
 	public Team find(Project project, String name) {
-		Long id = cacheManager.getTeamId(project.getId(), name);
-		if (id != null) 
-			return load(id);
-		else
-			return null;
+		EntityCriteria<Team> criteria = newCriteria();
+		criteria.add(Restrictions.eq("project", project));
+		criteria.add(Restrictions.eq("name", name));
+		return find(criteria);
 	}
 
 	@Sessional

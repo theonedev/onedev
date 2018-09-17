@@ -43,7 +43,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.build.BuildsStatusPanel;
+import io.onedev.server.web.component.buildstatus.BuildsStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
@@ -265,12 +265,11 @@ public class ProjectTagsPage extends ProjectPage {
 				link.add(new Label("name", tagName));
 				item.add(link);
 				
-				String commitHash = ref.getPeeledObj().name();
 				item.add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 					@Override
 					protected List<Build> load() {
-						return OneDev.getInstance(BuildManager.class).query(getProject(), commitHash);
+						return OneDev.getInstance(BuildManager.class).query(getProject(), ref.getPeeledObj().name());
 					}
 					
 				}));

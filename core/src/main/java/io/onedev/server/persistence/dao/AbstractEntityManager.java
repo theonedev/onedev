@@ -18,7 +18,7 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 	
 	protected final Dao dao;
 	
-	private final Map<String, AtomicLong> nextNumbers = new HashMap<>();
+	private final Map<Long, AtomicLong> nextNumbers = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
 	public AbstractEntityManager(Dao dao) {
@@ -32,16 +32,14 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 		this.dao = dao;
     }
 	
-	protected long getNextNumber(Project project) {
+	protected long getNextNumber(Project project, Query<?> maxNumberQuery) {
 		AtomicLong nextNumber;
 		synchronized (nextNumbers) {
-			nextNumber = nextNumbers.get(project.getUUID());
+			nextNumber = nextNumbers.get(project.getId());
 		}
 		if (nextNumber == null) {
 			long maxNumber;
-			Query<?> query = getSession().createQuery("select max(number) from PullRequest where targetProject=:project");
-			query.setParameter("project", project);
-			Object result = query.uniqueResult();
+			Object result = maxNumberQuery.uniqueResult();
 			if (result != null) {
 				maxNumber = (Long)result;
 			} else {
@@ -53,10 +51,10 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 			 * if there are limited connections. 
 			 */
 			synchronized (nextNumbers) {
-				nextNumber = nextNumbers.get(project.getUUID());
+				nextNumber = nextNumbers.get(project.getId());
 				if (nextNumber == null) {
 					nextNumber = new AtomicLong(maxNumber+1);
-					nextNumbers.put(project.getUUID(), nextNumber);
+					nextNumbers.put(project.getId(), nextNumber);
 				}
 			}
 		} 

@@ -9,10 +9,10 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.apache.commons.lang3.text.WordUtils;
 import org.hibernate.annotations.OptimisticLock;
 
 import io.onedev.server.model.User;
+import io.onedev.utils.WordUtils;
 
 @Embeddable
 public class CloseInfo implements Serializable {
@@ -24,7 +24,7 @@ public class CloseInfo implements Serializable {
 	
 		@Override
 		public String toString() {
-			return WordUtils.capitalize(name().toLowerCase());
+			return WordUtils.toWords(name());
 		}
 		
 	};

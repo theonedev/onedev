@@ -11,6 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.lifecycle.SystemStopping;
 import io.onedev.utils.FileUtils;
@@ -149,7 +151,7 @@ public abstract class AbstractEnvironmentManager {
 			return defaultValue;
 	}
 	
-	protected Collection<Long> readLongCollection(Store store, Transaction txn, ByteIterable key) {
+	protected Collection<Long> readLongs(Store store, Transaction txn, ByteIterable key) {
 		Collection<Long> collection = new HashSet<>();
 		byte[] bytes = readBytes(store, txn, key);
 		if (bytes != null) {
@@ -158,36 +160,63 @@ public abstract class AbstractEnvironmentManager {
 		} 
 		return collection;
 	}
+
+	protected Collection<ObjectId> readCommits(Store store, Transaction txn, ByteIterable key) {
+		Collection<ObjectId> commits = new HashSet<>();
+		byte[] bytes = readBytes(store, txn, key);
+		if (bytes != null) {
+			for (int i=0; i<bytes.length/20; i++)
+				commits.add(ObjectId.fromRaw(bytes, i*20));
+		} 
+		return commits;
+	}
 	
 	protected void writeLong(Store store, Transaction txn, ByteIterable key, long value) {
 		byte[] bytes = ByteBuffer.allocate(Long.BYTES).putLong(value).array();
 		store.put(txn, key, new ArrayByteIterable(bytes));
 	}
 	
-	protected void writeCollection(Store store, Transaction txn, ByteIterable key, Collection<Long> collection) {
-		ByteBuffer buffer = ByteBuffer.allocate(collection.size()*Long.BYTES);
+	protected void writeLongs(Store store, Transaction txn, ByteIterable key, Collection<Long> collection) {
+		store.put(txn, key, new LongsByteIterable(collection));
+	}
+	
+	protected void writeCommits(Store store, Transaction txn, ByteIterable key, Collection<ObjectId> commits) {
+		byte[] bytes = new byte[commits.size()*20];
 		int index = 0;
-		for (Long value: collection) {
-			buffer.putLong(index, value);
-			index += Long.BYTES;
+		for (ObjectId commit: commits) {
+			commit.copyRawTo(bytes, index);
+			index += 20;
 		}
-		store.put(txn, key, new ArrayByteIterable(buffer.array()));
+		store.put(txn, key, new ArrayByteIterable(bytes));
 	}
 	
 	protected void writeBoolean(Store store, Transaction txn, ByteIterable key, boolean value) {
 		byte[] bytes = new byte[] {(byte)(value?1:0)};
 		store.put(txn, key, new ArrayByteIterable(bytes));
 	}
+
+	static class CommitByteIterable extends ArrayByteIterable {
+		CommitByteIterable(ObjectId commit) {
+			super(getBytes(commit));
+		}
+
+		private static byte[] getBytes(ObjectId commit) {
+			byte[] commitBytes = new byte[20];
+			commit.copyRawTo(commitBytes, 0);
+			return commitBytes;
+		}
+		
+	}
 	
 	static class IntByteIterable extends ArrayByteIterable {
 		IntByteIterable(int value) {
-			super(new ArrayByteIterable(ByteBuffer.allocate(Integer.BYTES).putInt(value).array()));
+			super(ByteBuffer.allocate(Integer.BYTES).putInt(value).array());
 		}
 	}
 	
 	static class LongByteIterable extends ArrayByteIterable {
 		LongByteIterable(long value) {
-			super(new ArrayByteIterable(ByteBuffer.allocate(Long.BYTES).putLong(value).array()));
+			super(ByteBuffer.allocate(Long.BYTES).putLong(value).array());
 		}
 	}
 	
@@ -197,19 +226,20 @@ public abstract class AbstractEnvironmentManager {
 		}
 	}
 
-	static class StringPairByteIterable extends ArrayByteIterable {
+	static class LongsByteIterable extends ArrayByteIterable {
 		
-		StringPairByteIterable(String value1, String value2) {
-			super(getBytes(value1, value2));
+		LongsByteIterable(Collection<Long> values) {
+			super(getBytes(values));
 		}
 		
-		private static byte[] getBytes(String value1, String value2) {
-			byte[] bytes1 = value1.getBytes();
-			byte[] bytes2 = value2.getBytes();
-			byte[] bytes = new byte[bytes1.length+bytes2.length];
-			System.arraycopy(bytes1, 0, bytes, 0, bytes1.length);
-			System.arraycopy(bytes2, 0, bytes, bytes1.length, bytes2.length);
-			return bytes;
+		private static byte[] getBytes(Collection<Long> values) {
+			ByteBuffer buffer = ByteBuffer.allocate(Long.SIZE * values.size());
+			int index = 0;
+			for (Long value: values) {
+				buffer.putLong(index, value);
+				index += Long.SIZE;
+			}
+			return buffer.array();
 		}
 	}
 

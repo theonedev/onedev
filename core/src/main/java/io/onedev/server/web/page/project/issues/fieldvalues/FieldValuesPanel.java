@@ -33,9 +33,9 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.web.component.RequestStateLabel;
+import io.onedev.server.web.component.RequestStatusLabel;
 import io.onedev.server.web.component.avatar.AvatarLink;
-import io.onedev.server.web.component.build.BuildStatusIcon;
+import io.onedev.server.web.component.buildstatus.BuildStatusIcon;
 import io.onedev.server.web.component.issuestate.IssueStateLabel;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.editable.EditableUtils;
@@ -90,7 +90,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						if (build != null) {
 							Fragment buildFrag = new Fragment("value", "buildFrag", FieldValuesPanel.this);
 							ExternalLink link = new ExternalLink("link", build.getUrl());
-							link.add(new Label("label", StringUtils.abbreviate(build.getName(), MAX_BUILD_NAME_LEN)));
+							link.add(new Label("label", StringUtils.abbreviate(build.getVersion(), MAX_BUILD_NAME_LEN)));
 							buildFrag.add(link);
 							buildFrag.add(new BuildStatusIcon("status", Model.of(build)));
 							item.add(buildFrag);
@@ -104,7 +104,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 							Link<Void> link = new BookmarkablePageLink<Void>("link", RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(request, null));
 							link.add(new Label("label", "#" + request.getNumber()));
 							requestFrag.add(link);
-							requestFrag.add(new RequestStateLabel("status", Model.of(request)));
+							requestFrag.add(new RequestStatusLabel("status", Model.of(request)));
 							item.add(requestFrag);
 						} else {
 							item.add(new Label("value", "#" + value));

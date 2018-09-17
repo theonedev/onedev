@@ -1,9 +1,9 @@
 package io.onedev.server.web.page.project.pullrequests.requestdetail;
 
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.ALWAYS_MERGE;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.MERGE_IF_NECESSARY;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_MERGE;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_MERGE;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.web.page.project.pullrequests.requestdetail.PullRequestOperation.APPROVE;
 import static io.onedev.server.web.page.project.pullrequests.requestdetail.PullRequestOperation.DELETE_SOURCE_BRANCH;
 import static io.onedev.server.web.page.project.pullrequests.requestdetail.PullRequestOperation.DISCARD;
@@ -86,7 +86,7 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.build.PullRequestBuildsPanel;
+import io.onedev.server.web.component.buildstatus.PullRequestBuildsPanel;
 import io.onedev.server.web.component.entitynav.EntityNavPanel;
 import io.onedev.server.web.component.entitywatches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -245,7 +245,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 				super.onSubmit(target, form);
 				
 				if (StringUtils.isNotBlank(title)) {
-					OneDev.getInstance(PullRequestActionManager.class).changeTitle(getPullRequest(), title);
+					OneDev.getInstance(PullRequestActionManager.class).changeTitle(getPullRequest(), title, SecurityUtils.getUser());
 					send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 					isEditingTitle = false;
 				}
@@ -524,7 +524,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 					
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				OneDev.getInstance(PullRequestActionManager.class).changeMergeStrategy(getPullRequest(), mergeStrategy);
+				OneDev.getInstance(PullRequestActionManager.class).changeMergeStrategy(getPullRequest(), mergeStrategy, SecurityUtils.getUser());
 				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}
 			
@@ -1025,7 +1025,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 				MergePreview preview = request.getLastMergePreview();
 				setVisible(preview != null 
 						&& !preview.getRequestHead().equals(preview.getMerged())
-						&& (preview.getMergeStrategy() == ALWAYS_MERGE || preview.getMergeStrategy() == MERGE_IF_NECESSARY));
+						&& (preview.getMergeStrategy() == CREATE_MERGE_COMMIT || preview.getMergeStrategy() == CREATE_MERGE_COMMIT_IF_NECESSARY));
 			}
 			
 		});
@@ -1049,7 +1049,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 				MergePreview preview = request.getLastMergePreview();
 				setVisible(preview != null 
 						&& !preview.getRequestHead().equals(preview.getMerged())
-						&& preview.getMergeStrategy() == SQUASH_MERGE);
+						&& preview.getMergeStrategy() == SQUASH_SOURCE_BRANCH_COMMITS);
 			}
 			
 		});
@@ -1063,7 +1063,7 @@ public abstract class RequestDetailPage extends ProjectPage {
 				MergePreview preview = request.getMergePreview();
 				setVisible(preview != null 
 						&& !preview.getRequestHead().equals(preview.getMerged())
-						&& preview.getMergeStrategy() == REBASE_MERGE);
+						&& preview.getMergeStrategy() == REBASE_SOURCE_BRANCH_COMMITS);
 			}
 			
 		});

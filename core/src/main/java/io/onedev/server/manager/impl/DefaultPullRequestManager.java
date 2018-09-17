@@ -6,9 +6,9 @@ import static io.onedev.server.model.PullRequest.CriterionHelper.ofSourceProject
 import static io.onedev.server.model.PullRequest.CriterionHelper.ofSubmitter;
 import static io.onedev.server.model.PullRequest.CriterionHelper.ofTarget;
 import static io.onedev.server.model.PullRequest.CriterionHelper.ofTargetProject;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.ALWAYS_MERGE;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.MERGE_IF_NECESSARY;
-import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_MERGE;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
+import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -280,7 +280,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
         
 		Project targetProject = request.getTargetProject();
 		MergeStrategy strategy = request.getMergeStrategy();
-		if ((strategy == ALWAYS_MERGE || strategy == MERGE_IF_NECESSARY || strategy == SQUASH_MERGE) 
+		if ((strategy == CREATE_MERGE_COMMIT || strategy == CREATE_MERGE_COMMIT_IF_NECESSARY || strategy == SQUASH_SOURCE_BRANCH_COMMITS) 
 				&& !preview.getMerged().equals(preview.getRequestHead()) 
 				&& !mergedCommit.getFullMessage().equals(request.getCommitMessage())) {
 			try (	RevWalk revWalk = new RevWalk(targetProject.getRepository());
@@ -342,7 +342,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void open(PullRequest request) {
-		request.setNumber(getNextNumber(request.getTargetProject()));
+		Query<?> query = getSession().createQuery("select max(number) from PullRequest where targetProject=:project");
+		query.setParameter("project", request.getTargetProject());
+		request.setNumber(getNextNumber(request.getTargetProject(), query));
 
 		LastActivity lastActivity = new LastActivity();
 		lastActivity.setDescription("submitted");
@@ -629,7 +631,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	public void on(BuildEvent event) {
 		Build build = event.getBuild();
-		for (PullRequest request: queryOpenByCommit(build.getCommit())) { 
+		for (PullRequest request: queryOpenByCommit(build.getCommitHash())) { 
 			listenerRegistry.post(new PullRequestBuildEvent(request, build));
 			if (build.getStatus() != Build.Status.RUNNING)
 				checkAsync(request);
@@ -1057,7 +1059,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			EntityCriteria<PullRequest> criteria = newCriteria();
 			criteria.add(Restrictions.eq("targetProject", targetProject));
 			criteria.add(Restrictions.and(
-					Restrictions.or(Restrictions.ilike("noSpaceTitle", "%" + term + "%"), Restrictions.ilike("numberStr", term + "%")), 
+					Restrictions.or(
+							Restrictions.ilike("title", "%" + term + "%"), 
+							Restrictions.ilike("noSpaceTitle", "%" + term + "%"), 
+							Restrictions.ilike("numberStr", term + "%")), 
 					Restrictions.ne("number", number)
 				));
 			criteria.addOrder(Order.desc("number"));
@@ -1067,6 +1072,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			criteria.add(Restrictions.eq("targetProject", targetProject));
 			if (StringUtils.isNotBlank(term)) {
 				criteria.add(Restrictions.or(
+						Restrictions.ilike("title", "%" + term + "%"), 
 						Restrictions.ilike("noSpaceTitle", "%" + term + "%"), 
 						Restrictions.ilike("numberStr", (term.startsWith("#")? term.substring(1): term) + "%")));
 			}

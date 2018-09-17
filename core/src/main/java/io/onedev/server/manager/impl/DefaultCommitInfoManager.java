@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -321,9 +322,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			
 			@Override
 			public void execute(Transaction txn) {
-				byte[] commitKeyBytes = new byte[20];
-				commitId.copyRawTo(commitKeyBytes, 0);
-				ByteIterable commitKey = new ArrayByteIterable(commitKeyBytes);
+				ByteIterable commitKey = new CommitByteIterable(commitId);
 				byte[] commitBytes = readBytes(commitsStore, txn, commitKey);
 				
 				if (!isCommitCollected(commitBytes)) {
@@ -342,9 +341,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						
 						RevCommit nextCommit = revWalk.next();
 						while (nextCommit != null) {
-							byte[] nextCommitKeyBytes = new byte[20];
-							nextCommit.copyRawTo(nextCommitKeyBytes, 0);
-							ByteIterable nextCommitKey = new ArrayByteIterable(nextCommitKeyBytes);
+							ByteIterable nextCommitKey = new CommitByteIterable(nextCommit);
 							byte[] nextCommitBytes = readBytes(commitsStore, txn, nextCommitKey);
 							
 							if (!isCommitCollected(nextCommitBytes)) {
@@ -361,9 +358,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 								commitCount++;
 								
 								for (RevCommit parentCommit: nextCommit.getParents()) {
-									byte[] parentCommitKeyBytes = new byte[20];
-									parentCommit.copyRawTo(parentCommitKeyBytes, 0);
-									ByteIterable parentCommitKey = new ArrayByteIterable(parentCommitKeyBytes);
+									ByteIterable parentCommitKey = new CommitByteIterable(parentCommit);
 									byte[] parentCommitBytes = readBytes(commitsStore, txn, parentCommitKey);
 									byte[] newParentCommitBytes;
 									if (parentCommitBytes != null) {
@@ -378,15 +373,21 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 								
 								for (Long issueNumber: IssueUtils.parseFixedIssues(nextCommit.getFullMessage())) {
 									ByteIterable issueKey = new LongByteIterable(issueNumber);
-									Collection<ObjectId> fixCommits = getFixCommits(fixCommitsStore, txn, issueKey);
-									fixCommits.add(nextCommit);
-									byte[] fixCommitBytes = new byte[fixCommits.size()*20];
-									int index = 0;
-									for (ObjectId fixCommit: fixCommits) {
-										fixCommit.copyRawTo(fixCommitBytes, index);
-										index += 20;
+									Collection<ObjectId> fixCommits = readCommits(fixCommitsStore, txn, issueKey);
+									
+									boolean addNextCommit = true;
+									for (Iterator<ObjectId> it = fixCommits.iterator(); it.hasNext();) {
+										ObjectId fixCommit = it.next();
+										if (GitUtils.isMergedInto(project.getRepository(), null, fixCommit, nextCommit)) { 
+											it.remove();
+										} else if (GitUtils.isMergedInto(project.getRepository(), null, nextCommit, fixCommit)) {
+											addNextCommit = false;
+											break;
+										}
 									}
-									fixCommitsStore.put(txn, issueKey, new ArrayByteIterable(fixCommitBytes));
+									if (addNextCommit)
+										fixCommits.add(nextCommit);
+									writeCommits(fixCommitsStore, txn, issueKey, fixCommits);
 								}
 							}								
 							nextCommit = revWalk.next();
@@ -394,9 +395,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						writeInt(defaultStore, txn, COMMIT_COUNT_KEY, commitCount);
 						commitCountCache.remove(project.getId());
 						
-						lastCommitBytes = new byte[20];
-						commitId.copyRawTo(lastCommitBytes, 0);
-						defaultStore.put(txn, LAST_COMMIT_KEY, new ArrayByteIterable(lastCommitBytes));
+						defaultStore.put(txn, LAST_COMMIT_KEY, new CommitByteIterable(commitId));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -737,9 +736,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 							for (Map.Entry<Long, Integer> entry: editsCache.entrySet()) 
 								writeInt(editsStore, txn, new LongByteIterable(entry.getKey()), entry.getValue());
 							
-							byte[] bytes = new byte[20];
-							currentCommitId.copyRawTo(bytes, 0);
-							defaultStore.put(txn, LAST_COMMIT_OF_DEFAULT_BRANCH_KEY, new ArrayByteIterable(bytes));
+							defaultStore.put(txn, LAST_COMMIT_OF_DEFAULT_BRANCH_KEY, new CommitByteIterable(currentCommitId));
 						}
 					});
 				}
@@ -921,7 +918,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	}
 	
 	@Override
-	public Set<ObjectId> getDescendants(Project project, final ObjectId ancestor) {
+	public Collection<ObjectId> getDescendants(Project project, Collection<ObjectId> ancestors) {
 		Environment env = getEnv(project.getId().toString());
 		final Store store = getStore(env, COMMITS_STORE);
 
@@ -933,13 +930,11 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				
 				// Use stack instead of recursion to avoid StackOverflowException
 				Stack<ObjectId> stack = new Stack<>();
-				descendants.add(ancestor);
-				stack.add(ancestor);
+				descendants.addAll(ancestors);
+				stack.addAll(ancestors);
 				while (!stack.isEmpty()) {
 					ObjectId current = stack.pop();
-					byte[] keyBytes = new byte[20];
-					current.copyRawTo(keyBytes, 0);
-					byte[] valueBytes = readBytes(store, txn, new ArrayByteIterable(keyBytes));
+					byte[] valueBytes = readBytes(store, txn, new CommitByteIterable(current));
 					if (valueBytes != null) {
 						if (valueBytes.length % 20 == 0) {
 							for (int i=0; i<valueBytes.length/20; i++) {
@@ -962,36 +957,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				}
 				
 				return descendants;
-			}
-			
-		});
-	}
-
-	@Override
-	public Set<ObjectId> getChildren(Project project, final ObjectId parent) {
-		Environment env = getEnv(project.getId().toString());
-		final Store store = getStore(env, COMMITS_STORE);
-
-		return env.computeInReadonlyTransaction(new TransactionalComputable<Set<ObjectId>>() {
-
-			@Override
-			public Set<ObjectId> compute(Transaction txn) {
-				Set<ObjectId> children = new HashSet<>();
-				
-				byte[] keyBytes = new byte[20];
-				parent.copyRawTo(keyBytes, 0);
-				byte[] valueBytes = readBytes(store, txn, new ArrayByteIterable(keyBytes));
-				if (valueBytes != null) {
-					if (valueBytes.length % 20 == 0) {
-						for (int i=0; i<valueBytes.length/20; i++)
-							children.add(ObjectId.fromRaw(valueBytes, i*20));
-					} else { 
-						for (int i=0; i<(valueBytes.length-1)/20; i++) {
-							children.add(ObjectId.fromRaw(valueBytes, i*20+1));
-						}
-					}
-				}
-				return children;
 			}
 			
 		});
@@ -1386,16 +1351,6 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		int path;
 	}
 
-	private Collection<ObjectId> getFixCommits(Store store, Transaction txn, ByteIterable issueKey) {
-		Collection<ObjectId> fixCommits = new HashSet<>();
-		byte[] bytes = readBytes(store, txn, issueKey);
-		if (bytes != null) {
-			for (int i=0; i<bytes.length/20; i++)
-				fixCommits.add(ObjectId.fromRaw(bytes, i*20));
-		} 
-		return fixCommits;
-	}
-	
 	@Override
 	public Collection<ObjectId> getFixCommits(Project project, Long issueNumber) {
 		Environment env = getEnv(project.getId().toString());
@@ -1405,7 +1360,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			
 			@Override
 			public Collection<ObjectId> compute(Transaction txn) {
-				return getFixCommits(store, txn, new LongByteIterable(issueNumber));
+				return readCommits(store, txn, new LongByteIterable(issueNumber));
 			}
 			
 		});

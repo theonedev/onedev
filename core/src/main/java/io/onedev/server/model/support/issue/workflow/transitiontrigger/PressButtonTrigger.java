@@ -27,7 +27,7 @@ public class PressButtonTrigger implements TransitionTrigger {
 
 	private UserMatcher authorized;
 	
-	private List<String> promptFields;
+	private List<String> promptFields = new ArrayList<>();
 	
 	@Editable(order=100)
 	@NotEmpty

@@ -2,18 +2,20 @@ package io.onedev.server.manager.impl;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.lifecycle.SystemStarted;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.BatchWorkManager;
 import io.onedev.server.manager.BuildInfoManager;
 import io.onedev.server.manager.BuildManager;
@@ -50,7 +52,9 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 	
 	private static final String DEFAULT_STORE = "default";
 	
-	private static final String FIX_BUILDS_STORE = "fixBuilds";
+	private static final String LAST_COMMITS_STORE = "lastCommits";
+	
+	private static final String PREV_COMMITS_STORE = "prevCommits";
 	
 	private static final ByteIterable LAST_BUILD_KEY = new StringByteIterable("lastBuild");
 	
@@ -80,7 +84,7 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 	}
 	
 	private BatchWorker getBatchWorker(Long projectId) {
-		return new BatchWorker("project-" + projectId + "-collectIssueInfo") {
+		return new BatchWorker("project-" + projectId + "-collectBuildInfo") {
 
 			@Override
 			public void doWorks(Collection<Prioritized> works) {
@@ -115,7 +119,8 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 		
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
-		Store fixBuildsStore = getStore(env, FIX_BUILDS_STORE);
+		Store lastCommitsStore = getStore(env, LAST_COMMITS_STORE);
+		Store prevCommitsStore = getStore(env, PREV_COMMITS_STORE);
 
 		Long lastBuildId = env.computeInTransaction(new TransactionalComputable<Long>() {
 			
@@ -127,28 +132,31 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 		});
 		
 		List<Build> unprocessedBuilds = buildManager.queryAfter(project, lastBuildId, BATCH_SIZE); 
-		for (int i=0; i<unprocessedBuilds.size(); i++) {
-			int index = i;
+		for (Build build: unprocessedBuilds) {
 			env.executeInTransaction(new TransactionalExecutable() {
 
 				@Override
 				public void execute(Transaction txn) {
-					Build build = unprocessedBuilds.get(index);
-					Build prevBuild = null;
-					for (int j=index-1; j>=0; j--) {
-						Build prevBuildInProject = unprocessedBuilds.get(j);
-						if (prevBuildInProject.getConfiguration().equals(build.getConfiguration())
-								&& Objects.equals(build.getRef(), prevBuildInProject.getRef())) {
-							prevBuild = prevBuildInProject;
+					ByteIterable configurationKey = new LongByteIterable(build.getConfiguration().getId());
+					Collection<ObjectId> lastCommits = readCommits(lastCommitsStore, txn, configurationKey);
+					if (lastCommits.isEmpty() && build.getConfiguration().getBaseCommit() != null)
+						lastCommits.add(ObjectId.fromString(build.getConfiguration().getBaseCommit()));
+					writeCommits(prevCommitsStore, txn, new LongByteIterable(build.getId()), lastCommits);
+					
+					ObjectId buildCommit = ObjectId.fromString(build.getCommitHash());
+					boolean addCommit = true;
+					for (Iterator<ObjectId> it = lastCommits.iterator(); it.hasNext();) {
+						ObjectId lastCommit = it.next();
+						if (GitUtils.isMergedInto(project.getRepository(), null, lastCommit, buildCommit)) { 
+							it.remove();
+						} else if (GitUtils.isMergedInto(project.getRepository(), null, buildCommit, lastCommit)) {
+							addCommit = false;
 							break;
 						}
 					}
-					for (Long issueNumber: build.getFixedIssueNumbers(prevBuild)) {
-						ByteIterable issueKey = new LongByteIterable(issueNumber);
-						Collection<Long> fixBuildIds = readLongCollection(fixBuildsStore, txn, issueKey);
-						fixBuildIds.add(build.getId());
-						writeCollection(fixBuildsStore, txn, issueKey, fixBuildIds);
-					}
+					if (addCommit)
+						lastCommits.add(buildCommit);
+					writeCommits(lastCommitsStore, txn, configurationKey, lastCommits);
 					defaultStore.put(txn, LAST_BUILD_KEY, new LongByteIterable(build.getId()));
 				}
 				
@@ -159,15 +167,21 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 	}
 	
 	@Override
-	public Collection<Long> getFixBuildIds(Project project, Long issueNumber) {
+	public Collection<ObjectId> getPrevCommits(Project project, Long buildId) {
 		Environment env = getEnv(project.getId().toString());
-		Store store = getStore(env, FIX_BUILDS_STORE);
+		Store defaultStore = getStore(env, DEFAULT_STORE);
+		Store prevCommitsStore = getStore(env, PREV_COMMITS_STORE);
 		
-		return env.computeInTransaction(new TransactionalComputable<Collection<Long>>() {
+		return env.computeInTransaction(new TransactionalComputable<Collection<ObjectId>>() {
 			
 			@Override
-			public Collection<Long> compute(Transaction txn) {
-				return readLongCollection(store, txn, new LongByteIterable(issueNumber));
+			public Collection<ObjectId> compute(Transaction txn) {
+				if (readLong(defaultStore, txn, LAST_BUILD_KEY, 0) < buildId) { 
+					batchWorkManager.submit(getBatchWorker(project.getId()), new Prioritized(PRIORITY));
+					return null;
+				} else {
+					return readCommits(prevCommitsStore, txn, new LongByteIterable(buildId));
+				}
 			}
 			
 		});

@@ -32,11 +32,7 @@ import org.antlr.v4.runtime.Recognizer;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
-import io.onedev.server.manager.BuildManager;
-import io.onedev.server.manager.UserManager;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -200,16 +196,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 					public IssueCriteria visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
 						if (ctx.SubmittedBy() != null) {
-							User user = OneDev.getInstance(UserManager.class).findByName(value);
-							if (user == null)
-								throw new OneException("Unable to find user with login: " + value);
-							return new SubmittedByCriteria(user);
+							return new SubmittedByCriteria(getUser(value));
 						} else if (ctx.FixedInBuild() != null) {
-							Build build = OneDev.getInstance(BuildManager.class).findByFQN(project, value);
-							if (build != null)
-								return new FixedInCriteria(build);
-							else
-								throw new OneException("Unable to find build with FQN: " + value);
+							return new FixedInCriteria(getBuild(project, value));
 						} else {
 							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
 						}
@@ -218,11 +207,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					private ObjectId getCommitId(RevisionCriteriaContext revision) {
 						String value = getValue(revision.Quoted().getText());
 						if (revision.Build() != null) {
-							Build build = OneDev.getInstance(BuildManager.class).findByFQN(project, value);
-							if (build != null)
-								return ObjectId.fromString(build.getCommit());
-							else
-								throw new OneException("Unable to find build with FQN: " + value);
+							return ObjectId.fromString(getBuild(project, value).getCommitHash());
 						} else {
 							try {
 								return project.getRepository().resolve(value);

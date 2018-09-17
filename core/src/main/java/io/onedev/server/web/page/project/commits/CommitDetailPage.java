@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -36,6 +35,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
@@ -54,7 +54,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.avatar.ContributorAvatars;
-import io.onedev.server.web.component.build.BuildsStatusPanel;
+import io.onedev.server.web.component.buildstatus.BuildsStatusPanel;
 import io.onedev.server.web.component.commitmessage.CommitMessageLabel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createbranch.CreateBranchLink;
@@ -173,8 +173,8 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 
 					@Override
 					protected List<RefInfo> load() {
-						Set<ObjectId> descendants = OneDev.getInstance(CommitInfoManager.class)
-								.getDescendants(getProject(), getCommit().getId());
+						Collection<ObjectId> descendants = OneDev.getInstance(CommitInfoManager.class)
+								.getDescendants(getProject(), Sets.newHashSet(getCommit().getId()));
 						descendants.add(getCommit().getId());
 					
 						List<RefInfo> refs = new ArrayList<>();

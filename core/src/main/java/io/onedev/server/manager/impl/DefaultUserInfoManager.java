@@ -8,6 +8,8 @@ import javax.inject.Singleton;
 
 import org.joda.time.DateTime;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.issue.IssueEvent;
@@ -73,7 +75,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public void execute(Transaction txn) {
-				writeLong(store, txn, new StringByteIterable(project.getUUID()), System.currentTimeMillis()+1000L);
+				writeLong(store, txn, new LongByteIterable(project.getId()), System.currentTimeMillis()+1000L);
 			}
 			
 		});
@@ -87,7 +89,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public Date compute(Transaction txn) {
-				long millis = readLong(store, txn, new StringByteIterable(project.getUUID()), -1);
+				long millis = readLong(store, txn, new LongByteIterable(project.getId()), -1);
 				if (millis != -1)
 					return new Date(millis);
 				else
@@ -123,7 +125,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			@Override
 			public void execute(Transaction txn) {
 				long time = new DateTime().plusSeconds(1).getMillis();
-				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), issue.getUUID()), time);
+				writeLong(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), issue.getId())), time);
 			}
 			
 		});
@@ -140,7 +142,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			@Override
 			public void execute(Transaction txn) {
 				long time = new DateTime().plusSeconds(1).getMillis();
-				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), time);
+				writeLong(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), request.getId())), time);
 			}
 			
 		});
@@ -157,7 +159,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			@Override
 			public void execute(Transaction txn) {
 				long time = new DateTime().plusSeconds(1).getMillis();
-				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), time);
+				writeLong(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), request.getId())), time);
 			}
 			
 		});
@@ -172,7 +174,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			@Override
 			public void execute(Transaction txn) {
 				long time = new DateTime().plusSeconds(1).getMillis();
-				writeLong(store, txn, new StringPairByteIterable(user.getUUID(), comment.getUUID()), time);
+				writeLong(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), comment.getId())), time);
 			}
 			
 		});
@@ -186,7 +188,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public Date compute(Transaction txn) {
-				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), -1);
+				long millis = readLong(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), request.getId())), -1);
 				if (millis != -1)
 					return new Date(millis);
 				else
@@ -204,7 +206,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public Date compute(Transaction txn) {
-				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), issue.getUUID()), -1);
+				long millis = readLong(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), issue.getId())), -1);
 				if (millis != -1)
 					return new Date(millis);
 				else
@@ -222,7 +224,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public Date compute(Transaction txn) {
-				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), -1);
+				long millis = readLong(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), request.getId())), -1);
 				if (millis != -1)
 					return new Date(millis);
 				else
@@ -240,7 +242,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public Date compute(Transaction txn) {
-				long millis = readLong(store, txn, new StringPairByteIterable(user.getUUID(), comment.getUUID()), -1);
+				long millis = readLong(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), comment.getId())), -1);
 				if (millis != -1)
 					return new Date(millis);
 				else
@@ -293,7 +295,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public Boolean compute(Transaction txn) {
-				return readBoolean(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), false);
+				return readBoolean(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), request.getId())), false);
 			}
 			
 		});
@@ -307,7 +309,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public Boolean compute(Transaction txn) {
-				return readBoolean(store, txn, new StringPairByteIterable(user.getUUID(), issue.getUUID()), false);
+				return readBoolean(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), issue.getId())), false);
 			}
 			
 		});
@@ -322,7 +324,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public void execute(Transaction txn) {
-				writeBoolean(store, txn, new StringPairByteIterable(user.getUUID(), request.getUUID()), notified);
+				writeBoolean(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), request.getId())), notified);
 			}
 			
 		});
@@ -337,7 +339,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 			
 			@Override
 			public void execute(Transaction txn) {
-				writeBoolean(store, txn, new StringPairByteIterable(user.getUUID(), issue.getUUID()), notified);
+				writeBoolean(store, txn, new LongsByteIterable(Lists.newArrayList(user.getId(), issue.getId())), notified);
 			}
 			
 		});

@@ -12,9 +12,7 @@ public class PullRequestConstants {
 
 	public static final String ATTR_NUMBER = "number";
 	
-	public static final String FIELD_STATE = "State";
-	
-	public static final String ATTR_STATE = "state";
+	public static final String FIELD_STATUS = "Status";
 	
 	public static final String FIELD_TARGET_BRANCH = "Target Branch";
 	
@@ -31,8 +29,6 @@ public class PullRequestConstants {
 	public static final String FIELD_TITLE = "Title";
 	
 	public static final String ATTR_TITLE = "title";
-	
-	public static final String FIELD_COMMIT = "commit";
 	
 	public static final String FIELD_DESCRIPTION = "Description";
 	
@@ -89,10 +85,10 @@ public class PullRequestConstants {
 	public static final int MAX_CODE_COMMENTS = 1000;
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			FIELD_NUMBER, FIELD_TITLE, FIELD_TARGET_BRANCH, FIELD_SOURCE_PROJECT, 
-			FIELD_SOURCE_BRANCH, FIELD_DESCRIPTION, FIELD_COMMENT, FIELD_SUBMIT_DATE, 
-			FIELD_UPDATE_DATE, FIELD_CLOSE_DATE, FIELD_COMMIT, FIELD_MERGE_STRATEGY, 
-			FIELD_COMMENT_COUNT);
+			FIELD_NUMBER, FIELD_TITLE, FIELD_TARGET_BRANCH, 
+			FIELD_SOURCE_PROJECT, FIELD_SOURCE_BRANCH, FIELD_DESCRIPTION, 
+			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, 
+			FIELD_CLOSE_DATE, FIELD_MERGE_STRATEGY, FIELD_COMMENT_COUNT);
 
 	public static final Map<String, String> ORDER_FIELDS = new LinkedHashMap<>();
 	
@@ -101,6 +97,7 @@ public class PullRequestConstants {
 		ORDER_FIELDS.put(FIELD_UPDATE_DATE, ATTR_UPDATE_DATE);
 		ORDER_FIELDS.put(FIELD_CLOSE_DATE, ATTR_CLOSE_DATE);
 		ORDER_FIELDS.put(FIELD_NUMBER, ATTR_NUMBER);
+		ORDER_FIELDS.put(FIELD_STATUS, ATTR_CLOSE_STATUS);
 		ORDER_FIELDS.put(FIELD_COMMENT_COUNT, ATTR_COMMENT_COUNT);
 	}
 

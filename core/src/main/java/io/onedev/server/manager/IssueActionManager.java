@@ -10,20 +10,21 @@ import com.google.common.base.Optional;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.Milestone;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 
 public interface IssueActionManager extends EntityManager<IssueAction> {
 
-	void changeTitle(Issue issue, String title);
+	void changeTitle(Issue issue, String title, @Nullable User user);
 	
-	void changeMilestone(Issue issue, Milestone milestone);
+	void changeMilestone(Issue issue, Milestone milestone, @Nullable User user);
 	
-	void changeFields(Issue issue, Map<String, Object> fieldValues);
+	void changeFields(Issue issue, Map<String, Object> fieldValues, @Nullable User user);
 	
-	void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment);
+	void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment, @Nullable User user);
 	
 	void batchUpdate(Iterator<? extends Issue> issues, @Nullable String state, 
 			@Nullable Optional<Milestone> milestone, Map<String, Object> fieldValues, 
-			@Nullable String comment);
+			@Nullable String comment, @Nullable User user);
 	
 }

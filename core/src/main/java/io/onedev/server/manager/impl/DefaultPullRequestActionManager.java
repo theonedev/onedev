@@ -2,6 +2,7 @@ package io.onedev.server.manager.impl;
 
 import java.util.Date;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -11,6 +12,7 @@ import io.onedev.server.manager.PullRequestActionManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestAction;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.actiondata.ChangedMergeStrategyData;
 import io.onedev.server.model.support.pullrequest.actiondata.ChangedTitleData;
@@ -42,7 +44,7 @@ public class DefaultPullRequestActionManager extends AbstractEntityManager<PullR
 	
 	@Transactional
 	@Override
-	public void changeMergeStrategy(PullRequest request, MergeStrategy mergeStrategy) {
+	public void changeMergeStrategy(PullRequest request, MergeStrategy mergeStrategy, @Nullable User user) {
 		PullRequestAction action = new PullRequestAction();
 		action.setDate(new Date());
 		action.setRequest(request);
@@ -54,7 +56,7 @@ public class DefaultPullRequestActionManager extends AbstractEntityManager<PullR
 
 	@Transactional
 	@Override
-	public void changeTitle(PullRequest request, String title) {
+	public void changeTitle(PullRequest request, String title, @Nullable User user) {
 		PullRequestAction action = new PullRequestAction();
 		action.setDate(new Date());
 		action.setRequest(request);

@@ -13,7 +13,7 @@ public class MergedCriteria extends PullRequestCriteria {
 	private static final long serialVersionUID = 1L;
 
 	private PullRequestCriteria getCriteria(Project project) {
-		return new StateCriteria(CloseInfo.Status.MERGED.toString());
+		return new StatusCriteria(CloseInfo.Status.MERGED.toString());
 	}
 	
 	@Override

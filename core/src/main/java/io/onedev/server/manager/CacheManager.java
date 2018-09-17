@@ -1,9 +1,11 @@
 package io.onedev.server.manager;
 
+import java.util.Collection;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.util.facade.ConfigurationFacade;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.TeamFacade;
@@ -18,6 +20,8 @@ public interface CacheManager {
 	Map<Long, TeamFacade> getTeams();
 	
 	Map<Long, MembershipFacade> getMemberships();
+	
+	Map<Long, ConfigurationFacade> getConfigurations();
 	
 	@Nullable
 	ProjectFacade getProject(Long id);
@@ -42,7 +46,10 @@ public interface CacheManager {
 	@Nullable
 	Long getProjectIdByName(String name);
 	
-	@Nullable
-	Long getTeamId(Long projectId, String name);
+	Collection<Long> getIssueNumbers(Long projectId);
+	
+	Collection<Long> getBuildIds(Long projectId);
+	
+	Collection<Long> filterBuildIds(Long projectId, Collection<String> commitHashes);
 	
 }

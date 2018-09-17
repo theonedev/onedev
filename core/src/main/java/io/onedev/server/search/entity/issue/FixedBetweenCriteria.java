@@ -4,9 +4,11 @@ import static io.onedev.server.search.entity.EntityQuery.quote;
 import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -14,6 +16,8 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.CacheManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -62,10 +66,16 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		if (!fixedIssueNumbers.isEmpty())
+		
+		Path<Long> attribute = context.getRoot().get(IssueConstants.ATTR_NUMBER);		
+		if (fixedIssueNumbers.size() > IN_CLAUSE_LIMIT) {
+			Collection<Long> allIssueNumbers = OneDev.getInstance(CacheManager.class).getIssueNumbers(project.getId());
+			return inManyValues(context.getBuilder(), attribute, fixedIssueNumbers, allIssueNumbers);
+		} else if (!fixedIssueNumbers.isEmpty()) {
 			return context.getRoot().get(IssueConstants.ATTR_NUMBER).in(fixedIssueNumbers);
-		else
+		} else {
 			return context.getBuilder().disjunction();
+		}
 	}
 
 	@Override

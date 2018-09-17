@@ -29,6 +29,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.hibernate.boot.Metadata;
+import org.hibernate.boot.MetadataBuilder;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.boot.model.naming.Identifier;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
@@ -124,7 +125,9 @@ public class DefaultPersistManager implements PersistManager {
 			metadataSources.addAnnotatedClass(each);
 		}
 		
-		return metadataSources.getMetadataBuilder().applyPhysicalNamingStrategy(physicalNamingStrategy).build();
+		MetadataBuilder builder = metadataSources.getMetadataBuilder();
+		builder.applyPhysicalNamingStrategy(physicalNamingStrategy);
+		return builder.build();
 	}
 	
 	protected SessionFactory buildSessionFactory(Metadata metadata) {

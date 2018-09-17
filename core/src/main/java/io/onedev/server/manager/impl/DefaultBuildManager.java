@@ -5,9 +5,17 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Path;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -21,11 +29,19 @@ import io.onedev.server.manager.ConfigurationManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.build.BuildConstants;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.search.entity.build.BuildQueryBuildContext;
 
 @Singleton
 public class DefaultBuildManager extends AbstractEntityManager<Build> implements BuildManager {
@@ -50,34 +66,19 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 	@Sessional
 	@Override
-	public Build findPrevious(Build build) {
-		EntityCriteria<Build> criteria = newCriteria();
-		criteria.add(Restrictions.lt("id", build.getId()));
-		criteria.add(Restrictions.eq("configuration", build.getConfiguration()));
-		if (build.getRef() != null)
-			criteria.add(Restrictions.eq("ref", build.getRef()));
-		else
-			criteria.add(Restrictions.isNull("ref"));
-		criteria.addOrder(Order.desc("id"));
-		List<Build> builds = query(criteria, 0, 1);
-		return !builds.isEmpty()?builds.iterator().next():null;
-	}
-	
-	@Sessional
-	@Override
-	public List<Build> query(Project project, String commit) {
+	public List<Build> query(Project project, String commitHash) {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.createCriteria("configuration").add(Restrictions.eq("project", project));
-		criteria.add(Restrictions.eq("commit", commit));
+		criteria.add(Restrictions.eq("commitHash", commitHash));
 		criteria.addOrder(Order.asc("id"));
 		return query(criteria);
 	}
 
 	@Override
-	public Build findByCommit(Configuration configuration, String commit) {
+	public Build findByCommit(Configuration configuration, String commitHash) {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.eq("configuration", configuration));
-		criteria.add(Restrictions.eq("commit", commit));
+		criteria.add(Restrictions.eq("commitHash", commitHash));
 		return find(criteria);
 	}
 
@@ -93,10 +94,10 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	@Sessional
 	@Override
-	public Build findByName(Configuration configuration, String name) {
+	public Build findByVersion(Configuration configuration, String version) {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.eq("configuration", configuration));
-		criteria.add(Restrictions.eq("name", name));
+		criteria.add(Restrictions.eq("version", version));
 		criteria.addOrder(Order.desc("id"));
 		return find(criteria);
 	}
@@ -112,11 +113,11 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		if (term != null) {
 			if (term.contains(Build.FQN_SEPARATOR)) {
 				String configurationTerm = StringUtils.substringBefore(term, Build.FQN_SEPARATOR);
-				String nameTerm = StringUtils.substringAfter(term, Build.FQN_SEPARATOR);
+				String versionTerm = StringUtils.substringAfter(term, Build.FQN_SEPARATOR);
 				configurationCriteria.add(Restrictions.ilike("name", "%" + configurationTerm + "%"));
-				criteria.add(Restrictions.ilike("name", "%" + nameTerm + "%"));
+				criteria.add(Restrictions.ilike("version", "%" + versionTerm + "%"));
 			} else {
-				criteria.add(Restrictions.ilike("name", "%" + term + "%"));
+				criteria.add(Restrictions.ilike("version", "%" + term + "%"));
 			}
 		}
 		criteria.addOrder(Order.desc("id"));
@@ -138,12 +139,72 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Override
 	public Build findByFQN(Project project, String fqn) {
 		String configurationName = StringUtils.substringBefore(fqn, Build.FQN_SEPARATOR);
-		String buildName = StringUtils.substringAfter(fqn, Build.FQN_SEPARATOR);
+		String buildVersion = StringUtils.substringAfter(fqn, Build.FQN_SEPARATOR);
 		Configuration configuration = OneDev.getInstance(ConfigurationManager.class).find(project, configurationName);
 		if (configuration != null)
-			return OneDev.getInstance(BuildManager.class).findByName(configuration, buildName);
+			return OneDev.getInstance(BuildManager.class).findByVersion(configuration, buildVersion);
 		else
 			return null;
+	}
+
+	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Build> criteria, Project project, 
+			QueryBuildContext<Build> context, User user) {
+		List<Predicate> predicates = new ArrayList<>();
+		Join<?, ?> join = context.getRoot().join(BuildConstants.ATTR_CONFIGURATION, JoinType.INNER);
+		join.on(context.getBuilder().equal(join.get(Configuration.ATTR_PROJECT), project));
+		if (criteria != null)
+			predicates.add(criteria.getPredicate(project, context, user));
+		return predicates.toArray(new Predicate[0]);
+	}
+	
+	private CriteriaQuery<Build> buildCriteriaQuery(Session session, Project project, EntityQuery<Build> buildQuery, User user) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Build> query = builder.createQuery(Build.class);
+		Root<Build> root = query.from(Build.class);
+		query.select(root).distinct(true);
+		
+		QueryBuildContext<Build> context = new BuildQueryBuildContext(root, builder);
+		query.where(getPredicates(buildQuery.getCriteria(), project, context, user));
+
+		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		for (EntitySort sort: buildQuery.getSorts()) {
+			if (sort.getDirection() == Direction.ASCENDING)
+				orders.add(builder.asc(BuildQuery.getPath(root, BuildConstants.ORDER_FIELDS.get(sort.getField()))));
+			else
+				orders.add(builder.desc(BuildQuery.getPath(root, BuildConstants.ORDER_FIELDS.get(sort.getField()))));
+		}
+
+		Path<String> idPath = root.get("id");
+		if (orders.isEmpty())
+			orders.add(builder.desc(idPath));
+		query.orderBy(orders);
+		
+		return query;
+	}
+	
+	@Sessional
+	@Override
+	public List<Build> query(Project project, User user, EntityQuery<Build> buildQuery, int firstResult,
+			int maxResults) {
+		CriteriaQuery<Build> criteriaQuery = buildCriteriaQuery(getSession(), project, buildQuery, user);
+		Query<Build> query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(firstResult);
+		query.setMaxResults(maxResults);
+		return query.getResultList();
+	}
+
+	@Sessional
+	@Override
+	public int count(Project project, User user, io.onedev.server.search.entity.EntityCriteria<Build> buildCriteria) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+		Root<Build> root = criteriaQuery.from(Build.class);
+
+		QueryBuildContext<Build> context = new BuildQueryBuildContext(root, builder);
+		criteriaQuery.where(getPredicates(buildCriteria, project, context, user));
+
+		criteriaQuery.select(builder.countDistinct(root));
+		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 
 }

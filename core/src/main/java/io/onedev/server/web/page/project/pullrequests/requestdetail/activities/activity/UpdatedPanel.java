@@ -28,7 +28,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.avatar.AvatarLink;
-import io.onedev.server.web.component.build.BuildsStatusPanel;
+import io.onedev.server.web.component.buildstatus.BuildsStatusPanel;
 import io.onedev.server.web.component.commitmessage.ExpandableCommitMessagePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
@@ -85,12 +85,11 @@ class UpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				};
 				item.add(new ExpandableCommitMessagePanel("message", projectModel, item.getModel()));
 
-				String commitHash = commit.name();
 				item.add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 					@Override
 					protected List<Build> load() {
-						return OneDev.getInstance(BuildManager.class).query(projectModel.getObject(), commitHash);
+						return OneDev.getInstance(BuildManager.class).query(projectModel.getObject(), commit.name());
 					}
 					
 				}));

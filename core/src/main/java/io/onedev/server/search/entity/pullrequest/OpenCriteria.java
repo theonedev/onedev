@@ -13,7 +13,7 @@ public class OpenCriteria extends PullRequestCriteria {
 	private static final long serialVersionUID = 1L;
 
 	private PullRequestCriteria getCriteria(Project project) {
-		return new StateCriteria(PullRequestConstants.STATE_OPEN);
+		return new StatusCriteria(PullRequestConstants.STATE_OPEN);
 	}
 	
 	@Override

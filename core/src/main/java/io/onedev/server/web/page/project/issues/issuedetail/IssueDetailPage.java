@@ -51,7 +51,6 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.BuildInfoManager;
 import io.onedev.server.manager.CodeCommentRelationInfoManager;
 import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.IssueActionManager;
@@ -86,7 +85,7 @@ import io.onedev.server.web.component.entitywatches.EntityWatchesPanel;
 import io.onedev.server.web.component.issuestate.IssueStateLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
-import io.onedev.server.web.component.milestoneprogress.MilestoneProgressBar;
+import io.onedev.server.web.component.milestone.MilestoneProgressBar;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.projectcomment.CommentInput;
@@ -128,6 +127,29 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	
 	private final QueryPosition position;
 	
+	private final IModel<Collection<ObjectId>> fixCommitsModel = new LoadableDetachableModel<Collection<ObjectId>>() {
+
+		@Override
+		protected Collection<ObjectId> load() {
+			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
+			return commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
+		}
+		
+	};
+	
+	private final IModel<Collection<Long>> pullRequestIdsModel = new LoadableDetachableModel<Collection<Long>>() {
+
+		@Override
+		protected Collection<Long> load() {
+			CodeCommentRelationInfoManager codeCommentRelationInfoManager = OneDev.getInstance(CodeCommentRelationInfoManager.class); 
+			Collection<Long> pullRequestIds = new HashSet<>();
+			for (ObjectId commit: fixCommitsModel.getObject()) 
+				pullRequestIds.addAll(codeCommentRelationInfoManager.getPullRequestIds(getProject(), commit));		
+			return pullRequestIds;
+		}
+		
+	};
+	
 	public IssueDetailPage(PageParameters params) {
 		super(params);
 		
@@ -166,7 +188,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				OneDev.getInstance(IssueActionManager.class).changeTitle(getIssue(), titleInput.getModelObject());
+				OneDev.getInstance(IssueActionManager.class).changeTitle(getIssue(), titleInput.getModelObject(), SecurityUtils.getUser());
 				
 				Fragment titleViewer = newTitleViewer();
 				titleEditor.replaceWith(titleViewer);
@@ -309,7 +331,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 									getIssue().removeFields(transition.getRemoveFields());
 									Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean, trigger.getPromptFields());
-									getIssueChangeManager().changeState(getIssue(), transition.getToState(), fieldValues, comment);
+									getIssueChangeManager().changeState(getIssue(), transition.getToState(), fieldValues, comment, SecurityUtils.getUser());
 								
 									setResponsePage(IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), position));
 								}
@@ -372,20 +394,13 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		tabs.add(new IssueTab("Activities", IssueActivitiesPage.class));
 		
 		if (SecurityUtils.canReadCode(getProject().getFacade())) {
-			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
-			Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
-			if (!fixCommits.isEmpty())		
+			if (!getFixCommits().isEmpty())		
 				tabs.add(new IssueTab("Fix Commits", FixCommitsPage.class));
-			BuildInfoManager buildInfoManager = OneDev.getInstance(BuildInfoManager.class);
-			if (!buildInfoManager.getFixBuildIds(getProject(), getIssue().getNumber()).isEmpty())		
-				tabs.add(new IssueTab("Fix Builds", FixBuildsPage.class));
-			CodeCommentRelationInfoManager codeCommentRelationInfoManager = OneDev.getInstance(CodeCommentRelationInfoManager.class); 
-			Collection<Long> pullRequestIds = new HashSet<>();
-			for (ObjectId commit: fixCommits) 
-				pullRequestIds.addAll(codeCommentRelationInfoManager.getPullRequestIds(getProject(), commit));		
-			if (!pullRequestIds.isEmpty())
+			if (!getPullRequestIds().isEmpty())
 				tabs.add(new IssueTab("Pull Requests", ReviewRequestsPage.class));
 		}
+		if (!getFixCommits().isEmpty()) // Do not calculate fix builds now as it might be slow
+			tabs.add(new IssueTab("Fix Builds", FixBuildsPage.class));
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
 		
@@ -567,7 +582,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 						super.onSubmit(target, form);
 						
 						Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean, getIssue().getFieldNames());
-						OneDev.getInstance(IssueActionManager.class).changeFields(getIssue(), fieldValues);
+						OneDev.getInstance(IssueActionManager.class).changeFields(getIssue(), fieldValues, SecurityUtils.getUser());
 						modal.close();
 						target.add(fieldsContainer);
 					}
@@ -674,7 +689,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 						Milestone milestone = getProject().getMilestone(milestoneName);
-						getIssueChangeManager().changeMilestone(getIssue(), milestone);
+						getIssueChangeManager().changeMilestone(getIssue(), milestone, SecurityUtils.getUser());
 						Component container = newMilestoneContainer();
 						getPage().replace(container);
 						target.add(container);
@@ -849,6 +864,10 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		}
 	}
 
+	public QueryPosition getPosition() {
+		return position;
+	}
+	
 	private IssueActionManager getIssueChangeManager() {
 		return OneDev.getInstance(IssueActionManager.class);
 	}
@@ -867,6 +886,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	@Override
 	protected void onDetach() {
 		issueModel.detach();
+		fixCommitsModel.detach();
+		pullRequestIdsModel.detach();
 		super.onDetach();
 	}
 
@@ -891,6 +912,14 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	@Override
 	public boolean isReservedName(String inputName) {
 		throw new UnsupportedOperationException();
+	}
+	
+	protected Collection<ObjectId> getFixCommits() {
+		return fixCommitsModel.getObject();
+	}
+	
+	protected Collection<Long> getPullRequestIds() {
+		return pullRequestIdsModel.getObject();
 	}
 	
 	private class IssueTab extends PageTab {

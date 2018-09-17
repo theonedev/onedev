@@ -10,8 +10,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.OneDev;
-import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.web.component.commitlist.CommitListPanel;
 import io.onedev.server.web.page.project.issues.issuedetail.IssueDetailPage;
 
@@ -31,7 +29,7 @@ public class FixCommitsPage extends IssueDetailPage {
 			@Override
 			protected List<RevCommit> load() {
 				List<RevCommit> commits = new ArrayList<>();
-				for (ObjectId commitId: OneDev.getInstance(CommitInfoManager.class).getFixCommits(getProject(), getIssue().getNumber())) {
+				for (ObjectId commitId: getFixCommits()) {
 					RevCommit commit = getProject().getRevCommit(commitId, false);
 					if (commit != null)
 						commits.add(commit);

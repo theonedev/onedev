@@ -64,13 +64,14 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.PullRequestConstants;
+import io.onedev.server.search.entity.pullrequest.OpenCriteria;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branchchoice.BranchChoiceProvider;
 import io.onedev.server.web.component.branchchoice.BranchSingleChoice;
-import io.onedev.server.web.component.build.BuildsStatusPanel;
+import io.onedev.server.web.component.buildstatus.BuildsStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -445,12 +446,11 @@ public class ProjectBranchesPage extends ProjectPage {
 				
 				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId());
 				
-				String lastCommitHash = lastCommit.name();
 				item.add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 					@Override
 					protected List<Build> load() {
-						return OneDev.getInstance(BuildManager.class).query(getProject(), lastCommitHash);
+						return OneDev.getInstance(BuildManager.class).query(getProject(), lastCommit.name());
 					}
 					
 				}));
@@ -628,7 +628,7 @@ public class ProjectBranchesPage extends ProjectPage {
 							String query = String.format("\"%s\" %s \"%s\" %s %s", 
 									PullRequestConstants.FIELD_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 
 									branch, PullRequestQuery.getRuleName(PullRequestQueryLexer.And), 
-									PullRequestQuery.getRuleName(PullRequestQueryLexer.Open));
+									new OpenCriteria().toString());
 							PageParameters params = RequestListPage.paramsOf(getProject(), query);
 							bodyFrag.add(new ViewStateAwarePageLink<Void>("openRequests", RequestListPage.class, params));
 							bodyFrag.add(new Label("branch", branch));
