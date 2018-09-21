@@ -38,7 +38,10 @@ public class MilestoneCriteria extends IssueCriteria {
 
 	@Override
 	public boolean matches(Issue issue, User user) {
-		return issue.getMilestone() != null && issue.getMilestone().getName().equals(value);
+		if (value != null)
+			return issue.getMilestone() != null && issue.getMilestone().getName().equals(value);
+		else
+			return issue.getMilestone() == null;
 	}
 
 	@Override

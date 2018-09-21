@@ -107,6 +107,7 @@ onedev.server.issueBoards = {
 		$body.children(".card").removeClass("first").first().addClass("first");
 	}, 
 	markAccepted: function(issueId, accepted) {
-		$("#issue-boards .column .body .ui-draggable[data-issue='" + issueId + "']").data("accepted", accepted);
+		var $card = $("#issue-boards .column .body .ui-draggable.issue-dragging[data-issue='" + issueId + "']");
+		$card.data("accepted", accepted);
 	}
 }

@@ -29,8 +29,8 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.avatar.AvatarLink;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
 
 @SuppressWarnings("serial")
@@ -66,7 +66,9 @@ class BoardCardPanel extends GenericPanel<Issue> {
 						.findByName(field.getValues().iterator().next());
 				if (user != null) {
 					String tooltip = field.getName() + ": " + user.getDisplayName();
-					avatarsView.add(new AvatarLink(avatarsView.newChildId(), user, tooltip));
+					AvatarLink link = new AvatarLink(avatarsView.newChildId(), user, null);
+					link.add(AttributeAppender.append("title", tooltip));
+					avatarsView.add(link);
 				}
 			}
 		}
@@ -91,15 +93,15 @@ class BoardCardPanel extends GenericPanel<Issue> {
 			
 		});
 		
-		add(new ModalLink("detail") {
+		add(new DropdownLink("detail") {
 
 			@Override
-			protected Component newContent(String id, ModalPanel modal) {
+			protected Component newContent(String id, FloatingPanel dropdown) {
 				return new CardDetailPanel(id, BoardCardPanel.this.getModel()) {
 
 					@Override
 					protected void onClose(AjaxRequestTarget target) {
-						modal.close();
+						dropdown.close();
 					}
 					
 				};
