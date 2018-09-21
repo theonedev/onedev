@@ -21,10 +21,13 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.RevListCommand;
+import io.onedev.server.manager.BuildManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.commit.CommitQueryParser.CriteriaContext;
@@ -113,6 +116,13 @@ public class CommitQueryUtils {
 					revision.value = project.getDefaultBranch();
 				else
 					revision.value = unescape(removeParens(criteria.revisionCriteria().Value().getText()));
+				if (criteria.revisionCriteria().BUILD() != null) {
+					Build build = OneDev.getInstance(BuildManager.class).findByFQN(project, revision.value);
+					if (build == null)
+						throw new OneException("Unable to find build with FQN: " + revision.value);
+					else
+						revision.value = build.getCommitHash();
+				}
 				if (criteria.revisionCriteria().SINCE() != null)
 					revision.since = true;
 				else if (criteria.revisionCriteria().UNTIL() != null)

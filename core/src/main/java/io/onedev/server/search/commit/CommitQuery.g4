@@ -15,7 +15,7 @@ criteria
 	;
 
 revisionCriteria
-	: ((UNTIL|SINCE) WS+)? ((BRANCH|TAG|COMMIT) Value | DefaultBranch)
+	: ((UNTIL|SINCE) WS+)? ((BRANCH|TAG|COMMIT|BUILD) Value | DefaultBranch)
 	;
 	
 beforeCriteria
@@ -64,6 +64,10 @@ COMMIT
 	: 'commit'
 	;
 	
+BUILD
+	: 'build'
+	;
+		
 BEFORE
 	: 'before'
 	;

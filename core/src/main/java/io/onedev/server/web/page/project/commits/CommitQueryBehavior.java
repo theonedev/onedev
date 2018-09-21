@@ -77,6 +77,9 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 						case CommitQueryParser.TAG:
 							suggestions.addAll(SuggestionUtils.suggestTag(project, unfencedMatchWith, ESCAPE_CHARS));
 							break;
+						case CommitQueryParser.BUILD:
+							suggestions.addAll(SuggestionUtils.suggestBuild(project, unfencedMatchWith, true, ESCAPE_CHARS));
+							break;
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
 							Map<String, Range> suggestedInputs = new LinkedHashMap<>();

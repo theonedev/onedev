@@ -42,7 +42,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
@@ -89,8 +88,6 @@ import io.onedev.utils.StringUtils;
 public class ProjectCommitsPage extends ProjectPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProjectCommitsPage.class);
-	
-	private static final String GIT_ERROR_START = "Command error output: ";
 	
 	private static final int COUNT = 50;
 	
@@ -140,12 +137,12 @@ public class ProjectCommitsPage extends ProjectPage {
 				
 				commitHashes = command.call();
 			} catch (Exception e) {
-				if (e.getMessage() != null && e.getMessage().contains(GIT_ERROR_START)) {
-					queryForm.error(StringUtils.substringAfter(e.getMessage(), GIT_ERROR_START));
-					commitHashes = new ArrayList<>();
-				} else {
-					throw Throwables.propagate(e);
-				}
+				if (e.getMessage() != null)
+					error(e.getMessage());
+				else
+					error("Error calculating commits: check log for details");
+				commitHashes = new ArrayList<>();
+				logger.error("Error calculating commits: ", e);
 			}
 			
 			hasMore = commitHashes.size() == state.page*COUNT;
@@ -338,21 +335,7 @@ public class ProjectCommitsPage extends ProjectPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-				try {
-					String query = input.getModelObject();
-					queryContext = Optional.fromNullable(CommitQueryUtils.parse(query)); // validate query
-					state.query = query;
-					updateCommits(target);
-				} catch (Exception e) {
-					logger.error("Error parsing commit query string: " + state.query, e);
-					if (StringUtils.isNotBlank(e.getMessage()))
-						error(e.getMessage());
-					else
-						error("Malformed commit query");
-					target.add(feedback);
-				}
+				setResponsePage(ProjectCommitsPage.class, paramsOf(getProject(), state));
 			}
 
 			@Override
@@ -381,7 +364,7 @@ public class ProjectCommitsPage extends ProjectPage {
 		queryForm.setOutputMarkupId(true);
 		add(queryForm);
 		
-		feedback = new NotificationPanel("feedback", queryForm);
+		feedback = new NotificationPanel("feedback", this);
 		feedback.setOutputMarkupPlaceholderTag(true);
 		
 		body = new WebMarkupContainer("body");
@@ -475,17 +458,6 @@ public class ProjectCommitsPage extends ProjectPage {
 			
 		});
 		add(foot);
-	}
-	
-	private void updateCommits(AjaxRequestTarget target) {
-		state.page = 1;
-
-		target.add(feedback);
-		body.replace(commitsView = newCommitsView());
-		target.add(body);
-		target.add(foot);
-		target.appendJavaScript(renderCommitGraph());
-		pushState(target);
 	}
 	
 	private void pushState(AjaxRequestTarget target) {
