@@ -225,5 +225,20 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 	protected int getEnvVersion() {
 		return INFO_VERSION;
 	}
+
+	@Override
+	public void delete(Project project, Long buildId) {
+		Environment env = getEnv(project.getId().toString());
+		Store store = getStore(env, PREV_COMMITS_STORE);
+		
+		env.executeInTransaction(new TransactionalExecutable() {
+			
+			@Override
+			public void execute(Transaction txn) {
+				store.delete(txn, new LongByteIterable(buildId));
+			}
+			
+		});
+	}
 	
 }

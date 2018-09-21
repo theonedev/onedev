@@ -48,7 +48,9 @@ public interface CacheManager {
 	
 	Collection<Long> getIssueNumbers(Long projectId);
 	
-	Collection<Long> getBuildIds(Long projectId);
+	Collection<Long> getBuildIdsByProject(Long projectId);
+	
+	Collection<Long> getBuildIdsByConfiguration(Long configurationId);
 	
 	Collection<Long> filterBuildIds(Long projectId, Collection<String> commitHashes);
 	

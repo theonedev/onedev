@@ -19,12 +19,18 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
 
+import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.build.BuildStarted;
+import io.onedev.server.event.lifecycle.SystemStarted;
+import io.onedev.server.event.lifecycle.SystemStopping;
 import io.onedev.server.manager.BuildManager;
+import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.ConfigurationManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Configuration;
@@ -42,16 +48,27 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.BuildQueryBuildContext;
+import io.onedev.utils.schedule.SchedulableTask;
+import io.onedev.utils.schedule.TaskScheduler;
 
 @Singleton
-public class DefaultBuildManager extends AbstractEntityManager<Build> implements BuildManager {
+public class DefaultBuildManager extends AbstractEntityManager<Build> implements BuildManager, SchedulableTask {
 
+	private final TaskScheduler taskScheduler;
+	
 	private final ListenerRegistry listenerRegistry;
 	
+	private final ConfigurationManager configurationManager;
+	
+	private String taskId;
+	
 	@Inject
-	public DefaultBuildManager(Dao dao, ListenerRegistry listenerRegistry) {
+	public DefaultBuildManager(Dao dao, ListenerRegistry listenerRegistry, TaskScheduler taskScheduler, 
+			ConfigurationManager configurationManager) {
 		super(dao);
 		this.listenerRegistry = listenerRegistry;
+		this.taskScheduler = taskScheduler;
+		this.configurationManager = configurationManager;
 	}
 
 	@Transactional
@@ -207,4 +224,37 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 
+	@Transactional
+	@Override
+	public void cleanupBuilds(Configuration configuration) {
+		configuration.getBuildCleanupStrategy().cleanup(configuration, getSession());
+	}
+
+	@Listen
+	public void on(SystemStarted event) {
+		taskId = taskScheduler.schedule(this);
+	}
+
+	@Listen
+	public void on(SystemStopping event) {
+		taskScheduler.unschedule(taskId);
+	}
+
+	@Override
+	public void execute() {
+		for (Long configurationId: OneDev.getInstance(CacheManager.class).getConfigurations().keySet())
+			cleanup(configurationId);
+	}
+	
+	@Transactional
+	protected void cleanup(Long configurationId) {
+		Configuration configuration = configurationManager.load(configurationId);
+		cleanupBuilds(configuration);
+	}
+
+	@Override
+	public ScheduleBuilder<?> getScheduleBuilder() {
+		return CronScheduleBuilder.cronSchedule("0 0 1 * * ?");
+	}
+	
 }

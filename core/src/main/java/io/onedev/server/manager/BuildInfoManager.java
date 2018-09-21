@@ -22,4 +22,6 @@ public interface BuildInfoManager {
 	@Nullable
 	Collection<ObjectId> getPrevCommits(Project project, Long buildId);
 	
+	void delete(Project project, Long buildId);
+	
 }

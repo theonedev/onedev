@@ -60,5 +60,5 @@ public class DefaultConfigurationManager extends AbstractEntityManager<Configura
 			project.getIssueWorkflow().onDeleteConfiguration(configuration.getName());
 		}
 	}
-
+	
 }

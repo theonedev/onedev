@@ -12,5 +12,5 @@ public interface ConfigurationManager extends EntityManager<Configuration> {
 	Configuration find(Project project, String name);
 	
 	void save(Configuration configuration, @Nullable String oldName);
-	
+
 }

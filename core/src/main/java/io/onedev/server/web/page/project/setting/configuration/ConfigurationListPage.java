@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
@@ -28,8 +31,10 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.ConfigurationManager;
 import io.onedev.server.model.Configuration;
+import io.onedev.server.model.support.configuration.DoNotCleanup;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
@@ -38,6 +43,7 @@ import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 
 @SuppressWarnings("serial")
 public class ConfigurationListPage extends ProjectSettingPage {
@@ -131,6 +137,29 @@ public class ConfigurationListPage extends ProjectSettingPage {
 					}
 
 				}.add(new ConfirmOnClick("Do you really want to delete configuration '" + configuration.getName() + "'?")));
+				
+				fragment.add(new AjaxLink<Void>("cleanup") {
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						String message = "Do you really want to clean up builds of configuration '" + configuration.getName() + "'?";
+						attributes.getAjaxCallListeners().add(new ConfirmListener(message));
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						OneDev.getInstance(BuildManager.class).cleanupBuilds(rowModel.getObject());
+						Session.get().success("Builds cleaned up");
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!(rowModel.getObject().getBuildCleanupStrategy() instanceof DoNotCleanup));
+					}
+
+				});
 				
 				cellItem.add(fragment);
 			}

@@ -43,7 +43,7 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 			descendents.add(each.name());
 		CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
 		Collection<Long> inBuildIds = cacheManager.filterBuildIds(project.getId(), descendents);
-		return inManyValues(context.getBuilder(), attribute, inBuildIds, cacheManager.getBuildIds(project.getId()));
+		return inManyValues(context.getBuilder(), attribute, inBuildIds, cacheManager.getBuildIdsByProject(project.getId()));
 	}
 
 	@Override

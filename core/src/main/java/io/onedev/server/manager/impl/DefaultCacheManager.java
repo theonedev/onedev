@@ -500,7 +500,7 @@ public class DefaultCacheManager implements CacheManager {
 	}
 
 	@Override
-	public Collection<Long> getBuildIds(Long projectId) {
+	public Collection<Long> getBuildIdsByProject(Long projectId) {
 		buildsLock.readLock().lock();
 		configurationsLock.readLock().lock();
 		try {
@@ -517,6 +517,21 @@ public class DefaultCacheManager implements CacheManager {
 		}
 	}
 
+	@Override
+	public Collection<Long> getBuildIdsByConfiguration(Long configurationId) {
+		buildsLock.readLock().lock();
+		try {
+			Collection<Long> buildIds = new HashSet<>();
+			for (BuildFacade build: builds.values()) {
+				if (build.getConfigurationId().equals(configurationId))
+					buildIds.add(build.getId());
+			}
+			return buildIds;
+		} finally {
+			buildsLock.readLock().unlock();
+		}
+	}
+	
 	@Override
 	public Collection<Long> filterBuildIds(Long projectId, Collection<String> commitHashes) {
 		buildsLock.readLock().lock();
