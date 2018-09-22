@@ -1,8 +1,8 @@
 onedev.server.commitGraph = {
 	render: function(containerId, commits) {
-		var $container = $("#" + containerId);
-		$container.prepend("<svg class='commit-graph'></svg>");
-		var $graph = $container.children("svg");
+		var $commitList = $("#" + containerId + ">ul");
+		$commitList.before("<svg class='commit-graph'></svg>");
+		var $graph = $commitList.prev("svg");
 		onedev.server.commitGraph.populateData($graph, commits);
 		onedev.server.commitGraph.drawGraph($graph);
 

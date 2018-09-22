@@ -17,7 +17,7 @@ import io.onedev.server.model.Configuration;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=200, name="Keep builds by count")
-public class KeepByCount implements BuildCleanupStrategy {
+public class KeepByCount implements BuildCleanupRule {
 
 	private static final long serialVersionUID = 1L;
 

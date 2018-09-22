@@ -227,7 +227,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Transactional
 	@Override
 	public void cleanupBuilds(Configuration configuration) {
-		configuration.getBuildCleanupStrategy().cleanup(configuration, getSession());
+		configuration.getBuildCleanupRule().cleanup(configuration, getSession());
 	}
 
 	@Listen

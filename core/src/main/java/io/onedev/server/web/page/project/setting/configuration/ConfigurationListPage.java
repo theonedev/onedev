@@ -156,7 +156,7 @@ public class ConfigurationListPage extends ProjectSettingPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!(rowModel.getObject().getBuildCleanupStrategy() instanceof DoNotCleanup));
+						setVisible(!(rowModel.getObject().getBuildCleanupRule() instanceof DoNotCleanup));
 					}
 
 				});

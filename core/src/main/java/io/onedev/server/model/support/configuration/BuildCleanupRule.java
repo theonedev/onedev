@@ -8,7 +8,7 @@ import io.onedev.server.model.Configuration;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public interface BuildCleanupStrategy extends Serializable {
+public interface BuildCleanupRule extends Serializable {
 
 	void cleanup(Configuration configuration, Session session);
 	

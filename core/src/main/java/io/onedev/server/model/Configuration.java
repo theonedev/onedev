@@ -12,12 +12,13 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.model.support.configuration.BuildCleanupStrategy;
+import io.onedev.server.model.support.configuration.BuildCleanupRule;
 import io.onedev.server.model.support.configuration.DoNotCleanup;
 import io.onedev.server.util.facade.ConfigurationFacade;
 import io.onedev.server.util.validation.annotation.CommitHash;
@@ -45,7 +46,7 @@ public class Configuration extends AbstractEntity {
 	
 	private String baseCommit;
 	
-	private BuildCleanupStrategy buildCleanupStrategy = new DoNotCleanup();
+	private BuildCleanupRule buildCleanupRule = new DoNotCleanup();
 
 	@OneToMany(mappedBy="configuration", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestBuild> pullRequestBuilds = new ArrayList<>();
@@ -85,12 +86,13 @@ public class Configuration extends AbstractEntity {
 
 	@Editable(order=300, description="Optionally specify build cleanup strategy to improvement OneDev performance. "
 			+ "Note that this cleanup will not affect builds at build server side")
-	public BuildCleanupStrategy getBuildCleanupStrategy() {
-		return buildCleanupStrategy;
+	@NotNull
+	public BuildCleanupRule getBuildCleanupRule() {
+		return buildCleanupRule;
 	}
 
-	public void setBuildCleanupStrategy(BuildCleanupStrategy buildCleanupStrategy) {
-		this.buildCleanupStrategy = buildCleanupStrategy;
+	public void setBuildCleanupRule(BuildCleanupRule buildCleanupRule) {
+		this.buildCleanupRule = buildCleanupRule;
 	}
 
 	public Collection<PullRequestBuild> getPullRequestBuilds() {
