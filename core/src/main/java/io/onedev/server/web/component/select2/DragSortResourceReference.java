@@ -4,11 +4,11 @@ import java.util.List;
 
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
+import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
-public class DragSortResourceReference extends JavaScriptResourceReference {
+public class DragSortResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
