@@ -209,11 +209,6 @@
 			<version>${hibernate.version}</version>
 		</dependency>
 		<dependency>
-		    <groupId>com.vladmihalcea</groupId>
-		    <artifactId>hibernate-types-52</artifactId>
-		    <version>2.3.0</version>
-		</dependency>
-		<dependency>
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
 			<version>2.7.1</version>
