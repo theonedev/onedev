@@ -18,6 +18,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -94,7 +95,11 @@ public class CommitStatusResource {
     		build.setConfiguration(configuration);
         	build.setCommitHash(commit.name());
     	}
-    	build.setVersion(StringUtils.substringBefore(commitStatus.get("description"), ":"));
+    	String version = StringUtils.substringBefore(commitStatus.get("description"), ":");
+    	if (NumberUtils.isDigits(version))
+    		version = "#" + version;
+    	build.setVersion(version);
+    	
     	build.setStatus(Build.Status.valueOf(status));
     	build.setDate(new Date());
     	build.setUrl(commitStatus.get("target_url"));
