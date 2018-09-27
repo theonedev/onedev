@@ -95,14 +95,27 @@ public class CommitStatusResource {
     		build.setConfiguration(configuration);
         	build.setCommitHash(commit.name());
     	}
-    	String version = StringUtils.substringBefore(commitStatus.get("description"), ":");
+    	String version;
+    	String description = commitStatus.get("description");
+    	String url = commitStatus.get("target_url");
+    	if (url.endsWith("/display/redirect")) { // Jenkins
+    		version = description.substring("Build ".length());
+    		if (version.contains(" succeeded "))
+    			version = StringUtils.substringBefore(version, " succeeded ");
+    		else if (version.contains(" failed "))
+    			version = StringUtils.substringBefore(version, " failed ");
+    		else if (version.contains(" in progress"))
+    			version = StringUtils.substringBefore(version, " in progress");
+    	} else {
+    		version = StringUtils.substringBefore(commitStatus.get("description"), ":");
+    	}
     	if (NumberUtils.isDigits(version))
     		version = "#" + version;
     	build.setVersion(version);
     	
     	build.setStatus(Build.Status.valueOf(status));
     	build.setDate(new Date());
-    	build.setUrl(commitStatus.get("target_url"));
+    	build.setUrl(url);
     	buildManager.save(build);
     	UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
     	uriBuilder.path(context);
