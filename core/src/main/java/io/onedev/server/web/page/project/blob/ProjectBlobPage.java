@@ -994,9 +994,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		BlobIdent newBlobIdent;
 		getProject().cacheObjectId(branch, refUpdated.getNewCommitId());
 
-		Subject subject = SecurityUtils.getSubject();
-		Long projectId = project.getId();
-		
 		if (state.mode == Mode.DELETE) {
 			try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
 				RevTree revTree = getProject().getRevCommit(refUpdated.getNewCommitId()).getTree();
@@ -1020,6 +1017,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			newBlobIdent = null;
 		}
 		
+		Subject subject = SecurityUtils.getSubject();
+		Long projectId = project.getId();
+		String refName = refUpdated.getRefName();
+		ObjectId oldCommitId = refUpdated.getOldCommitId();
+		ObjectId newCommitId = refUpdated.getNewCommitId();
 		OneDev.getInstance(UnitOfWork.class).doAsync(new Runnable() {
 
 			@Override
@@ -1028,6 +1030,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 				try {
 					Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
 					project.cacheObjectId(branch, refUpdated.getNewCommitId());
+					RefUpdated refUpdated = new RefUpdated(project, refName, oldCommitId, newCommitId);
 					OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
 				} finally {
 					ThreadContext.unbindSubject();

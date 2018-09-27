@@ -20,6 +20,7 @@ import io.onedev.server.model.CommitQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.search.commit.CommitQueryUtils;
 
 @Singleton
@@ -46,6 +47,7 @@ public class DefaultCommitNotificationManager {
 		}
 	}
 	
+	@Sessional
 	@Listen
 	public void on(RefUpdated event) {
 		if (!event.getNewCommitId().equals(ObjectId.zeroId())) {
