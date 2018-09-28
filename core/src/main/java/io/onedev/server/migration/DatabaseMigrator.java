@@ -144,7 +144,7 @@ public class DatabaseMigrator {
 		}	
 	}
 	
-	private void migrateIntegrationStrategy(Element integrationStrategyElement) {
+	private void migrateIntegrationStrategy8(Element integrationStrategyElement) {
 		if (integrationStrategyElement != null) {
 			integrationStrategyElement.setName("mergeStrategy");
 			switch (integrationStrategyElement.getText()) {
@@ -197,14 +197,14 @@ public class DatabaseMigrator {
 					Element assigneeElement = element.element("assignee");
 					if (assigneeElement != null)
 						assigneeElement.detach();
-					migrateIntegrationStrategy(element.element("integrationStrategy"));
+					migrateIntegrationStrategy8(element.element("integrationStrategy"));
 					Element lastIntegrationPreviewElement = element.element("lastIntegrationPreview");
 					if (lastIntegrationPreviewElement != null) {
 						lastIntegrationPreviewElement.setName("lastMergePreview");
 						Element integratedElement = lastIntegrationPreviewElement.element("integrated");
 						if (integratedElement != null)
 							integratedElement.setName("merged");
-						migrateIntegrationStrategy(lastIntegrationPreviewElement.element("integrationStrategy"));
+						migrateIntegrationStrategy8(lastIntegrationPreviewElement.element("integrationStrategy"));
 					}
 					Element closeInfoElement = element.element("closeInfo");
 					if (closeInfoElement != null) {
@@ -468,6 +468,26 @@ public class DatabaseMigrator {
 				FileUtils.writeFile(file, content, Charsets.UTF_8.name());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
+			}
+		}
+	}
+	
+	private void migrateMergeStrategy16(Element mergeStrategyElement) {
+		if (mergeStrategyElement != null) {
+			mergeStrategyElement.setName("mergeStrategy");
+			switch (mergeStrategyElement.getText()) {
+			case "ALWAYS_MERGE":
+				mergeStrategyElement.setText("CREATE_MERGE_COMMIT");
+				break;
+			case "MERGE_IF_NECESSARY":
+				mergeStrategyElement.setText("CREATE_MERGE_COMMIT_IF_NECESSARY");
+				break;
+			case "SQUASH_MERGE":
+				mergeStrategyElement.setText("SQUASH_SOURCE_BRANCH_COMMITS");
+				break;
+			case "REBASE_MERGE":
+				mergeStrategyElement.setText("REBASE_SOURCE_BRANCH_COMMITS");
+				break;
 			}
 		}
 	}
@@ -803,6 +823,12 @@ public class DatabaseMigrator {
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
+					migrateMergeStrategy16(element.element("mergeStrategy"));
+					Element lastMergePreviewElement = element.element("lastMergePreview");
+					if (lastMergePreviewElement != null) {
+						migrateMergeStrategy16(lastMergePreviewElement.element("mergeStrategy"));
+					}
+					
 					Integer commentCount = requestCommentCounts.get(element.elementTextTrim("id"));
 					if (commentCount == null)
 						commentCount = 0;
@@ -894,6 +920,12 @@ public class DatabaseMigrator {
 					Element ignoreElement = element.element("ignore");
 					ignoreElement.setName("watching");
 					ignoreElement.setText(String.valueOf(!Boolean.parseBoolean(ignoreElement.getTextTrim())));
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequestUpdates.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("uuid").detach();
 				}
 				dom.writeToFile(file, false);
 			} else if (file.getName().startsWith("Projects.xml")) {
