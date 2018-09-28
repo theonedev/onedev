@@ -320,7 +320,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					}
 					
 					@Override
-					protected boolean getSubscriptionStatus() {
+					protected boolean isSubscribed() {
 						return getUserSubscriptionStatus(namedQuery);
 					}
 					
@@ -406,7 +406,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					}
 					
 					@Override
-					protected boolean getSubscriptionStatus() {
+					protected boolean isSubscribed() {
 						return getProjectSubscriptionStatus(namedQuery);
 					}
 
