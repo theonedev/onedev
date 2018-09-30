@@ -4,6 +4,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,6 +15,8 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.shiro.subject.Subject;
 import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.Component;
@@ -32,7 +35,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
-import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.apache.wicket.util.visit.IVisit;
@@ -122,6 +124,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	
 	private static final String PARAM_MARK = "mark";
 	
+	private static final String PARAM_RAW = "raw";
+	
 	private static final String REVISION_PICKER_ID = "revisionPicker";
 	
 	private static final String BLOB_NAVIGATOR_ID = "blobNavigator";
@@ -184,10 +188,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			if (!SecurityUtils.canModify(getProject(), state.blobIdent.revision, path))
 				unauthorized();
 		}
-	
-		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
-		String accept = request.getHeader("Accept");
-		if (accept != null && !accept.startsWith("text/html") && state.blobIdent.isFile()) {
+
+		Boolean raw = params.get(PARAM_RAW).toOptionalBoolean();
+		if (raw != null && raw) {
 			RequestCycle.get().scheduleRequestHandlerAfterCurrent(
 					new ResourceReferenceRequestHandler(new RawBlobResourceReference(), getPageParameters()));
 		}
@@ -1196,4 +1199,18 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		return SecurityUtils.canReadCode(getProject().getFacade());
 	}
 
+	@Override
+	public String appendRaw(String url) {
+		try {
+			URIBuilder builder = new URIBuilder(url);
+			for (NameValuePair pair: builder.getQueryParams()) {
+				if (pair.getName().equals(PARAM_RAW))
+					return url;
+			}
+			return builder.addParameter(PARAM_RAW, "true").build().toString();
+		} catch (URISyntaxException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 }

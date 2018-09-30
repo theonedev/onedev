@@ -415,6 +415,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 
 	public void insertUrl(AjaxRequestTarget target, boolean isImage, String url, 
 			String name, @Nullable String replaceMessage) {
+		if (isImage && getBlobRenderContext() != null)
+			url = getBlobRenderContext().appendRaw(url);
 		String script = String.format("onedev.server.markdown.insertUrl('%s', %s, '%s', '%s', %s);",
 				container.getMarkupId(), isImage, StringEscapeUtils.escapeEcmaScript(url), 
 				StringEscapeUtils.escapeEcmaScript(name), 

@@ -103,4 +103,5 @@ public interface BlobRenderContext extends Serializable {
 	
 	String getAutosaveKey();
 	
+	String appendRaw(String url);
 }
