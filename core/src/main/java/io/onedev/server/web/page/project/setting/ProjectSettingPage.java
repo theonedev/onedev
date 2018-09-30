@@ -26,6 +26,7 @@ import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage
 import io.onedev.server.web.page.project.setting.team.NewTeamPage;
 import io.onedev.server.web.page.project.setting.team.TeamEditPage;
 import io.onedev.server.web.page.project.setting.team.TeamListPage;
+import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 
 @SuppressWarnings("serial")
 public abstract class ProjectSettingPage extends ProjectPage {
@@ -56,6 +57,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 				tabs.add(new ProjectSettingTab("Issue Fields", "fa fa-fw fa-list-ul", IssueFieldsPage.class));
 				tabs.add(new ProjectSettingTab("Issue States", "fa fa-fw fa-check", IssueStatesPage.class));
 				tabs.add(new ProjectSettingTab("Issue State Transitions", "fa fa-fw fa-exchange", StateTransitionsPage.class));
+				tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", WebHooksPage.class));
 				tabs.add(new ProjectSettingTab("Build Configurations", "fa fa-fw fa-cube", ConfigurationListPage.class, 
 						NewConfigurationPage.class, ConfigurationEditPage.class));
 				return tabs;

@@ -113,16 +113,25 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
-				item.add(new Label("header", EditableUtils.getDisplayName(item.getModelObject().getPropertyGetter())));
-				item.add(AttributeAppender.append("class", "property-" + item.getModelObject().getPropertyName()));
+				PropertyContext<Serializable> propertyContext = item.getModelObject();
+				item.add(new Label("header", EditableUtils.getDisplayName(propertyContext.getPropertyGetter())));
+				item.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));
 				
 				String required;
-				if (item.getModelObject().isPropertyRequired() && item.getModelObject().getPropertyClass() != boolean.class)
+				if (propertyContext.isPropertyRequired() && propertyContext.getPropertyClass() != boolean.class)
 					required = "*";
 				else
 					required = "&nbsp;";
 				
 				item.add(new Label("required", required).setEscapeModelStrings(false));
+				String description = EditableUtils.getDescription(propertyContext.getPropertyGetter());
+				if (description != null) {
+					WebMarkupContainer help = new WebMarkupContainer("help");
+					help.add(AttributeAppender.append("title", description));
+					item.add(help);
+				} else {
+					item.add(new WebMarkupContainer("help").setVisible(false));
+				}
 			}
 			
 		});

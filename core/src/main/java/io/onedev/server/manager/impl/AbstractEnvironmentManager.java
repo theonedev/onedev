@@ -14,7 +14,7 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.launcher.loader.Listen;
-import io.onedev.server.event.lifecycle.SystemStopping;
+import io.onedev.server.event.system.SystemStopping;
 import io.onedev.utils.FileUtils;
 
 import com.google.common.base.Charsets;

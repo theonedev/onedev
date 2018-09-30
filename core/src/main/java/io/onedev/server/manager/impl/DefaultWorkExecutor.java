@@ -10,7 +10,7 @@ import java.util.concurrent.TimeoutException;
 import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.Listen;
-import io.onedev.server.event.lifecycle.SystemStopping;
+import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.manager.WorkExecutor;
 import io.onedev.utils.concurrent.PrioritizedCallable;
 import io.onedev.utils.concurrent.PrioritizedExecutor;

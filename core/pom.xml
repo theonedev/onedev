@@ -106,6 +106,10 @@
 			<artifactId>jersey-bean-validation</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.glassfish.jersey.ext</groupId>
+			<artifactId>jersey-bean-validation</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.glassfish.hk2</groupId>
 			<artifactId>guice-bridge</artifactId>
 			<version>2.4.0-b06</version>

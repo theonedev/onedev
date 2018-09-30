@@ -1,0 +1,10 @@
+.web-hook.list table thead th {
+	font-weight: bold !important;
+}
+.web-hook.list table thead th.property-eventTypes,
+.web-hook.list table thead th.property-secret {
+	width: 25%;
+}
+.web-hook.list table thead th.actions {
+	width: 60px;
+}

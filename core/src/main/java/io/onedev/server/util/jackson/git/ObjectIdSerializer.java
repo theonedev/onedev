@@ -14,9 +14,7 @@ public class ObjectIdSerializer extends JsonSerializer<ObjectId> {
 	@Override
 	public void serialize(ObjectId value, JsonGenerator jgen, SerializerProvider provider)
 			throws IOException, JsonGenerationException {
-		byte[] bytes = new byte[20];
-		value.copyRawTo(bytes, 0);
-		jgen.writeBinary(bytes);
+		jgen.writeString(value.name());
 	}
 
 }

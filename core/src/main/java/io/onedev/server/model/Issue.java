@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -45,6 +46,7 @@ import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -108,10 +110,12 @@ public class Issue extends AbstractEntity implements Referenceable {
 	
 	// used for number search in markdown editor
 	@Column(nullable=false)
+	@JsonView(DefaultView.class)
 	private String numberStr;
 	
 	// used for title search in markdown editor
 	@Column(nullable=false)
+	@JsonView(DefaultView.class)
 	private String noSpaceTitle;
 	
 	@Embedded

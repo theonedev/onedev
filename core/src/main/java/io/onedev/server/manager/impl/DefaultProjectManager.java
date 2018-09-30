@@ -30,11 +30,9 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 
 import io.onedev.launcher.loader.Listen;
-import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.event.ProjectRenamed;
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.event.lifecycle.SystemStarted;
-import io.onedev.server.event.lifecycle.SystemStopping;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.CloneCommand;
 import io.onedev.server.git.command.ListChangedFilesCommand;
@@ -69,8 +67,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
 	
-	private final ListenerRegistry listenerRegistry;
-	
     private final CommitInfoManager commitInfoManager;
     
     private final TeamManager teamManager;
@@ -86,13 +82,12 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
 	
     @Inject
-    public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager, ListenerRegistry listenerRegistry, 
+    public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager,  
     		TeamManager teamManager, MembershipManager membershipManager, BuildManager buildManager, 
     		CacheManager cacheManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
-        this.listenerRegistry = listenerRegistry;
         this.teamManager = teamManager;
         this.membershipManager = membershipManager;
         this.buildManager = buildManager;
@@ -151,9 +146,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     		membership.setUser(SecurityUtils.getUser());
     		membershipManager.save(membership);
     	}
-    	
-    	if (oldName != null && !project.getName().equals(oldName))
-    		listenerRegistry.post(new ProjectRenamed(project, oldName));
     	
     	File gitDir = project.getGitDir();
     	

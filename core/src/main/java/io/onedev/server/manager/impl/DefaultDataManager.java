@@ -25,7 +25,7 @@ import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ManagedSerializedForm;
 import io.onedev.server.OneDev;
-import io.onedev.server.event.lifecycle.SystemStarting;
+import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.DataManager;
 import io.onedev.server.manager.MailManager;

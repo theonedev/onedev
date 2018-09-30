@@ -1,8 +1,11 @@
 package io.onedev.server.event.pullrequest;
 
+import java.util.Date;
+
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 
 public abstract class PullRequestCodeCommentEvent extends PullRequestEvent implements MarkdownAware {
 
@@ -10,8 +13,8 @@ public abstract class PullRequestCodeCommentEvent extends PullRequestEvent imple
 	
 	private final boolean derived;
 	
-	public PullRequestCodeCommentEvent(PullRequest request, CodeComment comment, boolean derived) {
-		super(request);
+	public PullRequestCodeCommentEvent(User user, Date date, PullRequest request, CodeComment comment, boolean derived) {
+		super(user, date, request);
 		this.comment = comment;
 		this.derived = derived;
 	}

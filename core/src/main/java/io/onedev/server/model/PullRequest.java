@@ -60,6 +60,7 @@ import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.jackson.RestView;
 
 @Entity
@@ -126,10 +127,12 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 
 	// used for number search in markdown editor
 	@Column(nullable=false)
+	@JsonView(DefaultView.class)
 	private String numberStr;
 	
 	// used for title search in markdown editor
 	@Column(nullable=false)
+	@JsonView(DefaultView.class)
 	private String noSpaceTitle;
 	
 	@Version

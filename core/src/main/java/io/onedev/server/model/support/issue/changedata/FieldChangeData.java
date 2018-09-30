@@ -26,39 +26,83 @@ public class FieldChangeData implements ActionData {
 
 	private static final long serialVersionUID = 1L;
 
-	protected final List<String> oldLines = new ArrayList<>();
+	protected final Map<String, IssueField> oldFields;
 	
-	protected final List<String> newLines = new ArrayList<>();
-	
-	protected final Map<String, String> newUserNames = new HashMap<>();
-	
-	protected final Map<String, String> newTeamNames = new HashMap<>();
+	protected final Map<String, IssueField> newFields;
 	
 	public FieldChangeData(Map<String, IssueField> oldFields, Map<String, IssueField> newFields) {
-		oldFields = copyNonEmptyFields(oldFields);
-		newFields = copyNonEmptyFields(newFields);
-
+		this.oldFields = copyNonEmptyFields(oldFields);
+		this.newFields = copyNonEmptyFields(newFields);
+	}
+	
+	protected List<String> getOldLines() {
+		List<String> oldLines = new ArrayList<>();
+		for (IssueField oldField: oldFields.values()) {
+			IssueField newField = newFields.get(oldField.getName());
+			if (newField == null || !describe(oldField).equals(describe(newField)))
+				oldLines.add(describe(oldField));
+		}
+		for (IssueField newField: newFields.values()) {
+			if (!oldFields.containsKey(newField.getName()))
+				oldLines.add("");
+		}
+		return oldLines;
+	}
+	
+	protected List<String> getNewLines() {
+		List<String> newLines = new ArrayList<>();
 		for (IssueField oldField: oldFields.values()) {
 			IssueField newField = newFields.get(oldField.getName());
 			if (newField != null) {
 				if (!describe(oldField).equals(describe(newField))) {
-					oldLines.add(describe(oldField));
 					newLines.add(describe(newField));
-					extractUsersAndGroups(newField);
 				}
 			} else {
-				oldLines.add(describe(oldField));
 				newLines.add("");
 			}
 		}
 		for (IssueField newField: newFields.values()) {
-			IssueField oldField = oldFields.get(newField.getName());
-			if (oldField == null) {
-				oldLines.add("");
+			if (!oldFields.containsKey(newField.getName()))
 				newLines.add(describe(newField));
-				extractUsersAndGroups(newField);
+		}
+		return newLines;
+	}
+	
+	protected Map<String, String> getNewUsers() {
+		Map<String, String> newUsers = new HashMap<>();
+		for (IssueField oldField: oldFields.values()) {
+			IssueField newField = newFields.get(oldField.getName());
+			if (newField != null && !describe(oldField).equals(describe(newField)) 
+					&& newField.getType().equals(InputSpec.USER) && !newField.getValues().isEmpty()) 
+				newUsers.put(newField.getName(), newField.getValues().iterator().next());
+		}
+		for (IssueField newField: newFields.values()) {
+			if (!oldFields.containsKey(newField.getName()) && newField.getType().equals(InputSpec.USER) 
+					&& !newField.getValues().isEmpty()) { 
+				newUsers.put(newField.getName(), newField.getValues().iterator().next());
 			}
 		}
+		return newUsers;
+	}
+	
+	protected Map<String, String> getNewTeams() {
+		Map<String, String> newTeams = new HashMap<>();
+		for (IssueField oldField: oldFields.values()) {
+			IssueField newField = newFields.get(oldField.getName());
+			if (newField != null 
+					&& !describe(oldField).equals(describe(newField)) 
+					&& newField.getType().equals(InputSpec.TEAM) 
+					&& !newField.getValues().isEmpty()) 
+				newTeams.put(newField.getName(), newField.getValues().iterator().next());
+		}
+		for (IssueField newField: newFields.values()) {
+			if (!oldFields.containsKey(newField.getName()) 
+					&& newField.getType().equals(InputSpec.TEAM) 
+					&& !newField.getValues().isEmpty()) { 
+				newTeams.put(newField.getName(), newField.getValues().iterator().next());
+			}
+		}
+		return newTeams;
 	}
 	
 	private Map<String, IssueField> copyNonEmptyFields(Map<String, IssueField> fields) {
@@ -70,20 +114,13 @@ public class FieldChangeData implements ActionData {
 		return copy;
 	}
 	
-	private void extractUsersAndGroups(IssueField field) {
-		if (field.getType().equals(InputSpec.USER) && !field.getValues().isEmpty()) 
-			newUserNames.put(field.getName(), field.getValues().iterator().next());
-		if (field.getType().equals(InputSpec.TEAM) && !field.getValues().isEmpty()) 
-			newTeamNames.put(field.getName(), field.getValues().iterator().next());
-	}
-
 	private String describe(IssueField field) {
 		return field.getName() + ": " + StringUtils.join(field.getValues(), ", ");		
 	}
 	
 	@Override
 	public Component render(String componentId, IssueAction action) {
-		return new PlainDiffPanel(componentId, oldLines, "a.txt", newLines, "b.txt", true);
+		return new PlainDiffPanel(componentId, getOldLines(), "a.txt", getNewLines(), "b.txt", true);
 	}
 
 	@Override
@@ -111,12 +148,12 @@ public class FieldChangeData implements ActionData {
 
 			@Override
 			public List<String> getOldLines() {
-				return oldLines;
+				return FieldChangeData.this.getOldLines();
 			}
 
 			@Override
 			public List<String> getNewLines() {
-				return newLines;
+				return FieldChangeData.this.getNewLines();
 			}
 
 			@Override
@@ -135,7 +172,7 @@ public class FieldChangeData implements ActionData {
 	@Override
 	public Map<String, User> getNewUsers(Project project) {
 		Map<String, User> newUsers = new HashMap<>();
-		for (Map.Entry<String, String> entry: newUserNames.entrySet()) {
+		for (Map.Entry<String, String> entry: getNewUsers().entrySet()) {
 			User user = OneDev.getInstance(UserManager.class).findByName(entry.getValue());
 			if (user != null)
 				newUsers.put(entry.getKey(), user);
@@ -146,7 +183,7 @@ public class FieldChangeData implements ActionData {
 	@Override
 	public Map<String, Team> getNewTeams(Project project) {
 		Map<String, Team> newTeams = new HashMap<>();
-		for (Map.Entry<String, String> entry: newTeamNames.entrySet()) {
+		for (Map.Entry<String, String> entry: getNewTeams().entrySet()) {
 			Team team = OneDev.getInstance(TeamManager.class).find(project, entry.getValue());
 			if (team != null)
 				newTeams.put(entry.getKey(), team);

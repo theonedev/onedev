@@ -42,7 +42,8 @@ import com.google.common.base.Throwables;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.event.lifecycle.SystemStarted;
+import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.git.Contribution;
 import io.onedev.server.git.Contributor;
 import io.onedev.server.git.GitUtils;
@@ -60,7 +61,6 @@ import io.onedev.server.manager.StorageManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.dao.EntityRemoved;
 import io.onedev.server.util.BatchWorker;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.IssueUtils;

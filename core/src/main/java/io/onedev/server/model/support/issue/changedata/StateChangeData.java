@@ -1,5 +1,6 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -27,9 +28,20 @@ public class StateChangeData extends FieldChangeData {
 		this.oldState = oldState;
 		this.newState = newState;
 		this.comment = comment;
-		
+	}
+
+	@Override
+	protected List<String> getOldLines() {
+		List<String> oldLines = super.getOldLines();
 		oldLines.add(0, "State: " + oldState);
+		return oldLines;
+	}
+
+	@Override
+	protected List<String> getNewLines() {
+		List<String> newLines = super.getOldLines();
 		newLines.add(0, "State: " + newState);
+		return newLines;
 	}
 
 	public String getNewState() {

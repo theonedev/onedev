@@ -1,11 +1,13 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.util.lang.Objects;
+
+import com.google.common.base.Objects;
 
 import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.Milestone;
@@ -35,22 +37,36 @@ public class BatchUpdateData extends FieldChangeData {
 		this.oldMilestone = oldMilestone!=null?oldMilestone.getName():null;
 		this.newMilestone = newMilestone!=null?newMilestone.getName():null;
 		this.comment = comment;
-		
+	}
+
+	@Override
+	protected List<String> getOldLines() {
+		List<String> oldLines = super.getOldLines();
 		if (!Objects.equal(oldMilestone, newMilestone)) {
 			if (oldMilestone != null)
-				oldLines.add(0, "Milestone: " + oldMilestone.getName());
+				oldLines.add(0, "Milestone: " + oldMilestone);
 			else
 				oldLines.add(0, "Milestone: ");
+		}
+		if (!Objects.equal(oldState, newState)) {
+			oldLines.add(0, "State: " + oldState);
+		}
+		return oldLines;
+	}
+
+	@Override
+	protected List<String> getNewLines() {
+		List<String> newLines = super.getNewLines();
+		if (!Objects.equal(oldMilestone, newMilestone)) {
 			if (newMilestone != null)
-				newLines.add(0, "Milestone: " + newMilestone.getName());
+				newLines.add(0, "Milestone: " + newMilestone);
 			else
 				newLines.add(0, "Milestone: ");
 		}
-
 		if (!Objects.equal(oldState, newState)) {
-			oldLines.add(0, "State: " + oldState);
 			newLines.add(0, "State: " + newState);
 		}
+		return newLines;
 	}
 
 	public String getNewState() {

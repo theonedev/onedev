@@ -46,11 +46,11 @@ import com.google.common.base.Throwables;
 import io.onedev.jsymbol.Symbol;
 import io.onedev.jsymbol.SymbolExtractorRegistry;
 import io.onedev.launcher.loader.Listen;
-import io.onedev.server.event.lifecycle.SystemStopping;
+import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.EntityRemoved;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 

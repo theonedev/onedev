@@ -12,6 +12,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
+import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.pullrequest.PullRequestActionEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
@@ -25,7 +26,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.server.persistence.dao.EntityRemoved;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
 import jetbrains.exodus.env.Environment;

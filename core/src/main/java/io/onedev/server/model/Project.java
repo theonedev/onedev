@@ -58,6 +58,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
@@ -88,6 +89,7 @@ import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransformSetting;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.model.support.codecomment.NamedCodeCommentQuery;
 import io.onedev.server.model.support.issue.IssueBoard;
@@ -99,6 +101,7 @@ import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
@@ -136,6 +139,7 @@ public class Project extends AbstractEntity {
 	
 	@Lob
 	@Column(length=65535, name="COMMIT_MSG_TRANSFORM")
+	@JsonView(DefaultView.class)
 	private CommitMessageTransformSetting commitMessageTransformSetting;
 	
 	@Column(nullable=false)
@@ -153,10 +157,12 @@ public class Project extends AbstractEntity {
     
 	@Lob
 	@Column(nullable=false, length=65535)
+	@JsonView(DefaultView.class)
 	private ArrayList<BranchProtection> branchProtections = new ArrayList<>();
 	
 	@Lob
 	@Column(nullable=false, length=65535)
+	@JsonView(DefaultView.class)
 	private ArrayList<TagProtection> tagProtections = new ArrayList<>();
 	
 	@Column(nullable=false)
@@ -200,35 +206,48 @@ public class Project extends AbstractEntity {
 	
 	@Lob
 	@Column(length=65535)
+	@JsonView(DefaultView.class)
 	private IssueWorkflow issueWorkflow;
 	
 	@Lob
 	@Column(length=65535)
+	@JsonView(DefaultView.class)
 	private ArrayList<NamedIssueQuery> savedIssueQueries;
 
 	@Lob
 	@Column(length=65535)
+	@JsonView(DefaultView.class)
 	private ArrayList<NamedCommitQuery> savedCommitQueries;
 	
 	@Lob
 	@Column(length=65535)
+	@JsonView(DefaultView.class)
 	private ArrayList<NamedPullRequestQuery> savedPullRequestQueries;
 	
 	@Lob
 	@Column(length=65535)
+	@JsonView(DefaultView.class)
 	private ArrayList<NamedCodeCommentQuery> savedCodeCommentQueries;
 	
 	@Lob
 	@Column(length=65535)
+	@JsonView(DefaultView.class)
 	private ArrayList<NamedBuildQuery> savedBuildQueries;
 	
 	@Lob
 	@Column(length=65535)
+	@JsonView(DefaultView.class)
 	private ArrayList<String> issueListFields;
 	
 	@Lob
 	@Column(length=65535)
+	@JsonView(DefaultView.class)
 	private ArrayList<IssueBoard> issueBoards;
+	
+	@Lob
+	@Column(length=65535)
+	@JsonView(DefaultView.class)
+	private ArrayList<WebHook> webHooks;
 	
 	private transient Repository repository;
 	
@@ -1132,6 +1151,16 @@ public class Project extends AbstractEntity {
 
 	public void setIssueBoards(ArrayList<IssueBoard> issueBoards) {
 		this.issueBoards = issueBoards;
+	}
+
+	public ArrayList<WebHook> getWebHooks() {
+		if (webHooks == null)
+			webHooks = new ArrayList<>();
+		return webHooks;
+	}
+
+	public void setWebHooks(ArrayList<WebHook> webHooks) {
+		this.webHooks = webHooks;
 	}
 
 	@Nullable

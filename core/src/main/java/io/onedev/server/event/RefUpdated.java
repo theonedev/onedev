@@ -4,9 +4,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.Project;
 
-public class RefUpdated {
-	
-	private final Project project;
+public class RefUpdated extends ProjectEvent {
 	
 	private final String refName;
 	
@@ -15,14 +13,10 @@ public class RefUpdated {
 	private final ObjectId newCommitId;
 	
 	public RefUpdated(Project project, String refName, ObjectId oldCommitId, ObjectId newCommitId) {
-		this.project = project;
+		super(null, null, project);
 		this.refName = refName;
 		this.oldCommitId = oldCommitId;
 		this.newCommitId = newCommitId;
-	}
-
-	public Project getProject() {
-		return project;
 	}
 
 	public String getRefName() {

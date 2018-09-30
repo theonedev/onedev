@@ -14,7 +14,7 @@ public class ObjectIdDeserializer extends JsonDeserializer<ObjectId> {
 	@Override
 	public ObjectId deserialize(JsonParser jp, DeserializationContext ctxt)
 			throws IOException, JsonProcessingException {
-		return ObjectId.fromRaw(jp.getBinaryValue());
+		return ObjectId.fromString(jp.getValueAsString());
 	}
 
 }

@@ -1,20 +1,14 @@
-package io.onedev.server.persistence.dao;
+package io.onedev.server.event.entity;
 
 import io.onedev.server.model.AbstractEntity;
 
-public class EntityPersisted {
-	
-	private final AbstractEntity entity;
+public class EntityPersisted extends EntityEvent {
 	
 	private final boolean isNew;
 	
 	public EntityPersisted(AbstractEntity entity, boolean isNew) {
-		this.entity = entity;
+		super(entity);
 		this.isNew = isNew;
-	}
-
-	public AbstractEntity getEntity() {
-		return entity;
 	}
 
 	public boolean isNew() {

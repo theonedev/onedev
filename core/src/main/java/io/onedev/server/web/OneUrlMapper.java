@@ -61,6 +61,7 @@ import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage
 import io.onedev.server.web.page.project.setting.team.NewTeamPage;
 import io.onedev.server.web.page.project.setting.team.TeamEditPage;
 import io.onedev.server.web.page.project.setting.team.TeamListPage;
+import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
@@ -224,6 +225,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/settings/configurations", ConfigurationListPage.class));
 		add(new OnePageMapper("projects/${project}/settings/configurations/new", NewConfigurationPage.class));
 		add(new OnePageMapper("projects/${project}/settings/configurations/${configuration}", ConfigurationEditPage.class));
+		add(new OnePageMapper("projects/${project}/settings/web-hooks", WebHooksPage.class));
 		
 		add(new OnePageMapper("projects/${project}/no-commits", NoCommitsPage.class));
 	}

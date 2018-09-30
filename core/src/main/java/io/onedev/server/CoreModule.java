@@ -167,6 +167,7 @@ import io.onedev.server.manager.impl.DefaultSettingManager;
 import io.onedev.server.manager.impl.DefaultStorageManager;
 import io.onedev.server.manager.impl.DefaultUserInfoManager;
 import io.onedev.server.manager.impl.DefaultUserManager;
+import io.onedev.server.manager.impl.DefaultWebHookManager;
 import io.onedev.server.manager.impl.DefaultWorkExecutor;
 import io.onedev.server.migration.JpaConverter;
 import io.onedev.server.migration.PersistentBagConverter;
@@ -338,6 +339,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentQuerySettingManager.class).to(DefaultCodeCommentQuerySettingManager.class);
 		bind(CommitQuerySettingManager.class).to(DefaultCommitQuerySettingManager.class);
 		bind(BuildQuerySettingManager.class).to(DefaultBuildQuerySettingManager.class);
+		bind(DefaultWebHookManager.class);
 
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);

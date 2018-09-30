@@ -50,6 +50,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private String name;
 
     @Column(length=1024)
+	@JsonView(DefaultView.class)
     private String password;
 
 	private String fullName;
@@ -128,7 +129,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     
 	@Editable(order=150)
 	@Password(confirmative=true, autoComplete="new-password")
-	@JsonView(DefaultView.class)
 	@NotEmpty
 	public String getPassword() {
 		return password;

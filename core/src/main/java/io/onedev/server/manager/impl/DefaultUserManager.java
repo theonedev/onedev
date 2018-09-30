@@ -12,7 +12,8 @@ import org.hibernate.query.Query;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.event.lifecycle.SystemStarted;
+import io.onedev.server.event.entity.EntityPersisted;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.ProjectManager;
@@ -25,7 +26,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityPersisted;
 import io.onedev.utils.StringUtils;
 
 @Singleton
