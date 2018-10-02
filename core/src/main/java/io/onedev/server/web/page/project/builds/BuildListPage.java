@@ -19,7 +19,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.web.component.buildlist.BuildListPanel;
+import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;

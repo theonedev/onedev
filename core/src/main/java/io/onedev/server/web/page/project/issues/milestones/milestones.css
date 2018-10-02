@@ -28,9 +28,6 @@
 	position: absolute;
 	left: 6px;
 }
-.confirm-close-milestone .control-label, .confirm-delete-milestone .control-label {
-	font-weight: normal;
-}
 #new-milestone>.head, #milestone-edit>.head {
 	margin-bottom: 20px;
 }

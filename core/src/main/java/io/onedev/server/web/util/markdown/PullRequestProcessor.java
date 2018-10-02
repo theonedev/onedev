@@ -7,7 +7,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.markdown.MarkdownProcessor;
 import io.onedev.server.util.markdown.PullRequestParser;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
 public class PullRequestProcessor extends PullRequestParser implements MarkdownProcessor {
 	
@@ -19,7 +19,7 @@ public class PullRequestProcessor extends PullRequestParser implements MarkdownP
 	@Override
 	protected String toHtml(PullRequest request) {
 		CharSequence url = RequestCycle.get().urlFor(
-				RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(request, null)); 
+				PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request, null)); 
 		return String.format("<a href='%s' class='request'>#%d</a>", url, request.getNumber());
 	}
 	

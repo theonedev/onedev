@@ -19,7 +19,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.web.component.issuelist.IssueListPanel;
+import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.issues.IssuesPage;
 import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
@@ -65,7 +65,8 @@ public class IssueListPage extends IssuesPage {
 
 			@Override
 			protected Link<Void> newQueryLink(String componentId, NamedIssueQuery namedQuery) {
-				return new BookmarkablePageLink<Void>(componentId, IssueListPage.class, IssueListPage.paramsOf(getProject(), namedQuery.getQuery()));
+				return new BookmarkablePageLink<Void>(componentId, IssueListPage.class, 
+						IssueListPage.paramsOf(getProject(), namedQuery.getQuery(), 0));
 			}
 
 			@Override
@@ -95,7 +96,7 @@ public class IssueListPage extends IssuesPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getProject(), query);
+				PageParameters params = paramsOf(getProject(), query, 0);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -121,7 +122,7 @@ public class IssueListPage extends IssuesPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target) {
-				setResponsePage(IssueListPage.class, paramsOf(getProject(), query));
+				setResponsePage(IssueListPage.class, paramsOf(getProject(), query, 0));
 			}
 
 			@Override
@@ -183,10 +184,12 @@ public class IssueListPage extends IssuesPage {
 		
 	}
 	
-	public static PageParameters paramsOf(Project project, @Nullable String query) {
+	public static PageParameters paramsOf(Project project, @Nullable String query, int page) {
 		PageParameters params = paramsOf(project);
 		if (query != null)
 			params.add(PARAM_QUERY, query);
+		if (page != 0)
+			params.add(PARAM_CURRENT_PAGE, page);
 		return params;
 	}
 	

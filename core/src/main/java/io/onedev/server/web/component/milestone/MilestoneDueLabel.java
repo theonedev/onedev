@@ -20,7 +20,8 @@ public class MilestoneDueLabel extends Label {
 
 			@Override
 			protected String load() {
-				return DateUtils.formatDate(milestoneModel.getObject().getDueDate());
+				Milestone milestone = milestoneModel.getObject();
+				return DateUtils.formatDate(milestone.getDueDate());
 			}
 			
 		});

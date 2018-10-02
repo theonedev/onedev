@@ -9,16 +9,19 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueActionManager;
@@ -32,6 +35,8 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
+import io.onedev.server.web.util.ajaxlistener.AppendLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
 abstract class BacklogColumnPanel extends Panel {
@@ -67,6 +72,12 @@ abstract class BacklogColumnPanel extends Panel {
 		add(new ModalLink("addCard") {
 
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new AppendLoadingIndicatorListener(false));
+			}
+			
+			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				return new NewCardPanel(id) {
 
@@ -85,11 +96,6 @@ abstract class BacklogColumnPanel extends Panel {
 						return getQuery().getCriteria();
 					}
 
-					@Override
-					protected void onAdded(AjaxRequestTarget target, Issue issue) {
-						target.add(BacklogColumnPanel.this);
-					}
-					
 				};
 			}
 
@@ -100,22 +106,26 @@ abstract class BacklogColumnPanel extends Panel {
 			}
 			
 		});
-		add(new Label("count", new LoadableDetachableModel<String>() {
+		
+		if (getQuery() != null) {
+			PageParameters params = IssueListPage.paramsOf(getProject(), getQuery().toString(), 1);
+			add(new BookmarkablePageLink<Void>("viewAsList", IssueListPage.class, params));
+		} else {
+			add(new WebMarkupContainer("viewAsList").setVisible(false));
+		}
+		
+		add(new CardCountLabel("count") {
 
 			@Override
-			protected String load() {
-				return String.valueOf(OneDev.getInstance(IssueManager.class)
-						.count(getProject(), SecurityUtils.getUser(), getQuery().getCriteria()));
+			protected Project getProject() {
+				return BacklogColumnPanel.this.getProject();
 			}
-			
-		}) {
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getQuery() != null);
+			protected IssueQuery getQuery() {
+				return BacklogColumnPanel.this.getQuery();
 			}
-			
+
 		});
 		
 		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
@@ -127,30 +137,6 @@ abstract class BacklogColumnPanel extends Panel {
 				if (!SecurityUtils.canAdministrate(issue.getProject().getFacade())) 
 					throw new UnauthorizedException("Permission denied");
 				OneDev.getInstance(IssueActionManager.class).changeMilestone(issue, null, SecurityUtils.getUser());
-				if (getQuery().matches(issue, SecurityUtils.getUser())) {
-					target.add(BacklogColumnPanel.this);
-				} else {
-					new ModalPanel(target) {
-
-						@Override
-						protected Component newContent(String id) {
-							return new CardUnmatchedPanel(id) {
-								
-								@Override
-								protected void onClose(AjaxRequestTarget target) {
-									close();
-								}
-								
-								@Override
-								protected Issue getIssue() {
-									return issue;
-								}
-								
-							};
-						}
-						
-					};
-				}
 				target.appendJavaScript(String.format("onedev.server.issueBoards.markAccepted(%d, true);", issue.getId()));
 			}
 			
@@ -166,7 +152,7 @@ abstract class BacklogColumnPanel extends Panel {
 			@Override
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
-				if (getQuery() != null && event.getPayload() instanceof IssueDragging) {
+				if (event.getPayload() instanceof IssueDragging && getQuery() != null) {
 					IssueDragging issueDragging = (IssueDragging) event.getPayload();
 					Issue issue = issueDragging.getIssue();
 					if (SecurityUtils.canAdministrate(issue.getProject().getFacade())) {
@@ -182,20 +168,22 @@ abstract class BacklogColumnPanel extends Panel {
 			}
 
 			@Override
-			protected List<Issue> queryIssues(int offset, int count) {
-				if (getQuery() != null) 
-					return OneDev.getInstance(IssueManager.class).query(getProject(), SecurityUtils.getUser(), getQuery(), offset, count);
-				else 
-					return new ArrayList<>();
-			}
-
-			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
 				CharSequence callback = ajaxBehavior.getCallbackFunction(CallbackParameter.explicit("issue"));
 				String script = String.format("onedev.server.issueBoards.onColumnDomReady('%s', %s);", 
 						getMarkupId(), getQuery()!=null?callback:"undefined");
 				response.render(OnDomReadyHeaderItem.forScript(script));
+			}
+
+			@Override
+			protected Project getProject() {
+				return BacklogColumnPanel.this.getProject();
+			}
+
+			@Override
+			protected IssueQuery getQuery() {
+				return BacklogColumnPanel.this.getQuery();
 			}
 
 		});

@@ -3,11 +3,13 @@ onedev.server.issueBoards = {
 		$("body").css("overflow-y", "hidden");
 		var $head = $("#issue-boards>.head");
 		var $body = $("#issue-boards>.body");
-		var ps = new PerfectScrollbar($body[0]);
-		$(window).resize(function() {
-			$body.outerHeight($(window).height()-$body.offset().top);
-			ps.update();
-		});
+		if ($body.length != 0) {
+			var ps = new PerfectScrollbar($body[0]);
+			$(window).resize(function() {
+				$body.outerHeight($(window).height()-$body.offset().top);
+				ps.update();
+			});
+		}
 	}, 
 	onColumnDomReady: function(containerId, callback) {
 		var $body = $("#" + containerId);
@@ -35,7 +37,6 @@ onedev.server.issueBoards = {
 				}
 			});
 		}
-		$body.children(".card").removeClass("first").first().addClass("first");
 	}, 
 	onCardDomReady: function(cardId, callback) {
 		var $card = $("#" + cardId);
@@ -53,8 +54,6 @@ onedev.server.issueBoards = {
 					callback($card.data("issue"));
 				}, 
 				drag: function(event, ui) {
-					if ($card[0] != $card.parent().children().first()[0])
-						ui.position.top = ui.position.top + 16;
 					var left = ui.position.left;
 					var right = left + $(ui.helper).outerWidth();
 					if (left < $body.scrollLeft()) { 
@@ -80,14 +79,7 @@ onedev.server.issueBoards = {
 						function checkAccepted() {
 							var accepted = $card.data("accepted");
 							if (accepted != undefined) {
-								if (accepted) {
-									var $countBadge = $card.parent().prev().find(".badge");
-									$countBadge.text(parseInt($countBadge.text()) - 1);
-									var bodyId = $card.parent().attr("id");
-									$card.remove();
-									$body.children(".card").removeClass("first").first().addClass("first");
-									onedev.server.infiniteScroll.check(bodyId);
-								} else {
+								if (!accepted) {
 									$card.removeClass("issue-dragging");
 								}
 							} else {
@@ -104,10 +96,12 @@ onedev.server.issueBoards = {
 				}
 			});
 		}
-		$body.children(".card").removeClass("first").first().addClass("first");
 	}, 
 	markAccepted: function(issueId, accepted) {
 		var $card = $("#issue-boards .column .body .ui-draggable.issue-dragging[data-issue='" + issueId + "']");
 		$card.data("accepted", accepted);
+	}, 
+	onCardDetailLoad: function(containerId) { 
+		new PerfectScrollbar($("#" + containerId + ">.board-card-detail>.body>.side")[0]).update();
 	}
 }

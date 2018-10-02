@@ -13,6 +13,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
@@ -20,11 +21,13 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueActionManager;
@@ -58,7 +61,9 @@ import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.util.ComponentContext;
+import io.onedev.server.web.util.ajaxlistener.AppendLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
 abstract class BoardColumnPanel extends Panel implements EditContext {
@@ -122,7 +127,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					@Override
 					public void onEvent(IEvent<?> event) {
 						super.onEvent(event);
-						if (getQuery() != null && event.getPayload() instanceof IssueDragging) {
+						if (event.getPayload() instanceof IssueDragging && getQuery() != null) {
 							IssueDragging issueDragging = (IssueDragging) event.getPayload();
 							Issue issue = issueDragging.getIssue();
 							if (Objects.equals(issue.getMilestone(), getMilestone())) { 
@@ -158,20 +163,22 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					}
 					
 					@Override
-					protected List<Issue> queryIssues(int offset, int count) {
-						if (getQuery() != null) 
-							return OneDev.getInstance(IssueManager.class).query(getProject(), SecurityUtils.getUser(), getQuery(), offset, count);
-						else 
-							return new ArrayList<>();
-					}
-					
-					@Override
 					public void renderHead(IHeaderResponse response) {
 						super.renderHead(response);
 						CharSequence callback = ajaxBehavior.getCallbackFunction(CallbackParameter.explicit("issue"));
 						String script = String.format("onedev.server.issueBoards.onColumnDomReady('%s', %s);", 
 								getMarkupId(), getQuery()!=null?callback:"undefined");
 						response.render(OnDomReadyHeaderItem.forScript(script));
+					}
+
+					@Override
+					protected Project getProject() {
+						return BoardColumnPanel.this.getProject();
+					}
+
+					@Override
+					protected IssueQuery getQuery() {
+						return BoardColumnPanel.this.getQuery();
 					}
 
 				});
@@ -227,25 +234,21 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 			content.add(AttributeAppender.append("style", "border-color:" + color + ";"));
 		}
 		
-		head.add(new Label("count", new LoadableDetachableModel<String>() {
-
-			@Override
-			protected String load() {
-				return String.valueOf(OneDev.getInstance(IssueManager.class).count(getProject(), SecurityUtils.getUser(), getQuery().getCriteria()));
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getQuery() != null);
-			}
-			
-		});
+		if (getQuery() != null) {
+			PageParameters params = IssueListPage.paramsOf(getProject(), getQuery().toString(), 1);
+			head.add(new BookmarkablePageLink<Void>("viewAsList", IssueListPage.class, params));
+		} else {
+			head.add(new WebMarkupContainer("viewAsList").setVisible(false));
+		}
 		
 		head.add(new ModalLink("addCard") {
 
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new AppendLoadingIndicatorListener(false));
+			}
+			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				return new NewCardPanel(id) {
@@ -265,11 +268,6 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 						return getQuery().getCriteria();
 					}
 
-					@Override
-					protected void onAdded(AjaxRequestTarget target, Issue issue) {
-						target.add(BoardColumnPanel.this);
-					}
-					
 				};
 			}
 
@@ -284,38 +282,25 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 			
 		});
 		
+		head.add(new CardCountLabel("count") {
+
+			@Override
+			protected Project getProject() {
+				return BoardColumnPanel.this.getProject();
+			}
+
+			@Override
+			protected IssueQuery getQuery() {
+				return BoardColumnPanel.this.getQuery();
+			}
+
+		});
+		
 		add(ajaxBehavior = new AbstractPostAjaxBehavior() {
 			
 			private void markAccepted(AjaxRequestTarget target, Issue issue, boolean accepted) {
 				target.appendJavaScript(String.format("onedev.server.issueBoards.markAccepted(%d, %b);", 
 						issue.getId(), accepted));
-			}
-			
-			private void checkMatched(AjaxRequestTarget target, Issue issue) {
-				if (getQuery().matches(issue, SecurityUtils.getUser())) {
-					target.add(BoardColumnPanel.this);
-				} else {
-					new ModalPanel(target) {
-
-						@Override
-						protected Component newContent(String id) {
-							return new CardUnmatchedPanel(id) {
-								
-								@Override
-								protected void onClose(AjaxRequestTarget target) {
-									close();
-								}
-								
-								@Override
-								protected Issue getIssue() {
-									return issue;
-								}
-								
-							};
-						}
-						
-					};
-				}
 			}
 			
 			@Override
@@ -331,7 +316,6 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					
 					OneDev.getInstance(IssueActionManager.class).changeMilestone(issue, getMilestone(), SecurityUtils.getUser());
 					markAccepted(target, issue, true);
-					checkMatched(target, issue);
 				} else if (fieldName.equals(IssueConstants.FIELD_STATE)) {
 					IssueWorkflow workflow = getProject().getIssueWorkflow();
 					AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);
@@ -358,7 +342,6 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 									@Override
 									protected void onSaved(AjaxRequestTarget target) {
 										markAccepted(target, getIssue(), true);
-										checkMatched(target, getIssue());
 										close();
 									}
 									
@@ -385,7 +368,6 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					} else {
 						OneDev.getInstance(IssueActionManager.class).changeState(issue, getColumn(), new HashMap<>(), null, SecurityUtils.getUser());
 						markAccepted(target, issue, true);
-						checkMatched(target, issue);
 					}
 				} else {
 					if (!SecurityUtils.canAdministrate(issue.getProject().getFacade())) 
@@ -395,7 +377,6 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					fieldValues.put(fieldName, getColumn());
 					OneDev.getInstance(IssueActionManager.class).changeFields(issue, fieldValues, SecurityUtils.getUser());
 					markAccepted(target, issue, true);
-					checkMatched(target, issue);
 				}
 			}
 			

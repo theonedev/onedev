@@ -21,7 +21,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.MultilineLabel;
-import io.onedev.server.web.component.issuelist.IssueListPanel;
+import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.milestone.MilestoneDueLabel;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
 import io.onedev.server.web.page.project.issues.IssuesPage;

@@ -24,9 +24,7 @@ import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.issueboards.BoardEditPage;
 import io.onedev.server.web.page.project.issues.issueboards.IssueBoardsPage;
-import io.onedev.server.web.page.project.issues.issueboards.NewBoardPage;
 import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
@@ -116,7 +114,7 @@ public abstract class IssuesPage extends ProjectPage {
 			}
 			
 		});
-		tabs.add(new IssuesTab("Boards", IssueBoardsPage.class, NewBoardPage.class, BoardEditPage.class));
+		tabs.add(new IssuesTab("Boards", IssueBoardsPage.class));
 		tabs.add(new IssuesTab("Milestones", MilestoneListPage.class, NewMilestonePage.class, 
 				MilestoneDetailPage.class, MilestoneEditPage.class));
 		

@@ -702,7 +702,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		resolvedRevision = null;
 		resolvedRevision = getProject().getObjectId(state.blobIdent.revision);
 		
-		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
+		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 		newRevisionPicker(target);
 		target.add(revisionIndexing);
 		newBlobNavigator(target);
@@ -872,7 +872,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			newBlobOperations(target);
 			newBlobContent(target);
 			resizeWindow(target);
-			OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
+			OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 		} else if (state.mark != null) {
 			if (get(BLOB_CONTENT_ID) instanceof Markable) {
 				// This logic is added for performance reason, we do not want to 
@@ -908,14 +908,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			state.commentId = null;
 			state.mark = null;
 		}
-		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
+		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 		pushState(target);
 	}
 
 	@Override
 	public void onAddComment(AjaxRequestTarget target, TextRange mark) {
 		state.commentId = null;
-		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
+		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 		state.mark = mark;
 		pushState(target);
 	}

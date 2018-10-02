@@ -32,7 +32,7 @@ import io.onedev.server.util.facade.TeamFacade;
 import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.projectlist.ProjectListPanel;
+import io.onedev.server.web.component.project.list.ProjectListPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.utils.matchscore.MatchScoreProvider;

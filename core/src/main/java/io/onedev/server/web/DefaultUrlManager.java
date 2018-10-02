@@ -25,7 +25,7 @@ import io.onedev.server.model.PullRequestAction;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
+import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 
 @Singleton
 public class DefaultUrlManager implements UrlManager {
@@ -47,7 +47,7 @@ public class DefaultUrlManager implements UrlManager {
 		PageParametersEncoder paramsEncoder = new PageParametersEncoder();
 		if (request != null) {
 			PageParameters params = new PageParameters();
-			RequestChangesPage.fillParams(params, RequestChangesPage.getState(comment));
+			PullRequestChangesPage.fillParams(params, PullRequestChangesPage.getState(comment));
 			return urlFor(request) + "/changes" + paramsEncoder.encodePageParameters(params);
 		} else {
 			CompareContext compareContext = comment.getCompareContext();

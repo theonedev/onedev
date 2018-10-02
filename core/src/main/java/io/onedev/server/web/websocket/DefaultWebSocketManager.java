@@ -47,7 +47,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	}
 	
 	@Override
-	public void onObserverChanged(BasePage page) {
+	public void notifyObserverChange(BasePage page) {
 		String sessionId = page.getSession().getId();
 		if (sessionId != null) {
 			observables.put(new PageKey(sessionId, new PageIdKey(page.getPageId())), page.findWebSocketObservables());
@@ -65,7 +65,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 
 	@Sessional
 	@Override
-	public void onObservableChanged(String observable, @Nullable PageKey sourcePageKey) {
+	public void notifyObservableChange(String observable, @Nullable PageKey sourcePageKey) {
 		dao.doAfterCommit(new Runnable() {
 
 			@Override

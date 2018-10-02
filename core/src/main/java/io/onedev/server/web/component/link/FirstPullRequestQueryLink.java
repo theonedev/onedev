@@ -9,14 +9,14 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
+import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 
 public class FirstPullRequestQueryLink extends ViewStateAwarePageLink<Void> {
 
 	private static final long serialVersionUID = 1L;
 
 	public FirstPullRequestQueryLink(String id, Project project) {
-		super(id, RequestListPage.class, getPageParameters(project));
+		super(id, PullRequestListPage.class, getPageParameters(project));
 	}
 
 	private static PageParameters getPageParameters(Project project) {
@@ -37,7 +37,7 @@ public class FirstPullRequestQueryLink extends ViewStateAwarePageLink<Void> {
 			} catch (Exception e) {
 			}
 		} 
-		return RequestListPage.paramsOf(project, query);
+		return PullRequestListPage.paramsOf(project, query, 0);
 	}
 	
 }

@@ -88,7 +88,7 @@ import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.projectcomment.CommentInput;
+import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.revisionpicker.RevisionSelector;
 import io.onedev.server.web.component.sourceformat.OptionChangeCallback;
 import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
@@ -228,6 +228,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 			cookie = new Cookie(COOKIE_OUTLINE, "yes");
 			outline.setVisible(true);
 		}
+		cookie.setPath("/");
 		cookie.setMaxAge(Integer.MAX_VALUE);
 		response.addCookie(cookie);
 		target.add(outline);

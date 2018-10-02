@@ -14,7 +14,7 @@ import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.Response;
-import io.onedev.server.web.component.userchoice.AbstractUserChoiceProvider;
+import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 import io.onedev.utils.matchscore.MatchScoreProvider;
 import io.onedev.utils.matchscore.MatchScoreUtils;
 

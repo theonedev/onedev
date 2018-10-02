@@ -169,6 +169,7 @@ public class MilestoneListPage extends IssuesPage {
 					IModel<Milestone> rowModel) {
 				cellItem.add(new MilestoneDueLabel(componentId, rowModel));
 			}
+			
 		});
 		
 		columns.add(new AbstractColumn<Milestone, Void>(Model.of("Issues")) {

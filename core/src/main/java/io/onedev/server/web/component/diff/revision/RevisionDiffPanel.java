@@ -89,7 +89,7 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.component.projectcomment.CommentInput;
+import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.revisionpicker.RevisionSelector;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
@@ -520,6 +520,7 @@ public class RevisionDiffPanel extends Panel {
 					WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 					Cookie cookie = new Cookie(COOKIE_VIEW_MODE, diffMode.name());
 					cookie.setMaxAge(Integer.MAX_VALUE);
+					cookie.setPath("/");
 					response.addCookie(cookie);
 					target.add(RevisionDiffPanel.this);
 				}

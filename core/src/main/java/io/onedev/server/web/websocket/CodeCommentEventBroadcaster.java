@@ -21,7 +21,7 @@ public class CodeCommentEventBroadcaster {
 	@Listen
 	public void on(CodeCommentEvent event) {
 		PageKey sourcePageKey = WicketUtils.getPageKey();
-		webSocketManager.onObservableChanged(CodeComment.getWebSocketObservable(event.getComment().getId()), sourcePageKey);
+		webSocketManager.notifyObservableChange(CodeComment.getWebSocketObservable(event.getComment().getId()), sourcePageKey);
 	}
 		
 }

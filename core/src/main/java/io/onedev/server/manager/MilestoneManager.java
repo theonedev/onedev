@@ -8,6 +8,7 @@ import io.onedev.server.persistence.dao.EntityManager;
 
 public interface MilestoneManager extends EntityManager<Milestone> {
 	
+	@Nullable
 	Milestone find(Project project, String name);
 	
 	void delete(Milestone milestone, @Nullable Milestone moveIssuesToMilestone);

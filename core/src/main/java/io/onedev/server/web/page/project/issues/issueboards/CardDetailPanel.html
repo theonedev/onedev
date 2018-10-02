@@ -1,35 +1,16 @@
 <wicket:panel>
 	<div class="board-card-detail">
-		<div class="modal-header">
-			<button wicket:id="close" type="button" class="close">&times;</button>
-			<h4 id="modal-title" class="modal-title">
-				<span wicket:id="number" class="number"></span>
-				<span wicket:id="title" class="title"></span>
-			</h4>
+		<div class="modal-header clearfix">
+			<div wicket:id="title" class="pull-left"></div>
+			<button wicket:id="close" type="button" class="close pull-right">&times;</button>
 		</div>
-		<div class="modal-body">
-			<table>
-				<tr wicket:id="fieldPairs">
-					<td class="name">
-						<div wicket:id="name1"></div>
-					</td>
-					<td class="value">
-						<div wicket:id="value1"></div>
-					</td>
-					<td class="spacing"></td>
-					<td class="name">
-						<div wicket:id="name2"></div>
-					</td>
-					<td class="value">
-						<div wicket:id="value2"></div>
-					</td>
-				</tr>
-			</table>
-			<div wicket:id="description" class="description"></div>
+		<div class="body">
+			<div class="main">
+				<div wicket:id="operations"></div>
+				<ul wicket:id="tabs" class="tabs nav nav-tabs"></ul>
+				<div wicket:id="tabContent"></div>
+			</div>
+			<div wicket:id="side" class="side"></div>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="userFrag">
-		<a wicket:id="avatar" class="avatar"></a>
-		<a wicket:id="name" class="name"></a> 
-	</wicket:fragment>
 </wicket:panel>

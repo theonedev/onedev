@@ -75,8 +75,8 @@ import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.mergepreview.MergePreviewPage;
+import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
+import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergePreviewPage;
 import io.onedev.utils.Range;
 import io.onedev.utils.RangeUtils;
 import io.onedev.utils.StringUtils;
@@ -220,7 +220,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					&& request.getSource() != null 
 					&& request.getSource().getObjectName(false) != null
 					&& SecurityUtils.canModify(request.getSourceProject(), request.getSourceBranch(), change.getPath())
-					&& (getPage() instanceof RequestChangesPage || getPage() instanceof MergePreviewPage)) { 
+					&& (getPage() instanceof PullRequestChangesPage || getPage() instanceof MergePreviewPage)) { 
 				// we are in context of a pull request and pull request source branch exists, so we edit in source branch instead
 				Link<Void> editLink = new Link<Void>("editFile") {
 

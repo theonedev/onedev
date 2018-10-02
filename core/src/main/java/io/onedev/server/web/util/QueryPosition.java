@@ -7,11 +7,13 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.server.web.WebConstants;
+
 public class QueryPosition implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public static String PAGE_PARAM = "query-position";
+	public static String QUERY_POSITION_PARAM = "query-position";
 	
 	private final String query;
 	
@@ -38,12 +40,12 @@ public class QueryPosition implements Serializable {
 	}
 
 	public void fill(PageParameters params) {
-		params.add(PAGE_PARAM, query + ":" + count + ":" + offset);
+		params.add(QUERY_POSITION_PARAM, query + ":" + count + ":" + offset);
 	}
 	
 	@Nullable
 	public static QueryPosition from(PageParameters params) {
-		String positionStr = params.get(PAGE_PARAM).toOptionalString();
+		String positionStr = params.get(QUERY_POSITION_PARAM).toOptionalString();
 		if (positionStr != null) {
 			String tempStr = StringUtils.substringBeforeLast(positionStr, ":");
 			int offset = Integer.parseInt(StringUtils.substringAfterLast(positionStr, ":"));
@@ -54,4 +56,20 @@ public class QueryPosition implements Serializable {
 			return null;
 		}
 	}
+	
+	@Nullable
+	public static String getQuery(@Nullable QueryPosition position) {
+		if (position != null)
+			return position.getQuery();
+		else
+			return null;
+	}
+	
+	public static int getPage(@Nullable QueryPosition position) {
+		if (position != null)
+			return position.getOffset() / WebConstants.PAGE_SIZE;
+		else
+			return 0;
+	}
+	
 }

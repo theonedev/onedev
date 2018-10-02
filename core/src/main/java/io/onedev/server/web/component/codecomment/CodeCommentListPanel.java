@@ -51,9 +51,9 @@ import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
-import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
+import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
+import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.VisibleVisitor;
@@ -62,7 +62,7 @@ import io.onedev.utils.StringUtils;
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends GenericPanel<String> {
 
-	private static final Logger logger = LoggerFactory.getLogger(RequestListPage.class);
+	private static final Logger logger = LoggerFactory.getLogger(PullRequestListPage.class);
 	
 	private static final int MAX_COMMENT_LEN = 75;
 	
@@ -237,8 +237,8 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 				} else {
 					PullRequest request = getPullRequest();
 					if (request != null) {
-						RequestDetailPage page = (RequestDetailPage) getPage();
-						setResponsePage(RequestChangesPage.class, RequestChangesPage.paramsOf(request, page.getPosition(), comment));
+						PullRequestDetailPage page = (PullRequestDetailPage) getPage();
+						setResponsePage(PullRequestChangesPage.class, PullRequestChangesPage.paramsOf(request, page.getPosition(), comment));
 					} else {
 						String compareCommit = comment.getCompareContext().getCompareCommit();
 						if (!compareCommit.equals(comment.getMarkPos().getCommit())

@@ -62,6 +62,7 @@ import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.pullrequest.PullRequestActionEvent;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
+import io.onedev.server.event.pullrequest.PullRequestDeleted;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.exception.OneException;
@@ -1080,6 +1081,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			requests.addAll(query(criteria, 0, count));
 		} 
 		return requests;
+	}
+
+	@Transactional
+	@Override
+	public void delete(User user, PullRequest request) {
+		delete(request);
+		listenerRegistry.post(new PullRequestDeleted(user, request));
 	}
 	
 }

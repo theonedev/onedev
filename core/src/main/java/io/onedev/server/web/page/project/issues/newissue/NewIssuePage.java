@@ -19,9 +19,9 @@ import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.web.component.newissue.NewIssueEditor;
+import io.onedev.server.web.component.issue.create.NewIssueEditor;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.issuedetail.activities.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.issuedetail.IssueActivitiesPage;
 import io.onedev.server.web.page.security.LoginPage;
 
 @SuppressWarnings("serial")

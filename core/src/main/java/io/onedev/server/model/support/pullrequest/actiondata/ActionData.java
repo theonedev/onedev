@@ -9,7 +9,7 @@ import org.apache.wicket.Component;
 import io.onedev.server.model.PullRequestAction;
 import io.onedev.server.model.support.CommentSupport;
 import io.onedev.server.model.support.DiffSupport;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.activity.ActionDataPanel;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.ActionDataPanel;
 
 public abstract class ActionData implements Serializable {
 

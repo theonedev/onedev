@@ -1,0 +1,15 @@
+<wicket:panel>
+	<div wicket:id="content" class="issue-title"></div>
+	<wicket:fragment wicket:id="titleEditFrag">
+		<form wicket:id="form" class="form-inline clearable-wrapper">
+			<div wicket:id="feedback"></div>
+			<input wicket:id="title" type="text" placeholder="Input title" class="form-control"></input>
+			<input wicket:id="save" type="submit" value="Save" class="btn btn-primary"/>
+			<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"/>
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="titleViewFrag">
+		<span wicket:id="title"></span>
+		<a wicket:id="edit" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
+	</wicket:fragment>
+</wicket:panel>

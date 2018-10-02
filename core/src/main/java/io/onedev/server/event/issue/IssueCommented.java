@@ -21,4 +21,9 @@ public class IssueCommented extends IssueEvent implements MarkdownAware {
 		return getComment().getContent();
 	}
 
+	@Override
+	public boolean affectsBoards() {
+		return false;
+	}
+
 }

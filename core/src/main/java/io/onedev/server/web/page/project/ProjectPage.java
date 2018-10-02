@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.EntityNotFoundException;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
@@ -27,6 +25,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.Project;
@@ -57,9 +56,9 @@ import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
 import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.page.project.moreinfo.MoreInfoPanel;
 import io.onedev.server.web.page.project.pullrequests.InvalidRequestPage;
-import io.onedev.server.web.page.project.pullrequests.newrequest.NewRequestPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
-import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
+import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
+import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
@@ -89,7 +88,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
 		
 		if (project == null) 
-			throw new EntityNotFoundException("Unable to find project " + projectName);
+			throw new OneException("Unable to find project " + projectName);
 		
 		Long projectId = project.getId();
 		
@@ -165,7 +164,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 							0, ProjectTagsPage.class));
 					
 					tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
-							0, RequestListPage.class, NewRequestPage.class, RequestDetailPage.class, InvalidRequestPage.class) {
+							0, PullRequestListPage.class, NewPullRequestPage.class, PullRequestDetailPage.class, InvalidRequestPage.class) {
 						
 						@Override
 						public Component render(String componentId) {

@@ -53,10 +53,10 @@ import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.component.projectcomment.CommentInput;
+import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.changes.RequestChangesPage;
+import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
@@ -402,12 +402,12 @@ public abstract class CodeCommentPanel extends Panel {
 
 		if (getPullRequest() != null) {
 			QueryPosition position;
-			if (getPage() instanceof RequestDetailPage) 
-				position = ((RequestDetailPage)getPage()).getPosition();
+			if (getPage() instanceof PullRequestDetailPage) 
+				position = ((PullRequestDetailPage)getPage()).getPosition();
 			else
 				position = null;
-			PageParameters params = RequestChangesPage.paramsOf(getPullRequest(), position, getComment());
-			add(new BookmarkablePageLink<Void>("outdatedContext", RequestChangesPage.class, params) {
+			PageParameters params = PullRequestChangesPage.paramsOf(getPullRequest(), position, getComment());
+			add(new BookmarkablePageLink<Void>("outdatedContext", PullRequestChangesPage.class, params) {
 
 				@Override
 				public void onEvent(IEvent<?> event) {
@@ -426,8 +426,8 @@ public abstract class CodeCommentPanel extends Panel {
 					CodeComment comment = getComment();
 					if (getPage() instanceof ProjectBlobPage) {
 						setVisible(comment.isContextChanged(getPullRequest()));
-					} else if (getPage() instanceof RequestChangesPage) {
-						RequestChangesPage page = (RequestChangesPage) getPage();
+					} else if (getPage() instanceof PullRequestChangesPage) {
+						PullRequestChangesPage page = (PullRequestChangesPage) getPage();
 						if (page.getState().newCommit.equals(comment.getMarkPos().getCommit())) {
 							setVisible(comment.isContextChanged(getPullRequest()));
 						} else {

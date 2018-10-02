@@ -13,11 +13,11 @@ import com.google.common.collect.Lists;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.issue.IssueDeleted;
 import io.onedev.server.event.issue.IssueEvent;
-import io.onedev.server.event.pullrequest.PullRequestActionEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
-import io.onedev.server.event.pullrequest.PullRequestCommentAdded;
-import io.onedev.server.event.pullrequest.PullRequestOpened;
+import io.onedev.server.event.pullrequest.PullRequestDeleted;
+import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.CodeComment;
@@ -254,7 +254,8 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 
 	@Listen
 	public void on(IssueEvent event) {
-		visitIssue(event.getUser(), event.getIssue());
+		if (!(event instanceof IssueDeleted))
+			visitIssue(event.getUser(), event.getIssue());
 	}
 	
 	@Listen
@@ -263,28 +264,15 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 	}
 
 	@Listen
-	public void on(PullRequestCommentAdded event) {
-		visitPullRequest(event.getUser(), event.getRequest());
-	}
-	
-	@Listen
-	public void on(PullRequestCodeCommentEvent event) {
-		if (!event.isDerived()) {
-			visitPullRequest(event.getUser(), event.getRequest());
-			visitPullRequestCodeComments(event.getUser(), event.getRequest());
+	public void on(PullRequestEvent event) {
+		if (event.getUser() != null && !(event instanceof PullRequestDeleted)) {
+			if (!(event instanceof PullRequestCodeCommentEvent)) {			
+				visitPullRequest(event.getUser(), event.getRequest());
+			} else if (!((PullRequestCodeCommentEvent) event).isDerived()) {
+				visitPullRequest(event.getUser(), event.getRequest());
+				visitPullRequestCodeComments(event.getUser(), event.getRequest());
+			}
 		}
-	}
-	
-	@Listen
-	public void on(PullRequestOpened event) {
-		if (event.getRequest().getSubmitter() != null)
-			visitPullRequest(event.getRequest().getSubmitter(), event.getRequest());
-	}
-	
-	@Listen
-	public void on(PullRequestActionEvent event) {
-		if (event.getUser() != null)
-			visitPullRequest(event.getUser(), event.getRequest());
 	}
 
 	@Override

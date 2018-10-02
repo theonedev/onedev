@@ -18,4 +18,6 @@ public abstract class IssueEvent extends ProjectEvent {
 	public Issue getIssue() {
 		return issue;
 	}
+	
+	public abstract boolean affectsBoards();
 }

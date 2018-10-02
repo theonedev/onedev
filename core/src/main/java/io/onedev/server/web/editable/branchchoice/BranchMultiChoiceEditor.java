@@ -12,8 +12,8 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.web.component.branchchoice.BranchChoiceProvider;
-import io.onedev.server.web.component.branchchoice.BranchMultiChoice;
+import io.onedev.server.web.component.branch.choice.BranchChoiceProvider;
+import io.onedev.server.web.component.branch.choice.BranchMultiChoice;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;

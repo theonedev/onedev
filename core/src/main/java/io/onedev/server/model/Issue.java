@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,6 +30,8 @@ import javax.persistence.Version;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -37,6 +40,7 @@ import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.LastActivity;
@@ -135,6 +139,8 @@ public class Issue extends AbstractEntity implements Referenceable {
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueWatch> watches = new ArrayList<>();
+	
+	private transient List<RevCommit> commits;
 	
 	public long getVersion() {
 		return version;
@@ -461,4 +467,26 @@ public class Issue extends AbstractEntity implements Referenceable {
 	public IssueFacade getFacade() {
 		return new IssueFacade(getId(), getProject().getId(), getNumber());
 	}
+	
+	public List<RevCommit> getCommits() {
+		if (commits == null) {
+			commits = new ArrayList<>();
+			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
+			for (ObjectId commitId: commitInfoManager.getFixCommits(getProject(), getNumber())) {
+				RevCommit commit = getProject().getRevCommit(commitId, false);
+				if (commit != null)
+					commits.add(commit);
+			}
+			Collections.sort(commits, new Comparator<RevCommit>() {
+	
+				@Override
+				public int compare(RevCommit o1, RevCommit o2) {
+					return o2.getCommitTime() - o1.getCommitTime();
+				}
+				
+			});
+		}
+		return commits;		
+	}
+	
 }

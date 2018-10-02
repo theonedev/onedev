@@ -14,4 +14,9 @@ public class IssueOpened extends IssueEvent implements MarkdownAware {
 		return getIssue().getDescription();
 	}
 
+	@Override
+	public boolean affectsBoards() {
+		return true;
+	}
+
 }

@@ -1,0 +1,17 @@
+<wicket:panel>
+	<form wicket:id="form" class="leave-confirm board-edit">
+		<div class="modal-header">
+			<button wicket:id="close" type="button" class="close">&times;</button>
+			<h4 id="modal-title" class="modal-title">Edit Board</h4>
+		</div>
+		<div class="modal-body">
+			<div wicket:id="editor"></div>
+		</div>
+		<div class="modal-footer">
+			<div class="form-group">
+				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save"></input>
+				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+			</div>
+		</div>
+	</form>
+</wicket:panel>

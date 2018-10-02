@@ -79,4 +79,5 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	List<PullRequest> query(Project targetProject, String term, int count);
 	
+	void delete(User user, PullRequest request);
 }

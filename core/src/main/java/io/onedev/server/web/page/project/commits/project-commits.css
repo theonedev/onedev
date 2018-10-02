@@ -24,7 +24,7 @@
 	font-weight: bold;
 	font-size: 15px;
 }
-#project-commits>.main>.body .detail {
+#project-commits>.main>.body .commit>.detail {
 	padding-left: 8px; 
 	padding-right: 8px;
 }

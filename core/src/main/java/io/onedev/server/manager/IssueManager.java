@@ -48,4 +48,5 @@ public interface IssueManager extends EntityManager<Issue> {
 	
 	void fixFieldValueOrders(Project project);
 	
+	void delete(User user, Issue issue);
 }

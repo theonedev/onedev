@@ -37,7 +37,7 @@ public class FirstIssueQueryLink extends ViewStateAwarePageLink<Void> {
 			} catch (Exception e) {
 			}
 		} 
-		return IssueListPage.paramsOf(project, query);
+		return IssueListPage.paramsOf(project, query, 0);
 	}
 	
 }

@@ -77,7 +77,7 @@ class AssistPanel extends Panel {
 					}
 				}
 			}
-			
+
 		});
 
 		RepeatingView hintsView = new RepeatingView("hints");

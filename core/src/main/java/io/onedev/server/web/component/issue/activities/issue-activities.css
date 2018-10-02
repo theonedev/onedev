@@ -1,0 +1,72 @@
+.issue-activities>.options {
+	text-align: right;
+}
+.issue-activities>.options>div {
+	padding-left: 12px;
+	display: inline-block;
+}
+.issue-activities tr.activity.new>.avatar {
+	border-left-color: #4667EE;
+}
+
+.issue-activities>table>tbody>tr>td {
+	border-bottom: 1px solid #EEE;
+	padding: 16px 0;
+}
+.issue-activities>table>tbody>tr:last-child>td {
+	border-bottom: none;
+}
+.issue-activities>table>tbody>tr>td.avatar {
+	width: 40px;
+	border-left: 4px solid white;
+	padding-left: 12px;
+}
+.issue-activities>table>tbody>tr>td.avatar .avatar {
+	width: 40px;
+	height: 40px;
+}
+.issue-activities>table>tbody>tr>td.content {
+	padding-left: 20px;
+}
+.issue-activities .activity>.head {
+	color: #888;
+}
+.issue-activities .activity.commit .body a.summary {
+	font-size: 14px;
+	margin-right: 4px;
+}
+
+.issue-activities .activity>.body {
+	margin-top: 8px;
+}
+.issue-activities .activity>.body>.actions,
+.issue-activities .activity>.body>.action-data>div>.actions {
+	margin-top: 8px;
+}
+.issue-activities .activity>.body>.actions a,
+.issue-activities .activity>.body>.action-data>div>.actions a {
+	color: #888;
+	margin-right: 0;
+}
+.issue-activities .activity>.body .actions .middot {
+	margin: 0 4px;
+}
+.issue-activities .activity>.body .action-data .plain.diff {
+	margin-bottom: 12px;
+}
+.issue-activities .activity>.head a {
+	color: #999;
+	margin-left: 8px;
+}
+.issue-activities .add-comment {
+	margin-top: 16px;
+}
+.issue-activities .login-to-comment {
+	border: 1px solid #EEE;
+	vertical-align: center;
+	text-align: center;
+	padding: 20px;
+	font-size: 20px;
+	background: #F9F9F9;
+	border-radius: 4px;	
+}

@@ -1,0 +1,37 @@
+<wicket:panel>
+	<div class="issue-activities">
+		<div class="options">
+			<div class="checkbox">
+				<label>
+					<input type="checkbox" wicket:id="showComments"/> Comments
+				</label>
+			</div>
+			<div class="checkbox">
+				<label>
+					<input type="checkbox" wicket:id="showChangeHistory"/> Change History
+				</label>
+			</div>
+		</div>
+		<table>
+			<tr wicket:id="activities" class="activity">
+				<td class="avatar"><a wicket:id="avatar"></a></td>
+				<td wicket:id="content" class="content"></td>
+			</tr>
+		</table>
+		<div wicket:id="addComment"></div>
+	</div>
+	<wicket:fragment wicket:id="loginToCommentFrag">
+		<div class="login-to-comment">
+			<a wicket:id="login">Login to comment</a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="addCommentFrag">
+		<form wicket:id="form" class="add-comment leave-confirm no-autofocus">
+			<div wicket:id="feedback"></div>
+			<div wicket:id="comment" placeholder="Leave a comment"></div>
+			<div class="actions">
+				<a wicket:id="save" class="btn btn-primary dirty-aware">Comment</a>
+			</div>
+		</form>
+	</wicket:fragment>
+</wicket:panel>

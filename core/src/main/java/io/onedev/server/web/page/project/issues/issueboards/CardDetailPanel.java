@@ -1,48 +1,67 @@
 package io.onedev.server.web.page.project.issues.issueboards;
 
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_COMMENT_COUNT;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_MILESTONE;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_STATE;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_SUBMITTER;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_SUBMIT_DATE;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_VOTE_COUNT;
-
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.list.ListItem;
-import org.apache.wicket.markup.html.list.ListView;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.CodeCommentRelationInfoManager;
+import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.IssueField;
+import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.search.entity.build.FixedIssueCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.avatar.AvatarLink;
-import io.onedev.server.web.component.issuestate.IssueStateLabel;
-import io.onedev.server.web.component.link.UserLink;
-import io.onedev.server.web.component.markdown.ContentVersionSupport;
-import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.page.project.issues.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
-import jersey.repackaged.com.google.common.collect.Lists;
+import io.onedev.server.util.inputspec.InputContext;
+import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.component.build.list.BuildListPanel;
+import io.onedev.server.web.component.commit.list.CommitListPanel;
+import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
+import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
+import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
+import io.onedev.server.web.component.issue.side.IssueSidePanel;
+import io.onedev.server.web.component.issue.title.IssueTitlePanel;
+import io.onedev.server.web.component.tabbable.AjaxActionTab;
+import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 
 @SuppressWarnings("serial")
-abstract class CardDetailPanel extends GenericPanel<Issue> {
+abstract class CardDetailPanel extends GenericPanel<Issue> implements InputContext {
 
+	private static final String TAB_CONTENT_ID = "tabContent";
+	
+	@SuppressWarnings("unused")
+	private String buildQuery;
+	
 	public CardDetailPanel(String id, IModel<Issue> model) {
 		super(id, model);
 	}
@@ -51,134 +70,252 @@ abstract class CardDetailPanel extends GenericPanel<Issue> {
 		return getModelObject();
 	}
 	
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		add(new Label("number", "#" + getIssue().getNumber()));
-		
-		add(new Label("title", getIssue().getTitle()));
-
-		List<String> fieldNames = Lists.newArrayList(FIELD_STATE);
-		fieldNames.add(FIELD_SUBMITTER);
-		fieldNames.add(FIELD_SUBMIT_DATE);
-		for (String fieldName: getIssue().getFieldNames()) {
-			if (getIssue().isFieldVisible(fieldName))
-				fieldNames.add(fieldName);
-		}
-		fieldNames.add(FIELD_MILESTONE);
-		fieldNames.add(FIELD_COMMENT_COUNT);
-		fieldNames.add(FIELD_VOTE_COUNT);
-
-		if (fieldNames.size() % 2 != 0)
-			fieldNames.add(null);
-		
-		List<FieldPair> fieldPairs = new ArrayList<>();
-		for (int i=0; i<fieldNames.size()/2; i++) 
-			fieldPairs.add(new FieldPair(fieldNames.get(2*i), fieldNames.get(2*i+1)));
-		
-		add(new ListView<FieldPair>("fieldPairs", fieldPairs) {
+	private Project getProject() {
+		return getIssue().getProject();
+	}
+	
+	private Component newActivitiesPanel() {
+		return new IssueActivitiesPanel(TAB_CONTENT_ID) {
 
 			@Override
-			protected void populateItem(ListItem<FieldPair> item) {
-				FieldPair pair = item.getModelObject();
-				if (pair.getField1() != null) {
-					item.add(new Label("name1", pair.getField1()));
-					item.add(renderField("value1", pair.getField1()));
-				} else {
-					item.add(new WebMarkupContainer("name1"));
-					item.add(new WebMarkupContainer("value1"));
-				}
-				if (pair.getField2() != null) {
-					item.add(new Label("name2", pair.getField2()));
-					item.add(renderField("value2", pair.getField2()));
-				} else {
-					item.add(new WebMarkupContainer("name2"));
-					item.add(new WebMarkupContainer("value2"));
-				}
+			protected Issue getIssue() {
+				return CardDetailPanel.this.getIssue();
+			}
+			
+		}.setOutputMarkupId(true);
+	}
+	
+	@Override
+	protected void onBeforeRender() {
+		addOrReplace(new IssueTitlePanel("title") {
+
+			@Override
+			protected Issue getIssue() {
+				return CardDetailPanel.this.getIssue();
 			}
 
-			private Component renderField(String componentId, String fieldName) {
-				switch (fieldName) {
-				case FIELD_STATE:
-					return new IssueStateLabel(componentId, CardDetailPanel.this.getModel());
-				case FIELD_SUBMITTER:
-					Fragment fragment = new Fragment(componentId, "userFrag", CardDetailPanel.this);
-					fragment.add(new UserLink("name", User.getForDisplay(getIssue().getSubmitter(), getIssue().getSubmitterName())));
-					fragment.add(new AvatarLink("avatar", getIssue().getSubmitter()));
-					return fragment;
-				case FIELD_SUBMIT_DATE:
-					return new Label(componentId, DateUtils.formatAge(getIssue().getSubmitDate()));
-				case FIELD_MILESTONE:
-					if (getIssue().getMilestone() != null) {
-						return new BookmarkablePageLink<Void>(componentId, MilestoneDetailPage.class, 
-								MilestoneDetailPage.paramsOf(getIssue().getMilestone(), null)) {
+		});
+		
+		addOrReplace(new IssueOperationsPanel("operations") {
 
-							@Override
-							public IModel<?> getBody() {
-								return Model.of(getIssue().getMilestone().getName());
-							}
-							
-						};
-					} else {
-						return new Label(componentId, "<i>No milestone</i>").setEscapeModelStrings(false);
-					}
-				case FIELD_COMMENT_COUNT:
-					return new Label(componentId, getIssue().getCommentCount());
-				case FIELD_VOTE_COUNT:
-					return new Label(componentId, getIssue().getVoteCount());
-				default:
-					return new FieldValuesPanel(componentId) {
+			@Override
+			protected Issue getIssue() {
+				return CardDetailPanel.this.getIssue();
+			}
 
-						@Override
-						protected Issue getIssue() {
-							return CardDetailPanel.this.getIssue();
-						}
+			@Override
+			protected void onStateChanged(AjaxRequestTarget target) {
+				target.add(CardDetailPanel.this);
+			}
 
-						@Override
-						protected IssueField getField() {
-							return getIssue().getFields().get(fieldName);
-						}
-						
-					};
-				}
+			@Override
+			protected Component newCreateIssueButton(String componentId, String templateQuery) {
+				return new WebMarkupContainer(componentId).setVisible(false);
 			}
 			
 		});
-		ContentVersionSupport contentVersionSupport;
-		if (SecurityUtils.canAdministrate(getIssue().getProject().getFacade())) {
-			contentVersionSupport = new ContentVersionSupport() {
 
-				@Override
-				public long getVersion() {
-					return getIssue().getVersion();
-				}
-				
-			};
-		} else {
-			contentVersionSupport = null;
-		}
-		
-		add(new MarkdownViewer("description", new IModel<String>() {
+		List<Tab> tabs = new ArrayList<>();
+		tabs.add(new AjaxActionTab(Model.of("Activities")) {
 
 			@Override
-			public String getObject() {
-				return getIssue().getDescription();
-			}
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public void setObject(String object) {
-				getIssue().setDescription(object);
-				OneDev.getInstance(IssueManager.class).save(getIssue());				
+			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+				Component content = newActivitiesPanel();
+				CardDetailPanel.this.replace(content);
+				target.add(content);
 			}
 			
-		}, contentVersionSupport).setVisible(getIssue().getDescription() != null));
+		});
+		
+		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
+		Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
+		
+		if (SecurityUtils.canReadCode(getProject().getFacade())) {
+			if (!fixCommits.isEmpty()) {		
+				tabs.add(new AjaxActionTab(Model.of("Commits")) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+						Component content = new CommitListPanel(TAB_CONTENT_ID, new AbstractReadOnlyModel<Project>() {
+
+							@Override
+							public Project getObject() {
+								return getIssue().getProject();
+							}
+							
+						}, new AbstractReadOnlyModel<List<RevCommit>>() {
+
+							@Override
+							public List<RevCommit> getObject() {
+								return getIssue().getCommits();
+							}
+							
+						}).setOutputMarkupId(true);
+						CardDetailPanel.this.replace(content);
+						target.add(content);
+					}
+					
+				});
+			}
+			CodeCommentRelationInfoManager codeCommentRelationInfoManager = OneDev.getInstance(CodeCommentRelationInfoManager.class); 
+			Collection<Long> pullRequestIds = new HashSet<>();
+			for (ObjectId commit: fixCommits) 
+				pullRequestIds.addAll(codeCommentRelationInfoManager.getPullRequestIds(getProject(), commit));		
+			if (!pullRequestIds.isEmpty()) {
+				tabs.add(new AjaxActionTab(Model.of("Pull Requests")) {
+
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+						Component content = new IssuePullRequestsPanel(TAB_CONTENT_ID) {
+
+							@Override
+							protected Issue getIssue() {
+								return CardDetailPanel.this.getIssue();
+							}
+							
+						}.setOutputMarkupId(true);
+						CardDetailPanel.this.replace(content);
+						target.add(content);
+					}
+					
+				});
+			}
+		}
+		if (!fixCommits.isEmpty()) {
+			tabs.add(new AjaxActionTab(Model.of("Builds")) {
+
+				@Override
+				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+					Component content = new BuildListPanel(TAB_CONTENT_ID, new PropertyModel<String>(CardDetailPanel.this, "buildQuery")) {
+
+						@Override
+						protected Project getProject() {
+							return getIssue().getProject();
+						}
+
+						@Override
+						protected BuildQuery getBaseQuery() {
+							return new BuildQuery(new FixedIssueCriteria(getIssue()), new ArrayList<>());
+						}
+
+						@Override
+						protected PagingHistorySupport getPagingHistorySupport() {
+							return null;
+						}
+
+						@Override
+						protected void onQueryUpdated(AjaxRequestTarget target) {
+						}
+
+						@Override
+						protected QuerySaveSupport getQuerySaveSupport() {
+							return null;
+						}
+
+					}.setOutputMarkupId(true);
+					
+					CardDetailPanel.this.replace(content);
+					target.add(content);
+				}
+				
+			});
+		}
+		
+		addOrReplace(new Tabbable("tabs", tabs).setOutputMarkupId(true));
+		
+		addOrReplace(new IssueSidePanel("side") {
+
+			@Override
+			protected Issue getIssue() {
+				return CardDetailPanel.this.getIssue();
+			}
+
+			@Override
+			protected QueryPositionSupport<Issue> getQueryPositionSupport() {
+				return CardDetailPanel.this.getQueryPositionSupport();
+			}
+
+			@Override
+			protected Component newDeleteLink(String componentId) {
+				AjaxLink<Void> deleteLink = new AjaxLink<Void>(componentId) {
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this issue?"));
+					}
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						OneDev.getInstance(IssueManager.class).delete(SecurityUtils.getUser(), getIssue());
+						onDeletedIssue(target);
+					}
+					
+				};
+				deleteLink.setVisible(SecurityUtils.canAdministrate(getIssue().getProject().getFacade()));
+				return deleteLink;
+			}
+			
+		});
+		addOrReplace(newActivitiesPanel());
+		
+		super.onBeforeRender();
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+
+		RequestCycle.get().getListeners().add(new IRequestCycleListener() {
+			
+			@Override
+			public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
+			}
+			
+			@Override
+			public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
+			}
+			
+			@Override
+			public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
+			}
+			
+			@Override
+			public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
+			}
+			
+			@Override
+			public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
+			}
+			
+			@Override
+			public IRequestHandler onException(RequestCycle cycle, Exception ex) {
+				return null;
+			}
+			
+			@Override
+			public void onEndRequest(RequestCycle cycle) {
+				if (SecurityUtils.getUser() != null) 
+					OneDev.getInstance(UserInfoManager.class).visitIssue(SecurityUtils.getUser(), getIssue());
+			}
+			
+			@Override
+			public void onDetach(RequestCycle cycle) {
+			}
+			
+			@Override
+			public void onBeginRequest(RequestCycle cycle) {
+			}
+			
+		});	
 		
 		add(new AjaxLink<Void>("close") {
+
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
@@ -186,28 +323,36 @@ abstract class CardDetailPanel extends GenericPanel<Issue> {
 			}
 			
 		});
+		
+		setOutputMarkupId(true);
 	}
 	
+	public List<String> getInputNames() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public boolean isReservedName(String inputName) {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public InputSpec getInputSpec(String inputName) {
+		return getProject().getIssueWorkflow().getFieldSpec(inputName);
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		String script = String.format("onedev.server.issueBoards.onCardDetailLoad('%s')", getMarkupId());
+		// Use onload to make sure perfect scrollbar working 
+		response.render(OnLoadHeaderItem.forScript(script));
+	}
+
 	protected abstract void onClose(AjaxRequestTarget target);
 	
-	private static class FieldPair implements Serializable {
-		
-		private final String field1;
-		
-		private final String field2;
-		
-		public FieldPair(String field1, String field2) {
-			this.field1 = field1;
-			this.field2 = field2;
-		}
-
-		public String getField1() {
-			return field1;
-		}
-
-		public String getField2() {
-			return field2;
-		}
-		
-	}
+	@Nullable
+	protected abstract QueryPositionSupport<Issue> getQueryPositionSupport();
+	
+	protected abstract void onDeletedIssue(AjaxRequestTarget target);
 }

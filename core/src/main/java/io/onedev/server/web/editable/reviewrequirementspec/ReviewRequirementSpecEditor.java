@@ -8,7 +8,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.reviewrequirement.ReviewRequirementInput;
+import io.onedev.server.web.component.review.ReviewRequirementInput;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;

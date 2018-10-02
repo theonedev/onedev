@@ -69,9 +69,9 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.branchchoice.BranchChoiceProvider;
-import io.onedev.server.web.component.branchchoice.BranchSingleChoice;
-import io.onedev.server.web.component.buildstatus.BuildsStatusPanel;
+import io.onedev.server.web.component.branch.choice.BranchChoiceProvider;
+import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
+import io.onedev.server.web.component.build.status.BuildsStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -82,8 +82,8 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
-import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.utils.StringUtils;
 
@@ -590,7 +590,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				WebMarkupContainer requestLink;
 				if (effectiveRequest != null && ab.getAhead() != 0) {
 					requestLink = new BookmarkablePageLink<Void>("effectiveRequest", 
-							RequestActivitiesPage.class, RequestActivitiesPage.paramsOf(effectiveRequest, null)); 
+							PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(effectiveRequest, null)); 
 					if (effectiveRequest.isOpen()) {
 						requestLink.add(new Label("label", "Open"));
 						requestLink.add(AttributeAppender.append("title", "A pull request is open for this change"));
@@ -629,8 +629,8 @@ public class ProjectBranchesPage extends ProjectPage {
 									PullRequestConstants.FIELD_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 
 									branch, PullRequestQuery.getRuleName(PullRequestQueryLexer.And), 
 									new OpenCriteria().toString());
-							PageParameters params = RequestListPage.paramsOf(getProject(), query);
-							bodyFrag.add(new ViewStateAwarePageLink<Void>("openRequests", RequestListPage.class, params));
+							PageParameters params = PullRequestListPage.paramsOf(getProject(), query, 0);
+							bodyFrag.add(new ViewStateAwarePageLink<Void>("openRequests", PullRequestListPage.class, params));
 							bodyFrag.add(new Label("branch", branch));
 							fragment.add(bodyFrag);
 						} else {

@@ -10,7 +10,7 @@ import org.apache.wicket.Component;
 import io.onedev.server.model.IssueAction;
 import io.onedev.server.model.support.CommentSupport;
 import io.onedev.server.model.support.issue.IssueField;
-import io.onedev.server.web.page.project.issues.issuedetail.activities.activity.ActionDataPanel;
+import io.onedev.server.web.component.issue.activities.activity.ActionDataPanel;
 
 public class StateChangeData extends FieldChangeData {
 

@@ -1,55 +1,10 @@
 #issue-detail>.main {
 	margin-right: 360px;
-	pading-right: 20px;
+	padding-right: 20px;
 }
 #issue-detail>.main>div {
 	margin-bottom: 20px;
 }
-#issue-detail>.main>.title {
-	font-size: 20px;
-	font-weight: bold;
-	color: #444;
-	position: relative;
-}
-#issue-detail>.main>.title a.edit {
-	color: #666;
-	margin-left: 8px;
-}
-#issue-detail>.main>.title input[type=text] {
-	width: 600px;
-	font-weight: normal;
-}
-#issue-detail>.main>.title .input-clear {
-	right: auto;
-	left: 573px;
-}
-#issue-detail>.main>.title .alert {
-	font-weight: normal;
-	font-size: 14px;
-}
-#issue-detail>.main>.state-and-actions>.issue-state {
-	font-size: 16px;
-	display: block;
-	padding: 4px 8px;
-}
-#issue-detail>.main>.state-and-actions>* {
-	margin-right: 20px;
-}
-
-#issue-detail>.side>div>.head {
-	font-weight: bold;
-	margin-bottom: 16px;
-}
-#issue-detail>.side>div .body>* {
-	margin-bottom: 16px;
-}
-#issue-detail>.side>div>.body a.avatar {
-	margin-right: 8px;
-}
-#issue-detail>.side>div>.body .field-values a.avatar {
-	margin-right: 0;
-}
-
 #issue-detail>.side {
 	position: fixed;
 	top: 48px;
@@ -60,33 +15,4 @@
 	padding: 20px;
 	background: #FAFAFA;
 	overflow: auto;
-}
-#issue-detail>.side>* {
-	margin-bottom: 20px;
-	border-top: 1px solid #E8E8E8;
-	padding-top: 20px;
-}
-#issue-detail>.side>div:first-child {
-	border-top: none;
-	padding-top: 0;
-}
-
-#issue-detail>.side .fields td {
-	padding-bottom: 12px;
-	vertical-align: top;
-}
-#issue-detail>.side .fields tr:last-child td {
-	padding-bottom: 0;
-}
-#issue-detail>.side .fields td.name {
-	white-space: nowrap;
-	padding-right: 20px;
-}
-#issue-detail>.side a.action {
-	margin-top: 0;
-	margin-left: 8px;
-	color: #666;
-}
-#issue-detail>.side .milestone>.body>.progress {
-	margin-top: 20px;
 }

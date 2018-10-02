@@ -134,6 +134,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 				Cookie cookie = new Cookie(getCookieName(), "yes");
+				cookie.setPath("/");
 				cookie.setMaxAge(Integer.MAX_VALUE);
 				response.addCookie(cookie);
 				Component content = newCollapsed();
@@ -450,6 +451,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 				Cookie cookie = new Cookie(getCookieName(), "no");
+				cookie.setPath("/");
 				cookie.setMaxAge(Integer.MAX_VALUE);
 				response.addCookie(cookie);
 				Component content = newExpanded();

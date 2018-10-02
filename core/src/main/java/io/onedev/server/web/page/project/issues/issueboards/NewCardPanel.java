@@ -1,7 +1,7 @@
 package io.onedev.server.web.page.project.issues.issueboards;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
@@ -12,9 +12,8 @@ import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.newissue.NewIssueEditor;
+import io.onedev.server.web.component.issue.create.NewIssueEditor;
+import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
 abstract class NewCardPanel extends Panel {
@@ -53,28 +52,6 @@ abstract class NewCardPanel extends Panel {
 				super.onSubmit(target, form);
 				Issue issue = editor.getConvertedInput();
 				OneDev.getInstance(IssueManager.class).open(issue);
-				if (getTemplate().matches(issue, SecurityUtils.getUser())) {
-					onAdded(target, issue);
-				} else {
-					new ModalPanel(target) {
-						
-						@Override
-						protected Component newContent(String id) {
-							return new CardUnmatchedPanel(id) {
-
-								@Override
-								protected Issue getIssue() {
-									return issue;
-								}
-
-								@Override
-								protected void onClose(AjaxRequestTarget target) {
-									close();
-								}
-							};
-						}
-					};
-				}
 				onClose(target);
 			}
 
@@ -96,6 +73,12 @@ abstract class NewCardPanel extends Panel {
 		form.add(new AjaxLink<Void>("cancel") {
 
 			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+			}
+
+			@Override
 			public void onClick(AjaxRequestTarget target) {
 				onClose(target);
 			}
@@ -105,8 +88,6 @@ abstract class NewCardPanel extends Panel {
 	}
 
 	protected abstract IssueCriteria getTemplate();
-	
-	protected abstract void onAdded(AjaxRequestTarget target, Issue issue);
 	
 	protected abstract void onClose(AjaxRequestTarget target);
 

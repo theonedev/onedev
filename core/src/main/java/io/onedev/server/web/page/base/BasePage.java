@@ -235,7 +235,7 @@ public abstract class BasePage extends WebPage {
 
 	@Override
 	protected void onAfterRender() {
-		AppLoader.getInstance(WebSocketManager.class).onObserverChanged(this);
+		AppLoader.getInstance(WebSocketManager.class).notifyObserverChange(this);
 		super.onAfterRender();
 	}
 	

@@ -1,17 +1,18 @@
 package io.onedev.server.event.issue;
 
+import java.util.Date;
+
 import io.onedev.server.model.Issue;
 
-public class IssueCommitted {
+public class IssueCommitted extends IssueEvent {
 
-	private final Issue issue;
-	
 	public IssueCommitted(Issue issue) {
-		this.issue = issue;
+		super(null, new Date(), issue);
 	}
 
-	public Issue getIssue() {
-		return issue;
+	@Override
+	public boolean affectsBoards() {
+		return false;
 	}
 
 }

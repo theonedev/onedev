@@ -16,7 +16,7 @@ import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.pullrequests.requestlist.RequestListPage;
+import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 
 @SuppressWarnings("serial")
@@ -52,7 +52,7 @@ public class InvalidRequestPage extends ProjectPage {
 			@Override
 			public void onClick() {
 				OneDev.getInstance(PullRequestManager.class).delete(requestModel.getObject());
-				setResponsePage(RequestListPage.class, RequestListPage.paramsOf(getProject()));
+				setResponsePage(PullRequestListPage.class, PullRequestListPage.paramsOf(getProject()));
 			}
 
 			@Override

@@ -26,6 +26,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
 import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.server.event.issue.IssueDeleted;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
@@ -625,6 +626,12 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			OneContext.pop();
 		}
 		
+	}
+
+	@Override
+	public void delete(User user, Issue issue) {
+		super.delete(issue);
+		listenerRegistry.post(new IssueDeleted(user, issue));
 	}
 
 }

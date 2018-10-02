@@ -94,6 +94,7 @@ public class SourceFormatPanel extends Panel {
 			protected void onUpdate(AjaxRequestTarget target) {
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 				Cookie cookie = new Cookie(COOKIE_INDENT_TYPE, indentType);
+				cookie.setPath("/");
 				cookie.setMaxAge(Integer.MAX_VALUE);
 				response.addCookie(cookie);
 				indentTypeChangeCallback.onOptioneChange(target);
@@ -123,6 +124,7 @@ public class SourceFormatPanel extends Panel {
 			protected void onUpdate(AjaxRequestTarget target) {
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 				Cookie cookie = new Cookie(COOKIE_TAB_SIZE, tabSize);
+				cookie.setPath("/");
 				cookie.setMaxAge(Integer.MAX_VALUE);
 				response.addCookie(cookie);
 				tabSizeChangeCallback.onOptioneChange(target);
@@ -152,6 +154,7 @@ public class SourceFormatPanel extends Panel {
 			protected void onUpdate(AjaxRequestTarget target) {
 				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 				Cookie cookie = new Cookie(COOKIE_LINE_WRAP_MODE, lineWrapMode);				
+				cookie.setPath("/");
 				cookie.setMaxAge(Integer.MAX_VALUE);
 				response.addCookie(cookie);
 				lineWrapModeChangeCallback.onOptioneChange(target);

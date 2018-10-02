@@ -14,11 +14,11 @@ public interface WebSocketManager {
 	
 	static final String KEEP_ALIVE = "KeepAlive";
 	
-	void onObserverChanged(BasePage page);
+	void notifyObserverChange(BasePage page);
 	
 	void onDestroySession(String sessionId);
 	
-	void onObservableChanged(String observable, @Nullable PageKey sourcePageKey);
+	void notifyObservableChange(String observable, @Nullable PageKey sourcePageKey);
 	
 	void start();
 	

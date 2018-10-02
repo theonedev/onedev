@@ -44,7 +44,7 @@ import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.TooltipBehavior;
-import io.onedev.server.web.component.commitlist.CommitListPanel;
+import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -54,9 +54,9 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.pullrequests.newrequest.NewRequestPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.RequestDetailPage;
-import io.onedev.server.web.page.project.pullrequests.requestdetail.activities.RequestActivitiesPage;
+import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
+import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
@@ -399,7 +399,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 			public void onClick() {
 				ProjectAndBranch left = new ProjectAndBranch(state.leftSide.toString());
 				ProjectAndBranch right = new ProjectAndBranch(state.rightSide.toString());
-				setResponsePage(NewRequestPage.class, NewRequestPage.paramsOf(left.getProject(), left, right));
+				setResponsePage(NewPullRequestPage.class, NewPullRequestPage.paramsOf(left.getProject(), left, right));
 			}
 
 			@Override
@@ -463,8 +463,8 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 
 					@Override
 					public void onClick() {
-						PageParameters params = RequestDetailPage.paramsOf(requestModel.getObject(), null);
-						setResponsePage(RequestActivitiesPage.class, params);
+						PageParameters params = PullRequestDetailPage.paramsOf(requestModel.getObject(), null);
+						setResponsePage(PullRequestActivitiesPage.class, params);
 					}
 					
 				});
@@ -638,7 +638,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		super.onPopState(target, data);
 		
 		state = (State) data;
-		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
+		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 		
 		newTabPanel(target);
 		target.add(tabbable);
@@ -739,7 +739,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 			state.mark = null;
 		}
 		pushState(target);
-		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
+		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 	}
 
 	@Override
@@ -758,7 +758,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		state.commentId = null;
 		state.mark = mark;
 		pushState(target);
-		OneDev.getInstance(WebSocketManager.class).onObserverChanged(this);
+		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 	}
 
 	@Override

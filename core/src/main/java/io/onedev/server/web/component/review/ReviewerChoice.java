@@ -13,7 +13,7 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.select2.SelectToAddChoice;
-import io.onedev.server.web.component.userchoice.UserChoiceResourceReference;
+import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
 public class ReviewerChoice extends SelectToAddChoice<UserFacade> {

@@ -15,6 +15,8 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.util.EditContext;
@@ -46,6 +48,8 @@ public class IssueBoard implements Serializable {
 	private String identifyField;
 	
 	private List<String> columns = new ArrayList<>();
+	
+	private List<String> displayFields = Lists.newArrayList(IssueConstants.FIELD_STATE);
 
 	@Editable(order=100)
 	@NotEmpty
@@ -68,7 +72,8 @@ public class IssueBoard implements Serializable {
 		this.baseQuery = baseQuery;
 	}
 
-	@Editable(order=250, description="Optionally specify a base query to filter/order issues in backlog")
+	@Editable(order=250, description="Optionally specify a base query to filter/order issues in backlog. "
+			+ "Backlog issues are those not associating with any milestones")
 	@IssueQuery
 	@Nullable
 	public String getBacklogBaseQuery() {
@@ -79,7 +84,7 @@ public class IssueBoard implements Serializable {
 		this.backlogBaseQuery = backlogBaseQuery;
 	}
 
-	@Editable(order=300, description="Specify issue field to identify different lists of the board")
+	@Editable(order=300, description="Specify issue field to identify different columns of the board")
 	@ChoiceProvider("getIdentifyFieldChoices")
 	@NotEmpty
 	public String getIdentifyField() {
@@ -90,9 +95,9 @@ public class IssueBoard implements Serializable {
 		this.identifyField = identifyField;
 	}
 
-	@Editable(order=400, description="Specify lists of the board. Each list corresponds to "
+	@Editable(order=400, description="Specify columns of the board. Each column corresponds to "
 			+ "a value of the issue field specified above")
-	@Size(min=2, message="At least two lists need to be defined")
+	@Size(min=2, message="At least two columns need to be defined")
 	@ChoiceProvider("getColumnChoices")
 	public List<String> getColumns() {
 		return columns;
@@ -100,6 +105,16 @@ public class IssueBoard implements Serializable {
 
 	public void setColumns(List<String> columns) {
 		this.columns = columns;
+	}
+
+	@Editable(order=500, description="Specify fields to display in board card except issue number and title")
+	@ChoiceProvider("getDisplayFieldsChoices")
+	public List<String> getDisplayFields() {
+		return displayFields;
+	}
+
+	public void setDisplayFields(List<String> displayFields) {
+		this.displayFields = displayFields;
 	}
 
 	@SuppressWarnings("unused")
@@ -110,6 +125,17 @@ public class IssueBoard implements Serializable {
 		for (InputSpec fieldSpec: project.getIssueWorkflow().getFieldSpecs()) {
 			if (!fieldSpec.isAllowMultiple() && (fieldSpec instanceof ChoiceInput || fieldSpec instanceof UserChoiceInput || fieldSpec instanceof TeamChoiceInput))
 				choices.add(fieldSpec.getName());
+		}
+		return choices;
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<String> getDisplayFieldsChoices() {
+		List<String> choices = new ArrayList<>();
+		Project project = OneContext.get().getProject();
+		choices.add(IssueConstants.FIELD_STATE);
+		for (InputSpec fieldSpec: project.getIssueWorkflow().getFieldSpecs()) {
+			choices.add(fieldSpec.getName());
 		}
 		return choices;
 	}
@@ -190,6 +216,13 @@ public class IssueBoard implements Serializable {
 			if (fieldSpec == null)
 				undefinedFields.add(getIdentifyField());
 		}
+		for (String displayField: getDisplayFields()) {
+			if (!IssueConstants.FIELD_STATE.equals(displayField)) { 
+				InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(displayField);
+				if (fieldSpec == null)
+					undefinedFields.add(displayField);
+			}
+		}
 		return undefinedFields;
 	}
 	
@@ -221,9 +254,14 @@ public class IssueBoard implements Serializable {
 			if (resolution.getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
 				if (getIdentifyField().equals(entry.getKey()))
 					setIdentifyField(resolution.getNewField());
-			} else if (getIdentifyField().equals(entry.getKey())) {
-				return true;
-			}
+				int index = getDisplayFields().indexOf(entry.getKey());
+				if (index != -1)
+					getDisplayFields().set(index, resolution.getNewField());
+			} else {
+				getDisplayFields().remove(entry.getKey());
+				if (getIdentifyField().equals(entry.getKey())) 
+					return true;
+			} 
 		}				
 		return false;
 	}
@@ -334,4 +372,8 @@ public class IssueBoard implements Serializable {
 		return false;
 	}
 	
+	public static String getWebSocketObservable(Long projectId) {
+		return IssueBoard.class.getName() + ":" + projectId;
+	}
+
 }

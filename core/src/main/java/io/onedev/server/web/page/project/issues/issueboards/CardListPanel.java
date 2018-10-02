@@ -1,18 +1,31 @@
 package io.onedev.server.web.page.project.issues.issueboards;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.IssueBoard;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
+import io.onedev.server.web.util.QueryPosition;
 
 @SuppressWarnings("serial")
 abstract class CardListPanel extends Panel {
@@ -24,7 +37,16 @@ abstract class CardListPanel extends Panel {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+
+		int cardCount;
+		if (getQuery() != null) {
+			cardCount = getIssueManager().count(getProject(), SecurityUtils.getUser(), getQuery().getCriteria());
+		} else { 
+			cardCount = 0;
+		}
+		
 		RepeatingView cardsView = new RepeatingView("cards");
+		int index = 0;
 		for (Issue issue: queryIssues(0, WebConstants.PAGE_SIZE)) {
 			Long issueId = issue.getId();
 			IModel<Issue> model = new LoadableDetachableModel<Issue>() {
@@ -35,11 +57,25 @@ abstract class CardListPanel extends Panel {
 				}
 				
 			};
-			cardsView.add(new BoardCardPanel(cardsView.newChildId(), model));
+			int cardOffset = index;
+			cardsView.add(new BoardCardPanel(cardsView.newChildId(), model) {
+
+				@Override
+				protected QueryPosition getPosition() {
+					IssueQuery query = getQuery();
+					if (query != null)
+						return new QueryPosition(query.toString(), cardCount, cardOffset);
+					else
+						return null;
+				}
+
+			});
+			index++;
 		}
 		add(cardsView);
 		
-		add(new InfiniteScrollBehavior(WebConstants.PAGE_SIZE) {
+		InfiniteScrollBehavior behavior;
+		add(behavior = new InfiniteScrollBehavior(WebConstants.PAGE_SIZE) {
 
 			@Override
 			protected String getItemSelector() {
@@ -48,6 +84,7 @@ abstract class CardListPanel extends Panel {
 
 			@Override
 			protected void appendMore(AjaxRequestTarget target, int offset, int count) {
+				int index = offset;
 				for (Issue issue: queryIssues(offset, count)) {
 					Long issueId = issue.getId();
 					IModel<Issue> model = new LoadableDetachableModel<Issue>() {
@@ -58,18 +95,64 @@ abstract class CardListPanel extends Panel {
 						}
 						
 					};
-					BoardCardPanel card = new BoardCardPanel(cardsView.newChildId(), model);
+					int cardOffset = index;
+					BoardCardPanel card = new BoardCardPanel(cardsView.newChildId(), model) {
+
+						@Override
+						protected QueryPosition getPosition() {
+							IssueQuery query = getQuery();
+							if (query != null)
+								return new QueryPosition(query.toString(), cardCount, cardOffset);
+							else
+								return null;
+						}
+
+					};
 					cardsView.add(card);
 					String script = String.format("$('#%s').append('<div id=\"%s\"></div>');", 
 							getMarkupId(), card.getMarkupId());
 					target.prependJavaScript(script);
 					target.add(card);
+					index++;
 				}
 			}
 			
 		});
+		
+		add(new WebSocketObserver() {
+			
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+				behavior.refresh(handler);
+			}
+			
+			@Override
+			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				return Sets.newHashSet(IssueBoard.getWebSocketObservable(getProject().getId()));
+			}
+			
+		});
+		
+	}
+	
+	private IssueManager getIssueManager() {
+		return OneDev.getInstance(IssueManager.class);
 	}
 
-	protected abstract List<Issue> queryIssues(int offset, int count);
+	private List<Issue> queryIssues(int offset, int count) {
+		if (getQuery() != null) 
+			return getIssueManager().query(getProject(), SecurityUtils.getUser(), getQuery(), offset, count);
+		else 
+			return new ArrayList<>();
+	}
+	
+	protected abstract Project getProject();
+	
+	@Nullable
+	protected abstract IssueQuery getQuery();
 
 }

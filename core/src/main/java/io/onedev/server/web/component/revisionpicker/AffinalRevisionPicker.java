@@ -11,7 +11,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.web.component.ProjectPicker;
+import io.onedev.server.web.component.project.ProjectPicker;
 import io.onedev.server.web.util.model.AffinalProjectsModel;
 
 @SuppressWarnings("serial")

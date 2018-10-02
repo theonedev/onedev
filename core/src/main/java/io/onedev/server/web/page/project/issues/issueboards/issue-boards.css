@@ -1,65 +1,42 @@
-#issue-boards>.head {
-	position: relative;
-}
-#issue-boards>.head>form {
-	margin-right: 120px;
-}
-#issue-boards>.head>.add-new {
-	position: absolute;
-	top: 0;
-	right: 0;
-}
 #issue-boards .no-boards {
 	font-size: 16px;
 }
 #issue-boards .no-boards a {
 	margin-left: 12px;
 }
-#new-board>.head {
-	margin-bottom: 20px;
+
+.board-menu {
+	padding: 8px 26px;
 }
-.board-menu, .milestone-menu {
+.milestone-menu {
 	padding: 8px 12px;
 }
-.board-menu .board, .milestone-menu .milestone {
-	position: relative;
-	padding: 4px 0 4px 20px;
+.board-menu table td, .milestone-menu table td {
+	padding: 4px 0;
 	white-space: nowrap;
 }
-.board-menu .active:before, .milestone-menu .active:before {
-	content: "\f00c";
-	font-family: "FontAwesome";
-	position: absolute;
-	left: 0;
-	top: 4px;
+.board-menu table td.actions, .milestone-menu table td.actions, 
+.milestone-menu table td.status, .milestone-menu table td.due-date {
+	padding-left: 12px;
 }
-.milestone-menu .active:before {
-	top: 6px;
+
+.administrative .board-menu, .administrative .milestone-menu {
+	min-width: 300px;
+	padding: 8px 12px;
 }
-.board-menu a.action, .milestone-menu a.action {
+
+.board-menu>a, .milestone-menu>a {
+	margin-top: 10px !important;
+}
+.board-menu .actions, .milestone-menu .actions, .milestone-menu .status {
+	text-align: right;
+}
+.board-menu .actions a, .milestone-menu .actions a {
 	text-decoration: none;
-	margin-left: 8px;
 	color: #444;
 }
-.milestone-menu .status {
-	margin-left: 4px;
-}
-.milestone-menu .action {
-	font-size: 16px;
-}
-.milestone-menu>a {
-	display: block;
-	text-decoration: none;
-	background: #F9F9F9;
-	border: 1px solid #CCC;
-	border-radius: 3px;
-	padding: 4px 8px;
-	margin-top: 8px;
-	color: #666;
-	font-size: 12px;
-}
-.milestone-menu>a:hover {
-	background: #E5E5E5;
+.milestone-selector.create .fa-caret-down {
+	display: none;
 }
 
 #issue-boards>.feedback .alert {
@@ -95,14 +72,17 @@
 	border-bottom: 1px solid #E0E0E0;
 	border-top: 3px solid #E0E0E0;
 }
+#issue-boards>.body>.column>.content>.head .badge {
+	margin-left: 8px;
+}
 #issue-boards>.body>.column>.content>.head a {
 	color: #666;
-	margin-right: 8px;
+	margin-left: 8px;
 }
 
 #issue-boards>.body>.column>.content>.body {
 	position: relative;
-	padding: 16px;
+	padding: 16px 16px 0 16px;
 	height: 100%;
 } 
 #issue-boards>.body>.column>.content>.body.issue-droppable.ui-droppable-active {
@@ -115,11 +95,8 @@
 	margin-top: 8px;
 }
 #issue-boards>.body>.column>.content>.body>.card {
-	margin-top: 16px;
+	margin-bottom: 16px;
 } 
-#issue-boards>.body>.column>.content>.body>.card.first {
-	margin-top: 0;
-}
 
 #issue-boards>.body .card {
 	border-radius: 4px;
@@ -153,40 +130,69 @@
 #issue-boards>.body .card .avatars>.avatar:last-child {
 	margin-right: 0;
 }
-#issue-boards>.body .card .number {
+#issue-boards>.body .card a {
 	color: #666;
+	text-decoration: none;
+}
+#issue-boards>.body .card:hover a {
+	text-decoration: underline;
 }
 #issue-boards>.body .card .state {
 	border-radius: 2px;
-	width: 12px;
-	height: 12px;
-	margin-top: 3px;
-	cursor: default;
+	padding: 0 2px; 
+	font-size: 12px;
+}
+#issue-boards>.body .card .field-values>.value {
+	display: inline-block;
+	background: #EEE;
+	border-radius: 2px;
+	padding: 0 2px;
+	margin-right: 6px;
+}
+#issue-boards>.body .card .field-values>.has-color.value {
+	border-radius: 0;
+	border: none;
+	padding: 0;
+}
+#issue-boards>.body .card .field-values>.value:last-child {
+	margin-right: 0;
+}
+#issue-boards>.body .card .field-values, #issue-boards>.body .card .field-values a {
+	font-size: 12px;
+}
+#issue-boards>.body .card .field-values .referenceable>span {
+	display: none;
+}
+#issue-boards>.body .card .field-values .has-color span {
+	border-radius: 2px;
+	padding: 0 2px;
 }
 #issue-boards>.body .card .detail {
 	color: #666;
 	text-decoration: none;
-	font-size: 14px;
-	margin-top: -1px;
+	font-size: 16px;
+	margin-top: -3px;
 }
-
-.board-card-detail>.modal-header .number {
-	margin-right: 4px;
+.board-card-detail>.body {
+	position: relative;
+	min-height: 600px;
 }
-.board-card-detail>.modal-body>* {
+.board-card-detail>.body>.main {
+	margin-right: 240px;
+	padding: 20px;
+}
+.board-card-detail>.body>.main>div {
 	margin-bottom: 20px;
 }
-.board-card-detail>.modal-body>:last-child {
-	margin-bottom: 0;
-}
-.board-card-detail>.modal-body>table>tbody>tr>td {
-	padding: 6px;
-	vertical-align: top;
-	white-space: nowrap;
-}
-.board-card-detail>.modal-body>table>tbody>tr>td.name {
-	color: #888;
-}
-.board-card-detail>.modal-body>table>tbody>tr>td.spacing {
-	width: 20px;
+.board-card-detail>.body>.side {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	right: 0;
+	width: 240px;
+	padding: 20px;
+	background: #FAFAFA;
+	overflow: auto;
+	border-left: 2px solid #E0E0E0;
+	border-radius: 0 0 4px 0;
 }

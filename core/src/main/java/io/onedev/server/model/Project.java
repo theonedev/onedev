@@ -62,6 +62,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
@@ -1144,8 +1145,15 @@ public class Project extends AbstractEntity {
 	}
 
 	public ArrayList<IssueBoard> getIssueBoards() {
-		if (issueBoards == null)
+		if (issueBoards == null) {
 			issueBoards = new ArrayList<>();
+			IssueBoard board = new IssueBoard();
+			board.setName(IssueConstants.FIELD_STATE);
+			board.setIdentifyField(IssueConstants.FIELD_STATE);
+			board.setColumns(Lists.newArrayList("Open", "Assigned", "Closed"));
+			board.setDisplayFields(Lists.newArrayList(IssueConstants.FIELD_STATE, "Type", "Priority", "Assignee"));
+			issueBoards.add(board);
+		}
 		return issueBoards;
 	}
 
