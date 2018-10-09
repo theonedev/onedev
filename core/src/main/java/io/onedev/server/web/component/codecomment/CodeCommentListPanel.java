@@ -49,6 +49,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
@@ -176,7 +177,7 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 		
 		add(new NotificationPanel("feedback", this));
 
-		SortableDataProvider<CodeComment, Void> dataProvider = new SortableDataProvider<CodeComment, Void>() {
+		SortableDataProvider<CodeComment, Void> dataProvider = new LoadableDetachableDataProvider<CodeComment, Void>() {
 
 			@Override
 			public void detach() {
@@ -189,7 +190,7 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 			}
 
 			@Override
-			public long size() {
+			public long calcSize() {
 				CodeCommentQuery parsedQuery = parsedQueryModel.getObject();
 				if (parsedQuery != null)
 					return getCodeCommentManager().count(getProject(), getPullRequest(), SecurityUtils.getUser(), parsedQuery.getCriteria());

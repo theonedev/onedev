@@ -32,6 +32,7 @@ import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.BranchLink;
 import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
@@ -135,7 +136,7 @@ public abstract class IssuePullRequestsPanel extends Panel {
 
 		});
 		
-		SortableDataProvider<PullRequest, Void> dataProvider = new SortableDataProvider<PullRequest, Void>() {
+		SortableDataProvider<PullRequest, Void> dataProvider = new LoadableDetachableDataProvider<PullRequest, Void>() {
 
 			@Override
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
@@ -143,7 +144,7 @@ public abstract class IssuePullRequestsPanel extends Panel {
 			}
 
 			@Override
-			public long size() {
+			public long calcSize() {
 				return requestsModel.getObject().size();
 			}
 

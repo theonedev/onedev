@@ -18,7 +18,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -273,9 +272,8 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 				orders.add(builder.desc(CodeCommentQuery.getPath(root, CodeCommentConstants.ORDER_FIELDS.get(sort.getField()))));
 		}
 
-		Path<String> idPath = root.get("id");
 		if (orders.isEmpty())
-			orders.add(builder.desc(idPath));
+			orders.add(builder.desc(root.get("id")));
 		query.orderBy(orders);
 		
 		return query;

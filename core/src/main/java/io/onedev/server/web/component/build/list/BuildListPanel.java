@@ -52,6 +52,7 @@ import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -197,11 +198,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 		});
 		add(form);
 		
-		dataProvider = new SortableDataProvider<Build, Void>() {
-
-			@Override
-			public void detach() {
-			}
+		dataProvider = new LoadableDetachableDataProvider<Build, Void>() {
 
 			@Override
 			public Iterator<? extends Build> iterator(long first, long count) {
@@ -209,7 +206,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			}
 
 			@Override
-			public long size() {
+			public long calcSize() {
 				BuildQuery parsedQuery = parsedQueryModel.getObject();
 				if (parsedQuery != null)
 					return getBuildManager().count(getProject(), SecurityUtils.getUser(), parsedQuery.getCriteria());

@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.comments;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -37,11 +38,30 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private final String query;
+	private String query;
 	
 	public ProjectCodeCommentsPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toString();
+		if (query != null && query.length() == 0) {
+			query = null;
+			List<String> queries = new ArrayList<>();
+			if (getProject().getCodeCommentQuerySettingOfCurrentUser() != null) { 
+				for (NamedCodeCommentQuery namedQuery: getProject().getCodeCommentQuerySettingOfCurrentUser().getUserQueries())
+					queries.add(namedQuery.getQuery());
+			}
+			for (NamedCodeCommentQuery namedQuery: getProject().getSavedCodeCommentQueries())
+				queries.add(namedQuery.getQuery());
+			for (String each: queries) {
+				try {
+					if (SecurityUtils.getUser() != null || !CodeCommentQuery.parse(getProject(), each, true).needsLogin()) {  
+						query = each;
+						break;
+					}
+				} catch (Exception e) {
+				}
+			} 
+		}
 	}
 
 	private CodeCommentQuerySettingManager getCodeCommentQuerySettingManager() {

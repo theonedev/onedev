@@ -55,6 +55,7 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.issue.state.IssueStateLabel;
@@ -383,11 +384,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			
 		});
 		
-		dataProvider = new SortableDataProvider<Issue, Void>() {
-
-			@Override
-			public void detach() {
-			}
+		dataProvider = new LoadableDetachableDataProvider<Issue, Void>() {
 
 			@Override
 			public Iterator<? extends Issue> iterator(long first, long count) {
@@ -395,7 +392,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			}
 
 			@Override
-			public long size() {
+			public long calcSize() {
 				IssueQuery parsedQuery = parsedQueryModel.getObject();
 				if (parsedQuery != null)
 					return getIssueManager().count(getProject(), SecurityUtils.getUser(), parsedQuery.getCriteria());

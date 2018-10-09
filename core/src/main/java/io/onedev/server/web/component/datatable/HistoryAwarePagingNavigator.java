@@ -56,8 +56,15 @@ public class HistoryAwarePagingNavigator extends BootstrapPagingNavigator {
 		if (pagingHistorySupport != null) {
 			int pageNumber = (int) pageable.getCurrentPage() + increment;
 			link = new BookmarkablePageLink<Void>(id, getPage().getClass(),
-					pagingHistorySupport.newPageParameters(pageNumber));
-			link.setEnabled(pageNumber >= 0 && pageNumber < getPageable().getPageCount());
+					pagingHistorySupport.newPageParameters(pageNumber)) {
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setEnabled(pageNumber >= 0 && pageNumber < getPageable().getPageCount());
+				}
+				
+			};
 			link.add(new DisabledAttributeLinkBehavior());
 		} else {
 			link = new PagingNavigationIncrementLink<Void>(id, pageable, increment);
@@ -69,11 +76,19 @@ public class HistoryAwarePagingNavigator extends BootstrapPagingNavigator {
 	protected AbstractLink newPagingNavigationLink(String id, IPageable pageable, int pageNumber) {
 		AbstractLink link;
 		if (pagingHistorySupport != null) {
-			if (pageNumber == -1)
-				pageNumber = (int) (getPageable().getPageCount()) - 1;
 			link = new BookmarkablePageLink<Void>(id, getPage().getClass(),
-					pagingHistorySupport.newPageParameters(pageNumber));
-			link.setEnabled(pageNumber != pageable.getCurrentPage());
+					pagingHistorySupport.newPageParameters(pageNumber)) {
+				
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					if (pageNumber == -1)
+						setEnabled(getPageable().getPageCount() - 1 != pageable.getCurrentPage());
+					else
+						setEnabled(pageNumber != pageable.getCurrentPage());
+				}
+				
+			};
 			link.add(new DisabledAttributeLinkBehavior());
 		} else {
 			link = new PagingNavigationLink<Void>(id, pageable, pageNumber);

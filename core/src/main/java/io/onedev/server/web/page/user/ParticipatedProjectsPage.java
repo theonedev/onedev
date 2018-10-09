@@ -45,6 +45,7 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.link.ProjectLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -295,7 +296,7 @@ public class ParticipatedProjectsPage extends UserPage {
 			}
 		});
 		
-		SortableDataProvider<Project, Void> dataProvider = new SortableDataProvider<Project, Void>() {
+		SortableDataProvider<Project, Void> dataProvider = new LoadableDetachableDataProvider<Project, Void>() {
 
 			@Override
 			public Iterator<? extends Project> iterator(long first, long count) {
@@ -312,7 +313,7 @@ public class ParticipatedProjectsPage extends UserPage {
 			}
 
 			@Override
-			public long size() {
+			public long calcSize() {
 				return getJoinedProjects().size();
 			}
 

@@ -26,7 +26,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -959,9 +958,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequestConstants.ORDER_FIELDS.get(sort.getField()))));
 		}
 
-		Path<String> idPath = root.get("id");
 		if (orders.isEmpty())
-			orders.add(builder.desc(idPath));
+			orders.add(builder.desc(root.get("number")));
 		query.orderBy(orders);
 		
 		return query;

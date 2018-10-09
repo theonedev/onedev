@@ -36,6 +36,7 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.ProjectLink;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -132,7 +133,7 @@ public class ProjectListPanel extends Panel {
 			}
 		});
 		
-		SortableDataProvider<ProjectFacade, Void> dataProvider = new SortableDataProvider<ProjectFacade, Void>() {
+		SortableDataProvider<ProjectFacade, Void> dataProvider = new LoadableDetachableDataProvider<ProjectFacade, Void>() {
 
 			@Override
 			public Iterator<? extends ProjectFacade> iterator(long first, long count) {
@@ -145,7 +146,7 @@ public class ProjectListPanel extends Panel {
 			}
 
 			@Override
-			public long size() {
+			public long calcSize() {
 				return projectsModel.getObject().size();
 			}
 

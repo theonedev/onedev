@@ -19,6 +19,7 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 
 @SuppressWarnings("serial")
 class ContributionListPanel extends Panel {
@@ -69,7 +70,7 @@ class ContributionListPanel extends Panel {
 			}
 		});
 		
-		SortableDataProvider<DayContribution, Void> dataProvider = new SortableDataProvider<DayContribution, Void>() {
+		SortableDataProvider<DayContribution, Void> dataProvider = new LoadableDetachableDataProvider<DayContribution, Void>() {
 
 			@Override
 			public Iterator<? extends DayContribution> iterator(long first, long count) {
@@ -80,7 +81,7 @@ class ContributionListPanel extends Panel {
 			}
 
 			@Override
-			public long size() {
+			public long calcSize() {
 				return getContribution().size();
 			}
 

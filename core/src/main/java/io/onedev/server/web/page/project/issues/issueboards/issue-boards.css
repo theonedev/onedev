@@ -167,6 +167,9 @@
 	border-radius: 2px;
 	padding: 0 2px;
 }
+#issue-boards>.body>.column>.content>.body .loading-indicator {
+	margin-bottom: 16px;
+}
 #issue-boards>.body .card .detail {
 	color: #666;
 	text-decoration: none;

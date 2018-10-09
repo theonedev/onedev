@@ -9,7 +9,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -191,9 +190,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 				orders.add(builder.desc(BuildQuery.getPath(root, BuildConstants.ORDER_FIELDS.get(sort.getField()))));
 		}
 
-		Path<String> idPath = root.get("id");
 		if (orders.isEmpty())
-			orders.add(builder.desc(idPath));
+			orders.add(builder.desc(root.get("id")));
 		query.orderBy(orders);
 		
 		return query;

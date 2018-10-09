@@ -15,7 +15,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.component.link.FirstIssueQueryLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -107,7 +106,8 @@ public abstract class IssuesPage extends ProjectPage {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new FirstIssueQueryLink(linkId, getProject());
+						return new ViewStateAwarePageLink<Void>(linkId, IssueListPage.class, 
+								IssueListPage.paramsOf(getProject(), "", 0));
 					}
 				};
 				

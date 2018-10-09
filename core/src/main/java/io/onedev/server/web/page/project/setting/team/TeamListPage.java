@@ -35,6 +35,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -151,7 +152,7 @@ public class TeamListPage extends ProjectSettingPage {
 			
 		});
 		
-		SortableDataProvider<Team, Void> dataProvider = new SortableDataProvider<Team, Void>() {
+		SortableDataProvider<Team, Void> dataProvider = new LoadableDetachableDataProvider<Team, Void>() {
 
 			@Override
 			public Iterator<? extends Team> iterator(long first, long count) {
@@ -161,7 +162,7 @@ public class TeamListPage extends ProjectSettingPage {
 			}
 
 			@Override
-			public long size() {
+			public long calcSize() {
 				return OneDev.getInstance(TeamManager.class).count(getCriteria());
 			}
 

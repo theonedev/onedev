@@ -40,6 +40,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -165,7 +166,7 @@ public class ConfigurationListPage extends ProjectSettingPage {
 			}
 		});
 		
-		SortableDataProvider<Configuration, Void> dataProvider = new SortableDataProvider<Configuration, Void>() {
+		SortableDataProvider<Configuration, Void> dataProvider = new LoadableDetachableDataProvider<Configuration, Void>() {
 
 			@Override
 			public Iterator<? extends Configuration> iterator(long first, long count) {
@@ -175,7 +176,7 @@ public class ConfigurationListPage extends ProjectSettingPage {
 			}
 
 			@Override
-			public long size() {
+			public long calcSize() {
 				return OneDev.getInstance(ConfigurationManager.class).count(getCriteria());
 			}
 

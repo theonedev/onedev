@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.issues.issuelist;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -19,6 +20,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.issues.IssuesPage;
@@ -40,6 +42,25 @@ public class IssueListPage extends IssuesPage {
 	public IssueListPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toOptionalString();
+		if (query != null && query.length() == 0) {
+			query = null;
+			List<String> queries = new ArrayList<>();
+			if (getProject().getIssueQuerySettingOfCurrentUser() != null) { 
+				for (NamedIssueQuery namedQuery: getProject().getIssueQuerySettingOfCurrentUser().getUserQueries())
+					queries.add(namedQuery.getQuery());
+			}
+			for (NamedIssueQuery namedQuery: getProject().getSavedIssueQueries())
+				queries.add(namedQuery.getQuery());
+			for (String each: queries) {
+				try {
+					if (SecurityUtils.getUser() != null || !IssueQuery.parse(getProject(), each, true).needsLogin()) {  
+						query = each;
+						break;
+					}
+				} catch (Exception e) {
+				}
+			} 
+		}
 	}
 
 	private IssueQuerySettingManager getIssueQuerySettingManager() {

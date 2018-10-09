@@ -37,6 +37,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.MilestoneSort;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
@@ -215,7 +216,7 @@ public class MilestoneListPage extends IssuesPage {
 			});
 		}
 		
-		SortableDataProvider<Milestone, Void> dataProvider = new SortableDataProvider<Milestone, Void>() {
+		SortableDataProvider<Milestone, Void> dataProvider = new LoadableDetachableDataProvider<Milestone, Void>() {
 
 			@Override
 			public Iterator<? extends Milestone> iterator(long first, long count) {
@@ -225,7 +226,7 @@ public class MilestoneListPage extends IssuesPage {
 			}
 
 			@Override
-			public long size() {
+			public long calcSize() {
 				return OneDev.getInstance(Dao.class).count(getCriteria(closed));
 			}
 

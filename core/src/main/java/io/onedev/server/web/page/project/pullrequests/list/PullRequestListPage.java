@@ -103,6 +103,25 @@ public class PullRequestListPage extends ProjectPage {
 	public PullRequestListPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toOptionalString();
+		if (query != null && query.length() == 0) {
+			query = null;
+			List<String> queries = new ArrayList<>();
+			if (getProject().getPullRequestQuerySettingOfCurrentUser() != null) { 
+				for (NamedPullRequestQuery namedQuery: getProject().getPullRequestQuerySettingOfCurrentUser().getUserQueries())
+					queries.add(namedQuery.getQuery());
+			}
+			for (NamedPullRequestQuery namedQuery: getProject().getSavedPullRequestQueries())
+				queries.add(namedQuery.getQuery());
+			for (String each: queries) {
+				try {
+					if (SecurityUtils.getUser() != null || !PullRequestQuery.parse(getProject(), each, true).needsLogin()) {  
+						query = each;
+						break;
+					}
+				} catch (Exception e) {
+				}
+			} 
+		}
 	}
 
 	private PullRequestQuerySettingManager getPullRequestQuerySettingManager() {
@@ -386,8 +405,11 @@ public class PullRequestListPage extends ProjectPage {
 		
 		SortableDataProvider<PullRequest, Void> dataProvider = new SortableDataProvider<PullRequest, Void>() {
 
+			private Integer count;
+			
 			@Override
 			public void detach() {
+				count = null;
 			}
 
 			@Override
@@ -397,11 +419,14 @@ public class PullRequestListPage extends ProjectPage {
 
 			@Override
 			public long size() {
-				PullRequestQuery parsedQuery = parsedQueryModel.getObject();
-				if (parsedQuery != null)
-					return getPullRequestManager().count(getProject(), getLoginUser(), parsedQuery.getCriteria());
-				else
-					return 0;
+				if (count == null) {
+					PullRequestQuery parsedQuery = parsedQueryModel.getObject();
+					if (parsedQuery != null)
+						count = getPullRequestManager().count(getProject(), getLoginUser(), parsedQuery.getCriteria());
+					else
+						count = 0;
+				}
+				return count;
 			}
 
 			@Override

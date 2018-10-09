@@ -33,11 +33,6 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.FirstBuildQueryLink;
-import io.onedev.server.web.component.link.FirstCodeCommentQueryLink;
-import io.onedev.server.web.component.link.FirstCommitQueryLink;
-import io.onedev.server.web.component.link.FirstIssueQueryLink;
-import io.onedev.server.web.component.link.FirstPullRequestQueryLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
@@ -152,7 +147,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 								@Override
 								protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-									return new FirstCommitQueryLink(linkId, getProject());
+									ProjectCommitsPage.State state = new ProjectCommitsPage.State();
+									state.query = "";
+									return new ViewStateAwarePageLink<Void>(linkId, ProjectCommitsPage.class, 
+											ProjectCommitsPage.paramsOf(getProject(), state));
 								}
 							};
 						}
@@ -172,7 +170,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 								@Override
 								protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-									return new FirstPullRequestQueryLink(linkId, getProject());
+									return new ViewStateAwarePageLink<Void>(linkId, PullRequestListPage.class, 
+											PullRequestListPage.paramsOf(getProject(), "", 0));
 								}
 							};
 						}
@@ -189,7 +188,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 							@Override
 							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-								return new FirstIssueQueryLink(linkId, getProject());
+								return new ViewStateAwarePageLink<Void>(linkId, IssueListPage.class, 
+										IssueListPage.paramsOf(getProject(), "", 0));
 							}
 						};
 					}
@@ -204,7 +204,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 							@Override
 							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-								return new FirstBuildQueryLink(linkId, getProject());
+								return new ViewStateAwarePageLink<Void>(linkId, BuildListPage.class, BuildListPage.paramsOf(getProject(), ""));
 							}
 						};
 					}
@@ -221,7 +221,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 								@Override
 								protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-									return new FirstCodeCommentQueryLink(linkId, getProject());
+									return new ViewStateAwarePageLink<Void>(linkId, ProjectCodeCommentsPage.class, 
+											ProjectCodeCommentsPage.paramsOf(getProject(), ""));
 								}
 							};
 						}

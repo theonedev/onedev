@@ -37,6 +37,7 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.layout.LayoutPage;
@@ -184,7 +185,7 @@ public class UserListPage extends LayoutPage {
 			}
 		});
 		
-		SortableDataProvider<User, Void> dataProvider = new SortableDataProvider<User, Void>() {
+		SortableDataProvider<User, Void> dataProvider = new LoadableDetachableDataProvider<User, Void>() {
 
 			@Override
 			public Iterator<? extends User> iterator(long first, long count) {
@@ -194,7 +195,7 @@ public class UserListPage extends LayoutPage {
 			}
 
 			@Override
-			public long size() {
+			public long calcSize() {
 				return OneDev.getInstance(UserManager.class).count(getCriteria());
 			}
 

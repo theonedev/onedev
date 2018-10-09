@@ -181,10 +181,31 @@ public class ProjectCommitsPage extends ProjectPage {
 		super(params);
 		
 		state.compareWith = params.get(PARAM_COMPARE_WITH).toString();
-		state.query = params.get(PARAM_COMMIT_QUERY).toString();
+
 		Integer page = params.get(PARAM_CURRENT_PAGE).toOptionalInteger();
 		if (page != null)
 			state.page = page.intValue();		
+		
+		state.query = params.get(PARAM_COMMIT_QUERY).toString();
+		if (state.query != null && state.query.length() == 0) {
+			state.query = null;
+			List<String> queries = new ArrayList<>();
+			if (getProject().getCommitQuerySettingOfCurrentUser() != null) { 
+				for (NamedCommitQuery namedQuery: getProject().getCommitQuerySettingOfCurrentUser().getUserQueries())
+					queries.add(namedQuery.getQuery());
+			}
+			for (NamedCommitQuery namedQuery: getProject().getSavedCommitQueries())
+				queries.add(namedQuery.getQuery());
+			for (String each: queries) {
+				try {
+					if (SecurityUtils.getUser() != null || !CommitQueryUtils.needsLogin(each)) {  
+						state.query = each;
+						break;
+					}
+				} catch (Exception e) {
+				}
+			} 
+		}
 	}
 
 	@SuppressWarnings("deprecation")

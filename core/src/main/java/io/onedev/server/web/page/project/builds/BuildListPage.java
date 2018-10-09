@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.builds;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -19,6 +20,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.build.NamedBuildQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -40,6 +42,25 @@ public class BuildListPage extends ProjectPage {
 	public BuildListPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toOptionalString();
+		if (query != null && query.length() == 0) {
+			List<String> queries = new ArrayList<>();
+			if (getProject().getBuildQuerySettingOfCurrentUser() != null) { 
+				for (NamedBuildQuery namedQuery: getProject().getBuildQuerySettingOfCurrentUser().getUserQueries())
+					queries.add(namedQuery.getQuery());
+			}
+			for (NamedBuildQuery namedQuery: getProject().getSavedBuildQueries())
+				queries.add(namedQuery.getQuery());
+			query = null;
+			for (String each: queries) {
+				try {
+					if (SecurityUtils.getUser() != null || !BuildQuery.parse(getProject(), each, true).needsLogin()) {  
+						query = each;
+						break;
+					}
+				} catch (Exception e) {
+				}
+			} 
+		}
 	}
 
 	private BuildQuerySettingManager getBuildQuerySettingManager() {
