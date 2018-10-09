@@ -898,7 +898,7 @@ public class Project extends AbstractEntity {
 			savedIssueQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is after \"last week\""));
 			savedIssueQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
 			savedIssueQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
-			savedIssueQueries.add(new NamedIssueQuery("High Priority", "\"Priority\" is \"High\""));
+			savedIssueQueries.add(new NamedIssueQuery("Critical outstanding", "outstanding and \"Priority\" is \"Critical\""));
 			savedIssueQueries.add(new NamedIssueQuery("Unassigned outstanding", "outstanding and \"Assignee\" is empty"));
 			savedIssueQueries.add(new NamedIssueQuery("Closed", "closed"));
 			savedIssueQueries.add(new NamedIssueQuery("All", "all"));
@@ -1030,14 +1030,13 @@ public class Project extends AbstractEntity {
 	    	issueListFields.add(IssueConstants.FIELD_NUMBER);
 	    	issueListFields.add(IssueConstants.FIELD_STATE);
 	    	issueListFields.add(IssueConstants.FIELD_TITLE);
-			issueListFields.add("Type");
 			issueListFields.add("Priority");
 			issueListFields.add(IssueConstants.FIELD_SUBMITTER);
 			issueListFields.add("Assignee");
 		}
 		return issueListFields;
 	}
-
+	
 	public void setIssueListFields(ArrayList<String> issueListFields) {
 		this.issueListFields = issueListFields;
 	}
@@ -1151,7 +1150,7 @@ public class Project extends AbstractEntity {
 			board.setName(IssueConstants.FIELD_STATE);
 			board.setIdentifyField(IssueConstants.FIELD_STATE);
 			board.setColumns(Lists.newArrayList("Open", "Assigned", "Closed"));
-			board.setDisplayFields(Lists.newArrayList(IssueConstants.FIELD_STATE, "Type", "Priority", "Assignee"));
+			board.setDisplayFields(Lists.newArrayList(IssueConstants.FIELD_STATE, "Priority", "Assignee"));
 			issueBoards.add(board);
 		}
 		return issueBoards;
