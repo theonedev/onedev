@@ -51,11 +51,41 @@ public class IssueWorkflow implements Serializable {
 	private transient Map<String, InputSpec> fieldSpecMap;
 	
 	public IssueWorkflow() {
-		ChoiceInput priority = new ChoiceInput();
-		priority.setName("Priority");
+		ChoiceInput type = new ChoiceInput();
+		type.setName("Type");
 		SpecifiedChoices specifiedChoices = new SpecifiedChoices();
 
 		List<Choice> choices = new ArrayList<>(); 
+		Choice newFeature = new Choice();
+		newFeature.setValue("New Feature");
+		choices.add(newFeature);
+		
+		Choice improvement = new Choice();
+		improvement.setValue("Improvement");
+		choices.add(improvement);
+
+		Choice bug = new Choice();
+		bug.setValue("Bug");
+		choices.add(bug);
+
+		Choice task = new Choice();
+		task.setValue("Task");
+		choices.add(task);
+
+		specifiedChoices.setChoices(choices);
+		type.setChoiceProvider(specifiedChoices);
+		
+		SpecifiedDefaultValue specifiedDefaultValue = new SpecifiedDefaultValue();
+		specifiedDefaultValue.setValue("Bug");
+		type.setDefaultValueProvider(specifiedDefaultValue);
+		
+		fieldSpecs.add(type);
+		
+		ChoiceInput priority = new ChoiceInput();
+		priority.setName("Priority");
+		specifiedChoices = new SpecifiedChoices();
+
+		choices = new ArrayList<>(); 
 		
 		Choice minor = new Choice();
 		minor.setValue("Minor");
@@ -80,7 +110,7 @@ public class IssueWorkflow implements Serializable {
 		specifiedChoices.setChoices(choices);
 		priority.setChoiceProvider(specifiedChoices);
 		
-		SpecifiedDefaultValue specifiedDefaultValue = new SpecifiedDefaultValue();
+		specifiedDefaultValue = new SpecifiedDefaultValue();
 		specifiedDefaultValue.setValue("Normal");
 		priority.setDefaultValueProvider(specifiedDefaultValue);
 		

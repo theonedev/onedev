@@ -1030,6 +1030,7 @@ public class Project extends AbstractEntity {
 	    	issueListFields.add(IssueConstants.FIELD_NUMBER);
 	    	issueListFields.add(IssueConstants.FIELD_STATE);
 	    	issueListFields.add(IssueConstants.FIELD_TITLE);
+			issueListFields.add("Type");
 			issueListFields.add("Priority");
 			issueListFields.add(IssueConstants.FIELD_SUBMITTER);
 			issueListFields.add("Assignee");
