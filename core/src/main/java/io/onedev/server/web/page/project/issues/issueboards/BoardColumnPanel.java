@@ -98,6 +98,18 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		
 	};
 	
+	private final IModel<Integer> countModel = new LoadableDetachableModel<Integer>() {
+
+		@Override
+		protected Integer load() {
+			if (getQuery() != null)
+				return OneDev.getInstance(IssueManager.class).count(getProject(), SecurityUtils.getUser(), getQuery().getCriteria());
+			else
+				return 0;
+		}
+		
+	};
+	
 	private AbstractPostAjaxBehavior ajaxBehavior;
 	
 	public BoardColumnPanel(String id) {
@@ -107,6 +119,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 	@Override
 	protected void onDetach() {
 		queryModel.detach();
+		countModel.detach();
 		super.onDetach();
 	}
 	
@@ -179,6 +192,11 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					@Override
 					protected IssueQuery getQuery() {
 						return BoardColumnPanel.this.getQuery();
+					}
+
+					@Override
+					protected int getCardCount() {
+						return countModel.getObject();
 					}
 
 				});
@@ -290,8 +308,8 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 			}
 
 			@Override
-			protected IssueQuery getQuery() {
-				return BoardColumnPanel.this.getQuery();
+			protected int getCount() {
+				return countModel.getObject();
 			}
 
 		});

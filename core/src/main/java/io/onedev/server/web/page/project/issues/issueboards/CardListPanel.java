@@ -38,13 +38,6 @@ abstract class CardListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		int cardCount;
-		if (getQuery() != null) {
-			cardCount = getIssueManager().count(getProject(), SecurityUtils.getUser(), getQuery().getCriteria());
-		} else { 
-			cardCount = 0;
-		}
-		
 		RepeatingView cardsView = new RepeatingView("cards");
 		int index = 0;
 		for (Issue issue: queryIssues(0, WebConstants.PAGE_SIZE)) {
@@ -64,7 +57,7 @@ abstract class CardListPanel extends Panel {
 				protected QueryPosition getPosition() {
 					IssueQuery query = getQuery();
 					if (query != null)
-						return new QueryPosition(query.toString(), cardCount, cardOffset);
+						return new QueryPosition(query.toString(), getCardCount(), cardOffset);
 					else
 						return null;
 				}
@@ -102,7 +95,7 @@ abstract class CardListPanel extends Panel {
 						protected QueryPosition getPosition() {
 							IssueQuery query = getQuery();
 							if (query != null)
-								return new QueryPosition(query.toString(), cardCount, cardOffset);
+								return new QueryPosition(query.toString(), getCardCount(), cardOffset);
 							else
 								return null;
 						}
@@ -155,4 +148,6 @@ abstract class CardListPanel extends Panel {
 	@Nullable
 	protected abstract IssueQuery getQuery();
 
+	protected abstract int getCardCount();
+	
 }

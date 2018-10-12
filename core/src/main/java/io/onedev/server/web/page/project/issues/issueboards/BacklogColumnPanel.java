@@ -58,6 +58,18 @@ abstract class BacklogColumnPanel extends Panel {
 		}
 		
 	};
+
+	private final IModel<Integer> countModel = new LoadableDetachableModel<Integer>() {
+
+		@Override
+		protected Integer load() {
+			if (getQuery() != null)
+				return OneDev.getInstance(IssueManager.class).count(getProject(), SecurityUtils.getUser(), getQuery().getCriteria());
+			else
+				return 0;
+		}
+		
+	};
 	
 	private AbstractPostAjaxBehavior ajaxBehavior;
 	
@@ -122,8 +134,8 @@ abstract class BacklogColumnPanel extends Panel {
 			}
 
 			@Override
-			protected IssueQuery getQuery() {
-				return BacklogColumnPanel.this.getQuery();
+			protected int getCount() {
+				return countModel.getObject();
 			}
 
 		});
@@ -186,6 +198,11 @@ abstract class BacklogColumnPanel extends Panel {
 				return BacklogColumnPanel.this.getQuery();
 			}
 
+			@Override
+			protected int getCardCount() {
+				return countModel.getObject();
+			}
+
 		});
 		
 		super.onBeforeRender();
@@ -198,6 +215,7 @@ abstract class BacklogColumnPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		queryModel.detach();
+		countModel.detach();
 		super.onDetach();
 	}
 

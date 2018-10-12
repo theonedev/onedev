@@ -1151,7 +1151,7 @@ public class Project extends AbstractEntity {
 			board.setName(IssueConstants.FIELD_STATE);
 			board.setIdentifyField(IssueConstants.FIELD_STATE);
 			board.setColumns(Lists.newArrayList("Open", "Assigned", "Closed"));
-			board.setDisplayFields(Lists.newArrayList(IssueConstants.FIELD_STATE, "Priority", "Assignee"));
+			board.setDisplayFields(Lists.newArrayList(IssueConstants.FIELD_STATE, "Type", "Priority", "Assignee"));
 			issueBoards.add(board);
 		}
 		return issueBoards;
