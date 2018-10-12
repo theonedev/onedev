@@ -9,3 +9,54 @@
 #project-contribs .form-inline div .btn {
 	margin-left: 20px;
 }
+
+#orderBy{
+	float:left;
+}
+.timeZoom{
+	float:right;
+}
+.hr{
+	clear:both;
+}
+.top-contributors{
+	width:100%;
+}
+.overallLineContainer{
+	clear:both;
+}
+#overallLine{
+	width:100%;
+	height:320px;
+}
+#project-contribs{
+	width: 100%;
+	margin:0 auto;
+	height:310px;
+}
+
+#additions{
+	color:green;
+}
+#deletions{
+	color:red;
+}
+.project-userlines{
+	width: 100%;
+	height:250px
+}
+.project-userline{
+	width: 100%;
+	height:250px
+}
+.userLine{
+	display:flex;
+	justify-content:space-between;
+	flex-wrap: wrap;
+	width:100%;
+}
+.userInfo{
+	width:49%;
+	height:300px;
+	
+}

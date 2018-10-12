@@ -8,12 +8,12 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-public class ChartResourceReference extends JavaScriptResourceReference {
+public class EChartsResourceReference extends JavaScriptResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public ChartResourceReference() {
-		super(ChartResourceReference.class, "chart.bundle.min.js");
+	public EChartsResourceReference() {
+		super(EChartsResourceReference.class, "echarts.min.js");
 	}
 
 	@Override

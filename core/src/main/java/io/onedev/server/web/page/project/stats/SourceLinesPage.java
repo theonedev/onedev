@@ -31,7 +31,6 @@ import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Day;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 
 @SuppressWarnings("serial")
 public class SourceLinesPage extends ProjectStatsPage {
@@ -115,7 +114,7 @@ public class SourceLinesPage extends ProjectStatsPage {
 					
 				});
 				
-				SortableDataProvider<Day, Void> dataProvider = new LoadableDetachableDataProvider<Day, Void>() {
+				SortableDataProvider<Day, Void> dataProvider = new SortableDataProvider<Day, Void>() {
 
 					private List<Day> getDays() {
 						List<Day> days = new ArrayList<>();
@@ -134,7 +133,7 @@ public class SourceLinesPage extends ProjectStatsPage {
 					}
 
 					@Override
-					public long calcSize() {
+					public long size() {
 						return getDays().size();
 					}
 

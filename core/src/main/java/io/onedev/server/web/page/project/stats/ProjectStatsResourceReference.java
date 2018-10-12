@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import io.onedev.server.web.asset.chart.ChartResourceReference;
+import io.onedev.server.web.asset.chart.EChartsResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class ProjectStatsResourceReference extends BaseDependentResourceReference {
@@ -21,7 +21,7 @@ public class ProjectStatsResourceReference extends BaseDependentResourceReferenc
 	@Override
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
-		dependencies.add(JavaScriptHeaderItem.forReference(new ChartResourceReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new EChartsResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(
 				new CssResourceReference(ProjectStatsResourceReference.class, "project-stats.css")));
 		return dependencies;

@@ -1,38 +1,55 @@
 <wicket:extend>
-	<div id="project-contribs">
-		<h2>Overall contribution</h2>
-		<div class="well">
-			<div wicket:id="overallContribution"></div>
-		</div>
+	<select id="orderBy" wicket:id="orderBy" ></select>
 	
-		<div class="top-contributors">
-			<h2>Top 10 User Contributions</h2>	
-			<form wicket:id="topOptions" class="form-inline">
-				<div wicket:id="feedback"></div>
-				<div class="form-group">
-					<label class="control-label">From Day: </label>
-					<input wicket:id="fromDay" placeholder="yyyy-MM-dd" class="form-control no-autofocus"></input>
-				</div>
-				<div class="form-group">
-					<label class="control-label">To Day: </label>
-					<input wicket:id="toDay" placeholder="yyyy-MM-dd" class="form-control no-autofocus"></input>
-				</div>
-				<div class="form-group">
-					<label class="control-label">Order By: </label>
-					<select wicket:id="orderBy" class="form-control"></select>
-				</div>
-				<div class="form-group">
-					<a wicket:id="update" class="btn btn-default">Update</a>
-				</div>
-			</form>
-			<hr/>
-			<div wicket:id="topContributors" class="well">
-				<div wicket:id="user"></div>
-				<div wicket:id="contributions"></div>
-			</div>
+	<div wicket:id="timeZoomContainer" class="timeZoom">
+		<div wicket:id="timeZoom">
 		</div>
 	</div>
-	<wicket:fragment wicket:id="userFrag">
-		<a wicket:id="avatar"></a> <a wicket:id="link"></a>
+	<hr class="hr"/>
+	<div wicket:id="overallContributorsContainer" class="overallLineContainer">
+		<div wicket:id="overallContribution" id="overallLine" class="well"></div>
+	
+	</div> 
+	
+
+	<hr/>
+	
+	<div class="top-contributors">
+			<hr/>
+			<div wicket:id="topContributorsContainer" class="userLine">
+			<div wicket:id="topContributors" class="well userInfo">
+				<div wicket:id="user" ></div>
+				<div wicket:id="userline" class="project-userlines"></div>
+			</div>
+			</div>
+	</div>
+	
+	
+	<wicket:fragment wicket:id="timeZoomFrag">
+		<label wicket:id="time"></label>
 	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="overallContributionFrag">
+	<div id="project-contribs"  ></div>
+	</wicket:fragment>
+	
+	
+	<wicket:fragment wicket:id="userFrag" >
+		<a wicket:id="avatar"></a>
+		<a wicket:id="link"></a> 
+		<label wicket:id="No" style="float:right"></label>
+		<div>
+			<label id="commits" wicket:id="commits"  ></label>
+			<label> </label>
+			<label id="additions" wicket:id="additions" ></label>
+			<label id="deletions" wicket:id="deletions" ></label>
+		</div>
+		
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="userlineFrag" >
+		<div class="project-userline"  ></div>
+	</wicket:fragment>
+	
+	
 </wicket:extend>
