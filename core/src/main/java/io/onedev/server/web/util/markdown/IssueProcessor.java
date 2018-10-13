@@ -17,10 +17,10 @@ public class IssueProcessor extends IssueParser implements MarkdownProcessor {
 	}
 
 	@Override
-	protected String toHtml(Issue issue) {
+	protected String toHtml(Issue issue, String text) {
 		CharSequence url = RequestCycle.get().urlFor(
 				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue, null)); 
-		return String.format("<a href='%s' class='issue'>#%d</a>", url, issue.getNumber());
+		return String.format("<a href='%s' class='issue reference' data-reference=%d>%s</a>", url, issue.getId(), text);
 	}
 	
 }

@@ -65,9 +65,12 @@ public abstract class CommentInput extends MarkdownEditor {
 		return new AtWhoReferenceSupport() {
 
 			@Override
-			public List<PullRequest> findPullRequests(String query, int count) {
+			public List<PullRequest> findPullRequests(Project project, String query, int count) {
 				EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-				criteria.add(Restrictions.eq("targetProject", getProject()));
+				if (project != null)
+					criteria.add(Restrictions.eq("targetProject", project));
+				else
+					criteria.add(Restrictions.eq("targetProject", getProject()));
 				if (StringUtils.isNotBlank(query)) {
 					query = StringUtils.deleteWhitespace(query);
 					criteria.add(Restrictions.or(
@@ -79,9 +82,12 @@ public abstract class CommentInput extends MarkdownEditor {
 			}
 
 			@Override
-			public List<Issue> findIssues(String query, int count) {
+			public List<Issue> findIssues(Project project, String query, int count) {
 				EntityCriteria<Issue> criteria = EntityCriteria.of(Issue.class);
-				criteria.add(Restrictions.eq("project", getProject()));
+				if (project != null)
+					criteria.add(Restrictions.eq("project", project));
+				else
+					criteria.add(Restrictions.eq("project", getProject()));
 				if (StringUtils.isNotBlank(query)) {
 					query = StringUtils.deleteWhitespace(query);
 					criteria.add(Restrictions.or(

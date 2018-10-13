@@ -17,10 +17,10 @@ public class PullRequestProcessor extends PullRequestParser implements MarkdownP
 	}
 
 	@Override
-	protected String toHtml(PullRequest request) {
+	protected String toHtml(PullRequest request, String text) {
 		CharSequence url = RequestCycle.get().urlFor(
 				PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request, null)); 
-		return String.format("<a href='%s' class='request'>#%d</a>", url, request.getNumber());
+		return String.format("<a href='%s' class='pull-request reference' data-reference=%d>%s</a>", url, request.getId(), text);
 	}
 	
 }

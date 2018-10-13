@@ -19,8 +19,10 @@ public class MentionProcessor extends MentionParser implements MarkdownProcessor
 	@Override
 	protected String toHtml(User user) {
 		if (RequestCycle.get() != null) {
-			return String.format("<a href='%s' class='mention'>@%s</a>", 
-				RequestCycle.get().urlFor(UserProfilePage.class, UserProfilePage.paramsOf(user)), user.getName());
+			return String.format("<a href='%s' class='reference mention' data-reference=%s>@%s</a>", 
+				RequestCycle.get().urlFor(UserProfilePage.class, UserProfilePage.paramsOf(user)),
+				user.getId(),
+				user.getName());
 		} else {
 			return super.toHtml(user);
 		}

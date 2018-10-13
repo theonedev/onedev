@@ -14,13 +14,28 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.StaleStateException;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.launcher.loader.AppLoader;
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.MarkdownManager;
+import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.manager.UserManager;
+import io.onedev.server.model.Issue;
+import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.pullrequest.CloseInfo;
+import io.onedev.server.model.support.pullrequest.PullRequestConstants;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.util.avatar.AvatarManager;
+import io.onedev.utils.ColorUtils;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
@@ -28,11 +43,17 @@ public class MarkdownViewer extends GenericPanel<String> {
 
 	private static final String TASK_CHECKED = "taskchecked";
 	
+	private static final String REFERENCE_TYPE = "referenceType";
+	
+	private static final String REFERENCE_ID = "referenceId";
+	
 	private final ContentVersionSupport contentVersionSupport;
 	
 	private long lastContentVersion;
 	
-	private AbstractPostAjaxBehavior behavior;
+	private AbstractPostAjaxBehavior taskBehavior;
+	
+	private AbstractPostAjaxBehavior referenceBehavior;
 	
 	public MarkdownViewer(String id, IModel<String> model, @Nullable ContentVersionSupport contentVersionSupport) {
 		super(id, model);
@@ -70,7 +91,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 			
 		}).setEscapeModelStrings(false));
 		
-		add(behavior = new AbstractPostAjaxBehavior() {
+		add(taskBehavior = new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
@@ -99,6 +120,75 @@ public class MarkdownViewer extends GenericPanel<String> {
 			
 		});
 		
+		add(referenceBehavior = new AbstractPostAjaxBehavior() {
+
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
+				String referenceType = params.getParameterValue(REFERENCE_TYPE).toString();
+				String referenceId = params.getParameterValue(REFERENCE_ID).toString();
+				switch (referenceType) {
+				case "issue":
+					Issue issue = OneDev.getInstance(IssueManager.class).get(Long.valueOf(referenceId));
+					if (issue != null) {
+						String color = issue.getProject().getIssueWorkflow().getStateSpec(issue.getState()).getColor();
+						String script = String.format("onedev.server.markdown.renderIssueTooltip('%s', '%s', '%s', '%s')", 
+								JavaScriptEscape.escapeJavaScript(issue.getTitle()), JavaScriptEscape.escapeJavaScript(issue.getState()), 
+								ColorUtils.isLight(color)? "black": "white", color);
+						target.appendJavaScript(script);
+					}
+					break;
+				case "pull request":
+					PullRequest request = OneDev.getInstance(PullRequestManager.class).get(Long.valueOf(referenceId));
+					if (request != null) {
+						String statusCss;
+						String status;
+						CloseInfo closeInfo = request.getCloseInfo();
+						if (closeInfo == null) {
+							status = PullRequestConstants.STATE_OPEN;
+							statusCss = "label-warning";
+						} else {
+							status = closeInfo.getStatus().toString();
+							if (closeInfo.getStatus() == CloseInfo.Status.DISCARDED)
+								statusCss = "label-danger";
+							else
+								statusCss = "label-success";
+						}
+						
+						String script = String.format("onedev.server.markdown.renderPullRequestTooltip('%s', '%s', '%s')", 
+								JavaScriptEscape.escapeJavaScript(request.getTitle()), status, statusCss);
+						target.appendJavaScript(script);
+					}
+					break;
+				case "user":
+					User user = OneDev.getInstance(UserManager.class).get(Long.valueOf(referenceId));
+					if (user != null) {
+						String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(user.getFacade());
+						String script = String.format("onedev.server.markdown.renderUserTooltip('%s', '%s', '%s')", 
+								JavaScriptEscape.escapeJavaScript(avatarUrl), 
+								JavaScriptEscape.escapeJavaScript(user.getDisplayName()), 
+								JavaScriptEscape.escapeJavaScript(user.getEmail()));
+						target.appendJavaScript(script);
+					}
+					break;
+				case "commit":
+					ProjectPage page = (ProjectPage) getPage();
+					RevCommit commit = page.getProject().getRevCommit(ObjectId.fromString(referenceId), false);
+					if (commit != null) {
+						String script = String.format("onedev.server.markdown.renderCommitTooltip('%s', '%s', '%s')", 
+								JavaScriptEscape.escapeJavaScript(commit.getAuthorIdent().getName()), 
+								JavaScriptEscape.escapeJavaScript(DateUtils.formatAge(commit.getCommitterIdent().getWhen())), 
+								JavaScriptEscape.escapeJavaScript(commit.getFullMessage()));
+						target.appendJavaScript(script);
+					}
+					break;
+				default:
+					throw new RuntimeException("Unrecognized reference type: " + referenceType);
+				}
+			}
+			
+		});
+		
 		setOutputMarkupId(true);
 	}
 	
@@ -107,14 +197,18 @@ public class MarkdownViewer extends GenericPanel<String> {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new MarkdownResourceReference()));
 		
-		CharSequence callback = behavior.getCallbackFunction(
+		CharSequence taskCallback = taskBehavior.getCallbackFunction(
 				explicit(SourcePositionTrackExtension.DATA_START_ATTRIBUTE), 
 				explicit(TASK_CHECKED));
 		
-		String script = String.format("onedev.server.markdown.onViewerDomReady('%s', %s, '%s');", 
+		CharSequence referenceCallback = referenceBehavior.getCallbackFunction(
+				explicit(REFERENCE_TYPE), explicit(REFERENCE_ID));
+		
+		String script = String.format("onedev.server.markdown.onViewerDomReady('%s', %s, '%s', %s);", 
 				getMarkupId(), 
-				contentVersionSupport!=null?callback:"undefined", 
-				SourcePositionTrackExtension.DATA_START_ATTRIBUTE);
+				contentVersionSupport!=null?taskCallback:"undefined", 
+				SourcePositionTrackExtension.DATA_START_ATTRIBUTE, 
+				referenceCallback);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

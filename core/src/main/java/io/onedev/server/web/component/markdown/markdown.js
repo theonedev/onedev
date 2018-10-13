@@ -570,39 +570,52 @@ onedev.server.markdown = {
 	    } 
 
 	    if (canReferenceEntity) {
-	    	function isReferencingPullRequest() {
-	    		var input = $input.val().substring(0, $input.caret()).toLowerCase().replace(/\s/g,'').trim();
-	    		return input.endsWith("pullrequest#");
+	    	function getReferencePullRequestProject() {
+	    		var input = $input.val().substring(0, $input.caret());
+	    		var match = /.*pull\s*request\s+([\w\.-]*)\s*#/gi.exec(input);
+	    		if (match)
+	    			return match[1];		
+	    		else
+	    			return undefined;   		
 	    	}
-	    	function isReferencingIssue() {
-	    		var input = $input.val().substring(0, $input.caret()).toLowerCase().replace(/\s/g,'').trim();
-	    		return input.endsWith("issue#");
+
+	    	function getReferenceIssueProject() {
+	    		var input = $input.val().substring(0, $input.caret())
+	    		var match = /.*issue\s+([\w\.-]*)\s*#/gi.exec(input);
+	    		if (match)
+	    			return match[1];		
+	    		else
+	    			return undefined;   		
 	    	}
 	    	
 		    $input.atwho({
 		    	at: '#',
+		    	startWithSpace: false,
 		    	searchKey: "searchKey",
 		        callbacks: {
 		        	remoteFilter: function(query, renderCallback) {
 		        		$container.data("atWhoReferenceRenderCallback", renderCallback);
 		        		var queryType;
-		        		if (isReferencingPullRequest())
-		        			queryType = "pull request";
-		        		else if (isReferencingIssue())
-		        			queryType = "issue";
-		        		else
-		        			queryType = undefined;
-		            	callback("referenceQuery", query, queryType);
+		        		var project = getReferencePullRequestProject();
+		        		if (project != undefined) {
+			            	callback("referenceQuery", query, "pull request", project);
+		        		} else {
+		        			project = getReferenceIssueProject();
+		        			if (project != undefined)
+		        				callback("referenceQuery", query, "issue", project);
+		        			else if ($input.val().substring(0, $input.caret()).match(/(.*\s+|^)#/gi))
+		        				callback("referenceQuery", query, undefined, undefined);
+		        		}
 		        	}
 		        },
 		        displayTpl: function() {
-		    		if (isReferencingPullRequest() || isReferencingIssue())
+		    		if (getReferencePullRequestProject() != undefined || getReferenceIssueProject() != undefined)
 			    		return "<li><span class='text-muted'>#${referenceNumber}</span> - ${referenceTitle}</li>";
 		    		else
 			    		return "<li><span class='text-muted'>${referenceType} #${referenceNumber}</span> - ${referenceTitle}</li>";
 		        },
 		        insertTpl: function() {
-		    		if (isReferencingPullRequest() || isReferencingIssue())
+		    		if (getReferencePullRequestProject() != undefined || getReferenceIssueProject() != undefined)
 		    			return "#${referenceNumber}";
 		    		else
 		    			return '${referenceType} #${referenceNumber}';	    		
@@ -912,7 +925,7 @@ onedev.server.markdown = {
 			});
 		});
 	},
-	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute) {
+	onViewerDomReady: function(containerId, taskCallback, taskSourcePositionDataAttribute, referenceCallback) {
 		var $container = $("#" + containerId);
 		
 		if (taskCallback) {
@@ -924,7 +937,77 @@ onedev.server.markdown = {
 			});	
 		}
 		
+		var alignment = {targetX: 0, targetY: 0, x: 0, y: 100};
+		$container.find(".reference").hover(function() {
+			var $reference = $(this);
+			var referenceType;
+			var referenceId = $reference.data("reference");
+			if ($reference.hasClass("issue")) {
+				referenceType = "issue";
+			} else if ($reference.hasClass("pull-request")) {
+				referenceType = "pull request";
+			} else if ($reference.hasClass("mention")) {
+				referenceType = "user";
+			} else if ($reference.hasClass("commit")) {
+				referenceType = "commit";
+			}
+			if (referenceType) {
+				var $tooltip = $("<div id='reference-tooltip'></div>");
+				$tooltip.data("trigger", this);
+				$tooltip.data("alignment", alignment);
+				$container.append($tooltip);
+				referenceCallback(referenceType, referenceId);
+				return $tooltip;
+			}
+		}, alignment);
+		
 		onedev.server.markdown.initRendered($container.find(".markdown-rendered"));
+	},
+	renderIssueTooltip: function(title, state, stateFontColor, stateBackgroundColor) {
+		var $tooltip = $("#reference-tooltip");
+		$tooltip.append("" +
+				"<div class='content issue'>" +
+				"  <span class='state'></span> <span class='title'></span>" +
+				"</div>");
+		$tooltip.find(".state").css({
+			"color": stateFontColor,
+			"background": stateBackgroundColor
+		}).text(state);
+		$tooltip.find(".title").text(title);
+		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
+	},
+	renderPullRequestTooltip: function(title, status, statusCss) {
+		var $tooltip = $("#reference-tooltip");
+		$tooltip.append("" +
+				"<div class='content pull-request'>" +
+				"  <span class='label status'></span> <span class='title'></span>" +
+				"</div>");
+		$tooltip.find(".status").addClass(statusCss).text(status);
+		$tooltip.find(".title").text(title);
+		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
+	},
+	renderUserTooltip: function(avatarUrl, name, email) {
+		var $tooltip = $("#reference-tooltip");
+		$tooltip.append("" +
+				"<div class='content user'>" +
+				"  <img class='avatar'></img><div class='name'></div><div class='email'></div>" +
+				"</div>");
+		$tooltip.find(".avatar").attr("src", avatarUrl);
+		$tooltip.find(".name").text(name);
+		$tooltip.find(".email").text(email);
+		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
+	},
+	renderCommitTooltip: function(author, date, commitMessage) {
+		var $tooltip = $("#reference-tooltip");
+		$tooltip.append("" +
+				"<div class='content commit'>" +
+				"  <div class='head'><span class='author'></span> <span class='date'></span></div>" +
+				"  <pre class='body'></pre>" +
+				"</div>");
+		$tooltip.find(".author").text(author);
+		$tooltip.find(".date").text(date);
+		$tooltip.find(".body").text(commitMessage);
+		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
 	},
 	onEmojisLoaded: function(containerId, emojis) {
 		var $container = $("#" + containerId);

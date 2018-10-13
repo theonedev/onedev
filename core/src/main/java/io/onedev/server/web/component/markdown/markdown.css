@@ -226,10 +226,6 @@ body.fullscreen {
 	font-size: 16px;
 	line-height: 1.5;
 }
-.markdown-rendered .mention {
-	font-weight: bold;
-	color: #444;
-}
 .markdown-rendered li {
 	margin-bottom: 6px;
 }
@@ -320,6 +316,49 @@ body.fullscreen {
 	color: #333;
 	text-decoration: none;
 }
+#reference-tooltip .content {
+	background-color: #FBFCC5; 
+	border: 1px solid black;
+	border-radius: 4px; 
+	padding: 12px; 
+	z-index: 10000;
+}
+#reference-tooltip .content.issue .state, 
+#reference-tooltip .content.pull-request .status {
+	border-radius: 3px;
+	padding: 2px 4px;
+	font-weight: bold;
+	margin-right: 4px;
+}
+#reference-tooltip .content.user {
+	position: relative;
+	padding-left: 60px;
+}
+#reference-tooltip .content.user .avatar {
+	width: 36px;
+	height: 36px;
+	position: absolute;
+	left: 16px;
+	top: 16px;
+}
+#reference-tooltip .content.user .name {
+	padding: 0 !important;
+	margin: 0 !important;
+	font-weight: bold;
+}
+#reference-tooltip .content.commit .head {
+	font-weight: bold;
+	margin-bottom: 12px;
+}
+#reference-tooltip .content.commit .author {
+	margin-right: 4px;
+}
+#reference-tooltip .content.commit .body {
+	background: none;
+	border: none;
+	padding: 0;
+	margin: 0;
+}
 
 .markdown-image-loading {
 	position: absolute;
@@ -327,3 +366,4 @@ body.fullscreen {
 	top: 0;
 	background: url("/img/ajax-indicator-big.gif") center no-repeat;
 }
+

@@ -49,7 +49,9 @@ import com.google.common.base.Preconditions;
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.MarkdownManager;
+import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -289,26 +291,33 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				case "referenceQuery":
 					String referenceQuery = params.getParameterValue("param1").toOptionalString();
 					String referenceQueryType = params.getParameterValue("param2").toOptionalString();
-
+					String referenceProjectName = params.getParameterValue("param3").toOptionalString();
 					List<Map<String, String>> referenceList = new ArrayList<>();
-					if (StringUtils.isBlank(referenceQueryType) || "issue".equals(referenceQueryType)) {
-						for (Issue issue: getReferenceSupport().findIssues(referenceQuery, ATWHO_LIMIT)) {
-							Map<String, String> referenceMap = new HashMap<>();
-							referenceMap.put("referenceType", "issue");
-							referenceMap.put("referenceNumber", String.valueOf(issue.getNumber()));
-							referenceMap.put("referenceTitle", issue.getTitle());
-							referenceMap.put("searchKey", issue.getNumber() + " " + StringUtils.deleteWhitespace(issue.getTitle()));
-							referenceList.add(referenceMap);
+					Project referenceProject;
+					if (StringUtils.isNotBlank(referenceProjectName)) 
+						referenceProject = OneDev.getInstance(ProjectManager.class).find(referenceProjectName);
+					else
+						referenceProject = null;
+					if (referenceProject != null || StringUtils.isBlank(referenceProjectName)) {
+						if (StringUtils.isBlank(referenceQueryType) || "issue".equals(referenceQueryType)) {
+							for (Issue issue: getReferenceSupport().findIssues(referenceProject, referenceQuery, ATWHO_LIMIT)) {
+								Map<String, String> referenceMap = new HashMap<>();
+								referenceMap.put("referenceType", "issue");
+								referenceMap.put("referenceNumber", String.valueOf(issue.getNumber()));
+								referenceMap.put("referenceTitle", issue.getTitle());
+								referenceMap.put("searchKey", issue.getNumber() + " " + StringUtils.deleteWhitespace(issue.getTitle()));
+								referenceList.add(referenceMap);
+							}
 						}
-					}
-					if (StringUtils.isBlank(referenceQueryType) || "pull request".equals(referenceQueryType)) {
-						for (PullRequest request: getReferenceSupport().findPullRequests(referenceQuery, ATWHO_LIMIT)) {
-							Map<String, String> referenceMap = new HashMap<>();
-							referenceMap.put("referenceType", "pull request");
-							referenceMap.put("referenceNumber", String.valueOf(request.getNumber()));
-							referenceMap.put("referenceTitle", request.getTitle());
-							referenceMap.put("searchKey", request.getNumber() + " " + StringUtils.deleteWhitespace(request.getTitle()));
-							referenceList.add(referenceMap);
+						if (StringUtils.isBlank(referenceQueryType) || "pull request".equals(referenceQueryType)) {
+							for (PullRequest request: getReferenceSupport().findPullRequests(referenceProject, referenceQuery, ATWHO_LIMIT)) {
+								Map<String, String> referenceMap = new HashMap<>();
+								referenceMap.put("referenceType", "pull request");
+								referenceMap.put("referenceNumber", String.valueOf(request.getNumber()));
+								referenceMap.put("referenceTitle", request.getTitle());
+								referenceMap.put("searchKey", request.getNumber() + " " + StringUtils.deleteWhitespace(request.getTitle()));
+								referenceList.add(referenceMap);
+							}
 						}
 					}
 					

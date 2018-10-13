@@ -22,7 +22,7 @@ public class MentionParser {
 	
 	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("pre", "code", "a");
 	
-	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)@(\\S+)(?=($|\\s+))");
+	private static final Pattern PATTERN = Pattern.compile("(^|\\s+)@(\\S+)($|\\s+)");
 
 	public Collection<User> parseMentions(String rendered) {
 		return parseMentions(Jsoup.parseBodyFragment(rendered));		

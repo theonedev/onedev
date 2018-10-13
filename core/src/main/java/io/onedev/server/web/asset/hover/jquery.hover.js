@@ -19,27 +19,28 @@
 			function show() {
 				if (!popover) {
 					popover = callback.call(trigger);
-					
-					var $popover = jQuery(popover);
-					
-					$popover.mouseover(function() {
-						cancelHide();
-					});
-					
-					$popover.mouseout(function() {
-						cancelShow();
-						cancelHide();
-						hideTimer = setTimeout(hide, hoverDelay);
-					});
+					if (popover) {
+						var $popover = jQuery(popover);
+						
+						$popover.mouseover(function() {
+							cancelHide();
+						});
+						
+						$popover.mouseout(function() {
+							cancelShow();
+							cancelHide();
+							hideTimer = setTimeout(hide, hoverDelay);
+						});
 
-					$popover.mousemove(function() {
-						cancelHide();
-					});
-					
-					$popover.align({
-						placement: alignment,
-						target: {element: trigger}
-					});
+						$popover.mousemove(function() {
+							cancelHide();
+						});
+						
+						$popover.align({
+							placement: alignment,
+							target: {element: trigger}
+						});
+					}
 				}
 			}
 
