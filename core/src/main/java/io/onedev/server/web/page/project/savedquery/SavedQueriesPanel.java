@@ -33,8 +33,8 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.WatchStatus;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.subscriptionstatus.SubscriptionStatusLink;

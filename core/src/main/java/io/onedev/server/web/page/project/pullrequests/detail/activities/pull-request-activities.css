@@ -28,29 +28,29 @@
 #request-detail>.main>.activities .activity>td.content {
 	padding-left: 20px;
 }
-#request-detail>.main>.activities .UpdatedActivity>td.content .alert {
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content .alert {
 	margin: 16px 0;
 }
-#request-detail>.main>.activities .UpdatedActivity>td.content td {
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td {
 	color: #888;
 	padding: 4px 0;
 }
-#request-detail>.main>.activities .UpdatedActivity>td.content tr:hover td {
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content tr:hover td {
 	background: #F5F5F5;
 }
-#request-detail>.main>.activities .UpdatedActivity>td.content td.icon {
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.icon {
 	width: 30px;
 }
-#request-detail>.main>.activities .UpdatedActivity>td.content td.author {
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.author {
 	width: 35px;
 }
-#request-detail>.main>.activities .UpdatedActivity>td.content td.hash-and-status {
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status {
 	width: 160px;
 }
-#request-detail>.main>.activities .UpdatedActivity>td.content td.hash-and-status>div {
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status>div {
 	margin-left: 8px;
 }
-#request-detail>.main>.activities .UpdatedActivity>td.content a {
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content a {
 	color: #555;
 }
 
@@ -72,6 +72,9 @@
 }
 #request-detail>.main>.activities .activity>td>.body {
 	margin-top: 8px;
+}
+#request-detail>.main>.activities .activity>td>.body>.referenced-from .label {
+	line-height: inherit;
 }
 #request-detail>.main>.activities .add-comment {
 	margin-top: 16px;
@@ -106,9 +109,5 @@
 	margin-right: 4px;
 }
 #request-detail>.main>.activities .activity>td.content .plain.diff {
-	border: none;
-}
-#request-detail>.main>.activities .activity>td.content .plain.diff td {
-	padding: 0;
-	background: white;
+	margin-bottom: 12px;
 }

@@ -8,8 +8,8 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.IssueConstants;
 
 public class FixedInCriteria extends IssueCriteria {
 

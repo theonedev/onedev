@@ -7,7 +7,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.markdown.IssueParser;
 import io.onedev.server.util.markdown.MarkdownProcessor;
-import io.onedev.server.web.page.project.issues.issuedetail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 
 public class IssueProcessor extends IssueParser implements MarkdownProcessor {
 	

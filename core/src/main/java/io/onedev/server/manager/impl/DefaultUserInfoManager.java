@@ -11,6 +11,7 @@ import org.joda.time.DateTime;
 import com.google.common.collect.Lists;
 
 import io.onedev.launcher.loader.Listen;
+import io.onedev.server.event.codecomment.CodeCommentDeleted;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.issue.IssueDeleted;
@@ -254,13 +255,14 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 
 	@Listen
 	public void on(IssueEvent event) {
-		if (!(event instanceof IssueDeleted))
+		if (event.getUser() != null && !(event instanceof IssueDeleted))
 			visitIssue(event.getUser(), event.getIssue());
 	}
 	
 	@Listen
 	public void on(CodeCommentEvent event) {
-		visitCodeComment(event.getUser(), event.getComment());
+		if (event.getUser() != null && !(event instanceof CodeCommentDeleted))
+			visitCodeComment(event.getUser(), event.getComment());
 	}
 
 	@Listen

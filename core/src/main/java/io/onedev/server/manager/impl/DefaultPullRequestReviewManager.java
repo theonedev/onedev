@@ -10,18 +10,18 @@ import javax.persistence.Query;
 
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.server.manager.PullRequestActionManager;
+import io.onedev.server.manager.PullRequestChangeManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestAction;
+import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
-import io.onedev.server.model.support.pullrequest.actiondata.AddedReviewerData;
-import io.onedev.server.model.support.pullrequest.actiondata.ApprovedData;
-import io.onedev.server.model.support.pullrequest.actiondata.RemovedReviewerData;
-import io.onedev.server.model.support.pullrequest.actiondata.RequestedForChangesData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -33,29 +33,29 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 
 	private final PullRequestManager pullRequestManager;
 	
-	private final PullRequestActionManager pullRequestActionManager;
+	private final PullRequestChangeManager pullRequestChangeManager;
 	
 	@Inject
-	public DefaultPullRequestReviewManager(Dao dao, PullRequestManager pullRequestManager, PullRequestActionManager pullRequestActionManager) {
+	public DefaultPullRequestReviewManager(Dao dao, PullRequestManager pullRequestManager, PullRequestChangeManager pullRequestChangeManager) {
 		super(dao);
 		
 		this.pullRequestManager = pullRequestManager;
-		this.pullRequestActionManager = pullRequestActionManager;
+		this.pullRequestChangeManager = pullRequestChangeManager;
 	}
 
 	@Transactional
 	@Override
 	public void review(PullRequestReview review) {
 		ReviewResult result = review.getResult();
-		PullRequestAction action = new PullRequestAction();
-		action.setDate(new Date());
-		action.setRequest(review.getRequest());
+		PullRequestChange change = new PullRequestChange();
+		change.setDate(new Date());
+		change.setRequest(review.getRequest());
 		if (result.isApproved()) 
-			action.setData(new ApprovedData(result.getComment()));
+			change.setData(new PullRequestApproveData(result.getComment()));
 		else 
-			action.setData(new RequestedForChangesData(result.getComment()));
-		action.setUser(review.getUser());
-		pullRequestActionManager.save(action);
+			change.setData(new PullRequestRequestedForChangesData(result.getComment()));
+		change.setUser(review.getUser());
+		pullRequestChangeManager.save(change);
 		save(review);
 	}
 
@@ -80,12 +80,12 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		} else {
 			save(review);
 			
-			PullRequestAction action = new PullRequestAction();
-			action.setDate(new Date());
-			action.setRequest(request);
-			action.setUser(SecurityUtils.getUser());
-			action.setData(new RemovedReviewerData(reviewer.getDisplayName()));
-			pullRequestActionManager.save(action);
+			PullRequestChange change = new PullRequestChange();
+			change.setDate(new Date());
+			change.setRequest(request);
+			change.setUser(SecurityUtils.getUser());
+			change.setData(new PullRequestReviewerRemoveData(reviewer.getDisplayName()));
+			pullRequestChangeManager.save(change);
 			return true;
 		}
 	}
@@ -97,12 +97,12 @@ public class DefaultPullRequestReviewManager extends AbstractEntityManager<PullR
 		
 		PullRequest request = review.getRequest();
 		
-		PullRequestAction action = new PullRequestAction();
-		action.setDate(new Date());
-		action.setRequest(request);
-		action.setData(new AddedReviewerData(review.getUser().getDisplayName()));
-		action.setUser(SecurityUtils.getUser());
-		pullRequestActionManager.save(action);
+		PullRequestChange change = new PullRequestChange();
+		change.setDate(new Date());
+		change.setRequest(request);
+		change.setData(new PullRequestReviewerAddData(review.getUser().getDisplayName()));
+		change.setUser(SecurityUtils.getUser());
+		pullRequestChangeManager.save(change);
 	}
 
 	@Transactional

@@ -6,10 +6,10 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.codecomment.CodeCommentConstants;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
+import io.onedev.server.util.CodeCommentConstants;
 
 public class ContentCriteria extends EntityCriteria<CodeComment> {
 

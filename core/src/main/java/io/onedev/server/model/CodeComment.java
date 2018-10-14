@@ -32,19 +32,16 @@ import org.hibernate.annotations.DynamicUpdate;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
-import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.model.support.TextRange;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.web.editable.EditableUtils;
 
 /*
  * @DynamicUpdate annotation here along with various @OptimisticLock annotations
@@ -54,7 +51,8 @@ import io.onedev.server.web.editable.EditableUtils;
 @Entity
 @Table(indexes={
 		@Index(columnList="g_project_id"), @Index(columnList="g_user_id"),
-		@Index(columnList="commit"), @Index(columnList="path")})
+		@Index(columnList="commit"), @Index(columnList="path"), 
+		@Index(columnList="createDate"), @Index(columnList="updateDate")})
 @DynamicUpdate 
 public class CodeComment extends AbstractEntity {
 	
@@ -75,10 +73,10 @@ public class CodeComment extends AbstractEntity {
 	private String content;
 	
 	@Column(nullable=false)
-	private Date date = new Date();
+	private Date createDate = new Date();
 
-	@Embedded
-	private LastActivity lastActivity;
+	@Column(nullable=false)
+	private Date updateDate = new Date();
 	
 	private int replyCount;
 
@@ -133,12 +131,12 @@ public class CodeComment extends AbstractEntity {
 		this.content = content;
 	}
 
-	public Date getDate() {
-		return date;
+	public Date getCreateDate() {
+		return createDate;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
 	}
 
 	public int getReplyCount() {
@@ -189,22 +187,14 @@ public class CodeComment extends AbstractEntity {
 		this.compareContext = compareContext;
 	}
 
-	public LastActivity getLastActivity() {
-		return lastActivity;
+	public Date getUpdateDate() {
+		return updateDate;
 	}
 
-	public void setLastActivity(LastActivity lastActivity) {
-		this.lastActivity = lastActivity;
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
 	}
 	
-	public void setLastActivity(CodeCommentEvent event) {
-		LastActivity lastActivity = new LastActivity();
-		lastActivity.setDate(event.getDate());
-		lastActivity.setDescription(EditableUtils.getDisplayName(event.getClass()));
-		lastActivity.setUser(event.getUser());
-		setLastActivity(lastActivity);
-	}
-
 	public boolean isVisitedAfter(Date date) {
 		User user = SecurityUtils.getUser();
 		if (user != null) {

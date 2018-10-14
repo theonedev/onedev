@@ -15,11 +15,11 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueAction;
+import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestAction;
+import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
@@ -163,16 +163,16 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 				|| canWriteCode(comment.getIssue().getProject().getFacade());
 	}
 	
-	public static boolean canModifyOrDelete(PullRequestAction action) {
+	public static boolean canModifyOrDelete(PullRequestChange change) {
 		User user = SecurityUtils.getUser();
-		return user != null && user.equals(action.getUser()) 
-				|| canWriteCode(action.getRequest().getTargetProject().getFacade());
+		return user != null && user.equals(change.getUser()) 
+				|| canWriteCode(change.getRequest().getTargetProject().getFacade());
 	}
 	
-	public static boolean canModifyOrDelete(IssueAction action) {
+	public static boolean canModifyOrDelete(IssueChange change) {
 		User user = SecurityUtils.getUser();
-		return user != null && user.equals(action.getUser()) 
-				|| canWriteCode(action.getIssue().getProject().getFacade());
+		return user != null && user.equals(change.getUser()) 
+				|| canWriteCode(change.getIssue().getProject().getFacade());
 	}
 
 	public static boolean canModify(PullRequest request) {

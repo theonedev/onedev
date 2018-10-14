@@ -32,18 +32,24 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.CodeCommentManager;
 import io.onedev.server.manager.IssueCommentManager;
+import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueAction;
+import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
+import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
+import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.avatar.AvatarLink;
-import io.onedev.server.web.component.issue.activities.activity.ActionActivity;
-import io.onedev.server.web.component.issue.activities.activity.CommentedActivity;
+import io.onedev.server.web.component.issue.activities.activity.IssueChangeActivity;
+import io.onedev.server.web.component.issue.activities.activity.IssueCommentedActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueActivity;
-import io.onedev.server.web.component.issue.activities.activity.OpenedActivity;
+import io.onedev.server.web.component.issue.activities.activity.IssueOpenedActivity;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.page.security.LoginPage;
@@ -128,17 +134,32 @@ public abstract class IssueActivitiesPanel extends Panel {
 	private List<IssueActivity> getActivities() {
 		List<IssueActivity> activities = new ArrayList<>();
 
-		activities.add(new OpenedActivity(getIssue()));
+		activities.add(new IssueOpenedActivity(getIssue()));
 
 		List<IssueActivity> otherActivities = new ArrayList<>();
 		if (showComments) {
 			for (IssueComment comment: getIssue().getComments())  
-				otherActivities.add(new CommentedActivity(comment));
+				otherActivities.add(new IssueCommentedActivity(comment));
 		}
 		
 		if (showChangeHistory) {
-			for (IssueAction action: getIssue().getActions())
-				otherActivities.add(new ActionActivity(action));
+			for (IssueChange change: getIssue().getChanges()) {
+				if (change.getData() instanceof IssueReferencedFromIssueData) {
+					IssueReferencedFromIssueData referencedFromIssueData = (IssueReferencedFromIssueData) change.getData();
+					if (OneDev.getInstance(IssueManager.class).get(referencedFromIssueData.getIssueId()) != null)
+						otherActivities.add(new IssueChangeActivity(change));
+				} else if (change.getData() instanceof IssueReferencedFromPullRequestData) {
+					IssueReferencedFromPullRequestData referencedFromPullRequestData = (IssueReferencedFromPullRequestData) change.getData();
+					if (OneDev.getInstance(PullRequestManager.class).get(referencedFromPullRequestData.getRequestId()) != null)
+						otherActivities.add(new IssueChangeActivity(change));
+				} else if (change.getData() instanceof IssueReferencedFromCodeCommentData) {
+					IssueReferencedFromCodeCommentData referencedFromCodeCommentData = (IssueReferencedFromCodeCommentData) change.getData();
+					if (OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId()) != null)
+						otherActivities.add(new IssueChangeActivity(change));
+				} else {
+					otherActivities.add(new IssueChangeActivity(change));
+				}
+			}
 		}
 		
 		otherActivities.sort((o1, o2) -> {
@@ -269,7 +290,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 
 					@SuppressWarnings("deprecation")
 					Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-					Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentedActivity(comment)); 
+					Component newActivityRow = newActivityRow(activitiesView.newChildId(), new IssueCommentedActivity(comment)); 
 					activitiesView.add(newActivityRow);
 					
 					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 

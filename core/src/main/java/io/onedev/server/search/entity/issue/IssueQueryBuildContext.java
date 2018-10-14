@@ -6,8 +6,8 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.IssueConstants;
 import io.onedev.server.model.IssueFieldUnary;
 
 public class IssueQueryBuildContext extends QueryBuildContext<Issue> {

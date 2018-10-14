@@ -12,16 +12,8 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.DynamicUpdate;
-
-/*
- * @DynamicUpdate annotation here along with various @OptimisticLock annotations
- * on certain fields tell Hibernate not to perform version check on those fields
- * which can be updated from background thread.
- */
 @Entity
 @Table(indexes={@Index(columnList="g_request_id"), @Index(columnList="g_user_id")})
-@DynamicUpdate 
 public class PullRequestComment extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;

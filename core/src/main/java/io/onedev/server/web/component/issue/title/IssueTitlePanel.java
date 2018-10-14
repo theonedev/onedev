@@ -15,7 +15,7 @@ import org.apache.wicket.model.Model;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueActionManager;
+import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.security.SecurityUtils;
 
@@ -43,7 +43,7 @@ public abstract class IssueTitlePanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				OneDev.getInstance(IssueActionManager.class).changeTitle(getIssue(), titleInput.getModelObject(), SecurityUtils.getUser());
+				OneDev.getInstance(IssueChangeManager.class).changeTitle(getIssue(), titleInput.getModelObject(), SecurityUtils.getUser());
 				
 				Fragment titleViewer = newTitleViewer();
 				titleEditor.replaceWith(titleViewer);

@@ -11,7 +11,7 @@ import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.MarkdownAware;
-import io.onedev.server.event.issue.IssueActionEvent;
+import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueDeleted;
 import io.onedev.server.event.issue.IssueEvent;
@@ -22,7 +22,7 @@ import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.manager.UrlManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueAction;
+import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
@@ -110,8 +110,8 @@ public class DefaultIssueNotificationManager {
 							url = urlManager.urlFor(((IssueOpened)event).getIssue());
 						else if (event instanceof IssueCommented) 
 							url = urlManager.urlFor(((IssueCommented)event).getComment());
-						else if (event instanceof IssueActionEvent)
-							url = urlManager.urlFor(((IssueActionEvent)event).getAction());
+						else if (event instanceof IssueChangeEvent)
+							url = urlManager.urlFor(((IssueChangeEvent)event).getChange());
 						else 
 							url = urlManager.urlFor(event.getIssue());
 						
@@ -126,19 +126,25 @@ public class DefaultIssueNotificationManager {
 				}
 			} 		
 
-			if (event instanceof IssueActionEvent) {
-				IssueAction issueAction = ((IssueActionEvent) event).getAction();
-				for (Team team: issueAction.getData().getNewTeams(issue.getProject()).values()) {
-					for (User member: team.getMembers())
-						watch(issue, member, true);
+			if (event instanceof IssueChangeEvent) {
+				IssueChange change = ((IssueChangeEvent) event).getChange();
+				Map<String, Team> newTeams = change.getData().getNewTeams(issue.getProject());
+				if (newTeams != null) {
+					for (Team team: newTeams.values()) {
+						for (User member: team.getMembers())
+							watch(issue, member, true);
+					}
 				}
 				String url = urlManager.urlFor(issue);
-				for (Map.Entry<String, User> entry: issueAction.getData().getNewUsers(issue.getProject()).entrySet()) {
-					String subject = String.format("You are designated as \"%s\" of issue #%d: %s", 
-							entry.getKey(), issue.getNumber(), issue.getTitle());
-					String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-					mailManager.sendMailAsync(Lists.newArrayList(entry.getValue().getEmail()), subject, body.toString());
-					notifiedUsers.add(entry.getValue());
+				Map<String, User> newUsers = change.getData().getNewUsers(issue.getProject());
+				if (newUsers != null) {
+					for (Map.Entry<String, User> entry: newUsers.entrySet()) {
+						String subject = String.format("You are designated as \"%s\" of issue #%d: %s", 
+								entry.getKey(), issue.getNumber(), issue.getTitle());
+						String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+						mailManager.sendMailAsync(Lists.newArrayList(entry.getValue().getEmail()), subject, body.toString());
+						notifiedUsers.add(entry.getValue());
+					}
 				}
 			}
 					

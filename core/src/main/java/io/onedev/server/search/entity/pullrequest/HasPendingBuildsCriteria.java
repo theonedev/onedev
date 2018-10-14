@@ -9,8 +9,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.PullRequestConstants;
 
 public class HasPendingBuildsCriteria extends PullRequestCriteria {
 

@@ -33,20 +33,26 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.manager.CodeCommentManager;
+import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.PullRequestCommentManager;
+import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestAction;
+import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.ActionActivity;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.CommentedActivity;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.OpenedActivity;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.UpdatedActivity;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestChangeActivity;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentedActivity;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestOpenedActivity;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestUpdatedActivity;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.DeleteCallback;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
@@ -119,23 +125,37 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		PullRequest request = getPullRequest();
 		List<PullRequestActivity> activities = new ArrayList<>();
 
-		activities.add(new OpenedActivity(request));
+		activities.add(new PullRequestOpenedActivity(request));
 		
 		List<PullRequestActivity> otherActivities = new ArrayList<>();
 		if (showCommits) {
 			for (PullRequestUpdate update: request.getUpdates())
-				otherActivities.add(new UpdatedActivity(update));
+				otherActivities.add(new PullRequestUpdatedActivity(update));
 		}
 
 		if (showComments) {
 			for (PullRequestComment comment: request.getComments()) { 
-				otherActivities.add(new CommentedActivity(comment));
+				otherActivities.add(new PullRequestCommentedActivity(comment));
 			}
 		}
 		
 		if (showChangeHistory) {
-			for (PullRequestAction action: request.getActions()) {
-				otherActivities.add(new ActionActivity(action));
+			for (PullRequestChange change: request.getChanges()) {
+				if (change.getData() instanceof PullRequestReferencedFromIssueData) {
+					PullRequestReferencedFromIssueData referencedFromIssueData = (PullRequestReferencedFromIssueData) change.getData();
+					if (OneDev.getInstance(IssueManager.class).get(referencedFromIssueData.getIssueId()) != null)
+						otherActivities.add(new PullRequestChangeActivity(change));
+				} else if (change.getData() instanceof PullRequestReferencedFromPullRequestData) {
+					PullRequestReferencedFromPullRequestData referencedFromPullRequestData = (PullRequestReferencedFromPullRequestData) change.getData();
+					if (OneDev.getInstance(PullRequestManager.class).get(referencedFromPullRequestData.getRequestId()) != null)
+						otherActivities.add(new PullRequestChangeActivity(change));
+				} else if (change.getData() instanceof PullRequestReferencedFromCodeCommentData) {
+					PullRequestReferencedFromCodeCommentData referencedFromCodeCommentData = (PullRequestReferencedFromCodeCommentData) change.getData();
+					if (OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId()) != null)
+						otherActivities.add(new PullRequestChangeActivity(change));
+				} else {
+					otherActivities.add(new PullRequestChangeActivity(change));
+				}
 			}
 		}
 		
@@ -144,7 +164,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				return -1;
 			else if (o1.getDate().getTime()>o2.getDate().getTime())
 				return 1;
-			else if (o1 instanceof OpenedActivity)
+			else if (o1 instanceof PullRequestOpenedActivity)
 				return -1;
 			else
 				return 1;
@@ -181,7 +201,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 			}
 
 			if (sinceChangesRow == null && !newActivities.isEmpty()) {
-				Date sinceDate = new DateTime(newActivities.iterator().next().getDate()).minusMillis(1).toDate();
+				Date sinceDate = new DateTime(newActivities.iterator().next().getDate()).minusSeconds(1).toDate();
 				sinceChangesRow = newSinceChangesRow(activitiesView.newChildId(), sinceDate);
 				activitiesView.add(sinceChangesRow);
 				String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 
@@ -201,7 +221,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				partialPageRequestHandler.prependJavaScript(script);
 				partialPageRequestHandler.add(newActivityRow);
 				
-				if (activity instanceof UpdatedActivity) {
+				if (activity instanceof PullRequestUpdatedActivity) {
 					partialPageRequestHandler.appendJavaScript("$('tr.since-changes').addClass('visible');");
 				}
 				prevActivityRow = newActivityRow;
@@ -298,10 +318,10 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				}
 
 				if (!oldActivities.isEmpty() && !newActivities.isEmpty()) {
-					Date sinceDate = new DateTime(newActivities.iterator().next().getDate()).minusMillis(1).toDate();
+					Date sinceDate = new DateTime(newActivities.iterator().next().getDate()).minusSeconds(1).toDate();
 					Component row = newSinceChangesRow(activitiesView.newChildId(), sinceDate);
 					for (PullRequestActivity activity: newActivities) {
-						if (activity instanceof UpdatedActivity) {
+						if (activity instanceof PullRequestUpdatedActivity) {
 							row.add(AttributeAppender.append("class", "visible"));
 							break;
 						}
@@ -368,7 +388,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 					
 					@SuppressWarnings("deprecation")
 					Component lastActivityRow = activitiesView.get(activitiesView.size()-1);
-					Component newActivityRow = newActivityRow(activitiesView.newChildId(), new CommentedActivity(comment)); 
+					Component newActivityRow = newActivityRow(activitiesView.newChildId(), new PullRequestCommentedActivity(comment)); 
 					activitiesView.add(newActivityRow);
 					
 					String script = String.format("$(\"<tr id='%s'></tr>\").insertAfter('#%s');", 

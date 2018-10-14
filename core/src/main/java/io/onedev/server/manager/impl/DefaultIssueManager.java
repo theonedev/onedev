@@ -24,8 +24,13 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
+import com.google.common.base.Preconditions;
+
+import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.issue.IssueDeleted;
+import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
@@ -36,9 +41,7 @@ import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.issue.IssueBoard;
-import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -56,6 +59,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryBuildContext;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -95,12 +99,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Transactional
 	@Override
 	public void open(Issue issue) {
-		LastActivity lastActivity = new LastActivity();
-		lastActivity.setDescription("submitted");
-		lastActivity.setUser(issue.getSubmitter());
-		lastActivity.setDate(issue.getSubmitDate());
-		issue.setLastActivity(lastActivity);
-		
+		Preconditions.checkArgument(issue.isNew());
 		Query<?> query = getSession().createQuery("select max(number) from Issue where project=:project");
 		query.setParameter("project", issue.getProject());
 		issue.setNumber(getNextNumber(issue.getProject(), query));
@@ -163,6 +162,13 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			issueFieldUnaryManager.populateFields(issues);
 		
 		return issues;
+	}
+	
+	@Transactional
+	@Listen
+	public void on(IssueEvent event) {
+		if (!(event instanceof IssueDeleted) && !(event instanceof IssueCommitted))
+			event.getIssue().setUpdateDate(event.getDate());
 	}
 	
 	@Sessional

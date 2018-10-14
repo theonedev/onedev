@@ -29,11 +29,11 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ProjectPrivilege;
+import io.onedev.server.util.PullRequestConstants;
 import io.onedev.utils.StringUtils;
 import io.onedev.utils.license.LicenseDetail;
 

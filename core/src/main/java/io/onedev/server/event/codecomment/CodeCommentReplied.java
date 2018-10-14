@@ -1,11 +1,10 @@
 package io.onedev.server.event.codecomment;
 
+import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.web.editable.annotation.Editable;
 
-@Editable(name="replied")
-public class CodeCommentReplied extends CodeCommentEvent {
+public class CodeCommentReplied extends CodeCommentEvent implements MarkdownAware {
 
 	private final CodeCommentReply reply;
 	

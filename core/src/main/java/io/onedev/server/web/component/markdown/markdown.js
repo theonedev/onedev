@@ -955,7 +955,7 @@ onedev.server.markdown = {
 				var $tooltip = $("<div id='reference-tooltip'></div>");
 				$tooltip.data("trigger", this);
 				$tooltip.data("alignment", alignment);
-				$container.append($tooltip);
+				$("body").append($tooltip);
 				referenceCallback(referenceType, referenceId);
 				return $tooltip;
 			}
@@ -967,7 +967,7 @@ onedev.server.markdown = {
 		var $tooltip = $("#reference-tooltip");
 		$tooltip.append("" +
 				"<div class='content issue'>" +
-				"  <span class='state'></span> <span class='title'></span>" +
+				"  <span class='state label'></span> <span class='title'></span>" +
 				"</div>");
 		$tooltip.find(".state").css({
 			"color": stateFontColor,

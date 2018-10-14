@@ -43,6 +43,8 @@ import io.onedev.server.web.component.link.UserLink;
 @SuppressWarnings("serial")
 public class ProjectContribsPage extends ProjectStatsPage {
 
+	private final int NUM_CONTRIBUTORS = 25;
+	
 	private final IModel<List<DayContribution>> overallContributionsModel = 
 			new LoadableDetachableModel<List<DayContribution>>() {
 
@@ -57,6 +59,8 @@ public class ProjectContribsPage extends ProjectStatsPage {
 	private String fromDayText;
 	
 	private String toDayText;
+	
+//	private int  gap;
 	
 	private int commits;
 	
@@ -131,6 +135,7 @@ public class ProjectContribsPage extends ProjectStatsPage {
 
 			@Override
 			public String getObject() {
+				// TODO Auto-generated method stub
 				Day fromDay;
 				if (StringUtils.isNotBlank(fromDayText)) {
 					fromDay = new Day(Constants.DATE_FORMATTER.parseDateTime(fromDayText));
@@ -163,6 +168,7 @@ public class ProjectContribsPage extends ProjectStatsPage {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
+				//System.out.println("#########"+fromDayText+toDayText);
 				target.add(overallContributorsContainer);
 				target.add(topContributorsContainer); 
 			}
@@ -180,6 +186,7 @@ public class ProjectContribsPage extends ProjectStatsPage {
 		    String today = RequestCycle.get().getRequest().getRequestParameters().getParameterValue("today").toString();
 		    fromDayText=fromday.replaceAll("/", "-");
 		    toDayText=today.replaceAll("/", "-");
+		    //System.out.println("<<<<<<<<"+fromDayText+toDayText);
 		    _target.add(topContributorsContainer);
 		    _target.add(timeZoomContainer);
 		  }
@@ -190,6 +197,11 @@ public class ProjectContribsPage extends ProjectStatsPage {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
+				String fromday = RequestCycle.get().getRequest().getRequestParameters().getParameterValue("fromday").toString();
+			    String today = RequestCycle.get().getRequest().getRequestParameters().getParameterValue("today").toString();
+			    fromDayText=fromday.replaceAll("/", "-");
+			    toDayText=today.replaceAll("/", "-");
+			    //System.out.println("<<<<<<<<"+fromDayText+toDayText);
 				target.add(overallContributorsContainer);
 			}
 		};
@@ -203,8 +215,24 @@ public class ProjectContribsPage extends ProjectStatsPage {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				String jsonContributionList = getJson(OverallContributions);
-				String script = String.format("onedev.server.stats.contribs.onDomReady(%s,'%s','%s','%s');",jsonContributionList,
-						orderBy,fromDayText,toDayText
+				
+				Day fromDay;
+				if (StringUtils.isNotBlank(fromDayText)) {
+					fromDay = new Day(Constants.DATE_FORMATTER.parseDateTime(fromDayText));
+				} else {
+					fromDay = OverallContributions.get(0).getDay();
+				}
+				
+				Day toDay;
+				if (StringUtils.isNotBlank(toDayText)) {
+					toDay = new Day(Constants.DATE_FORMATTER.parseDateTime(toDayText));
+				} else {
+					toDay = OverallContributions.get(OverallContributions.size()-1).getDay();
+				}
+				int gapday=(int)((toDay.getDate().getTime()-fromDay.getDate().getTime())/ (1000*3600*24));
+				//System.out.println(">>>>>>startday"+fromDayText+"  " + "today"+toDayText);
+				String script = String.format("onedev.server.stats.contribs.onDomReady(%s,'%s','%s','%s','%d');",jsonContributionList,
+						orderBy,fromDayText,toDayText,gapday
 						) 
 					;
 				response.render(OnDomReadyHeaderItem.forScript(script));
@@ -243,7 +271,7 @@ public class ProjectContribsPage extends ProjectStatsPage {
 					}
 					
 					return OneDev.getInstance(CommitInfoManager.class)
-							.getTopContributors(getProject(), 100, Contribution.Type.valueOf(orderBy), fromDay, toDay);
+							.getTopContributors(getProject(), NUM_CONTRIBUTORS, Contribution.Type.valueOf(orderBy), fromDay, toDay);
 				} else {
 					return new ArrayList<>();
 				}
@@ -275,6 +303,8 @@ public class ProjectContribsPage extends ProjectStatsPage {
 					
 					@Override
 					protected void respond(AjaxRequestTarget target) {
+						// TODO Auto-generated method stub
+						
 					}
 				
 					@Override

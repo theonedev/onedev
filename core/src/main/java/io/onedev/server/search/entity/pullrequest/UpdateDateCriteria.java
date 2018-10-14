@@ -8,8 +8,8 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.PullRequestConstants;
 
 public class UpdateDateCriteria extends PullRequestCriteria {
 
@@ -39,9 +39,9 @@ public class UpdateDateCriteria extends PullRequestCriteria {
 	@Override
 	public boolean matches(PullRequest request, User user) {
 		if (operator == PullRequestQueryLexer.IsBefore)
-			return request.getLastActivity().getDate().before(value);
+			return request.getUpdateDate().before(value);
 		else
-			return request.getLastActivity().getDate().after(value);
+			return request.getUpdateDate().after(value);
 	}
 
 	@Override

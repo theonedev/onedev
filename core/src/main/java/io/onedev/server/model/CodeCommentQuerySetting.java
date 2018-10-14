@@ -12,10 +12,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.QuerySubscriptionSupport;
-import io.onedev.server.model.support.QueryWatchSupport;
-import io.onedev.server.model.support.codecomment.NamedCodeCommentQuery;
+import io.onedev.server.util.watch.QuerySubscriptionSupport;
+import io.onedev.server.util.watch.QueryWatchSupport;
 
 @Entity
 @Table(

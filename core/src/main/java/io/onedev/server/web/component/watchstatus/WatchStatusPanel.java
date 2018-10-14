@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import io.onedev.server.model.support.WatchStatus;
+import io.onedev.server.util.watch.WatchStatus;
 
 @SuppressWarnings("serial")
 abstract class WatchStatusPanel extends Panel {

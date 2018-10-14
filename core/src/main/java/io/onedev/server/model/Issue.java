@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -32,8 +31,6 @@ import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.collect.Lists;
@@ -43,11 +40,10 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.LastActivity;
-import io.onedev.server.model.support.Referenceable;
-import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.jackson.DefaultView;
@@ -67,9 +63,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList="number"), @Index(columnList="numberStr"), 
 				@Index(columnList="submitDate"), @Index(columnList="g_submitter_id"),
 				@Index(columnList="voteCount"), @Index(columnList="commentCount"),
-				@Index(columnList="g_milestone_id"), @Index(columnList="LAST_ACT_DATE")}, 
+				@Index(columnList="g_milestone_id"), @Index(columnList="updateDate")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"g_project_id", "number"})})
-@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 public class Issue extends AbstractEntity implements Referenceable {
 
@@ -122,8 +117,8 @@ public class Issue extends AbstractEntity implements Referenceable {
 	@JsonView(DefaultView.class)
 	private String noSpaceTitle;
 	
-	@Embedded
-	private LastActivity lastActivity;
+	@Column(nullable=false)
+	private Date updateDate = new Date();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueFieldUnary> fieldUnaries = new ArrayList<>();
@@ -132,7 +127,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	private Collection<IssueComment> comments = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
-	private Collection<IssueAction> actions = new ArrayList<>();
+	private Collection<IssueChange> changes = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueVote> votes = new ArrayList<>();
@@ -234,12 +229,12 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.comments = comments;
 	}
 
-	public Collection<IssueAction> getActions() {
-		return actions;
+	public Collection<IssueChange> getChanges() {
+		return changes;
 	}
 
-	public void setChanges(Collection<IssueAction> actions) {
-		this.actions = actions;
+	public void setChanges(Collection<IssueChange> changes) {
+		this.changes = changes;
 	}
 
 	public Collection<IssueVote> getVotes() {
@@ -299,12 +294,12 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.fieldUnaries = fieldUnaries;
 	}
 	
-	public LastActivity getLastActivity() {
-		return lastActivity;
+	public Date getUpdateDate() {
+		return updateDate;
 	}
 
-	public void setLastActivity(LastActivity lastActivity) {
-		this.lastActivity = lastActivity;
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
 	}
 
 	public boolean isVisitedAfter(Date date) {

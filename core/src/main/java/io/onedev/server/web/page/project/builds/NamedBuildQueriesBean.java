@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.model.support.build.NamedBuildQuery;
+import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;

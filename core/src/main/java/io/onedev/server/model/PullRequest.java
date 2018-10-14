@@ -41,24 +41,20 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.event.pullrequest.PullRequestActionEvent;
-import io.onedev.server.event.pullrequest.PullRequestCodeCommentAdded;
-import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.ProjectAndBranch;
-import io.onedev.server.model.support.Referenceable;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.jackson.RestView;
@@ -75,6 +71,7 @@ import io.onedev.server.util.jackson.RestView;
 				@Index(columnList="title"), @Index(columnList="uuid"), 
 				@Index(columnList="numberStr"), @Index(columnList="noSpaceTitle"), 
 				@Index(columnList="number"), @Index(columnList="g_targetProject_id"), 
+				@Index(columnList="submitDate"), @Index(columnList="updateDate"),  
 				@Index(columnList="g_sourceProject_id"), @Index(columnList="g_submitter_id"),
 				@Index(columnList="headCommitHash"), @Index(columnList="PREVIEW_REQUEST_HEAD"), 
 				@Index(columnList="CLOSE_DATE"), @Index(columnList="CLOSE_STATUS"), 
@@ -119,8 +116,8 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	@Column(nullable=false)
 	private String headCommitHash;
 	
-	@Embedded
-	private LastActivity lastActivity;
+	@Column(nullable=false)
+	private Date updateDate = new Date();
 	
 	@Column(nullable=true)
 	private Date lastCodeCommentActivityDate;
@@ -168,7 +165,7 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	private Collection<PullRequestComment> comments = new ArrayList<>();
 
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestAction> actions = new ArrayList<>();
+	private Collection<PullRequestChange> changes = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestWatch> watches = new ArrayList<>();
@@ -365,12 +362,12 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		this.comments = comments;
 	}
 
-	public Collection<PullRequestAction> getActions() {
-		return actions;
+	public Collection<PullRequestChange> getChanges() {
+		return changes;
 	}
 
-	public void setActions(Collection<PullRequestAction> actions) {
-		this.actions = actions;
+	public void setChanges(Collection<PullRequestChange> changes) {
+		this.changes = changes;
 	}
 
 	@Override
@@ -654,12 +651,12 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		}
 	}
 	
-	public LastActivity getLastActivity() {
-		return lastActivity;
+	public Date getUpdateDate() {
+		return updateDate;
 	}
 
-	public void setLastActivity(LastActivity lastActivity) {
-		this.lastActivity = lastActivity;
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
 	}
 
 	public Date getLastCodeCommentActivityDate() {
@@ -706,27 +703,6 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		return mergedIntoTarget;
 	}
 	
-	public void setLastActivity(PullRequestActionEvent event) {
-		PullRequestAction action = event.getAction();
-		LastActivity lastActivity = new LastActivity();
-		lastActivity.setDate(action.getDate());
-		lastActivity.setDescription(action.getData().getDescription());
-		lastActivity.setUser(action.getUser());
-		setLastActivity(lastActivity);
-	}
-	
-	public void setLastActivity(PullRequestCodeCommentEvent event) {
-		LastActivity lastActivity = new LastActivity();
-		lastActivity.setDate(event.getDate());
-		if (event instanceof PullRequestCodeCommentAdded)
-			lastActivity.setDescription("added code comment");
-		else
-			lastActivity.setDescription("replied code comment");
-		lastActivity.setUser(event.getUser());
-		setLastActivity(lastActivity);
-		setLastCodeCommentActivityDate(event.getDate());
-	}
-
 	@Nullable
 	public ObjectId getSourceHead() {
 		ProjectAndBranch projectAndBranch = getSource();

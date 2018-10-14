@@ -19,7 +19,6 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -33,6 +32,7 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OrCrite
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.OrderContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser.QueryContext;
+import io.onedev.server.util.PullRequestConstants;
 
 public class PullRequestQuery extends EntityQuery<PullRequest> {
 

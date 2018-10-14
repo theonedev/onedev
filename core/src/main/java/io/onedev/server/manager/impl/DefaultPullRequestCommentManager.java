@@ -4,12 +4,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.event.pullrequest.PullRequestCommentAdded;
+import io.onedev.server.event.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.manager.PullRequestCommentManager;
-import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -20,15 +18,10 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 
 	private final ListenerRegistry listenerRegistry;
 	
-	private final PullRequestManager pullRequestManager;
-	
 	@Inject
-	public DefaultPullRequestCommentManager(Dao dao, PullRequestManager pullRequestManager, 
-			ListenerRegistry listenerRegistry) {
+	public DefaultPullRequestCommentManager(Dao dao, ListenerRegistry listenerRegistry) {
 		super(dao);
-
 		this.listenerRegistry = listenerRegistry;
-		this.pullRequestManager = pullRequestManager;
 	}
 
 	@Transactional
@@ -37,18 +30,11 @@ public class DefaultPullRequestCommentManager extends AbstractEntityManager<Pull
 		boolean isNew = comment.isNew();
 		dao.persist(comment);
 		if (isNew) {
-			PullRequestCommentAdded event = new PullRequestCommentAdded(comment);
+			PullRequestCommentCreated event = new PullRequestCommentCreated(comment);
 			listenerRegistry.post(event);
-			
-			LastActivity lastEvent = new LastActivity();
-			lastEvent.setDate(event.getDate());
-			lastEvent.setDescription("added comment");
-			lastEvent.setUser(event.getUser());
 			
 			PullRequest request = comment.getRequest();
 			request.setCommentCount(request.getCommentCount()+1);
-			request.setLastActivity(lastEvent);
-			pullRequestManager.save(event.getRequest());
 		}
 	}
 

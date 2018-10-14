@@ -66,7 +66,7 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.PullRequestActionManager;
+import io.onedev.server.manager.PullRequestChangeManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.PullRequestUpdateManager;
 import io.onedev.server.manager.PullRequestWatchManager;
@@ -246,7 +246,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				super.onSubmit(target, form);
 				
 				if (StringUtils.isNotBlank(title)) {
-					OneDev.getInstance(PullRequestActionManager.class).changeTitle(getPullRequest(), title, SecurityUtils.getUser());
+					OneDev.getInstance(PullRequestChangeManager.class).changeTitle(getPullRequest(), title, SecurityUtils.getUser());
 					send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 					isEditingTitle = false;
 				}
@@ -536,7 +536,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 					
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				OneDev.getInstance(PullRequestActionManager.class).changeMergeStrategy(getPullRequest(), mergeStrategy, SecurityUtils.getUser());
+				OneDev.getInstance(PullRequestChangeManager.class).changeMergeStrategy(getPullRequest(), mergeStrategy, SecurityUtils.getUser());
 				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}
 			

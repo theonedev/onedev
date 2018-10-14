@@ -6,7 +6,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.issues.issuelist.IssueListPage;
+import io.onedev.server.web.page.project.issues.list.IssueListPage;
 
 @SuppressWarnings("serial")
 public class NoCommitsPage extends ProjectPage {

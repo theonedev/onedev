@@ -900,7 +900,7 @@ public class RevisionDiffPanel extends Panel {
 									comment.setContent(contentInput.getModelObject());
 									comment.setCompareContext(getCompareContext(comment.getMarkPos().getCommit()));
 									
-									OneDev.getInstance(CodeCommentManager.class).save(comment, requestModel.getObject());
+									OneDev.getInstance(CodeCommentManager.class).create(comment, requestModel.getObject());
 									
 									CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 

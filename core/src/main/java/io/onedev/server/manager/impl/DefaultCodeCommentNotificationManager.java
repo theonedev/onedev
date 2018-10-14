@@ -8,7 +8,8 @@ import javax.inject.Singleton;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.MarkdownAware;
-import io.onedev.server.event.codecomment.CodeCommentAdded;
+import io.onedev.server.event.codecomment.CodeCommentCreated;
+import io.onedev.server.event.codecomment.CodeCommentDeleted;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
 import io.onedev.server.manager.MailManager;
@@ -37,15 +38,15 @@ public class DefaultCodeCommentNotificationManager {
 	@Transactional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		if (event.getRequest() == null) {
+		if (event.getRequest() == null && !(event instanceof CodeCommentDeleted)) {
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
 			String rendered = markdownManager.render(markdown);
 			Collection<User> mentionUsers = new MentionParser().parseMentions(rendered);
 			if (!mentionUsers.isEmpty()) {
 				String url;
-				if (event instanceof CodeCommentAdded)
-					url = urlManager.urlFor(((CodeCommentAdded)event).getComment(), null);
+				if (event instanceof CodeCommentCreated)
+					url = urlManager.urlFor(((CodeCommentCreated)event).getComment(), null);
 				else 
 					url = urlManager.urlFor(((CodeCommentReplied)event).getReply(), null);
 				

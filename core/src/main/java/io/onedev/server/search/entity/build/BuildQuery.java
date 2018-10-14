@@ -1,9 +1,9 @@
 package io.onedev.server.search.entity.build;
 
-import static io.onedev.server.model.support.build.BuildConstants.FIELD_BUILD_DATE;
-import static io.onedev.server.model.support.build.BuildConstants.FIELD_COMMIT;
-import static io.onedev.server.model.support.build.BuildConstants.FIELD_CONFIGURATION;
-import static io.onedev.server.model.support.build.BuildConstants.FIELD_VERSION;
+import static io.onedev.server.util.BuildConstants.FIELD_BUILD_DATE;
+import static io.onedev.server.util.BuildConstants.FIELD_COMMIT;
+import static io.onedev.server.util.BuildConstants.FIELD_CONFIGURATION;
+import static io.onedev.server.util.BuildConstants.FIELD_VERSION;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,7 +21,6 @@ import org.antlr.v4.runtime.Recognizer;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.build.BuildConstants;
 import io.onedev.server.search.entity.AndCriteriaHelper;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -39,6 +38,7 @@ import io.onedev.server.search.entity.build.BuildQueryParser.OrCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.OrderContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.QueryContext;
+import io.onedev.server.util.BuildConstants;
 
 public class BuildQuery extends EntityQuery<Build> {
 

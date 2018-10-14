@@ -28,7 +28,7 @@
 .issue-activities>table>tbody>tr>td.content {
 	padding-left: 20px;
 }
-.issue-activities .activity>.head {
+.issue-activities .activity>.content>.head {
 	color: #888;
 }
 .issue-activities .activity.commit .body a.summary {
@@ -36,25 +36,27 @@
 	margin-right: 4px;
 }
 
-.issue-activities .activity>.body {
+.issue-activities .activity>.content>.body {
 	margin-top: 8px;
 }
-.issue-activities .activity>.body>.actions,
-.issue-activities .activity>.body>.action-data>div>.actions {
+.issue-activities .activity>.content>.body>.referenced-from .label {
+	line-height: inherit;
+}
+
+.issue-activities .activity>.content>.body>.actions {
 	margin-top: 8px;
 }
-.issue-activities .activity>.body>.actions a,
-.issue-activities .activity>.body>.action-data>div>.actions a {
+.issue-activities .activity>.content>.body>.actions a {
 	color: #888;
 	margin-right: 0;
 }
-.issue-activities .activity>.body .actions .middot {
+.issue-activities .activity>.content>.body .actions .middot {
 	margin: 0 4px;
 }
-.issue-activities .activity>.body .action-data .plain.diff {
+.issue-activities .activity>.content>.body .plain.diff {
 	margin-bottom: 12px;
 }
-.issue-activities .activity>.head a {
+.issue-activities .activity>.content>.head a {
 	color: #999;
 	margin-left: 8px;
 }

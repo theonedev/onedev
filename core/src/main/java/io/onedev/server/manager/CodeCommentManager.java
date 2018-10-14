@@ -27,11 +27,14 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 		
 	List<CodeComment> queryAfter(Project project, @Nullable Long afterCommentId, int count);
 	
-	void save(CodeComment comment, @Nullable PullRequest request);
+	void create(CodeComment comment, @Nullable PullRequest request);
 
 	List<CodeComment> query(Project project, @Nullable PullRequest request, User user,
 			EntityQuery<CodeComment> commentQuery, int firstResult, int maxResults);
 	
 	int count(Project project, @Nullable PullRequest request, User user, EntityCriteria<CodeComment> commentCriteria);
 	
+	void delete(User user, CodeComment comment);
+	
+	void update(User user, CodeComment comment);
 }

@@ -17,12 +17,12 @@ import com.google.common.collect.Lists;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.MarkdownAware;
-import io.onedev.server.event.pullrequest.PullRequestActionEvent;
+import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
-import io.onedev.server.event.pullrequest.PullRequestCodeCommentAdded;
+import io.onedev.server.event.pullrequest.PullRequestCodeCommentCreated;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentReplied;
-import io.onedev.server.event.pullrequest.PullRequestCommentAdded;
+import io.onedev.server.event.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.event.pullrequest.PullRequestDeleted;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
@@ -39,12 +39,12 @@ import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.pullrequest.actiondata.ActionData;
-import io.onedev.server.model.support.pullrequest.actiondata.ApprovedData;
-import io.onedev.server.model.support.pullrequest.actiondata.DiscardedData;
-import io.onedev.server.model.support.pullrequest.actiondata.MergedData;
-import io.onedev.server.model.support.pullrequest.actiondata.ReopenedData;
-import io.onedev.server.model.support.pullrequest.actiondata.RequestedForChangesData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestRequestedForChangesData;
 import io.onedev.server.persistence.PersistListener;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.entity.EntityQuery;
@@ -124,12 +124,12 @@ public class DefaultPullRequestNotificationManager implements PersistListener {
 							watch(request, mentionedUser, true);
 						
 						String url;
-						if (event instanceof PullRequestCommentAdded)
-							url = urlManager.urlFor(((PullRequestCommentAdded)event).getComment());
-						else if (event instanceof PullRequestActionEvent) 
-							url = urlManager.urlFor(((PullRequestActionEvent)event).getAction());
-						else if (event instanceof PullRequestCodeCommentAdded)
-							url = urlManager.urlFor(((PullRequestCodeCommentAdded)event).getComment(), request);
+						if (event instanceof PullRequestCommentCreated)
+							url = urlManager.urlFor(((PullRequestCommentCreated)event).getComment());
+						else if (event instanceof PullRequestChangeEvent) 
+							url = urlManager.urlFor(((PullRequestChangeEvent)event).getChange());
+						else if (event instanceof PullRequestCodeCommentCreated)
+							url = urlManager.urlFor(((PullRequestCodeCommentCreated)event).getComment(), request);
 						else if (event instanceof PullRequestCodeCommentReplied)
 							url = urlManager.urlFor(((PullRequestCodeCommentReplied)event).getReply(), request);
 						else 
@@ -146,14 +146,14 @@ public class DefaultPullRequestNotificationManager implements PersistListener {
 				}
 			} 
 			
-			if (event instanceof PullRequestActionEvent) {
-				PullRequestActionEvent actionEvent = (PullRequestActionEvent) event;
-				ActionData actionData = actionEvent.getAction().getData();
+			if (event instanceof PullRequestChangeEvent) {
+				PullRequestChangeEvent actionEvent = (PullRequestChangeEvent) event;
+				PullRequestChangeData actionData = actionEvent.getChange().getData();
 				String subject = null;
-				if (actionData instanceof ApprovedData) {
+				if (actionData instanceof PullRequestApproveData) {
 					subject = String.format(user.getDisplayName() + " approved pull request #%d - %s", 
 							request.getNumber(), request.getTitle());
-				} else if (actionData instanceof RequestedForChangesData) {
+				} else if (actionData instanceof PullRequestRequestedForChangesData) {
 					subject = String.format(user.getDisplayName() + " requested changes for pull request #%d - %s", 
 							request.getNumber(), request.getTitle());
 				}
@@ -184,11 +184,11 @@ public class DefaultPullRequestNotificationManager implements PersistListener {
 			}
 			
 			boolean notifyWatchers = false;
-			if (event instanceof PullRequestActionEvent) {
-				ActionData actionData = ((PullRequestActionEvent) event).getAction().getData();
-				if (actionData instanceof ApprovedData || actionData instanceof RequestedForChangesData 
-						|| actionData instanceof MergedData || actionData instanceof DiscardedData
-						|| actionData instanceof ReopenedData) {
+			if (event instanceof PullRequestChangeEvent) {
+				PullRequestChangeData actionData = ((PullRequestChangeEvent) event).getChange().getData();
+				if (actionData instanceof PullRequestApproveData || actionData instanceof PullRequestRequestedForChangesData 
+						|| actionData instanceof PullRequestMergeData || actionData instanceof PullRequestDiscardData
+						|| actionData instanceof PullRequestReopenData) {
 					notifyWatchers = true;
 				}
 			} else if (!(event instanceof PullRequestMergePreviewCalculated || event instanceof PullRequestBuildEvent)) {

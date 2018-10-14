@@ -8,6 +8,8 @@ import javax.persistence.MappedSuperclass;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.util.watch.QuerySubscriptionSupport;
+import io.onedev.server.util.watch.QueryWatchSupport;
 
 @MappedSuperclass
 public abstract class QuerySetting<T extends NamedQuery> extends AbstractEntity {

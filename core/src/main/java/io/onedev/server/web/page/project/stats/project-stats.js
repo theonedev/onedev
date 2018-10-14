@@ -1,93 +1,335 @@
 onedev.server.stats = {
 	contribs : {
-		onDomReady : function(jsonList, orderBy, fromDay, toDay) {
-			var date = [];
-			var data = [];
-			var base = +new Date(jsonList[0].day.dateTime);
-			var oneDay = 24 * 3600 * 1000;
-			var firstday = new Date(jsonList[0].day.dateTime);
+		onDomReady : function(jsonList, orderBy, fromDay, toDay, gapday) {
 
-			date.push([ firstday.getFullYear(), firstday.getMonth() + 1, firstday.getDate() ].join('/'));
+			//console.log(">>>>>>>>>>gapday:",gapday,"fromDay:",fromDay,"toDay",toDay);
+			var flag = false;
+			function getDailyData(list) {
+				//var dailyData=[];
+				var date = [];
+				var data = [];
+				var base = +new Date(list[0].day.dateTime);
+				var oneDay = 24 * 3600 * 1000;
+				var firstday = new Date(list[0].day.dateTime);
 
-			if (orderBy == "COMMITS") {
-				data.push(jsonList[0].contribution.commits);
-				for (var i = 1; i < jsonList.length; i++) {
-					var day = new Date(jsonList[i].day.dateTime);
-					var now = new Date(base += oneDay);
-					while (day.getTime() != now.getTime()) {
+				date.push([ firstday.getFullYear(), firstday.getMonth() + 1, firstday.getDate() ].join('/'));
+
+				if (orderBy == "COMMITS") {
+					data.push(list[0].contribution.commits);
+					for (var i = 1; i < list.length; i++) {
+						var day = new Date(list[i].day.dateTime);
+						var now = new Date(base += oneDay);
+						while (day.getTime() != now.getTime()) {
+							date.push([ now.getFullYear(), now.getMonth() + 1, now.getDate() ].join('/'));
+							data.push(0);
+							now = new Date(base += oneDay);
+
+						}
 						date.push([ now.getFullYear(), now.getMonth() + 1, now.getDate() ].join('/'));
-						data.push(0);
-						now = new Date(base += oneDay);
-
+						data.push(list[i].contribution.commits);
 					}
-					date.push([ now.getFullYear(), now.getMonth() + 1, now.getDate() ].join('/'));
-					data.push(jsonList[i].contribution.commits);
-				}
-			} else if (orderBy == "ADDITIONS") {
-				data.push(jsonList[0].contribution.additions / 1000);
-				for (var i = 1; i < jsonList.length; i++) {
-					var day = new Date(jsonList[i].day.dateTime);
-					var now = new Date(base += oneDay);
-					while (day.getTime() != now.getTime()) {
+				} else if (orderBy == "ADDITIONS") {
+					data.push(list[0].contribution.additions / 1000);
+					for (var i = 1; i < list.length; i++) {
+						var day = new Date(list[i].day.dateTime);
+						var now = new Date(base += oneDay);
+						while (day.getTime() != now.getTime()) {
+							date.push([ now.getFullYear(), now.getMonth() + 1, now.getDate() ].join('/'));
+							data.push(0);
+							now = new Date(base += oneDay);
+
+						}
 						date.push([ now.getFullYear(), now.getMonth() + 1, now.getDate() ].join('/'));
-						data.push(0);
-						now = new Date(base += oneDay);
-
+						data.push(list[i].contribution.additions / 1000);
 					}
-					date.push([ now.getFullYear(), now.getMonth() + 1, now.getDate() ].join('/'));
-					data.push(jsonList[i].contribution.additions / 1000);
-				}
 
-			} else {
-				data.push(jsonList[0].contribution.deletions / 1000);
-				for (var i = 1; i < jsonList.length; i++) {
-					var day = new Date(jsonList[i].day.dateTime);
-					var now = new Date(base += oneDay);
-					while (day.getTime() != now.getTime()) {
+				} else {
+					data.push(list[0].contribution.deletions / 1000);
+					for (var i = 1; i < list.length; i++) {
+						var day = new Date(list[i].day.dateTime);
+						var now = new Date(base += oneDay);
+						while (day.getTime() != now.getTime()) {
+							date.push([ now.getFullYear(), now.getMonth() + 1, now.getDate() ].join('/'));
+							data.push(0);
+							now = new Date(base += oneDay);
+
+						}
 						date.push([ now.getFullYear(), now.getMonth() + 1, now.getDate() ].join('/'));
-						data.push(0);
-						now = new Date(base += oneDay);
-
+						data.push(list[i].contribution.deletions / 1000);
 					}
-					date.push([ now.getFullYear(), now.getMonth() + 1, now.getDate() ].join('/'));
-					data.push(jsonList[i].contribution.deletions / 1000);
 				}
+				data = data.concat(date);
+				return data;
 			}
 
-			var showdate = [];
+			/*get Whole Monthly Data from jsonList*/
+			function getMonthData(list) {
+				var monthdate = [];
+				var monthdata = [];
+				var MONTH = new Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
+				var lastDay = new Date(list[0].day.dateTime);
+				if (orderBy == "COMMITS") {
+					var monthCommits = list[0].contribution.commits;
+					if (list.length == 1) {
+						monthdate.push([ lastDay.getFullYear(), MONTH[lastDay.getMonth()] ].join('/'));
+						monthdata.push(monthCommits);
+					}
+					for (var i = 1; i < list.length; i++) {
+						var monthNo = lastDay.getMonth();
+						var currentDay = new Date(list[i].day.dateTime);
+						var current_monthNo = currentDay.getMonth();
+						if (lastDay.getFullYear() == currentDay.getFullYear() && monthNo == current_monthNo) {
+							monthCommits += list[i].contribution.commits;
+							if (i == list.length - 1) {
+								monthdate.push([ lastDay.getFullYear(), MONTH[lastDay.getMonth()] ].join('/'));
+								monthdata.push(monthCommits);
+								break;
+							}
+						} else {
+							monthdate.push([ lastDay.getFullYear(), MONTH[lastDay.getMonth()] ].join('/'));
+							monthdata.push(monthCommits);
+
+							var monthgap = (currentDay.getFullYear() * 12 + currentDay.getMonth()) - (lastDay.getFullYear() * 12 + lastDay.getMonth());
+							if (monthgap >= 2) {
+								var curr = lastDay;
+								curr.setMonth(curr.getMonth() + 1);
+								while (curr <= currentDay) {
+									if (curr.getFullYear() == currentDay.getFullYear() && curr.getMonth() == currentDay.getMonth()) break;
+									var month = curr.getMonth();
+									monthdate.push([ curr.getFullYear(), MONTH[month] ].join('/'));
+									monthdata.push(0);
+									curr.setMonth(month + 1);
+								}
+							}
+
+							monthCommits = list[i].contribution.commits;
+							lastDay = new Date(list[i].day.dateTime);
+							if (i == list.length - 1) {
+								monthdate.push([ currentDay.getFullYear(), MONTH[currentDay.getMonth()] ].join('/'));
+								monthdata.push(monthCommits);
+								break;
+							}
+						}
+
+					}
+				} else if (orderBy == "ADDITIONS") {
+					var monthAdditions = list[0].contribution.additions;
+					if (list.length == 1) {
+						monthdate.push([ lastDay.getFullYear(), MONTH[lastDay.getMonth()] ].join('/'));
+						monthdata.push(monthAdditions / 1000);
+					}
+					for (var i = 1; i < list.length; i++) {
+						var monthNo = lastDay.getMonth();
+						var currentDay = new Date(list[i].day.dateTime);
+						var current_monthNo = currentDay.getMonth();
+						if (lastDay.getFullYear() == currentDay.getFullYear() && monthNo == current_monthNo) {
+							monthAdditions += list[i].contribution.additions;
+							if (i == list.length - 1) {
+								monthdate.push([ lastDay.getFullYear(), MONTH[lastDay.getMonth()] ].join('/'));
+								monthdata.push(monthAdditions / 1000);
+								break;
+							}
+						} else {
+							monthdate.push([ lastDay.getFullYear(), MONTH[lastDay.getMonth()] ].join('/'));
+							monthdata.push(monthAdditions / 1000);
+							var monthgap = (currentDay.getFullYear() * 12 + currentDay.getMonth()) - (lastDay.getFullYear() * 12 + lastDay.getMonth());
+							if (monthgap >= 2) {
+								var curr = lastDay;
+								curr.setMonth(curr.getMonth() + 1);
+								while (curr <= currentDay) {
+									if (curr.getFullYear() == currentDay.getFullYear() && curr.getMonth() == currentDay.getMonth()) break;
+									var month = curr.getMonth();
+									monthdate.push([ curr.getFullYear(), MONTH[month] ].join('/'));
+									monthdata.push(0);
+									curr.setMonth(month + 1);
+								}
+							}
+
+							monthAdditions = list[i].contribution.additions;
+							lastDay = new Date(list[i].day.dateTime);
+							if (i == list.length - 1) {
+								monthdate.push([ currentDay.getFullYear(), MONTH[currentDay.getMonth()] ].join('/'));
+								monthdata.push(monthAdditions / 1000);
+								break;
+							}
+						}
+
+					}
+				} else {
+					var monthDeletions = list[0].contribution.deletions;
+					if (list.length == 1) {
+						monthdate.push([ lastDay.getFullYear(), MONTH[lastDay.getMonth()] ].join('/'));
+						monthdata.push(monthDeletions / 1000);
+					}
+					for (var i = 1; i < list.length; i++) {
+						var monthNo = lastDay.getMonth();
+						var currentDay = new Date(list[i].day.dateTime);
+						var current_monthNo = currentDay.getMonth();
+						if (lastDay.getFullYear() == currentDay.getFullYear() && monthNo == current_monthNo) {
+							monthDeletions += list[i].contribution.deletions;
+							if (i == list.length - 1) {
+								monthdate.push([ lastDay.getFullYear(), MONTH[lastDay.getMonth()] ].join('/'));
+								monthdata.push(monthDeletions / 1000);
+								break;
+							}
+						} else {
+							monthdate.push([ lastDay.getFullYear(), MONTH[lastDay.getMonth()] ].join('/'));
+							monthdata.push(monthDeletions / 1000);
+
+							var monthgap = (currentDay.getFullYear() * 12 + currentDay.getMonth()) - (lastDay.getFullYear() * 12 + lastDay.getMonth());
+							if (monthgap >= 2) {
+								var curr = lastDay;
+								curr.setMonth(curr.getMonth() + 1);
+								while (curr <= currentDay) {
+									if (curr.getFullYear() == currentDay.getFullYear() && curr.getMonth() == currentDay.getMonth()) break;
+									var month = curr.getMonth();
+									monthdate.push([ curr.getFullYear(), MONTH[month] ].join('/'));
+									monthdata.push(0);
+									curr.setMonth(month + 1);
+								}
+							}
+
+							monthDeletions = list[i].contribution.deletions;
+							lastDay = new Date(list[i].day.dateTime);
+							if (i == list.length - 1) {
+								monthdate.push([ currentDay.getFullYear(), MONTH[currentDay.getMonth()] ].join('/'));
+								monthdata.push(monthDeletions / 1000);
+								break;
+							}
+						}
+
+					}
+				}
+				monthdata = monthdata.concat(monthdate);
+				return monthdata;
+			}
+			/*get Sliced DailyData from the Whole DailyData*/
+			function getSlicedDailyData(list, fromday, today) {
+				var slicedDate = [];
+				var slicedData = [];
+				for (var i = 0; i < list.length / 2; i++) {
+					slicedData.push(list[i]);
+				}
+				for (var j = list.length / 2; j < list.length; j++) {
+					slicedDate.push(list[j]);
+				}
+
+				var firstday,
+					lastday;
+				if (fromday == 'null' && today == 'null') {
+					firstday = 0;
+					lastday = slicedDate.length - 1;
+				} else {
+					fromday = fromday.replace(/-/g, "/");
+					today = today.replace(/-/g, "/");
+					for (var j = 0; j < slicedDate.length; j++) {
+						if (slicedDate[j] == fromday)
+							firstday = j;
+						if (slicedDate[j] == today) {
+							lastday = j;
+							break;
+						}
+					}
+
+				}
+				slicedDate = slicedDate.slice(firstday, lastday + 1);
+				slicedData = slicedData.slice(firstday, lastday + 1);
+				slicedData = slicedData.concat(slicedDate);
+				return slicedData;
+			}
+			/*get Sliced MonthData from the Whole MonthData*/
+			function getSlicedMonthData(list, fromday, today) {
+				//console.log("FUNCTION GETSLICED MONTHDATA",fromday,today)
+				var slicedDate = [];
+				var slicedData = [];
+				var MONTH = new Array("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec");
+				for (var i = 0; i < list.length / 2; i++) {
+					slicedData.push(list[i]);
+				}
+				for (var j = list.length / 2; j < list.length; j++) {
+					slicedDate.push(list[j]);
+				}
+
+				var firstday,
+					lastday;
+				if (fromday == 'null' && today == 'null') {
+					firstday = 0;
+					lastday = slicedDate.length - 1;
+				} else {
+					fromday = fromday.replace(/-/g, "/");
+					today = today.replace(/-/g, "/");
+					var year_fromday = fromday.split("/")[0];
+					var month_fromday = fromday.split("/")[1];
+					var year_today = today.split("/")[0];
+					var month_today = today.split("/")[1];
+					//console.log("##########year:",year_fromday," month",month_fromday);
+					for (var j = 0; j < slicedDate.length; j++) {
+						var year = slicedDate[j].split("/")[0];
+						var month = slicedDate[j].split("/")[1];
+						if (year == year_fromday && month == MONTH[month_fromday - 1]) {
+							firstday = j;
+							break;
+						}
+
+					}
+					for (var j = firstday; j < slicedDate.length; j++) {
+						var year = slicedDate[j].split("/")[0];
+						var month = slicedDate[j].split("/")[1];
+						if (year == year_today && month == MONTH[month_today - 1]) {
+							lastday = j;
+							break;
+						}
+					}
+
+				}
+				slicedDate = slicedDate.slice(firstday, lastday + 1);
+				slicedData = slicedData.slice(firstday, lastday + 1);
+				slicedData = slicedData.concat(slicedDate);
+				return slicedData;
+			}
+			//				console.log("fromDay and toDay",fromDay,"###",toDay);
+
 			var showdata = [];
-			var firstday,
-				lastday;
-			if (fromDay == 'null' && toDay == 'null') {
-				firstday = 0;
-				lastday = date.length - 1;
-			} else {
-				fromDay = fromDay.replace(/-/g, "/");
-				toDay = toDay.replace(/-/g, "/");
-				for (var j = 0; j < date.length; j++) {
-					if (date[j] == fromDay)
-						firstday = j;
-					if (date[j] == toDay) {
-						lastday = j;
-						break;
-					}
-				}
+			var showdate = [];
 
+			/*get showdata for monthContribution*/
+			if (gapday > 365) {
+				var wholeMonthData = getMonthData(jsonList);
+				var monthData = getSlicedMonthData(wholeMonthData, fromDay, toDay);
+				//console.log("month",monthData);
+				for (var i = 0; i < monthData.length / 2; i++) {
+					showdata.push(monthData[i]);
+				}
+				for (var j = monthData.length / 2; j < monthData.length; j++) {
+					showdate.push(monthData[j]);
+				}
 			}
-			showdate = date.slice(firstday, lastday + 1);
-			showdata = data.slice(firstday, lastday + 1);
-			var windowWidth = $(window).width();
+
+			/*get showdata for dailyContribution*/
+			else {
+				var wholeDailyData = getDailyData(jsonList);
+				var dailyData = getSlicedDailyData(wholeDailyData, fromDay, toDay);
+				for (var i = 0; i < dailyData.length / 2; i++) {
+					showdata.push(dailyData[i]);
+				}
+				for (var j = dailyData.length / 2; j < dailyData.length; j++) {
+					showdate.push(dailyData[j]);
+				}
+			}
+			//console.log("showdata",showdata);
 			var myChart = echarts.init(document.getElementById('project-contribs'));
+
 			var optionCommits = {
 				tooltip : {
 					trigger : 'axis',
+					// formatter: '{b} <br/>{a}:{c}s',
 					position : function(pt) {
 						return [ pt[0], '10%' ];
 					}
 				},
 				title : {
 					left : 'center',
-					text : 'Overall Contribution',
+					text : 'OverallContribution',
 				},
 				grid : {
 					left : "2%",
@@ -103,15 +345,16 @@ onedev.server.stats = {
 								opacity : 0
 							}
 						},
-						restore : {
-							title: 'Restore date range',
-							iconStyle : {
-								textPosition : 'left',
-								opacity : 0
-							}
-						},
-					},
-					right: 40
+					/*restore: {
+						//icon:'path://M30.9,53.2C16.8,53.2,5.3,41.7,5.3,27.6S16.8,2,30.9,2C45,2,56.4,13.5,56.4,27.6S45,53.2,30.9,53.2z M30.9,3.5C17.6,3.5,6.8,14.4,6.8,27.6c0,13.3,10.8,24.1,24.101,24.1C44.2,51.7,55,40.9,55,27.6C54.9,14.4,44.1,3.5,30.9,3.5z M36.9,35.8c0,0.601-0.4,1-0.9,1h-1.3c-0.5,0-0.9-0.399-0.9-1V19.5c0-0.6,0.4-1,0.9-1H36c0.5,0,0.9,0.4,0.9,1V35.8z M27.8,35.8 c0,0.601-0.4,1-0.9,1h-1.3c-0.5,0-0.9-0.399-0.9-1V19.5c0-0.6,0.4-1,0.9-1H27c0.5,0,0.9,0.4,0.9,1L27.8,35.8L27.8,35.8z',
+						iconStyle:{
+							textPosition:'left',
+							opacity:1
+						}
+					},*/
+					//saveAsImage: {}
+					}
+				//show:false
 				},
 				xAxis : {
 					type : 'category',
@@ -124,6 +367,9 @@ onedev.server.stats = {
 						show : false
 					},
 					minInterval : 1,
+					/*max: function(value) {
+					    return value.max ;
+					},*/
 					type : 'value',
 					boundaryGap : [ 0, '100%' ],
 					triggerEvent : true
@@ -165,20 +411,21 @@ onedev.server.stats = {
 					}
 				]
 			};
+
 			var optionAdditions = {
 				tooltip : {
 					trigger : 'axis',
-					formatter : '{b} <br/>{a}: {c}k',
+					formatter : '{b} <br/>{a}:{c}k',
 					position : function(pt) {
 						return [ pt[0], '10%' ];
 					}
 				},
 				title : {
 					left : 'center',
-					text : 'Overall Contribution',
+					text : 'OverallContribution',
 				},
 				grid : {
-					left : "2%",
+					left : "4%",
 					right : "2%",
 					top : 60,
 					buttom : 60
@@ -191,11 +438,13 @@ onedev.server.stats = {
 								opacity : 0
 							}
 						},
-						restore : {
-							title: 'Restore date range'
-						},
-					},
-					right: 40
+					/*restore: {
+						iconStyle:{
+							opacity:1
+						}
+					},*/
+					//saveAsImage: {}
+					}
 				},
 				xAxis : {
 					type : 'category',
@@ -260,17 +509,17 @@ onedev.server.stats = {
 			var optionDeletions = {
 				tooltip : {
 					trigger : 'axis',
-					formatter : '{b} <br/>{a}: {c}k',
+					formatter : '{b} <br/>{a}:{c}k',
 					position : function(pt) {
 						return [ pt[0], '10%' ];
 					}
 				},
 				title : {
 					left : 'center',
-					text : 'Overall Contribution',
+					text : 'OverallContribution',
 				},
 				grid : {
-					left : "2%",
+					left : "4%",
 					right : "2%",
 					top : 60,
 					buttom : 60
@@ -283,11 +532,13 @@ onedev.server.stats = {
 								opacity : 0
 							}
 						},
-						restore : {
-							title: 'Restore date range'
-						},
-					},
-					right: 40
+					/*restore: {
+						iconStyle:{
+					    	opacity:1
+					    }
+					},*/
+					//saveAsImage: {}
+					}
 				},
 				xAxis : {
 					type : 'category',
@@ -350,46 +601,114 @@ onedev.server.stats = {
 				]
 			};
 
-			if (orderBy == "COMMITS") myChart.setOption(optionCommits, true);
-			else if (orderBy == "ADDITIONS") myChart.setOption(optionAdditions, true);
-			else myChart.setOption(optionDeletions, true);
+			if (orderBy == "COMMITS") {
+				myChart.setOption(optionCommits, true);
+			} else if (orderBy == "ADDITIONS") {
+				myChart.setOption(optionAdditions, true);
+			} else {
+				myChart.setOption(optionDeletions, true);
+			}
+			var firstday = new Date(jsonList[0].day.dateTime);
+			var firstDay = [ firstday.getFullYear(), firstday.getMonth() + 1, firstday.getDate() ].join('-');
+			var lastday = new Date(jsonList[jsonList.length - 1].day.dateTime);
+			var lastDay = [ lastday.getFullYear(), lastday.getMonth() + 1, lastday.getDate() ].join('-');
 
-			myChart.on('click', function(params) {
-			});
-			myChart.dispatchAction({
-				type : 'takeGlobalCursor',
-				key : 'dataZoomSelect',
-				dataZoomSelectActive : true // 允许缩放
-			});
-			myChart.on('restore', function(params) {
-				myFunction(date[0], date[date.length - 1]);
-				redraw(date[0], date[date.length - 1]);
-			});
-			$(window).resize(function() {
-				myChart.resize();
-			});
-			myChart.on('datazoom', function(params) {
+			//				 console.log("firstday and lastday",firstDay,"##",lastDay);
+			if ((fromDay == 'null' && toDay == 'null') || (fromDay == firstDay && toDay == lastDay)) {
 				myChart.setOption({
 					toolbox : {
 						feature : {
 							restore : {
-								title: 'Restore date range',
+								title : 'Restore date range',
+								iconStyle : {
+									opacity : 0
+								}
+							}
+						},
+						right: '40px'
+					},
+				});
+			} else {
+				myChart.setOption({
+					toolbox : {
+						feature : {
+							restore : {
+                				title: 'Restore date range',
 								iconStyle : {
 									opacity : 1
 								}
 							}
 						},
-						right: 40
+						right: '40px'
 					},
 				});
-				var startValue = myChart.getModel().option.dataZoom[0].startValue;
-				var endValue = myChart.getModel().option.dataZoom[0].endValue;
-				myFunction(showdate[startValue], showdate[endValue]);
+			}
+
+			myChart.dispatchAction({
+				type : 'takeGlobalCursor',
+				key : 'dataZoomSelect',
+				dataZoomSelectActive : true // 允许缩放
+			});
+
+			myChart.on('restore', function(params) {
+				var firstday = new Date(jsonList[0].day.dateTime);
+				var lastday = new Date(jsonList[jsonList.length - 1].day.dateTime)
+				myFunction([ firstday.getFullYear(), firstday.getMonth() + 1, firstday.getDate() ].join('/'), [ lastday.getFullYear(), lastday.getMonth() + 1, lastday.getDate() ].join('/'));
+				myChart.setOption({
+					toolbox : {
+						feature : {
+							restore : {
+                				title: 'Restore date range',
+								iconStyle : {
+									opacity : 0
+								}
+							}
+						},
+						right: '40px'
+					},
+				});
+				redraw([ firstday.getFullYear(), firstday.getMonth() + 1, firstday.getDate() ].join('/'), [ lastday.getFullYear(), lastday.getMonth() + 1, lastday.getDate() ].join('/'));
+			});
+			$(window).resize(function() {myChart.resize()});
+
+			myChart.on('datazoom', function(params) {
+				myChart.setOption({
+					toolbox : {
+						feature : {
+							restore : {
+                				title: 'Restore date range',
+								iconStyle : {
+									opacity : 1
+								}
+							}
+						},
+						right: '40px'
+					},
+				});
+				var startIndex = myChart.getModel().option.dataZoom[0].startValue;
+				var endIndex = myChart.getModel().option.dataZoom[0].endValue;
+				var startdate = Date.parse(showdate[startIndex]);
+				var enddate = Date.parse(showdate[endIndex]);
+				var startday = new Date(startdate);
+				var endday = new Date(enddate);
+				var currGap = (enddate - startdate) / (24 * 3600 * 1000);
+				//console.log("<<<<<<currGap+from+tp:",currGap,[startday.getFullYear(),startday.getMonth() + 1, startday.getDate()].join('/'),[endday.getFullYear(),endday.getMonth() + 1, endday.getDate()].join('/'))
+				if (gapday > 365) {
+					if (currGap < 365) {
+						redraw([ startday.getFullYear(), startday.getMonth() + 1, startday.getDate() ].join('/'), [ endday.getFullYear(), endday.getMonth() + 1, endday.getDate() ].join('/'));
+						myFunction([ startday.getFullYear(), startday.getMonth() + 1, startday.getDate() ].join('/'), [ endday.getFullYear(), endday.getMonth() + 1, endday.getDate() ].join('/'));
+					} else {
+						myFunction([ startday.getFullYear(), startday.getMonth() + 1, startday.getDate() ].join('/'), [ endday.getFullYear(), endday.getMonth() + 1, endday.getDate() ].join('/'));
+					}
+				} else {
+					myFunction([ startday.getFullYear(), startday.getMonth() + 1, startday.getDate() ].join('/'), [ endday.getFullYear(), endday.getMonth() + 1, endday.getDate() ].join('/'));
+				}
 			});
 		},
 
 
 		ondrawLinesReady : function(flag, jsonUserDailyContribution, orderBy, gap) {
+			//console.log("flag:"+flag+"  "+gap);
 			function getMonthData(list) {
 				var monthdate = [];
 				var monthdata = [];
@@ -633,13 +952,24 @@ onedev.server.stats = {
 							}
 						},
 						restore : {
-							title: 'Restore date range',
+            				title: 'Restore date range',
 							iconStyle : {
 								opacity : 0
 							}
 						},
+						//saveAsImage: {show:false},
+						/*mytool:{//自定义按钮 danielinbiti,这里增加，selfbuttons可以随便取名字  
+						       show:true,//是否显示  
+						       title:'自定义', //鼠标移动上去显示的文字  
+						       icon: 'image://images/timg.jpg',
+						       option:{},  
+						       onclick:function() {//点击事件,这里的option1是chart的option信息  
+						             alert('1');//这里可以加入自己的处理代码，切换不同的图形  
+						             }  
+						},*/
+
 					},
-					right: 40
+					right: '40px'
 				},
 				xAxis : {
 					type : 'category',
@@ -714,13 +1044,14 @@ onedev.server.stats = {
 							}
 						},
 						restore : {
-							title: 'Restore date range',
+            				title: 'Restore date range',
 							iconStyle : {
 								opacity : 0
 							}
 						},
+					//saveAsImage: {}
 					},
-					right: 40
+					right: '40px'
 				},
 				xAxis : {
 					type : 'category',
@@ -772,7 +1103,7 @@ onedev.server.stats = {
 			var optionAdditions = {
 				tooltip : {
 					trigger : 'axis',
-					formatter : '{b} <br/>{a}: {c}k',
+					formatter : '{b} <br/>{a}:{c}k',
 					position : function(pt) {
 						return [ pt[0], '10%' ];
 					}
@@ -796,13 +1127,14 @@ onedev.server.stats = {
 							}
 						},
 						restore : {
-							title: 'Restore date range',
+            				title: 'Restore date range',
 							iconStyle : {
 								opacity : 0
 							}
 						},
+					//saveAsImage: {}
 					},
-					right: 40
+					right: '40px'
 				},
 				xAxis : {
 					type : 'category',
@@ -822,9 +1154,9 @@ onedev.server.stats = {
 						show : false
 					},
 					type : 'value',
-					max : function(value) {
-						return value.max * 1;
-					},
+					/*max: function(value) {
+					    return value.max *1;
+					},*/
 					boundaryGap : [ 0, '100%' ]
 				},
 
@@ -858,7 +1190,7 @@ onedev.server.stats = {
 			var optionAdditionsDaily = {
 				tooltip : {
 					trigger : 'axis',
-					formatter : '{b} <br/>{a}: {c}k',
+					formatter : '{b} <br/>{a}:{c}k',
 					position : function(pt) {
 						return [ pt[0], '10%' ];
 					}
@@ -868,7 +1200,7 @@ onedev.server.stats = {
 					text : '',
 				},
 				grid : {
-					left : "5%",
+					left : "7%",
 					right : "1%",
 					top : 30,
 					buttom : 0
@@ -882,13 +1214,14 @@ onedev.server.stats = {
 							}
 						},
 						restore : {
-							title: 'Restore date range',
+            				title: 'Restore date range',
 							iconStyle : {
 								opacity : 0
 							}
 						},
+					//saveAsImage: {}
 					},
-					right: 40
+					right: '40px'
 				},
 				xAxis : {
 					type : 'category',
@@ -946,7 +1279,7 @@ onedev.server.stats = {
 			var optionDeletions = {
 				tooltip : {
 					trigger : 'axis',
-					formatter : '{b} <br/>{a}: {c}k',
+					formatter : '{b} <br/>{a}:{c}k',
 					position : function(pt) {
 						return [ pt[0], '10%' ];
 					}
@@ -970,13 +1303,14 @@ onedev.server.stats = {
 							}
 						},
 						restore : {
-							title: 'Restore date range',
+            				title: 'Restore date range',
 							iconStyle : {
 								opacity : 0
 							}
 						},
+					//saveAsImage: {}
 					},
-					right: 40
+					right: '40px'
 				},
 				xAxis : {
 					type : 'category',
@@ -1032,7 +1366,7 @@ onedev.server.stats = {
 			var optionDeletionsDaily = {
 				tooltip : {
 					trigger : 'axis',
-					formatter : '{b} <br/>{a}: {c}k',
+					formatter : '{b} <br/>{a}:{c}k',
 					position : function(pt) {
 						return [ pt[0], '10%' ];
 					}
@@ -1056,13 +1390,14 @@ onedev.server.stats = {
 							}
 						},
 						restore : {
-							title: 'Restore date range',
+            				title: 'Restore date range',
 							iconStyle : {
 								opacity : 0
 							}
 						},
+					//saveAsImage: {}
 					},
-					right: 40
+					right: '40px'
 				},
 				xAxis : {
 					type : 'category',
@@ -1126,9 +1461,8 @@ onedev.server.stats = {
 				if (gap > 365) myChart.setOption(optionDeletions);
 				else myChart.setOption(optionDeletionsDaily);
 			}
-			$(window).resize(function() {
-				myChart.resize();
-			});
+			//myChart.showLoading();
+			$(window).resize(function() {myChart.resize();});
 			myChart.dispatchAction({
 				type : 'takeGlobalCursor',
 				key : 'dataZoomSelect',
@@ -1171,18 +1505,22 @@ onedev.server.stats = {
 					toolbox : {
 						feature : {
 							restore : {
-								title: 'Restore date range',
+                				title: 'Restore date range',
 								iconStyle : {
 									opacity : 1
 								}
 							}
 						},
-						right: 40
+						right: '40px'
 					},
 				});
 				var startValue = myChart.getModel().option.dataZoom[0].startValue;
 				var endValue = myChart.getModel().option.dataZoom[0].endValue;
 
+				//console.log("start"+monthdate[startValue]+"/1");
+				//console.log("end"+monthdate[endValue]+"/1");
+
+				//console.log(monthdata[startValue]+" + "+monthdata[endValue]);
 				if (monthdata[startValue] == 0) {
 					for (var i = startValue + 1; i < endValue; i++) {
 						if (monthdata[i] != 0) {
@@ -1206,7 +1544,10 @@ onedev.server.stats = {
 				var startday = new Date(startdate);
 				var endday = new Date(enddate);
 				var gapday = (enddate - startdate) / (24 * 3600 * 1000);
+				//console.log("start----------",[startday.getFullYear(),startday.getMonth() + 1, startday.getDate()].join('/'),[endday.getFullYear(),endday.getMonth() + 1, endday.getDate()].join('/'));
+				//console.log("gapday in user:"+gapday);
 				if (gapday < 365 && monthdata[startValue] != 0 && monthdata[endValue] != 0) {
+					//console.log("here gapday",gapday);
 					var start = 0;
 					var end = jsonUserDailyContribution.length - 1;
 					for (var i = 0; i < jsonUserDailyContribution.length; i++) {
@@ -1221,6 +1562,7 @@ onedev.server.stats = {
 							break;
 						}
 					}
+					//console.log("start:"+start+"   end:"+end);
 
 					var userDailyContribution = jsonUserDailyContribution.slice(start, end + 1);
 					var newdata = [];
@@ -1232,6 +1574,8 @@ onedev.server.stats = {
 					for (var j = byDay.length / 2; j < byDay.length; j++) {
 						newdate.push(byDay[j]);
 					}
+					//console.log("date:"+newdate);
+					//console.log("data:"+newdata);
 
 					myChart.clear();
 					myChart.setOption({
@@ -1260,10 +1604,11 @@ onedev.server.stats = {
 									}
 								},
 								restore : {
-									title: 'Restore date range'
+	                				title: 'Restore date range',
 								},
+							//saveAsImage: {}
 							},
-							right: 40
+							right: '40px'
 						},
 						xAxis : {
 							type : 'category',

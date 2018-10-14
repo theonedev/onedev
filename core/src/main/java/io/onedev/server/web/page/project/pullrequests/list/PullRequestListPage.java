@@ -387,18 +387,12 @@ public class PullRequestListPage extends ProjectPage {
 
 		});
 		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Last Activity")) {
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Last Update")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
 				PullRequest request = rowModel.getObject();
-				Fragment fragment = new Fragment(componentId, "lastActivityFrag", PullRequestListPage.this);
-				fragment.add(new Label("user", request.getLastActivity().getUserName()).setVisible(request.getLastActivity().getUserName()!=null));
-					
-				fragment.add(new Label("description", request.getLastActivity().getDescription()));
-				fragment.add(new Label("date", DateUtils.formatAge(request.getLastActivity().getDate())));
-				
-				cellItem.add(fragment);
+				cellItem.add(new Label(componentId, DateUtils.formatAge(request.getUpdateDate())));
 			}
 
 		});
@@ -469,7 +463,7 @@ public class PullRequestListPage extends ProjectPage {
 				Item<PullRequest> item = super.newRowItem(id, index, model);
 				PullRequest request = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						request.isVisitedAfter(request.getLastActivity().getDate())?"request":"request new"));
+						request.isVisitedAfter(request.getUpdateDate())?"request":"request new"));
 				return item;
 			}
 		});

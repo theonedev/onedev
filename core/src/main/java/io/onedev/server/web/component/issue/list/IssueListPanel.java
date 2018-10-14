@@ -46,26 +46,26 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.IssueConstants;
-import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.IssueField;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.component.issue.state.IssueStateLabel;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.project.issues.issuedetail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.create.NewIssuePage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
-import io.onedev.server.web.page.project.issues.newissue.NewIssuePage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -524,7 +524,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					@Override
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
 							IModel<Issue> rowModel) {
-						cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getLastActivity().getDate())));
+						cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getUpdateDate())));
 					}
 				});
 				break;
@@ -610,7 +610,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 				Item<Issue> item = super.newRowItem(id, index, model);
 				Issue issue = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						issue.isVisitedAfter(issue.getLastActivity().getDate())?"issue":"issue new"));
+						issue.isVisitedAfter(issue.getUpdateDate())?"issue":"issue new"));
 				return item;
 			}
 		});

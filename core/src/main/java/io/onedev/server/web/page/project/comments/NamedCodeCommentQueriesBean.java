@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.model.support.codecomment.NamedCodeCommentQuery;
+import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;

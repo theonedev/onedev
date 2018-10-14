@@ -7,9 +7,9 @@ import org.hibernate.criterion.Restrictions;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.event.codecomment.CodeCommentAdded;
+import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
-import io.onedev.server.event.pullrequest.PullRequestCodeCommentAdded;
+import io.onedev.server.event.pullrequest.PullRequestCodeCommentCreated;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentReplied;
 import io.onedev.server.manager.CodeCommentRelationManager;
 import io.onedev.server.model.CodeComment;
@@ -46,10 +46,9 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 			request.setCommentCount(request.getCommentCount() + relation.getComment().getReplyCount() + 1);
 		super.save(relation);
 		CodeComment comment = relation.getComment();
-		if (request.getLastActivity() == null || comment.getDate().after(request.getLastActivity().getDate())) {
-			PullRequestCodeCommentAdded event = new PullRequestCodeCommentAdded(request, comment, derived); 
+		if (comment.getCreateDate().after(request.getUpdateDate())) {
+			PullRequestCodeCommentCreated event = new PullRequestCodeCommentCreated(request, comment, derived); 
 			listenerRegistry.post(event);
-			request.setLastActivity(event);
 		}
 	}
 	
@@ -69,7 +68,7 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 
 	@Listen
 	@Transactional
-	public void on(CodeCommentAdded event) {
+	public void on(CodeCommentCreated event) {
 		if (event.getRequest() != null) {
 			CodeCommentRelation relation = new CodeCommentRelation();
 			relation.setComment(event.getComment());
@@ -85,7 +84,6 @@ public class DefaultCodeCommentRelationManager extends AbstractEntityManager<Cod
 			PullRequestCodeCommentReplied pullRequestCodeCommentReplied = new PullRequestCodeCommentReplied(
 					relation.getRequest(), event.getReply(), !relation.getRequest().equals(event.getRequest())); 
 			listenerRegistry.post(pullRequestCodeCommentReplied);
-			relation.getRequest().setLastActivity(pullRequestCodeCommentReplied);
 		}
 	}
 	

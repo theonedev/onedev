@@ -6,10 +6,10 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
+import io.onedev.server.util.CodeCommentConstants;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.codecomment.CodeCommentConstants;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.QueryBuildContext;
 
@@ -41,9 +41,9 @@ public class UpdateDateCriteria extends EntityCriteria<CodeComment>  {
 	@Override
 	public boolean matches(CodeComment comment, User user) {
 		if (operator == CodeCommentQueryLexer.IsBefore)
-			return comment.getLastActivity().getDate().before(value);
+			return comment.getUpdateDate().before(value);
 		else
-			return comment.getLastActivity().getDate().after(value);
+			return comment.getUpdateDate().after(value);
 	}
 
 	@Override

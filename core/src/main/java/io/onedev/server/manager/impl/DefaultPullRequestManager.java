@@ -59,9 +59,10 @@ import io.onedev.server.OneDev;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.pullrequest.PullRequestActionEvent;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
+import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.event.pullrequest.PullRequestDeleted;
+import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.exception.OneException;
@@ -72,8 +73,8 @@ import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.ConfigurationManager;
 import io.onedev.server.manager.MarkdownManager;
-import io.onedev.server.manager.PullRequestActionManager;
 import io.onedev.server.manager.PullRequestBuildManager;
+import io.onedev.server.manager.PullRequestChangeManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.manager.PullRequestReviewManager;
 import io.onedev.server.manager.PullRequestUpdateManager;
@@ -82,30 +83,28 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestAction;
 import io.onedev.server.model.PullRequestBuild;
+import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
-import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.model.support.pullrequest.PullRequestConstants;
-import io.onedev.server.model.support.pullrequest.actiondata.ActionData;
-import io.onedev.server.model.support.pullrequest.actiondata.AddedReviewerData;
-import io.onedev.server.model.support.pullrequest.actiondata.ApprovedData;
-import io.onedev.server.model.support.pullrequest.actiondata.ChangedMergeStrategyData;
-import io.onedev.server.model.support.pullrequest.actiondata.DeletedSourceBranchData;
-import io.onedev.server.model.support.pullrequest.actiondata.DiscardedData;
-import io.onedev.server.model.support.pullrequest.actiondata.MergedData;
-import io.onedev.server.model.support.pullrequest.actiondata.RemovedReviewerData;
-import io.onedev.server.model.support.pullrequest.actiondata.ReopenedData;
-import io.onedev.server.model.support.pullrequest.actiondata.RestoredSourceBranchData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchDeleteData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestSourceBranchRestoreData;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -122,6 +121,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.BatchWorker;
+import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
@@ -152,7 +152,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	private final BatchWorkManager batchWorkManager;
 	
-	private final PullRequestActionManager pullRequestActionManager;
+	private final PullRequestChangeManager pullRequestChangeManager;
 	
 	private final ConfigurationManager configurationManager;
 	
@@ -163,7 +163,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			PullRequestReviewManager pullRequestReviewManager, UserManager userManager, 
 			MarkdownManager markdownManager, BatchWorkManager batchWorkManager, 
 			ListenerRegistry listenerRegistry, UnitOfWork unitOfWork, 
-			PullRequestActionManager pullRequestActionManager, BuildManager buildManager,
+			PullRequestChangeManager pullRequestChangeManager, BuildManager buildManager,
 			ConfigurationManager configurationManager, PullRequestBuildManager pullRequestBuildManager) {
 		super(dao);
 		
@@ -174,7 +174,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
 		this.listenerRegistry = listenerRegistry;
-		this.pullRequestActionManager = pullRequestActionManager;
+		this.pullRequestChangeManager = pullRequestChangeManager;
 		this.configurationManager = configurationManager;
 		this.pullRequestBuildManager = pullRequestBuildManager;
 	}
@@ -208,12 +208,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			}
 			request.getSourceProject().cacheObjectId(request.getSourceBranch(), latestCommit.copy());
 			
-			PullRequestAction action = new PullRequestAction();
-			action.setDate(new Date());
-			action.setData(new RestoredSourceBranchData(note));
-			action.setRequest(request);
-			action.setUser(userManager.getCurrent());
-			pullRequestActionManager.save(action);
+			PullRequestChange change = new PullRequestChange();
+			change.setDate(new Date());
+			change.setData(new PullRequestSourceBranchRestoreData(note));
+			change.setRequest(request);
+			change.setUser(userManager.getCurrent());
+			pullRequestChangeManager.save(change);
 		}
 	}
 
@@ -225,12 +225,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		if (request.getSource().getObjectName(false) != null) {
 			request.getSource().delete();
 			
-			PullRequestAction action = new PullRequestAction();
-			action.setDate(new Date());
-			action.setData(new DeletedSourceBranchData(note));
-			action.setRequest(request);
-			action.setUser(userManager.getCurrent());
-			pullRequestActionManager.save(action);
+			PullRequestChange change = new PullRequestChange();
+			change.setDate(new Date());
+			change.setData(new PullRequestSourceBranchDeleteData(note));
+			change.setRequest(request);
+			change.setUser(userManager.getCurrent());
+			pullRequestChangeManager.save(change);
 		}
 	}
 	
@@ -240,12 +240,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		User user = userManager.getCurrent();
 		request.setCloseInfo(null);
 
-		PullRequestAction action = new PullRequestAction();
-		action.setDate(new Date());
-		action.setData(new ReopenedData(note));
-		action.setRequest(request);
-		action.setUser(user);
-		pullRequestActionManager.save(action);
+		PullRequestChange change = new PullRequestChange();
+		change.setDate(new Date());
+		change.setData(new PullRequestReopenData(note));
+		change.setRequest(request);
+		change.setUser(user);
+		pullRequestChangeManager.save(change);
 		checkAsync(request);
 	}
 
@@ -261,12 +261,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		closeInfo.setStatus(CloseInfo.Status.DISCARDED);
 		request.setCloseInfo(closeInfo);
 		
-		PullRequestAction action = new PullRequestAction();
-		action.setDate(date);
-		action.setData(new DiscardedData(note));
-		action.setRequest(request);
-		action.setUser(user);
-		pullRequestActionManager.save(action);
+		PullRequestChange change = new PullRequestChange();
+		change.setDate(date);
+		change.setData(new PullRequestDiscardData(note));
+		change.setRequest(request);
+		change.setUser(user);
+		pullRequestChangeManager.save(change);
 	}
 	
 	private void merge(PullRequest request) {
@@ -342,16 +342,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void open(PullRequest request) {
+		Preconditions.checkArgument(request.isNew());
 		Query<?> query = getSession().createQuery("select max(number) from PullRequest where targetProject=:project");
 		query.setParameter("project", request.getTargetProject());
 		request.setNumber(getNextNumber(request.getTargetProject(), query));
 
-		LastActivity lastActivity = new LastActivity();
-		lastActivity.setDescription("submitted");
-		lastActivity.setUser(request.getSubmitter());
-		lastActivity.setDate(request.getSubmitDate());
-		request.setLastActivity(lastActivity);
-		
 		dao.persist(request);
 		
 		RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), request.getBaseRef());
@@ -388,11 +383,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		if (dueToMerged)
 			reason = "closed pull request as source branch is merged into target branch";
 		
-		PullRequestAction action = new PullRequestAction();
-		action.setDate(date);
-		action.setData(new MergedData(reason));
-		action.setRequest(request);
-		pullRequestActionManager.save(action);
+		PullRequestChange change = new PullRequestChange();
+		change.setDate(date);
+		change.setData(new PullRequestMergeData(reason));
+		change.setRequest(request);
+		pullRequestChangeManager.save(change);
 	}
 
 	private void checkUpdate(PullRequest request) {
@@ -617,14 +612,21 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Transactional
 	@Listen
-	public void on(PullRequestActionEvent event) {
-		event.getRequest().setLastActivity(event);
-		ActionData data = event.getAction().getData();
-		if (data instanceof ApprovedData || data instanceof DiscardedData  
-				|| data instanceof RemovedReviewerData || data instanceof AddedReviewerData 
-				|| data instanceof ChangedMergeStrategyData) {
+	public void on(PullRequestChangeEvent event) {
+		PullRequestChangeData data = event.getChange().getData();
+		if (data instanceof PullRequestApproveData || data instanceof PullRequestDiscardData  
+				|| data instanceof PullRequestReviewerRemoveData || data instanceof PullRequestReviewerAddData 
+				|| data instanceof PullRequestMergeStrategyChangeData) {
 			checkAsync(event.getRequest());
 		}
+	}
+	
+	@Transactional
+	@Listen
+	public void on(PullRequestEvent event) {
+		if (!(event instanceof PullRequestDeleted) && !(event instanceof PullRequestMergePreviewCalculated)
+				&& !(event instanceof PullRequestBuildEvent))
+			event.getRequest().setUpdateDate(event.getDate());
 	}
 	
 	@Listen

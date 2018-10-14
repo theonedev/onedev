@@ -8,8 +8,8 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.IssueConstants;
 
 public class UpdateDateCriteria extends IssueCriteria {
 
@@ -39,9 +39,9 @@ public class UpdateDateCriteria extends IssueCriteria {
 	@Override
 	public boolean matches(Issue issue, User user) {
 		if (operator == IssueQueryLexer.IsBefore)
-			return issue.getLastActivity().getDate().before(value);
+			return issue.getUpdateDate().before(value);
 		else
-			return issue.getLastActivity().getDate().after(value);
+			return issue.getUpdateDate().after(value);
 	}
 
 	@Override

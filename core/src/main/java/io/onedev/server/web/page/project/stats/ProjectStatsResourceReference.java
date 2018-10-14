@@ -7,7 +7,7 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import io.onedev.server.web.asset.chart.EChartsResourceReference;
+import io.onedev.server.web.asset.echarts.EChartsResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class ProjectStatsResourceReference extends BaseDependentResourceReference {

@@ -36,7 +36,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueActionManager;
+import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueVoteManager;
 import io.onedev.server.manager.IssueWatchManager;
@@ -48,10 +48,10 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.IssueField;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -213,7 +213,7 @@ public abstract class IssueSidePanel extends Panel {
 						super.onSubmit(target, form);
 						
 						Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean, getIssue().getFieldNames());
-						OneDev.getInstance(IssueActionManager.class).changeFields(getIssue(), fieldValues, SecurityUtils.getUser());
+						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues, SecurityUtils.getUser());
 						
 						Component fieldsContainer = newFieldsContainer();
 						IssueSidePanel.this.replace(fieldsContainer);
@@ -475,8 +475,8 @@ public abstract class IssueSidePanel extends Panel {
 		return getIssue().getProject();
 	}
 	
-	private IssueActionManager getIssueChangeManager() {
-		return OneDev.getInstance(IssueActionManager.class);
+	private IssueChangeManager getIssueChangeManager() {
+		return OneDev.getInstance(IssueChangeManager.class);
 	}
 
 	private IssueManager getIssueManager() {

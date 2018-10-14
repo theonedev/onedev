@@ -10,9 +10,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.codecomment.CodeCommentConstants;
-import io.onedev.server.model.support.pullrequest.PullRequestConstants;
 import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.CodeCommentConstants;
+import io.onedev.server.util.PullRequestConstants;
 
 public class CommentCriteria extends PullRequestCriteria {
 

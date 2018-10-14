@@ -8,7 +8,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
-import io.onedev.server.model.support.pullrequest.PullRequestConstants;
+import io.onedev.server.util.PullRequestConstants;
 
 @SuppressWarnings("serial")
 public class RequestStatusLabel extends Label {
@@ -43,11 +43,11 @@ public class RequestStatusLabel extends Label {
 				PullRequest request = getPullRequest();
 				CloseInfo closeInfo = request.getCloseInfo();
 				if (closeInfo == null)
-					return "label label-warning request-status referenceable-status";
+					return "label label-warning request-status";
 				else if (closeInfo.getStatus() == CloseInfo.Status.MERGED)
-					return "label label-success request-status referenceable-status";
+					return "label label-success request-status";
 				else
-					return "label label-danger request-status referenceable-status";
+					return "label label-danger request-status";
 			}
 			
 		}));

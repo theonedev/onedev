@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.IssueConstants;
+import io.onedev.server.util.IssueConstants;
 
 public abstract class FieldCriteria extends IssueCriteria {
 

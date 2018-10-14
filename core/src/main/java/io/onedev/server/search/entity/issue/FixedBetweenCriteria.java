@@ -21,8 +21,8 @@ import io.onedev.server.manager.CacheManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueUtils;
 
 public class FixedBetweenCriteria extends IssueCriteria {

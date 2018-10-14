@@ -16,9 +16,9 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.build.BuildConstants;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.BuildConstants;
 
 public class FixedIssueCriteria extends EntityCriteria<Build> {
 

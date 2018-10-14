@@ -14,7 +14,6 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.Model;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
@@ -27,20 +26,17 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.IssueField;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.web.component.avatar.AvatarLink;
-import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.issue.state.IssueStateLabel;
 import io.onedev.server.web.component.link.UserLink;
-import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.issuedetail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.ColorUtils;
@@ -76,36 +72,33 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 					} else if (getField().getType().equals(InputSpec.ISSUE)) {
 						Issue issue = OneDev.getInstance(IssueManager.class).find(project, Long.valueOf(value));
 						if (issue != null) {
-							Fragment issueFrag = new Fragment("value", "issueFrag", FieldValuesPanel.this);
+							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue, null));
 							link.add(new Label("label", "#" + issue.getNumber()));
-							issueFrag.add(link);
-							issueFrag.add(new IssueStateLabel("state", Model.of(issue)));
-							item.add(issueFrag);
+							linkFrag.add(link);
+							item.add(linkFrag);
 						} else {
 							item.add(new Label("value", "#" + value));
 						}
 					} else if (getField().getType().equals(InputSpec.BUILD)) {
 						Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(value));
 						if (build != null) {
-							Fragment buildFrag = new Fragment("value", "buildFrag", FieldValuesPanel.this);
+							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							ExternalLink link = new ExternalLink("link", build.getUrl());
 							link.add(new Label("label", StringUtils.abbreviate(build.getVersion(), MAX_BUILD_NAME_LEN)));
-							buildFrag.add(link);
-							buildFrag.add(new BuildStatusIcon("status", Model.of(build)));
-							item.add(buildFrag);
+							linkFrag.add(link);
+							item.add(linkFrag);
 						} else {
 							item.add(new Label("value", "#" + value));
 						}
 					} else if (getField().getType().equals(InputSpec.PULLREQUEST)) {
 						PullRequest request = OneDev.getInstance(PullRequestManager.class).find(project, Long.valueOf(value));
 						if (request != null) {
-							Fragment requestFrag = new Fragment("value", "pullRequestFrag", FieldValuesPanel.this);
+							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request, null));
 							link.add(new Label("label", "#" + request.getNumber()));
-							requestFrag.add(link);
-							requestFrag.add(new RequestStatusLabel("status", Model.of(request)));
-							item.add(requestFrag);
+							linkFrag.add(link);
+							item.add(linkFrag);
 						} else {
 							item.add(new Label("value", "#" + value));
 						}
@@ -123,6 +116,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 											"background-color: %s; color: %s;", 
 											backgroundColor, fontColor);
 									label.add(AttributeAppender.append("style", style));
+									label.add(AttributeAppender.append("class", "label"));
 									item.add(AttributeAppender.append("class", "has-color"));
 								}
 							} finally {

@@ -26,7 +26,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -287,17 +286,12 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 
 		});
 		
-		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("Last Activity")) {
+		columns.add(new AbstractColumn<CodeComment, Void>(Model.of("Last Update")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<CodeComment>> cellItem, String componentId, IModel<CodeComment> rowModel) {
 				CodeComment comment = rowModel.getObject();
-				Fragment fragment = new Fragment(componentId, "lastActivityFrag", CodeCommentListPanel.this);
-				fragment.add(new Label("user", comment.getLastActivity().getUserName()));
-				fragment.add(new Label("description", comment.getLastActivity().getDescription()));
-				fragment.add(new Label("date", DateUtils.formatAge(comment.getLastActivity().getDate())));
-				
-				cellItem.add(fragment);
+				cellItem.add(new Label(componentId, DateUtils.formatAge(comment.getUpdateDate())));
 			}
 
 		});
@@ -310,7 +304,7 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 				Item<CodeComment> item = super.newRowItem(id, index, model);
 				CodeComment comment = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						comment.isVisitedAfter(comment.getLastActivity().getDate())?"comment":"comment new"));
+						comment.isVisitedAfter(comment.getUpdateDate())?"comment":"comment new"));
 				return item;
 			}
 		});

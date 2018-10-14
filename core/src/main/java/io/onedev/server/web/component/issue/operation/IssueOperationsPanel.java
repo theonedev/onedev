@@ -30,21 +30,21 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueActionManager;
+import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.IssueConstants;
-import io.onedev.server.model.support.issue.IssueField;
 import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.issue.workflow.TransitionSpec;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.IssueField;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
-import io.onedev.server.web.component.issue.state.IssueStateLabel;
+import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
@@ -153,7 +153,7 @@ public abstract class IssueOperationsPanel extends Panel {
 
 									getIssue().removeFields(transition.getRemoveFields());
 									Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean, trigger.getPromptFields());
-									IssueActionManager manager = OneDev.getInstance(IssueActionManager.class);
+									IssueChangeManager manager = OneDev.getInstance(IssueChangeManager.class);
 									manager.changeState(getIssue(), transition.getToState(), fieldValues, comment, SecurityUtils.getUser());
 									onStateChanged(target);
 								}

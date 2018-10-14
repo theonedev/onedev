@@ -7,7 +7,6 @@ import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.manager.IssueCommentManager;
 import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.support.LastActivity;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -32,11 +31,6 @@ public class DefaultIssueCommentManager extends AbstractEntityManager<IssueComme
 		if (isNew) {
 			IssueCommented event = new IssueCommented(comment);
 			listenerRegistry.post(event);
-			LastActivity lastActivity = new LastActivity();
-			lastActivity.setUser(comment.getUser());
-			lastActivity.setDate(comment.getDate());
-			lastActivity.setDescription("commented");
-			comment.getIssue().setLastActivity(lastActivity);
 			comment.getIssue().setCommentCount(comment.getIssue().getCommentCount()+1);
 		}		
 	}

@@ -117,7 +117,3 @@ table.diff>tbody>tr:hover>td {
 table.plain.diff {
 	border: none;
 }
-table.plain.diff>tbody>tr>td {
-	padding: 0 12px 6px 0;
-	background: white !important;
-}

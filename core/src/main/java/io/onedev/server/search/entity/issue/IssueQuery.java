@@ -1,16 +1,16 @@
 package io.onedev.server.search.entity.issue;
 
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_COMMENT;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_COMMENT_COUNT;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_DESCRIPTION;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_MILESTONE;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_NUMBER;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_STATE;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_SUBMITTER;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_SUBMIT_DATE;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_TITLE;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_UPDATE_DATE;
-import static io.onedev.server.model.support.issue.IssueConstants.FIELD_VOTE_COUNT;
+import static io.onedev.server.util.IssueConstants.FIELD_COMMENT;
+import static io.onedev.server.util.IssueConstants.FIELD_COMMENT_COUNT;
+import static io.onedev.server.util.IssueConstants.FIELD_DESCRIPTION;
+import static io.onedev.server.util.IssueConstants.FIELD_MILESTONE;
+import static io.onedev.server.util.IssueConstants.FIELD_NUMBER;
+import static io.onedev.server.util.IssueConstants.FIELD_STATE;
+import static io.onedev.server.util.IssueConstants.FIELD_SUBMITTER;
+import static io.onedev.server.util.IssueConstants.FIELD_SUBMIT_DATE;
+import static io.onedev.server.util.IssueConstants.FIELD_TITLE;
+import static io.onedev.server.util.IssueConstants.FIELD_UPDATE_DATE;
+import static io.onedev.server.util.IssueConstants.FIELD_VOTE_COUNT;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,7 +36,6 @@ import io.onedev.server.exception.OneException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.IssueConstants;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -54,6 +53,7 @@ import io.onedev.server.search.entity.issue.IssueQueryParser.ParensCriteriaConte
 import io.onedev.server.search.entity.issue.IssueQueryParser.QueryContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.RevisionCriteriaContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.BuildChoiceInput;
 import io.onedev.server.util.inputspec.InputContext;

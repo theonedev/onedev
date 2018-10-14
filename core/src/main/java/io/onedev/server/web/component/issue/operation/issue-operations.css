@@ -2,9 +2,7 @@
 	margin-bottom: 20px;
 }
 .issue-operations>.state-and-actions>.issue-state {
-	font-size: 16px;
-	display: block;
-	padding: 4px 8px;
+	font-size: 20px;
 }
 .issue-operations>.state-and-actions>* {
 	margin-right: 20px;

@@ -1,11 +1,11 @@
 package io.onedev.server.search.entity.codecomment;
 
-import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_CONTENT;
-import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_CREATE_DATE;
-import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_PATH;
-import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_REPLY;
-import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_REPLY_COUNT;
-import static io.onedev.server.model.support.codecomment.CodeCommentConstants.FIELD_UPDATE_DATE;
+import static io.onedev.server.util.CodeCommentConstants.FIELD_CONTENT;
+import static io.onedev.server.util.CodeCommentConstants.FIELD_CREATE_DATE;
+import static io.onedev.server.util.CodeCommentConstants.FIELD_PATH;
+import static io.onedev.server.util.CodeCommentConstants.FIELD_REPLY;
+import static io.onedev.server.util.CodeCommentConstants.FIELD_REPLY_COUNT;
+import static io.onedev.server.util.CodeCommentConstants.FIELD_UPDATE_DATE;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,7 +23,6 @@ import org.antlr.v4.runtime.Recognizer;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.codecomment.CodeCommentConstants;
 import io.onedev.server.search.entity.AndCriteriaHelper;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -41,6 +40,7 @@ import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrCrite
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrderContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.QueryContext;
+import io.onedev.server.util.CodeCommentConstants;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
 

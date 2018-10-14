@@ -510,7 +510,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 							comment.setProject(context.getProject());
 							comment.setCompareContext(getCompareContext());
 							
-							OneDev.getInstance(CodeCommentManager.class).save(comment, context.getPullRequest());
+							OneDev.getInstance(CodeCommentManager.class).create(comment, context.getPullRequest());
 							
 							CodeCommentPanel commentPanel = new CodeCommentPanel(fragment.getId(), comment.getId()) {
 

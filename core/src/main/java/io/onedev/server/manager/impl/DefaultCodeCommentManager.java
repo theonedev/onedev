@@ -38,8 +38,10 @@ import com.google.common.collect.Lists;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.server.event.codecomment.CodeCommentAdded;
+import io.onedev.server.event.codecomment.CodeCommentCreated;
+import io.onedev.server.event.codecomment.CodeCommentDeleted;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
+import io.onedev.server.event.codecomment.CodeCommentUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.manager.CodeCommentManager;
@@ -50,7 +52,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TextRange;
-import io.onedev.server.model.support.codecomment.CodeCommentConstants;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -62,6 +63,7 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryBuildContext;
+import io.onedev.server.util.CodeCommentConstants;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 
@@ -85,14 +87,11 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 
 	@Transactional
 	@Override
-	public void save(CodeComment comment, PullRequest request) {
-		if (comment.isNew()) {
-			dao.persist(comment);
-			CodeCommentAdded event = new CodeCommentAdded(comment, request);
-			listenerRegistry.post(event);
-		} else {
-			dao.persist(comment);
-		}
+	public void create(CodeComment comment, PullRequest request) {
+		Preconditions.checkArgument(comment.isNew());
+		save(comment);
+		CodeCommentCreated event = new CodeCommentCreated(comment, request);
+		listenerRegistry.post(event);
 	}
 
 	@Transactional
@@ -108,7 +107,8 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Transactional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		event.getComment().setLastActivity(event);
+		if (!(event instanceof CodeCommentDeleted)) 
+			event.getComment().setUpdateDate(event.getDate());
 	}
 	
 	@Sessional
@@ -303,6 +303,21 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 
 		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
+	}
+
+	@Transactional
+	@Override
+	public void delete(User user, CodeComment comment) {
+		delete(comment);
+		listenerRegistry.post(new CodeCommentDeleted(user, comment));
+	}
+	
+	@Transactional
+	@Override
+	public void update(User user, CodeComment comment) {
+		Preconditions.checkArgument(!comment.isNew());
+		save(comment);
+		listenerRegistry.post(new CodeCommentUpdated(user, comment));
 	}
 	
 }

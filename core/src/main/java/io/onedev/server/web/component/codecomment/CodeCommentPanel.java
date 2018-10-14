@@ -97,7 +97,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 			@Override
 			protected String load() {
-				return getComment().isVisitedAfter(getComment().getDate())?"": "new";
+				return getComment().isVisitedAfter(getComment().getCreateDate())?"": "new";
 			}
 			
 		}));
@@ -106,7 +106,7 @@ public abstract class CodeCommentPanel extends Panel {
 		commentContainer.add(new AvatarLink("userAvatar", userForDisplay));
 		commentContainer.add(new UserLink("userName", userForDisplay));
 		commentContainer.add(new Label("action", "commented"));
-		commentContainer.add(new Label("date", DateUtils.formatAge(getComment().getDate())));
+		commentContainer.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate())));
 
 		commentContainer.add(new MarkdownViewer("content", new IModel<String>() {
 
@@ -123,7 +123,7 @@ public abstract class CodeCommentPanel extends Panel {
 			public void setObject(String object) {
 				CodeComment comment = getComment();
 				comment.setContent(object);
-				OneDev.getInstance(CodeCommentManager.class).save(comment, getPullRequest());				
+				OneDev.getInstance(CodeCommentManager.class).update(SecurityUtils.getUser(), comment);				
 			}
 			
 		}, null));
@@ -190,7 +190,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 						CodeComment comment = getComment();
 						comment.setContent(contentInput.getModelObject());
-						OneDev.getInstance(CodeCommentManager.class).save(comment, getPullRequest());
+						OneDev.getInstance(CodeCommentManager.class).update(SecurityUtils.getUser(), comment);
 						WebMarkupContainer commentContainer = newCommentContainer();
 						fragment.replaceWith(commentContainer);
 						target.add(commentContainer);
@@ -225,7 +225,7 @@ public abstract class CodeCommentPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				onDeleteComment(target, getComment());
-				OneDev.getInstance(CodeCommentManager.class).delete(getComment());
+				OneDev.getInstance(CodeCommentManager.class).delete(SecurityUtils.getUser(), getComment());
 			}
 			
 		});
@@ -525,7 +525,7 @@ public abstract class CodeCommentPanel extends Panel {
 				lastReplyDate = lastReply.getDate();
 				prevReplyMarkupId = lastReplyContainer.getMarkupId();
 			} else {
-				lastReplyDate = getComment().getDate();
+				lastReplyDate = getComment().getCreateDate();
 				prevReplyMarkupId = get("comment").getMarkupId();
 			}
 			

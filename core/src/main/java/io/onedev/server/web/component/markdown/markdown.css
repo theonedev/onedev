@@ -316,18 +316,16 @@ body.fullscreen {
 	color: #333;
 	text-decoration: none;
 }
+#reference-tooltip {
+	z-index: 1000;
+}
 #reference-tooltip .content {
 	background-color: #FBFCC5; 
 	border: 1px solid black;
 	border-radius: 4px; 
 	padding: 12px; 
-	z-index: 10000;
 }
-#reference-tooltip .content.issue .state, 
-#reference-tooltip .content.pull-request .status {
-	border-radius: 3px;
-	padding: 2px 4px;
-	font-weight: bold;
+#reference-tooltip .content .label { 
 	margin-right: 4px;
 }
 #reference-tooltip .content.user {

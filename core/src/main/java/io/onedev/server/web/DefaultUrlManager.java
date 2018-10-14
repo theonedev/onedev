@@ -16,12 +16,12 @@ import io.onedev.server.manager.UrlManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueAction;
+import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.PullRequestAction;
+import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
@@ -91,9 +91,9 @@ public class DefaultUrlManager implements UrlManager {
 	}
 
 	@Override
-	public String urlFor(PullRequestAction action) {
-		String url = urlFor(action.getRequest());
-		return url + "#" + action.getAnchor();
+	public String urlFor(PullRequestChange change) {
+		String url = urlFor(change.getRequest());
+		return url + "#" + change.getAnchor();
 	}
 
 	@Override
@@ -107,7 +107,7 @@ public class DefaultUrlManager implements UrlManager {
 	}
 
 	@Override
-	public String urlFor(IssueAction change) {
+	public String urlFor(IssueChange change) {
 		return urlFor(change.getIssue()) + "#" + change.getAnchor();
 	}
 

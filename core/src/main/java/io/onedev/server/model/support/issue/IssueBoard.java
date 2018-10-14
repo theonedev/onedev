@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.workflow.StateSpec;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
