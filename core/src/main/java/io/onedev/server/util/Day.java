@@ -33,9 +33,6 @@ public class Day implements Serializable, Comparable<Day> {
 	public Date getDate() {
 		return dateTime.toDate();
 	}
-	public DateTime getDateTime() {
-		return dateTime;
-	}
 	
 	public int getValue() {
 		return (dateTime.getYear()<<16) | (dateTime.getMonthOfYear()<<8) | (dateTime.getDayOfMonth());

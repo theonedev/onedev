@@ -1,55 +1,15 @@
 <wicket:extend>
-	<select id="orderBy" wicket:id="orderBy" ></select>
-	
-	<div wicket:id="timeZoomContainer" class="timeZoom">
-		<div wicket:id="timeZoom">
+	<div id="project-contribs">
+		<div class="options clearfix">
+			<span class="date-range pull-left clearfix"></span>
+			<select class="contrib-type pull-right form-control">
+				<option>Commits</option>
+				<option>Additions</option>
+				<option>Deletions</option>
+			</select>
 		</div>
+		<div class="note">Contributions to master, excluding merge commits</div>
+		<div class="overall chart"></div>
+		<div class="top-contributors container-fluid"></div>
 	</div>
-	<hr class="hr"/>
-	<div wicket:id="overallContributorsContainer" class="overallLineContainer">
-		<div wicket:id="overallContribution" id="overallLine" class="well"></div>
-	
-	</div> 
-	
-
-	<hr/>
-	
-	<div class="top-contributors">
-			<hr/>
-			<div wicket:id="topContributorsContainer" class="userLine">
-			<div wicket:id="topContributors" class="well userInfo">
-				<div wicket:id="user" ></div>
-				<div wicket:id="userline" class="project-userlines"></div>
-			</div>
-			</div>
-	</div>
-	
-	
-	<wicket:fragment wicket:id="timeZoomFrag">
-		<label wicket:id="time"></label>
-	</wicket:fragment>
-	
-	<wicket:fragment wicket:id="overallContributionFrag">
-	<div id="project-contribs"  ></div>
-	</wicket:fragment>
-	
-	
-	<wicket:fragment wicket:id="userFrag" >
-		<a wicket:id="avatar"></a>
-		<a wicket:id="link"></a> 
-		<label wicket:id="No" style="float:right"></label>
-		<div>
-			<label id="commits" wicket:id="commits"  ></label>
-			<label> </label>
-			<label id="additions" wicket:id="additions" ></label>
-			<label id="deletions" wicket:id="deletions" ></label>
-		</div>
-		
-	</wicket:fragment>
-	
-	<wicket:fragment wicket:id="userlineFrag" >
-		<div class="project-userline"  ></div>
-	</wicket:fragment>
-	
-	
 </wicket:extend>

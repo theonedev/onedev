@@ -1204,7 +1204,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	@Sessional
 	@Override
-	public List<Contributor> getTopContributors(Project project, int top, Contribution.Type orderBy, 
+	public List<Contributor> getTopContributors(Project project, int top, Contribution.Type type, 
 			Day fromDay, Day toDay) {
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -1217,35 +1217,39 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			public List<Contributor> compute(Transaction txn) {
 				Map<Integer, Contribution> overallContributions = 
 						deserializeContributions(readBytes(defaultStore, txn, OVERALL_CONTRIBUTIONS_KEY));
-				Map<Integer, Integer> orderByValues = new HashMap<>();
+				Map<Integer, Contribution> totalContributions = new HashMap<>();
 				for (int dayValue: overallContributions.keySet()) {
 					if (dayValue >= fromDay.getValue() && dayValue <= toDay.getValue()) {
 						ByteIterable dayKey = new IntByteIterable(dayValue);
 						Map<Integer, Contribution> contributionsOnDay = 
 								deserializeContributions(readBytes(dailyContributionsStore, txn, dayKey));
 						for (Map.Entry<Integer, Contribution> entry: contributionsOnDay.entrySet()) {
-							int orderByValue;
-							if (orderBy == Contribution.Type.COMMITS)
-								orderByValue = entry.getValue().getCommits();
-							else if (orderBy == Contribution.Type.ADDITIONS)
-								orderByValue = entry.getValue().getAdditions();
-							else
-								orderByValue = entry.getValue().getDeletions();
 							Integer userIndex = entry.getKey();
-							Integer existingOrderByValue = orderByValues.get(userIndex);
-							if (existingOrderByValue != null)
-								orderByValue += existingOrderByValue;
-							orderByValues.put(userIndex, orderByValue);
+							Contribution totalContribution = totalContributions.get(userIndex);
+							if (totalContribution == null) {
+								totalContribution = entry.getValue();
+							} else {
+								totalContribution = new Contribution(
+										totalContribution.getCommits() + entry.getValue().getCommits(), 
+										totalContribution.getAdditions() + entry.getValue().getAdditions(), 
+										totalContribution.getDeletions() + entry.getValue().getDeletions());
+							}
+							totalContributions.put(userIndex, totalContribution);
 						}
 					}
 				}
 				
-				List<Integer> topUserIndexes = new ArrayList<>(orderByValues.keySet());
+				List<Integer> topUserIndexes = new ArrayList<>(totalContributions.keySet());
 				Collections.sort(topUserIndexes, new Comparator<Integer>() {
 
 					@Override
 					public int compare(Integer o1, Integer o2) {
-						return orderByValues.get(o2) - orderByValues.get(o1);
+						if (type == Contribution.Type.COMMITS)
+							return totalContributions.get(o2).getCommits() - totalContributions.get(o1).getCommits();
+						else if (type == Contribution.Type.ADDITIONS)
+							return totalContributions.get(o2).getAdditions() - totalContributions.get(o1).getAdditions();
+						else
+							return totalContributions.get(o2).getDeletions() - totalContributions.get(o1).getDeletions();
 					}
 					
 				});
@@ -1255,7 +1259,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				
 				Set<Integer> topUserIndexSet = new HashSet<>(topUserIndexes);
 				
-				Map<Integer, Map<Day, Contribution>> userContributions = new HashMap<>();
+				Map<Integer, Map<Day, Integer>> userContributions = new HashMap<>();
 				
 				for (int dayValue: overallContributions.keySet()) {
 					if (dayValue >= fromDay.getValue() && dayValue <= toDay.getValue()) {
@@ -1266,12 +1270,17 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 						for (Map.Entry<Integer, Contribution> entry: contributionsOnDay.entrySet()) {
 							Integer userIndex = entry.getKey();
 							if (topUserIndexSet.contains(userIndex)) {
-								Map<Day, Contribution> contributionsByUser = userContributions.get(userIndex);
+								Map<Day, Integer> contributionsByUser = userContributions.get(userIndex);
 								if (contributionsByUser == null) {
 									contributionsByUser = new HashMap<>();
 									userContributions.put(userIndex, contributionsByUser);
 								}
-								contributionsByUser.put(day, entry.getValue());
+								if (type == Contribution.Type.COMMITS)
+									contributionsByUser.put(day, entry.getValue().getCommits());
+								else if (type == Contribution.Type.ADDITIONS)
+									contributionsByUser.put(day, entry.getValue().getAdditions());
+								else
+									contributionsByUser.put(day, entry.getValue().getDeletions());
 							}
 						}
 					}
@@ -1281,10 +1290,10 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				
 				for (int userIndex: topUserIndexes) {
 					byte[] userBytes = readBytes(indexToUserStore, txn, new IntByteIterable(userIndex));
-					Map<Day, Contribution> contributionsByUser = userContributions.get(userIndex);
+					Map<Day, Integer> contributionsByUser = userContributions.get(userIndex);
 					if (userBytes != null && contributionsByUser != null) {
 						PersonIdent user = ((NameAndEmail)SerializationUtils.deserialize(userBytes)).asPersonIdent();
-						contributors.add(new Contributor(user, contributionsByUser));
+						contributors.add(new Contributor(user, totalContributions.get(userIndex), contributionsByUser));
 					}
 				}
 				

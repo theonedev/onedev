@@ -11,20 +11,27 @@ public class Contributor implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private final PersonIdent user;
+	private final PersonIdent author;
 	
-	private final Map<Day, Contribution> dailyContributions;
+	private final Contribution totalContribution;
 	
-	public Contributor(PersonIdent user, Map<Day, Contribution> dailyContributions) {
-		this.user = user;
+	private final Map<Day, Integer> dailyContributions;
+	
+	public Contributor(PersonIdent author, Contribution totalContribution, Map<Day, Integer> dailyContributions) {
+		this.author = author;
+		this.totalContribution = totalContribution;
 		this.dailyContributions = dailyContributions;
 	}
 
-	public PersonIdent getUser() {
-		return user;
+	public PersonIdent getAuthor() {
+		return author;
 	}
 
-	public Map<Day, Contribution> getDailyContributions() {
+	public Contribution getTotalContribution() {
+		return totalContribution;
+	}
+
+	public Map<Day, Integer> getDailyContributions() {
 		return dailyContributions;
 	}
 

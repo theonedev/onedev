@@ -43,12 +43,12 @@ public interface CommitInfoManager {
 	Collection<String> getHistoryPaths(Project project, String path);
 	
 	/**
-	 * Get list of contributions, ordered by day
+	 * Get overall contributions
 	 * 
 	 * @param project
 	 * 			project to get daily commits for
 	 * @return
-	 * 			list of contributions, ordered by day
+	 * 			map of day to contribution
 	 */
 	Map<Day, Contribution> getOverallContributions(Project project);
 	
@@ -59,7 +59,7 @@ public interface CommitInfoManager {
 	 * 			project to get top contributors for
 	 * @param top
 	 * 			number of top contributors to get
-	 * @param orderBy
+	 * @param type
 	 * 			type of contribution to order by
 	 * @param fromDay
 	 * 			from day
@@ -68,8 +68,7 @@ public interface CommitInfoManager {
 	 * @return
 	 * 			list of top user contributors, reversely ordered by number of contributions 
 	 */
-	List<Contributor> getTopContributors(Project project, int top, Contribution.Type orderBy, 
-			Day fromDay, Day toDay);
+	List<Contributor> getTopContributors(Project project, int top, Contribution.Type type, Day fromDay, Day toDay);
 
 	/**
 	 * Get source code line statistics over time
