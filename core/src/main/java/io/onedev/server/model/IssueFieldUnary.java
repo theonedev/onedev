@@ -12,7 +12,7 @@ import javax.persistence.Table;
 @Entity
 @Table(
 		indexes={
-				@Index(columnList="g_issue_id"), @Index(columnList="name"), 
+				@Index(columnList="o_issue_id"), @Index(columnList="name"), 
 				@Index(columnList="value"), @Index(columnList="type"), 
 				@Index(columnList="ordinal")})
 public class IssueFieldUnary extends AbstractEntity {

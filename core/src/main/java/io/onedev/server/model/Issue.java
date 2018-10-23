@@ -58,13 +58,13 @@ import io.onedev.server.web.editable.annotation.Editable;
 @Entity
 @Table(
 		indexes={
-				@Index(columnList="g_project_id"), @Index(columnList="state"), 
+				@Index(columnList="o_project_id"), @Index(columnList="state"), 
 				@Index(columnList="title"), @Index(columnList="noSpaceTitle"),  
 				@Index(columnList="number"), @Index(columnList="numberStr"), 
-				@Index(columnList="submitDate"), @Index(columnList="g_submitter_id"),
+				@Index(columnList="submitDate"), @Index(columnList="o_submitter_id"),
 				@Index(columnList="voteCount"), @Index(columnList="commentCount"),
-				@Index(columnList="g_milestone_id"), @Index(columnList="updateDate")}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_project_id", "number"})})
+				@Index(columnList="o_milestone_id"), @Index(columnList="updateDate")}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})})
 @Editable
 public class Issue extends AbstractEntity implements Referenceable {
 

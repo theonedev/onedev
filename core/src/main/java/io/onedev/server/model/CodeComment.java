@@ -50,7 +50,7 @@ import io.onedev.server.util.diff.WhitespaceOption;
  */
 @Entity
 @Table(indexes={
-		@Index(columnList="g_project_id"), @Index(columnList="g_user_id"),
+		@Index(columnList="o_project_id"), @Index(columnList="o_user_id"),
 		@Index(columnList="commit"), @Index(columnList="path"), 
 		@Index(columnList="createDate"), @Index(columnList="updateDate")})
 @DynamicUpdate 

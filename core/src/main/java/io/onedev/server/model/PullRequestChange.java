@@ -15,7 +15,7 @@ import javax.persistence.Table;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
 
 @Entity
-@Table(indexes={@Index(columnList="g_request_id"), @Index(columnList="g_user_id")})
+@Table(indexes={@Index(columnList="o_request_id"), @Index(columnList="o_user_id")})
 public class PullRequestChange extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

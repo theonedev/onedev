@@ -35,7 +35,7 @@ import io.onedev.server.git.command.ListFileChangesCommand;
 import io.onedev.server.manager.impl.DefaultCodeCommentRelationManager;
 
 @Entity
-@Table(indexes={@Index(columnList="g_request_id"), @Index(columnList="date")})
+@Table(indexes={@Index(columnList="o_request_id"), @Index(columnList="date")})
 public class PullRequestUpdate extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

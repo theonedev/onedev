@@ -29,8 +29,8 @@ import io.onedev.server.util.facade.BuildFacade;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_configuration_id"), @Index(columnList="commitHash"), @Index(columnList="version")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_configuration_id", "commitHash"})}
+		indexes={@Index(columnList="o_configuration_id"), @Index(columnList="commitHash"), @Index(columnList="version")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_configuration_id", "commitHash"})}
 )
 public class Build extends AbstractEntity {
 

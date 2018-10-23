@@ -19,8 +19,8 @@ import io.onedev.server.util.watch.QueryWatchSupport;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_project_id"), @Index(columnList="g_user_id")}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_project_id", "g_user_id"})}
+		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_user_id")}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "o_user_id"})}
 )
 public class BuildQuerySetting extends QuerySetting<NamedBuildQuery> {
 

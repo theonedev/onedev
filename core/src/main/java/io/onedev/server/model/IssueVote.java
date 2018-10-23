@@ -13,8 +13,8 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_issue_id"), @Index(columnList="g_user_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_issue_id", "g_user_id"})}
+		indexes={@Index(columnList="o_issue_id"), @Index(columnList="o_user_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_issue_id", "o_user_id"})}
 )
 public class IssueVote extends AbstractEntity {
 

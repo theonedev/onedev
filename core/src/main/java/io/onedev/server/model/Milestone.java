@@ -23,8 +23,8 @@ import io.onedev.server.web.editable.annotation.Multiline;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_project_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_project_id", "name"})}
+		indexes={@Index(columnList="o_project_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "name"})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable

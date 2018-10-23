@@ -12,8 +12,8 @@ import io.onedev.server.model.support.EntityWatch;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_request_id"), @Index(columnList="g_user_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_request_id", "g_user_id"})
+		indexes={@Index(columnList="o_request_id"), @Index(columnList="o_user_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_request_id", "o_user_id"})
 })
 public class PullRequestWatch extends EntityWatch {
 

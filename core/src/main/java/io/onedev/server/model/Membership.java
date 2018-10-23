@@ -12,8 +12,8 @@ import io.onedev.server.util.facade.MembershipFacade;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_user_id"), @Index(columnList="g_team_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_user_id", "g_team_id"})
+		indexes={@Index(columnList="o_user_id"), @Index(columnList="o_team_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_user_id", "o_team_id"})
 })
 public class Membership extends AbstractEntity {
 

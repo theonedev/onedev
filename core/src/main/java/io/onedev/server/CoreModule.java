@@ -488,7 +488,7 @@ public class CoreModule extends AbstractPluginModule {
 		// Use an optional binding here in case our client does not like to 
 		// start persist service provided by this plugin
 		bind(Interceptor.class).to(HibernateInterceptor.class);
-		bind(PhysicalNamingStrategy.class).toInstance(new PrefixedNamingStrategy("g_"));
+		bind(PhysicalNamingStrategy.class).toInstance(new PrefixedNamingStrategy("o_"));
 		
 		bind(UnitOfWork.class).to(DefaultUnitOfWork.class);
 		bind(IdManager.class).to(DefaultIdManager.class);

@@ -8,6 +8,9 @@ import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
+import io.onedev.server.web.util.resourcebundle.ResourceBundle;
+
+@ResourceBundle
 public class EChartsResourceReference extends JavaScriptResourceReference {
 
 	private static final long serialVersionUID = 1L;

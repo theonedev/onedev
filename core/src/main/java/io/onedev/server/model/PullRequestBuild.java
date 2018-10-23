@@ -10,8 +10,8 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_request_id"), @Index(columnList="g_configuration_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_configuration_id", "g_request_id"})}
+		indexes={@Index(columnList="o_request_id"), @Index(columnList="o_configuration_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_configuration_id", "o_request_id"})}
 )
 public class PullRequestBuild extends AbstractEntity {
 

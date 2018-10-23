@@ -70,13 +70,13 @@ import io.onedev.server.util.jackson.RestView;
 		indexes={
 				@Index(columnList="title"), @Index(columnList="uuid"), 
 				@Index(columnList="numberStr"), @Index(columnList="noSpaceTitle"), 
-				@Index(columnList="number"), @Index(columnList="g_targetProject_id"), 
+				@Index(columnList="number"), @Index(columnList="o_targetProject_id"), 
 				@Index(columnList="submitDate"), @Index(columnList="updateDate"),  
-				@Index(columnList="g_sourceProject_id"), @Index(columnList="g_submitter_id"),
+				@Index(columnList="o_sourceProject_id"), @Index(columnList="o_submitter_id"),
 				@Index(columnList="headCommitHash"), @Index(columnList="PREVIEW_REQUEST_HEAD"), 
 				@Index(columnList="CLOSE_DATE"), @Index(columnList="CLOSE_STATUS"), 
 				@Index(columnList="CLOSE_USER"), @Index(columnList="CLOSE_USER_NAME")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_targetProject_id", "number"})})
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_targetProject_id", "number"})})
 public class PullRequest extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;

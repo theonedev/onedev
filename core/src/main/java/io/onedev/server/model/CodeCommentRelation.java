@@ -9,8 +9,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Table(
-		indexes={@Index(columnList="g_request_id"), @Index(columnList="g_comment_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_request_id", "g_comment_id"})
+		indexes={@Index(columnList="o_request_id"), @Index(columnList="o_comment_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_request_id", "o_comment_id"})
 })
 @Entity
 public class CodeCommentRelation extends AbstractEntity {

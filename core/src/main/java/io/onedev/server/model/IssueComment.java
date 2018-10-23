@@ -13,7 +13,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(indexes={
-		@Index(columnList="g_issue_id"), @Index(columnList="g_user_id")})
+		@Index(columnList="o_issue_id"), @Index(columnList="o_user_id")})
 public class IssueComment extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

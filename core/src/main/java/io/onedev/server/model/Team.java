@@ -28,8 +28,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @Editable
 @Table(
-		indexes={@Index(columnList="g_project_id"), @Index(columnList="name")}, 
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_project_id", "name"})})
+		indexes={@Index(columnList="o_project_id"), @Index(columnList="name")}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "name"})})
 public class Team extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

@@ -18,8 +18,8 @@ import io.onedev.server.model.support.pullrequest.ReviewResult;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="g_user_id"), @Index(columnList="g_request_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"g_user_id", "g_request_id"})}
+		indexes={@Index(columnList="o_user_id"), @Index(columnList="o_request_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_user_id", "o_request_id"})}
 )
 public class PullRequestReview extends AbstractEntity {
 

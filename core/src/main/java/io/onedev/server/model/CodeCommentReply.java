@@ -13,7 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(indexes={@Index(columnList="g_comment_id"), @Index(columnList="g_user_id")})
+@Table(indexes={@Index(columnList="o_comment_id"), @Index(columnList="o_user_id")})
 public class CodeCommentReply extends AbstractEntity {
 	
 	private static final long serialVersionUID = 1L;

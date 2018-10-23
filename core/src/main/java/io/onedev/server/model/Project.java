@@ -113,7 +113,7 @@ import io.onedev.utils.Range;
 import io.onedev.utils.StringUtils;
 
 @Entity
-@Table(indexes={@Index(columnList="g_forkedFrom_id")})
+@Table(indexes={@Index(columnList="o_forkedFrom_id")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @DynamicUpdate
 @Editable
