@@ -9,7 +9,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -36,7 +35,6 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.issues.list.IssueListPage;
-import io.onedev.server.web.util.ajaxlistener.AppendLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
 abstract class BacklogColumnPanel extends Panel {
@@ -83,12 +81,6 @@ abstract class BacklogColumnPanel extends Panel {
 
 		add(new ModalLink("addCard") {
 
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new AppendLoadingIndicatorListener(false));
-			}
-			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				return new NewCardPanel(id) {

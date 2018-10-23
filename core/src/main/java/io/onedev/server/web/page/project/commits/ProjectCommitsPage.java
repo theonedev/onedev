@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -80,7 +79,6 @@ import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
 import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.util.VisibleVisitor;
-import io.onedev.server.web.util.ajaxlistener.ShowGlobalLoadingIndicatorImmediatelyListener;
 import io.onedev.server.web.util.model.CommitRefsModel;
 import io.onedev.utils.StringUtils;
 
@@ -407,12 +405,6 @@ public class ProjectCommitsPage extends ProjectPage {
 		foot.setOutputMarkupId(true);
 		
 		foot.add(new AjaxLink<Void>("more") {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ShowGlobalLoadingIndicatorImmediatelyListener());
-			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {

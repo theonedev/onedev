@@ -43,6 +43,18 @@ public abstract class InfiniteScrollBehavior extends AbstractPostAjaxBehavior {
 		IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 		int offset = params.getParameterValue("offset").toInt();
 		int count = params.getParameterValue("count").toInt();
+		if (offset == 0) {
+			WebMarkupContainer container = (WebMarkupContainer) getComponent();
+			container.visitChildren(RepeatingView.class, new IVisitor<RepeatingView, Void>() {
+
+				@Override
+				public void component(RepeatingView component, IVisit<Void> visit) {
+					component.removeAll();
+					visit.stop();
+				}
+				
+			});
+		}
 
 		appendMore(target, offset, count);
 
@@ -63,16 +75,6 @@ public abstract class InfiniteScrollBehavior extends AbstractPostAjaxBehavior {
 	protected abstract void appendMore(AjaxRequestTarget target, int offset, int count);
 	
 	public void refresh(IPartialPageRequestHandler handler) {
-		WebMarkupContainer container = (WebMarkupContainer) getComponent();
-		container.visitChildren(RepeatingView.class, new IVisitor<RepeatingView, Void>() {
-
-			@Override
-			public void component(RepeatingView component, IVisit<Void> visit) {
-				component.removeAll();
-				visit.stop();
-			}
-			
-		});
 		handler.appendJavaScript(String.format("onedev.server.infiniteScroll.refresh('%s');", 
 				getComponent().getMarkupId()));
 	}

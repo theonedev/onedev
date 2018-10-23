@@ -48,6 +48,8 @@ onedev.server.issueBoards = {
 				appendTo: $body.parent().closest(".body"),
 				scroll: false,
 				start: function(event, ui) {
+					// pretend that we are in ajax operation to prevent websocket auto-update while dragging
+					onedev.server.ajaxRequests.count++;					
 					$card.addClass("issue-dragging");
 					$(ui.helper).outerWidth($card.outerWidth());
 					bodyContentWidth = $body.prop("scrollWidth");
@@ -82,6 +84,7 @@ onedev.server.issueBoards = {
 								if (!accepted) {
 									$card.removeClass("issue-dragging");
 								}
+								onedev.server.ajaxRequests.count--;					
 							} else {
 								setTimeout(checkAccepted, 10);
 							}
@@ -90,6 +93,7 @@ onedev.server.issueBoards = {
 						checkAccepted();
 					} else {
 						$card.removeClass("issue-dragging");
+						onedev.server.ajaxRequests.count--;		
 					}
 					$card.removeData("droppedTo");
 					$("#issue-boards .body .body").removeClass("issue-droppable");

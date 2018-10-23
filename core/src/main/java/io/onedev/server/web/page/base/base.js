@@ -259,7 +259,7 @@ onedev.server = {
 				$ajaxLoadingIndicator[0].timer = setTimeout(function() {
 					if (!$ajaxLoadingIndicator.is(":visible") && $(".ajax-indicator:visible").length == 0)
 						$ajaxLoadingIndicator.show();
-				}, 2000);		
+				}, 1000);		
 			}
 			ongoingAjaxRequests++;
 		});
@@ -380,18 +380,21 @@ onedev.server = {
 	},	
 
 	setupWebsocketCallback: function() {
+		var messagesToSent = [];
+		function sendMessages() {
+			if (onedev.server.ajaxRequests.count == 0) {
+				for (var i in messagesToSent)
+					Wicket.WebSocket.send(messagesToSent[i]);
+				messagesToSent = [];
+			}
+			setTimeout(sendMessages, 0);
+		}
+		sendMessages();
+		
 		Wicket.Event.subscribe("/websocket/message", function(jqEvent, message) {
 			if (message.indexOf("ObservableChanged:") != -1) { 
-				function requestToRender() {
-					if (onedev.server.ajaxRequests.count != 0) {
-						setTimeout(function() {
-							requestToRender();
-						}, 10);
-					} else {
-						Wicket.WebSocket.send(message);
-					}
-				}
-				requestToRender();
+				if (messagesToSent.indexOf(message) == -1)
+					messagesToSent.push(message);				
 			} else if (message == "ErrorMessage") {
 				$("#websocket-error").show();
 			}

@@ -19,14 +19,16 @@ onedev.server.infiniteScroll = {
 	},
 	refresh: function(containerId) {
 		var $container = $("#" + containerId);
-		$container.data("scrollTop", $container.scrollTop());
-		var $items = onedev.server.infiniteScroll.getItems($container);
-		$items.remove();
-		$container.scrollTop(0);
-		$container.data("prevItems", 0);
-		var pageSize = $container.data("pageSize");
-		$container.data("callback")(0, pageSize);
-		$container.data("appending", true);
+		if (!$container.data("appending")) {
+			$container.data("scrollTop", $container.scrollTop());
+			var $items = onedev.server.infiniteScroll.getItems($container);
+			$items.remove();
+			$container.scrollTop(0);
+			$container.data("prevItems", 0);
+			var pageSize = $container.data("pageSize");
+			$container.data("callback")(0, pageSize);
+			$container.data("appending", true);
+		}
 	},
 	check: function(containerId) {
 		var $container = $("#" + containerId);

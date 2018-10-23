@@ -13,7 +13,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
@@ -63,7 +62,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.issues.list.IssueListPage;
 import io.onedev.server.web.util.ComponentContext;
-import io.onedev.server.web.util.ajaxlistener.AppendLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
 abstract class BoardColumnPanel extends Panel implements EditContext {
@@ -262,12 +260,6 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		head.add(new ModalLink("addCard") {
 
 			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new AppendLoadingIndicatorListener(false));
-			}
-			
-			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				return new NewCardPanel(id) {
 
@@ -320,7 +312,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				target.appendJavaScript(String.format("onedev.server.issueBoards.markAccepted(%d, %b);", 
 						issue.getId(), accepted));
 			}
-			
+
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
@@ -384,6 +376,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 							
 						};
 					} else {
+						issue.removeFields(transitionRef.get().getRemoveFields());
 						OneDev.getInstance(IssueChangeManager.class).changeState(issue, getColumn(), new HashMap<>(), null, SecurityUtils.getUser());
 						markAccepted(target, issue, true);
 					}

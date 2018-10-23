@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
@@ -40,7 +39,6 @@ import io.onedev.server.web.component.modal.ModalPanel.Size;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
-import io.onedev.server.web.util.ajaxlistener.AppendLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
 abstract class BoardCardPanel extends GenericPanel<Issue> {
@@ -119,12 +117,6 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		add(avatarsView);
 
 		add(new ModalLink("detail", Size.LARGE) {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new AppendLoadingIndicatorListener(false));
-			}
 
 			private Component newCardDetail(String id, ModalPanel modal, IModel<Issue> issueModel, QueryPosition position) {
 				return new CardDetailPanel(id, issueModel) {

@@ -172,7 +172,6 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 			change.setDate(new Date());
 			change.setUser(user);
 			change.setData(new IssueStateChangeData(prevState, issue.getState(), prevFields, issue.getFields(), comment));
-			
 			save(change);
 		}
 	}
