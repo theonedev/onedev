@@ -47,7 +47,6 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.git.Contribution;
 import io.onedev.server.git.Contributor;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.LineStats;
 import io.onedev.server.git.NameAndEmail;
 import io.onedev.server.git.command.FileChange;
 import io.onedev.server.git.command.GitCommit;
@@ -850,41 +849,24 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	}
 
 	@Override
-	public LineStats getLineStats(Project project) {
+	public Map<Day, Map<String, Integer>> getLineIncrements(Project project) {
 		Environment env = getEnv(project.getId().toString());
 		Store store = getStore(env, DEFAULT_STORE);
 
-		return env.computeInReadonlyTransaction(new TransactionalComputable<LineStats>() {
+		return env.computeInReadonlyTransaction(new TransactionalComputable<Map<Day, Map<String, Integer>>>() {
 
 			@Override
-			public LineStats compute(Transaction txn) {
+			public Map<Day, Map<String, Integer>> compute(Transaction txn) {
+				Map<Day, Map<String, Integer>> lineIncrements = new HashMap<>();
 				byte[] bytes = readBytes(store, txn, LINE_STATS_KEY);
-				Map<Day, Map<String, Integer>> linesByDay = new HashMap<>();
 				if (bytes != null) {
 					@SuppressWarnings("unchecked")
 					Map<Integer, Map<String, Integer>> storedMap = 
 							(Map<Integer, Map<String, Integer>>) SerializationUtils.deserialize(bytes);
-					List<Integer> sortedDays = new ArrayList<>(storedMap.keySet());
-					Collections.sort(sortedDays);
-					Map<String, Integer> accumulatedLines = new HashMap<>();
-					for (Integer day: sortedDays) {
-						Map<String, Integer> linesOnDay = storedMap.get(day);
-						for (Map.Entry<String, Integer> entry: linesOnDay.entrySet()) {
-							Integer value = accumulatedLines.get(entry.getKey());
-							if (value != null) 
-								value += entry.getValue();
-							else
-								value = entry.getValue();
-							entry.setValue(value);
-						}
-						for (Map.Entry<String, Integer> entry: accumulatedLines.entrySet()) 
-							linesOnDay.putIfAbsent(entry.getKey(), entry.getValue());
-						accumulatedLines = linesOnDay;
-					}
 					for (Map.Entry<Integer, Map<String, Integer>> entry: storedMap.entrySet())
-						linesByDay.put(new Day(entry.getKey()), entry.getValue());
+						lineIncrements.put(new Day(entry.getKey()), entry.getValue());
 				} 
-				return new LineStats(linesByDay);
+				return lineIncrements;
 			}
 			
 		});

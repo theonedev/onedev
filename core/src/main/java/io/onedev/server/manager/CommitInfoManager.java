@@ -8,7 +8,6 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.git.Contribution;
 import io.onedev.server.git.Contributor;
-import io.onedev.server.git.LineStats;
 import io.onedev.server.git.NameAndEmail;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Day;
@@ -78,7 +77,7 @@ public interface CommitInfoManager {
 	 * @return
 	 * 			line statistics data
 	 */
-	LineStats getLineStats(Project project);
+	Map<Day, Map<String, Integer>> getLineIncrements(Project project);
 
 	Collection<ObjectId> getFixCommits(Project project, Long issueNumber);
 

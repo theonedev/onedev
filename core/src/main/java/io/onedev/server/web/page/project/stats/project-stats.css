@@ -3,7 +3,7 @@
 	padding-bottom: 8px;
 	border-bottom: 1px solid #EEE;
 }
-#project-contribs .note {
+#project-stats .note {
 	margin-bottom: 20px;
 	color: #666;
 	font-size: 16px;
@@ -68,4 +68,14 @@
 #project-contribs .top-contributors .body {
 	background: #F9F9F9;
 	height: 300px;
+}
+#source-lines>.chart {
+	height: 600px;
+	background: #F9F9F9;
+	border: 1px solid #EEE;
+}
+#source-lines .no-data {
+	text-align: center;
+	font-size: 36px;
+	font-style: italic;
 }
