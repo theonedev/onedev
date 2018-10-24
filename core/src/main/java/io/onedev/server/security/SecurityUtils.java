@@ -39,7 +39,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static Collection<UserFacade> getAuthorizedUsers(ProjectFacade project, ProjectPrivilege privilege) {
 		Collection<UserFacade> authorizedUsers = new HashSet<>();
 		CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
-		if (project.getDefaultPrivilege() != null && project.getDefaultPrivilege().implies(privilege)) {
+		if (project.getDefaultPrivilege() != null && project.getDefaultPrivilege().getProjectPrivilege().implies(privilege)) {
 			authorizedUsers.addAll(cacheManager.getUsers().values());
 		} else {
 			for (UserFacade user: cacheManager.getUsers().values()) {

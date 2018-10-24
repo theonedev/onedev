@@ -3,6 +3,7 @@ package io.onedev.server.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -95,7 +96,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
-            gitReceiveHook = StringUtils.join(IOUtils.readLines(is), "\n");
+            gitReceiveHook = StringUtils.join(IOUtils.readLines(is, Charset.defaultCharset()), "\n");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -199,7 +200,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
         	return false;
         
         try {
-			String content = FileUtils.readFileToString(hookFile);
+			String content = FileUtils.readFileToString(hookFile, Charset.defaultCharset());
 			if (!content.contains("ENV_GIT_ALTERNATE_OBJECT_DIRECTORIES"))
 				return false;
 		} catch (IOException e) {

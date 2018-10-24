@@ -7,7 +7,7 @@ import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.ProjectPrivilege;
+import io.onedev.server.security.permission.DefaultPrivilege;
 
 public class ProjectFacade extends EntityFacade {
 	
@@ -15,7 +15,7 @@ public class ProjectFacade extends EntityFacade {
 	
 	private final String name;
 	
-	private final ProjectPrivilege defaultPrivilege;
+	private final DefaultPrivilege defaultPrivilege;
 	
 	private final String uuid;
 	
@@ -30,7 +30,7 @@ public class ProjectFacade extends EntityFacade {
 		return name;
 	}
 
-	public ProjectPrivilege getDefaultPrivilege() {
+	public DefaultPrivilege getDefaultPrivilege() {
 		return defaultPrivilege;
 	}
 

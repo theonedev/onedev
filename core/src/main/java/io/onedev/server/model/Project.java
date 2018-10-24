@@ -99,13 +99,14 @@ import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.security.permission.ProjectPrivilege;
+import io.onedev.server.security.permission.DefaultPrivilege;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.LockUtils;
 import io.onedev.utils.PathUtils;
@@ -136,7 +137,7 @@ public class Project extends AbstractEntity {
 	@Column(length=65535)
 	private String description;
 	
-	private ProjectPrivilege defaultPrivilege;
+	private DefaultPrivilege defaultPrivilege;
 	
 	@Lob
 	@Column(length=65535, name="COMMIT_MSG_TRANSFORM")
@@ -297,11 +298,12 @@ public class Project extends AbstractEntity {
 
 	@Editable(order=300, description="Optionally specify default privilege for users not "
 			+ "joining any teams of the project")
-	public ProjectPrivilege getDefaultPrivilege() {
+	@NameOfEmptyValue("No default privilege")
+	public DefaultPrivilege getDefaultPrivilege() {
 		return defaultPrivilege;
 	}
 
-	public void setDefaultPrivilege(ProjectPrivilege defaultPrivilege) {
+	public void setDefaultPrivilege(DefaultPrivilege defaultPrivilege) {
 		this.defaultPrivilege = defaultPrivilege;
 	}
 

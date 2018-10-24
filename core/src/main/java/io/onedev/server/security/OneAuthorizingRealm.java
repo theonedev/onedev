@@ -79,7 +79,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		Collection<Permission> defaultPermissions = new ArrayList<>();
 		for (ProjectFacade project: cacheManager.getProjects().values()) {
 			if (project.getDefaultPrivilege() != null)
-				defaultPermissions.add(new ProjectPermission(project, project.getDefaultPrivilege()));
+				defaultPermissions.add(new ProjectPermission(project, project.getDefaultPrivilege().getProjectPrivilege()));
 		}
 		return defaultPermissions;
 	}

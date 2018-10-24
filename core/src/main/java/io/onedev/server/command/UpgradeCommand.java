@@ -2,6 +2,7 @@ package io.onedev.server.command;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -55,7 +56,7 @@ public class UpgradeCommand extends DefaultPersistManager {
 		File versionFile = new File(upgradeDir, "version.txt");
 		if (versionFile.exists()) {
 			try {
-				version = FileUtils.readFileToString(versionFile).trim();
+				version = FileUtils.readFileToString(versionFile, Charset.defaultCharset()).trim();
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -369,7 +370,7 @@ public class UpgradeCommand extends DefaultPersistManager {
 				String serverScript = null;
 				if (file.getName().equals("server.sh")) {
 					String siteRunAsUserLine = null;
-					for (String line: (List<String>)FileUtils.readLines(siteServerScriptFile)) {
+					for (String line: (List<String>)FileUtils.readLines(siteServerScriptFile, Charset.defaultCharset())) {
 						if (line.contains("RUN_AS_USER")) {
 							siteRunAsUserLine = line;
 							break;
@@ -377,20 +378,20 @@ public class UpgradeCommand extends DefaultPersistManager {
 					}
 					if (siteRunAsUserLine != null) {
 						String newRunAsUserLine = null;
-						for (String line: (List<String>)FileUtils.readLines(file)) {
+						for (String line: (List<String>)FileUtils.readLines(file, Charset.defaultCharset())) {
 							if (line.contains("RUN_AS_USER")) {
 								newRunAsUserLine = line;
 								break;
 							}
 						}
 						if (newRunAsUserLine != null) {
-							serverScript = FileUtils.readFileToString(file);
+							serverScript = FileUtils.readFileToString(file, Charset.defaultCharset());
 							serverScript = StringUtils.replace(serverScript, newRunAsUserLine, siteRunAsUserLine);
 						}
 					}
 				}
 				if (serverScript != null)
-					FileUtils.writeStringToFile(siteServerScriptFile, serverScript);
+					FileUtils.writeStringToFile(siteServerScriptFile, serverScript, Charset.defaultCharset());
 				else 
 					FileUtils.copyFile(file, new File(upgradeDir, "bin/" + file.getName()));
 			} catch (IOException e) {

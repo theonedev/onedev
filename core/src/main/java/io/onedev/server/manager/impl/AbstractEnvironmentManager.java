@@ -3,6 +3,7 @@ package io.onedev.server.manager.impl;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -44,7 +45,7 @@ public abstract class AbstractEnvironmentManager {
 		int versionFromFile;
 		if (versionFile.exists()) {
 			try {
-				versionFromFile = Integer.parseInt(FileUtils.readFileToString(versionFile).trim());
+				versionFromFile = Integer.parseInt(FileUtils.readFileToString(versionFile, Charset.defaultCharset()).trim());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

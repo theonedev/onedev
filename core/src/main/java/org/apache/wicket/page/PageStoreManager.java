@@ -39,6 +39,25 @@ public class PageStoreManager extends AbstractPageManager
 
 	private static final String ATTRIBUTE_NAME = "wicket:persistentPageManagerData";
 
+	/**
+	 * A flag indicating whether this session entry is being re-set in the Session.
+	 * <p>
+	 * Web containers intercept
+	 * {@link javax.servlet.http.HttpSession#setAttribute(String, Object)} to detect changes and
+	 * replicate the session. If the attribute has been already bound in the session then
+	 * {@link #valueUnbound(HttpSessionBindingEvent)} might get called - this flag
+	 * helps us to ignore the invocation in that case.
+	 * 
+	 * @see #valueUnbound(HttpSessionBindingEvent)
+	 */
+	private static final ThreadLocal<Boolean> STORING_TOUCHED_PAGES = new ThreadLocal<Boolean>()
+	{
+		protected Boolean initialValue()
+		{
+			return Boolean.FALSE;
+		};
+	};
+
 	private final IPageStore pageStore;
 
 	private final String applicationName;
@@ -60,8 +79,8 @@ public class PageStoreManager extends AbstractPageManager
 
 		if (MANAGERS.containsKey(applicationName))
 		{
-			throw new IllegalStateException("Manager for application with key '" + applicationName
-				+ "' already exists.");
+			throw new IllegalStateException(
+					"Manager for application with key '" + applicationName + "' already exists.");
 		}
 		MANAGERS.put(applicationName, this);
 	}
@@ -121,8 +140,13 @@ public class PageStoreManager extends AbstractPageManager
 		 */
 		public synchronized IManageablePage getPage(int id)
 		{
-			// not found, ask pagestore for the page
-			return getPageStore().getPage(sessionId, id);
+			IManageablePage page = null;
+			final IPageStore pageStore = getPageStore();
+			if (pageStore != null)
+			{
+				page = pageStore.getPage(sessionId, id);
+			}
+			return page;
 		}
 
 		/**
@@ -142,6 +166,12 @@ public class PageStoreManager extends AbstractPageManager
 		@Override
 		public void valueUnbound(HttpSessionBindingEvent event)
 		{
+			if (STORING_TOUCHED_PAGES.get())
+			{
+				// triggered by #storeTouchedPages(), so do not remove the data
+				return;
+			}
+			
 			// WICKET-5164 use the original sessionId
 			IPageStore store = getPageStore();
 			// store might be null if destroyed already
@@ -210,13 +240,11 @@ public class PageStoreManager extends AbstractPageManager
 		 */
 		private SessionEntry getSessionEntry(boolean create)
 		{
-			String attributeName = getAttributeName();
-			SessionEntry entry = (SessionEntry)getSessionAttribute(attributeName);
+			SessionEntry entry = (SessionEntry)getSessionAttribute(getAttributeName());
 			if (entry == null && create)
 			{
 				bind();
 				entry = new SessionEntry(applicationName, getSessionId());
-				setSessionAttribute(attributeName, entry);
 			}
 			return entry;
 		}
@@ -240,8 +268,19 @@ public class PageStoreManager extends AbstractPageManager
 				entry.setSessionCache(touchedPages);
 				for (IManageablePage page : touchedPages)
 				{
-					// WICKET-5103 use the same sessionId as used in SessionEntry#getPage()
+					// WICKET-5103 use the same sessionId as used in
+					// SessionEntry#getPage()
 					pageStore.storePage(entry.sessionId, page);
+				}
+
+				STORING_TOUCHED_PAGES.set(true);
+				try
+				{
+					setSessionAttribute(getAttributeName(), entry);
+				}
+				finally
+				{
+					STORING_TOUCHED_PAGES.remove();
 				}
 			}
 		}

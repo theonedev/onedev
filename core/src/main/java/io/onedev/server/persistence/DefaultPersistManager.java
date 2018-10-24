@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -161,7 +162,7 @@ public class DefaultPersistManager implements PersistManager {
 	        	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
 	        			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), metadata);
 	        	List<String> sqls = new ArrayList<String>();
-	        	for (String sql: FileUtils.readLines(tempFile)) {
+	        	for (String sql: FileUtils.readLines(tempFile, Charset.defaultCharset())) {
 	        		if (shouldInclude(sql))
 	        			sqls.add(sql);
 	        	}
@@ -499,7 +500,7 @@ public class DefaultPersistManager implements PersistManager {
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), metadata);
         	List<String> sqls = new ArrayList<>();
-        	for (String sql: FileUtils.readLines(tempFile)) {
+        	for (String sql: FileUtils.readLines(tempFile, Charset.defaultCharset())) {
         		if (isApplyingConstraints(sql)) {
         			sqls.add(sql);
         		}
@@ -520,7 +521,7 @@ public class DefaultPersistManager implements PersistManager {
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).createOnly(EnumSet.of(TargetType.SCRIPT), metadata);
         	List<String> sqls = new ArrayList<>();
-        	for (String sql: FileUtils.readLines(tempFile)) {
+        	for (String sql: FileUtils.readLines(tempFile, Charset.defaultCharset())) {
         		if (shouldInclude(sql) && !isApplyingConstraints(sql))
         			sqls.add(sql);
         	}
@@ -540,7 +541,7 @@ public class DefaultPersistManager implements PersistManager {
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), metadata);
         	List<String> sqls = new ArrayList<>();
-        	for (String sql: FileUtils.readLines(tempFile)) {
+        	for (String sql: FileUtils.readLines(tempFile, Charset.defaultCharset())) {
         		if (isDroppingConstraints(sql))
         			sqls.add(sql);
         	}
@@ -560,7 +561,7 @@ public class DefaultPersistManager implements PersistManager {
         	new SchemaExport().setOutputFile(tempFile.getAbsolutePath())
         			.setFormat(false).drop(EnumSet.of(TargetType.SCRIPT), metadata);
         	List<String> sqls = new ArrayList<>();
-        	for (String sql: FileUtils.readLines(tempFile)) {
+        	for (String sql: FileUtils.readLines(tempFile, Charset.defaultCharset())) {
         		sqls.add(sql);
         	}
         	execute(sqls, false);
