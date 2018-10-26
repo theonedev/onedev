@@ -87,6 +87,15 @@ public class OneWebApplication extends WebApplication {
 		
 		getStoreSettings().setFileStoreFolder(Bootstrap.getTempDir());
 		
+		/*
+		 * We disabled session store of pages to reduce memory usage at peak time. However when 
+		 * an user visits the page, the page instance may not get written to disk timely due to 
+		 * page synchronous writing. So adding a in-memory cache is important to compensate the 
+		 * page written latency; otherwise, user may experience odd exceptions such as 
+		 * ComponentNotFound when visit a page instance again after it is being created
+		 */
+		getStoreSettings().setInmemoryCacheSize(1000);
+		
 		getRequestCycleSettings().setTimeout(Duration.minutes(30));
 		
 		BootstrapSettings bootstrapSettings = new BootstrapSettings();

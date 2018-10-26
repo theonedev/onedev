@@ -26,9 +26,8 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.RawParseUtils;
 
-import com.google.common.base.Throwables;
-
 import io.onedev.server.git.GitUtils;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.StringUtils;
 
 /**
@@ -327,7 +326,7 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 				next = revWalk.next();
 			}
 		} catch (Exception e) {
-			throw Throwables.propagate(e);
+			throw ExceptionUtils.unchecked(e);
 		}
 	}
 	

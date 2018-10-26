@@ -44,7 +44,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -58,6 +57,7 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
 import io.onedev.utils.BeanUtils;
 import io.onedev.utils.ClassUtils;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.FileUtils;
 
 @Singleton
@@ -212,7 +212,7 @@ public class DefaultPersistManager implements PersistManager {
 	    			properties.getUser(), properties.getPassword());
 	    	return conn;
 		} catch (Exception e) {
-			throw Throwables.propagate(e);
+			throw ExceptionUtils.unchecked(e);
 		}
 	}
 
@@ -266,7 +266,7 @@ public class DefaultPersistManager implements PersistManager {
 			if (e.getMessage() != null && e.getMessage().contains("ORA-00942")) 
 				return null;
 			else
-				throw Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 		}
 	}
 
@@ -458,7 +458,7 @@ public class DefaultPersistManager implements PersistManager {
 					transaction.commit();
 				} catch (Throwable e) {
 					transaction.rollback();
-					throw Throwables.propagate(e);
+					throw ExceptionUtils.unchecked(e);
 				}
 			}
 		}	
@@ -487,7 +487,7 @@ public class DefaultPersistManager implements PersistManager {
 						validator.validate(entity);
 					}
 				} catch (Throwable e) {
-					throw Throwables.propagate(e);
+					throw ExceptionUtils.unchecked(e);
 				}
 			}
 		}	

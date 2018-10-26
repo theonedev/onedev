@@ -36,18 +36,18 @@ import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
 import org.xml.sax.EntityResolver;
 
-import io.onedev.launcher.loader.AppLoader;
-import io.onedev.utils.ClassUtils;
-import io.onedev.utils.FileUtils;
-
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.core.util.HierarchicalStreams;
 import com.thoughtworks.xstream.io.xml.Dom4JReader;
 import com.thoughtworks.xstream.io.xml.Dom4JWriter;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
+
+import io.onedev.launcher.loader.AppLoader;
+import io.onedev.utils.ClassUtils;
+import io.onedev.utils.ExceptionUtils;
+import io.onedev.utils.FileUtils;
 
 public final class VersionedDocument implements Document, Externalizable {
 
@@ -377,7 +377,7 @@ public final class VersionedDocument implements Document, Externalizable {
 			new XMLWriter(baos, format).write(getWrapped());
 			return baos.toString(Charsets.UTF_8.name());
 		} catch (Exception e) {
-			throw Throwables.propagate(e);
+			throw ExceptionUtils.unchecked(e);
 		}
 	}
 	
@@ -392,7 +392,7 @@ public final class VersionedDocument implements Document, Externalizable {
 			XMLWriter writer = new XMLWriter(os, format);
 			writer.write(this);
 		} catch (Exception e) {
-			throw Throwables.propagate(e);
+			throw ExceptionUtils.unchecked(e);
 		} finally {
 			IOUtils.closeQuietly(os);
 		}
@@ -402,7 +402,7 @@ public final class VersionedDocument implements Document, Externalizable {
 		try {
 			return new VersionedDocument(new SAXReader().read(new StringReader(xml)));
 		} catch (Exception e) {
-			throw Throwables.propagate(e);
+			throw ExceptionUtils.unchecked(e);
 		}
 	}
 	

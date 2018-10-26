@@ -62,6 +62,8 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.jsymbol.Symbol;
 import io.onedev.jsymbol.SymbolExtractor;
 import io.onedev.jsymbol.SymbolExtractorRegistry;
@@ -78,11 +80,9 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.BatchWorker;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.IndexResult;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.StringUtils;
 import io.onedev.utils.concurrent.Prioritized;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 
 @Singleton
 public class DefaultIndexManager implements IndexManager {
@@ -347,7 +347,7 @@ public class DefaultIndexManager implements IndexManager {
 								writer.commit();
 							} catch (Exception e) {
 								writer.rollback();
-								throw Throwables.propagate(e);
+								throw ExceptionUtils.unchecked(e);
 							}
 						}
 					}
@@ -360,7 +360,7 @@ public class DefaultIndexManager implements IndexManager {
 						writer.commit();
 					} catch (Exception e) {
 						writer.rollback();
-						throw Throwables.propagate(e);
+						throw ExceptionUtils.unchecked(e);
 					}
 				}
 			}

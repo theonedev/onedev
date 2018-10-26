@@ -41,8 +41,6 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Throwables;
-
 import io.onedev.jsymbol.Symbol;
 import io.onedev.jsymbol.SymbolExtractorRegistry;
 import io.onedev.launcher.loader.Listen;
@@ -53,6 +51,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
+import io.onedev.utils.ExceptionUtils;
 
 @Singleton
 public class DefaultSearchManager implements SearchManager {
@@ -94,7 +93,7 @@ public class DefaultSearchManager implements SearchManager {
 			// which may creating the searcher manager if it does not exist yet
 			throw new InterruptedException();
 		} catch (IOException e) {
-			throw Throwables.propagate(e);
+			throw ExceptionUtils.unchecked(e);
 		}
 	}
 	
@@ -152,7 +151,7 @@ public class DefaultSearchManager implements SearchManager {
 					searcherManager.release(searcher);
 				}
 			} catch (IOException e) {
-				throw Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 		}
 		if (Thread.interrupted())
@@ -174,7 +173,7 @@ public class DefaultSearchManager implements SearchManager {
 						searcherManager.release(searcher);
 					}
 				} catch (IOException e) {
-					throw Throwables.propagate(e);
+					throw ExceptionUtils.unchecked(e);
 				}
 			} else {
 				return null;
@@ -244,7 +243,7 @@ public class DefaultSearchManager implements SearchManager {
 			if (searcherManager != null)
 				searcherManager.maybeRefresh();
 		} catch (InterruptedException | IOException e) {
-			Throwables.propagate(e);
+			throw ExceptionUtils.unchecked(e);
 		}
 	}
 
@@ -259,7 +258,7 @@ public class DefaultSearchManager implements SearchManager {
 					try {
 						searcherManager.close();
 					} catch (IOException e) {
-						Throwables.propagate(e);
+						throw ExceptionUtils.unchecked(e);
 					}
 				}
 			}
@@ -273,7 +272,7 @@ public class DefaultSearchManager implements SearchManager {
 				try {
 					searcherManager.close();
 				} catch (IOException e) {
-					Throwables.propagate(e);
+					throw ExceptionUtils.unchecked(e);
 				}
 			}
 			searcherManagers.clear();

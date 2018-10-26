@@ -410,6 +410,6 @@
 		<flexmark.version>0.18.3</flexmark.version>
 		<groovy.version>2.4.14</groovy.version>
 		<wicket.version>7.10.0</wicket.version>
-		<wicketbootstrap.version>0.10.6</wicketbootstrap.version>
+		<wicketbootstrap.version>0.10.17</wicketbootstrap.version>
 	</properties>
 </project>

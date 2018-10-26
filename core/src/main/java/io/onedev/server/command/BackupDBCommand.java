@@ -17,10 +17,9 @@ import io.onedev.server.persistence.HibernateProperties;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.ZipUtils;
-
-import com.google.common.base.Throwables;
 
 @Singleton
 public class BackupDBCommand extends DefaultPersistManager {
@@ -66,7 +65,7 @@ public class BackupDBCommand extends DefaultPersistManager {
 			exportData(tempDir);
 			ZipUtils.zip(tempDir, backupFile);
 		} catch (Exception e) {
-			throw Throwables.propagate(e);
+			throw ExceptionUtils.unchecked(e);
 		} finally {
 			FileUtils.deleteDir(tempDir);
 		}

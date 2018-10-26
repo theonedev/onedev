@@ -23,9 +23,9 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.manager.CacheManager;
+import io.onedev.server.manager.MembershipManager;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.TeamManager;
-import io.onedev.server.manager.MembershipManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.Team;
@@ -42,9 +42,8 @@ import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.TeamFacade;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.StringUtils;
-
-import com.google.common.base.Throwables;
 
 @Singleton
 public class OneAuthorizingRealm extends AuthorizingRealm {
@@ -149,7 +148,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
         		} catch (Throwable e) {
         			if (e instanceof AuthenticationException) {
         				logger.debug("Authentication not passed", e);
-            			throw Throwables.propagate(e);
+    					throw ExceptionUtils.unchecked(e);
         			} else {
         				logger.error("Error authenticating user", e);
             			throw new AuthenticationException("Error authenticating user", e);

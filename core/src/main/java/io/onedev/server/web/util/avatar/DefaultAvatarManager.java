@@ -15,19 +15,19 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.lib.PersonIdent;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
+
 import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.LockUtils;
 import io.onedev.utils.StringUtils;
-
-import com.google.common.base.Splitter;
-import com.google.common.base.Throwables;
-import com.google.common.collect.Iterables;
 
 @Singleton
 public class DefaultAvatarManager implements AvatarManager {
@@ -132,7 +132,7 @@ public class DefaultAvatarManager implements AvatarManager {
 				try {
 					upload.writeTo(avatarFile);
 				} catch (Exception e) {
-					throw Throwables.propagate(e);
+					throw ExceptionUtils.unchecked(e);
 				}
 			} else {
 				FileUtils.deleteFile(avatarFile);

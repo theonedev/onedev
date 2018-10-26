@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.RefUpdated;
@@ -60,6 +59,7 @@ import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.TeamFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.StringUtils;
 
@@ -219,7 +219,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
             try {
 				Git.init().setDirectory(gitDir).setBare(true).call();
 			} catch (Exception e) {
-				Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 		} else if (!GitUtils.isValid(gitDir)) {
         	logger.warn("Directory '" + gitDir + "' is not a valid git repository, reinitializing...");
@@ -227,7 +227,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
             try {
 				Git.init().setDirectory(gitDir).setBare(true).call();
 			} catch (Exception e) {
-				Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
         } 
 

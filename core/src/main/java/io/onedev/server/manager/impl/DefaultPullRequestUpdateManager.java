@@ -11,8 +11,6 @@ import org.eclipse.jgit.transport.RefSpec;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import com.google.common.base.Throwables;
-
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
 import io.onedev.server.git.GitUtils;
@@ -27,6 +25,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.utils.ExceptionUtils;
 
 @Singleton
 public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullRequestUpdate> 
@@ -72,7 +71,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 					GitUtils.updateRef(refUpdate);
 				}
 			} catch (Exception e) {
-				Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 		} else {
 			RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), 

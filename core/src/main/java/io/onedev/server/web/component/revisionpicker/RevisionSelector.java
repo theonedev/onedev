@@ -54,6 +54,7 @@ import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.utils.ExceptionUtils;
 
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {
@@ -453,7 +454,7 @@ public abstract class RevisionSelector extends Panel {
 				feedbackMessage = Throwables.getRootCause(e).getMessage();
 				target.add(feedback);
 			} else {
-				Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 		}
 	}

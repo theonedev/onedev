@@ -3,7 +3,7 @@ package io.onedev.server.web.component.project.choice;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.json.JSONException;
 import org.json.JSONWriter;
 

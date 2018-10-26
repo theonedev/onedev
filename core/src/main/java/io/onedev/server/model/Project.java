@@ -61,7 +61,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 
 import io.onedev.launcher.loader.ListenerRegistry;
@@ -107,6 +106,7 @@ import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.LockUtils;
 import io.onedev.utils.PathUtils;
@@ -798,7 +798,7 @@ public class Project extends AbstractEntity {
     	try {
 			git().branchDelete().setForce(true).setBranchNames(branch).call();
 		} catch (Exception e) {
-			Throwables.propagate(e);
+			throw ExceptionUtils.unchecked(e);
 		}
     	
     	Subject subject = SecurityUtils.getSubject();

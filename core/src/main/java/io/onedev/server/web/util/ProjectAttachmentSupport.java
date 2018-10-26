@@ -11,7 +11,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.AttachmentManager;
@@ -23,6 +22,7 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.util.resource.AttachmentResource;
 import io.onedev.server.web.util.resource.AttachmentResourceReference;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.StringUtils;
 
@@ -124,7 +124,7 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 		if (ex != null) {
 			if (file.exists())
 				FileUtils.deleteFile(file);
-			throw Throwables.propagate(ex);
+			throw ExceptionUtils.unchecked(ex);
 		} else {
 			return file.getName();
 		}

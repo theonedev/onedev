@@ -8,10 +8,10 @@ import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Throwables;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.ObjectReference;
 
 @Singleton
@@ -76,7 +76,7 @@ public class DefaultUnitOfWork implements UnitOfWork {
 			try {
 				return callable.call();
 			} catch (Exception e) {
-				throw Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			} finally {
 				end();
 			}
@@ -84,7 +84,7 @@ public class DefaultUnitOfWork implements UnitOfWork {
 			try {
 				return callable.call();
 			} catch (Exception e) {
-				throw Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 		}
 	}

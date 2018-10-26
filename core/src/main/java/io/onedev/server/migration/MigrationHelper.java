@@ -15,8 +15,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Throwables;
-
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.StringUtils;
 
 public class MigrationHelper {
@@ -149,7 +148,7 @@ public class MigrationHelper {
 				try {
 					migrateMethod.invoke(migrator, customData, versionParts);
 				} catch (Exception e) {
-					throw Throwables.propagate(e);
+					throw ExceptionUtils.unchecked(e);
 				}
 				migrated = true;
 			}

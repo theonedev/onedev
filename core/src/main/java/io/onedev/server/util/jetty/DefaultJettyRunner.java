@@ -16,10 +16,10 @@ import org.eclipse.jetty.server.handler.gzip.GzipHandler;
 import org.eclipse.jetty.servlet.ErrorPageErrorHandler;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 
-import com.google.common.base.Throwables;
 import com.google.inject.servlet.GuiceFilter;
 
 import io.onedev.launcher.bootstrap.Bootstrap;
+import io.onedev.utils.ExceptionUtils;
 
 @Singleton
 public class DefaultJettyRunner implements JettyRunner, Provider<ServletContextHandler> {
@@ -94,7 +94,7 @@ public class DefaultJettyRunner implements JettyRunner, Provider<ServletContextH
 			try {
 				jettyServer.start();
 			} catch (Exception e) {
-				throw Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 		}
 	}
@@ -105,7 +105,7 @@ public class DefaultJettyRunner implements JettyRunner, Provider<ServletContextH
 			try {
 				jettyServer.stop();
 			} catch (Exception e) {
-				throw Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 		}
 	}

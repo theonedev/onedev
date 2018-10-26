@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
-import com.google.common.base.Throwables;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.server.event.RefUpdated;
@@ -65,6 +64,7 @@ import io.onedev.server.util.Day;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.PathUtils;
 import io.onedev.utils.StringUtils;
@@ -701,7 +701,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 								if (logException.get() != null)
 									throw logException.get();
 							} catch (Exception e) {
-								Throwables.propagate(e);
+								throw ExceptionUtils.unchecked(e);
 							}
 							
 							for (Map.Entry<Integer, Map<Integer, Contribution>> entry: dailyContributionsCache.entrySet()) {

@@ -92,7 +92,7 @@ public class RevListCommand extends GitCommand<List<String>> {
 	}
 	
 	public RevListCommand after(Date after) {
-		this.after = DateFormatUtils.ISO_DATE_FORMAT.format(after);
+		this.after = DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(after);
 		return this;
 	}
 
@@ -106,7 +106,7 @@ public class RevListCommand extends GitCommand<List<String>> {
 	}
 	
 	public RevListCommand before(Date before) {
-		this.before = DateFormatUtils.ISO_DATE_FORMAT.format(before);		
+		this.before = DateFormatUtils.ISO_8601_EXTENDED_DATE_FORMAT.format(before);		
 		return this;
 	}
 	

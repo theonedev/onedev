@@ -41,6 +41,7 @@ import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.ZipUtils;
 import io.onedev.utils.init.ManualConfig;
@@ -219,7 +220,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 						ZipUtils.zip(tempDir, backupFile);
 					} catch (Exception e) {
 						notifyBackupError(e);
-						throw Throwables.propagate(e);
+						throw ExceptionUtils.unchecked(e);
 					} finally {
 						FileUtils.deleteDir(tempDir);
 					}

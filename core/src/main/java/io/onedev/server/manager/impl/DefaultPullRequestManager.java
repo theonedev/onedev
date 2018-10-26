@@ -51,7 +51,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Throwables;
 
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
@@ -95,11 +94,11 @@ import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestApproveData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReopenData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerAddData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReviewerRemoveData;
@@ -125,6 +124,7 @@ import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.concurrent.Prioritized;
 
 @Singleton
@@ -204,7 +204,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			try {
 				request.getSourceProject().git().branchCreate().setName(request.getSourceBranch()).setStartPoint(latestCommit).call();
 			} catch (Exception e) {
-				Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 			request.getSourceProject().cacheObjectId(request.getSourceBranch(), latestCommit.copy());
 			
@@ -295,7 +295,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		        merged = mergedId.name();
 		        inserter.flush();
 			} catch (Exception e) {
-				Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 	        preview = new MergePreview(preview.getTargetHead(), preview.getRequestHead(), 
 	        		preview.getMergeStrategy(), merged);

@@ -13,7 +13,8 @@ import java.util.Map.Entry;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
-import com.google.common.base.Throwables;
+
+import io.onedev.utils.ExceptionUtils;
 
 public class EmojiOnes {
 	
@@ -53,7 +54,7 @@ public class EmojiOnes {
 				codes.put(key, map.get(key));
 			
 		} catch (IOException e) {
-			throw Throwables.propagate(e);
+			throw ExceptionUtils.unchecked(e);
 		}
 	}
 

@@ -14,14 +14,6 @@ import org.dom4j.Element;
 import org.hibernate.collection.internal.PersistentBag;
 import org.hibernate.proxy.HibernateProxy;
 
-import io.onedev.launcher.loader.AppLoader;
-import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.utils.ClassUtils;
-import io.onedev.utils.ReflectionUtils;
-import io.onedev.utils.StringUtils;
-
-import com.google.common.base.Throwables;
 import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.converters.reflection.ReflectionConverter;
@@ -30,6 +22,14 @@ import com.thoughtworks.xstream.core.util.HierarchicalStreams;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
+
+import io.onedev.launcher.loader.AppLoader;
+import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.persistence.dao.Dao;
+import io.onedev.utils.ClassUtils;
+import io.onedev.utils.ExceptionUtils;
+import io.onedev.utils.ReflectionUtils;
+import io.onedev.utils.StringUtils;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class JpaConverter extends ReflectionConverter {
@@ -156,7 +156,7 @@ public class JpaConverter extends ReflectionConverter {
 				collection = (Collection) mapper.defaultImplementationOf(
 						field.getType()).newInstance();
 			} catch (Exception e) {
-				throw Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 			while (reader.hasMoreChildren()) {
 				reader.moveDown();
@@ -176,7 +176,7 @@ public class JpaConverter extends ReflectionConverter {
 			try {
 				map = (Map) mapper.defaultImplementationOf(field.getType()).newInstance();
 			} catch (Exception e) {
-				throw Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 			while (reader.hasMoreChildren()) {
 				reader.moveDown();
