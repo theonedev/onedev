@@ -296,7 +296,7 @@ onedev.server.stats = {
 		}
 	},
 	sourceLines: {
-		onDomReady: function(lineIncrements) {
+		onDomReady: function(lineIncrements, defaultBranch) {
 			var numOfTopLanguages = 10;
 			
 			var $chart = $("#source-lines>.chart");
@@ -363,7 +363,7 @@ onedev.server.stats = {
 			var useKilo;
 			var option = {
 				title: {
-					text: 'Source lines of code on default branch',
+					text: 'Source lines of code on ' + defaultBranch + ' branch',
 					left: 'center',
 					top: 10
 				},

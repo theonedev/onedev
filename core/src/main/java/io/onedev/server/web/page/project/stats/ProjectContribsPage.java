@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,6 +29,12 @@ public class ProjectContribsPage extends ProjectStatsPage {
 		return SecurityUtils.canReadCode(getProject().getFacade());
 	}
 	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		add(new Label("note", "Contributions to " + getProject().getDefaultBranch() + " branch, excluding merge commits"));
+	}
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
