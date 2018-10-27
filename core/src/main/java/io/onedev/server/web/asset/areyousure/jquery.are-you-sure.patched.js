@@ -70,7 +70,7 @@
 
       var isFieldDirty = function($field) {
         var origValue = $field.data('ays-orig');
-        if (undefined === origValue) {
+        if (!($field.is("form")) && undefined === origValue) {
           // Patched by Robin to return true here instead of false, as form fields 
           // can often be replaced via Ajax while editing the form and this can 
           // cause the stored original value missing
