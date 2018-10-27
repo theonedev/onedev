@@ -2,7 +2,6 @@ package io.onedev.server.web.websocket;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -15,6 +14,7 @@ import javax.inject.Singleton;
 
 import org.apache.wicket.Application;
 import org.apache.wicket.protocol.ws.api.IWebSocketConnection;
+import org.apache.wicket.protocol.ws.api.registry.IKey;
 import org.apache.wicket.protocol.ws.api.registry.IWebSocketConnectionRegistry;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
@@ -35,7 +35,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	
 	private final WebSocketPolicy webSocketPolicy;
 	
-	private final Map<PageKey, Collection<String>> observables = new ConcurrentHashMap<>();
+	private final Map<String, Map<IKey, Collection<String>>> observables = new ConcurrentHashMap<>();
 	
 	private final IWebSocketConnectionRegistry connectionRegistry = new SimpleWebSocketConnectionRegistry();
 
@@ -50,17 +50,18 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	public void notifyObserverChange(BasePage page) {
 		String sessionId = page.getSession().getId();
 		if (sessionId != null) {
-			observables.put(new PageKey(sessionId, new PageIdKey(page.getPageId())), page.findWebSocketObservables());
+			Map<IKey, Collection<String>> sessionPages = observables.get(sessionId);
+			if (sessionPages == null) {
+				sessionPages = new ConcurrentHashMap<>();
+				observables.put(sessionId, sessionPages);
+			}
+			sessionPages.put(new PageIdKey(page.getPageId()), page.findWebSocketObservables());
 		}
 	}
 	
 	@Override
 	public void onDestroySession(String sessionId) {
-		for (Iterator<Map.Entry<PageKey, Collection<String>>> it = observables.entrySet().iterator(); it.hasNext();) {
-			PageKey pageKey = it.next().getKey();
-			if (pageKey.getSessionId().equals(sessionId))
-				it.remove();
-		}
+		observables.remove(sessionId);
 	}
 
 	@Sessional
@@ -73,12 +74,15 @@ public class DefaultWebSocketManager implements WebSocketManager {
 				for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
 					PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
 					if (connection.isOpen() && (sourcePageKey == null || !sourcePageKey.equals(pageKey))) {
-						Collection<String> pageObservables = observables.get(pageKey);
-						if (pageObservables != null && pageObservables.contains(observable)) {
-							try {
-								connection.sendMessage(OBSERVABLE_CHANGED + ":" + observable);
-							} catch (IOException e) {
-								throw new RuntimeException(e);
+						Map<IKey, Collection<String>> sessionPages = observables.get(pageKey.getSessionId());
+						if (sessionPages != null) {
+							Collection<String> pageObservables = sessionPages.get(pageKey.getPageId());
+							if (pageObservables != null && pageObservables.contains(observable)) {
+								try {
+									connection.sendMessage(OBSERVABLE_CHANGED + ":" + observable);
+								} catch (IOException e) {
+									throw new RuntimeException(e);
+								}
 							}
 						}
 					}
