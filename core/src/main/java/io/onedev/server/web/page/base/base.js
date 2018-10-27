@@ -298,7 +298,7 @@ onedev.server = {
 				var $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
 				if ($inError.length != 0) {
 					var $focusable = $inError.find(focusibleSelector).addBack(focusibleSelector);
-					if ($focusable.hasClass("CodeMirror")) {
+					if ($focusable.hasClass("CodeMirror") && $this[0].CodeMirror.options.readOnly == false) {
 						$focusable[0].CodeMirror.focus();					
 					} else if ($focusable.length != 0 && $focusable.closest(".select2-container").length == 0) {
 						$focusable.focus();
@@ -309,7 +309,7 @@ onedev.server = {
 					$containers.find(focusibleSelector).addBack(focusibleSelector).each(function() {
 						var $this = $(this);
 						if ($this.closest(".no-autofocus").length == 0) {
-							if ($this.hasClass("CodeMirror")) {
+							if ($this.hasClass("CodeMirror") && $this[0].CodeMirror.options.readOnly == false) {
 								$this[0].CodeMirror.focus();					
 							} else if ($this.closest(".select2-container").length == 0) {
 								$this.focus();
