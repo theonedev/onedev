@@ -6,7 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.request.resource.CssResourceReference;
 
-import io.onedev.server.web.component.avatar.AvatarResourceReference;
+import io.onedev.server.web.component.user.avatar.UserAvatarResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
 public class FolderViewResourceReference extends BaseDependentResourceReference {
@@ -24,7 +24,7 @@ public class FolderViewResourceReference extends BaseDependentResourceReference 
 				new CssResourceReference(FolderViewResourceReference.class, "folder-view.css")));
 		
 		// add this dependency as the lazy loaded last commits information includes avatar displaying
-		dependencies.add(CssHeaderItem.forReference(new AvatarResourceReference()));
+		dependencies.add(CssHeaderItem.forReference(new UserAvatarResourceReference()));
 		return dependencies;
 	}
 

@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.avatar;
+package io.onedev.server.web.component.user.avatar;
 
 import javax.annotation.Nullable;
 
@@ -15,13 +15,13 @@ import io.onedev.server.model.User;
 import io.onedev.server.web.util.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
-public class Avatar extends WebComponent {
+public class UserAvatar extends WebComponent {
 
 	private final Long userId;
 	
 	private String url;
 	
-	public Avatar(String id, @Nullable User user) {
+	public UserAvatar(String id, @Nullable User user) {
 		super(id);
 
 		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
@@ -35,7 +35,7 @@ public class Avatar extends WebComponent {
 		url = avatarManager.getAvatarUrl(user!=null?user.getFacade():null);
 	}
 	
-	public Avatar(String id, PersonIdent person) {
+	public UserAvatar(String id, PersonIdent person) {
 		super(id);
 		
 		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
@@ -54,8 +54,8 @@ public class Avatar extends WebComponent {
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 		
-		if (event.getPayload() instanceof AvatarChanged) {
-			AvatarChanged avatarChanged = (AvatarChanged) event.getPayload();
+		if (event.getPayload() instanceof UserAvatarChanged) {
+			UserAvatarChanged avatarChanged = (UserAvatarChanged) event.getPayload();
 			if (avatarChanged.getUser().getId().equals(userId)) {
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
 				url = avatarManager.getAvatarUrl(avatarChanged.getUser().getFacade());
@@ -73,7 +73,7 @@ public class Avatar extends WebComponent {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new AvatarResourceReference()));
+		response.render(CssHeaderItem.forReference(new UserAvatarResourceReference()));
 	}
 
 	@Override

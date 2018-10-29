@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.avatar;
+package io.onedev.server.web.component.user.avatar;
 
 import javax.annotation.Nullable;
 
@@ -22,7 +22,7 @@ import io.onedev.server.web.page.user.UserProfilePage;
 import io.onedev.server.web.util.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
-public class AvatarLink extends ViewStateAwarePageLink<Void> {
+public class UserAvatarLink extends ViewStateAwarePageLink<Void> {
 
 	private final Long userId;
 	
@@ -32,11 +32,11 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 	
 	private String url;
 	
-	public AvatarLink(String id, @Nullable User user) {
+	public UserAvatarLink(String id, @Nullable User user) {
 		this(id, user, null);
 	}
 	
-	public AvatarLink(String id, @Nullable User user, @Nullable String tooltip) {
+	public UserAvatarLink(String id, @Nullable User user, @Nullable String tooltip) {
 		super(id, UserProfilePage.class);
 
 		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
@@ -54,11 +54,11 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 		url = avatarManager.getAvatarUrl(user!=null?user.getFacade():null);
 	}
 	
-	public AvatarLink(String id, PersonIdent person) {
+	public UserAvatarLink(String id, PersonIdent person) {
 		this(id, person, null);
 	}
 	
-	public AvatarLink(String id, PersonIdent person, @Nullable String tooltip) {
+	public UserAvatarLink(String id, PersonIdent person, @Nullable String tooltip) {
 		super(id, UserProfilePage.class);
 		
 		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
@@ -91,8 +91,8 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 		
-		if (event.getPayload() instanceof AvatarChanged) {
-			AvatarChanged avatarChanged = (AvatarChanged) event.getPayload();
+		if (event.getPayload() instanceof UserAvatarChanged) {
+			UserAvatarChanged avatarChanged = (UserAvatarChanged) event.getPayload();
 			if (avatarChanged.getUser().getId().equals(userId)) {
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
 				url = avatarManager.getAvatarUrl(avatarChanged.getUser().getFacade());
@@ -112,7 +112,7 @@ public class AvatarLink extends ViewStateAwarePageLink<Void> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new AvatarResourceReference()));
+		response.render(CssHeaderItem.forReference(new UserAvatarResourceReference()));
 	}
 	
 	@Override

@@ -228,7 +228,7 @@ import io.onedev.server.web.editable.DefaultEditSupportRegistry;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
-import io.onedev.server.web.page.layout.LayoutMenuContribution;
+import io.onedev.server.web.page.layout.MainNavContribution;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.util.avatar.AvatarManager;
@@ -459,7 +459,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestEventBroadcaster.class);
 		bind(IssueEventBroadcaster.class);
 		
-		contribute(LayoutMenuContribution.class, new LayoutMenuContribution() {
+		contribute(MainNavContribution.class, new MainNavContribution() {
 			
 			@Override
 			public boolean isAuthorized() {

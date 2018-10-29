@@ -53,12 +53,12 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.util.IssueUtils;
-import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.milestone.progress.MilestoneProgressBar;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
+import io.onedev.server.web.component.user.avatar.UserAvatarLink;
 import io.onedev.server.web.component.user.list.UserListLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
@@ -383,7 +383,7 @@ public abstract class IssueSidePanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<IssueVote> item) {
 				User user = item.getModelObject().getUser();
-				item.add(new AvatarLink("voter", user, user.getDisplayName()));
+				item.add(new UserAvatarLink("voter", user, user.getDisplayName()));
 			}
 
 			@Override

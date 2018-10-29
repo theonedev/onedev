@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.user;
+package io.onedev.server.web.page.project.setting.avatar;
 
 import java.util.Collection;
 
@@ -19,12 +19,13 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.OneDev;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
-import io.onedev.server.web.component.user.avatar.UserAvatar;
-import io.onedev.server.web.component.user.avatar.UserAvatarChanged;
+import io.onedev.server.web.component.project.avatar.ProjectAvatar;
+import io.onedev.server.web.component.project.avatar.ProjectAvatarChanged;
+import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.util.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
-public class AvatarEditPage extends UserPage {
+public class AvatarEditPage extends ProjectSettingPage {
 
 	private static final int MAX_IMAGE_SIZE = 5;
 	
@@ -38,7 +39,7 @@ public class AvatarEditPage extends UserPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new UserAvatar("avatar", getUser()));
+		add(new ProjectAvatar("avatar", getProject()));
 		
 		Form<?> form = new Form<Void>("form");
 		add(form);
@@ -68,8 +69,8 @@ public class AvatarEditPage extends UserPage {
 				super.onSubmit(target, form);
 				FileUpload upload = uploads.iterator().next();
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-            	avatarManager.useAvatar(userModel.getObject().getFacade(), upload);
-				send(getPage(), Broadcast.BREADTH, new UserAvatarChanged(target, userModel.getObject()));	
+            	avatarManager.useAvatar(projectModel.getObject().getFacade(), upload);
+				send(getPage(), Broadcast.BREADTH, new ProjectAvatarChanged(target, projectModel.getObject()));	
 				target.add(form);
 			}
 			
@@ -81,15 +82,15 @@ public class AvatarEditPage extends UserPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-				setVisible(avatarManager.getUploaded(userModel.getObject().getFacade()).exists());
+				setVisible(avatarManager.getUploaded(projectModel.getObject().getFacade()).exists());
 			}
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-				avatarManager.useAvatar(userModel.getObject().getFacade(), null);
+				avatarManager.useAvatar(projectModel.getObject().getFacade(), null);
 				target.add(form);
-				send(getPage(), Broadcast.BREADTH, new UserAvatarChanged(target, userModel.getObject()));								
+				send(getPage(), Broadcast.BREADTH, new ProjectAvatarChanged(target, projectModel.getObject()));								
 			}
 			
 		});
@@ -101,7 +102,7 @@ public class AvatarEditPage extends UserPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAdministrate(getUser().getFacade());
+		return SecurityUtils.canAdministrate(getProject().getFacade());
 	}
 	
 }

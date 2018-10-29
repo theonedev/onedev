@@ -21,8 +21,8 @@ import com.google.common.collect.Iterables;
 import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.FileUtils;
@@ -49,11 +49,11 @@ public class DefaultAvatarManager implements AvatarManager {
 		if (user == null) {
 			return AVATARS_BASE_URL + "onedev.png";
 		} else if (user.getId() == null) {
-			return AVATARS_BASE_URL + "default.png";
+			return AVATARS_BASE_URL + "user.png";
 		} else {
 			File avatarFile = getUploaded(user);
 			if (avatarFile.exists()) { 
-				return AVATARS_BASE_URL + "uploaded/" + user.getId() + "?version=" + avatarFile.lastModified();
+				return AVATARS_BASE_URL + "uploaded/users/" + user.getId() + "?version=" + avatarFile.lastModified();
 			}
 			
 			if (configManager.getSystemSetting().isGravatarEnabled())
@@ -117,16 +117,16 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Override
 	public File getUploaded(UserFacade user) {
-		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/" + user.getId());
+		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/users/" + user.getId());
 	}
 
 	@Sessional
 	@Override
-	public void useAvatar(User user, FileUpload upload) {
-		Lock avatarLock = LockUtils.getLock("uploaded-avatar:" + user.getId());
+	public void useAvatar(UserFacade user, FileUpload upload) {
+		Lock avatarLock = LockUtils.getLock("uploaded-user-avatar:" + user.getId());
 		avatarLock.lock();
 		try {
-			File avatarFile = getUploaded(user.getFacade());
+			File avatarFile = getUploaded(user);
 			if (upload != null) {
 				FileUtils.createDir(avatarFile.getParentFile());
 				try {
@@ -140,6 +140,41 @@ public class DefaultAvatarManager implements AvatarManager {
 		} finally {
 			avatarLock.unlock();
 		}
+	}
+
+	@Override
+	public String getAvatarUrl(ProjectFacade project) {
+		File avatarFile = getUploaded(project);
+		if (avatarFile.exists())  
+			return AVATARS_BASE_URL + "uploaded/projects/" + project.getId() + "?version=" + avatarFile.lastModified();
+		else
+			return AVATARS_BASE_URL + "project.png";
+	}
+
+	@Override
+	public void useAvatar(ProjectFacade project, FileUpload upload) {
+		Lock avatarLock = LockUtils.getLock("uploaded-project-avatar:" + project.getId());
+		avatarLock.lock();
+		try {
+			File avatarFile = getUploaded(project);
+			if (upload != null) {
+				FileUtils.createDir(avatarFile.getParentFile());
+				try {
+					upload.writeTo(avatarFile);
+				} catch (Exception e) {
+					throw ExceptionUtils.unchecked(e);
+				}
+			} else {
+				FileUtils.deleteFile(avatarFile);
+			}
+		} finally {
+			avatarLock.unlock();
+		}
+	}
+
+	@Override
+	public File getUploaded(ProjectFacade project) {
+		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/projects/" + project.getId());
 	}
 
 }

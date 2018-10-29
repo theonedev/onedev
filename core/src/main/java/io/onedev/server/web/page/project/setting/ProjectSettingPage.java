@@ -13,6 +13,7 @@ import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
 import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
 import io.onedev.server.web.page.project.setting.configuration.ConfigurationEditPage;
@@ -50,6 +51,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 			protected List<? extends Tab> newTabs() {
 				List<PageTab> tabs = new ArrayList<>();
 				tabs.add(new ProjectSettingTab("General Setting", "fa fa-fw fa-sliders", GeneralSettingPage.class));
+				tabs.add(new ProjectSettingTab("Edit Avatar", "fa fa-fw fa-picture-o", AvatarEditPage.class));
 				tabs.add(new ProjectSettingTab("Teams", "fa fa-fw fa-group", TeamListPage.class, NewTeamPage.class, TeamEditPage.class));
 				tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
 				tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));

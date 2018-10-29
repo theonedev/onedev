@@ -11,10 +11,6 @@ table.project-list a {
 table.project-list td.project, table.project-list td.author {
 	white-space: nowrap;
 } 
-table.project-list td.author img.avatar {
-	width: 20px;
-	height: 20px;
-}
 table.project-list td.author span, table.project-list td.commit-date {
 	color: #888;
 }

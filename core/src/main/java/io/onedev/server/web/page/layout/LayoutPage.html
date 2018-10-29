@@ -1,60 +1,60 @@
 <wicket:extend>
 	<div id="layout">
-		<div wicket:id="head" class="head clearfix">
-			<div class="nav pull-left">
-				<a wicket:id="nav" title="Navigation" class="fa fa-bars"></a>
+		<nav class="navbar navbar-fixed-top navbar-inverse">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false">
+	        			<span class="sr-only">Toggle navigation</span>
+	        			<span class="icon-bar"></span>
+	        			<span class="icon-bar"></span>
+	        			<span class="icon-bar"></span>
+	      			</button>					
+	      			<a class="navbar-brand" href="https://onedev.io">
+			        	<img alt="Brand" src="/img/logo.png">
+			      	</a>
+		    	</div>
+				<div class="collapse navbar-collapse" id="navbar-collapse">
+      				<ul class="nav navbar-nav">
+        				<li wicket:id="navProjects"><a wicket:id="link">Projects</a></li>
+        				<li wicket:id="navContributions"><a wicket:id="link"><span wicket:id="label"></span></a></li>
+        				<li wicket:id="navUsers"><a wicket:id="link">Users</a></li>
+        				<li wicket:id="navAdministration"><a wicket:id="link">Administration</a></li>
+					</ul>
+ 					<ul class="nav navbar-nav navbar-right">
+        				<li class="dropdown">
+							<a href="#" class="dropdown-toggle expanded" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-question-circle"></i> <i class="fa fa-angle-down"></i></a>
+							<a href="#" class="dropdown-toggle collapsed" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Help <i class="fa fa-angle-down"></i></a>
+          					<ul class="dropdown-menu">
+								<li wicket:id="productVersion" class="dropdown-header"></li>          					
+								<li role="separator" class="divider"></li>
+								<li><a wicket:id="docLink">Documentation</a></li>
+								<li><a href="mailto:support@onedev.io">Support &amp; Bug Report</a></li>
+				          	</ul>        				
+						</li>	
+				  		<wicket:container wicket:id="notSignedIn">
+				  		<li><a wicket:id="signIn">Sign in</a></li>
+				  		<wicket:enclosure child="signUp">				  	
+				  		<li><a wicket:id="signUp">Sign Up</a></li>
+				  		</wicket:enclosure>
+				  		</wicket:container>
+				  		<wicket:container wicket:id="signedIn">
+        				<li class="dropdown">
+							<a href="#" class="dropdown-toggle avatar expanded" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><img wicket:id="avatar"></img> <i class="fa fa-angle-down"></i></a>
+							<a href="#" class="dropdown-toggle collapsed" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><span wicket:id="userNameCollapsed"></span> <i class="fa fa-angle-down"></i></a>
+          					<ul class="dropdown-menu">
+								<li wicket:id="userNameExpanded" class="dropdown-header expanded"></li>          					
+								<li role="separator" class="divider expanded"></li>
+								<li><a wicket:id="profile">My Setting</a></li>
+								<li><a wicket:id="signOut">Sign Out</a></li>
+				          	</ul>        				
+				  		</li>
+				  		</wicket:container>
+        			</ul>					
+			    </div>		    	
 			</div>
-			<div wicket:id="breadcrumbs" class="breadcrumb pull-left clearfix">
-				<a wicket:id="nav" class="nav pull-left"></a>
-				<div wicket:id="separator" class="separator pull-left">></div>
-			</div>
-			<div class="user pull-right">
-			  	<wicket:enclosure child="login">
-			  		<div class="logged-out">
-				  		<a wicket:id="login" class="login">Log in</a>
-				  		<a wicket:id="register" class="register">Sign up</a>
-			  		</div>
-				</wicket:enclosure>
-				<wicket:enclosure child="user">
-					<div class="logged-in">
-				  		<a wicket:id="user" class="current"></a>
-				  		<a wicket:id="userMenuTrigger" class="menu"><i class="fa fa-angle-down"></i></a>
-					</div>
-			  	</wicket:enclosure>
-			</div>
-			<wicket:enclosure child="pushDisabled">
-			<div class="push-disabled pull-right">
-				<span wicket:id="pushDisabled" class="label label-danger">Git Push Disabled</span>
-			</div>
-			</wicket:enclosure>
-		</div>
+		</nav>	
 		<div class="body">
 			<wicket:child></wicket:child>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="userMenuFrag">
-		<div class="user-menu">
-			<a wicket:id="profile"><i class="fa fa-fw fa-gear"></i> My profile</a>
-			<a wicket:id="logout"><i class="fa fa-fw fa-sign-out"></i> Logout</a>
-		</div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="navFrag">
-		<div class="main-nav">
-			<h4>OneDev <span wicket:id="productVersion"></span></h4>
-			<ul>
-				<li><a wicket:id="projects">Projects</a></li>
-				<wicket:enclosure child="users">
-				<li><a wicket:id="users">Users</a></li>
-				</wicket:enclosure>
-				<li wicket:id="extensions"><a wicket:id="link"><span wicket:id="label"></span></a></li>
-				<wicket:enclosure child="administration">
-				<li><a wicket:id="administration">Administration</a></li>
-				</wicket:enclosure>
-				<li class="divider"></li>
-				<li><a href="https://www.onedev.io">Product Home</a></li>
-				<li><a wicket:id="docLink">Documentation</a></li>
-				<li><a href="mailto:support@onedev.io">Support &amp; Bug Report</a></li>
-			</ul>
-		</div>
-	</wicket:fragment>
 </wicket:extend>

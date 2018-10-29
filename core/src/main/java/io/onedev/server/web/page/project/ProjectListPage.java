@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -29,9 +28,7 @@ import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.TeamFacade;
-import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -220,29 +217,6 @@ public class ProjectListPage extends LayoutPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new ProjectResourceReference()));
-	}
-
-	@Override
-	protected List<ComponentRenderer> getBreadcrumbs() {
-		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
-		
-		breadcrumbs.add(new ComponentRenderer() {
-
-			@Override
-			public Component render(String componentId) {
-				return new ViewStateAwarePageLink<Void>(componentId, ProjectListPage.class) {
-
-					@Override
-					public IModel<?> getBody() {
-						return Model.of("Projects");
-					}
-					
-				};
-			}
-			
-		});
-
-		return breadcrumbs;
 	}
 
 }

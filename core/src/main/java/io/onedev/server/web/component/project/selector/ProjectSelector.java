@@ -31,6 +31,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.InputChangeBehavior;
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
+import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.utils.matchscore.MatchScoreProvider;
 import io.onedev.utils.matchscore.MatchScoreUtils;
@@ -154,6 +155,7 @@ public abstract class ProjectSelector extends Panel {
 				};
 				if (project.getId().equals(currentProjectId)) 
 					link.add(AttributeAppender.append("class", " current"));
+				link.add(new ProjectAvatar("avatar", project));
 				link.add(new Label("name", project.getName()));
 				item.add(link);
 				

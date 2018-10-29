@@ -202,7 +202,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		Matcher matcher = DOCLINK_PATTERN.matcher(productVersion);
 		if (!matcher.find())
 			throw new RuntimeException("Unexpected product version format: " + productVersion);
-		return "https://go.onedev.io/projects/onedev-docs/blob/" + matcher.group();
+		return "https://code.onedev.io/projects/onedev-docs/blob/" + matcher.group();
 	}
 	
 }

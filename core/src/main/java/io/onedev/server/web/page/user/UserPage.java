@@ -5,25 +5,21 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.ComponentRenderer;
-import io.onedev.server.web.component.avatar.Avatar;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.util.model.EntityModel;
 import io.onedev.utils.StringUtils;
@@ -51,23 +47,9 @@ public abstract class UserPage extends LayoutPage {
 			@Override
 			protected Component newHead(String componentId) {
 				Fragment fragment = new Fragment(componentId, "sidebarHeadFrag", UserPage.this);
-				ViewStateAwarePageLink<Void> avatarLink = new ViewStateAwarePageLink<Void>("avatar", 
-						AvatarEditPage.class, AvatarEditPage.paramsOf(getUser())) {
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						if (!isEnabled())
-							tag.setName("span");
-					}
-					
-				};
-				if (!SecurityUtils.canAdministrate(getUser().getFacade())) {
-					avatarLink.setEnabled(false);
-				}
-				avatarLink.add(new Avatar("avatar", userModel.getObject()));
-				fragment.add(avatarLink);
-				
+				User user = userModel.getObject();
+				fragment.add(new UserAvatar("avatar", user).add(AttributeAppender.append("title", user.getDisplayName())));
+				fragment.add(new Label("name", user.getDisplayName()));
 				return fragment;
 			}
 
@@ -112,48 +94,6 @@ public abstract class UserPage extends LayoutPage {
 		PageParameters params = new PageParameters();
 		params.add(PARAM_USER, user.getId());
 		return params;
-	}
-
-	@Override
-	protected List<ComponentRenderer> getBreadcrumbs() {
-		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
-
-		if (SecurityUtils.isAdministrator()) {
-			breadcrumbs.add(new ComponentRenderer() {
-	
-				@Override
-				public Component render(String componentId) {
-					return new ViewStateAwarePageLink<Void>(componentId, UserListPage.class) {
-	
-						@Override
-						public IModel<?> getBody() {
-							return Model.of("Users");
-						}
-						
-					};
-				}
-				
-			});
-		}
-		
-		breadcrumbs.add(new ComponentRenderer() {
-			
-			@Override
-			public Component render(String componentId) {
-				Label label;
-				if (SecurityUtils.isAdministrator()) {
-					label = new Label(componentId, getUser().getDisplayName());
-				} else {
-					label = new Label(componentId, "User (" + getUser().getDisplayName() + ")");
-				}
-				label.add(AttributeAppender.append("class", "name"));
-				label.add(AttributeAppender.append("title", getUser().getDisplayName()));
-				return label;
-			}
-			
-		});
-		
-		return breadcrumbs;
 	}
 
 }

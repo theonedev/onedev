@@ -1,21 +1,21 @@
 #user>.sidebar>.head {
-	text-align: center;
-	vertical-align: center;
 	border-bottom: 2px solid #E0E0E0;
-	padding: 10px;
+	padding: 6px 22px 6px 4px;
+	font-size: 16px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 46px;
 }
 #user>.sidebar>.tabs {
-	top: 240px;
+	top: 46px;
 }
 #user>.sidebar>.head img {
-	height: 220px;
-	width: 220px;
+	height: 32px;
+	width: 32px;
 }
-#user>.minimized.sidebar>.head {
+#user>.minimized.sidebar>.head>span {
 	display: none;
-}
-#user>.minimized.sidebar>.tabs {
-	top: 0;
 }
 
 #user .avatar-edit img.avatar {

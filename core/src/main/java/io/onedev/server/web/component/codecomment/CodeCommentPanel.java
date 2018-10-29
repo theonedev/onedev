@@ -49,11 +49,11 @@ import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.asset.caret.CaretResourceReference;
-import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.user.avatar.UserAvatarLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
@@ -103,7 +103,7 @@ public abstract class CodeCommentPanel extends Panel {
 		}));
 		
 		User userForDisplay = User.getForDisplay(getComment().getUser(), getComment().getUserName());
-		commentContainer.add(new AvatarLink("userAvatar", userForDisplay));
+		commentContainer.add(new UserAvatarLink("userAvatar", userForDisplay));
 		commentContainer.add(new UserLink("userName", userForDisplay));
 		commentContainer.add(new Label("action", "commented"));
 		commentContainer.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate())));
@@ -246,7 +246,7 @@ public abstract class CodeCommentPanel extends Panel {
 		replyContainer.add(AttributeAppender.append("name", reply.getAnchor()));
 		
 		User userForDisplay = User.getForDisplay(reply.getUser(), reply.getUserName());
-		replyContainer.add(new AvatarLink("userAvatar", userForDisplay));
+		replyContainer.add(new UserAvatarLink("userAvatar", userForDisplay));
 		replyContainer.add(new UserLink("userName", userForDisplay));
 		
 		replyContainer.add(new Label("action", "replied"));

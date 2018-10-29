@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.avatar;
+package io.onedev.server.web.component.user.avatar;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -23,19 +23,19 @@ public class ContributorAvatars extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new AvatarLink("author", author));
+		add(new UserAvatarLink("author", author));
 		if (committer.getEmailAddress().equals(author.getEmailAddress())
 				&& committer.getName().equals(author.getName())) {
 			add(new WebMarkupContainer("committer").setVisible(false));
 		} else {
-			add(new AvatarLink("committer", committer));
+			add(new UserAvatarLink("committer", committer));
 		}
 	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new AvatarResourceReference()));
+		response.render(CssHeaderItem.forReference(new UserAvatarResourceReference()));
 	}
 
 }

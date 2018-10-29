@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -32,14 +31,12 @@ import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.ComponentRenderer;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.UserLink;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.user.avatar.UserAvatarLink;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -109,7 +106,7 @@ public class UserListPage extends LayoutPage {
 					IModel<User> rowModel) {
 				User user = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", UserListPage.this);
-				fragment.add(new AvatarLink("avatarLink", user));
+				fragment.add(new UserAvatarLink("avatarLink", user));
 				fragment.add(new UserLink("nameLink", user));
 				cellItem.add(fragment);
 			}
@@ -239,27 +236,4 @@ public class UserListPage extends LayoutPage {
 		response.render(CssHeaderItem.forReference(new UserCssResourceReference()));
 	}
 
-	@Override
-	protected List<ComponentRenderer> getBreadcrumbs() {
-		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
-		
-		breadcrumbs.add(new ComponentRenderer() {
-
-			@Override
-			public Component render(String componentId) {
-				return new ViewStateAwarePageLink<Void>(componentId, UserListPage.class) {
-
-					@Override
-					public IModel<?> getBody() {
-						return Model.of("Users");
-					}
-					
-				};
-			}
-			
-		});
-
-		return breadcrumbs;
-	}
-	
 }

@@ -67,3 +67,11 @@
 	width: 240px;
 } 
 
+#project-setting .avatar-edit img.project-avatar {
+	height: 240px;
+	width: 240px;
+	margin-bottom: 20px;
+}
+#project-setting .avatar-edit .upload {
+	margin-right: 8px;
+}

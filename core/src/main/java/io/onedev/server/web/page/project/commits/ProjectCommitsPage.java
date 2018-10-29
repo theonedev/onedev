@@ -64,7 +64,6 @@ import io.onedev.server.search.commit.CommitQueryUtils;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Constants;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.avatar.ContributorAvatars;
 import io.onedev.server.web.component.build.status.BuildsStatusPanel;
 import io.onedev.server.web.component.commit.graph.CommitGraphResourceReference;
 import io.onedev.server.web.component.commit.graph.CommitGraphUtils;
@@ -72,6 +71,7 @@ import io.onedev.server.web.component.commit.message.ExpandableCommitMessagePane
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.user.avatar.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;

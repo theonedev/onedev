@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.lib.PersonIdent;
 
-import io.onedev.server.model.User;
+import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
 
 public interface AvatarManager {
@@ -22,6 +22,8 @@ public interface AvatarManager {
 	 */
 	String getAvatarUrl(@Nullable UserFacade user);
 	
+	String getAvatarUrl(ProjectFacade project);
+	
 	/**
 	 * Get URL of avatar image of specified person. 
 	 *  
@@ -32,9 +34,13 @@ public interface AvatarManager {
 	 */
 	String getAvatarUrl(PersonIdent person);
 
-	void useAvatar(User user, @Nullable FileUpload avatar);
+	void useAvatar(UserFacade user, @Nullable FileUpload upload);
+	
+	void useAvatar(ProjectFacade project, @Nullable FileUpload upload);
 	
 	File getUploaded(UserFacade user);
+	
+	File getUploaded(ProjectFacade project);
 	
 }
 

@@ -34,8 +34,8 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.JsoupUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.behavior.dropdown.DropdownHover;
-import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.link.UserLink;
+import io.onedev.server.web.component.user.avatar.UserAvatarLink;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.websocket.PageDataChanged;
 
@@ -113,7 +113,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected void populateItem(ListItem<PullRequestReview> item) {
 				PullRequestReview review = item.getModelObject();
-				item.add(new AvatarLink("avatar", review.getUser()));
+				item.add(new UserAvatarLink("avatar", review.getUser()));
 				item.add(new UserLink("name", review.getUser()));
 				
 				PullRequest request = getPullRequest();

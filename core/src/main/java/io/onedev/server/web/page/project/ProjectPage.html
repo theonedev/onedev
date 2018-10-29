@@ -5,10 +5,11 @@
 			<wicket:child></wicket:child>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="breadcrumbFrag">
-		<div class="project clearfix">
-			<a wicket:id="name" class="pull-left name"></a>
-			<a wicket:id="moreInfo" class="pull-left more-info"><i class="fa fa-ellipsis-h"></i></a>
-		</div>
+	<wicket:fragment wicket:id="sidebarHeadFrag">
+		<a wicket:id="link">
+			<img wicket:id="avatar"></img>
+			<span wicket:id="name"></span>
+			<i class="fa fa-angle-down"></i>
+		</a>
 	</wicket:fragment>
 </wicket:extend>

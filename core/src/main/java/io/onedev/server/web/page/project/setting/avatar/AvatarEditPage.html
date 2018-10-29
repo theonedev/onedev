@@ -1,0 +1,16 @@
+<wicket:extend>
+	<div class="avatar-edit">
+		<img wicket:id="avatar"></img>
+		<form wicket:id="form">
+			<div wicket:id="feedback"></div>
+			<div wicket:id="file"></div>
+			<div class="actions">
+				<button wicket:id="useUploaded" class="btn btn-primary dirty-aware">Use Uploaded</button>
+				<a wicket:id="useDefault" class="btn btn-default">Use Default</a>
+			</div>
+		</form>
+		<div class="help-block">
+			The image size should be less than <span wicket:id="maxSize"></span>M bytes.
+		</div>
+	</div>
+</wicket:extend>

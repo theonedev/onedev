@@ -3,15 +3,10 @@ package io.onedev.server.web.page.admin;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.Model;
 
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.ComponentRenderer;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -60,29 +55,6 @@ public abstract class AdministrationPage extends LayoutPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new AdministrationResourceReference()));
-	}
-
-	@Override
-	protected List<ComponentRenderer> getBreadcrumbs() {
-		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
-		
-		breadcrumbs.add(new ComponentRenderer() {
-
-			@Override
-			public Component render(String componentId) {
-				return new ViewStateAwarePageLink<Void>(componentId, SystemSettingPage.class) {
-
-					@Override
-					public IModel<?> getBody() {
-						return Model.of("Administration");
-					}
-					
-				};
-			}
-			
-		});
-		
-		return breadcrumbs;
 	}
 
 }

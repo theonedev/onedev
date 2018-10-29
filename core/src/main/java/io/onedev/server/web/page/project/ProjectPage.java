@@ -9,11 +9,10 @@ import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
@@ -30,10 +29,11 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.ComponentRenderer;
+import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -238,6 +238,33 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				
 				return tabs;
 			}
+
+			@Override
+			protected Component newHead(String componentId) {
+				Fragment fragment = new Fragment(componentId, "sidebarHeadFrag", ProjectPage.this);
+				Project project = getProject();
+				AlignPlacement placement = new AlignPlacement(0, 100, 0, 0);
+				AjaxLink<Void> link = new DropdownLink("link", placement) {
+
+					@Override
+					protected Component newContent(String id, FloatingPanel dropdown) {
+						return new MoreInfoPanel(id, projectModel) {
+							
+							@Override
+							protected void onPromptForkOption(AjaxRequestTarget target) {
+								dropdown.close();
+							}
+						};
+					}
+					
+				};
+				link.add(new ProjectAvatar("avatar", getProject()));
+				link.add(new Label("name", project.getName()));
+				fragment.add(link);
+				
+				return fragment;
+			}
+			
 		});
 	}
 
@@ -262,72 +289,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	protected void onDetach() {
 		projectModel.detach();
 		super.onDetach();
-	}
-
-	@Override
-	protected List<ComponentRenderer> getBreadcrumbs() {
-		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
-		
-		breadcrumbs.add(new ComponentRenderer() {
-
-			@Override
-			public Component render(String componentId) {
-				return new ViewStateAwarePageLink<Void>(componentId, ProjectListPage.class) {
-
-					@Override
-					public IModel<?> getBody() {
-						return Model.of("Projects");
-					}
-					
-				};
-			}
-			
-		});
-
-		breadcrumbs.add(new ComponentRenderer() {
-			
-			@Override
-			public Component render(String componentId) {
-				Fragment fragment = new Fragment(componentId, "breadcrumbFrag", ProjectPage.this) {
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						tag.setName("div");
-					}
-					
-				};
-				fragment.add(new BookmarkablePageLink<Void>("name", ProjectBlobPage.class, 
-						ProjectBlobPage.paramsOf(getProject())) {
-
-					@Override
-					public IModel<?> getBody() {
-						return Model.of(getProject().getName());
-					}
-					
-				}.add(AttributeAppender.append("title", getProject().getName())));
-				
-				fragment.add(new DropdownLink("moreInfo") {
-
-					@Override
-					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new MoreInfoPanel(id, projectModel) {
-
-							@Override
-							protected void onPromptForkOption(AjaxRequestTarget target) {
-								dropdown.close();
-							}
-							
-						};
-					}
-					
-				});
-				return fragment;
-			}
-			
-		});
-		
-		return breadcrumbs;
 	}
 
 }

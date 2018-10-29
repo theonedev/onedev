@@ -45,9 +45,9 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromCodeCommentData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromIssueData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
-import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.user.avatar.UserAvatarLink;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestChangeActivity;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentedActivity;
@@ -102,7 +102,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		if (anchor != null)
 			row.setMarkupId(anchor);
 		
-		row.add(new AvatarLink("avatar", activity.getUser()));
+		row.add(new UserAvatarLink("avatar", activity.getUser()));
 		
 		Component content = activity.render("content", new DeleteCallback() {
 

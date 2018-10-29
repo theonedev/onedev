@@ -6,6 +6,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
@@ -53,7 +54,7 @@ public abstract class ProjectPicker extends DropdownLink {
 	public IModel<?> getBody() {
 		Project currentProject = OneDev.getInstance(Dao.class).load(Project.class, currentProjectId);
 		return Model.of(String.format("<i class='fa fa-ext fa-repo'></i> <span>%s</span> <i class='fa fa-caret-down'></i>", 
-				currentProject.getName()));
+				HtmlEscape.escapeHtml5(currentProject.getName())));
 	}
 
 	@Override

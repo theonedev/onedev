@@ -32,8 +32,8 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.link.UserLink;
+import io.onedev.server.web.component.user.avatar.UserAvatarLink;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
@@ -67,7 +67,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						User user = User.getForDisplay(OneDev.getInstance(UserManager.class).findByName(value), value);
 						Fragment userFrag = new Fragment("value", "userFrag", FieldValuesPanel.this);
 						userFrag.add(new UserLink("name", user));
-						userFrag.add(new AvatarLink("avatar", user));
+						userFrag.add(new UserAvatarLink("avatar", user));
 						item.add(userFrag);
 					} else if (getField().getType().equals(InputSpec.ISSUE)) {
 						Issue issue = OneDev.getInstance(IssueManager.class).find(project, Long.valueOf(value));

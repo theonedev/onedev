@@ -53,7 +53,6 @@ import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
-import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
@@ -62,6 +61,7 @@ import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.user.avatar.UserAvatarLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
@@ -502,7 +502,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						Issue issue = rowModel.getObject();
 						Fragment fragment = new Fragment(componentId, "userFrag", IssueListPanel.this);
 						User submitter = User.getForDisplay(issue.getSubmitter(), issue.getSubmitterName());
-						fragment.add(new AvatarLink("avatar", submitter));
+						fragment.add(new UserAvatarLink("avatar", submitter));
 						fragment.add(new UserLink("name", submitter));
 						cellItem.add(fragment);
 					}

@@ -1,166 +1,48 @@
-#layout {
-	min-width: 768px;
+.navbar-brand {
+	padding-top: 14px;
+	padding-bottom: 14px;
 }
-#layout>.head {
-	background: #212121;
-	padding: 8px 16px;
-	color: #E0E0E0;
-	position: fixed;
-	height: 48px;
-	z-index: 210;
-	left: 0;
-	right: 0;
-	min-width: 375px;
+.navbar-brand img {
+	width: 24px;
+	height: 24px;
+	margin-left: -6px;
 }
-#layout>.head>div {
-	margin-right: 20px;
+.navbar-nav>li>a.avatar {
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
-#layout>.head a {
-	text-decoration: none;
-	color: #E0E0E0;
+.navbar img.avatar {
+	width: 30px;
+	height: 30px;
 }
-#layout>.head .push-disabled {
-	padding-top: 6px;
-}
-#layout>.head .push-disabled .label {
-	font-size: 15px;
-}
-#layout>.head>.nav .fa {
-	margin-top: 2px;
-	font-size: 28px;
-}
-#layout>.head>.breadcrumb {
-	padding: 0;
-	margin: 0;
-	background: inherit;
-	border-radius: 0;
-	font-size: 20px;
-}
-#layout>.head>.breadcrumb .separator {
-	margin: 0 8px;
-}
-#layout>.head>.breadcrumb .name {
-	text-overflow: ellipsis;
-	overflow: hidden;
-	white-space: nowrap;
-}
-@media(min-width: 0px) {
-	#layout>.head>.breadcrumb .name {
-		max-width: 50px;
-	}	
-	#layout>.head .register {
-		display: none;
-	}	
-}
-@media(min-width: 500px) {
-	#layout>.head>.breadcrumb .name {
-		max-width: 100px;
-	}	
-}
-@media(min-width: 600px) {
-	#layout>.head>.breadcrumb .name {
-		max-width: 200px;
-	}	
-	#layout>.head .register {
-		display: inline;
-	}	
-}
-@media(min-width: 900px) {
-	#layout>.head>.breadcrumb .name {
-		max-width: 400px;
-	}	
-}
-#layout>.head>.help {
-	padding-top: 7px;
-}
-#layout>.head>.help .fa {
-	font-size: 20px;
-}
-#layout>.head>.user {
-	margin-right: 0;
-}
-#layout>.head>.user>.logged-in>a, #layout>.head>.user>.logged-in>span {
-	margin-right: 8px;
-	font-size: 20px;
-}
-#layout>.head>.user>.logged-in>.menu {
-	margin-right: 8px;
-}
-#layout>.head>.user>.logged-out {
-	padding-top: 4px;
-}
-#layout>.head>.user>.logged-out a {
+.navbar .dropdown-header {
 	font-size: 16px;
+	padding: 4px 20px 0 20px;
 }
-#layout>.head>.user>.logged-out>a:LAST-CHILD {
-	margin-left: 16px;
+
+@media (max-width: 768px) {
+	.navbar .expanded {
+		display: none;
+	}
 }
-#layout>.head>.user .avatar {
-	width: 32px;
-	height: 32px;
+@media (min-width: 768px) {
+	.navbar .collapsed {
+		display: none;
+	}
 }
+
 #layout>.body {
-	padding: 68px 20px 20px 20px;
+	padding: 70px 20px 20px 20px;
 	width: 100%;
 }
 
-#project-add {
-	padding: 20px;
-}
-
-.floating>.content>.user-menu {
-	padding: 12px 0;
-	min-width: 120px;
-}
-.floating>.content>.user-menu a {
-	display: block;
-	color: #555;
-	text-decoration: none;
-	padding: 8px 12px;
-}
-.floating>.content>.user-menu a:hover {
-	background: #F2F2F2;
-}
-
 #layout .sidebar {
-	top: 48px;
-}
-
-.main-nav {
-	padding: 6px 0;
-}
-.main-nav>h4 {
-	padding: 0 20px;
-}
-.main-nav ul {
-	margin:0; 
-	padding: 0;
-}
-.main-nav li {
-	white-space: nowrap;
-}
-.main-nav li a:hover {
-	background-color: #f5f5f5;
-}
-.main-nav ul>li>a {
-	position: relative;
-	color: #333333; 
-	display: block; 
-	font-weight: normal; 
-	line-height: 20px; 
-	text-decoration: none; 
-	padding: 6px 24px; 
-	white-space: nowrap;
-}
-.main-nav ul>li.divider {
-	border-top: 1px solid #DDD;
-	margin: 8px 0; 
-	height: 0;
+	top: 50px;
 }
 
 .floating.side {
 	position: fixed;
-	top: 48px;
+	top: 50px;
 	border-top: none;
 	border-bottom: none;
 	bottom: 0;

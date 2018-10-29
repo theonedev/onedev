@@ -48,7 +48,7 @@
 }
 
 .minimizable.sidebar>.tabs {
-	bottom: 36px;
+	bottom: 40px;
 }
 .minimizable.sidebar>a.mini-toggle {
 	display: block;

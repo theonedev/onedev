@@ -1,6 +1,6 @@
 package io.onedev.server.web.page.layout;
 
-public interface LayoutMenuContribution {
+public interface MainNavContribution {
 	
 	int getOrder();
 

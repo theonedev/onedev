@@ -34,11 +34,12 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.ProjectLink;
 import io.onedev.server.web.component.link.UserLink;
+import io.onedev.server.web.component.project.avatar.ProjectAvatar;
+import io.onedev.server.web.component.user.avatar.UserAvatarLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 
@@ -70,6 +71,7 @@ public class ProjectListPanel extends Panel {
 				Fragment fragment = new Fragment(componentId, "projectFrag", ProjectListPanel.this);
 				Project project = OneDev.getInstance(ProjectManager.class).load(rowModel.getObject().getId());
 				Link<Void> link = new ProjectLink("link", project); 
+				link.add(new ProjectAvatar("avatar", project));
 				link.add(new Label("name", project.getName()));
 				fragment.add(link);
 				cellItem.add(fragment);
@@ -86,7 +88,7 @@ public class ProjectListPanel extends Panel {
 				RevCommit lastCommit = project.getLastCommit();
 				if (lastCommit != null) {
 					Fragment fragment = new Fragment(componentId, "authorFrag", ProjectListPanel.this);
-					fragment.add(new AvatarLink("avatar", lastCommit.getAuthorIdent()));
+					fragment.add(new UserAvatarLink("avatar", lastCommit.getAuthorIdent()));
 					fragment.add(new UserLink("name", lastCommit.getAuthorIdent()));
 					cellItem.add(fragment);
 				} else {

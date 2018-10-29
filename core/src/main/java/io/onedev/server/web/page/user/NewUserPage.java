@@ -1,17 +1,13 @@
 package io.onedev.server.web.page.user;
 
-import java.util.List;
 import java.util.Set;
 
 import org.apache.shiro.authc.credential.PasswordService;
-import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
@@ -24,8 +20,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.web.ComponentRenderer;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathSegment;
@@ -137,48 +131,6 @@ public class NewUserPage extends LayoutPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new UserCssResourceReference()));
-	}
-
-	@Override
-	protected List<ComponentRenderer> getBreadcrumbs() {
-		List<ComponentRenderer> breadcrumbs = super.getBreadcrumbs();
-		
-		if (SecurityUtils.isAdministrator()) {
-			breadcrumbs.add(new ComponentRenderer() {
-	
-				@Override
-				public Component render(String componentId) {
-					return new ViewStateAwarePageLink<Void>(componentId, UserListPage.class) {
-	
-						@Override
-						public IModel<?> getBody() {
-							return Model.of("Users");
-						}
-						
-					};
-				}
-				
-			});
-		}
-
-		breadcrumbs.add(new ComponentRenderer() {
-			
-			@Override
-			public Component render(String componentId) {
-				return new Label(componentId, "New User") {
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						tag.setName("div");
-					}
-					
-				};
-			}
-			
-		});
-		
-		return breadcrumbs;
 	}
 
 }

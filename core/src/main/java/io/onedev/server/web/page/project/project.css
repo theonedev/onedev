@@ -1,13 +1,42 @@
-.breadcrumb .project .pull-left {
-	margin-right: 4px;
+#project>.sidebar>.head a {
+	display: block;
+	border-bottom: 2px solid #E0E0E0;
+	padding: 6px 22px 6px 4px;
+	font-size: 16px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	text-decoration: none;
+	color: #444;
+	height: 46px;
 }
-.breadcrumb .project .more-info {
-	background: #424242;
-	padding: 0 8px;
-	border-radius: 4px;
-	font-size: 14px;
-	margin-top: 6px;
-	margin-left: 8px;
+#project>.sidebar>.head a:hover {
+	background: #EEE;
+}
+#project>.sidebar>.head img {
+	width: 32px;
+	height: 32px;
+}
+#project>.sidebar>.head i {
+	position: absolute;
+	right: 4px;
+	top: 14px;
+}
+#project>.sidebar>.tabs {
+	top: 46px;
+}
+#project>.minimized.sidebar>.head a {
+	height: 60px;
+}
+#project>.minimized.sidebar>.head span {
+	display: none;
+}
+#project>.minimized.sidebar>.head i {
+	left: 14px;	
+	top: 38px;
+}
+#project>.minimized.sidebar>.tabs {
+	top: 60px;
 }
 
 .no-commits>.head {

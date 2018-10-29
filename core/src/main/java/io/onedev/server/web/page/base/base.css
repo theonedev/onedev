@@ -358,6 +358,11 @@ form>.test-feedback {
 	margin-bottom: 50px;
 	color: #333;
 }
+.center-box .logo {
+	width: 36px;
+	height: 36px;
+	margin-bottom: 8px;
+}
 @media(max-width: 738px) {
 	.center-box {
 		border: none;

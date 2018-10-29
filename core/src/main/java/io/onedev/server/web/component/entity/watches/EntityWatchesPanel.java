@@ -20,7 +20,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.watch.WatchStatus;
-import io.onedev.server.web.component.avatar.AvatarLink;
+import io.onedev.server.web.component.user.avatar.UserAvatarLink;
 import io.onedev.server.web.component.user.list.UserListLink;
 import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 
@@ -78,7 +78,7 @@ public abstract class EntityWatchesPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<EntityWatch> item) {
 				User user = item.getModelObject().getUser();
-				item.add(new AvatarLink("watcher", user, user.getDisplayName()));
+				item.add(new UserAvatarLink("watcher", user, user.getDisplayName()));
 			}
 
 			@Override

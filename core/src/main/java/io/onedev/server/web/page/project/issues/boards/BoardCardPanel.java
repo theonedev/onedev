@@ -30,12 +30,12 @@ import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.avatar.AvatarLink;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.modal.ModalPanel.Size;
+import io.onedev.server.web.component.user.avatar.UserAvatarLink;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
@@ -107,7 +107,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 						.findByName(field.getValues().iterator().next());
 				if (user != null) {
 					String tooltip = field.getName() + ": " + user.getDisplayName();
-					Link<Void> link = new AvatarLink(avatarsView.newChildId(), user, null);
+					Link<Void> link = new UserAvatarLink(avatarsView.newChildId(), user, null);
 					link.add(AttributeAppender.append("title", tooltip));
 					avatarsView.add(link);
 				}
