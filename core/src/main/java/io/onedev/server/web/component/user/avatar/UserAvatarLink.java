@@ -2,6 +2,7 @@ package io.onedev.server.web.component.user.avatar;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -11,11 +12,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.PersonIdent;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.server.web.behavior.TooltipBehavior;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.user.UserPage;
 import io.onedev.server.web.page.user.UserProfilePage;
@@ -123,7 +122,7 @@ public class UserAvatarLink extends ViewStateAwarePageLink<Void> {
 		setEscapeModelStrings(false);
 		
 		if (tooltip != null)
-			add(new TooltipBehavior(Model.of(tooltip), new TooltipConfig()));
+			add(AttributeAppender.append("title", tooltip));
 		
 		setOutputMarkupId(true);
 	}

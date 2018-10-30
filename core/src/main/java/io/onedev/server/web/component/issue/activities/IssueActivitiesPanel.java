@@ -183,7 +183,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 		if (anchor != null)
 			row.setMarkupId(anchor);
 		
-		row.add(new UserAvatarLink("avatar", activity.getUser()));
+		row.add(new UserAvatarLink("avatar", activity.getUser(), activity.getUser()!=null?activity.getUser().getDisplayName():"OneDev"));
 
 		row.add(activity.render("content", new DeleteCallback() {
 

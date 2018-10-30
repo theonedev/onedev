@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-parent</artifactId>
-		<version>2.0-dev-build115</version>
+		<version>2.0-beta-build116</version>
 	</parent>
 	<build>
 		<plugins>
@@ -95,7 +95,7 @@
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>codeassist</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
@@ -278,7 +278,7 @@
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>launcher-loader</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-httpclient</groupId>
@@ -312,12 +312,12 @@
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>jsymbol</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>jsyntax</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>

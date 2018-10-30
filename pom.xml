@@ -4,11 +4,11 @@
     <parent>
     	<groupId>io.onedev</groupId>
     	<artifactId>launcher</artifactId>
-    	<version>1.0.0</version>
+    	<version>1.0.1</version>
 		<relativePath>../launcher</relativePath>
     </parent>
     <artifactId>server-parent</artifactId>  
-    <version>2.0-dev-build115</version>  
+    <version>2.0-beta-build116</version>  
     <packaging>pom</packaging>  
     <build>
     	<pluginManagement>
@@ -229,7 +229,7 @@
 		</repository>
 	</repositories>
     <properties> 
-    	<launcher.version>1.0.0</launcher.version>
+    	<launcher.version>1.0.1</launcher.version>
         <jersey.version>2.13</jersey.version>  
         <jetty.version>9.3.8.v20160314</jetty.version>  
         <jackson.version>2.4.3</jackson.version>  

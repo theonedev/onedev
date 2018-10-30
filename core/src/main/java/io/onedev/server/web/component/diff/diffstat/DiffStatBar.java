@@ -1,15 +1,11 @@
 package io.onedev.server.web.component.diff.diffstat;
 
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
-import org.apache.wicket.model.LoadableDetachableModel;
-
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig;
-import de.agilecoders.wicket.core.markup.html.bootstrap.components.TooltipConfig.Placement;
-import io.onedev.server.web.behavior.TooltipBehavior;
 
 @SuppressWarnings("serial")
 public class DiffStatBar extends Panel {
@@ -69,17 +65,8 @@ public class DiffStatBar extends Panel {
 			}
 		}).setEscapeModelStrings(false));
 		
-		if (showTooltip) {
-			TooltipConfig config = new TooltipConfig().withPlacement(Placement.right);
-			add(new TooltipBehavior(new LoadableDetachableModel<String>() {
-	
-				@Override
-				protected String load() {
-					return additions + " additions & " + deletions + " deletions";			
-				}
-				
-			}, config));
-		}
+		if (showTooltip)
+			add(AttributeAppender.append("title", additions + " additions & " + deletions + " deletions"));			
 	}
 	
 	private int getAdditionBlocks() {

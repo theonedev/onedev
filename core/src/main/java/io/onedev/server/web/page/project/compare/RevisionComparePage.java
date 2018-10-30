@@ -43,7 +43,6 @@ import io.onedev.server.model.support.ProjectAndRevision;
 import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.server.web.behavior.TooltipBehavior;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
@@ -340,7 +339,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 			tooltip = "Check this to compare \"right side\" with common ancestor of left and right";
 		}
 		
-		add(new WebMarkupContainer("mergeBaseTooltip").add(new TooltipBehavior(Model.of(tooltip))));
+		add(new WebMarkupContainer("mergeBaseTooltip").add(AttributeAppender.append("title", tooltip)));
 
 		PageParameters params = CommitDetailPage.paramsOf(state.leftSide.getProject(), state.leftSide.getCommit().name());
 		Link<Void> leftCommitLink = new ViewStateAwarePageLink<Void>("leftCommitLink", CommitDetailPage.class, params);

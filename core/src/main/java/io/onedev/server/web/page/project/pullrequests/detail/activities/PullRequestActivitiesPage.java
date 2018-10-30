@@ -102,7 +102,7 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		if (anchor != null)
 			row.setMarkupId(anchor);
 		
-		row.add(new UserAvatarLink("avatar", activity.getUser()));
+		row.add(new UserAvatarLink("avatar", activity.getUser(), activity.getUser()!=null?activity.getUser().getDisplayName():"OneDev"));
 		
 		Component content = activity.render("content", new DeleteCallback() {
 
