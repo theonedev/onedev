@@ -18,6 +18,8 @@ import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Charsets;
+
 import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.launcher.loader.PluginManager;
 import io.onedev.server.migration.DatabaseMigrator;
@@ -31,8 +33,6 @@ import io.onedev.utils.FileUtils;
 import io.onedev.utils.StringUtils;
 import io.onedev.utils.command.Commandline;
 import io.onedev.utils.command.LineConsumer;
-
-import com.google.common.base.Charsets;
 
 @Singleton
 public class UpgradeCommand extends DefaultPersistManager {
@@ -400,12 +400,25 @@ public class UpgradeCommand extends DefaultPersistManager {
 		}
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
-		File onedevAvatar = new File(upgradeDir, "site/avatars/onedev.png");
-		if (!onedevAvatar.exists()) {
+		for (File file: new File(Bootstrap.getSiteDir(), "avatars").listFiles()) {
 			try {
-				FileUtils.copyFile(new File(Bootstrap.getSiteDir(), "avatars/onedev.png"), onedevAvatar);
+				FileUtils.copyFileToDirectory(file, new File(upgradeDir, "site/avatars"));
 			} catch (IOException e) {
 				throw new RuntimeException(e);
+			}
+		}
+		File uploadedDir = new File(upgradeDir, "site/avatars/uploaded");
+		File userUploadsDir = new File(uploadedDir, "users"); 
+		if (uploadedDir.exists() && !userUploadsDir.exists()) {
+			FileUtils.createDir(userUploadsDir);
+			for (File file: uploadedDir.listFiles()) {
+				if (file.isFile()) {
+					try {
+						FileUtils.moveFileToDirectory(file, userUploadsDir, false);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
 			}
 		}
 		for (File file: Bootstrap.getSiteLibDir().listFiles()) {

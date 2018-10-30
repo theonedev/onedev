@@ -789,34 +789,16 @@ public class DatabaseMigrator {
 						replyCount = 0;
 					element.addElement("replyCount").setText(String.valueOf(replyCount));
 					
+					Element dateElement = element.element("date");
+					dateElement.setName("createDate");
+					Element updateDateElement = element.addElement("updateDate");
+					updateDateElement.addAttribute("class", "sql-timestamp");
 					Element lastEventElement = element.element("lastEvent");
 					if (lastEventElement != null) {
-						lastEventElement.setName("lastActivity");
-						lastEventElement.element("type").setName("description");
-						Element userElement = lastEventElement.element("user");
-						Element userNameElement = lastEventElement.element("userName");
-						if (userNameElement != null) {
-							if (userElement != null)
-								userElement.detach();
-						} else {
-							if (userElement != null) {
-								userElement.setName("userName");
-								userElement.setText(userNames.get(userElement.getTextTrim()));
-							} else {
-								lastEventElement.addElement("userName").setText("unknown");
-							}
-						}
+						updateDateElement.setText(lastEventElement.elementText("date"));
+						lastEventElement.detach();
 					} else {
-						Element lastActivityElement = element.addElement("lastActivity");
-						lastActivityElement.addElement("description").setText("created");
-						Element dateElement = lastActivityElement.addElement("date");
-						dateElement.addAttribute("class", "sql-timestamp");
-						dateElement.setText(element.elementText("date"));
-						Element userElement = element.element("user");
-						if (userElement != null)
-							lastActivityElement.addElement("userName").setText(userNames.get(userElement.getTextTrim()));
-						else
-							lastActivityElement.addElement("userName").setText(element.elementText("userName"));
+						updateDateElement.setText(dateElement.getText());
 					}
 				}				
 				dom.writeToFile(file, false);
@@ -849,34 +831,15 @@ public class DatabaseMigrator {
 						closeInfoElement.element("closeDate").setName("date");
 						closeInfoElement.element("closeStatus").setName("status");
 					}
+					Element submitDateElement = element.element("submitDate");
+					Element updateDateElement = element.addElement("updateDate");
+					updateDateElement.addAttribute("class", "sql-timestamp");
 					Element lastEventElement = element.element("lastEvent");
 					if (lastEventElement != null) {
-						lastEventElement.setName("lastActivity");
-						lastEventElement.element("type").setName("description");
-						Element userElement = lastEventElement.element("user");
-						Element userNameElement = lastEventElement.element("userName");
-						if (userNameElement != null) {
-							if (userElement != null)
-								userElement.detach();
-						} else {
-							if (userElement != null) {
-								userElement.setName("userName");
-								userElement.setText(userNames.get(userElement.getTextTrim()));
-							} else {
-								lastEventElement.addElement("userName").setText("unknown");
-							}
-						}
+						updateDateElement.setText(lastEventElement.elementText("date"));
+						lastEventElement.detach();
 					} else {
-						Element lastActivityElement = element.addElement("lastActivity");
-						lastActivityElement.addElement("description").setText("submitted");
-						Element dateElement = lastActivityElement.addElement("date");
-						dateElement.addAttribute("class", "sql-timestamp");
-						dateElement.setText(element.elementText("submitDate"));
-						Element submitterElement = element.element("submitter");
-						if (submitterElement != null)
-							lastActivityElement.addElement("userName").setText(userNames.get(submitterElement.getTextTrim()));
-						else
-							lastActivityElement.addElement("userName").setText(element.elementText("submitterName"));
+						updateDateElement.setText(submitDateElement.getText());
 					}
 				}				
 				dom.writeToFile(file, false);
