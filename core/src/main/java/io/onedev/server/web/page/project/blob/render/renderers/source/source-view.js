@@ -22,7 +22,7 @@ onedev.server.sourceView = {
 			highlightIdentifiers: {delay: 500},
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		});
-		
+					
 		onedev.server.codemirror.setMode(cm, filePath);
 
 		$sourceView.data("callback", callback);
@@ -273,6 +273,7 @@ onedev.server.sourceView = {
 		var $gutter = $(document.createElement("div"));
 		$gutter.addClass("CodeMirror-comment");
 		$gutter.data("comments", comments);
+		
 		if (comments.length != 1) {
 			/* 
 			 * when there are multiple comments starts with the same line, we should 

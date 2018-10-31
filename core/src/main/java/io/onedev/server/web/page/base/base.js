@@ -36,6 +36,7 @@ onedev.server = {
 			}
 			
 		});
+		
 		trigger.click(function() {
 			if (target[0].collapsibleIds == undefined) {
 				if (!target.hasClass("in")) {
