@@ -1,6 +1,8 @@
 **/target/
 **/.classpath
 **/.gitignore
+**/.settings
+**/.project
 release.properties
 pom.xml.releaseBackup
 
