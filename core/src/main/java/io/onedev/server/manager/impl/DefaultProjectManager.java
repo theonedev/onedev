@@ -59,6 +59,7 @@ import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.TeamFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import io.onedev.server.web.util.avatar.AvatarManager;
 import io.onedev.utils.ExceptionUtils;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.StringUtils;
@@ -78,6 +79,8 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     
     private final CacheManager cacheManager;
     
+    private final AvatarManager avatarManager;
+    
     private final String gitReceiveHook;
     
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
@@ -85,7 +88,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     @Inject
     public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager,  
     		TeamManager teamManager, MembershipManager membershipManager, BuildManager buildManager, 
-    		CacheManager cacheManager) {
+    		CacheManager cacheManager, AvatarManager avatarManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -93,6 +96,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
         this.membershipManager = membershipManager;
         this.buildManager = buildManager;
         this.cacheManager = cacheManager;
+        this.avatarManager = avatarManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
@@ -192,6 +196,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
         FileUtils.cleanDir(to.getGitDir());
         new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
         commitInfoManager.cloneInfo(from, to);
+        avatarManager.copyAvatar(from.getFacade(), to.getFacade());
 	}
 
 	private boolean isGitHookValid(File gitDir, String hookName) {

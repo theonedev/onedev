@@ -7,6 +7,9 @@
 	height: 24px;
 	margin-left: -6px;
 }
+.navbar a {
+	font-size: 16px;
+}
 .navbar-nav>li>a.avatar {
 	padding-top: 10px;
 	padding-bottom: 10px;

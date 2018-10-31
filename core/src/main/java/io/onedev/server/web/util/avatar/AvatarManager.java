@@ -42,5 +42,7 @@ public interface AvatarManager {
 	
 	File getUploaded(ProjectFacade project);
 	
+	void copyAvatar(ProjectFacade from, ProjectFacade to);
+	
 }
 

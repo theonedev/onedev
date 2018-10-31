@@ -177,4 +177,20 @@ public class DefaultAvatarManager implements AvatarManager {
 		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/projects/" + project.getId());
 	}
 
+	@Override
+	public void copyAvatar(ProjectFacade from, ProjectFacade to) {
+		Lock avatarLock = LockUtils.getLock("uploaded-project-avatar:" + from.getId());
+		avatarLock.lock();
+		try {
+			File uploaded = getUploaded(from);
+			if (uploaded.exists()) {
+				FileUtils.copyFile(uploaded, getUploaded(to));
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		} finally {
+			avatarLock.unlock();
+		}
+	}
+
 }
