@@ -276,11 +276,6 @@
 			<artifactId>unbescape</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>launcher-loader</artifactId>
-			<version>1.0.1</version>
-		</dependency>
-		<dependency>
 			<groupId>commons-httpclient</groupId>
 			<artifactId>commons-httpclient</artifactId>
 		</dependency>

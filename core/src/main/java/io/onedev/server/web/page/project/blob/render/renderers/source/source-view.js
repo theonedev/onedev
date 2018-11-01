@@ -22,7 +22,7 @@ onedev.server.sourceView = {
 			highlightIdentifiers: {delay: 500},
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		});
-					
+
 		onedev.server.codemirror.setMode(cm, filePath);
 
 		$sourceView.data("callback", callback);
