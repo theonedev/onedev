@@ -17,15 +17,8 @@
                         <id>copy-product-resources</id>  
                         <phase>compile</phase>  
                         <goals> 
-                            <goal>run-ant</goal> 
+                            <goal>copy-product-resources</goal> 
                         </goals>  
-                        <configuration> 
-                            <target> 
-                                <copy todir="${project.build.directory}/sandbox"> 
-                                    <fileset dir="system"/>  
-                                </copy>  
-                            </target> 
-                        </configuration> 
                     </execution> 
                 </executions> 
             </plugin>  
