@@ -3,6 +3,7 @@
 **/.gitignore
 **/.settings
 **/.project
+**/.vscode
 release.properties
 pom.xml.releaseBackup
 
