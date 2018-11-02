@@ -10,7 +10,6 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import de.agilecoders.wicket.core.Bootstrap;
 import io.onedev.server.web.asset.align.AlignResourceReference;
-import io.onedev.server.web.asset.areyousure.AreYouSureResourceReference;
 import io.onedev.server.web.asset.autosize.AutoSizeResourceReference;
 import io.onedev.server.web.asset.cookies.CookiesResourceReference;
 import io.onedev.server.web.asset.perfectscrollbar.PerfectScrollbarResourceReference;
@@ -32,7 +31,6 @@ public class BaseResourceReference extends JavaScriptResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(Bootstrap.getSettings().getJsResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AlignResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new AutoSizeResourceReference()));
-		dependencies.add(JavaScriptHeaderItem.forReference(new AreYouSureResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new PerfectScrollbarResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new CookiesResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new ScrollIntoViewResourceReference()));

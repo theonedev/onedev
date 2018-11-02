@@ -100,42 +100,22 @@ onedev.server = {
 				onedev.server.form.dirtyChanged($(this));
 			});
 		},
-		removeDirty: function(triggerId, $forms) {
-			$(function() {
-				var $trigger = $("#" + triggerId);
-				
-				var previousClick;
-
-				var handlers = $._data($trigger[0], 'events').click;
-
-				$.each(handlers, function(i,f) {
-					previousClick = f.handler; 
-					return false; 
-				});
-				
-				$trigger.unbind('click');
-
-				$trigger.click(function(event){
-					onedev.server.form.markClean($forms);
-					previousClick(event);
-				});
-			});
-		},
 		trackDirty: function(form) {
 			var $form = $(form);
 			if ($form.find(".dirty-aware").length != 0 || $form.hasClass("leave-confirm")) {
-				$form.areYouSure({
-					"silent": !$form.hasClass("leave-confirm"),
-					"addRemoveFieldsMarksDirty": true,
-					change: function() {
-						onedev.server.form.dirtyChanged($(this));
-					}
+				var fieldSelector = ":input:not(.no-dirtytrack):not(input[type=submit]):not(input[type=button]):not(button)"; 
+				var events = "change keyup propertychange input";
+				$form.find(fieldSelector).on(events, function() {
+					onedev.server.form.markDirty($form);
 				});
 				if ($form.find(".has-error").length != 0) {
 					$form.addClass("dirty");
 				}
 				onedev.server.form.dirtyChanged($form);
 			}
+			$form.submit(function() {
+				$form.removeClass("dirty");				
+			});
 		},
 		dirtyChanged: function($form) {
 			$dirtyAware = $form.find(".dirty-aware");
@@ -160,9 +140,6 @@ onedev.server = {
 				$forms.each(function() {
 					onedev.server.form.trackDirty(this);
 				});
-				var $form = $component.closest("form").not($component);
-				if ($form.find(".dirty-aware").length != 0 || $form.hasClass("leave-confirm"))
-					$form.trigger("checkform.areYouSure");
 			});
 			
 			if (Wicket && Wicket.Ajax) {
@@ -182,6 +159,14 @@ onedev.server = {
 					processAjaxResponse.call(this, data, textStatus, jqXHR, context);					
 				}
 			}
+
+			$(window).on("beforeunload", function() {
+				$dirtyForms = $("form").filter('.leave-confirm.dirty');
+				if ($dirtyForms.length != 0) {
+					return "There are unsaved changes";
+				}
+			});
+
 		},
 		confirmLeave: function(containerId) {
 			var $container;
