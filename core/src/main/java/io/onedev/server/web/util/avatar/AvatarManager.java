@@ -4,7 +4,6 @@ import java.io.File;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.server.util.facade.ProjectFacade;
@@ -34,9 +33,9 @@ public interface AvatarManager {
 	 */
 	String getAvatarUrl(PersonIdent person);
 
-	void useAvatar(UserFacade user, @Nullable FileUpload upload);
+	void useAvatar(UserFacade user, @Nullable String avatarData);
 	
-	void useAvatar(ProjectFacade project, @Nullable FileUpload upload);
+	void useAvatar(ProjectFacade project, @Nullable String avatarData);
 	
 	File getUploaded(UserFacade user);
 	

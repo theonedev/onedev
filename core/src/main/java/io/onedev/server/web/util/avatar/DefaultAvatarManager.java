@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Splitter;
@@ -24,7 +23,7 @@ import io.onedev.server.manager.SettingManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.utils.ExceptionUtils;
+import io.onedev.server.web.component.avatarupload.AvatarUploadField;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.LockUtils;
 import io.onedev.utils.StringUtils;
@@ -53,7 +52,7 @@ public class DefaultAvatarManager implements AvatarManager {
 		} else {
 			File avatarFile = getUploaded(user);
 			if (avatarFile.exists()) { 
-				return AVATARS_BASE_URL + "uploaded/users/" + user.getId() + "?version=" + avatarFile.lastModified();
+				return AVATARS_BASE_URL + "uploaded/users/" + user.getId() + ".jpg?version=" + avatarFile.lastModified();
 			}
 			
 			if (configManager.getSystemSetting().isGravatarEnabled())
@@ -71,7 +70,7 @@ public class DefaultAvatarManager implements AvatarManager {
 		if (StringUtils.isBlank(secondaryName))
 			secondaryName = primaryName;
 		
-		File avatarFile = new File(Bootstrap.getSiteDir(), "avatars/generated/" + encoded);
+		File avatarFile = new File(Bootstrap.getSiteDir(), "avatars/generated/" + encoded + ".png");
 		if (!avatarFile.exists()) {
 			Lock avatarLock = LockUtils.getLock("generated-avatar:" + encoded);
 			avatarLock.lock();
@@ -87,7 +86,7 @@ public class DefaultAvatarManager implements AvatarManager {
 			}
 		}
 		
-		return AVATARS_BASE_URL + "generated/" + encoded;
+		return AVATARS_BASE_URL + "generated/" + encoded + ".png";
 	}
 	
 	@Override
@@ -117,26 +116,18 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Override
 	public File getUploaded(UserFacade user) {
-		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/users/" + user.getId());
+		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/users/" + user.getId() + ".jpg");
 	}
 
 	@Sessional
 	@Override
-	public void useAvatar(UserFacade user, FileUpload upload) {
+	public void useAvatar(UserFacade user, String avatarData) {
 		Lock avatarLock = LockUtils.getLock("uploaded-user-avatar:" + user.getId());
 		avatarLock.lock();
 		try {
 			File avatarFile = getUploaded(user);
-			if (upload != null) {
-				FileUtils.createDir(avatarFile.getParentFile());
-				try {
-					upload.writeTo(avatarFile);
-				} catch (Exception e) {
-					throw ExceptionUtils.unchecked(e);
-				}
-			} else {
-				FileUtils.deleteFile(avatarFile);
-			}
+			FileUtils.createDir(avatarFile.getParentFile());
+			AvatarUploadField.writeToFile(avatarFile, avatarData);
 		} finally {
 			avatarLock.unlock();
 		}
@@ -146,27 +137,19 @@ public class DefaultAvatarManager implements AvatarManager {
 	public String getAvatarUrl(ProjectFacade project) {
 		File avatarFile = getUploaded(project);
 		if (avatarFile.exists())  
-			return AVATARS_BASE_URL + "uploaded/projects/" + project.getId() + "?version=" + avatarFile.lastModified();
+			return AVATARS_BASE_URL + "uploaded/projects/" + project.getId() + ".jpg?version=" + avatarFile.lastModified();
 		else
 			return AVATARS_BASE_URL + "project.png";
 	}
 
 	@Override
-	public void useAvatar(ProjectFacade project, FileUpload upload) {
+	public void useAvatar(ProjectFacade project, String avatarData) {
 		Lock avatarLock = LockUtils.getLock("uploaded-project-avatar:" + project.getId());
 		avatarLock.lock();
 		try {
 			File avatarFile = getUploaded(project);
-			if (upload != null) {
-				FileUtils.createDir(avatarFile.getParentFile());
-				try {
-					upload.writeTo(avatarFile);
-				} catch (Exception e) {
-					throw ExceptionUtils.unchecked(e);
-				}
-			} else {
-				FileUtils.deleteFile(avatarFile);
-			}
+			FileUtils.createDir(avatarFile.getParentFile());
+			AvatarUploadField.writeToFile(avatarFile, avatarData);
 		} finally {
 			avatarLock.unlock();
 		}
@@ -174,7 +157,7 @@ public class DefaultAvatarManager implements AvatarManager {
 
 	@Override
 	public File getUploaded(ProjectFacade project) {
-		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/projects/" + project.getId());
+		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/projects/" + project.getId() + ".jpg");
 	}
 
 	@Override

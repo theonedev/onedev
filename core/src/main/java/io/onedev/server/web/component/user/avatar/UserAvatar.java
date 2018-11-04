@@ -2,7 +2,6 @@ package io.onedev.server.web.component.user.avatar;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -17,51 +16,27 @@ import io.onedev.server.web.util.avatar.AvatarManager;
 @SuppressWarnings("serial")
 public class UserAvatar extends WebComponent {
 
-	private final Long userId;
-	
 	private String url;
 	
 	public UserAvatar(String id, @Nullable User user) {
 		super(id);
 
-		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-		if (user == null) {
-			userId = null;
-		} else if (user.getId() == null) {
-			userId = null;
-		} else {
-			userId = user.getId();
-		}
-		url = avatarManager.getAvatarUrl(user!=null?user.getFacade():null);
+		url = getAvatarManager().getAvatarUrl(user!=null?user.getFacade():null);
 	}
 	
 	public UserAvatar(String id, PersonIdent person) {
 		super(id);
 		
-		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-		
 		User user = OneDev.getInstance(UserManager.class).find(person);
 		if (user != null) { 
-			userId = user.getId();
-			url = avatarManager.getAvatarUrl(user.getFacade());
+			url = getAvatarManager().getAvatarUrl(user.getFacade());
 		} else {
-			userId = null;
-			url = avatarManager.getAvatarUrl(person);
+			url = getAvatarManager().getAvatarUrl(person);
 		}
 	}
 	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-		
-		if (event.getPayload() instanceof UserAvatarChanged) {
-			UserAvatarChanged avatarChanged = (UserAvatarChanged) event.getPayload();
-			if (avatarChanged.getUser().getId().equals(userId)) {
-				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-				url = avatarManager.getAvatarUrl(avatarChanged.getUser().getFacade());
-				avatarChanged.getHandler().add(this);
-			}
-		}
+	private AvatarManager getAvatarManager() {
+		return OneDev.getInstance(AvatarManager.class);
 	}
 	
 	@Override

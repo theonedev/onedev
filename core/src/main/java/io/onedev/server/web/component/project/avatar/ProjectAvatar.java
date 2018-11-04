@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.project.avatar;
 
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -13,30 +12,16 @@ import io.onedev.server.web.util.avatar.AvatarManager;
 @SuppressWarnings("serial")
 public class ProjectAvatar extends WebComponent {
 
-	private final Long projectId;
-	
 	private String url;
 	
 	public ProjectAvatar(String id, Project project) {
 		super(id);
 
-		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-		projectId = project.getId();
-		url = avatarManager.getAvatarUrl(project.getFacade());
+		url = getAvatarManager().getAvatarUrl(project.getFacade());
 	}
 	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-		
-		if (event.getPayload() instanceof ProjectAvatarChanged) {
-			ProjectAvatarChanged avatarChanged = (ProjectAvatarChanged) event.getPayload();
-			if (avatarChanged.getProject().getId().equals(projectId)) {
-				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-				url = avatarManager.getAvatarUrl(avatarChanged.getProject().getFacade());
-				avatarChanged.getHandler().add(this);
-			}
-		}
+	private AvatarManager getAvatarManager() {
+		return OneDev.getInstance(AvatarManager.class);
 	}
 	
 	@Override

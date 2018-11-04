@@ -209,6 +209,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/builds", BuildListPage.class));
 		
 		add(new OnePageMapper("projects/${project}/settings/general", GeneralSettingPage.class));
+		add(new OnePageMapper("projects/${project}/settings/avatar", io.onedev.server.web.page.project.setting.avatar.AvatarEditPage.class));
 		add(new OnePageMapper("projects/${project}/settings/teams", TeamListPage.class));
 		add(new OnePageMapper("projects/${project}/settings/teams/new", NewTeamPage.class));
 		add(new OnePageMapper("projects/${project}/settings/teams/${team}", TeamEditPage.class));

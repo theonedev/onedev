@@ -66,12 +66,24 @@
 #project-setting .authorization.list .head .select2-container {
 	width: 240px;
 } 
-
-#project-setting .avatar-edit img.project-avatar {
-	height: 240px;
-	width: 240px;
+#project-setting .avatar-edit .title {
+	font-size: 18px;
+	font-weight: bold;
 	margin-bottom: 20px;
 }
-#project-setting .avatar-edit .upload {
-	margin-right: 8px;
+#project-setting .avatar-edit>.current {
+	margin-bottom: 20px;
+	padding-bottom: 20px;
+	border-bottom: 1px solid #E8E8E8;
+}
+#project-setting .avatar-edit .current img {
+	height: 240px;
+	width: 240px;
+	display: block;
+}
+#project-setting .avatar-edit .current a {
+	margin-top: 20px;
+}
+#project-setting .avatar-edit form>button {
+	margin-top: 20px;
 }

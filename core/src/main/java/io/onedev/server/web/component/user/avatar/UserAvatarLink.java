@@ -3,7 +3,6 @@ package io.onedev.server.web.component.user.avatar;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.behavior.AttributeAppender;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -23,8 +22,6 @@ import io.onedev.server.web.util.avatar.AvatarManager;
 @SuppressWarnings("serial")
 public class UserAvatarLink extends ViewStateAwarePageLink<Void> {
 
-	private final Long userId;
-	
 	private final PageParameters params;
 	
 	private final String tooltip;
@@ -40,13 +37,10 @@ public class UserAvatarLink extends ViewStateAwarePageLink<Void> {
 
 		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
 		if (user == null) {
-			userId = null;
 			params = new PageParameters();
 		} else if (user.getId() == null) {
-			userId = null;
 			params = new PageParameters();
 		} else {
-			userId = user.getId();
 			params = UserPage.paramsOf(user);
 		}
 		this.tooltip = tooltip;
@@ -64,11 +58,9 @@ public class UserAvatarLink extends ViewStateAwarePageLink<Void> {
 		
 		User user = OneDev.getInstance(UserManager.class).find(person);
 		if (user != null) { 
-			userId = user.getId();
 			params = UserPage.paramsOf(user);
 			url = avatarManager.getAvatarUrl(user.getFacade());
 		} else {
-			userId = null;
 			params = new PageParameters();
 			url = avatarManager.getAvatarUrl(person);
 		}
@@ -84,20 +76,6 @@ public class UserAvatarLink extends ViewStateAwarePageLink<Void> {
 	@Override
 	public IModel<?> getBody() {
 		return Model.of("<img src='" + url + "' class='avatar'></img>");
-	}
-	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-		
-		if (event.getPayload() instanceof UserAvatarChanged) {
-			UserAvatarChanged avatarChanged = (UserAvatarChanged) event.getPayload();
-			if (avatarChanged.getUser().getId().equals(userId)) {
-				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-				url = avatarManager.getAvatarUrl(avatarChanged.getUser().getFacade());
-				avatarChanged.getHandler().add(this);
-			}
-		}
 	}
 	
 	@Override

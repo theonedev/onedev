@@ -1,6 +1,5 @@
 package io.onedev.server.web.component.project.avatar;
 
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -18,8 +17,6 @@ import io.onedev.server.web.util.avatar.AvatarManager;
 @SuppressWarnings("serial")
 public class ProjectAvatarLink extends ViewStateAwarePageLink<Void> {
 
-	private final Long projectId;
-	
 	private final PageParameters params;
 	
 	private String url;
@@ -30,7 +27,6 @@ public class ProjectAvatarLink extends ViewStateAwarePageLink<Void> {
 		super(id, ProjectBlobPage.class);
 
 		AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-		projectId = project.getId();
 		params = ProjectPage.paramsOf(project);
 		url = avatarManager.getAvatarUrl(project.getFacade());
 		tooltip = project.getName();
@@ -44,20 +40,6 @@ public class ProjectAvatarLink extends ViewStateAwarePageLink<Void> {
 	@Override
 	public IModel<?> getBody() {
 		return Model.of("<img src='" + url + "' class='project-avatar'></img>");
-	}
-	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
-		
-		if (event.getPayload() instanceof ProjectAvatarChanged) {
-			ProjectAvatarChanged avatarChanged = (ProjectAvatarChanged) event.getPayload();
-			if (avatarChanged.getProject().getId().equals(projectId)) {
-				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-				url = avatarManager.getAvatarUrl(avatarChanged.getProject().getFacade());
-				avatarChanged.getHandler().add(this);
-			}
-		}
 	}
 	
 	@Override

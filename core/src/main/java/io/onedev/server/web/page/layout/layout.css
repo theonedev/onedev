@@ -7,7 +7,7 @@
 	height: 24px;
 	margin-left: -6px;
 }
-.navbar a {
+.navbar .tabs a {
 	font-size: 16px;
 }
 .navbar-nav>li>a.avatar {

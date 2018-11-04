@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.test;
+package io.onedev.server.web.component.avatarupload;
 
 import java.util.List;
 
@@ -10,12 +10,12 @@ import io.onedev.server.web.asset.cropper.CropperResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
-public class TestResourceReference extends BaseDependentResourceReference {
+public class AvatarUploadResourceReference extends BaseDependentResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
-	public TestResourceReference() {
-		super(TestResourceReference.class, "test.js");
+	public AvatarUploadResourceReference() {
+		super(AvatarUploadResourceReference.class, "avatar-upload.js");
 	}
 
 	@Override
@@ -23,7 +23,7 @@ public class TestResourceReference extends BaseDependentResourceReference {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new CropperResourceReference()));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(
-				TestResourceReference.class, "test.css")));
+				AvatarUploadResourceReference.class, "avatar-upload.css")));
 		return dependencies;
 	}
 

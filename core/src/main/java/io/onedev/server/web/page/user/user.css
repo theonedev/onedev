@@ -18,15 +18,6 @@
 	display: none;
 }
 
-#user .avatar-edit img.avatar {
-	height: 240px;
-	width: 240px;
-	margin-bottom: 20px;
-}
-#user .avatar-edit .upload {
-	margin-right: 8px;
-}
-
 #user .project.list .head .select2-container {
 	width: 240px;
 } 
@@ -34,6 +25,28 @@
 	color: #666;
 	margin-left: 4px;
 } 
+
+#user .avatar-edit .title {
+	margin-bottom: 20px;
+	font-size: 18px; 
+	font-weight: bold;
+}
+#user .avatar-edit>.current {
+	margin-bottom: 20px;
+	padding-bottom: 20px;
+	border-bottom: 1px solid #E8E8E8;
+}
+#user .avatar-edit .current img {
+	height: 240px;
+	width: 240px;
+	display: block;
+}
+#user .avatar-edit .current a {
+	margin-top: 20px;
+}
+#user .avatar-edit form>button {
+	margin-top: 20px;
+}
 
 .user.list .actions a {
 	color: #666;
