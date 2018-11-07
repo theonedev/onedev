@@ -54,9 +54,9 @@ public class WebSocketFilter extends AbstractUpgradeFilter {
 	@Override
 	public void init(final boolean isServlet, final FilterConfig filterConfig) throws ServletException {
 		super.init(isServlet, filterConfig);
-
+ 
 		try {
-			webSocketFactory = new WebSocketServerFactory(webSocketPolicy);
+			webSocketFactory = new WebSocketServerFactory(getApplication().getServletContext(), webSocketPolicy);
 
 			webSocketFactory.setCreator(new WebSocketCreator() {
 				@Override
