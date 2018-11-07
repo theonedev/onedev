@@ -26,7 +26,7 @@ import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonView;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
 import io.onedev.launcher.loader.AppLoader;
@@ -190,10 +190,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.memberships = memberships;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this)
+		return MoreObjects.toStringHelper(this)
 				.add("name", getName())
 				.toString();
 	}

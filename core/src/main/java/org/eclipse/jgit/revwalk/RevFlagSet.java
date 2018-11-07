@@ -50,7 +50,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Multiple application level mark bits for {@link RevObject}s.
+ * Multiple application level mark bits for
+ * {@link org.eclipse.jgit.revwalk.RevObject}s.
  *
  * @see RevFlag
  */
@@ -59,7 +60,9 @@ public class RevFlagSet extends AbstractSet<RevFlag> {
 
 	private final List<RevFlag> active;
 
-	/** Create an empty set of flags. */
+	/**
+	 * Create an empty set of flags.
+	 */
 	public RevFlagSet() {
 		active = new ArrayList<>();
 	}
@@ -70,7 +73,7 @@ public class RevFlagSet extends AbstractSet<RevFlag> {
 	 * @param s
 	 *            the set to copy flags from.
 	 */
-	public RevFlagSet(final RevFlagSet s) {
+	public RevFlagSet(RevFlagSet s) {
 		mask = s.mask;
 		active = new ArrayList<>(s.active);
 	}
@@ -81,20 +84,22 @@ public class RevFlagSet extends AbstractSet<RevFlag> {
 	 * @param s
 	 *            the collection to copy flags from.
 	 */
-	public RevFlagSet(final Collection<RevFlag> s) {
+	public RevFlagSet(Collection<RevFlag> s) {
 		this();
 		addAll(s);
 	}
 
+	/** {@inheritDoc} */
 	@Override
-	public boolean contains(final Object o) {
+	public boolean contains(Object o) {
 		if (o instanceof RevFlag)
 			return (mask & ((RevFlag) o).mask) != 0;
 		return false;
 	}
 
+	/** {@inheritDoc} */
 	@Override
-	public boolean containsAll(final Collection<?> c) {
+	public boolean containsAll(Collection<?> c) {
 		if (c instanceof RevFlagSet) {
 			final int cMask = ((RevFlagSet) c).mask;
 			return (mask & cMask) == cMask;
@@ -102,8 +107,9 @@ public class RevFlagSet extends AbstractSet<RevFlag> {
 		return super.containsAll(c);
 	}
 
+	/** {@inheritDoc} */
 	@Override
-	public boolean add(final RevFlag flag) {
+	public boolean add(RevFlag flag) {
 		if ((mask & flag.mask) != 0)
 			return false;
 		mask |= flag.mask;
@@ -114,8 +120,9 @@ public class RevFlagSet extends AbstractSet<RevFlag> {
 		return true;
 	}
 
+	/** {@inheritDoc} */
 	@Override
-	public boolean remove(final Object o) {
+	public boolean remove(Object o) {
 		final RevFlag flag = (RevFlag) o;
 		if ((mask & flag.mask) == 0)
 			return false;
@@ -126,6 +133,7 @@ public class RevFlagSet extends AbstractSet<RevFlag> {
 		return true;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public Iterator<RevFlag> iterator() {
 		final Iterator<RevFlag> i = active.iterator();
@@ -150,6 +158,7 @@ public class RevFlagSet extends AbstractSet<RevFlag> {
 		};
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public int size() {
 		return active.size();

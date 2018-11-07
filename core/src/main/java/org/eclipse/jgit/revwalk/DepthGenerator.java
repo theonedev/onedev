@@ -113,7 +113,7 @@ class DepthGenerator extends Generator {
 	}
 
 	@Override
-	void shareFreeList(final BlockRevQueue q) {
+	void shareFreeList(BlockRevQueue q) {
 		pending.shareFreeList(q);
 	}
 
@@ -134,7 +134,7 @@ class DepthGenerator extends Generator {
 
 			int newDepth = c.depth + 1;
 
-			for (final RevCommit p : c.parents) {
+			for (RevCommit p : c.parents) {
 				DepthWalk.Commit dp = (DepthWalk.Commit) p;
 
 				// If no depth has been assigned to this commit, assign

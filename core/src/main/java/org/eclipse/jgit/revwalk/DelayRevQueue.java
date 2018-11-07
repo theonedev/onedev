@@ -69,7 +69,7 @@ final class DelayRevQueue extends Generator {
 
 	private int size;
 
-	DelayRevQueue(final Generator g) {
+	DelayRevQueue(Generator g) {
 		pending = g;
 		delay = new FIFORevQueue();
 	}

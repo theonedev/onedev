@@ -73,6 +73,7 @@ import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.backup.BackupStrategy;
 import jetbrains.exodus.backup.BackupStrategy.FileDescriptor;
+import jetbrains.exodus.backup.VirtualFileDescriptor;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.Transaction;
@@ -987,8 +988,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		List<CollectingWork> works = new ArrayList<>();
 		try (RevWalk revWalk = new RevWalk(project.getRepository())) {
 			Collection<Ref> refs = new ArrayList<>();
-			refs.addAll(project.getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values());
-			refs.addAll(project.getRepository().getRefDatabase().getRefs(Constants.R_TAGS).values());
+			refs.addAll(project.getRepository().getRefDatabase().getRefsByPrefix(Constants.R_HEADS));
+			refs.addAll(project.getRepository().getRefDatabase().getRefsByPrefix(Constants.R_TAGS));
 
 			for (Ref ref: refs) {
 				RevObject revObj = revWalk.peel(revWalk.parseAny(ref.getObjectId()));
@@ -1089,8 +1090,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			File targetDir = getEnvDir(target.getId().toString());
 			backupStrategy.beforeBackup();
 			try {
-				for (FileDescriptor descriptor: backupStrategy.listFiles()) {
-					FileUtils.copyFileToDirectory(descriptor.getFile(), targetDir);
+				for (VirtualFileDescriptor descriptor: backupStrategy.getContents()) {
+					FileUtils.copyFileToDirectory(((FileDescriptor)descriptor).getFile(), targetDir);
 				}
 			} finally {
 				backupStrategy.afterBackup();

@@ -53,7 +53,7 @@ import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.Ref;
 
 /**
- * Utility methods for {@link RevWalk}.
+ * Utility methods for {@link org.eclipse.jgit.revwalk.RevWalk}.
  */
 public final class RevWalkUtils {
 
@@ -67,9 +67,10 @@ public final class RevWalkUtils {
 	 * other words, count the number of commits that are in <code>start</code>,
 	 * but not in <code>end</code>.
 	 * <p>
-	 * Note that this method calls {@link RevWalk#reset()} at the beginning.
-	 * Also note that the existing rev filter on the walk is left as-is, so be
-	 * sure to set the right rev filter before calling this method.
+	 * Note that this method calls
+	 * {@link org.eclipse.jgit.revwalk.RevWalk#reset()} at the beginning. Also
+	 * note that the existing rev filter on the walk is left as-is, so be sure
+	 * to set the right rev filter before calling this method.
 	 *
 	 * @param walk
 	 *            the rev walk to use
@@ -78,11 +79,10 @@ public final class RevWalkUtils {
 	 * @param end
 	 *            the commit where counting should end, or null if counting
 	 *            should be done until there are no more commits
-	 *
 	 * @return the number of commits
-	 * @throws MissingObjectException
-	 * @throws IncorrectObjectTypeException
-	 * @throws IOException
+	 * @throws org.eclipse.jgit.errors.MissingObjectException
+	 * @throws org.eclipse.jgit.errors.IncorrectObjectTypeException
+	 * @throws java.io.IOException
 	 */
 	public static int count(final RevWalk walk, final RevCommit start,
 			final RevCommit end) throws MissingObjectException,
@@ -96,9 +96,10 @@ public final class RevWalkUtils {
 	 * Find of commits that are in <code>start</code>, but not in
 	 * <code>end</code>.
 	 * <p>
-	 * Note that this method calls {@link RevWalk#reset()} at the beginning.
-	 * Also note that the existing rev filter on the walk is left as-is, so be
-	 * sure to set the right rev filter before calling this method.
+	 * Note that this method calls
+	 * {@link org.eclipse.jgit.revwalk.RevWalk#reset()} at the beginning. Also
+	 * note that the existing rev filter on the walk is left as-is, so be sure
+	 * to set the right rev filter before calling this method.
 	 *
 	 * @param walk
 	 *            the rev walk to use
@@ -108,9 +109,9 @@ public final class RevWalkUtils {
 	 *            the commit where counting should end, or null if counting
 	 *            should be done until there are no more commits
 	 * @return the commits found
-	 * @throws MissingObjectException
-	 * @throws IncorrectObjectTypeException
-	 * @throws IOException
+	 * @throws org.eclipse.jgit.errors.MissingObjectException
+	 * @throws org.eclipse.jgit.errors.IncorrectObjectTypeException
+	 * @throws java.io.IOException
 	 */
 	public static List<RevCommit> find(final RevWalk walk,
 			final RevCommit start, final RevCommit end)
@@ -131,7 +132,8 @@ public final class RevWalkUtils {
 	 * Find the list of branches a given commit is reachable from when following
 	 * parent.s
 	 * <p>
-	 * Note that this method calls {@link RevWalk#reset()} at the beginning.
+	 * Note that this method calls
+	 * {@link org.eclipse.jgit.revwalk.RevWalk#reset()} at the beginning.
 	 * <p>
 	 * In order to improve performance this method assumes clock skew among
 	 * committers is never larger than 24 hours.
@@ -143,9 +145,9 @@ public final class RevWalkUtils {
 	 * @param refs
 	 *            the set of branches we want to see reachability from
 	 * @return the list of branches a given commit is reachable from
-	 * @throws MissingObjectException
-	 * @throws IncorrectObjectTypeException
-	 * @throws IOException
+	 * @throws org.eclipse.jgit.errors.MissingObjectException
+	 * @throws org.eclipse.jgit.errors.IncorrectObjectTypeException
+	 * @throws java.io.IOException
 	 */
 	public static List<Ref> findBranchesReachableFrom(RevCommit commit,
 			RevWalk revWalk, Collection<Ref> refs)

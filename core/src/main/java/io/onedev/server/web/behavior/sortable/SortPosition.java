@@ -1,6 +1,6 @@
 package io.onedev.server.web.behavior.sortable;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 public class SortPosition {
 	
@@ -21,10 +21,9 @@ public class SortPosition {
 		return itemIndex;
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this)
+		return MoreObjects.toStringHelper(this)
 				.add("listIndex", listIndex)
 				.add("itemIndex", itemIndex)
 				.toString();

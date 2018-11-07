@@ -49,22 +49,27 @@ import java.io.IOException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 
-/** A queue of commits in LIFO order. */
+/**
+ * A queue of commits in LIFO order.
+ */
 public class LIFORevQueue extends BlockRevQueue {
 	private Block head;
 
-	/** Create an empty LIFO queue. */
+	/**
+	 * Create an empty LIFO queue.
+	 */
 	public LIFORevQueue() {
 		super();
 	}
 
-	LIFORevQueue(final Generator s) throws MissingObjectException,
+	LIFORevQueue(Generator s) throws MissingObjectException,
 			IncorrectObjectTypeException, IOException {
 		super(s);
 	}
 
+	/** {@inheritDoc} */
 	@Override
-	public void add(final RevCommit c) {
+	public void add(RevCommit c) {
 		Block b = head;
 		if (b == null || !b.canUnpop()) {
 			b = free.newBlock();
@@ -75,6 +80,7 @@ public class LIFORevQueue extends BlockRevQueue {
 		b.unpop(c);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public RevCommit next() {
 		final Block b = head;
@@ -89,6 +95,7 @@ public class LIFORevQueue extends BlockRevQueue {
 		return c;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void clear() {
 		head = null;
@@ -96,7 +103,7 @@ public class LIFORevQueue extends BlockRevQueue {
 	}
 
 	@Override
-	boolean everbodyHasFlag(final int f) {
+	boolean everbodyHasFlag(int f) {
 		for (Block b = head; b != null; b = b.next) {
 			for (int i = b.headIndex; i < b.tailIndex; i++)
 				if ((b.commits[i].flags & f) == 0)
@@ -106,7 +113,7 @@ public class LIFORevQueue extends BlockRevQueue {
 	}
 
 	@Override
-	boolean anybodyHasFlag(final int f) {
+	boolean anybodyHasFlag(int f) {
 		for (Block b = head; b != null; b = b.next) {
 			for (int i = b.headIndex; i < b.tailIndex; i++)
 				if ((b.commits[i].flags & f) != 0)
@@ -115,6 +122,7 @@ public class LIFORevQueue extends BlockRevQueue {
 		return false;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		final StringBuilder s = new StringBuilder();

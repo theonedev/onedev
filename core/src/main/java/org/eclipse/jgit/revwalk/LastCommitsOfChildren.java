@@ -2,6 +2,7 @@ package org.eclipse.jgit.revwalk;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -229,7 +230,7 @@ public final class LastCommitsOfChildren extends HashMap<String, Value> {
 										}
 										if (modified) {
 											childRef.set(RawParseUtils.decode(
-													Constants.CHARSET, 
+													StandardCharsets.UTF_8, 
 													walker.getRawPath(), 
 													treePathRaw.length!=0?treePathRaw.length+1:0, 
 													walkPathLen));

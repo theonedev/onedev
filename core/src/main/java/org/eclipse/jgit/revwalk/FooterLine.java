@@ -80,11 +80,13 @@ public final class FooterLine {
 	}
 
 	/**
+	 * Whether keys match
+	 *
 	 * @param key
 	 *            key to test this line's key name against.
 	 * @return true if {@code key.getName().equalsIgnorecase(getKey())}.
 	 */
-	public boolean matches(final FooterKey key) {
+	public boolean matches(FooterKey key) {
 		final byte[] kRaw = key.raw;
 		final int len = kRaw.length;
 		int bPtr = keyStart;
@@ -101,6 +103,8 @@ public final class FooterLine {
 	}
 
 	/**
+	 * Get key name of this footer.
+	 *
 	 * @return key name of this footer; that is the text before the ":" on the
 	 *         line footer's line. The text is decoded according to the commit's
 	 *         specified (or assumed) character encoding.
@@ -110,6 +114,8 @@ public final class FooterLine {
 	}
 
 	/**
+	 * Get value of this footer.
+	 *
 	 * @return value of this footer; that is the text after the ":" and any
 	 *         leading whitespace has been skipped. May be the empty string if
 	 *         the footer has no value (line ended with ":"). The text is
@@ -144,6 +150,7 @@ public final class FooterLine {
 		return RawParseUtils.decode(enc, buffer, lt, gt - 1);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return getKey() + ": " + getValue(); //$NON-NLS-1$

@@ -61,7 +61,7 @@ import org.eclipse.jgit.errors.MissingObjectException;
 final class FixUninterestingGenerator extends Generator {
 	private final Generator pending;
 
-	FixUninterestingGenerator(final Generator g) {
+	FixUninterestingGenerator(Generator g) {
 		pending = g;
 	}
 

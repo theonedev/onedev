@@ -57,9 +57,10 @@ import org.eclipse.jgit.revwalk.RevWalk;
  * Includes a commit only if all subfilters include the same commit.
  * <p>
  * Classic shortcut behavior is used, so evaluation of the
- * {@link RevFilter#include(RevWalk, RevCommit)} method stops as soon as a false
- * result is obtained. Applications can improve filtering performance by placing
- * faster filters that are more likely to reject a result earlier in the list.
+ * {@link org.eclipse.jgit.revwalk.filter.RevFilter#include(RevWalk, RevCommit)}
+ * method stops as soon as a false result is obtained. Applications can improve
+ * filtering performance by placing faster filters that are more likely to
+ * reject a result earlier in the list.
  */
 public abstract class AndRevFilter extends RevFilter {
 	/**
@@ -71,7 +72,7 @@ public abstract class AndRevFilter extends RevFilter {
 	 *            second filter to test.
 	 * @return a filter that must match both input filters.
 	 */
-	public static RevFilter create(final RevFilter a, final RevFilter b) {
+	public static RevFilter create(RevFilter a, RevFilter b) {
 		if (a == ALL)
 			return b;
 		if (b == ALL)
@@ -87,7 +88,7 @@ public abstract class AndRevFilter extends RevFilter {
 	 *            filters.
 	 * @return a filter that must match all input filters.
 	 */
-	public static RevFilter create(final RevFilter[] list) {
+	public static RevFilter create(RevFilter[] list) {
 		if (list.length == 2)
 			return create(list[0], list[1]);
 		if (list.length < 2)
@@ -105,7 +106,7 @@ public abstract class AndRevFilter extends RevFilter {
 	 *            filters.
 	 * @return a filter that must match all input filters.
 	 */
-	public static RevFilter create(final Collection<RevFilter> list) {
+	public static RevFilter create(Collection<RevFilter> list) {
 		if (list.size() < 2)
 			throw new IllegalArgumentException(JGitText.get().atLeastTwoFiltersNeeded);
 		final RevFilter[] subfilters = new RevFilter[list.size()];
@@ -122,7 +123,7 @@ public abstract class AndRevFilter extends RevFilter {
 
 		private final boolean requiresCommitBody;
 
-		Binary(final RevFilter one, final RevFilter two) {
+		Binary(RevFilter one, RevFilter two) {
 			a = one;
 			b = two;
 			requiresCommitBody = a.requiresCommitBody()
@@ -130,7 +131,7 @@ public abstract class AndRevFilter extends RevFilter {
 		}
 
 		@Override
-		public boolean include(final RevWalk walker, final RevCommit c)
+		public boolean include(RevWalk walker, RevCommit c)
 				throws MissingObjectException, IncorrectObjectTypeException,
 				IOException {
 			return a.include(walker, c) && b.include(walker, c);
@@ -158,7 +159,7 @@ public abstract class AndRevFilter extends RevFilter {
 
 		private final boolean requiresCommitBody;
 
-		List(final RevFilter[] list) {
+		List(RevFilter[] list) {
 			subfilters = list;
 
 			boolean rcb = false;
@@ -168,10 +169,10 @@ public abstract class AndRevFilter extends RevFilter {
 		}
 
 		@Override
-		public boolean include(final RevWalk walker, final RevCommit c)
+		public boolean include(RevWalk walker, RevCommit c)
 				throws MissingObjectException, IncorrectObjectTypeException,
 				IOException {
-			for (final RevFilter f : subfilters) {
+			for (RevFilter f : subfilters) {
 				if (!f.include(walker, c))
 					return false;
 			}

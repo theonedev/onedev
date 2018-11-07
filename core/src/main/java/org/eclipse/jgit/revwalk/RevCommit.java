@@ -51,6 +51,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -66,7 +67,9 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.util.RawParseUtils;
 import org.eclipse.jgit.util.StringUtils;
 
-/** A commit reference to a commit in the DAG. */
+/**
+ * A commit reference to a commit in the DAG.
+ */
 public class RevCommit extends RevObject {
 	private static final int STACK_DEPTH = 500;
 
@@ -79,7 +82,8 @@ public class RevCommit extends RevObject {
 	 * will not have their headers loaded.
 	 *
 	 * Applications are discouraged from using this API. Callers usually need
-	 * more than one commit. Use {@link RevWalk#parseCommit(AnyObjectId)} to
+	 * more than one commit. Use
+	 * {@link org.eclipse.jgit.revwalk.RevWalk#parseCommit(AnyObjectId)} to
 	 * obtain a RevCommit from an existing repository.
 	 *
 	 * @param raw
@@ -115,7 +119,7 @@ public class RevCommit extends RevObject {
 	 *            modified by the caller.
 	 * @return the parsed commit, in an isolated revision pool that is not
 	 *         available to the caller.
-	 * @throws IOException
+	 * @throws java.io.IOException
 	 *             in case of RevWalk initialization fails
 	 */
 	public static RevCommit parse(RevWalk rw, byte[] raw) throws IOException {
@@ -145,18 +149,18 @@ public class RevCommit extends RevObject {
 	 * @param id
 	 *            object name for the commit.
 	 */
-	protected RevCommit(final AnyObjectId id) {
+	protected RevCommit(AnyObjectId id) {
 		super(id);
 	}
 
 	@Override
-	void parseHeaders(final RevWalk walk) throws MissingObjectException,
+	void parseHeaders(RevWalk walk) throws MissingObjectException,
 			IncorrectObjectTypeException, IOException {
 		parseCanonical(walk, walk.getCachedBytes(this));
 	}
 
 	@Override
-	void parseBody(final RevWalk walk) throws MissingObjectException,
+	void parseBody(RevWalk walk) throws MissingObjectException,
 			IncorrectObjectTypeException, IOException {
 		if (buffer == null) {
 			buffer = walk.getCachedBytes(this);
@@ -165,10 +169,10 @@ public class RevCommit extends RevObject {
 		}
 	}
 
-	void parseCanonical(final RevWalk walk, final byte[] raw)
-			throws IOException {
-		if (!walk.shallowCommitsInitialized)
-			walk.initializeShallowCommits();
+	void parseCanonical(RevWalk walk, byte[] raw) throws IOException {
+		if (!walk.shallowCommitsInitialized) {
+			walk.initializeShallowCommits(this);
+		}
 
 		final MutableObjectId idBuffer = walk.idBuffer;
 		idBuffer.fromString(raw, 5);
@@ -179,13 +183,14 @@ public class RevCommit extends RevObject {
 			RevCommit[] pList = new RevCommit[1];
 			int nParents = 0;
 			for (;;) {
-				if (raw[ptr] != 'p')
+				if (raw[ptr] != 'p') {
 					break;
+				}
 				idBuffer.fromString(raw, ptr + 7);
 				final RevCommit p = walk.lookupCommit(idBuffer);
-				if (nParents == 0)
+				if (nParents == 0) {
 					pList[nParents++] = p;
-				else if (nParents == 1) {
+				} else if (nParents == 1) {
 					pList = new RevCommit[] { pList[0], p };
 					nParents = 2;
 				} else {
@@ -215,11 +220,13 @@ public class RevCommit extends RevObject {
 			commitTime = RawParseUtils.parseBase10(raw, ptr, null);
 		}
 
-		if (walk.isRetainBody())
+		if (walk.isRetainBody()) {
 			buffer = raw;
+		}
 		flags |= PARSED;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public final int getType() {
 		return Constants.OBJ_COMMIT;
@@ -306,7 +313,7 @@ public class RevCommit extends RevObject {
 	 * @param flag
 	 *            the single flag value to carry back onto parents.
 	 */
-	public void carry(final RevFlag flag) {
+	public void carry(RevFlag flag) {
 		final int carry = flags & flag.mask;
 		if (carry != 0)
 			carryFlags(this, carry);
@@ -315,7 +322,7 @@ public class RevCommit extends RevObject {
 	/**
 	 * Time from the "committer " line of the buffer.
 	 *
-	 * @return time, expressed as seconds since the epoch.
+	 * @return commit time
 	 */
 	public final int getCommitTime() {
 		return commitTime;
@@ -346,10 +353,10 @@ public class RevCommit extends RevObject {
 	 *            parent index to obtain. Must be in the range 0 through
 	 *            {@link #getParentCount()}-1.
 	 * @return the specified parent.
-	 * @throws ArrayIndexOutOfBoundsException
+	 * @throws java.lang.ArrayIndexOutOfBoundsException
 	 *             an invalid parent index was specified.
 	 */
-	public final RevCommit getParent(final int nth) {
+	public final RevCommit getParent(int nth) {
 		return parents[nth];
 	}
 
@@ -384,19 +391,48 @@ public class RevCommit extends RevObject {
 	}
 
 	/**
+	 * Parse the gpg signature from the raw buffer.
+	 * <p>
+	 * This method parses and returns the raw content of the gpgsig lines. This
+	 * method is fairly expensive and produces a new byte[] instance on each
+	 * invocation. Callers should invoke this method only if they are certain
+	 * they will need, and should cache the return value for as long as
+	 * necessary to use all information from it.
+	 * <p>
+	 * RevFilter implementations should try to use
+	 * {@link org.eclipse.jgit.util.RawParseUtils} to scan the
+	 * {@link #getRawBuffer()} instead, as this will allow faster evaluation of
+	 * commits.
+	 *
+	 * @return contents of the gpg signature; null if the commit was not signed.
+	 * @since 5.1
+	 */
+	public final @Nullable byte[] getRawGpgSignature() {
+		final byte[] raw = buffer;
+		final byte[] header = {'g', 'p', 'g', 's', 'i', 'g'};
+		final int start = RawParseUtils.headerStart(header, raw, 0);
+		if (start < 0) {
+			return null;
+		}
+		final int end = RawParseUtils.headerEnd(raw, start);
+		return Arrays.copyOfRange(raw, start, end);
+	}
+
+	/**
 	 * Parse the author identity from the raw buffer.
 	 * <p>
 	 * This method parses and returns the content of the author line, after
-	 * taking the commit's character set into user and decoding the author
+	 * taking the commit's character set into account and decoding the author
 	 * name and email address. This method is fairly expensive and produces a
 	 * new PersonIdent instance on each invocation. Callers should invoke this
 	 * method only if they are certain they will be outputting the result, and
 	 * should cache the return value for as long as necessary to use all
 	 * information from it.
 	 * <p>
-	 * RevFilter implementations should try to use {@link RawParseUtils} to scan
-	 * the {@link #getRawBuffer()} instead, as this will allow faster evaluation
-	 * of commits.
+	 * RevFilter implementations should try to use
+	 * {@link org.eclipse.jgit.util.RawParseUtils} to scan the
+	 * {@link #getRawBuffer()} instead, as this will allow faster evaluation of
+	 * commits.
 	 *
 	 * @return identity of the author (name, email) and the time the commit was
 	 *         made by the author; null if no author line was found.
@@ -413,16 +449,17 @@ public class RevCommit extends RevObject {
 	 * Parse the committer identity from the raw buffer.
 	 * <p>
 	 * This method parses and returns the content of the committer line, after
-	 * taking the commit's character set into user and decoding the committer
+	 * taking the commit's character set into account and decoding the committer
 	 * name and email address. This method is fairly expensive and produces a
 	 * new PersonIdent instance on each invocation. Callers should invoke this
 	 * method only if they are certain they will be outputting the result, and
 	 * should cache the return value for as long as necessary to use all
 	 * information from it.
 	 * <p>
-	 * RevFilter implementations should try to use {@link RawParseUtils} to scan
-	 * the {@link #getRawBuffer()} instead, as this will allow faster evaluation
-	 * of commits.
+	 * RevFilter implementations should try to use
+	 * {@link org.eclipse.jgit.util.RawParseUtils} to scan the
+	 * {@link #getRawBuffer()} instead, as this will allow faster evaluation of
+	 * commits.
 	 *
 	 * @return identity of the committer (name, email) and the time the commit
 	 *         was made by the committer; null if no committer line was found.
@@ -439,7 +476,7 @@ public class RevCommit extends RevObject {
 	 * Parse the complete commit message and decode it to a string.
 	 * <p>
 	 * This method parses and returns the message portion of the commit buffer,
-	 * after taking the commit's character set into user and decoding the
+	 * after taking the commit's character set into account and decoding the
 	 * buffer using that character set. This method is a fairly expensive
 	 * operation and produces a new string on each invocation.
 	 *
@@ -461,7 +498,7 @@ public class RevCommit extends RevObject {
 	 * "oneline" format, suitable for output in a single line display.
 	 * <p>
 	 * This method parses and returns the message portion of the commit buffer,
-	 * after taking the commit's character set into user and decoding the
+	 * after taking the commit's character set into account and decoding the
 	 * buffer using that character set. This method is a fairly expensive
 	 * operation and produces a new string on each invocation.
 	 *
@@ -484,7 +521,7 @@ public class RevCommit extends RevObject {
 		return str;
 	}
 
-	static boolean hasLF(final byte[] r, int b, final int e) {
+	static boolean hasLF(byte[] r, int b, int e) {
 		while (b < e)
 			if (r[b++] == '\n')
 				return true;
@@ -609,7 +646,7 @@ public class RevCommit extends RevObject {
 	 *         with the specified key, or there are no footers at all.
 	 * @see #getFooterLines()
 	 */
-	public final List<String> getFooterLines(final String keyName) {
+	public final List<String> getFooterLines(String keyName) {
 		return getFooterLines(new FooterKey(keyName));
 	}
 
@@ -624,12 +661,12 @@ public class RevCommit extends RevObject {
 	 *         with the specified key, or there are no footers at all.
 	 * @see #getFooterLines()
 	 */
-	public final List<String> getFooterLines(final FooterKey keyName) {
+	public final List<String> getFooterLines(FooterKey keyName) {
 		final List<FooterLine> src = getFooterLines();
 		if (src.isEmpty())
 			return Collections.emptyList();
 		final ArrayList<String> r = new ArrayList<>(src.size());
-		for (final FooterLine f : src) {
+		for (FooterLine f : src) {
 			if (f.matches(keyName))
 				r.add(f.getValue());
 		}
@@ -654,7 +691,7 @@ public class RevCommit extends RevObject {
 	 * time in {@link #getCommitTime()}. Accessing other properties such as
 	 * {@link #getAuthorIdent()}, {@link #getCommitterIdent()} or either message
 	 * function requires reloading the buffer by invoking
-	 * {@link RevWalk#parseBody(RevObject)}.
+	 * {@link org.eclipse.jgit.revwalk.RevWalk#parseBody(RevObject)}.
 	 *
 	 * @since 4.0
 	 */
@@ -662,6 +699,7 @@ public class RevCommit extends RevObject {
 		buffer = null;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		final StringBuilder s = new StringBuilder();

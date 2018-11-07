@@ -7,6 +7,7 @@ import java.util.Date;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 
 public class BlameCommit implements Serializable {
@@ -62,10 +63,9 @@ public class BlameCommit implements Serializable {
 		return Objects.equal(hash, rhs.hash);
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(this)
+		return MoreObjects.toStringHelper(this)
 				.add("hash", hash)
 				.add("committer", committer.getName())
 				.add("date", committer.getWhen())

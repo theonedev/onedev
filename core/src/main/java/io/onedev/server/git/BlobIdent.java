@@ -9,7 +9,7 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.FileMode;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
@@ -119,10 +119,9 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 			.toHashCode();
 	}		
 
-	@SuppressWarnings("deprecation")
 	@Override
 	public String toString() {
-		return Objects.toStringHelper(BlobIdent.class)
+		return MoreObjects.toStringHelper(BlobIdent.class)
 				.add("revision", revision)
 				.add("path", path)
 				.omitNullValues()

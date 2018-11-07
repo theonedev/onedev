@@ -81,7 +81,7 @@ abstract class Generator {
 	 * @param q
 	 *            another FIFO queue that wants to share our queue's free list.
 	 */
-	void shareFreeList(final BlockRevQueue q) {
+	void shareFreeList(BlockRevQueue q) {
 		// Do nothing by default.
 	}
 

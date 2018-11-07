@@ -49,7 +49,9 @@ import java.io.IOException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 
-/** A queue of commits sorted by commit time order. */
+/**
+ * A queue of commits sorted by commit time order.
+ */
 public class DateRevQueue extends AbstractRevQueue {
 	private static final int REBUILD_INDEX_COUNT = 1000;
 
@@ -67,12 +69,14 @@ public class DateRevQueue extends AbstractRevQueue {
 
 	private int last = -1;
 
-	/** Create an empty date queue. */
+	/**
+	 * Create an empty date queue.
+	 */
 	public DateRevQueue() {
 		super();
 	}
 
-	DateRevQueue(final Generator s) throws MissingObjectException,
+	DateRevQueue(Generator s) throws MissingObjectException,
 			IncorrectObjectTypeException, IOException {
 		for (;;) {
 			final RevCommit c = s.next();
@@ -82,8 +86,9 @@ public class DateRevQueue extends AbstractRevQueue {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
-	public void add(final RevCommit c) {
+	public void add(RevCommit c) {
 		sinceLastIndex++;
 		if (++inQueue > REBUILD_INDEX_COUNT
 				&& sinceLastIndex > REBUILD_INDEX_COUNT)
@@ -127,6 +132,7 @@ public class DateRevQueue extends AbstractRevQueue {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public RevCommit next() {
 		final Entry q = head;
@@ -163,6 +169,7 @@ public class DateRevQueue extends AbstractRevQueue {
 		return head != null ? head.commit : null;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void clear() {
 		head = null;
@@ -174,7 +181,7 @@ public class DateRevQueue extends AbstractRevQueue {
 	}
 
 	@Override
-	boolean everbodyHasFlag(final int f) {
+	boolean everbodyHasFlag(int f) {
 		for (Entry q = head; q != null; q = q.next) {
 			if ((q.commit.flags & f) == 0)
 				return false;
@@ -183,7 +190,7 @@ public class DateRevQueue extends AbstractRevQueue {
 	}
 
 	@Override
-	boolean anybodyHasFlag(final int f) {
+	boolean anybodyHasFlag(int f) {
 		for (Entry q = head; q != null; q = q.next) {
 			if ((q.commit.flags & f) != 0)
 				return true;
@@ -196,6 +203,7 @@ public class DateRevQueue extends AbstractRevQueue {
 		return outputType | SORT_COMMIT_TIME_DESC;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		final StringBuilder s = new StringBuilder();
@@ -204,7 +212,7 @@ public class DateRevQueue extends AbstractRevQueue {
 		return s.toString();
 	}
 
-	private Entry newEntry(final RevCommit c) {
+	private Entry newEntry(RevCommit c) {
 		Entry r = free;
 		if (r == null)
 			r = new Entry();
@@ -214,7 +222,7 @@ public class DateRevQueue extends AbstractRevQueue {
 		return r;
 	}
 
-	private void freeEntry(final Entry e) {
+	private void freeEntry(Entry e) {
 		e.next = free;
 		free = e;
 	}

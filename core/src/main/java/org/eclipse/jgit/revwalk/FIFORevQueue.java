@@ -48,24 +48,29 @@ import java.io.IOException;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.MissingObjectException;
 
-/** A queue of commits in FIFO order. */
+/**
+ * A queue of commits in FIFO order.
+ */
 public class FIFORevQueue extends BlockRevQueue {
 	private Block head;
 
 	private Block tail;
 
-	/** Create an empty FIFO queue. */
+	/**
+	 * Create an empty FIFO queue.
+	 */
 	public FIFORevQueue() {
 		super();
 	}
 
-	FIFORevQueue(final Generator s) throws MissingObjectException,
+	FIFORevQueue(Generator s) throws MissingObjectException,
 			IncorrectObjectTypeException, IOException {
 		super(s);
 	}
 
+	/** {@inheritDoc} */
 	@Override
-	public void add(final RevCommit c) {
+	public void add(RevCommit c) {
 		Block b = tail;
 		if (b == null) {
 			b = free.newBlock();
@@ -87,7 +92,7 @@ public class FIFORevQueue extends BlockRevQueue {
 	 * @param c
 	 *            the commit to insert into the queue.
 	 */
-	public void unpop(final RevCommit c) {
+	public void unpop(RevCommit c) {
 		Block b = head;
 		if (b == null) {
 			b = free.newBlock();
@@ -108,6 +113,7 @@ public class FIFORevQueue extends BlockRevQueue {
 		head = b;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public RevCommit next() {
 		final Block b = head;
@@ -124,6 +130,7 @@ public class FIFORevQueue extends BlockRevQueue {
 		return c;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void clear() {
 		head = null;
@@ -132,7 +139,7 @@ public class FIFORevQueue extends BlockRevQueue {
 	}
 
 	@Override
-	boolean everbodyHasFlag(final int f) {
+	boolean everbodyHasFlag(int f) {
 		for (Block b = head; b != null; b = b.next) {
 			for (int i = b.headIndex; i < b.tailIndex; i++)
 				if ((b.commits[i].flags & f) == 0)
@@ -142,7 +149,7 @@ public class FIFORevQueue extends BlockRevQueue {
 	}
 
 	@Override
-	boolean anybodyHasFlag(final int f) {
+	boolean anybodyHasFlag(int f) {
 		for (Block b = head; b != null; b = b.next) {
 			for (int i = b.headIndex; i < b.tailIndex; i++)
 				if ((b.commits[i].flags & f) != 0)
@@ -151,7 +158,7 @@ public class FIFORevQueue extends BlockRevQueue {
 		return false;
 	}
 
-	void removeFlag(final int f) {
+	void removeFlag(int f) {
 		final int not_f = ~f;
 		for (Block b = head; b != null; b = b.next) {
 			for (int i = b.headIndex; i < b.tailIndex; i++)
@@ -159,6 +166,7 @@ public class FIFORevQueue extends BlockRevQueue {
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		final StringBuilder s = new StringBuilder();

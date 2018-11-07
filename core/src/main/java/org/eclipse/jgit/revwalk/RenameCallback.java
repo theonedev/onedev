@@ -46,8 +46,9 @@ import org.eclipse.jgit.diff.DiffEntry;
 
 /**
  * An instance of this class can be used in conjunction with a
- * {@link FollowFilter}. Whenever a rename has been detected during a revision
- * walk, it will be reported here.
+ * {@link org.eclipse.jgit.revwalk.FollowFilter}. Whenever a rename has been
+ * detected during a revision walk, it will be reported here.
+ *
  * @see FollowFilter#setRenameCallback(RenameCallback)
  */
 public abstract class RenameCallback {

@@ -55,7 +55,7 @@ class BlockObjQueue {
 		free = new BlockFreeList();
 	}
 
-	void add(final RevObject c) {
+	void add(RevObject c) {
 		Block b = tail;
 		if (b == null) {
 			b = free.newBlock();
@@ -98,7 +98,7 @@ class BlockObjQueue {
 			return b;
 		}
 
-		void freeBlock(final Block b) {
+		void freeBlock(Block b) {
 			b.next = next;
 			next = b;
 		}
@@ -127,7 +127,7 @@ class BlockObjQueue {
 			return headIndex == tailIndex;
 		}
 
-		void add(final RevObject c) {
+		void add(RevObject c) {
 			objects[tailIndex++] = c;
 		}
 

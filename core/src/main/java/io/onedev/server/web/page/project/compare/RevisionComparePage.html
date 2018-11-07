@@ -4,9 +4,9 @@
 			<tr>
 				<td class="left revision">
 					<div class="title clearfix">
-						<label class="pull-left">Left side</label>
+						<label class="pull-left">Base</label>
 						<wicket:enclosure child="compareWithMergeBase">
-							<input wicket:id="compareWithMergeBase" type="checkbox" class="pull-left"></input> 
+							<input wicket:id="compareWithMergeBase" type="checkbox" class="pull-left">
 							<span class="pull-left">common ancestor</span>
 							<span wicket:id="mergeBaseTooltip" class="pull-left"><i class="fa fa-question-circle"></i></span>
 						</wicket:enclosure>
@@ -21,7 +21,7 @@
 				</td>
 				<td class="right revision">
 					<div class="title">
-						<label>Right side</label>
+						<label>Compare</label>
 					</div>
 					<div wicket:id="rightRevSelector" class="selector"></div>
 					<div class="message">
@@ -38,7 +38,7 @@
 		</div>
 		<div wicket:id="unrelatedHistory" class="alert alert-danger">
 			<span class="fa fa-lg fa-warning"></span>
-			<span>History of left side and right side is unrelated.</span>
+			<span>History of comparing revisions is unrelated.</span>
 		</div>
 		<ul wicket:id="tabs" class="nav nav-tabs"></ul>
 		<div wicket:id="tabPanel" class="tab-panel"></div>

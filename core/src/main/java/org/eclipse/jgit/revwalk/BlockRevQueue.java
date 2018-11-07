@@ -51,12 +51,14 @@ import org.eclipse.jgit.errors.MissingObjectException;
 abstract class BlockRevQueue extends AbstractRevQueue {
 	protected BlockFreeList free;
 
-	/** Create an empty revision queue. */
+	/**
+	 * Create an empty revision queue.
+	 */
 	protected BlockRevQueue() {
 		free = new BlockFreeList();
 	}
 
-	BlockRevQueue(final Generator s) throws MissingObjectException,
+	BlockRevQueue(Generator s) throws MissingObjectException,
 			IncorrectObjectTypeException, IOException {
 		free = new BlockFreeList();
 		outputType = s.outputType();
@@ -70,6 +72,8 @@ abstract class BlockRevQueue extends AbstractRevQueue {
 	}
 
 	/**
+	 * {@inheritDoc}
+	 * <p>
 	 * Reconfigure this queue to share the same free list as another.
 	 * <p>
 	 * Multiple revision queues can be connected to the same free list, making
@@ -79,12 +83,9 @@ abstract class BlockRevQueue extends AbstractRevQueue {
 	 * <p>
 	 * Free lists are not thread-safe. Applications must ensure that all queues
 	 * sharing the same free list are doing so from only a single thread.
-	 *
-	 * @param q
-	 *            the other queue we will steal entries from.
 	 */
 	@Override
-	public void shareFreeList(final BlockRevQueue q) {
+	public void shareFreeList(BlockRevQueue q) {
 		free = q.free;
 	}
 
@@ -100,7 +101,7 @@ abstract class BlockRevQueue extends AbstractRevQueue {
 			return b;
 		}
 
-		void freeBlock(final Block b) {
+		void freeBlock(Block b) {
 			b.next = next;
 			next = b;
 		}
@@ -137,11 +138,11 @@ abstract class BlockRevQueue extends AbstractRevQueue {
 			return headIndex > 0;
 		}
 
-		void add(final RevCommit c) {
+		void add(RevCommit c) {
 			commits[tailIndex++] = c;
 		}
 
-		void unpop(final RevCommit c) {
+		void unpop(RevCommit c) {
 			commits[--headIndex] = c;
 		}
 

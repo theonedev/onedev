@@ -78,6 +78,7 @@ public class SkipRevFilter extends RevFilter {
 		this.skip = skip;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean include(RevWalk walker, RevCommit cmit)
 			throws StopWalkException, MissingObjectException,
@@ -87,6 +88,7 @@ public class SkipRevFilter extends RevFilter {
 		return true;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public RevFilter clone() {
 		return new SkipRevFilter(skip);

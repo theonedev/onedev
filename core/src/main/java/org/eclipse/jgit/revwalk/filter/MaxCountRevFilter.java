@@ -79,6 +79,7 @@ public class MaxCountRevFilter extends RevFilter {
 		this.maxCount = maxCount;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public boolean include(RevWalk walker, RevCommit cmit)
 			throws StopWalkException, MissingObjectException,
@@ -89,6 +90,7 @@ public class MaxCountRevFilter extends RevFilter {
 		return true;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public RevFilter clone() {
 		return new MaxCountRevFilter(maxCount);

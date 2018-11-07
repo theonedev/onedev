@@ -51,7 +51,7 @@ import java.util.AbstractList;
 import org.eclipse.jgit.internal.JGitText;
 
 /**
- * An ordered list of {@link RevObject} subclasses.
+ * An ordered list of {@link org.eclipse.jgit.revwalk.RevObject} subclasses.
  *
  * @param <E>
  *            type of subclass of RevObject the list is storing.
@@ -73,13 +73,16 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 	/** Current number of elements in the list. */
 	protected int size = 0;
 
-	/** Create an empty object list. */
+	/**
+	 * Create an empty object list.
+	 */
 	public RevObjectList() {
 		// Initialized above.
 	}
 
+	/** {@inheritDoc} */
 	@Override
-	public void add(final int index, final E element) {
+	public void add(int index, E element) {
 		if (index != size)
 			throw new UnsupportedOperationException(MessageFormat.format(
 					JGitText.get().unsupportedOperationNotAddAtEnd,
@@ -88,6 +91,7 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 		size++;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	@SuppressWarnings("unchecked")
 	public E set(int index, E element) {
@@ -109,6 +113,7 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 		return (E) old;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	@SuppressWarnings("unchecked")
 	public E get(int index) {
@@ -123,11 +128,13 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 		return s != null ? (E) s.contents[index] : null;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public int size() {
 		return size;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void clear() {
 		contents = new Block(0);
@@ -140,7 +147,7 @@ public class RevObjectList<E extends RevObject> extends AbstractList<E> {
 
 		final int shift;
 
-		Block(final int s) {
+		Block(int s) {
 			shift = s;
 		}
 	}

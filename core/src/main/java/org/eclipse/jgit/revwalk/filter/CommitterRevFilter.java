@@ -50,7 +50,9 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.util.RawCharSequence;
 import org.eclipse.jgit.util.RawParseUtils;
 
-/** Matches only commits whose committer name matches the pattern. */
+/**
+ * Matches only commits whose committer name matches the pattern.
+ */
 public class CommitterRevFilter {
 	/**
 	 * Create a new committer filter.
@@ -79,7 +81,7 @@ public class CommitterRevFilter {
 		// Don't permit us to be created.
 	}
 
-	static RawCharSequence textFor(final RevCommit cmit) {
+	static RawCharSequence textFor(RevCommit cmit) {
 		final byte[] raw = cmit.getRawBuffer();
 		final int b = RawParseUtils.committer(raw, 0);
 		if (b < 0)
@@ -89,12 +91,12 @@ public class CommitterRevFilter {
 	}
 
 	private static class PatternSearch extends PatternMatchRevFilter {
-		PatternSearch(final String patternText) {
+		PatternSearch(String patternText) {
 			super(patternText, true, true, Pattern.CASE_INSENSITIVE);
 		}
 
 		@Override
-		protected CharSequence text(final RevCommit cmit) {
+		protected CharSequence text(RevCommit cmit) {
 			return textFor(cmit);
 		}
 
@@ -105,12 +107,12 @@ public class CommitterRevFilter {
 	}
 
 	private static class SubStringSearch extends SubStringRevFilter {
-		SubStringSearch(final String patternText) {
+		SubStringSearch(String patternText) {
 			super(patternText);
 		}
 
 		@Override
-		protected RawCharSequence text(final RevCommit cmit) {
+		protected RawCharSequence text(RevCommit cmit) {
 			return textFor(cmit);
 		}
 	}

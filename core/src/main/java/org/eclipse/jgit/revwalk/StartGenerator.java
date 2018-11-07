@@ -66,7 +66,7 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 class StartGenerator extends Generator {
 	private final RevWalk walker;
 
-	StartGenerator(final RevWalk w) {
+	StartGenerator(RevWalk w) {
 		walker = w;
 	}
 

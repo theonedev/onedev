@@ -76,12 +76,12 @@ class RewriteGenerator extends Generator {
 
 	private final Generator source;
 
-	RewriteGenerator(final Generator s) {
+	RewriteGenerator(Generator s) {
 		source = s;
 	}
 
 	@Override
-	void shareFreeList(final BlockRevQueue q) {
+	void shareFreeList(BlockRevQueue q) {
 		source.shareFreeList(q);
 	}
 
@@ -93,27 +93,25 @@ class RewriteGenerator extends Generator {
 	@Override
 	RevCommit next() throws MissingObjectException,
 			IncorrectObjectTypeException, IOException {
-		for (;;) {
-			final RevCommit c = source.next();
-			if (c == null)
-				return null;
-
-			boolean rewrote = false;
-			final RevCommit[] pList = c.parents;
-			final int nParents = pList.length;
-			for (int i = 0; i < nParents; i++) {
-				final RevCommit oldp = pList[i];
-				final RevCommit newp = rewrite(oldp);
-				if (oldp != newp) {
-					pList[i] = newp;
-					rewrote = true;
-				}
-			}
-			if (rewrote)
-				c.parents = cleanup(pList);
-
-			return c;
+		final RevCommit c = source.next();
+		if (c == null) {
+			return null;
 		}
+		boolean rewrote = false;
+		final RevCommit[] pList = c.parents;
+		final int nParents = pList.length;
+		for (int i = 0; i < nParents; i++) {
+			final RevCommit oldp = pList[i];
+			final RevCommit newp = rewrite(oldp);
+			if (oldp != newp) {
+				pList[i] = newp;
+				rewrote = true;
+			}
+		}
+		if (rewrote) {
+			c.parents = cleanup(pList);
+		}
+		return c;
 	}
 
 	private RevCommit rewrite(RevCommit p) {
@@ -150,7 +148,7 @@ class RewriteGenerator extends Generator {
 		}
 	}
 
-	private RevCommit[] cleanup(final RevCommit[] oldList) {
+	private RevCommit[] cleanup(RevCommit[] oldList) {
 		// Remove any duplicate parents caused due to rewrites (e.g. a merge
 		// with two sides that both simplified back into the merge base).
 		// We also may have deleted a parent by marking it null.
@@ -169,14 +167,14 @@ class RewriteGenerator extends Generator {
 		}
 
 		if (newCnt == oldList.length) {
-			for (final RevCommit p : oldList)
+			for (RevCommit p : oldList)
 				p.flags &= ~DUPLICATE;
 			return oldList;
 		}
 
 		final RevCommit[] newList = new RevCommit[newCnt];
 		newCnt = 0;
-		for (final RevCommit p : oldList) {
+		for (RevCommit p : oldList) {
 			if (p != null) {
 				newList[newCnt++] = p;
 				p.flags &= ~DUPLICATE;

@@ -69,32 +69,27 @@ import org.eclipse.jgit.internal.JGitText;
  */
 class MergeBaseGenerator extends Generator {
 	private static final int PARSED = RevWalk.PARSED;
-
 	private static final int IN_PENDING = RevWalk.SEEN;
-
 	private static final int POPPED = RevWalk.TEMP_MARK;
-
 	private static final int MERGE_BASE = RevWalk.REWRITE;
 
 	private final RevWalk walker;
-
 	private final DateRevQueue pending;
 
 	private int branchMask;
-
 	private int recarryTest;
-
 	private int recarryMask;
-
 	private int mergeBaseAncestor = -1;
 	private LinkedList<RevCommit> ret = new LinkedList<>();
 
-	MergeBaseGenerator(final RevWalk w) {
+	private CarryStack stack;
+
+	MergeBaseGenerator(RevWalk w) {
 		walker = w;
 		pending = new DateRevQueue();
 	}
 
-	void init(final AbstractRevQueue p) throws IOException {
+	void init(AbstractRevQueue p) throws IOException {
 		try {
 			for (;;) {
 				final RevCommit c = p.next();
@@ -124,7 +119,7 @@ class MergeBaseGenerator extends Generator {
 		}
 	}
 
-	private void add(final RevCommit c) {
+	private void add(RevCommit c) {
 		final int flag = walker.allocFlag();
 		branchMask |= flag;
 		if ((c.flags & branchMask) != 0) {
@@ -151,7 +146,7 @@ class MergeBaseGenerator extends Generator {
 				return null;
 			}
 
-			for (final RevCommit p : c.parents) {
+			for (RevCommit p : c.parents) {
 				if ((p.flags & IN_PENDING) != 0)
 					continue;
 				if ((p.flags & PARSED) == 0)
@@ -202,29 +197,56 @@ class MergeBaseGenerator extends Generator {
 		return null;
 	}
 
-	private void carryOntoHistory(RevCommit c, final int carry) {
+	private void carryOntoHistory(RevCommit c, int carry) {
+		stack = null;
 		for (;;) {
-			final RevCommit[] pList = c.parents;
-			if (pList == null)
-				return;
-			final int n = pList.length;
-			if (n == 0)
-				return;
-
-			for (int i = 1; i < n; i++) {
-				final RevCommit p = pList[i];
-				if (!carryOntoOne(p, carry))
-					carryOntoHistory(p, carry);
-			}
-
-			c = pList[0];
-			if (carryOntoOne(c, carry))
+			carryOntoHistoryInnerLoop(c, carry);
+			if (stack == null) {
 				break;
+			}
+			c = stack.c;
+			carry = stack.carry;
+			stack = stack.prev;
 		}
 	}
 
-	private boolean carryOntoOne(final RevCommit p, final int carry) {
-		final boolean haveAll = (p.flags & carry) == carry;
+	private void carryOntoHistoryInnerLoop(RevCommit c, int carry) {
+		for (;;) {
+			RevCommit[] parents = c.parents;
+			if (parents == null || parents.length == 0) {
+				break;
+			}
+
+			int e = parents.length - 1;
+			for (int i = 0; i < e; i++) {
+				RevCommit p = parents[i];
+				if (carryOntoOne(p, carry) == CONTINUE) {
+					// Walking p will be required, buffer p on stack.
+					stack = new CarryStack(stack, p, carry);
+				}
+				// For other results from carryOntoOne:
+				// HAVE_ALL: p has all bits, do nothing to skip that path.
+				// CONTINUE_ON_STACK: callee pushed StackElement for p.
+			}
+
+			c = parents[e];
+			if (carryOntoOne(c, carry) != CONTINUE) {
+				break;
+			}
+		}
+	}
+
+	private static final int CONTINUE = 0;
+	private static final int HAVE_ALL = 1;
+	private static final int CONTINUE_ON_STACK = 2;
+
+	private int carryOntoOne(RevCommit p, int carry) {
+		// If we already had all carried flags, our parents do too.
+		// Return HAVE_ALL to stop caller from running down this leg
+		// of the revision graph any further.
+		//
+		// Otherwise return CONTINUE to ask the caller to walk history.
+		int rc = (p.flags & carry) == carry ? HAVE_ALL : CONTINUE;
 		p.flags |= carry;
 
 		if ((p.flags & recarryMask) == recarryTest) {
@@ -232,17 +254,23 @@ class MergeBaseGenerator extends Generator {
 			// voted to be one. Inject ourselves back at the front of the
 			// pending queue and tell all of our ancestors they are within
 			// the merge base now.
-			//
 			p.flags &= ~POPPED;
 			pending.add(p);
-			carryOntoHistory(p, branchMask | MERGE_BASE);
-			return true;
+			stack = new CarryStack(stack, p, branchMask | MERGE_BASE);
+			return CONTINUE_ON_STACK;
 		}
+		return rc;
+	}
 
-		// If we already had all carried flags, our parents do too.
-		// Return true to stop the caller from running down this leg
-		// of the revision graph any further.
-		//
-		return haveAll;
+	private static class CarryStack {
+		final CarryStack prev;
+		final RevCommit c;
+		final int carry;
+
+		CarryStack(CarryStack prev, RevCommit c, int carry) {
+			this.prev = prev;
+			this.c = c;
+			this.carry = carry;
+		}
 	}
 }

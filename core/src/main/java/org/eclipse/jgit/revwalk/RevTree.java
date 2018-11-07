@@ -52,7 +52,9 @@ import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
 
-/** A reference to a tree of subtrees/files. */
+/**
+ * A reference to a tree of subtrees/files.
+ */
 public class RevTree extends RevObject {
 	/**
 	 * Create a new tree reference.
@@ -60,10 +62,11 @@ public class RevTree extends RevObject {
 	 * @param id
 	 *            object name for the tree.
 	 */
-	protected RevTree(final AnyObjectId id) {
+	protected RevTree(AnyObjectId id) {
 		super(id);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public final int getType() {
 		return Constants.OBJ_TREE;

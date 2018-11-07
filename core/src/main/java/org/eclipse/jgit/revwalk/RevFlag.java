@@ -48,9 +48,10 @@ import java.text.MessageFormat;
 import org.eclipse.jgit.internal.JGitText;
 
 /**
- * Application level mark bit for {@link RevObject}s.
+ * Application level mark bit for {@link org.eclipse.jgit.revwalk.RevObject}s.
  * <p>
- * To create a flag use {@link RevWalk#newFlag(String)}.
+ * To create a flag use
+ * {@link org.eclipse.jgit.revwalk.RevWalk#newFlag(String)}.
  */
 public class RevFlag {
 	/**
@@ -84,7 +85,7 @@ public class RevFlag {
 
 	final int mask;
 
-	RevFlag(final RevWalk w, final String n, final int m) {
+	RevFlag(RevWalk w, String n, int m) {
 		walker = w;
 		name = n;
 		mask = m;
@@ -99,13 +100,14 @@ public class RevFlag {
 		return walker;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return name;
 	}
 
 	static class StaticRevFlag extends RevFlag {
-		StaticRevFlag(final String n, final int m) {
+		StaticRevFlag(String n, int m) {
 			super(null, n, m);
 		}
 

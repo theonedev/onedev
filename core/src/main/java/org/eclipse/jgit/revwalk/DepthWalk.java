@@ -52,15 +52,30 @@ import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 
-/** Interface for revision walkers that perform depth filtering. */
+/**
+ * Interface for revision walkers that perform depth filtering.
+ */
 public interface DepthWalk {
-	/** @return Depth to filter to. */
+	/**
+	 * Get depth to filter to.
+	 *
+	 * @return Depth to filter to.
+	 */
 	public int getDepth();
 
 	/** @return flag marking commits that should become unshallow. */
+	/**
+	 * Get flag marking commits that should become unshallow.
+	 *
+	 * @return flag marking commits that should become unshallow.
+	 */
 	public RevFlag getUnshallowFlag();
 
-	/** @return flag marking commits that are interesting again. */
+	/**
+	 * Get flag marking commits that are interesting again.
+	 *
+	 * @return flag marking commits that are interesting again.
+	 */
 	public RevFlag getReinterestingFlag();
 
 	/** RevCommit with a depth (in commits) from a root. */

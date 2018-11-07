@@ -140,7 +140,7 @@ class PendingGenerator extends Generator {
 					produce = filter.include(walker, c);
 				}
 
-				for (final RevCommit p : c.parents) {
+				for (RevCommit p : c.parents) {
 					if ((p.flags & SEEN) != 0)
 						continue;
 					if ((p.flags & PARSED) == 0)

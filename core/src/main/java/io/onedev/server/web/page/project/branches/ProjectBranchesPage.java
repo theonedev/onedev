@@ -145,8 +145,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				compareIds.add(ref.getRef().getObjectId());
 			}
 
-			Ref baseRef = getProject().getRefs(Constants.R_HEADS).get(baseBranch);
-			Preconditions.checkNotNull(baseRef);
+			Ref baseRef = Preconditions.checkNotNull(getProject().getBranchRef(baseBranch));
 			Map<ObjectId, AheadBehind> aheadBehinds = new HashMap<>();
 			
 			try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {

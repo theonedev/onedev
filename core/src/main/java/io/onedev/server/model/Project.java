@@ -407,7 +407,7 @@ public class Project extends AbstractEntity {
 
 	public List<RefInfo> getRefInfos(String prefix) {
 		try (RevWalk revWalk = new RevWalk(getRepository())) {
-			List<Ref> refs = new ArrayList<Ref>(getRepository().getRefDatabase().getRefs(prefix).values());
+			List<Ref> refs = new ArrayList<Ref>(getRepository().getRefDatabase().getRefsByPrefix(prefix));
 			List<RefInfo> refInfos = refs.stream()
 					.map(ref->new RefInfo(revWalk, ref))
 					.filter(refInfo->refInfo.getPeeledObj() instanceof RevCommit)
@@ -757,9 +757,9 @@ public class Project extends AbstractEntity {
 		return getRevCommit(revId, true);
 	}
 	
-	public Map<String, Ref> getRefs(String prefix) {
+	public List<Ref> getRefs(String prefix) {
 		try {
-			return getRepository().getRefDatabase().getRefs(prefix);
+			return getRepository().getRefDatabase().getRefsByPrefix(prefix);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		} 
@@ -1205,7 +1205,7 @@ public class Project extends AbstractEntity {
 		if (lastCommitOptional == null) {
 			RevCommit lastCommit = null;
 			try {
-				for (Ref ref: getRepository().getRefDatabase().getRefs(Constants.R_HEADS).values()) {
+				for (Ref ref: getRepository().getRefDatabase().getRefsByPrefix(Constants.R_HEADS)) {
 					RevCommit commit = getRevCommit(ref.getObjectId(), false);
 					if (commit != null) {
 						if (lastCommit != null) {

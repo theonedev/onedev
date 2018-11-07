@@ -52,7 +52,9 @@ import org.eclipse.jgit.revwalk.RevFlag;
 import org.eclipse.jgit.revwalk.RevFlagSet;
 import org.eclipse.jgit.revwalk.RevWalk;
 
-/** Matches only commits with some/all RevFlags already set. */
+/**
+ * Matches only commits with some/all RevFlags already set.
+ */
 public abstract class RevFlagFilter extends RevFilter {
 	/**
 	 * Create a new filter that tests for a single flag.
@@ -61,7 +63,7 @@ public abstract class RevFlagFilter extends RevFilter {
 	 *            the flag to test.
 	 * @return filter that selects only commits with flag <code>a</code>.
 	 */
-	public static RevFilter has(final RevFlag a) {
+	public static RevFilter has(RevFlag a) {
 		final RevFlagSet s = new RevFlagSet();
 		s.add(a);
 		return new HasAll(s);
@@ -74,9 +76,9 @@ public abstract class RevFlagFilter extends RevFilter {
 	 *            set of flags to test.
 	 * @return filter that selects only commits with all flags in <code>a</code>.
 	 */
-	public static RevFilter hasAll(final RevFlag... a) {
+	public static RevFilter hasAll(RevFlag... a) {
 		final RevFlagSet set = new RevFlagSet();
-		for (final RevFlag flag : a)
+		for (RevFlag flag : a)
 			set.add(flag);
 		return new HasAll(set);
 	}
@@ -88,7 +90,7 @@ public abstract class RevFlagFilter extends RevFilter {
 	 *            set of flags to test.
 	 * @return filter that selects only commits with all flags in <code>a</code>.
 	 */
-	public static RevFilter hasAll(final RevFlagSet a) {
+	public static RevFilter hasAll(RevFlagSet a) {
 		return new HasAll(new RevFlagSet(a));
 	}
 
@@ -99,9 +101,9 @@ public abstract class RevFlagFilter extends RevFilter {
 	 *            set of flags to test.
 	 * @return filter that selects only commits with any flag in <code>a</code>.
 	 */
-	public static RevFilter hasAny(final RevFlag... a) {
+	public static RevFilter hasAny(RevFlag... a) {
 		final RevFlagSet set = new RevFlagSet();
-		for (final RevFlag flag : a)
+		for (RevFlag flag : a)
 			set.add(flag);
 		return new HasAny(set);
 	}
@@ -113,33 +115,35 @@ public abstract class RevFlagFilter extends RevFilter {
 	 *            set of flags to test.
 	 * @return filter that selects only commits with any flag in <code>a</code>.
 	 */
-	public static RevFilter hasAny(final RevFlagSet a) {
+	public static RevFilter hasAny(RevFlagSet a) {
 		return new HasAny(new RevFlagSet(a));
 	}
 
 	final RevFlagSet flags;
 
-	RevFlagFilter(final RevFlagSet m) {
+	RevFlagFilter(RevFlagSet m) {
 		flags = m;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public RevFilter clone() {
 		return this;
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public String toString() {
 		return super.toString() + flags;
 	}
 
 	private static class HasAll extends RevFlagFilter {
-		HasAll(final RevFlagSet m) {
+		HasAll(RevFlagSet m) {
 			super(m);
 		}
 
 		@Override
-		public boolean include(final RevWalk walker, final RevCommit c)
+		public boolean include(RevWalk walker, RevCommit c)
 				throws MissingObjectException, IncorrectObjectTypeException,
 				IOException {
 			return c.hasAll(flags);
@@ -152,12 +156,12 @@ public abstract class RevFlagFilter extends RevFilter {
 	}
 
 	private static class HasAny extends RevFlagFilter {
-		HasAny(final RevFlagSet m) {
+		HasAny(RevFlagSet m) {
 			super(m);
 		}
 
 		@Override
-		public boolean include(final RevWalk walker, final RevCommit c)
+		public boolean include(RevWalk walker, RevCommit c)
 				throws MissingObjectException, IncorrectObjectTypeException,
 				IOException {
 			return c.hasAny(flags);
