@@ -106,13 +106,14 @@ public class SymbolQuery extends BlobQuery {
 	}
 
 	@Override
-	protected void applyConstraints(BooleanQuery query) {
+	protected void applyConstraints(BooleanQuery.Builder builder) {
 		if (fileNames != null) {
-			BooleanQuery subQuery = new BooleanQuery(true);
+			BooleanQuery.Builder subQueryBuilder = new BooleanQuery.Builder();
 			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase()))
-				subQuery.add(new WildcardQuery(new Term(BLOB_NAME.name(), pattern)), Occur.SHOULD);
-			if (subQuery.getClauses().length != 0)
-				query.add(subQuery, Occur.MUST);
+				subQueryBuilder.add(new WildcardQuery(new Term(BLOB_NAME.name(), pattern)), Occur.SHOULD);
+			BooleanQuery subQuery = subQueryBuilder.build();
+			if (subQuery.clauses().size() != 0)
+				builder.add(subQuery, Occur.MUST);
 		}
 
 		boolean tooGeneral = true;
@@ -132,7 +133,7 @@ public class SymbolQuery extends BlobQuery {
 			else
 				fieldName = BLOB_SECONDARY_SYMBOLS.name();
 			
-			query.add(new WildcardQuery(new Term(fieldName, term.toLowerCase())), Occur.MUST);
+			builder.add(new WildcardQuery(new Term(fieldName, term.toLowerCase())), Occur.MUST);
 		}
 	}
 	

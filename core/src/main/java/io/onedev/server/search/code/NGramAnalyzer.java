@@ -1,8 +1,5 @@
 package io.onedev.server.search.code;
 
-import java.io.IOException;
-import java.io.Reader;
-
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.Tokenizer;
@@ -21,20 +18,10 @@ public class NGramAnalyzer extends Analyzer {
 	}
 	
 	@Override
-	protected TokenStreamComponents createComponents(String fieldName, Reader reader) {
-
-		Tokenizer src = new NGramTokenizer(reader, minGram, maxGram);
-
+	protected TokenStreamComponents createComponents(String fieldName) {
+		Tokenizer src = new NGramTokenizer(minGram, maxGram);
 		TokenStream stream = new LowerCaseFilter(src);
-
-		return new TokenStreamComponents(src, stream) {
-			
-			@Override
-			protected void setReader(final Reader reader) throws IOException {
-				super.setReader(reader);
-			}
-			
-		};
+		return new TokenStreamComponents(src, stream);
 	}
 
 }

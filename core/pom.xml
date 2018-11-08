@@ -264,31 +264,16 @@
 		<dependency>
 			<artifactId>lucene-core</artifactId>
 			<groupId>org.apache.lucene</groupId>
-			<type>jar</type>
 			<version>${lucene.version}</version>
 		</dependency>
 		<dependency>
 			<artifactId>lucene-queries</artifactId>
 			<groupId>org.apache.lucene</groupId>
-			<type>jar</type>
-			<version>${lucene.version}</version>
-		</dependency>
-		<dependency>
-			<artifactId>lucene-queryparser</artifactId>
-			<groupId>org.apache.lucene</groupId>
-			<type>jar</type>
 			<version>${lucene.version}</version>
 		</dependency>
 		<dependency>
 			<artifactId>lucene-analyzers-common</artifactId>
 			<groupId>org.apache.lucene</groupId>
-			<type>jar</type>
-			<version>${lucene.version}</version>
-		</dependency>
-		<dependency>
-			<artifactId>lucene-facet</artifactId>
-			<groupId>org.apache.lucene</groupId>
-			<type>jar</type>
 			<version>${lucene.version}</version>
 		</dependency>
 		<dependency>
@@ -462,7 +447,7 @@
 	</dependencies>
 	<properties>
 		<moduleClass>io.onedev.server.CoreModule</moduleClass>
-		<lucene.version>4.10.3</lucene.version>
+		<lucene.version>7.1.0</lucene.version>
 		<hibernate.version>5.2.10.Final</hibernate.version>
 		<shiro.version>1.4.0</shiro.version>
 		<jgit.version>5.1.3.201810200350-r</jgit.version>
@@ -473,7 +458,7 @@
 		<launcher.version>1.0.2</launcher.version>
 		<jersey.version>2.13</jersey.version>
 		<jetty.version>9.3.24.v20180605</jetty.version>
-		<jackson.version>2.4.3</jackson.version>
+		<jackson.version>2.9.7</jackson.version>
 		<servlet.version>3.1.0</servlet.version>
 		<antlr.version>4.5.1-1</antlr.version>
 	</properties>

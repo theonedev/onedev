@@ -61,7 +61,7 @@ public class HibernateObjectMapperModule extends Module {
 				// hibernate proxies
 				if (AbstractEntity.class.isAssignableFrom(type.getContentType().getRawClass())) {
 					return new CollectionSerializer(type.getContentType(), false, 
-							elementTypeSerializer, null, elementValueSerializer);
+							elementTypeSerializer, elementValueSerializer);
 				} else {
 					return null;
 				}
@@ -75,9 +75,9 @@ public class HibernateObjectMapperModule extends Module {
 				// hibernate proxies
 				if (AbstractEntity.class.isAssignableFrom(type.getContentType().getRawClass())) {
 	                Object filterId = config.getAnnotationIntrospector().findFilterId((Annotated)beanDesc.getClassInfo());
-	                return MapSerializer.construct(config.getAnnotationIntrospector().findPropertiesToIgnore(beanDesc.getClassInfo()),
-	                    type, false, elementTypeSerializer,
-	                    keySerializer, elementValueSerializer, filterId);
+	                return MapSerializer.construct(
+	                		config.getAnnotationIntrospector().findPropertyIgnorals(beanDesc.getClassInfo()).getIgnored(), 
+	                		type, false, elementTypeSerializer, keySerializer, elementValueSerializer, filterId);
 				} else {
 					return null;
 				}

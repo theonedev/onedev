@@ -173,19 +173,20 @@ public class TextQuery extends BlobQuery {
 	}
 
 	@Override
-	protected void applyConstraints(BooleanQuery query) {
+	protected void applyConstraints(BooleanQuery.Builder builder) {
 		if (fileNames != null) {
-			BooleanQuery subQuery = new BooleanQuery(true);
+			BooleanQuery.Builder subQueryBuilder = new BooleanQuery.Builder();
 			for (String pattern: Splitter.on(",").omitEmptyStrings().trimResults().split(fileNames.toLowerCase()))
-				subQuery.add(new WildcardQuery(new Term(BLOB_NAME.name(), pattern)), Occur.SHOULD);
-			if (subQuery.getClauses().length != 0)
-				query.add(subQuery, Occur.MUST);
+				subQueryBuilder.add(new WildcardQuery(new Term(BLOB_NAME.name(), pattern)), Occur.SHOULD);
+			BooleanQuery subQuery = subQueryBuilder.build();
+			if (subQuery.clauses().size() != 0)
+				builder.add(subQuery, Occur.MUST);
 		}
 
 		if (regex) 
-			query.add(new RegexLiterals(term).asNGramQuery(BLOB_TEXT.name(), NGRAM_SIZE), Occur.MUST);
+			builder.add(new RegexLiterals(term).asNGramQuery(BLOB_TEXT.name(), NGRAM_SIZE), Occur.MUST);
 		else if (term.length() >= NGRAM_SIZE)
-			query.add(new NGramLuceneQuery(BLOB_TEXT.name(), term, NGRAM_SIZE), Occur.MUST);
+			builder.add(new NGramLuceneQuery(BLOB_TEXT.name(), term, NGRAM_SIZE), Occur.MUST);
 		else 
 			throw new TooGeneralQueryException();
 	}

@@ -48,17 +48,19 @@ public class RegexLiterals {
 	 * @throws TooGeneralQueryException
 	 */
 	public Query asNGramQuery(String fieldName, int gramSize) throws TooGeneralQueryException {
-		BooleanQuery orQuery = new BooleanQuery();
+		BooleanQuery.Builder orQueryBuilder = new BooleanQuery.Builder();
 		for (List<LeafLiterals> row: rows) {
-			BooleanQuery andQuery = new BooleanQuery();
+			BooleanQuery.Builder andQueryBuilder = new BooleanQuery.Builder();
 			for (LeafLiterals literals: row) {
 				if (literals.getLiteral() != null && literals.getLiteral().length()>=NGRAM_SIZE)
-					andQuery.add(new NGramLuceneQuery(fieldName, literals.getLiteral(), gramSize), Occur.MUST);
+					andQueryBuilder.add(new NGramLuceneQuery(fieldName, literals.getLiteral(), gramSize), Occur.MUST);
 			}
-			if (andQuery.getClauses().length != 0)
-				orQuery.add(andQuery, Occur.SHOULD);
+			BooleanQuery andQuery = andQueryBuilder.build();
+			if (andQuery.clauses().size() != 0)
+				orQueryBuilder.add(andQuery, Occur.SHOULD);
 		}
-		if (orQuery.getClauses().length != 0)
+		BooleanQuery orQuery = orQueryBuilder.build();
+		if (orQuery.clauses().size() != 0)
 			return orQuery;
 		else
 			throw new TooGeneralQueryException();

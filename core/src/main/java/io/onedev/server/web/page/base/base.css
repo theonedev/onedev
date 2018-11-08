@@ -577,8 +577,8 @@ a.input-clear.input-group-clear {
 	margin-right: 8px;
 }
 
-.avatar+.name {
-	margin-left: 4px !important; 
+.project-avatar+.name, .avatar+.name {
+	margin-left: 2px !important; 
 }
 
 .alert {

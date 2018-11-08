@@ -37,8 +37,8 @@ public class PathQuery extends BlobQuery {
 	}
 
 	@Override
-	protected void applyConstraints(BooleanQuery query) {
-		query.add(new WildcardQuery(new Term(BLOB_PATH.name(), "*"+match+"*")), Occur.MUST);
+	protected void applyConstraints(BooleanQuery.Builder builder) {
+		builder.add(new WildcardQuery(new Term(BLOB_PATH.name(), "*"+match+"*")), Occur.MUST);
 	}
 		
 }

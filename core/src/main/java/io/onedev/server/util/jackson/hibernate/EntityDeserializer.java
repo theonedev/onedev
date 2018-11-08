@@ -76,7 +76,7 @@ public class EntityDeserializer extends BeanDeserializer {
                 continue;
             }
         	
-        	throw ctxt.mappingException(entityClass, t);
+        	ctxt.handleUnexpectedToken(entityClass, jp);
         }
 
         // reach end of object

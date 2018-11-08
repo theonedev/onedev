@@ -21,16 +21,14 @@ import javax.inject.Singleton;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.BinaryDocValues;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Collector;
-import org.apache.lucene.search.FieldCache;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Scorer;
 import org.apache.lucene.search.SearcherManager;
+import org.apache.lucene.search.SimpleCollector;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
@@ -52,6 +50,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.utils.ExceptionUtils;
+import jersey.repackaged.com.google.common.base.Preconditions;
 
 @Singleton
 public class DefaultSearchManager implements SearchManager {
@@ -77,7 +76,7 @@ public class DefaultSearchManager implements SearchManager {
 			if (searcherManager == null) synchronized (searcherManagers) {
 				searcherManager = searcherManagers.get(project.getId());
 				if (searcherManager == null) {
-					Directory directory = FSDirectory.open(storageManager.getProjectIndexDir(project.getId()));
+					Directory directory = FSDirectory.open(storageManager.getProjectIndexDir(project.getId()).toPath());
 					if (DirectoryReader.indexExists(directory)) {
 						searcherManager = new SearcherManager(directory, null);
 						searcherManagers.put(project.getId(), searcherManager);
@@ -111,20 +110,15 @@ public class DefaultSearchManager implements SearchManager {
 						final RevTree revTree = revWalk.parseCommit(commit).getTree();
 						final Set<String> checkedBlobPaths = new HashSet<>();
 						
-						searcher.search(query.asLuceneQuery(), new Collector() {
+						searcher.search(query.asLuceneQuery(), new SimpleCollector() {
 	
-							private AtomicReaderContext context;
+							private BinaryDocValues blobPathValues;
 							
-							@Override
-							public void setScorer(Scorer scorer) throws IOException {
-							}
-	
 							@Override
 							public void collect(int doc) throws IOException {
 								if (hits.size() < query.getCount() && !Thread.currentThread().isInterrupted()) {
-									BinaryDocValues cachedBlobPaths = FieldCache.DEFAULT.getTerms(
-											context.reader(), FieldConstants.BLOB_PATH.name(), false);
-									String blobPath = cachedBlobPaths.get(doc).utf8ToString();
+									Preconditions.checkState(blobPathValues.advanceExact(doc));
+									String blobPath = blobPathValues.binaryValue().utf8ToString();
 									
 									if (!checkedBlobPaths.contains(blobPath)) {
 										TreeWalk treeWalk = TreeWalk.forPath(project.getRepository(), blobPath, revTree);									
@@ -136,15 +130,15 @@ public class DefaultSearchManager implements SearchManager {
 							}
 	
 							@Override
-							public void setNextReader(AtomicReaderContext context) throws IOException {
-								this.context = context;
+							protected void doSetNextReader(LeafReaderContext context) throws IOException {
+								blobPathValues  = context.reader().getBinaryDocValues(FieldConstants.BLOB_PATH.name());
+							}
+
+							@Override
+							public boolean needsScores() {
+								return false;
 							}
 	
-							@Override
-							public boolean acceptsDocsOutOfOrder() {
-								return true;
-							}
-							
 						});
 					}
 				} finally {
@@ -185,21 +179,19 @@ public class DefaultSearchManager implements SearchManager {
 	
 	@Override
 	public List<Symbol> getSymbols(IndexSearcher searcher, ObjectId blobId, String blobPath) {
-		BooleanQuery query = new BooleanQuery();
-		query.add(BLOB_HASH.query(blobId.name()), Occur.MUST);
-		query.add(BLOB_PATH.query(blobPath), Occur.MUST);
+		BooleanQuery.Builder builder = new BooleanQuery.Builder();
+		builder.add(BLOB_HASH.query(blobId.name()), Occur.MUST);
+		builder.add(BLOB_PATH.query(blobPath), Occur.MUST);
+		
+		BooleanQuery query = builder.build();
 		
 		String indexVersion = indexManager.getIndexVersion(SymbolExtractorRegistry.getExtractor(blobPath));
 		AtomicReference<List<Symbol>> symbolsRef = new AtomicReference<>(null);
 		if (searcher != null) {
 			try {
-				searcher.search(query, new Collector() {
+				searcher.search(query, new SimpleCollector() {
 
-					private AtomicReaderContext context;
-
-					@Override
-					public void setScorer(Scorer scorer) throws IOException {
-					}
+					private LeafReaderContext context;
 
 					@SuppressWarnings("unchecked")
 					@Override
@@ -218,13 +210,13 @@ public class DefaultSearchManager implements SearchManager {
 					}
 
 					@Override
-					public void setNextReader(AtomicReaderContext context) throws IOException {
+					protected void doSetNextReader(LeafReaderContext context) throws IOException {
 						this.context = context;
 					}
 
 					@Override
-					public boolean acceptsDocsOutOfOrder() {
-						return true;
+					public boolean needsScores() {
+						return false;
 					}
 					
 				});

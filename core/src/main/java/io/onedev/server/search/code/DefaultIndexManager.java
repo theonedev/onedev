@@ -20,6 +20,7 @@ import static io.onedev.server.search.code.IndexConstants.NGRAM_SIZE;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -29,26 +30,26 @@ import javax.inject.Singleton;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang.SerializationUtils;
+import org.apache.lucene.document.BinaryDocValuesField;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field.Store;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.AtomicReaderContext;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.index.LeafReaderContext;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Collector;
 import org.apache.lucene.search.IndexSearcher;
-import org.apache.lucene.search.Scorer;
+import org.apache.lucene.search.SimpleCollector;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.util.Version;
+import org.apache.lucene.util.BytesRef;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.Constants;
@@ -118,29 +119,25 @@ public class DefaultIndexManager implements IndexManager {
 	private String getCommitIndexVersion(final IndexSearcher searcher, AnyObjectId commitId) throws IOException {
 		final AtomicReference<String> indexVersion = new AtomicReference<>(null);
 		
-		searcher.search(COMMIT_HASH.query(commitId.getName()), new Collector() {
+		searcher.search(COMMIT_HASH.query(commitId.getName()), new SimpleCollector() {
 
 			private int docBase;
 			
-			@Override
-			public void setScorer(Scorer scorer) throws IOException {
-			}
-
 			@Override
 			public void collect(int doc) throws IOException {
 				indexVersion.set(searcher.doc(docBase+doc).get(COMMIT_INDEX_VERSION.name()));
 			}
 
 			@Override
-			public void setNextReader(AtomicReaderContext context) throws IOException {
+			protected void doSetNextReader(LeafReaderContext context) throws IOException {
 				docBase = context.docBase;
 			}
 
 			@Override
-			public boolean acceptsDocsOutOfOrder() {
-				return true;
+			public boolean needsScores() {
+				return false;
 			}
-			
+
 		});
 		return indexVersion.get();
 	}
@@ -177,19 +174,16 @@ public class DefaultIndexManager implements IndexManager {
 					String blobPath = treeWalk.getPathString();
 					String blobName = treeWalk.getNameString();
 					
-					BooleanQuery query = new BooleanQuery();
-					query.add(BLOB_HASH.query(blobId.name()), Occur.MUST);
-					query.add(BLOB_PATH.query(blobPath), Occur.MUST);
+					BooleanQuery.Builder builder = new BooleanQuery.Builder();
+					builder.add(BLOB_HASH.query(blobId.name()), Occur.MUST);
+					builder.add(BLOB_PATH.query(blobPath), Occur.MUST);
+					BooleanQuery query = builder.build();
 					
 					final AtomicReference<String> blobIndexVersionRef = new AtomicReference<>(null);
 					if (searcher != null) {
-						searcher.search(query, new Collector() {
+						searcher.search(query, new SimpleCollector() {
 	
-							private AtomicReaderContext context;
-	
-							@Override
-							public void setScorer(Scorer scorer) throws IOException {
-							}
+							private LeafReaderContext context;
 	
 							@Override
 							public void collect(int doc) throws IOException {
@@ -197,13 +191,13 @@ public class DefaultIndexManager implements IndexManager {
 							}
 	
 							@Override
-							public void setNextReader(AtomicReaderContext context) throws IOException {
+							protected void doSetNextReader(LeafReaderContext context) throws IOException {
 								this.context = context;
 							}
 	
 							@Override
-							public boolean acceptsDocsOutOfOrder() {
-								return true;
+							public boolean needsScores() {
+								return false;
 							}
 							
 						});
@@ -249,7 +243,8 @@ public class DefaultIndexManager implements IndexManager {
 		
 		document.add(new StoredField(BLOB_INDEX_VERSION.name(), getIndexVersion(extractor)));
 		document.add(new StringField(BLOB_HASH.name(), blobId.name(), Store.NO));
-		document.add(new StringField(BLOB_PATH.name(), blobPath, Store.YES));
+		document.add(new StringField(BLOB_PATH.name(), blobPath, Store.NO));
+		document.add(new BinaryDocValuesField(BLOB_PATH.name(), new BytesRef(blobPath.getBytes(StandardCharsets.UTF_8))));
 		
 		String blobName = blobPath;
 		if (blobPath.indexOf('/') != -1) 
@@ -297,7 +292,7 @@ public class DefaultIndexManager implements IndexManager {
 	}
 	
 	private IndexWriterConfig newIndexWriterConfig() {
-		IndexWriterConfig config = new IndexWriterConfig(Version.LATEST, new NGramAnalyzer(NGRAM_SIZE, NGRAM_SIZE));
+		IndexWriterConfig config = new IndexWriterConfig(new NGramAnalyzer(NGRAM_SIZE, NGRAM_SIZE));
 		config.setOpenMode(OpenMode.CREATE_OR_APPEND);
 		return config;
 	}
@@ -333,7 +328,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private IndexResult doIndex(Project project, ObjectId commit) {
 		IndexResult indexResult;
-		try (Directory directory = FSDirectory.open(storageManager.getProjectIndexDir(project.getId()))) {
+		try (Directory directory = FSDirectory.open(storageManager.getProjectIndexDir(project.getId()).toPath())) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
 					IndexSearcher searcher = new IndexSearcher(reader);
@@ -389,7 +384,7 @@ public class DefaultIndexManager implements IndexManager {
 	@Override
 	public boolean isIndexed(Project project, ObjectId commit) {
 		File indexDir = storageManager.getProjectIndexDir(project.getForkRoot().getId());
-		try (Directory directory = FSDirectory.open(indexDir)) {
+		try (Directory directory = FSDirectory.open(indexDir.toPath())) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
 					IndexSearcher searcher = new IndexSearcher(reader);

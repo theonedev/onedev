@@ -57,7 +57,7 @@ public class FileQuery extends BlobQuery {
 	}
 
 	@Override
-	protected void applyConstraints(BooleanQuery query) {
+	protected void applyConstraints(BooleanQuery.Builder builder) {
 		boolean tooGeneral = true;
 		for (char ch: fileNames.toCharArray()) {
 			if (ch != '?' && ch != '*' && ch != ',' && ch != '.') {
@@ -68,7 +68,7 @@ public class FileQuery extends BlobQuery {
 		if (tooGeneral)
 			throw new TooGeneralQueryException();
 		
-		query.add(new WildcardQuery(new Term(BLOB_NAME.name(), fileNames.toLowerCase())), Occur.MUST);
+		builder.add(new WildcardQuery(new Term(BLOB_NAME.name(), fileNames.toLowerCase())), Occur.MUST);
 	}
 
 	public static class Builder {

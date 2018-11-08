@@ -11,6 +11,8 @@ import io.onedev.server.model.AbstractEntity;
 
 public final class ManyToOneSerializer extends StdSerializer<AbstractEntity> {
 
+	private static final long serialVersionUID = 1L;
+
 	public ManyToOneSerializer(Class<AbstractEntity> entityClass) {
 		super(entityClass);
 	}

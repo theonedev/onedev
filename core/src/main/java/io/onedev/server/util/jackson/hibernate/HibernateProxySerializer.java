@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ser.impl.PropertySerializerMap;
  */
 public class HibernateProxySerializer extends JsonSerializer<HibernateProxy> {
 
-	protected PropertySerializerMap _dynamicSerializers = PropertySerializerMap.emptyMap();
+	protected PropertySerializerMap _dynamicSerializers = PropertySerializerMap.emptyForProperties();
 
 	// since 2.3
 	@Override

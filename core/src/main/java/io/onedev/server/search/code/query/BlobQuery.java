@@ -46,20 +46,20 @@ public abstract class BlobQuery {
 	 * 			TooGeneralQueryException if supplied query term is too general to possibly cause query slow
 	 */
 	public Query asLuceneQuery() throws TooGeneralQueryException {
-		BooleanQuery luceneQuery = new BooleanQuery(true);
+		BooleanQuery.Builder luceneQueryBuilder = new BooleanQuery.Builder();
 		
 		String directory = this.directory;
 		if (directory != null) {
 			if (!directory.endsWith("/"))
 				directory += "/";
-			luceneQuery.add(new WildcardQuery(BLOB_PATH.term(directory + "*")), Occur.MUST);
+			luceneQueryBuilder.add(new WildcardQuery(BLOB_PATH.term(directory + "*")), Occur.MUST);
 		}
 		
-		applyConstraints(luceneQuery);
+		applyConstraints(luceneQueryBuilder);
 		
-		return luceneQuery;
+		return luceneQueryBuilder.build();
 	}
 
-	protected abstract void applyConstraints(BooleanQuery query);
+	protected abstract void applyConstraints(BooleanQuery.Builder query);
 	
 }
