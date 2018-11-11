@@ -32,9 +32,9 @@ public class RelativeUrlProcessor implements MarkdownProcessor {
 
 	@Override
 	public void process(Project project, Document rendered, Object context) {
-		if (context instanceof BlobRenderContext) {
+		if (context instanceof BlobRenderContext && project != null) {
 			BlobRenderContext blobRenderContext = (BlobRenderContext) context;
-
+			
 			Repository repository = project.getRepository();
 			RevCommit commit;
 			try (RevWalk revWalk = new RevWalk(repository)) {

@@ -34,31 +34,33 @@ public class CommitProcessor implements MarkdownProcessor {
 
 	@Override
 	public void process(Project project, Document rendered, Object context) {
-		TextNodeVisitor visitor = new TextNodeVisitor() {
-			
-			@Override
-			protected boolean isApplicable(TextNode node) {
-				return !JsoupUtils.hasAncestor(node, IGNORED_TAGS);
-			}
-		};
-		
-		NodeTraversor tranversor = new NodeTraversor(visitor);
-		tranversor.traverse(rendered);
-		
-		for (TextNode node : visitor.getMatchedNodes()) {
-			Matcher matcher = PATTERN_COMMIT.matcher(node.getWholeText());
-			while (matcher.find()) {
-				String commitHash = matcher.group(2);
-				String commitTag;
-				ObjectId commitId = ObjectId.fromString(commitHash);
-				if (project.getRevCommit(commitId, false) != null) {
-					commitTag = toHtml(project, commitId);
-				} else {
-					commitTag = commitId.name();
+		if (project != null) {
+			TextNodeVisitor visitor = new TextNodeVisitor() {
+				
+				@Override
+				protected boolean isApplicable(TextNode node) {
+					return !JsoupUtils.hasAncestor(node, IGNORED_TAGS);
 				}
-				JsoupUtils.appendReplacement(matcher, node, matcher.group(1) + commitTag + matcher.group(3));
+			};
+			
+			NodeTraversor tranversor = new NodeTraversor(visitor);
+			tranversor.traverse(rendered);
+			
+			for (TextNode node : visitor.getMatchedNodes()) {
+				Matcher matcher = PATTERN_COMMIT.matcher(node.getWholeText());
+				while (matcher.find()) {
+					String commitHash = matcher.group(2);
+					String commitTag;
+					ObjectId commitId = ObjectId.fromString(commitHash);
+					if (project.getRevCommit(commitId, false) != null) {
+						commitTag = toHtml(project, commitId);
+					} else {
+						commitTag = commitId.name();
+					}
+					JsoupUtils.appendReplacement(matcher, node, matcher.group(1) + commitTag + matcher.group(3));
+				}
+				JsoupUtils.appendTail(matcher, node);
 			}
-			JsoupUtils.appendTail(matcher, node);
 		}
 	}
 	

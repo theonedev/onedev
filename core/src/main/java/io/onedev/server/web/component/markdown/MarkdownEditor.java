@@ -14,8 +14,8 @@ import javax.annotation.Nullable;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
@@ -125,8 +125,12 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 	protected String renderMarkdown(String markdown) {
 		MarkdownManager markdownManager = OneDev.getInstance(MarkdownManager.class);
 		String rendered = markdownManager.render(markdown);
-		ProjectPage page = (ProjectPage) getPage();
-		return markdownManager.process(page.getProject(), rendered, blobRenderContext);
+		Project project ;
+		if (getPage() instanceof ProjectPage)
+			project = ((ProjectPage) getPage()).getProject();
+		else
+			project = null;
+		return markdownManager.process(project, rendered, blobRenderContext);
 	}
 	
 	@Override

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.TextNode;
@@ -54,7 +56,7 @@ public abstract class ReferenceParser<T extends Referenceable> {
 	
 	protected abstract T findReferenceable(Project project, long number);
 	
-	public Collection<T> parseReferences(Project project, Document document) {
+	public Collection<T> parseReferences(@Nullable Project project, Document document) {
 		Collection<T> references = new HashSet<>();
 		
 		TextNodeVisitor visitor = new TextNodeVisitor() {

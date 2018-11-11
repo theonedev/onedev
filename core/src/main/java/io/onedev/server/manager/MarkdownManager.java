@@ -17,7 +17,7 @@ public interface MarkdownManager {
 	 */
 	String render(String markdown);
 	
-	String process(Project project, String rendered, @Nullable Object context);
+	String process(@Nullable Project project, String rendered, @Nullable Object context);
 
 	/**
 	 * Escape html characters in specified markdown so that the markdown plain text 
