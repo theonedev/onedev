@@ -179,12 +179,15 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Issue> issues = new ArrayList<>();
 	
-	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<Team> teams = new ArrayList<>();
-	
     @OneToMany(mappedBy="forkedFrom")
 	private Collection<Project> forks = new ArrayList<>();
     
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<GroupAuthorization> groupAuthorizations = new ArrayList<>();
+	
+	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	private Collection<UserAuthorization> userAuthorizations = new ArrayList<>();
+	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<CodeComment> codeComments = new ArrayList<>();
 	
@@ -299,6 +302,7 @@ public class Project extends AbstractEntity {
 	@Editable(order=300, description="Optionally specify default privilege for users not "
 			+ "joining any teams of the project")
 	@NameOfEmptyValue("No default privilege")
+	@Nullable
 	public DefaultPrivilege getDefaultPrivilege() {
 		return defaultPrivilege;
 	}
@@ -365,12 +369,20 @@ public class Project extends AbstractEntity {
 		this.outgoingRequests = outgoingRequests;
 	}
 
-	public Collection<Team> getTeams() {
-		return teams;
+	public Collection<GroupAuthorization> getGroupAuthorizations() {
+		return groupAuthorizations;
 	}
 
-	public void setTeams(Collection<Team> teams) {
-		this.teams = teams;
+	public void setGroupAuthorizations(Collection<GroupAuthorization> groupAuthorizations) {
+		this.groupAuthorizations = groupAuthorizations;
+	}
+
+	public Collection<UserAuthorization> getUserAuthorizations() {
+		return userAuthorizations;
+	}
+
+	public void setAuthorizedUsers(Collection<UserAuthorization> userAuthorizations) {
+		this.userAuthorizations = userAuthorizations;
 	}
 
 	public Project getForkedFrom() {

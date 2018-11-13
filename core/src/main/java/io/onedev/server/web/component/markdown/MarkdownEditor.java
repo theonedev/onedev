@@ -59,6 +59,7 @@ import io.onedev.server.web.component.markdown.emoji.EmojiOnes;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
@@ -279,7 +280,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 						} else {
 							userMap.put("searchKey", noSpaceName);
 						}
-						String avatarUrl = avatarManager.getAvatarUrl(user);
+						String avatarUrl = avatarManager.getAvatarUrl(UserIdent.of(user));
 						userMap.put("avatarUrl", avatarUrl);
 						userList.add(userMap);
 					}

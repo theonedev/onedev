@@ -12,32 +12,30 @@ import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.exception.OneException;
+import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.UserManager;
+import io.onedev.server.model.Group;
+import io.onedev.server.model.User;
 import io.onedev.server.util.reviewrequirement.ReviewRequirementParser.CountContext;
 import io.onedev.server.util.reviewrequirement.ReviewRequirementParser.CriteriaContext;
 import io.onedev.server.util.reviewrequirement.ReviewRequirementParser.RequirementContext;
-
-import io.onedev.server.OneDev;
-import io.onedev.server.exception.OneException;
-import io.onedev.server.manager.TeamManager;
-import io.onedev.server.manager.UserManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.Team;
-import io.onedev.server.model.User;
 
 public class ReviewRequirement {
 	
 	private final List<User> users;
 	
-	private final Map<Team, Integer> teams;
+	private final Map<Group, Integer> groups;
 	
-	public ReviewRequirement(List<User> users, Map<Team, Integer> teams) {
+	public ReviewRequirement(List<User> users, Map<Group, Integer> groups) {
 		this.users = users;
-		this.teams = teams;
+		this.groups = groups;
 	}
 	
-	public static ReviewRequirement parse(Project project, String requirementString) {
+	public static ReviewRequirement fromString(String requirementString) {
 		List<User> users = new ArrayList<>();
-		Map<Team, Integer> teams = new LinkedHashMap<>();
+		Map<Group, Integer> groups = new LinkedHashMap<>();
 		
 		if (requirementString != null) {
 			RequirementContext requirement = parse(requirementString);
@@ -55,31 +53,31 @@ public class ReviewRequirement {
 					} else {
 						throw new OneException("Unable to find user '" + userName + "'");
 					}
-				} else if (criteria.teamCriteria() != null) {
-					String teamName = getBracedValue(criteria.teamCriteria().Value());
-					Team team = OneDev.getInstance(TeamManager.class).find(project, teamName);
-					if (team!= null) {
-						if (!teams.containsKey(team)) {
-							CountContext count = criteria.teamCriteria().count();
+				} else if (criteria.groupCriteria() != null) {
+					String groupName = getBracedValue(criteria.groupCriteria().Value());
+					Group group = OneDev.getInstance(GroupManager.class).find(groupName);
+					if (group != null) {
+						if (!groups.containsKey(group)) {
+							CountContext count = criteria.groupCriteria().count();
 							if (count != null) {
 								if (count.DIGIT() != null)
-									teams.put(team, Integer.parseInt(count.DIGIT().getText()));
+									groups.put(group, Integer.parseInt(count.DIGIT().getText()));
 								else
-									teams.put(team, 0);
+									groups.put(group, 0);
 							} else {
-								teams.put(team, 1);
+								groups.put(group, 1);
 							}
 						} else {
-							throw new OneException("Team '" + teamName + "' is included multiple times");
+							throw new OneException("Group '" + groupName + "' is included multiple times");
 						}
 					} else {
-						throw new OneException("Unable to find team '" + teamName + "'");
+						throw new OneException("Unable to find group '" + groupName + "'");
 					}
 				}
 			}			
 		}
 		
-		return new ReviewRequirement(users, teams);
+		return new ReviewRequirement(users, groups);
 	}
 
 	public static RequirementContext parse(String requirementString) {
@@ -102,8 +100,8 @@ public class ReviewRequirement {
 		return users;
 	}
 
-	public Map<Team, Integer> getTeams() {
-		return teams;
+	public Map<Group, Integer> getGroups() {
+		return groups;
 	}
 	
 	public boolean satisfied(User user) {
@@ -111,13 +109,13 @@ public class ReviewRequirement {
 			if (!eachUser.equals(user))
 				return false;
 		}
-		for (Map.Entry<Team, Integer> entry: teams.entrySet()) {
-			Team team = entry.getKey();
+		for (Map.Entry<Group, Integer> entry: groups.entrySet()) {
+			Group group = entry.getKey();
 			int requiredCount = entry.getValue();
-			if (requiredCount == 0 || requiredCount > team.getMembers().size())
-				requiredCount = team.getMembers().size();
+			if (requiredCount == 0 || requiredCount > group.getMembers().size())
+				requiredCount = group.getMembers().size();
 
-			if (requiredCount > 1 || requiredCount == 1 && !team.getMembers().contains(user))
+			if (requiredCount > 1 || requiredCount == 1 && !group.getMembers().contains(user))
 				return false;
 		}
 		return true;
@@ -129,8 +127,8 @@ public class ReviewRequirement {
 		StringBuilder builder = new StringBuilder();
 		for (User user: users)
 			builder.append("user(").append(user.getName()).append(") ");
-		for (Map.Entry<Team, Integer> entry: teams.entrySet()) {
-			builder.append("team(").append(entry.getKey().getName()).append(")");
+		for (Map.Entry<Group, Integer> entry: groups.entrySet()) {
+			builder.append("group(").append(entry.getKey().getName()).append(")");
 			if (entry.getValue() == 0)
 				builder.append(":all");
 			else if (entry.getValue() != 1)

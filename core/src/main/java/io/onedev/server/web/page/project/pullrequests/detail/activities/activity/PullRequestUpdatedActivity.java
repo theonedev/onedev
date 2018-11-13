@@ -7,10 +7,11 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivity;
 import io.onedev.server.web.util.DeleteCallback;
+import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 public class PullRequestUpdatedActivity implements PullRequestActivity {
@@ -48,8 +49,8 @@ public class PullRequestUpdatedActivity implements PullRequestActivity {
 	}
 
 	@Override
-	public User getUser() {
-		return null;
+	public UserIdent getUser() {
+		return UserIdent.of(UserFacade.of(null));
 	}
 
 }

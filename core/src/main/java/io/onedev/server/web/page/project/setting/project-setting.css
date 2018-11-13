@@ -8,12 +8,17 @@
 	/* use hacks below to make the sidebar extend to the screen bottom even if body does not reach to the bottom */
 	margin-bottom: -10000px;
 	padding-bottom: 10000px;
+	width: 260px;
 }
 #project-setting>.sidebar>.tabs>li>a {
 	border-left: none;
+	padding: 12px 14px;
 }
 #project>.minimized.sidebar+.content>#project-setting>.sidebar {
 	left: 44px;
+}
+#project-setting>.sidebar+.content {
+	padding-left: 260px;
 }
 #project-setting .general-setting form .delete {
 	margin-right: 0;

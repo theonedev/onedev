@@ -13,7 +13,7 @@ onedev.server.stats = {
 		return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
 	},
 	contribs: {
-		onDomReady : function(overallContributions, topContributorsDataUrl) {
+		onDomReady : function(overallContributions, topContributorsDataUrl, userDetailCallback) {
 			var $contribs = $("#project-contribs");
 			var $overall = $contribs.find(".overall");
 			if (overallContributions.length == 0) {
@@ -184,8 +184,24 @@ onedev.server.stats = {
 								$content.append($head);
 								var $left = $("<div class='pull-left'></div>");
 								$head.append($left);
-								$left.append("<img class='avatar' src='" + contributor.authorAvatarUrl + "'></img>");
-								var nameSpan = "<span class='name'>" + contributor.authorName + "</span>"; 
+								if (contributor.author["@class"].indexOf("SystemUserIdent") != -1) {
+									$left.append("<img class='avatar' src='" + contributor.authorAvatarUrl + "'></img>");
+								} else {
+									$left.append("<a class='user'><img class='avatar' src='" + contributor.authorAvatarUrl + "'></img></a>");
+								}
+
+								var alignment = {targetX: 0, targetY: 0, x: 0, y: 100, offset: 8};
+								$left.find("a.user").hover(function() {
+									var $detail = $("<div id='user-detail' class='floating'></div>");
+									$detail.hide();
+									$detail.data("trigger", this);
+									$detail.data("alignment", alignment);
+									$("body").append($detail);
+									userDetailCallback(JSON.stringify(contributor.author));
+									return $detail;
+								}, alignment);
+								
+								var nameSpan = "<span class='name'>" + contributor.author.name + "</span>"; 
 								if (contributor.authorUrl) {
 									$left.append("<a href='" + contributor.authorUrl + "'>" + nameSpan + "</a>");
 								} else {
@@ -293,6 +309,11 @@ onedev.server.stats = {
 					$(this).data("chart").resize();
 				});
 			});
+		},
+		onUserDetailAvailable: function() {
+			var $userDetail = $("#user-detail");
+			$userDetail.empty().append($(".user-detail-content").children()).show();
+			$userDetail.align({placement: $userDetail.data("alignment"), target: {element: $userDetail.data("trigger")}});
 		}
 	},
 	sourceLines: {

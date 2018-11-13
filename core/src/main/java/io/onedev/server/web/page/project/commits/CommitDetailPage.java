@@ -61,7 +61,7 @@ import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.user.avatar.ContributorAvatars;
+import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;

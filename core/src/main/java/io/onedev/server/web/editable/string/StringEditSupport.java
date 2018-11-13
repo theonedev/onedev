@@ -14,7 +14,7 @@ import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.web.editable.annotation.BranchPattern;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Color;
-import io.onedev.server.web.editable.annotation.TeamChoice;
+import io.onedev.server.web.editable.annotation.GroupChoice;
 import io.onedev.server.web.editable.annotation.IssueQuery;
 import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.editable.annotation.Multiline;
@@ -40,7 +40,7 @@ public class StringEditSupport implements EditSupport {
 				&& descriptor.getPropertyGetter().getAnnotation(BranchPattern.class) == null
 				&& descriptor.getPropertyGetter().getAnnotation(TagPattern.class) == null
 				&& descriptor.getPropertyGetter().getAnnotation(IssueQuery.class) == null
-				&& descriptor.getPropertyGetter().getAnnotation(TeamChoice.class) == null
+				&& descriptor.getPropertyGetter().getAnnotation(GroupChoice.class) == null
 				&& descriptor.getPropertyGetter().getAnnotation(UserChoice.class) == null
 				&& descriptor.getPropertyGetter().getAnnotation(PathPattern.class) == null
 				&& descriptor.getPropertyGetter().getAnnotation(ReviewRequirement.class) == null) {

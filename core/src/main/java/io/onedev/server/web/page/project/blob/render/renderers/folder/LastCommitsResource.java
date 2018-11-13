@@ -6,27 +6,23 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.revwalk.LastCommitsOfChildren;
-import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.user.UserProfilePage;
 import io.onedev.server.web.util.avatar.AvatarManager;
 
 /**
@@ -66,7 +62,6 @@ class LastCommitsResource extends AbstractResource {
 				
 				LastCommitsOfChildren lastCommits = project.getLastCommitsOfChildren(revision, path);
 				
-				UserManager userManager = OneDev.getInstance(UserManager.class);
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
 				
 				Map<String, LastCommitInfo> map = new HashMap<>();
@@ -76,21 +71,13 @@ class LastCommitsResource extends AbstractResource {
 					LastCommitsOfChildren.Value value = entry.getValue();
 					PageParameters params = CommitDetailPage.paramsOf(project, value.getId().name());
 					info.url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
-					info.summary = StringEscapeUtils.escapeHtml4(value.getSummary());
+					info.summary = value.getSummary();
 					info.when = DateUtils.formatAge(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();
-					User user = userManager.find(author);
-					if (user != null) {
-						info.authorName = HtmlEscape.escapeHtml5(user.getDisplayName());
-						info.authorAvatarUrl = avatarManager.getAvatarUrl(user.getFacade());
-						params = UserProfilePage.paramsOf(user);
-						info.authorUrl = RequestCycle.get().urlFor(UserProfilePage.class, params).toString();
-					} else {
-						info.authorName = HtmlEscape.escapeHtml5(author.getName());
-						info.authorAvatarUrl = avatarManager.getAvatarUrl(author);
-					}
-					
+					UserIdent userIdent = UserIdent.of(author);
+					info.author = userIdent;
+					info.authorAvatarUrl = avatarManager.getAvatarUrl(userIdent);
 					map.put(entry.getKey(), info);
 				}
 				String json;
@@ -127,10 +114,8 @@ class LastCommitsResource extends AbstractResource {
 		
 		String authorAvatarUrl;
 		
-		String authorName;
+		UserIdent author;
 		
-		@Nullable
-		String authorUrl;
 	}
 	
 }

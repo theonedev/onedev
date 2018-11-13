@@ -53,17 +53,20 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.milestone.progress.MilestoneProgressBar;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
-import io.onedev.server.web.component.user.avatar.UserAvatarLink;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.component.user.list.UserListLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.ajaxlistener.AppendLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
@@ -383,7 +386,7 @@ public abstract class IssueSidePanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<IssueVote> item) {
 				User user = item.getModelObject().getUser();
-				item.add(new UserAvatarLink("voter", user, user.getDisplayName()));
+				item.add(new UserIdentPanel("voter", UserIdent.of(UserFacade.of(user)), Mode.AVATAR));
 			}
 
 			@Override

@@ -12,8 +12,8 @@ import io.onedev.server.util.facade.MembershipFacade;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_user_id"), @Index(columnList="o_team_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_user_id", "o_team_id"})
+		indexes={@Index(columnList="o_user_id"), @Index(columnList="o_group_id")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_user_id", "o_group_id"})
 })
 public class Membership extends AbstractEntity {
 
@@ -25,7 +25,7 @@ public class Membership extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Team team;
+	private Group group;
 	
 	public User getUser() {
 		return user;
@@ -35,12 +35,12 @@ public class Membership extends AbstractEntity {
 		this.user = user;
 	}
 
-	public Team getTeam() {
-		return team;
+	public Group getGroup() {
+		return group;
 	}
 
-	public void setTeam(Team team) {
-		this.team = team;
+	public void setGroup(Group group) {
+		this.group = group;
 	}
 
 	public MembershipFacade getFacade() {

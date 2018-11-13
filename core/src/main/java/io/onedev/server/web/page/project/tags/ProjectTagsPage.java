@@ -47,15 +47,17 @@ import io.onedev.server.web.component.build.status.BuildsStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
-import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.revisionpicker.RevisionPicker;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 import io.onedev.utils.StringUtils;
 
@@ -278,7 +280,7 @@ public class ProjectTagsPage extends ProjectPage {
 					RevTag revTag = (RevTag) ref.getObj();
 					Fragment fragment = new Fragment("annotated", "annotatedFrag", ProjectTagsPage.this);
 					if (revTag.getTaggerIdent() != null) {
-						fragment.add(new UserLink("author", revTag.getTaggerIdent()));
+						fragment.add(new UserIdentPanel("author", UserIdent.of(revTag.getTaggerIdent()), Mode.NAME));
 					} else {
 						fragment.add(new WebMarkupContainer("author").setVisible(false));
 					}

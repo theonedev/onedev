@@ -32,8 +32,8 @@ import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
-import io.onedev.server.web.component.link.BranchLink;
 import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 

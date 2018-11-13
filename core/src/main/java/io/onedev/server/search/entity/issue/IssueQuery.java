@@ -64,7 +64,7 @@ import io.onedev.server.util.inputspec.booleaninput.BooleanInput;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.util.inputspec.numberinput.NumberInput;
-import io.onedev.server.util.inputspec.teamchoiceinput.TeamChoiceInput;
+import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
 import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
@@ -300,7 +300,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 									long ordinal = getValueOrdinal((ChoiceInput) field, value);
 									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
 								} else if (field instanceof UserChoiceInput 
-										|| field instanceof TeamChoiceInput) {
+										|| field instanceof GroupChoiceInput) {
 									return new ChoiceFieldCriteria(fieldName, value, -1, operator, false);
 								} else {
 									return new StringFieldCriteria(fieldName, value, operator);
@@ -428,7 +428,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					&& !(fieldSpec instanceof NumberInput) 
 					&& !(fieldSpec instanceof ChoiceInput) 
 					&& !(fieldSpec instanceof UserChoiceInput)
-					&& !(fieldSpec instanceof TeamChoiceInput)
+					&& !(fieldSpec instanceof GroupChoiceInput)
 					&& !(fieldSpec instanceof TextInput)) {
 				throw newOperatorException(fieldName, operator);
 			}

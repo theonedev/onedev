@@ -21,10 +21,10 @@ import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.manager.UrlManager;
 import io.onedev.server.manager.UserInfoManager;
+import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueWatch;
-import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
@@ -128,10 +128,10 @@ public class DefaultIssueNotificationManager {
 
 			if (event instanceof IssueChangeEvent) {
 				IssueChange change = ((IssueChangeEvent) event).getChange();
-				Map<String, Team> newTeams = change.getData().getNewTeams(issue.getProject());
-				if (newTeams != null) {
-					for (Team team: newTeams.values()) {
-						for (User member: team.getMembers())
+				Map<String, Group> newGroups = change.getData().getNewGroups(issue.getProject());
+				if (newGroups != null) {
+					for (Group group: newGroups.values()) {
+						for (User member: group.getMembers())
 							watch(issue, member, true);
 					}
 				}

@@ -45,12 +45,12 @@ import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueField;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
@@ -58,10 +58,10 @@ import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
-import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.avatar.UserAvatarLink;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
@@ -69,6 +69,7 @@ import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.VisibleVisitor;
 import io.onedev.utils.StringUtils;
 
@@ -500,11 +501,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
 							IModel<Issue> rowModel) {
 						Issue issue = rowModel.getObject();
-						Fragment fragment = new Fragment(componentId, "userFrag", IssueListPanel.this);
-						User submitter = User.getForDisplay(issue.getSubmitter(), issue.getSubmitterName());
-						fragment.add(new UserAvatarLink("avatar", submitter));
-						fragment.add(new UserLink("name", submitter));
-						cellItem.add(fragment);
+						UserIdent userIdent = UserIdent.of(UserFacade.of(issue.getSubmitter()), issue.getSubmitterName());
+						cellItem.add(new UserIdentPanel(componentId, userIdent, Mode.AVATAR_AND_NAME));
 					}
 				});
 				break;

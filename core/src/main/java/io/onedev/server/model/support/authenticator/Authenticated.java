@@ -10,12 +10,12 @@ public class Authenticated {
 	
 	private final String email;
 	
-	private final Collection<String> teamFQNs;
+	private final Collection<String> groupNames;
 	
-	public Authenticated(@Nullable String fullName, @Nullable String email, Collection<String> teamFQNs) {
+	public Authenticated(@Nullable String fullName, @Nullable String email, Collection<String> groupNames) {
 		this.fullName = fullName;
 		this.email = email;
-		this.teamFQNs = teamFQNs;
+		this.groupNames = groupNames;
 	}
 
 	@Nullable
@@ -28,8 +28,8 @@ public class Authenticated {
 		return email;
 	}
 
-	public Collection<String> getTeamFQNs() {
-		return teamFQNs;
+	public Collection<String> getGroupNames() {
+		return groupNames;
 	}
 	
 }

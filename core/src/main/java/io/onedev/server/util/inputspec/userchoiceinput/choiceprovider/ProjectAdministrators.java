@@ -18,7 +18,7 @@ public class ProjectAdministrators implements ChoiceProvider {
 	@Override
 	public List<UserFacade> getChoices(boolean allPossible) {
 		Project project = OneContext.get().getProject();
-		return new ArrayList<>(SecurityUtils.getAuthorizedUsers(project.getFacade(), ProjectPrivilege.PROJECT_ADMINISTRATION));
+		return new ArrayList<>(SecurityUtils.getAuthorizedUsers(project.getFacade(), ProjectPrivilege.ADMINISTRATION));
 	}
 
 }

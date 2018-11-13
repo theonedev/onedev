@@ -6,9 +6,11 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import io.onedev.server.util.facade.ConfigurationFacade;
+import io.onedev.server.util.facade.GroupAuthorizationFacade;
+import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.TeamFacade;
+import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.server.util.facade.UserFacade;
 
 public interface CacheManager {
@@ -17,7 +19,11 @@ public interface CacheManager {
 	
 	Map<Long, UserFacade> getUsers();
 	
-	Map<Long, TeamFacade> getTeams();
+	Map<Long, GroupFacade> getGroups();
+	
+	Map<Long, UserAuthorizationFacade> getUserAuthorizations();
+	
+	Map<Long, GroupAuthorizationFacade> getGroupAuthorizations();
 	
 	Map<Long, MembershipFacade> getMemberships();
 	
@@ -30,7 +36,7 @@ public interface CacheManager {
 	UserFacade getUser(Long id);
 	
 	@Nullable
-	TeamFacade getTeam(Long id);
+	GroupFacade getGroup(Long id);
 	
 	@Nullable
 	MembershipFacade getMembership(Long id);
@@ -40,6 +46,15 @@ public interface CacheManager {
 	
 	@Nullable
 	Long getUserIdByEmail(String email);
+	
+	@Nullable
+	UserAuthorizationFacade getUserAuthorization(Long id);
+	
+	@Nullable
+	GroupAuthorizationFacade getGroupAuthorization(Long id);
+	
+	@Nullable
+	Long getGroupIdByName(String name);
 	
 	Map<String, Long> getProjectIds();
 	

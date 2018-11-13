@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -49,18 +48,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @Column(unique=true, nullable=false)
     private String name;
 
-    @Column(length=1024)
+    @Column(length=1024, nullable=false)
 	@JsonView(DefaultView.class)
     private String password;
 
 	private String fullName;
 	
-	@Column(unique=true)
+	@Column(unique=true, nullable=false)
 	private String email;
-	
-	private boolean administrator;
-	
-	private boolean canCreateProjects = true;
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -164,24 +159,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.email = email;
 	}
 
-	@Editable(order=400)
-	public boolean isAdministrator() {
-		return administrator;
-	}
-
-	public void setAdministrator(boolean administrator) {
-		this.administrator = administrator;
-	}
-
-	@Editable(order=500)
-	public boolean isCanCreateProjects() {
-		return canCreateProjects;
-	}
-
-	public void setCanCreateProjects(boolean canCreateProjects) {
-		this.canCreateProjects = canCreateProjects;
-	}
-
 	public Collection<Membership> getMemberships() {
 		return memberships;
 	}
@@ -240,14 +217,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		} else {
 			return getDisplayName().compareTo(user.getDisplayName());
 		}
-	}
-
-	public static User getForDisplay(@Nullable User user, @Nullable String userName) {
-		if (user == null && userName != null) {
-			user = new User();
-			user.setName(userName);
-		}
-		return user;
 	}
 
 	public UserFacade getFacade() {

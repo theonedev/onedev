@@ -25,9 +25,9 @@ import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
-import io.onedev.server.util.facade.MembershipFacade;
+import io.onedev.server.util.facade.GroupAuthorizationFacade;
 import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.TeamFacade;
+import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
@@ -51,19 +51,20 @@ public class ProjectListPage extends LayoutPage {
 			CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
 			List<ProjectFacade> projects = new ArrayList<>();
 			
-			Set<Long> teamIdsWithMembers = new HashSet<>();
-			for (MembershipFacade membership: cacheManager.getMemberships().values()) 
-				teamIdsWithMembers.add(membership.getTeamId());
-			
 			Set<Long> projectIdsWithExplicitAdministrators = new HashSet<>();
-			for (TeamFacade team: cacheManager.getTeams().values()) {
-				if (team.getPrivilege() == ProjectPrivilege.PROJECT_ADMINISTRATION && teamIdsWithMembers.contains(team.getId()))
-					projectIdsWithExplicitAdministrators.add(team.getProjectId());
+			for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
+				if (authorization.getPrivilege() == ProjectPrivilege.ADMINISTRATION)
+					projectIdsWithExplicitAdministrators.add(authorization.getProjectId());
+			}
+			for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
+				if (authorization.getPrivilege() == ProjectPrivilege.ADMINISTRATION)
+					projectIdsWithExplicitAdministrators.add(authorization.getProjectId());
 			}
 			
 			for (ProjectFacade project: cacheManager.getProjects().values()) {
-				if (!projectIdsWithExplicitAdministrators.contains(project.getId())) 
+				if (!projectIdsWithExplicitAdministrators.contains(project.getId())) {
 					projects.add(project);
+				}
 			}
 			projects.sort(Comparator.comparing(ProjectFacade::getName));
 			

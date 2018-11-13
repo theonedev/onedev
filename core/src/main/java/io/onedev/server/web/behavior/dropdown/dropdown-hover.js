@@ -1,5 +1,5 @@
-onedev.server.dropdownhover = {
-	init: function(triggerId, hoverDelay, openCallback) {
+onedev.server.dropdownHover = {
+	onDomReady: function(triggerId, hoverDelay, openCallback) {
 		var $trigger = $("#" + triggerId);
 		$trigger.addClass("dropdown-hover");
 		

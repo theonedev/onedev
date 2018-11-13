@@ -45,13 +45,14 @@ import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueD
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.component.issue.activities.activity.IssueActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueChangeActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueCommentedActivity;
-import io.onedev.server.web.component.issue.activities.activity.IssueActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueOpenedActivity;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
-import io.onedev.server.web.component.user.avatar.UserAvatarLink;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.DeleteCallback;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
@@ -183,7 +184,7 @@ public abstract class IssueActivitiesPanel extends Panel {
 		if (anchor != null)
 			row.setMarkupId(anchor);
 		
-		row.add(new UserAvatarLink("avatar", activity.getUser(), activity.getUser()!=null?activity.getUser().getDisplayName():"OneDev"));
+		row.add(new UserIdentPanel("avatar", activity.getUser(), Mode.AVATAR));
 
 		row.add(activity.render("content", new DeleteCallback() {
 

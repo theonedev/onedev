@@ -88,9 +88,9 @@ public class AuthenticatorPage extends AdministrationPage {
 										.append(authenticated.getEmail())
 										.append("\n");
 							}
-							if (authenticated.getTeamFQNs() != null) {
+							if (authenticated.getGroupNames() != null) {
 								retrievedInfoBuilder.append("Groups: ")
-										.append(Joiner.on(", ").join(authenticated.getTeamFQNs()))
+										.append(Joiner.on(", ").join(authenticated.getGroupNames()))
 										.append("\n");
 							}
 							StringBuilder messageBuilder = 

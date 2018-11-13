@@ -8,7 +8,9 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.eclipse.jgit.lib.PersonIdent;
 
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.link.UserLink;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
+import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 public class ContributorPanel extends Panel {
@@ -30,12 +32,12 @@ public class ContributorPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new UserLink("author", author));
+		add(new UserIdentPanel("author", UserIdent.of(author), Mode.NAME));
 		if (committer.getEmailAddress().equals(author.getEmailAddress())
 				&& committer.getName().equals(author.getName())) {
 			add(new WebMarkupContainer("committer").setVisible(false));
 		} else {
-			add(new UserLink("committer", committer));
+			add(new UserIdentPanel("committer", UserIdent.of(committer), Mode.NAME));
 		}
 		if (withDate)
 			add(new Label("date", DateUtils.formatAge(committer.getWhen())));

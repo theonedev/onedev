@@ -30,9 +30,11 @@ import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.status.BuildsStatusPanel;
 import io.onedev.server.web.component.commit.message.ExpandableCommitMessagePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.user.avatar.UserAvatarLink;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
@@ -73,7 +75,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 			protected void populateItem(final ListItem<RevCommit> item) {
 				RevCommit commit = item.getModelObject();
 				
-				item.add(new UserAvatarLink("author", commit.getAuthorIdent(), commit.getAuthorIdent().getName()));
+				item.add(new UserIdentPanel("author", UserIdent.of(commit.getAuthorIdent()), Mode.AVATAR));
 
 				IModel<Project> projectModel = new AbstractReadOnlyModel<Project>() {
 

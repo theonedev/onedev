@@ -9,10 +9,10 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.link.UserLink;
+import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.project.comment.ProjectCommentPanel;
@@ -31,7 +31,7 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 		super.onInitialize();
 		
 		Issue issue = getIssue();
-		add(new UserLink("user", User.getForDisplay(issue.getSubmitter(), issue.getSubmitterName())));
+		add(new Label("user", UserIdent.of(UserFacade.of(issue.getSubmitter()), issue.getSubmitterName()).getName()));
 		add(new Label("age", DateUtils.formatAge(issue.getSubmitDate())));
 		
 		add(new ProjectCommentPanel("body") {

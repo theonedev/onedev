@@ -7,7 +7,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.markdown.MarkdownProcessor;
 import io.onedev.server.util.markdown.MentionParser;
-import io.onedev.server.web.page.user.UserProfilePage;
+import io.onedev.server.web.page.admin.user.UserProfilePage;
 
 public class MentionProcessor extends MentionParser implements MarkdownProcessor {
 	

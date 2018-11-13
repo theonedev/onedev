@@ -33,9 +33,10 @@ import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.JsoupUtils;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.web.behavior.dropdown.DropdownHover;
-import io.onedev.server.web.component.link.UserLink;
-import io.onedev.server.web.component.user.avatar.UserAvatarLink;
+import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.websocket.PageDataChanged;
 
@@ -113,8 +114,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected void populateItem(ListItem<PullRequestReview> item) {
 				PullRequestReview review = item.getModelObject();
-				item.add(new UserAvatarLink("avatar", review.getUser()));
-				item.add(new UserLink("name", review.getUser()));
+				item.add(new UserIdentPanel("user", UserIdent.of(UserFacade.of(review.getUser())), Mode.AVATAR_AND_NAME));
 				
 				PullRequest request = getPullRequest();
 				
@@ -127,7 +127,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 				} else {
 					result.add(AttributeAppender.append("class", "awaiting fa fa-clock-o"));
 				}
-				result.add(new DropdownHover() {
+				result.add(new DropdownHoverBehavior() {
 					
 					@Override
 					protected Component newContent(String id) {

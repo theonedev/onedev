@@ -4,10 +4,10 @@ import java.util.Map;
 
 import org.apache.wicket.Component;
 
+import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.web.component.issue.referencedfrom.ReferencedFromIssuePanel;
@@ -47,7 +47,7 @@ public class IssueReferencedFromIssueData implements IssueChangeData {
 	}
 
 	@Override
-	public Map<String, Team> getNewTeams(Project project) {
+	public Map<String, Group> getNewGroups(Project project) {
 		return null;
 	}
 	

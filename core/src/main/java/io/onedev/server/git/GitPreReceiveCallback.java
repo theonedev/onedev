@@ -151,7 +151,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 
 	    		if (refName.startsWith(PullRequestConstants.REFS_PREFIX) || refName.startsWith(PullRequestUpdate.REFS_PREFIX)) {
 	    			if (!user.asSubject().isPermitted(
-	    					new ProjectPermission(project.getFacade(), ProjectPrivilege.PROJECT_ADMINISTRATION))) {
+	    					new ProjectPermission(project.getFacade(), ProjectPrivilege.ADMINISTRATION))) {
 	    				error(output, refName, "Only project administrators can update onedev refs.");
 	    				break;
 	    			}

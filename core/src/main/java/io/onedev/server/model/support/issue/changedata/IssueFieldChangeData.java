@@ -9,11 +9,11 @@ import java.util.Map;
 import org.apache.wicket.Component;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.TeamManager;
+import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.UserManager;
+import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.util.IssueField;
@@ -84,24 +84,24 @@ public class IssueFieldChangeData implements IssueChangeData {
 		return newUsers;
 	}
 	
-	protected Map<String, String> getNewTeams() {
-		Map<String, String> newTeams = new HashMap<>();
+	protected Map<String, String> getNewGroups() {
+		Map<String, String> newGroups = new HashMap<>();
 		for (IssueField oldField: oldFields.values()) {
 			IssueField newField = newFields.get(oldField.getName());
 			if (newField != null 
 					&& !describe(oldField).equals(describe(newField)) 
-					&& newField.getType().equals(InputSpec.TEAM) 
+					&& newField.getType().equals(InputSpec.GROUP) 
 					&& !newField.getValues().isEmpty()) 
-				newTeams.put(newField.getName(), newField.getValues().iterator().next());
+				newGroups.put(newField.getName(), newField.getValues().iterator().next());
 		}
 		for (IssueField newField: newFields.values()) {
 			if (!oldFields.containsKey(newField.getName()) 
-					&& newField.getType().equals(InputSpec.TEAM) 
+					&& newField.getType().equals(InputSpec.GROUP) 
 					&& !newField.getValues().isEmpty()) { 
-				newTeams.put(newField.getName(), newField.getValues().iterator().next());
+				newGroups.put(newField.getName(), newField.getValues().iterator().next());
 			}
 		}
-		return newTeams;
+		return newGroups;
 	}
 	
 	private Map<String, IssueField> copyNonEmptyFields(Map<String, IssueField> fields) {
@@ -151,14 +151,14 @@ public class IssueFieldChangeData implements IssueChangeData {
 	}
 
 	@Override
-	public Map<String, Team> getNewTeams(Project project) {
-		Map<String, Team> newTeams = new HashMap<>();
-		for (Map.Entry<String, String> entry: getNewTeams().entrySet()) {
-			Team team = OneDev.getInstance(TeamManager.class).find(project, entry.getValue());
-			if (team != null)
-				newTeams.put(entry.getKey(), team);
+	public Map<String, Group> getNewGroups(Project project) {
+		Map<String, Group> newGroups = new HashMap<>();
+		for (Map.Entry<String, String> entry: getNewGroups().entrySet()) {
+			Group group = OneDev.getInstance(GroupManager.class).find(entry.getValue());
+			if (group != null)
+				newGroups.put(entry.getKey(), group);
 		}
-		return newTeams;
+		return newGroups;
 	}
 
 }

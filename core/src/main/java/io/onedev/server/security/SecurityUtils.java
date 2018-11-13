@@ -2,7 +2,7 @@ package io.onedev.server.security;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -29,9 +29,11 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UserAdministration;
+import io.onedev.server.util.facade.GroupAuthorizationFacade;
+import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.TeamFacade;
+import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.server.util.facade.UserFacade;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
@@ -42,32 +44,33 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (project.getDefaultPrivilege() != null && project.getDefaultPrivilege().getProjectPrivilege().implies(privilege)) {
 			authorizedUsers.addAll(cacheManager.getUsers().values());
 		} else {
-			for (UserFacade user: cacheManager.getUsers().values()) {
-				if (user.isRoot() || user.isAdministrator())
-					authorizedUsers.add(user);
+			authorizedUsers.add(OneDev.getInstance(UserManager.class).getRoot().getFacade());
+
+			Set<Long> authorizedGroupIds = new HashSet<>();
+			for (GroupFacade group: cacheManager.getGroups().values()) {
+				if (group.isAdministrator()) 
+					authorizedGroupIds.add(group.getId());
+			}
+			for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
+				if (authorization.getProjectId().equals(project.getId()) && authorization.getPrivilege().implies(privilege))
+					authorizedGroupIds.add(authorization.getGroupId());
+			}
+			for (MembershipFacade membership: cacheManager.getMemberships().values()) {
+				if (authorizedGroupIds.contains(membership.getGroupId()))
+					authorizedUsers.add(cacheManager.getUser(membership.getUserId()));
 			}
 
-			Collection<Long> authorizedTeamIds = 
-					getAuthorizedTeams(project, privilege).stream().map(it->it.getId()).collect(Collectors.toSet());
-			for (MembershipFacade membership: cacheManager.getMemberships().values()) {
-				if (authorizedTeamIds.contains(membership.getTeamId()))
-					authorizedUsers.add(cacheManager.getUser(membership.getUserId()));
+			for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
+				if (authorization.getProjectId().equals(project.getId()) 
+						&& authorization.getPrivilege().implies(privilege)) {
+					authorizedUsers.add(cacheManager.getUser(authorization.getUserId()));
+				}
 			}
 		}
 
 		return authorizedUsers;
 	}
 	
-	public static Collection<TeamFacade> getAuthorizedTeams(ProjectFacade project, ProjectPrivilege privilege) {
-		CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
-		Collection<TeamFacade> authorizedTeams = new HashSet<>();
-		for (TeamFacade team: cacheManager.getTeams().values()) {
-			if (team.getProjectId().equals(project.getId()) && team.getPrivilege().implies(privilege))
-				authorizedTeams.add(team);
-		}
-		return authorizedTeams;
-	}
-
 	public static User getUser() {
 		return OneDev.getInstance(UserManager.class).getCurrent();
 	}
@@ -132,7 +135,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canAdministrate(ProjectFacade project) {
-		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.PROJECT_ADMINISTRATION));
+		return getSubject().isPermitted(new ProjectPermission(project, ProjectPrivilege.ADMINISTRATION));
 	}
 	
 	public static boolean isAdministrator() {

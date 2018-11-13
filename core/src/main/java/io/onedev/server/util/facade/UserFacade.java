@@ -15,10 +15,6 @@ public class UserFacade extends EntityFacade {
 	
 	private final String email;
 	
-	private final boolean administrator;
-	
-	private final boolean canCreateProjects;
-	
 	private final String uuid;
 	
 	public UserFacade(User user) {
@@ -27,8 +23,6 @@ public class UserFacade extends EntityFacade {
 		name = user.getName();
 		fullName = user.getFullName();
 		email = user.getEmail();
-		administrator = user.isAdministrator();
-		canCreateProjects = user.isCanCreateProjects();
 		uuid = user.getUUID();
 	}
 
@@ -44,14 +38,6 @@ public class UserFacade extends EntityFacade {
 		return email;
 	}
 	
-	public boolean isAdministrator() {
-		return administrator;
-	}
-
-	public boolean isCanCreateProjects() {
-		return canCreateProjects;
-	}
-
 	public String getUUID() {
 		return uuid;
 	}
@@ -76,6 +62,10 @@ public class UserFacade extends EntityFacade {
 		double scoreOfName = MatchScoreUtils.getMatchScore(name, queryTerm);
 		double scoreOfFullName = MatchScoreUtils.getMatchScore(fullName, queryTerm);
 		return Math.max(scoreOfName, scoreOfFullName);
+	}
+
+	public static UserFacade of(@Nullable User user) {
+		return user!=null?new UserFacade(user):null;
 	}
 	
 }

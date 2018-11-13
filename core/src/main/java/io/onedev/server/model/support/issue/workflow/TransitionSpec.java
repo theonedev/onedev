@@ -15,7 +15,7 @@ import io.onedev.server.model.support.issue.workflow.transitionprerequisite.Tran
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.issue.workflow.transitiontrigger.TransitionTrigger;
-import io.onedev.server.model.support.usermatcher.SpecifiedTeam;
+import io.onedev.server.model.support.usermatcher.SpecifiedGroup;
 import io.onedev.server.model.support.usermatcher.SpecifiedUser;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -166,10 +166,10 @@ public class TransitionSpec implements Serializable {
 		TransitionTrigger trigger = getTrigger();
 		if (trigger instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			if (pressButton.getAuthorized() instanceof SpecifiedTeam) {
-				SpecifiedTeam specifiedGroup = (SpecifiedTeam) pressButton.getAuthorized();
-				if (specifiedGroup.getTeamName().equals(oldName))
-					specifiedGroup.setTeamName(newName);
+			if (pressButton.getAuthorized() instanceof SpecifiedGroup) {
+				SpecifiedGroup specifiedGroup = (SpecifiedGroup) pressButton.getAuthorized();
+				if (specifiedGroup.getGroupName().equals(oldName))
+					specifiedGroup.setGroupName(newName);
 			}
 		}
 	}
@@ -178,9 +178,9 @@ public class TransitionSpec implements Serializable {
 		TransitionTrigger trigger = getTrigger();
 		if (trigger instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			if (pressButton.getAuthorized() instanceof SpecifiedTeam) {
-				SpecifiedTeam specifiedGroup = (SpecifiedTeam) pressButton.getAuthorized();
-				if (specifiedGroup.getTeamName().equals(groupName))
+			if (pressButton.getAuthorized() instanceof SpecifiedGroup) {
+				SpecifiedGroup specifiedGroup = (SpecifiedGroup) pressButton.getAuthorized();
+				if (specifiedGroup.getGroupName().equals(groupName))
 					return true;
 			}
 		}

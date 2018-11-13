@@ -71,7 +71,7 @@ import io.onedev.server.web.component.commit.message.ExpandableCommitMessagePane
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.avatar.ContributorAvatars;
+import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;

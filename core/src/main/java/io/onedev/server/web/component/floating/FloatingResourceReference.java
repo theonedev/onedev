@@ -2,10 +2,8 @@ package io.onedev.server.web.component.floating;
 
 import java.util.List;
 
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.HeaderItem;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.request.resource.CssResourceReference;
 
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
@@ -22,7 +20,6 @@ public class FloatingResourceReference extends BaseDependentResourceReference {
 	public List<HeaderItem> getDependencies() {
 		List<HeaderItem> dependencies = super.getDependencies();
 		dependencies.add(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
-		dependencies.add(CssHeaderItem.forReference(new CssResourceReference(FloatingResourceReference.class, "floating.css")));
 		return dependencies;
 	}
 

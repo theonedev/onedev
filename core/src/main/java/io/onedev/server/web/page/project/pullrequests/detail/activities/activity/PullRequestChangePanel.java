@@ -7,9 +7,10 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.link.UserLink;
+import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.SystemUserIdent;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.SinceChangesLink;
 
 @SuppressWarnings("serial")
@@ -24,8 +25,8 @@ class PullRequestChangePanel extends GenericPanel<PullRequestChange> {
 		super.onInitialize();
 		
 		PullRequestChange change = getModelObject();
-		User userForDisplay = User.getForDisplay(change.getUser(), change.getUserName());
-		add(new UserLink("user", userForDisplay).setVisible(userForDisplay != null));
+		UserIdent userIdent = UserIdent.of(UserFacade.of(change.getUser()), change.getUserName());
+		add(new Label("user", userIdent.getName()).setVisible(!(userIdent instanceof SystemUserIdent)));
 		add(new Label("description", change.getData().getDescription()));
 		add(new Label("age", DateUtils.formatAge(change.getDate())));
 		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {

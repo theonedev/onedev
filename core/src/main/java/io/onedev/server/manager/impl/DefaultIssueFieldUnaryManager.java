@@ -59,7 +59,7 @@ public class DefaultIssueFieldUnaryManager extends AbstractEntityManager<IssueFi
 	@Override
 	public void onRenameGroup(String oldName, String newName) {
 		Query query = getSession().createQuery("update IssueFieldUnary set value=:newName where type=:groupChoice and value=:oldName");
-		query.setParameter("groupChoice", InputSpec.TEAM);
+		query.setParameter("groupChoice", InputSpec.GROUP);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
 		query.executeUpdate();

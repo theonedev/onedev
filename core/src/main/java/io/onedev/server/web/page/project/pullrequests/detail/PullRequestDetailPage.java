@@ -76,7 +76,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.PullRequestWatch;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.ProjectAndBranch;
@@ -86,13 +85,13 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.build.status.PullRequestBuildsPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.link.BranchLink;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -101,6 +100,8 @@ import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
@@ -112,6 +113,7 @@ import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.model.EntityModel;
@@ -634,8 +636,8 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			
 		});
 		
-		statusAndBranchesContainer.add(new UserLink("user", 
-				User.getForDisplay(request.getSubmitter(), request.getSubmitterName())));
+		UserIdent userIdent = UserIdent.of(UserFacade.of(request.getSubmitter()), request.getSubmitterName());
+		statusAndBranchesContainer.add(new UserIdentPanel("user", userIdent, Mode.NAME));
 		statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
 		
 		statusAndBranchesContainer.add(new BranchLink("target", request.getTarget(), null));

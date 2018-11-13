@@ -41,7 +41,7 @@ import io.onedev.server.web.component.commit.graph.CommitGraphUtils;
 import io.onedev.server.web.component.commit.message.ExpandableCommitMessagePanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.user.avatar.ContributorAvatars;
+import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.model.CommitRefsModel;

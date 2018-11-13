@@ -13,7 +13,7 @@ public class ProjectAdministrators implements UserMatcher {
 
 	@Override
 	public boolean matches(Project project, User user) {
-		return user.asSubject().isPermitted(new ProjectPermission(project.getFacade(), ProjectPrivilege.PROJECT_ADMINISTRATION));
+		return user.asSubject().isPermitted(new ProjectPermission(project.getFacade(), ProjectPrivilege.ADMINISTRATION));
 	}
 
 }

@@ -23,6 +23,13 @@ public class AdministrationTab extends PageTab {
 		this.iconClass = iconClass;
 	}
 
+	public AdministrationTab(String title, String iconClass, Class<? extends AdministrationPage> mainPageClass, 
+			Class<? extends AdministrationPage> additionalPageClass1, Class<? extends AdministrationPage> additionalPageClass2) {
+		super(Model.of(title), mainPageClass, additionalPageClass1, additionalPageClass2);
+		
+		this.iconClass = iconClass;
+	}
+	
 	@Override
 	public Component render(String componentId) {
 		return new AdministrationTabLink(componentId, this);

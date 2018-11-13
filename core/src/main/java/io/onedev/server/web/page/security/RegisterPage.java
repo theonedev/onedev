@@ -16,10 +16,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.page.admin.user.UserAvatarPage;
+import io.onedev.server.web.page.admin.user.UserPage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectListPage;
-import io.onedev.server.web.page.user.AvatarEditPage;
-import io.onedev.server.web.page.user.UserPage;
 
 @SuppressWarnings("serial")
 public class RegisterPage extends BasePage {
@@ -60,7 +60,7 @@ public class RegisterPage extends BasePage {
 					userManager.save(user, null);
 					Session.get().success("New user registered");
 					SecurityUtils.getSubject().runAs(user.getPrincipals());
-					setResponsePage(AvatarEditPage.class, UserPage.paramsOf(user));
+					setResponsePage(UserAvatarPage.class, UserPage.paramsOf(user));
 				}
 			}
 			

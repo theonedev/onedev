@@ -47,7 +47,7 @@ public abstract class InputSpec implements Serializable {
 	
 	public static final String USER = "User";
 	
-	public static final String TEAM = "Team";
+	public static final String GROUP = "Group";
 	
 	public static final String ISSUE = "Issue";
 	

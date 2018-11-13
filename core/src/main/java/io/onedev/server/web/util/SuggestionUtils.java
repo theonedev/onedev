@@ -23,11 +23,12 @@ import io.onedev.server.git.RefInfo;
 import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.Team;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.facade.ConfigurationFacade;
@@ -159,11 +160,11 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestTeam(Project project, String matchWith, @Nullable String escapeChars) {
+	public static List<InputSuggestion> suggestGroup(String matchWith, @Nullable String escapeChars) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (Team team: project.getTeams()) {
-			String name = team.getName();
+		for (Group group: OneDev.getInstance(GroupManager.class).query()) {
+			String name = group.getName();
 			int index = name.toLowerCase().indexOf(matchWith);
 			if (index != -1) {
 				Range match = new Range(index, index+matchWith.length());

@@ -4,35 +4,16 @@ import java.io.File;
 
 import javax.annotation.Nullable;
 
-import org.eclipse.jgit.lib.PersonIdent;
-
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.UserIdent;
 
 public interface AvatarManager {
 	
-	/**
-	 * Get URL of user avatar image. 
-	 *  
-	 * @param user
-	 * 			user to get avatar for
-	 * @return
-	 * 			url of avatar image. This url will be relative to context root if gravatar is disabled
-	 */
-	String getAvatarUrl(@Nullable UserFacade user);
+	String getAvatarUrl(UserIdent userIdent);
 	
 	String getAvatarUrl(ProjectFacade project);
 	
-	/**
-	 * Get URL of avatar image of specified person. 
-	 *  
-	 * @param person
-	 * 			person to get avatar for
-	 * @return
-	 * 			url of avatar image. This url will be relative to context root if gravatar is disabled
-	 */
-	String getAvatarUrl(PersonIdent person);
-
 	void useAvatar(UserFacade user, @Nullable String avatarData);
 	
 	void useAvatar(ProjectFacade project, @Nullable String avatarData);

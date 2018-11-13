@@ -51,15 +51,17 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.component.link.UserLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.avatar.UserAvatarLink;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.issues.list.IssueListPage;
 import io.onedev.server.web.util.ComponentContext;
 
@@ -235,12 +237,10 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		if (user != null) {
 			head.add(new WebMarkupContainer("title").setVisible(false));
-			head.add(new UserAvatarLink("avatarLink", user));
-			head.add(new UserLink("userLink", user));
+			head.add(new UserIdentPanel("userIdent", UserIdent.of(UserFacade.of(user)), Mode.AVATAR_AND_NAME));
 		} else {
 			head.add(new Label("title", title));
-			head.add(new WebMarkupContainer("avatarLink").setVisible(false));
-			head.add(new WebMarkupContainer("userLink").setVisible(false));
+			head.add(new WebMarkupContainer("userIdent").setVisible(false));
 		}
 		
 		head.add(AttributeAppender.append("title", getBoard().getIdentifyField()));

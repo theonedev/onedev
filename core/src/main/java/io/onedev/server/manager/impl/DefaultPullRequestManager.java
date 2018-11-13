@@ -80,13 +80,13 @@ import io.onedev.server.manager.PullRequestUpdateManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Configuration;
+import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
-import io.onedev.server.model.Team;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
@@ -675,7 +675,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	public void checkQuality(PullRequest request) {
 		BranchProtection branchProtection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
 		if (branchProtection != null) {
-			checkReviews(ReviewRequirement.parse(request.getTargetProject(), branchProtection.getReviewRequirement()), request.getLatestUpdate());
+			checkReviews(ReviewRequirement.fromString(branchProtection.getReviewRequirement()), request.getLatestUpdate());
 
 			if (branchProtection.getConfigurations() != null)
 				checkBuilds(request, branchProtection.getConfigurations(), branchProtection.isBuildMerges());
@@ -689,7 +689,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					FileProtection fileProtection = branchProtection.getFileProtection(file);
 					if (fileProtection != null && !checkedFileProtections.contains(fileProtection)) {
 						checkedFileProtections.add(fileProtection);
-						checkReviews(ReviewRequirement.parse(request.getTargetProject(), fileProtection.getReviewRequirement()), update);
+						checkReviews(ReviewRequirement.fromString(fileProtection.getReviewRequirement()), update);
 					}
 				}
 			}
@@ -767,10 +767,10 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			}
 		}
 		
-		for (Map.Entry<Team, Integer> entry: reviewRequirement.getTeams().entrySet()) {
-			Team team = entry.getKey();
+		for (Map.Entry<Group, Integer> entry: reviewRequirement.getGroups().entrySet()) {
+			Group group = entry.getKey();
 			int requiredCount = entry.getValue();
-			checkReviews(team.getMembers(), requiredCount, update);
+			checkReviews(group.getMembers(), requiredCount, update);
 		}
 	}
 	

@@ -8,10 +8,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.shiro.authz.UnauthorizedException;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
-import org.eclipse.jgit.lib.PersonIdent;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -19,13 +17,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.git.Contribution;
 import io.onedev.server.git.Contributor;
 import io.onedev.server.manager.CommitInfoManager;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Day;
-import io.onedev.server.web.page.user.UserProfilePage;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.avatar.AvatarManager;
 
 class TopContributorsResource extends AbstractResource {
@@ -63,22 +59,14 @@ class TopContributorsResource extends AbstractResource {
 
 				List<Contributor> topContributors = OneDev.getInstance(CommitInfoManager.class).getTopContributors(project, TOP_CONTRIBUTORS, type, fromDay, toDay);
 				
-				UserManager userManager = OneDev.getInstance(UserManager.class);
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
 
 				List<Map<String, Object>> data = new ArrayList<>();
 				for (Contributor contributor: topContributors) {
 					Map<String, Object> contributorData = new HashMap<>();
-					PersonIdent author = contributor.getAuthor();
-					User user = userManager.find(author);
-					if (user != null) {
-						contributorData.put("authorName", user.getDisplayName());
-						contributorData.put("authorAvatarUrl", avatarManager.getAvatarUrl(user.getFacade()));
-						contributorData.put("authorUrl", RequestCycle.get().urlFor(UserProfilePage.class, UserProfilePage.paramsOf(user)));
-					} else {
-						contributorData.put("authorName", author.getName());
-						contributorData.put("authorAvatarUrl", avatarManager.getAvatarUrl(author));
-					}
+					UserIdent userIdent = UserIdent.of(contributor.getAuthor(), "Git author");
+					contributorData.put("author", userIdent);
+					contributorData.put("authorAvatarUrl", avatarManager.getAvatarUrl(userIdent));
 					contributorData.put("totalCommits", contributor.getTotalContribution().getCommits());
 					contributorData.put("totalAdditions", contributor.getTotalContribution().getAdditions());
 					contributorData.put("totalDeletions", contributor.getTotalContribution().getDeletions());

@@ -1,0 +1,22 @@
+<wicket:extend>
+	<div class="new-group">
+		<form wicket:id="form" class="leave-confirm">
+			<div wicket:id="editor"></div>
+			<div class="checkbox">
+			  <label>
+			    <input wicket:id="administrator" type="checkbox"/> Is Administrator
+			    <div class="help-block">Members of administrator group have administrative rights over the whole system</div>
+			  </label>
+			</div>			
+			<div class="checkbox">
+			  <label>
+			    <input wicket:id="canCreateProjects" class="can-create-projects" type="checkbox"/> Can Create Projects
+			    <div class="help-block">Check this to make members of this group able to fork/create projects</div>
+			  </label>
+			</div>			
+			<div class="actions clearfix">
+				<input class="btn btn-primary dirty-aware pull-left" value="Save" type="submit"></input>
+			</div>
+		</form>
+	</div>
+</wicket:extend>

@@ -22,19 +22,20 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
+import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.my.MyPage;
+import io.onedev.server.web.page.my.MyProfilePage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
 import io.onedev.server.web.page.security.RegisterPage;
-import io.onedev.server.web.page.user.UserListPage;
-import io.onedev.server.web.page.user.UserPage;
-import io.onedev.server.web.page.user.UserProfilePage;
+import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
@@ -49,6 +50,8 @@ public abstract class LayoutPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		User loginUser = getLoginUser();
 		
 		WebMarkupContainer projectsContainer = new WebMarkupContainer("navProjects");
 		projectsContainer.add(new ViewStateAwarePageLink<Void>("link", ProjectListPage.class));
@@ -78,15 +81,15 @@ public abstract class LayoutPage extends BasePage {
 		}
 		add(contributionsView);
 		
-		WebMarkupContainer usersContainer = new WebMarkupContainer("navUsers");
-		usersContainer.add(new ViewStateAwarePageLink<Void>("link", UserListPage.class));
-		if (getPage() instanceof UserListPage || getPage() instanceof UserPage) 
-			usersContainer.add(AttributeAppender.append("class", "active"));
-		usersContainer.setVisible(SecurityUtils.isAdministrator());
-		add(usersContainer);
+		WebMarkupContainer myContainer = new WebMarkupContainer("navMy");
+		myContainer.add(new ViewStateAwarePageLink<Void>("link", MyProfilePage.class));
+		if (getPage() instanceof MyPage) 
+			myContainer.add(AttributeAppender.append("class", "active"));
+		myContainer.setVisible(loginUser != null);
+		add(myContainer);
 		
 		WebMarkupContainer administrationContainer = new WebMarkupContainer("navAdministration");
-		administrationContainer.add(new ViewStateAwarePageLink<Void>("link", SystemSettingPage.class));
+		administrationContainer.add(new ViewStateAwarePageLink<Void>("link", UserListPage.class));
 		if (getPage() instanceof AdministrationPage) 
 			administrationContainer.add(AttributeAppender.append("class", "active"));
 		administrationContainer.setVisible(SecurityUtils.isAdministrator());
@@ -106,18 +109,15 @@ public abstract class LayoutPage extends BasePage {
 			
 		});
 		
-		User loginUser = getLoginUser();
 		boolean enableSelfRegister = OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableSelfRegister();
 		notSignedInContainer.add(new ViewStateAwarePageLink<Void>("signUp", RegisterPage.class).setVisible(enableSelfRegister));
 		notSignedInContainer.setVisible(loginUser == null);
 		add(notSignedInContainer);
 		
 		WebMarkupContainer signedInContainer = new WebMarkupContainer("signedIn");
-		signedInContainer.add(new UserAvatar("avatar", loginUser));
+		signedInContainer.add(new UserAvatar("avatar", UserIdent.of(UserFacade.of(loginUser))));
 		signedInContainer.add(new Label("userNameExpanded", loginUser!=null?loginUser.getDisplayName():""));
 		signedInContainer.add(new Label("userNameCollapsed", loginUser!=null?loginUser.getDisplayName():""));
-		signedInContainer.add(new ViewStateAwarePageLink<Void>("profile", UserProfilePage.class, 
-				loginUser!=null?UserProfilePage.paramsOf(loginUser):new PageParameters()));
 		signedInContainer.add(new ViewStateAwarePageLink<Void>("signOut", LogoutPage.class));
 		signedInContainer.setVisible(loginUser != null);
 		add(signedInContainer);

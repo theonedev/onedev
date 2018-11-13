@@ -5,12 +5,9 @@ table.project-list td.project {
 	font-size: 14px;
 }
 
-table.project-list a {
-	color: #444;
-}
 table.project-list td.project, table.project-list td.author {
 	white-space: nowrap;
 } 
-table.project-list td.author span, table.project-list td.commit-date {
+table.project-list td.commit-date {
 	color: #888;
 }

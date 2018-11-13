@@ -36,12 +36,12 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
-import io.onedev.server.web.component.link.ProjectLink;
-import io.onedev.server.web.component.link.UserLink;
+import io.onedev.server.web.component.project.ProjectLink;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
-import io.onedev.server.web.component.user.avatar.UserAvatarLink;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
@@ -87,10 +87,8 @@ public class ProjectListPanel extends Panel {
 				Project project = OneDev.getInstance(ProjectManager.class).load(rowModel.getObject().getId());
 				RevCommit lastCommit = project.getLastCommit();
 				if (lastCommit != null) {
-					Fragment fragment = new Fragment(componentId, "authorFrag", ProjectListPanel.this);
-					fragment.add(new UserAvatarLink("avatar", lastCommit.getAuthorIdent()));
-					fragment.add(new UserLink("name", lastCommit.getAuthorIdent()));
-					cellItem.add(fragment);
+					UserIdent userIdent = UserIdent.of(lastCommit.getAuthorIdent());
+					cellItem.add(new UserIdentPanel(componentId, userIdent, UserIdentPanel.Mode.AVATAR_AND_NAME));
 				} else {
 					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
 				}

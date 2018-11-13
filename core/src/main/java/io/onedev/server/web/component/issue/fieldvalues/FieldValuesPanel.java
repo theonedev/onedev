@@ -25,20 +25,21 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.web.component.link.UserLink;
-import io.onedev.server.web.component.user.avatar.UserAvatarLink;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.ComponentContext;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.utils.ColorUtils;
 
 @SuppressWarnings("serial")
@@ -64,11 +65,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 				protected void populateItem(ListItem<String> item) {
 					String value = item.getModelObject();
 					if (getField().getType().equals(InputSpec.USER)) {
-						User user = User.getForDisplay(OneDev.getInstance(UserManager.class).findByName(value), value);
-						Fragment userFrag = new Fragment("value", "userFrag", FieldValuesPanel.this);
-						userFrag.add(new UserLink("name", user));
-						userFrag.add(new UserAvatarLink("avatar", user));
-						item.add(userFrag);
+						UserIdent userIdent = UserIdent.of(UserFacade.of(OneDev.getInstance(UserManager.class).findByName(value)), value);
+						item.add(new UserIdentPanel("value", userIdent, Mode.AVATAR_AND_NAME));
 					} else if (getField().getType().equals(InputSpec.ISSUE)) {
 						Issue issue = OneDev.getInstance(IssueManager.class).find(project, Long.valueOf(value));
 						if (issue != null) {

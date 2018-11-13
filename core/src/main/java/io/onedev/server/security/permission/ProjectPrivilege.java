@@ -25,7 +25,7 @@ public enum ProjectPrivilege {
 		}
 		
 	},
-	PROJECT_ADMINISTRATION("Project administration") {
+	ADMINISTRATION("Administration") {
 
 		@Override
 		public boolean implies(ProjectPrivilege privilege) {

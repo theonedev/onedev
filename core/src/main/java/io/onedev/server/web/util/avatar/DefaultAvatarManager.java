@@ -6,23 +6,26 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.locks.Lock;
 
-import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.codec.binary.Hex;
-import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
 import io.onedev.launcher.bootstrap.Bootstrap;
-import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
+import io.onedev.server.manager.UserManager;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.EmailAwareIdent;
+import io.onedev.server.util.userident.RemovedUserIdent;
+import io.onedev.server.util.userident.SystemUserIdent;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.LockUtils;
@@ -35,30 +38,35 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	private static final String AVATARS_BASE_URL = "/site/avatars/";
 	
-	private final SettingManager configManager;
+	private final SettingManager settingManager;
+	
+	private final UserManager userManager;
 	
 	@Inject
-	public DefaultAvatarManager(SettingManager configManager) {
-		this.configManager = configManager;
+	public DefaultAvatarManager(SettingManager settingManager, UserManager userManager) {
+		this.settingManager = settingManager;
+		this.userManager = userManager;
 	}
 	
 	@Sessional
 	@Override
-	public String getAvatarUrl(@Nullable UserFacade user) {
-		if (user == null) {
+	public String getAvatarUrl(UserIdent userIdent) {
+		if (userIdent instanceof SystemUserIdent) {
 			return AVATARS_BASE_URL + "onedev.png";
-		} else if (user.getId() == null) {
+		} else if (userIdent instanceof RemovedUserIdent) {
 			return AVATARS_BASE_URL + "user.png";
 		} else {
-			File avatarFile = getUploaded(user);
-			if (avatarFile.exists()) { 
-				return AVATARS_BASE_URL + "uploaded/users/" + user.getId() + ".jpg?version=" + avatarFile.lastModified();
+			EmailAwareIdent emailAwareIdent = (EmailAwareIdent) userIdent;
+			User user = userManager.findByEmail(emailAwareIdent.getEmail());
+			if (user != null) {
+				File uploadedFile = getUploaded(user.getFacade());
+				if (uploadedFile.exists())
+					return AVATARS_BASE_URL + "uploaded/users/" + user.getId() + ".jpg?version=" + uploadedFile.lastModified();
 			}
-			
-			if (configManager.getSystemSetting().isGravatarEnabled())
-				return Gravatar.getURL(user.getEmail(), GRAVATAR_SIZE);
+			if (settingManager.getSystemSetting().isGravatarEnabled())
+				return Gravatar.getURL(emailAwareIdent.getEmail(), GRAVATAR_SIZE);
 			else 
-				return generateAvatar(user.getDisplayName(), user.getEmail());
+				return generateAvatar(userIdent.getName(), emailAwareIdent.getEmail());
 		}
 	}
 	
@@ -87,16 +95,6 @@ public class DefaultAvatarManager implements AvatarManager {
 		}
 		
 		return AVATARS_BASE_URL + "generated/" + encoded + ".png";
-	}
-	
-	@Override
-	public String getAvatarUrl(PersonIdent person) {
-		if (person.getEmailAddress().length() == 0 && person.getName().equals(OneDev.NAME))
-			return AVATARS_BASE_URL + "onedev.png";
-		else if (configManager.getSystemSetting().isGravatarEnabled())
-			return Gravatar.getURL(person.getEmailAddress(), GRAVATAR_SIZE);
-		else 
-			return generateAvatar(person.getName(), person.getEmailAddress());
 	}
 
 	private String getLetter(String name) {

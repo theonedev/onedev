@@ -35,7 +35,7 @@ import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.PullRequestManager;
-import io.onedev.server.manager.TeamManager;
+import io.onedev.server.manager.GroupManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -56,8 +56,8 @@ import io.onedev.server.util.inputspec.PullRequestChoiceInput;
 import io.onedev.server.util.inputspec.booleaninput.BooleanInput;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
+import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
 import io.onedev.server.util.inputspec.numberinput.NumberInput;
-import io.onedev.server.util.inputspec.teamchoiceinput.TeamChoiceInput;
 import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
@@ -174,8 +174,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										}
 									} else if (fieldSpec instanceof BooleanInput) {
 										suggestions.addAll(SuggestionUtils.suggest(Lists.newArrayList("true", "false"), unfencedLowerCaseMatchWith, null));
-									} else if (fieldSpec instanceof TeamChoiceInput) {
-										List<String> candidates = OneDev.getInstance(TeamManager.class).query().stream().map(it->it.getName()).collect(Collectors.toList());
+									} else if (fieldSpec instanceof GroupChoiceInput) {
+										List<String> candidates = OneDev.getInstance(GroupManager.class).query().stream().map(it->it.getName()).collect(Collectors.toList());
 										suggestions.addAll(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 									} else if (fieldName.equals(FIELD_STATE)) {
 										List<String> candidates = project.getIssueWorkflow().getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());

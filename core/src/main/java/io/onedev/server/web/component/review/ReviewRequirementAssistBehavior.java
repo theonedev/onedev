@@ -57,7 +57,7 @@ public class ReviewRequirementAssistBehavior extends ANTLRAssistBehavior {
 							return SuggestionUtils.suggestUser(project, ProjectPrivilege.CODE_READ, 
 									unfencedMatchWith, ESCAPE_CHARS);
 						} else {
-							return SuggestionUtils.suggestTeam(project, unfencedMatchWith, ESCAPE_CHARS);
+							return SuggestionUtils.suggestGroup(unfencedMatchWith, ESCAPE_CHARS);
 						}
 					}
 
