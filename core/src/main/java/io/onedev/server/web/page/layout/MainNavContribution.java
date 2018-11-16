@@ -9,4 +9,6 @@ public interface MainNavContribution {
 	String getLabel();
 	
 	boolean isAuthorized();
+	
+	boolean isActive(LayoutPage page);
 }

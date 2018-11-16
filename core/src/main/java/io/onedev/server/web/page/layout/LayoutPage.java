@@ -78,6 +78,9 @@ public abstract class LayoutPage extends BasePage {
 			Link<Void> link = new ViewStateAwarePageLink<Void>("link", contribution.getPageClass());
 			link.add(new Label("label", contribution.getLabel()));
 			contributionContainer.add(link);
+			if (contribution.isActive((LayoutPage) getPage()))
+				contributionContainer.add(AttributeAppender.append("class", "active"));
+			contributionsView.add(contributionContainer);
 		}
 		add(contributionsView);
 		

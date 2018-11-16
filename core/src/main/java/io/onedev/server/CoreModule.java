@@ -486,6 +486,11 @@ public class CoreModule extends AbstractPluginModule {
 			public String getLabel() {
 				throw new UnsupportedOperationException();
 			}
+
+			@Override
+			public boolean isActive(LayoutPage page) {
+				return false;
+			}
 			
 		});
 	}
