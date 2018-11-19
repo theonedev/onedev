@@ -71,6 +71,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private Collection<Membership> memberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<UserAuthorization> authorizations = new ArrayList<>();
+	
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReview> reviews = new ArrayList<>();
 	
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)

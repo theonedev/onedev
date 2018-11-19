@@ -625,3 +625,7 @@ a.disabled, a[disabled="disabled"] {
 .floating>.content>div>img[alt="Loading..."] {
 	margin: 8px;
 }
+
+.nav.nav-tabs>li.options {
+	float: right;
+}

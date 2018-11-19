@@ -11,7 +11,7 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -85,36 +85,6 @@ public abstract class IssueActivitiesPanel extends Panel {
 
 	@Override
 	protected void onBeforeRender() {
-		addOrReplace(new AjaxCheckBox("showComments", Model.of(showComments)) {
-
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				showComments = !showComments;
-				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-				Cookie cookie = new Cookie(COOKIE_SHOW_COMMENTS, String.valueOf(showComments));
-				cookie.setPath("/");
-				cookie.setMaxAge(Integer.MAX_VALUE);
-				response.addCookie(cookie);
-				target.add(IssueActivitiesPanel.this);
-			}
-
-		});
-		
-		addOrReplace(new AjaxCheckBox("showChangeHistory", Model.of(showChangeHistory)) {
-
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				showChangeHistory = !showChangeHistory;
-				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-				Cookie cookie = new Cookie(COOKIE_SHOW_CHANGE_HISTORY, String.valueOf(showChangeHistory));
-				cookie.setPath("/");
-				cookie.setMaxAge(Integer.MAX_VALUE);
-				response.addCookie(cookie);
-				target.add(IssueActivitiesPanel.this);
-			}
-
-		});
-		
 		activitiesView = new RepeatingView("activities");
 		addOrReplace(activitiesView);
 		Issue issue = getIssue();
@@ -335,4 +305,56 @@ public abstract class IssueActivitiesPanel extends Panel {
 	}
 
 	protected abstract Issue getIssue();
+
+	public Component renderOptions(String componentId) {
+		Fragment fragment = new Fragment(componentId, "optionsFrag", this);
+		fragment.add(new AjaxLink<Void>("showComments") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (showComments)
+					add(AttributeAppender.append("class", "active"));
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				showComments = !showComments;
+				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+				Cookie cookie = new Cookie(COOKIE_SHOW_COMMENTS, String.valueOf(showComments));
+				cookie.setPath("/");
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
+				target.add(IssueActivitiesPanel.this);
+				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
+			}
+
+		});
+		
+		fragment.add(new AjaxLink<Void>("showChangeHistory") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (showChangeHistory)
+					add(AttributeAppender.append("class", "active"));
+			}
+			
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				showChangeHistory = !showChangeHistory;
+				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+				Cookie cookie = new Cookie(COOKIE_SHOW_CHANGE_HISTORY, String.valueOf(showChangeHistory));
+				cookie.setPath("/");
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
+				target.add(IssueActivitiesPanel.this);
+				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
+			}
+
+		});
+				
+		return fragment;
+	}
+	
 }

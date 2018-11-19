@@ -1,22 +1,5 @@
 <wicket:extend>
 	<div wicket:id="activities" class="activities">
-		<div class="options">
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" wicket:id="showComments"/> Comments
-				</label>
-			</div>
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" wicket:id="showCommits"/> Commits
-				</label>
-			</div>
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" wicket:id="showChangeHistory"/> Change History
-				</label>
-			</div>
-		</div>
 		<table>
 			<tr wicket:id="activities" class="activity">
 				<td class="avatar"><a wicket:id="avatar"></a></td>
@@ -42,6 +25,15 @@
 	<wicket:fragment wicket:id="sinceChangesRowContentFrag">
 		<div>
 			<span class="icon fa fa-ext fa-file-diff"></span> <a wicket:id="sinceChanges">Changes since last visit</a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="optionsFrag">
+		<div class="request-activity-options">
+			<span class="btn-group">
+				<a wicket:id="showComments" class="btn btn-sm btn-default" title="Show comments"><i class="fa fa-comments"></i></a>
+				<a wicket:id="showCommits" class="btn btn-sm btn-default" title="Show commits"><i class="fa fa-ext fa-commit"></i></a>
+				<a wicket:id="showChangeHistory" class="btn btn-sm btn-default" title="Show change history"><i class="fa fa-history"></i></a>
+			</span>
 		</div>
 	</wicket:fragment>
 </wicket:extend>

@@ -7,6 +7,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.server.web.util.WicketUtils;
+
 public class PageTab extends Tab {
 	
 	private static final long serialVersionUID = 1L;
@@ -137,7 +139,7 @@ public class PageTab extends Tab {
 	
 	@Override
 	public final boolean isSelected() {
-		return isActive(getItem().getPage());
+		return isActive(WicketUtils.getPage());
 	}
 
 	public boolean isActive(Page currentPage) {

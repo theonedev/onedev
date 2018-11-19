@@ -115,7 +115,15 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		});
 
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new IssueTab("Activities", IssueActivitiesPage.class));
+		tabs.add(new IssueTab("Activities", IssueActivitiesPage.class) {
+
+			@Override
+			protected Component renderOptions(String componentId) {
+				IssueActivitiesPage page = (IssueActivitiesPage) getPage();
+				return page.renderOptions(componentId);
+			}
+			
+		});
 		
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
 		Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());

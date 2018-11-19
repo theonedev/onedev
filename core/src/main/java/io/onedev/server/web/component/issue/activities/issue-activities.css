@@ -1,7 +1,7 @@
-.issue-activities>.options {
+.issue-activity-options {
 	text-align: right;
 }
-.issue-activities>.options>div {
+.issue-activity-options>div {
 	padding-left: 12px;
 	display: inline-block;
 }

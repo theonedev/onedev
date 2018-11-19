@@ -86,6 +86,7 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.build.status.PullRequestBuildsPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -113,7 +114,6 @@ import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.model.EntityModel;
@@ -332,7 +332,15 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		
 		List<Tab> tabs = new ArrayList<>();
 		
-		tabs.add(new RequestTab("Activities", PullRequestActivitiesPage.class));
+		tabs.add(new RequestTab("Activities", PullRequestActivitiesPage.class) {
+
+			@Override
+			protected Component renderOptions(String componentId) {
+				PullRequestActivitiesPage page = (PullRequestActivitiesPage) getPage();
+				return page.renderOptions(componentId);
+			}
+			
+		});
 		tabs.add(new RequestTab("File Changes", PullRequestChangesPage.class));
 		tabs.add(new RequestTab("Code Comments", PullRequestCodeCommentsPage.class));
 		if (request.isOpen())

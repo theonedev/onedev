@@ -42,6 +42,8 @@ public abstract class ActionTab extends Tab {
 			each.setSelected(false);
 		
 		setSelected(true);
+
+		tabLink.findParent(Tabbable.class).renderOptions(this);
 		
 		onSelect(tabLink);
 	}

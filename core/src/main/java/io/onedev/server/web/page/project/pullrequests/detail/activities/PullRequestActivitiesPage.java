@@ -10,7 +10,7 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -253,52 +253,6 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 
 			@Override
 			protected void onBeforeRender() {
-				WebMarkupContainer container = this;
-				addOrReplace(new AjaxCheckBox("showComments", Model.of(showComments)) {
-
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						showComments = !showComments;
-						WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-						Cookie cookie = new Cookie(COOKIE_SHOW_COMMENTS, String.valueOf(showComments));
-						cookie.setPath("/");
-						cookie.setMaxAge(Integer.MAX_VALUE);
-						response.addCookie(cookie);
-						target.add(container);
-					}
-					
-				});
-				
-				addOrReplace(new AjaxCheckBox("showCommits", Model.of(showCommits)) {
-
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						showCommits = !showCommits;
-						WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-						Cookie cookie = new Cookie(COOKIE_SHOW_COMMITS, String.valueOf(showCommits));
-						cookie.setPath("/");
-						cookie.setMaxAge(Integer.MAX_VALUE);
-						response.addCookie(cookie);
-						target.add(container);
-					}
-
-				});
-				
-				addOrReplace(new AjaxCheckBox("showChangeHistory", Model.of(showChangeHistory)) {
-
-					@Override
-					protected void onUpdate(AjaxRequestTarget target) {
-						showChangeHistory = !showChangeHistory;
-						WebResponse response = (WebResponse) RequestCycle.get().getResponse();
-						Cookie cookie = new Cookie(COOKIE_SHOW_CHANGE_HISTORY, String.valueOf(showChangeHistory));
-						cookie.setPath("/");
-						cookie.setMaxAge(Integer.MAX_VALUE);
-						response.addCookie(cookie);
-						target.add(container);
-					}
-
-				});
-				
 				addOrReplace(activitiesView = new RepeatingView("activities"));
 				
 				List<PullRequestActivity> activities = getActivities();
@@ -425,5 +379,82 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new PullRequestActivitiesCssResourceReference()));
 	}
-	
+
+	public Component renderOptions(String componentId) {
+		Fragment fragment = new Fragment(componentId, "optionsFrag", this);
+		
+		fragment.add(new AjaxLink<Void>("showComments") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (showComments)
+					add(AttributeAppender.append("class", "active"));
+				setOutputMarkupId(true);
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				showComments = !showComments;
+				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+				Cookie cookie = new Cookie(COOKIE_SHOW_COMMENTS, String.valueOf(showComments));
+				cookie.setPath("/");
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
+				target.add(container);
+				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
+			}
+			
+		});
+		
+		fragment.add(new AjaxLink<Void>("showCommits") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (showCommits)
+					add(AttributeAppender.append("class", "active"));
+				setOutputMarkupId(true);
+			}
+			
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				showCommits = !showCommits;
+				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+				Cookie cookie = new Cookie(COOKIE_SHOW_COMMITS, String.valueOf(showCommits));
+				cookie.setPath("/");
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
+				target.add(container);
+				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
+			}
+
+		});
+		
+		fragment.add(new AjaxLink<Void>("showChangeHistory") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				if (showChangeHistory)
+					add(AttributeAppender.append("class", "active"));
+				setOutputMarkupId(true);
+			}
+			
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				showChangeHistory = !showChangeHistory;
+				WebResponse response = (WebResponse) RequestCycle.get().getResponse();
+				Cookie cookie = new Cookie(COOKIE_SHOW_CHANGE_HISTORY, String.valueOf(showChangeHistory));
+				cookie.setPath("/");
+				cookie.setMaxAge(Integer.MAX_VALUE);
+				response.addCookie(cookie);
+				target.add(container);
+				target.appendJavaScript(String.format("$('#%s').toggleClass('active');", getMarkupId()));
+			}
+
+		});
+		
+		return fragment;
+	}
 }

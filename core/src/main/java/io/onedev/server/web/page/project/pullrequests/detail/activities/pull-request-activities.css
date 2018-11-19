@@ -1,7 +1,7 @@
-#request-detail>.main>.activities>.options {
+.request-activity-options {
 	text-align: right;
 }
-#request-detail>.main>.activities>.options>div {
+.request-activity-options>div {
 	padding-left: 12px;
 	display: inline-block;
 }

@@ -2,26 +2,19 @@ package io.onedev.server.web.component.tabbable;
 
 import java.io.Serializable;
 
-import org.apache.wicket.Component;
-import org.apache.wicket.markup.html.list.ListItem;
+import javax.annotation.Nullable;
 
-import com.google.common.base.Preconditions;
+import org.apache.wicket.Component;
 
 @SuppressWarnings("serial")
 public abstract class Tab implements Serializable {
 	
-	private ListItem<Tab> item;
-	
-	void setItem(ListItem<Tab> item) {
-		this.item = item;
-	}
-	
-	protected ListItem<Tab> getItem() {
-		Preconditions.checkNotNull(item);
-		return item;
-	}
-	
 	protected abstract Component render(String componentId);
+	
+	@Nullable
+	protected Component renderOptions(String componentId) {
+		return null;
+	}
 	
 	public abstract boolean isSelected();
 }

@@ -1,17 +1,5 @@
 <wicket:panel>
 	<div class="issue-activities">
-		<div class="options">
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" wicket:id="showComments"/> Comments
-				</label>
-			</div>
-			<div class="checkbox">
-				<label>
-					<input type="checkbox" wicket:id="showChangeHistory"/> Change History
-				</label>
-			</div>
-		</div>
 		<table>
 			<tr wicket:id="activities" class="activity">
 				<td class="avatar"><a wicket:id="avatar"></a></td>
@@ -33,5 +21,13 @@
 				<a wicket:id="save" class="btn btn-primary dirty-aware">Comment</a>
 			</div>
 		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="optionsFrag">
+		<div class="issue-activity-options">
+			<span class="btn-group">
+				<a wicket:id="showComments" class="btn btn-sm btn-default" title="Show comments"><i class="fa fa-comments"></i></a>
+				<a wicket:id="showChangeHistory" class="btn btn-sm btn-default" title="Show change history"><i class="fa fa-history"></i></a>
+			</span>
+		</div>
 	</wicket:fragment>
 </wicket:panel>
