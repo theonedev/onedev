@@ -6,11 +6,12 @@ import java.util.stream.Collectors;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 public class UndefinedStateResolution implements Serializable {
@@ -33,8 +34,8 @@ public class UndefinedStateResolution implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getNewStateChoices() {
-		ProjectPage projectPage = (ProjectPage) WicketUtils.getPage();
-		return projectPage.getProject().getIssueWorkflow().getStateSpecs().stream().map(each->each.getName()).collect(Collectors.toList());
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return issueSetting.getStateSpecs().stream().map(each->each.getName()).collect(Collectors.toList());
 	}
 	
 }

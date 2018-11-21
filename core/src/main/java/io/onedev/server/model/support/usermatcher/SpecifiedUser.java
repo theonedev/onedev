@@ -12,7 +12,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.UserChoice;
 
-@Editable(order=500, name="User")
+@Editable(order=500, name="Specified user")
 public class SpecifiedUser implements UserMatcher {
 
 	private static final long serialVersionUID = 1L;

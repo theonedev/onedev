@@ -48,7 +48,7 @@ public class IssueConstants {
 	
 	public static final String FIELD_UPDATE_DATE = "Update Date";
 	
-	public static final String ATTR_UPDATE_DATE = "lastActivity.date";
+	public static final String ATTR_UPDATE_DATE = "updateDate";
 	
 	public static final String FIELD_MILESTONE = "Milestone";
 	
@@ -61,10 +61,6 @@ public class IssueConstants {
 			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, 
 			FIELD_COMMENT_COUNT, FIELD_MILESTONE);
 	
-	public static final Set<String> DISPLAY_FIELDS = Sets.newHashSet(
-			FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_SUBMITTER, FIELD_SUBMIT_DATE, 
-			FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, FIELD_COMMENT_COUNT, FIELD_MILESTONE);
-
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_DESCRIPTION, FIELD_COMMENT, 
 			FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, FIELD_COMMENT_COUNT, 

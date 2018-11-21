@@ -2,10 +2,12 @@ package io.onedev.server.search.entity.issue;
 
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.search.entity.QueryBuildContext;
 
 public class ClosedCriteria extends IssueCriteria {
@@ -13,7 +15,7 @@ public class ClosedCriteria extends IssueCriteria {
 	private static final long serialVersionUID = 1L;
 
 	private IssueCriteria getCriteria(Project project) {
-		return project.getIssueWorkflow().getCategoryCriteria(StateSpec.Category.CLOSED);
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getCategoryCriteria(StateSpec.Category.CLOSED);
 	}
 	
 	@Override

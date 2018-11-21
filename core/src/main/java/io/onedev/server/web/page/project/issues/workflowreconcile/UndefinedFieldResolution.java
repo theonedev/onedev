@@ -8,6 +8,8 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
@@ -61,7 +63,7 @@ public class UndefinedFieldResolution implements Serializable {
 	private static List<String> getFieldChoices() {
 		ProjectPage page = (ProjectPage) WicketUtils.getPage();
 		List<String> fields = new ArrayList<>();
-		for (InputSpec field: page.getProject().getIssueWorkflow().getFieldSpecs()) 
+		for (InputSpec field: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs()) 
 			fields.add(field.getName());
 		return fields;
 	}

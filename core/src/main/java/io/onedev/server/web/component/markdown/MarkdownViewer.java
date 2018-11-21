@@ -25,6 +25,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
@@ -32,9 +33,9 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.avatar.AvatarManager;
 import io.onedev.utils.ColorUtils;
 import io.onedev.utils.StringUtils;
@@ -132,7 +133,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 				case "issue":
 					Issue issue = OneDev.getInstance(IssueManager.class).get(Long.valueOf(referenceId));
 					if (issue != null) {
-						String color = issue.getProject().getIssueWorkflow().getStateSpec(issue.getState()).getColor();
+						String color = OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(issue.getState()).getColor();
 						String script = String.format("onedev.server.markdown.renderIssueTooltip('%s', '%s', '%s', '%s')", 
 								JavaScriptEscape.escapeJavaScript(issue.getTitle()), JavaScriptEscape.escapeJavaScript(issue.getState()), 
 								ColorUtils.isLight(color)? "black": "white", color);

@@ -2,6 +2,7 @@ package io.onedev.server.web.page.project.issues.workflowreconcile;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.apache.wicket.Component;
@@ -23,9 +24,12 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValueResolution.FixType;
 import io.onedev.server.web.util.ajaxlistener.ChangeTextListener;
 import io.onedev.server.web.util.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.util.ajaxlistener.SelfDisableListener;
@@ -65,7 +69,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				Collection<String> undefinedStates = getIssueManager().getUndefinedStates(getProject());
+				Collection<String> undefinedStates = getIssueManager().getUndefinedStates();
 				if (!undefinedStates.isEmpty()) {
 					Fragment fragment = new Fragment(markupId, "fixStatesFrag", WorkflowReconcilePanel.this);
 					Form<?> form = new Form<Void>("form") {
@@ -121,7 +125,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						@Override
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 							super.onSubmit(target, form);
-							getIssueManager().fixUndefinedStates(getProject(), resolutions);
+							getIssueManager().fixUndefinedStates(resolutions);
 							Component content = checkFields(CONTENT_ID);
 							WorkflowReconcilePanel.this.replace(content);
 							target.add(content);
@@ -156,7 +160,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				Collection<String> undefinedFields = getIssueManager().getUndefinedFields(getProject());
+				Collection<String> undefinedFields = getIssueManager().getUndefinedFields();
 				if (!undefinedFields.isEmpty()) {
 					Fragment fragment = new Fragment(markupId, "fixFieldsFrag", WorkflowReconcilePanel.this);
 					Form<?> form = new Form<Void>("form") {
@@ -211,7 +215,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 							super.onSubmit(target, form);
 							
-							getIssueManager().fixUndefinedFields(getProject(), resolutions);
+							getIssueManager().fixUndefinedFields(resolutions);
 							
 							Component content = checkFieldValues(CONTENT_ID);
 							WorkflowReconcilePanel.this.replace(content);
@@ -246,7 +250,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				Collection<UndefinedFieldValue> undefinedFieldValues = getIssueManager().getUndefinedFieldValues(getProject());
+				Collection<UndefinedFieldValue> undefinedFieldValues = getIssueManager().getUndefinedFieldValues();
 				if (!undefinedFieldValues.isEmpty()) {
 					Fragment fragment = new Fragment(markupId, "fixFieldValuesFrag", WorkflowReconcilePanel.this);
 					Form<?> form = new Form<Void>("form") {
@@ -300,7 +304,27 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						@Override
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 							super.onSubmit(target, form);
-							getIssueManager().fixUndefinedFieldValues(getProject(), resolutions);
+
+							Map<String, ValueSetEdit> edits = new HashMap<>();
+							Collection<String> fieldNames = new HashSet<>();
+							for (UndefinedFieldValue key: resolutions.keySet())
+								fieldNames.add(key.getFieldName());
+							for (String fieldName: fieldNames) {
+								Map<String, String> renames = new HashMap<>();
+								Collection<String> deletions = new HashSet<>();
+								for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
+									if (entry.getKey().getFieldName().equals(fieldName)) {
+										if (entry.getValue().getFixType() == FixType.CHANGE_TO_ANOTHER_VALUE) 
+											renames.put(entry.getKey().getFieldValue(), entry.getValue().getNewValue());
+										else
+											deletions.add(entry.getKey().getFieldValue());
+									}
+								}
+								edits.put(fieldName, new ValueSetEdit(renames, deletions));
+							}
+							
+							getIssueManager().fixUndefinedFieldValues(edits);
+							
 							Component content = checkFieldValueOrders(CONTENT_ID);
 							WorkflowReconcilePanel.this.replace(content);
 							target.add(content);
@@ -335,9 +359,12 @@ public abstract class WorkflowReconcilePanel extends Panel {
 
 			@Override
 			public Component getLazyLoadComponent(String markupId) {
-				getIssueManager().fixFieldValueOrders(getProject());
-				getProject().getIssueWorkflow().setReconciled(true);
-				OneDev.getInstance(ProjectManager.class).save(getProject());
+				getIssueManager().fixFieldValueOrders();
+				
+				SettingManager settingManager = OneDev.getInstance(SettingManager.class);
+				GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
+				issueSetting.setReconciled(true);
+				settingManager.saveIssueSetting(issueSetting);
 				
 				Fragment fragment = new Fragment(markupId, "completedFrag", WorkflowReconcilePanel.this);
 				fragment.add(new AjaxLink<Void>("ok") {

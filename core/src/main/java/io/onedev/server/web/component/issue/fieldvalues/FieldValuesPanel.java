@@ -20,11 +20,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.util.OneContext;
@@ -51,6 +53,10 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 		super(id);
 	}
 
+	private GlobalIssueSetting getIssueSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -102,7 +108,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						}
 					} else {
 						Label label = new Label("value", value);
-						InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getFieldSpec(getField().getName());
+						InputSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
 						if (fieldSpec != null && fieldSpec instanceof ChoiceInput) {
 							ChoiceProvider choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
 							OneContext.push(new ComponentContext(this));
@@ -131,7 +137,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 		} else {
 			InputSpec fieldSpec = null;
 			if (getField() != null)
-				fieldSpec = getIssue().getProject().getIssueWorkflow().getFieldSpec(getField().getName());
+				fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
 			String displayValue;
 			if (fieldSpec != null && fieldSpec.getNameOfEmptyValue() != null) 
 				displayValue = fieldSpec.getNameOfEmptyValue();
@@ -145,7 +151,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 	@Override
 	public Object getInputValue(String name) {
 		IssueField field = getIssue().getFields().get(name);
-		InputSpec fieldSpec = getIssue().getProject().getIssueWorkflow().getFieldSpec(name);
+		InputSpec fieldSpec = getIssueSetting().getFieldSpec(name);
 		if (field != null && fieldSpec != null && field.getType().equals(EditableUtils.getDisplayName(fieldSpec.getClass()))) {
 			return fieldSpec.convertToObject(field.getValues());
 		} else {

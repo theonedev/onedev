@@ -18,7 +18,10 @@ public class IssueReaders implements ChoiceProvider {
 	@Override
 	public List<UserFacade> getChoices(boolean allPossible) {
 		Project project = OneContext.get().getProject();
-		return new ArrayList<>(SecurityUtils.getAuthorizedUsers(project.getFacade(), ProjectPrivilege.ISSUE_READ));
+		if (project != null)
+			return new ArrayList<>(SecurityUtils.getAuthorizedUsers(project.getFacade(), ProjectPrivilege.ISSUE_READ));
+		else
+			return new ArrayList<>();
 	}
 
 }

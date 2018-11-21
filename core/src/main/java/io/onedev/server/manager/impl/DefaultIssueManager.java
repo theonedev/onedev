@@ -35,15 +35,17 @@ import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueQuerySettingManager;
+import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.IssueBoard;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
-import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.model.support.issue.StateSpec;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -58,15 +60,12 @@ import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryBuildContext;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.IssueConstants;
-import io.onedev.server.util.OneContext;
-import io.onedev.server.util.inputspec.InputContext;
+import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValueResolution;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedStateResolution;
 
 @Singleton
@@ -77,14 +76,21 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	private final ListenerRegistry listenerRegistry;
 	
 	private final IssueQuerySettingManager issueQuerySettingManager;
+	
+	private final SettingManager settingManager;
+	
+	private final ProjectManager projectManager;
 
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldUnaryManager issueFieldUnaryManager, 
-			IssueQuerySettingManager issueQuerySettingManager, ListenerRegistry listenerRegistry) {
+			IssueQuerySettingManager issueQuerySettingManager, SettingManager settingManager, 
+			ListenerRegistry listenerRegistry, ProjectManager projectManager) {
 		super(dao);
 		this.issueFieldUnaryManager = issueFieldUnaryManager;
 		this.issueQuerySettingManager = issueQuerySettingManager;
 		this.listenerRegistry = listenerRegistry;
+		this.settingManager = settingManager;
+		this.projectManager = projectManager;
 	}
 
 	@Sessional
@@ -149,6 +155,10 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		
 		return query;
 	}
+	
+	private GlobalIssueSetting getGlobalIssueSetting() {
+		return settingManager.getIssueSetting();
+	}
 
 	@Sessional
 	@Override
@@ -188,7 +198,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Override
 	public int count(Milestone milestone, User user, @Nullable StateSpec.Category category) {
 		if (category != null) {
-			IssueCriteria criteria = milestone.getProject().getIssueWorkflow().getCategoryCriteria(category);
+			IssueCriteria criteria = getGlobalIssueSetting().getCategoryCriteria(category);
 			if (criteria != null) {
 				List<IssueCriteria> criterias = new ArrayList<>();
 				criterias.add(new MilestoneCriteria(milestone.getName()));
@@ -206,63 +216,49 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
-	public Collection<String> getUndefinedStates(Project project) {
-		Query<String> query = getSession().createQuery("select distinct state from Issue where project=:project");
-		query.setParameter("project", project);
+	public Collection<String> getUndefinedStates() {
+		Query<String> query = getSession().createQuery("select distinct state from Issue");
 		
-		Set<String> states = new HashSet<>(query.getResultList());
-		for (Iterator<String> it = states.iterator(); it.hasNext();) {
-			if (project.getIssueWorkflow().getStateSpec(it.next()) != null)
+		Set<String> undefinedStates = new HashSet<>(query.getResultList());
+		for (Iterator<String> it = undefinedStates.iterator(); it.hasNext();) {
+			if (getGlobalIssueSetting().getStateSpec(it.next()) != null)
 				it.remove();
 		}
 
-		for (NamedIssueQuery namedQuery: project.getSavedIssueQueries()) {
-			try {
-				states.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedStates(project));
-			} catch (Exception e) {
-			}
+		for (Project project: projectManager.query()) {
+			undefinedStates.addAll(project.getIssueSetting().getUndefinedStates(project));
 		}
 		
-		for (IssueQuerySetting setting: project.getIssueQuerySettings()) {
+		for (IssueQuerySetting setting: issueQuerySettingManager.query()) {
 			for (NamedIssueQuery namedQuery: setting.getUserQueries()) {
 				try {
-					states.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedStates(project));
+					undefinedStates.addAll(IssueQuery.parse(setting.getProject(), namedQuery.getQuery(), false).getUndefinedStates());
 				} catch (Exception e) {
 				}
 			}
 		}
-		
-		for (IssueBoard board: project.getIssueBoards())
-			states.addAll(board.getUndefinedStates(project));
 
-		return states;
+		return undefinedStates;
 	}
 
 	@Transactional
 	@Override
-	public void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions) {
+	public void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
 		for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
-			Query<?> query = getSession().createQuery("update Issue set state=:newState where state=:oldState and project=:project");
-			query.setParameter("project", project);
+			Query<?> query = getSession().createQuery("update Issue set state=:newState where state=:oldState");
 			query.setParameter("oldState", entry.getKey());
 			query.setParameter("newState", entry.getValue().getNewState());
 			query.executeUpdate();
 		}
 		
-		for (NamedIssueQuery namedQuery: project.getSavedIssueQueries()) {
-			try {
-				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
-				for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
-					query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
-				namedQuery.setQuery(query.toString());
-			} catch (Exception e) {
-			}
+		for (Project project: projectManager.query()) {
+			project.getIssueSetting().fixUndefinedStates(project, resolutions);
 		}
 		
-		for (IssueQuerySetting setting: project.getIssueQuerySettings()) {
+		for (IssueQuerySetting setting: issueQuerySettingManager.query()) {
 			for (NamedIssueQuery namedQuery: setting.getUserQueries()) {
 				try {
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
+					IssueQuery query = IssueQuery.parse(setting.getProject(), namedQuery.getQuery(), false);
 					for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 						query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 					namedQuery.setQuery(query.toString());
@@ -272,8 +268,6 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			issueQuerySettingManager.save(setting);
 		}
 		
-		for (IssueBoard board: project.getIssueBoards())
-			board.fixUndefinedStates(project, resolutions);
 	}
 
 	@Sessional
@@ -321,96 +315,62 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		return issues;
 	}
 
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	@Sessional
 	@Override
-	public Collection<String> getUndefinedFields(Project project) {
-		Query query = getSession().createQuery("select distinct name from IssueFieldUnary where issue.project=:project");
-		query.setParameter("project", project);
+	public Collection<String> getUndefinedFields() {
+		Query<?> query = getSession().createQuery("select distinct name from IssueFieldUnary");
 		Set<String> undefinedFields = new HashSet<>();
-		for (String name: (List<String>)query.getResultList()) {
-			if (project.getIssueWorkflow().getFieldSpec(name) == null)
-				undefinedFields.add(name);
-		}
-		for (String fieldName: project.getIssueListFields()) {
-			if (!IssueConstants.DISPLAY_FIELDS.contains(fieldName) && project.getIssueWorkflow().getFieldSpec(fieldName) == null)
+		for (String fieldName: (List<String>)query.getResultList()) {
+			InputSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
+			if (field == null)
 				undefinedFields.add(fieldName);
 		}
-		for (NamedIssueQuery namedQuery: project.getSavedIssueQueries()) {
-			try {
-				undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedFields(project));
-			} catch (Exception e) {
-			}
+		for (Project project: projectManager.query()) {
+			undefinedFields.addAll(project.getIssueSetting().getUndefinedFields(project));
 		}
-		for (IssueQuerySetting setting: project.getIssueQuerySettings()) {
+		for (IssueQuerySetting setting: issueQuerySettingManager.query()) {
 			for (NamedIssueQuery namedQuery: setting.getUserQueries()) {
 				try {
-					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedFields(project));
+					undefinedFields.addAll(IssueQuery.parse(setting.getProject(), namedQuery.getQuery(), false).getUndefinedFields());
 				} catch (Exception e) {
 				}
 			}
 		}
-		for (IssueBoard board: project.getIssueBoards()) 
-			undefinedFields.addAll(board.getUndefinedFields(project));
 		return undefinedFields;
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Transactional
 	@Override
-	public void fixUndefinedFields(Project project, Map<String, UndefinedFieldResolution> resolutions) {
+	public void fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
 		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
-			Query query;
+			Query<?> query;
 			if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
-				query = getSession().createQuery("update IssueFieldUnary set name=:newName where name=:oldName and issue.id in (select id from Issue where project=:project)");
+				query = getSession().createQuery("update IssueFieldUnary set name=:newName where name=:oldName");
 				query.setParameter("oldName", entry.getKey());
 				query.setParameter("newName", entry.getValue().getNewField());
-				
-				int index = project.getIssueListFields().indexOf(entry.getKey());
-				if (index != -1)
-					project.getIssueListFields().set(index, entry.getValue().getNewField());
 			} else {
-				query = getSession().createQuery("delete from IssueFieldUnary where name=:fieldName and issue.id in (select id from Issue where project=:project)");
+				query = getSession().createQuery("delete from IssueFieldUnary where name=:fieldName");
 				query.setParameter("fieldName", entry.getKey());
-				project.getIssueListFields().remove(entry.getKey());
-			}
-			query.setParameter("project", project);
+			}				
 			query.executeUpdate();
 		}
 		
-		for (Iterator<NamedIssueQuery> it = project.getSavedIssueQueries().iterator(); it.hasNext();) {
-			NamedIssueQuery namedQuery = it.next();
-			try {
-				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
-				boolean remove = false;
-				for (Map.Entry<String, UndefinedFieldResolution> resolutionEntry: resolutions.entrySet()) {
-					UndefinedFieldResolution resolution = resolutionEntry.getValue();
-					if (resolution.getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
-						query.onRenameField(resolutionEntry.getKey(), resolution.getNewField());
-					} else if (query.onDeleteField(resolutionEntry.getKey())) {
-						remove = true;
-						break;
-					}
-				}				
-				if (remove)
-					it.remove();
-				else
-					namedQuery.setQuery(query.toString());
-			} catch (Exception e) {
-			}
+		for (Project project: projectManager.query()) {
+			project.getIssueSetting().fixUndefinedFields(project, resolutions);
 		}
-		for (IssueQuerySetting setting: project.getIssueQuerySettings()) {
+		
+		for (IssueQuerySetting setting: issueQuerySettingManager.query()) {
 			for (Iterator<NamedIssueQuery> it = setting.getUserQueries().iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
+					IssueQuery query = IssueQuery.parse(setting.getProject(), namedQuery.getQuery(), false);
 					boolean remove = false;
-					for (Map.Entry<String, UndefinedFieldResolution> resolutionEntry: resolutions.entrySet()) {
-						UndefinedFieldResolution resolution = resolutionEntry.getValue();
+					for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
+						UndefinedFieldResolution resolution = entry.getValue();
 						if (resolution.getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
-							query.onRenameField(resolutionEntry.getKey(), resolution.getNewField());
-						} else if (query.onDeleteField(resolutionEntry.getKey())) {
+							query.onRenameField(entry.getKey(), resolution.getNewField());
+						} else if (query.onDeleteField(entry.getKey())) {
 							remove = true;
 							break;
 						}
@@ -422,143 +382,72 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 				} catch (Exception e) {
 				}
 			}
-			issueQuerySettingManager.save(setting);
 		}
 		
-		for (Iterator<IssueBoard> it = project.getIssueBoards().iterator(); it.hasNext();) {
-			IssueBoard board = it.next();
-			if (board.fixUndefinedFields(project, resolutions))
-				it.remove();
-		}
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Sessional
 	@Override
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
-		Query query = getSession().createQuery("select distinct name, value from IssueFieldUnary where issue.project=:project and type=:choice");
-		query.setParameter("project", project);
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
+		Query query = getSession().createQuery("select distinct name, value from IssueFieldUnary where type=:choice");
 		query.setParameter("choice", InputSpec.ENUMERATION);
 		Set<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
-		OneContext.push(new OneContext() {
-
-			@Override
-			public Project getProject() {
-				return project;
+		for (Object[] row: (List<Object[]>)query.getResultList()) {
+			String fieldName = (String) row[0];
+			String fieldValue = (String) row[1];
+			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getGlobalIssueSetting().getFieldSpec(fieldName));
+			if (specifiedChoices != null && !specifiedChoices.getChoiceValues().contains(fieldValue)) {
+				undefinedFieldValues.add(new UndefinedFieldValue(fieldName, fieldValue));
 			}
+		}
 
-			@Override
-			public EditContext getEditContext(int level) {
-				return new EditContext() {
-
-					@Override
-					public Object getInputValue(String name) {
-						return null;
-					}
-					
-				};
-			}
-
-			@Override
-			public InputContext getInputContext() {
-				throw new UnsupportedOperationException();
-			}
-			
-		});
-		try {
-			for (Object[] row: (List<Object[]>)query.getResultList()) {
-				String name = (String) row[0];
-				String value = (String) row[1];
-				InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(name);
-				if (fieldSpec != null && value != null) {
-					List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
-					if (!choices.contains(value))
-						undefinedFieldValues.add(new UndefinedFieldValue(name, value));
-				}
-			}
-			
-			for (NamedIssueQuery namedQuery: project.getSavedIssueQueries()) {
+		for (Project project: projectManager.query()) {
+			undefinedFieldValues.addAll(project.getIssueSetting().getUndefinedFieldValues(project));
+		}
+		
+		for (IssueQuerySetting setting: issueQuerySettingManager.query()) {
+			for (NamedIssueQuery namedQuery: setting.getUserQueries()) {
 				try {
-					undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), true).getUndefinedFieldValues(project));
+					undefinedFieldValues.addAll(IssueQuery.parse(setting.getProject(), namedQuery.getQuery(), false).getUndefinedFieldValues());
 				} catch (Exception e) {
 				}
 			}
-			for (IssueQuerySetting setting: project.getIssueQuerySettings()) {
-				for (NamedIssueQuery namedQuery: setting.getUserQueries()) {
-					try {
-						undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), true).getUndefinedFieldValues(project));
-					} catch (Exception e) {
-					}
-				}
-			}
-			for (IssueBoard board: project.getIssueBoards())
-				undefinedFieldValues.addAll(board.getUndefinedFieldValues(project));
-			
-			return undefinedFieldValues;
-		} finally {
-			OneContext.pop();
 		}
+		
+		return undefinedFieldValues;
 	}
 
 	@SuppressWarnings("rawtypes")
 	@Transactional
 	@Override
-	public void fixUndefinedFieldValues(Project project, Map<UndefinedFieldValue, UndefinedFieldValueResolution> resolutions) {
-		for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> entry: resolutions.entrySet()) {
-			Query query;
-			if (entry.getValue().getFixType() == UndefinedFieldValueResolution.FixType.CHANGE_TO_ANOTHER_VALUE) {
-				query = getSession().createQuery("update IssueFieldUnary set value=:newValue where name=:fieldName and value=:oldValue and issue.id in (select id from Issue where project=:project)");
-				query.setParameter("fieldName", entry.getKey().getFieldName());
-				query.setParameter("oldValue", entry.getKey().getFieldValue());
-				query.setParameter("newValue", entry.getValue().getNewValue());
-			} else {
-				query = getSession().createQuery("delete from IssueFieldUnary where name=:fieldName and value=:fieldValue and issue.id in (select id from Issue where project=:project)");
-				query.setParameter("fieldName", entry.getKey().getFieldName());
-				query.setParameter("fieldValue", entry.getKey().getFieldValue());
+	public void fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits) {
+		for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
+			for (String deletion: entry.getValue().getDeletions()) {
+				Query query = getSession().createQuery("delete from IssueFieldUnary where name=:fieldName and value=:fieldValue");
+				query.setParameter("fieldName", entry.getKey());
+				query.setParameter("fieldValue", deletion);
+				query.executeUpdate();
 			}
-			query.setParameter("project", project);
-			query.executeUpdate();
+			for (Map.Entry<String, String> renameEntry: entry.getValue().getRenames().entrySet()) {
+				Query query = getSession().createQuery("update IssueFieldUnary set value=:newValue where name=:fieldName and value=:oldValue");
+				query.setParameter("fieldName", entry.getKey());
+				query.setParameter("oldValue", renameEntry.getKey());
+				query.setParameter("newValue", renameEntry.getValue());
+				query.executeUpdate();
+			}
 		}
 		
-		for (Iterator<NamedIssueQuery> it = project.getSavedIssueQueries().iterator(); it.hasNext();) {
-			NamedIssueQuery namedQuery = it.next();
-			try {
-				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), true);
-				boolean remove = false;
-				for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> resolutionEntry: resolutions.entrySet()) {
-					UndefinedFieldValueResolution resolution = resolutionEntry.getValue();
-					if (resolution.getFixType() == UndefinedFieldValueResolution.FixType.CHANGE_TO_ANOTHER_VALUE) {
-						query.onRenameFieldValue(resolutionEntry.getKey().getFieldName(), resolutionEntry.getKey().getFieldValue(), 
-								resolutionEntry.getValue().getNewValue());
-					} else if (query.onDeleteFieldValue(resolutionEntry.getKey().getFieldName(), resolutionEntry.getKey().getFieldValue())) {
-						remove = true;
-						break;
-					}
-				}				
-				if (remove)
-					it.remove();
-				else
-					namedQuery.setQuery(query.toString());
-			} catch (Exception e) {
-			}
+		for (Project project: projectManager.query()) {
+			project.getIssueSetting().fixUndefinedFieldValues(project, valueSetEdits);
 		}
-		for (IssueQuerySetting setting: project.getIssueQuerySettings()) {
+		
+		for (IssueQuerySetting setting: issueQuerySettingManager.query()) {
 			for (Iterator<NamedIssueQuery> it = setting.getUserQueries().iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), true);
-					boolean remove = false;
-					for (Map.Entry<UndefinedFieldValue, UndefinedFieldValueResolution> resolutionEntry: resolutions.entrySet()) {
-						UndefinedFieldValueResolution resolution = resolutionEntry.getValue();
-						if (resolution.getFixType() == UndefinedFieldValueResolution.FixType.CHANGE_TO_ANOTHER_VALUE) {
-							query.onRenameFieldValue(resolutionEntry.getKey().getFieldName(), resolutionEntry.getKey().getFieldValue(), 
-									resolutionEntry.getValue().getNewValue());
-						} else if (query.onDeleteFieldValue(resolutionEntry.getKey().getFieldName(), resolutionEntry.getKey().getFieldValue())) {
-							remove = true;
-							break;
-						}
-					}				
-					if (remove)
+					IssueQuery query = IssueQuery.parse(setting.getProject(), namedQuery.getQuery(), false);
+					if (query.fixUndefinedFieldValues(valueSetEdits))
 						it.remove();
 					else
 						namedQuery.setQuery(query.toString());
@@ -566,72 +455,34 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 				}
 			}
 			issueQuerySettingManager.save(setting);
-		}
-		
-		for (Iterator<IssueBoard> it = project.getIssueBoards().iterator(); it.hasNext();) {
-			if (it.next().fixUndefinedFieldValues(project, resolutions))
-				it.remove();
 		}
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Transactional
 	@Override
-	public void fixFieldValueOrders(Project project) {
-		OneContext.push(new OneContext() {
+	public void fixFieldValueOrders() {
+		Query query = getSession().createQuery("select distinct name, value, ordinal from IssueFieldUnary where type=:choice");
+		query.setParameter("choice", InputSpec.ENUMERATION);
 
-			@Override
-			public Project getProject() {
-				return project;
-			}
-
-			@Override
-			public EditContext getEditContext(int level) {
-				return new EditContext() {
-
-					@Override
-					public Object getInputValue(String name) {
-						return null;
-					}
-					
-				};
-			}
-
-			@Override
-			public InputContext getInputContext() {
-				throw new UnsupportedOperationException();
-			}
-			
-		});
-		try {
-			Query query = getSession().createQuery("select distinct name, value, ordinal from IssueFieldUnary where issue.project=:project and type=:choice");
-			query.setParameter("project", project);
-			query.setParameter("choice", InputSpec.ENUMERATION);
-
-			for (Object[] row: (List<Object[]>)query.getResultList()) {
-				String name = (String) row[0];
-				String value = (String) row[1];
-				long ordinal = (long) row[2];
-				InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(name);
-				if (fieldSpec != null) {
-					List<String> choices = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
-					long newOrdinal = choices.indexOf(value);
-					if (ordinal != newOrdinal) {
-						query = getSession().createQuery("update IssueFieldUnary set ordinal=:newOrdinal where name=:fieldName and value=:fieldValue and issue.id in (select id from Issue where project=:project)");
-						query.setParameter("fieldName", name);
-						query.setParameter("fieldValue", value);
-						query.setParameter("newOrdinal", newOrdinal);
-						query.setParameter("project", project);
-						query.executeUpdate();
-					}
+		for (Object[] row: (List<Object[]>)query.getResultList()) {
+			String name = (String) row[0];
+			String value = (String) row[1];
+			long ordinal = (long) row[2];
+			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getGlobalIssueSetting().getFieldSpec(name));
+			if (specifiedChoices != null) {
+				long newOrdinal = specifiedChoices.getChoiceValues().indexOf(value);
+				if (ordinal != newOrdinal) {
+					query = getSession().createQuery("update IssueFieldUnary set ordinal=:newOrdinal where name=:fieldName and value=:fieldValue");
+					query.setParameter("fieldName", name);
+					query.setParameter("fieldValue", value);
+					query.setParameter("newOrdinal", newOrdinal);
+					query.executeUpdate();
 				}
 			}
-		} finally {
-			OneContext.pop();
 		}
-		
 	}
-
+	
 	@Override
 	public void delete(User user, Issue issue) {
 		super.delete(issue);

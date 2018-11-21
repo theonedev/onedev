@@ -16,6 +16,11 @@ import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.GroupMembershipsPage;
 import io.onedev.server.web.page.admin.group.GroupProfilePage;
 import io.onedev.server.web.page.admin.group.NewGroupPage;
+import io.onedev.server.web.page.admin.issuesetting.DefaultQueryListPage;
+import io.onedev.server.web.page.admin.issuesetting.DefaultBoardListPage;
+import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
+import io.onedev.server.web.page.admin.issuesetting.IssueStateListPage;
+import io.onedev.server.web.page.admin.issuesetting.DefaultStateTransitionsPage;
 import io.onedev.server.web.page.admin.licensemanagement.LicenseManagementPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
@@ -66,9 +71,8 @@ import io.onedev.server.web.page.project.setting.configuration.ConfigurationEdit
 import io.onedev.server.web.page.project.setting.configuration.ConfigurationListPage;
 import io.onedev.server.web.page.project.setting.configuration.NewConfigurationPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
-import io.onedev.server.web.page.project.setting.issueworkflow.fields.IssueFieldsPage;
-import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
-import io.onedev.server.web.page.project.setting.issueworkflow.statetransitions.StateTransitionsPage;
+import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
+import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
@@ -142,6 +146,13 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/settings/backup", DatabaseBackupPage.class));
 		add(new OnePageMapper("administration/settings/security", SecuritySettingPage.class));
 		add(new OnePageMapper("administration/settings/authenticator", AuthenticatorPage.class));
+
+		add(new OnePageMapper("administration/settings/issue-fields", IssueFieldListPage.class));
+		add(new OnePageMapper("administration/settings/issue-states", IssueStateListPage.class));
+		add(new OnePageMapper("administration/settings/state-transitions", DefaultStateTransitionsPage.class));
+		add(new OnePageMapper("administration/settings/issue-boards", DefaultBoardListPage.class));
+		add(new OnePageMapper("administration/settings/default-issue-queries", DefaultQueryListPage.class));
+		
 		add(new OnePageMapper("administration/server-log", ServerLogPage.class));
 		add(new OnePageMapper("administration/server-information", ServerInformationPage.class));
 		add(new OnePageMapper("administration/license-management", LicenseManagementPage.class));
@@ -222,10 +233,10 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/settings/authorizations", ProjectAuthorizationsPage.class));
 		add(new OnePageMapper("projects/${project}/settings/branch-protection", BranchProtectionPage.class));
 		add(new OnePageMapper("projects/${project}/settings/tag-protection", TagProtectionPage.class));
+		add(new OnePageMapper("projects/${project}/settings/issue/state-transitions", StateTransitionsPage.class));
+		add(new OnePageMapper("projects/${project}/settings/issue/prompt-fields-upon-issue-open", 
+				PromptFieldsUponIssueOpenSettingPage.class));
 		add(new OnePageMapper("projects/${project}/settings/commit-message-transform", CommitMessageTransformPage.class));
-		add(new OnePageMapper("projects/${project}/settings/issue-fields", IssueFieldsPage.class));
-		add(new OnePageMapper("projects/${project}/settings/issue-states", IssueStatesPage.class));
-		add(new OnePageMapper("projects/${project}/settings/issue-state-transitions", StateTransitionsPage.class));
 		add(new OnePageMapper("projects/${project}/settings/configurations", ConfigurationListPage.class));
 		add(new OnePageMapper("projects/${project}/settings/configurations/new", NewConfigurationPage.class));
 		add(new OnePageMapper("projects/${project}/settings/configurations/${configuration}", ConfigurationEditPage.class));

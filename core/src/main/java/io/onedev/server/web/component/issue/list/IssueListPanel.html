@@ -14,7 +14,7 @@
 				<a wicket:id="saveQuery" class="pull-left save-query"><i class="fa fa-save"></i> Save Query</a>
 				<a wicket:id="batchEditSelected" class="pull-left"><i class="fa fa-pencil"></i> Batch Edit Selected</a>
 				<a wicket:id="batchEditAll" class="pull-left"><i class="fa fa-pencil"></i> Batch Edit All</a>
-				<a wicket:id="displayFields" class="display-fields pull-left"><i class="fa fa-list-ul"></i> Display Fields</a>
+				<a wicket:id="listFields" class="list-fields pull-left"><i class="fa fa-list-ul"></i> Display Fields</a>
 				<div wicket:id="pageInfo" class="page-info pull-right"></div>
 			</div>
 		</div>
@@ -26,21 +26,24 @@
 	<wicket:fragment wicket:id="linkFrag">
 		<a wicket:id="link"><span wicket:id="label"></span></a>
 	</wicket:fragment>
-	<wicket:fragment wicket:id="fieldsFrag">
-		<form wicket:id="form" class="issue-table-fields leave-confirm no-autofocus">
-			<div class="modal-header">
-				<button wicket:id="close" type="button" class="close">&times;</button>
-				<h4 id="modal-title" class="modal-title">
-					Fields to Display
-				</h4>
-			</div>
-			<div class="modal-body">
-				<div wicket:id="editor"></div>
-			</div>
-			<div class="modal-footer clearfix">
-				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">
-				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
-			</div>
-		</form>	
+	<wicket:fragment wicket:id="listFieldsFrag">
+		<div class="issue-list-fields">
+			<form wicket:id="form">
+				<div class="modal-header">
+					<button wicket:id="close" type="button" class="close">&times;</button>
+					<h4 id="modal-title" class="modal-title">
+						Fields to Display
+					</h4>
+				</div>
+				<div class="modal-body">
+					<input wicket:id="fields" type="hidden" class="form-control">
+				</div>
+				<div class="modal-footer clearfix">
+					<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">
+					<a wicket:id="useDefault" class="btn btn-primary">Use Default</a>
+					<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+				</div>
+			</form>
+		</div>
 	</wicket:fragment>	
 </wicket:panel>

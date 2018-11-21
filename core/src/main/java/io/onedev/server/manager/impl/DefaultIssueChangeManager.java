@@ -33,19 +33,19 @@ import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
-import io.onedev.server.model.support.issue.workflow.TransitionSpec;
-import io.onedev.server.model.support.issue.workflow.transitiontrigger.BuildSuccessfulTrigger;
-import io.onedev.server.model.support.issue.workflow.transitiontrigger.CommitTrigger;
-import io.onedev.server.model.support.issue.workflow.transitiontrigger.DiscardPullRequest;
-import io.onedev.server.model.support.issue.workflow.transitiontrigger.MergePullRequest;
-import io.onedev.server.model.support.issue.workflow.transitiontrigger.OpenPullRequest;
-import io.onedev.server.model.support.issue.workflow.transitiontrigger.PullRequestTrigger;
+import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTrigger;
+import io.onedev.server.model.support.issue.transitiontrigger.CommitTrigger;
+import io.onedev.server.model.support.issue.transitiontrigger.DiscardPullRequest;
+import io.onedev.server.model.support.issue.transitiontrigger.MergePullRequest;
+import io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequest;
+import io.onedev.server.model.support.issue.transitiontrigger.PullRequestTrigger;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
 import io.onedev.server.persistence.UnitOfWork;
@@ -207,7 +207,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Transactional
 	@Listen
 	public void on(BuildEvent event) {
-		for (TransitionSpec transition: event.getBuild().getConfiguration().getProject().getIssueWorkflow().getTransitionSpecs()) {
+		for (TransitionSpec transition: event.getBuild().getConfiguration().getProject().getIssueSetting().getTransitionSpecs(true)) {
 			if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
 				BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
 				if (trigger.getConfiguration().equals(event.getBuild().getConfiguration().getName()) 
@@ -261,7 +261,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	}
 	
 	private void on(PullRequest request, Class<? extends PullRequestTrigger> triggerClass) {
-		for (TransitionSpec transition: request.getTargetProject().getIssueWorkflow().getTransitionSpecs()) {
+		for (TransitionSpec transition: request.getTargetProject().getIssueSetting().getTransitionSpecs(true)) {
 			if (transition.getTrigger().getClass() == triggerClass) {
 				PullRequestTrigger trigger = (PullRequestTrigger) transition.getTrigger();
 				if (trigger.getBranch().equals(request.getTargetBranch())) {
@@ -295,7 +295,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Listen
 	public void on(IssueCommitted event) {
 		Issue issue = event.getIssue();
-		for (TransitionSpec transition: issue.getProject().getIssueWorkflow().getTransitionSpecs()) {
+		for (TransitionSpec transition: issue.getProject().getIssueSetting().getTransitionSpecs(true)) {
 			if (transition.getTrigger() instanceof CommitTrigger && transition.getFromStates().contains(issue.getState())) {
 				issue.removeFields(transition.getRemoveFields());
 				changeState(issue, transition.getToState(), new HashMap<>(), null, null);

@@ -38,8 +38,10 @@ public class BranchMultiChoiceEditor extends PropertyEditor<List<String>> {
 
 			@Override
 			protected Project load() {
-				ProjectPage page = (ProjectPage) getPage();
-				return page.getProject();
+				if (getPage() instanceof ProjectPage)
+					return ((ProjectPage) getPage()).getProject();
+				else
+					return null;
 			}
     		
     	});

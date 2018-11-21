@@ -12,9 +12,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.inputspec.InputContext;
@@ -95,14 +97,18 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		response.render(CssHeaderItem.forReference(new NewIssueResourceReference()));
 	}
 
+	private GlobalIssueSetting getIssueSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+	}
+	
 	@Override
 	public List<String> getInputNames() {
-		return getProject().getIssueWorkflow().getFieldNames();
+		return getIssueSetting().getFieldNames();
 	}
 
 	@Override
 	public InputSpec getInputSpec(String inputName) {
-		return getProject().getIssueWorkflow().getFieldSpec(inputName);
+		return getIssueSetting().getFieldSpec(inputName);
 	}
 
 	@Override

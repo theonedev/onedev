@@ -12,7 +12,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.component.confirmdelete.ConfirmDeleteProjectModal;
+import io.onedev.server.web.component.project.ConfirmDeleteProjectModal;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathSegment;
@@ -96,6 +96,11 @@ public class GeneralSettingPage extends ProjectSettingPage {
 					protected Project getProject() {
 						return GeneralSettingPage.this.getProject();
 					}
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+					}
+
 				};
 			}
 			

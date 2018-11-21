@@ -38,9 +38,10 @@ import com.google.common.collect.Lists;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.util.Referenceable;
@@ -328,8 +329,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 			}
 			fieldsOfName.add(unary);
 		}
-		
-		for (InputSpec fieldSpec: getProject().getIssueWorkflow().getFieldSpecs()) {
+		for (InputSpec fieldSpec: getIssueSetting().getFieldSpecs()) {
 			String fieldName = fieldSpec.getName();
 			List<IssueFieldUnary> unaries = unaryMap.get(fieldName);
 			if (unaries != null) {
@@ -367,8 +367,13 @@ public class Issue extends AbstractEntity implements Referenceable {
 			return null;
 	}
 	
+	private GlobalIssueSetting getIssueSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+	}
+	
 	public long getFieldOrdinal(String fieldName, Object fieldValue) {
-		InputSpec fieldSpec = getProject().getIssueWorkflow().getFieldSpec(fieldName);
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		InputSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
 		if (fieldSpec != null) 
 			return fieldSpec.getOrdinal(fieldValue);
 		else 
@@ -407,7 +412,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 				it.remove();
 		}
 		
-		InputSpec fieldSpec = getProject().getIssueWorkflow().getFieldSpec(fieldName);
+		InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec != null) {
 			long ordinal = getFieldOrdinal(fieldName, fieldValue);
 
@@ -436,8 +441,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	}
 
 	public boolean isFieldVisible(String fieldName) {
-		IssueWorkflow workflow = getProject().getIssueWorkflow();
-		InputSpec fieldSpec = workflow.getFieldSpec(fieldName);
+		InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec != null) {
 			if (fieldSpec.getShowCondition() != null) {
 				IssueField dependentField = getFields().get(fieldSpec.getShowCondition().getInputName());

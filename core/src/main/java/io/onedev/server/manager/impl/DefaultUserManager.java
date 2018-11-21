@@ -17,6 +17,7 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.IssueFieldUnaryManager;
 import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -35,6 +36,8 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     
     private final ProjectManager projectManager;
     
+    private final SettingManager settingManager;
+    
     private final IssueFieldUnaryManager issueFieldUnaryManager;
     
     private final CacheManager cacheManager;
@@ -42,13 +45,14 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     private final ListenerRegistry listenerRegistry;
     
 	@Inject
-    public DefaultUserManager(Dao dao, ProjectManager projectManager, 
+    public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
     		IssueFieldUnaryManager issueFieldUnaryManager, CacheManager cacheManager, 
     		PasswordService passwordService, ListenerRegistry listenerRegistry) {
         super(dao);
         
         this.passwordService = passwordService;
         this.projectManager = projectManager;
+        this.settingManager = settingManager;
         this.issueFieldUnaryManager = issueFieldUnaryManager;
         this.cacheManager = cacheManager;
         this.listenerRegistry = listenerRegistry;
@@ -70,10 +74,11 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     				protection.onRenameUser(project, oldName, user.getName());
     			for (TagProtection protection: project.getTagProtections())
     				protection.onRenameUser(oldName, user.getName());
-    			project.getIssueWorkflow().onRenameUser(oldName, user.getName());
+    			project.getIssueSetting().onRenameUser(oldName, user.getName());
     		}
     		
     		issueFieldUnaryManager.onRenameUser(oldName, user.getName());
+    		settingManager.getIssueSetting().onRenameUser(oldName, user.getName());
     	}
     }
     
@@ -150,9 +155,10 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 				if (it.next().onDeleteUser(user.getName()))
 					it.remove();
 			}
-			project.getIssueWorkflow().onDeleteUser(user.getName());
+			project.getIssueSetting().onDeleteUser(user.getName());
 		}
-		
+
+		settingManager.getIssueSetting().onDeleteUser(user.getName());
     }
 
 	@Sessional

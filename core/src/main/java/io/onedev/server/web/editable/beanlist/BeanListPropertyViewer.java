@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -43,7 +44,9 @@ public class BeanListPropertyViewer extends Panel {
 
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
-				item.add(new Label("header", EditableUtils.getDisplayName(item.getModelObject().getPropertyGetter())));
+				PropertyContext<?> propertyContext = item.getModelObject();
+				item.add(new Label("header", EditableUtils.getDisplayName(propertyContext.getPropertyGetter())));
+				item.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));
 			}
 			
 		});
@@ -58,6 +61,7 @@ public class BeanListPropertyViewer extends Panel {
 						PropertyContext<Serializable> propertyContext = columnItem.getModelObject(); 
 						Serializable elementPropertyValue = (Serializable) propertyContext.getPropertyValue(rowItem.getModelObject());
 						columnItem.add(propertyContext.renderForView("cell", Model.of(elementPropertyValue)));
+						columnItem.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));
 					}
 					
 				});

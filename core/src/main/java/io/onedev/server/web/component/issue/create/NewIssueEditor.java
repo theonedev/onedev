@@ -18,8 +18,11 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
@@ -98,7 +101,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		add(milestoneChoice);
 		
 		Collection<String> properties = IssueUtils.getPropertyNames(fieldBeanClass, 
-				getProject().getIssueWorkflow().getPromptFieldsUponIssueOpen());
+				getProject().getIssueSetting().getPromptFieldsUponIssueOpen(true));
 		add(fieldEditor = new BeanContext(fieldBean.getClass(), properties, false).renderForEdit("fields", Model.of(fieldBean)));
 	}
 	
@@ -120,9 +123,13 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		throw new UnsupportedOperationException();
 	}
 
+	private GlobalIssueSetting getIssueSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+	}
+	
 	@Override
 	public InputSpec getInputSpec(String inputName) {
-		return getProject().getIssueWorkflow().getFieldSpec(inputName);
+		return getIssueSetting().getFieldSpec(inputName);
 	}
 
 	@Override
@@ -134,7 +141,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		Issue issue = new Issue();
 		issue.setProject(getProject());
 		issue.setSubmitDate(new Date());
-		issue.setState(getProject().getIssueWorkflow().getInitialStateSpec().getName());
+		issue.setState(getIssueSetting().getInitialStateSpec().getName());
 		issue.setSubmitter(SecurityUtils.getUser());
 		if (getTemplate() != null)
 			getTemplate().fill(issue);
@@ -149,7 +156,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			issue.setDescription(descriptionInput.getConvertedInput());
 			issue.setMilestone(getProject().getMilestone(milestoneChoice.getConvertedInput()));
 			
-			Collection<String> fieldNames = getProject().getIssueWorkflow().getPromptFieldsUponIssueOpen(); 
+			Collection<String> fieldNames = getProject().getIssueSetting().getPromptFieldsUponIssueOpen(true); 
 			issue.setFieldValues(IssueUtils.getFieldValues(fieldEditor.getConvertedInput(), fieldNames));
 			setConvertedInput(issue);
 		} catch (ConversionException e) {

@@ -3,8 +3,6 @@ package io.onedev.server.web.component.issue.operation;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -31,11 +29,12 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
-import io.onedev.server.model.support.issue.workflow.TransitionSpec;
-import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueConstants;
@@ -88,16 +87,8 @@ public abstract class IssueOperationsPanel extends Panel {
 		
 		RepeatingView transitionsView = new RepeatingView("transitions");
 
-		List<TransitionSpec> transitions = getIssue().getProject().getIssueWorkflow().getTransitionSpecs();
-		Collections.sort(transitions, new Comparator<TransitionSpec>() {
-
-			@Override
-			public int compare(TransitionSpec o1, TransitionSpec o2) {
-				IssueWorkflow workflow = getIssue().getProject().getIssueWorkflow();
-				return workflow.getStateSpecIndex(o1.getToState()) - workflow.getStateSpecIndex(o2.getToState());
-			}
-			
-		});
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		List<TransitionSpec> transitions = getIssue().getProject().getIssueSetting().getTransitionSpecs(true);
 		for (TransitionSpec transition: transitions) {
 			if (transition.canTransite(getIssue()) && transition.getTrigger() instanceof PressButtonTrigger) {
 				PressButtonTrigger trigger = (PressButtonTrigger) transition.getTrigger();
@@ -192,7 +183,7 @@ public abstract class IssueOperationsPanel extends Panel {
 			if (strings.isEmpty()) {
 				criterias.add(IssueQuery.quote(entry.getKey()) + " is empty");
 			} else { 
-				InputSpec field = getIssue().getProject().getIssueWorkflow().getFieldSpec(entry.getKey());
+				InputSpec field = issueSetting.getFieldSpec(entry.getKey());
 				if (field instanceof ChoiceInput && ((ChoiceInput)field).isAllowMultiple()) {
 					for (String string: strings)
 						criterias.add(IssueQuery.quote(entry.getKey()) + " contains " + IssueQuery.quote(string));

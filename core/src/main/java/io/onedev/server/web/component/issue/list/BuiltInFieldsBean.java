@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -44,7 +47,8 @@ public class BuiltInFieldsBean implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getStateChoices() {
-		return OneContext.get().getProject().getIssueWorkflow().getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return issueSetting.getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 	
 	@SuppressWarnings("unused")

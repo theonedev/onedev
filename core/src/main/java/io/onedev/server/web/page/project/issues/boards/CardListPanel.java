@@ -19,7 +19,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.IssueBoard;
+import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.WebConstants;
@@ -125,7 +125,7 @@ abstract class CardListPanel extends Panel {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(IssueBoard.getWebSocketObservable(getProject().getId()));
+				return Sets.newHashSet(BoardSpec.getWebSocketObservable(getProject().getId()));
 			}
 			
 		});

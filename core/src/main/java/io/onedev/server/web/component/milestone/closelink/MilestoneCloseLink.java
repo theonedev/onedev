@@ -8,7 +8,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.model.Milestone;
-import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;

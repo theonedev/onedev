@@ -13,7 +13,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -38,6 +41,10 @@ public abstract class IssuesPage extends ProjectPage {
 		super(params);
 	}
 
+	protected GlobalIssueSetting getGlobalIssueSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting();		
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -70,7 +77,7 @@ public abstract class IssuesPage extends ProjectPage {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(!getProject().getIssueWorkflow().isReconciled());
+					setVisible(!getGlobalIssueSetting().isReconciled());
 				}
 
 				@Override
@@ -91,7 +98,7 @@ public abstract class IssuesPage extends ProjectPage {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(!getProject().getIssueWorkflow().isReconciled());
+					setVisible(!getGlobalIssueSetting().isReconciled());
 				}
 				
 			});

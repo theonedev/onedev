@@ -19,6 +19,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -32,10 +33,13 @@ import org.antlr.v4.runtime.Recognizer;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -52,22 +56,22 @@ import io.onedev.server.search.entity.issue.IssueQueryParser.OrderContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.QueryContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.RevisionCriteriaContext;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.IssueConstants;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.BuildChoiceInput;
-import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.IssueChoiceInput;
 import io.onedev.server.util.inputspec.PullRequestChoiceInput;
 import io.onedev.server.util.inputspec.booleaninput.BooleanInput;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
-import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
+import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
+import io.onedev.server.web.page.admin.issuesetting.GlobalIssueSettingPage;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.util.WicketUtils;
 
 public class IssueQuery extends EntityQuery<Issue> {
 
@@ -95,7 +99,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 		return sorts;
 	}
 
-	public static IssueQuery parse(Project project, @Nullable String queryString, boolean validate) {
+	public static IssueQuery parse(@Nullable Project project, @Nullable String queryString, boolean validate) {
 		if (queryString != null) {
 			ANTLRInputStream is = new ANTLRInputStream(queryString); 
 			IssueQueryLexer lexer = new IssueQueryLexer(is);
@@ -128,37 +132,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 				issueCriteria = new IssueQueryBaseVisitor<IssueCriteria>() {
 
 					private long getValueOrdinal(ChoiceInput field, String value) {
-						OneContext.push(new OneContext() {
-
-							@Override
-							public Project getProject() {
-								return project;
-							}
-
-							@Override
-							public EditContext getEditContext(int level) {
-								return new EditContext() {
-
-									@Override
-									public Object getInputValue(String name) {
-										return null;
-									}
-									
-								};
-							}
-
-							@Override
-							public InputContext getInputContext() {
-								throw new UnsupportedOperationException();
-							}
-							
-						});
-						try {
-							List<String> choices = new ArrayList<>(field.getChoiceProvider().getChoices(true).keySet());
-							return choices.indexOf(value);
-						} finally {
-							OneContext.pop();
-						}								
+						List<String> choices = new ArrayList<>(field.getChoiceProvider().getChoices(true).keySet());
+						return choices.indexOf(value);
 					}
 					
 					@Override
@@ -182,7 +157,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 						String fieldName = getValue(ctx.Quoted().getText());
 						int operator = ctx.operator.getType();
 						if (validate)
-							checkField(project, fieldName, operator);
+							checkField(fieldName, operator);
 						if (fieldName.equals(FIELD_MILESTONE))
 							return new MilestoneCriteria(null);
 						else if (fieldName.equals(FIELD_DESCRIPTION))
@@ -196,7 +171,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					public IssueCriteria visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
 						if (ctx.SubmittedBy() != null) {
-							return new SubmittedByCriteria(getUser(value));
+							return new SubmittedByCriteria(getUser(value), value);
 						} else if (ctx.FixedInBuild() != null) {
 							return new FixedInCriteria(getBuild(project, value));
 						} else {
@@ -241,7 +216,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
 						if (validate)
-							checkField(project, fieldName, operator);
+							checkField(fieldName, operator);
 						
 						switch (operator) {
 						case IssueQueryLexer.IsBefore:
@@ -261,16 +236,16 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(FIELD_COMMENT)) {
 								return new CommentCriteria(value);
 							} else {
-								if (validate) {
-									InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
-									if (fieldSpec instanceof TextInput) {
-										return new StringFieldCriteria(fieldName, value, operator);
-									} else {
-										long ordinal = getValueOrdinal((ChoiceInput) fieldSpec, value);
-										return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, true);
-									}
-								} else {
+								InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
+								if (fieldSpec instanceof TextInput) {
 									return new StringFieldCriteria(fieldName, value, operator);
+								} else {
+									long ordinal;
+									if (validate)
+										ordinal = getValueOrdinal((ChoiceInput) fieldSpec, value);
+									else
+										ordinal = 0;
+									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, true);
 								}
 							}
 						case IssueQueryLexer.Is:
@@ -285,7 +260,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(FIELD_NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
-								InputSpec field = project.getIssueWorkflow().getFieldSpec(fieldName);
+								InputSpec field = getIssueSetting().getFieldSpec(fieldName);
 								if (field instanceof IssueChoiceInput || field instanceof BuildChoiceInput 
 										|| field instanceof PullRequestChoiceInput) {
 									value = value.trim();
@@ -315,16 +290,16 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(FIELD_NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
-								if (validate) {
-									InputSpec field = project.getIssueWorkflow().getFieldSpec(fieldName);
-									if (field instanceof NumberInput) {
-										return new NumberFieldCriteria(fieldName, getIntValue(value), operator);
-									} else {
-										long ordinal = getValueOrdinal((ChoiceInput) field, value);
-										return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
-									}
+								InputSpec field = getIssueSetting().getFieldSpec(fieldName);
+								if (field instanceof NumberInput) {
+									return new NumberFieldCriteria(fieldName, getIntValue(value), operator);
 								} else {
-									return new NumberFieldCriteria(fieldName, 0, operator);
+									long ordinal;
+									if (validate)
+										ordinal = getValueOrdinal((ChoiceInput) field, value);
+									else
+										ordinal = 0;
+									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
 								}
 							}
 						default:
@@ -362,7 +337,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
 				if (validate && !IssueConstants.ORDER_FIELDS.containsKey(fieldName)) {
-					InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
+					InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 					if (!(fieldSpec instanceof ChoiceInput) && !(fieldSpec instanceof DateInput) 
 							&& !(fieldSpec instanceof NumberInput)) {
 						throw new OneException("Can not order by field: " + fieldName);
@@ -384,12 +359,19 @@ public class IssueQuery extends EntityQuery<Issue> {
 		}
 	}
 	
+	private static GlobalIssueSetting getIssueSetting() {
+		if (WicketUtils.getPage() instanceof GlobalIssueSettingPage) 
+			return ((GlobalIssueSettingPage)WicketUtils.getPage()).getSetting();
+		else
+			return OneDev.getInstance(SettingManager.class).getIssueSetting();
+	}
+	
 	private static OneException newOperatorException(String fieldName, int operator) {
 		return new OneException("Field '" + fieldName + "' is not applicable for operator '" + getRuleName(operator) + "'");
 	}
 	
-	public static void checkField(Project project, String fieldName, int operator) {
-		InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
+	public static void checkField(String fieldName, int operator) {
+		InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec == null && !IssueConstants.QUERY_FIELDS.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
@@ -478,37 +460,41 @@ public class IssueQuery extends EntityQuery<Issue> {
 		return builder.toString().trim();
 	}
 	
-	public Collection<String> getUndefinedStates(Project project) {
+	public Collection<String> getUndefinedStates() {
 		if (criteria != null) 
-			return criteria.getUndefinedStates(project);
+			return criteria.getUndefinedStates();
 		else
 			return new ArrayList<>();
 	}
 	
-	public void onRenameState(String oldState, String newState) {
+	public void onRenameState(String oldName, String newName) {
 		if (criteria != null)
-			criteria.onRenameState(oldState, newState);
+			criteria.onRenameState(oldName, newName);
 	}
 
-	public Collection<String> getUndefinedFields(Project project) {
+	public boolean onDeleteState(String stateName) {
+		return criteria != null && criteria.onDeleteState(stateName);
+	}
+	
+	public Collection<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
 		if (criteria != null)
-			undefinedFields.addAll(criteria.getUndefinedFields(project));
+			undefinedFields.addAll(criteria.getUndefinedFields());
 		for (EntitySort sort: sorts) {
 			if (!IssueConstants.QUERY_FIELDS.contains(sort.getField()) 
-					&& project.getIssueWorkflow().getFieldSpec(sort.getField()) == null) {
+					&& getIssueSetting().getFieldSpec(sort.getField()) == null) {
 				undefinedFields.add(sort.getField());
 			}
 		}
 		return undefinedFields;
 	}
 
-	public void onRenameField(String oldField, String newField) {
+	public void onRenameField(String oldName, String newName) {
 		if (criteria != null)
-			criteria.onRenameField(oldField, newField);
+			criteria.onRenameField(oldName, newName);
 		for (EntitySort sort: sorts) {
-			if (sort.getField().equals(oldField))
-				sort.setField(newField);
+			if (sort.getField().equals(oldName))
+				sort.setField(newName);
 		}
 	}
 
@@ -522,20 +508,23 @@ public class IssueQuery extends EntityQuery<Issue> {
 		return false;
 	}
 	
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		if (criteria != null)
-			return criteria.getUndefinedFieldValues(project);
+			return criteria.getUndefinedFieldValues();
 		else
 			return new HashSet<>();
 	}
 
-	public void onRenameFieldValue(String fieldName, String oldValue, String newValue) {
-		if (criteria != null)
-			criteria.onRenameFieldValue(fieldName, oldValue, newValue);
+	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
+		return criteria != null && criteria.onEditFieldValues(fieldName, valueSetEdit);
 	}
 	
-	public boolean onDeleteFieldValue(String fieldName, String fieldValue) {
-		return criteria != null && criteria.onDeleteFieldValue(fieldName, fieldValue);
+	public boolean fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits) {
+		for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
+			if (onEditFieldValues(entry.getKey(), entry.getValue()))
+				return true;
+		}
+		return false;
 	}
 	
 	public static IssueQuery merge(IssueQuery query1, IssueQuery query2) {
@@ -549,5 +538,5 @@ public class IssueQuery extends EntityQuery<Issue> {
 		sorts.addAll(query2.getSorts());
 		return new IssueQuery(IssueCriteria.of(criterias), sorts);
 	}
-	
+
 }

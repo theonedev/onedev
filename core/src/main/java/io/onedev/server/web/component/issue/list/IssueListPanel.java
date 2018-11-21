@@ -1,8 +1,11 @@
 package io.onedev.server.web.component.issue.list;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -35,7 +38,6 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.request.cycle.RequestCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,14 +45,14 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueField;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
@@ -60,16 +62,12 @@ import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
-import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.VisibleVisitor;
 import io.onedev.utils.StringUtils;
 
@@ -139,6 +137,10 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 	
 	@Nullable
 	protected abstract QuerySaveSupport getQuerySaveSupport();
+	
+	private GlobalIssueSetting getGlobalIssueSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+	}
 	
 	@Override
 	protected void onInitialize() {
@@ -215,25 +217,33 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		});
 		add(form);
 		
-		others.add(new ModalLink("displayFields") {
+		others.add(new ModalLink("listFields") {
 
+			private Set<String> fieldSet;
+			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				Fragment fragment = new Fragment(id, "fieldsFrag", IssueListPanel.this);
-
-				FieldsEditBean bean = new FieldsEditBean();
-				bean.setFields(getProject().getIssueListFields());
-				Form<?> form = new Form<Void>("form") {
+				Fragment fragment = new Fragment(id, "listFieldsFrag", IssueListPanel.this);
+				Form<?> form = new Form<Void>("form");
+				fieldSet = getProject().getIssueSetting().getListFields(true);
+				form.add(new StringMultiChoice("fields", new IModel<Collection<String>>() {
 
 					@Override
-					protected void onError() {
-						super.onError();
-						RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+					public void detach() {
 					}
 
-				};
-				form.add(BeanContext.editBean("editor", bean));
+					@Override
+					public Collection<String> getObject() {
+						return fieldSet;
+					}
 
+					@Override
+					public void setObject(Collection<String> object) {
+						fieldSet = new HashSet<>(object);
+					}
+					
+				}, getGlobalIssueSetting().getFieldNames()));
+				
 				form.add(new AjaxLink<Void>("close") {
 
 					@Override
@@ -248,13 +258,25 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						getProject().setIssueListFields((ArrayList<String>) bean.getFields());
-						OneDev.getInstance(ProjectManager.class).save(getProject());
 						modal.close();
+						getProject().getIssueSetting().setListFields(fieldSet);
+						OneDev.getInstance(ProjectManager.class).save(getProject());
 						onQueryUpdated(target);
 					}
 					
 				});
+				
+				form.add(new AjaxLink<Void>("useDefault") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+						getProject().getIssueSetting().setListFields(null);
+						OneDev.getInstance(ProjectManager.class).save(getProject());
+						onQueryUpdated(target);
+					}
+					
+				}.setVisible(getProject().getIssueSetting().getListFields(false) != null));
 				
 				form.add(new AjaxLink<Void>("cancel") {
 
@@ -264,8 +286,9 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					}
 					
 				});
-				form.setOutputMarkupId(true);
+
 				fragment.add(form);
+				
 				return fragment;
 			}
 
@@ -444,160 +467,76 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			});
 		}
 		
-		for (String field: getProject().getIssueListFields()) {
-			switch (field) {
-			case IssueConstants.FIELD_NUMBER:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of("#")) {
+		columns.add(new AbstractColumn<Issue, Void>(Model.of("#")) {
 
-					@Override
-					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-							IModel<Issue> rowModel) {
-						cellItem.add(new Label(componentId, rowModel.getObject().getNumber()));
-					}
-				});
-				break;
-			case IssueConstants.FIELD_STATE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_STATE)) {
-
-					@Override
-					public String getCssClass() {
-						return "state";
-					}
-
-					@Override
-					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-							IModel<Issue> rowModel) {
-						cellItem.add(new IssueStateLabel(componentId, rowModel));
-					}
-				});
-				break;
-			case IssueConstants.FIELD_TITLE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_TITLE)) {
-
-					@Override
-					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-							IModel<Issue> rowModel) {
-						Fragment fragment = new Fragment(componentId, "linkFrag", IssueListPanel.this);
-						OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
-						QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
-								(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
-						Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
-								IssueActivitiesPage.paramsOf(rowModel.getObject(), position));
-						link.add(new Label("label", rowModel.getObject().getTitle()));
-						fragment.add(link);
-						cellItem.add(fragment);
-					}
-				});
-				break;
-			case IssueConstants.FIELD_SUBMITTER:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_SUBMITTER)) {
-
-					@Override
-					public String getCssClass() {
-						return "submitter";
-					}
-
-					@Override
-					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-							IModel<Issue> rowModel) {
-						Issue issue = rowModel.getObject();
-						UserIdent userIdent = UserIdent.of(UserFacade.of(issue.getSubmitter()), issue.getSubmitterName());
-						cellItem.add(new UserIdentPanel(componentId, userIdent, Mode.AVATAR_AND_NAME));
-					}
-				});
-				break;
-			case IssueConstants.FIELD_SUBMIT_DATE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_SUBMIT_DATE)) {
-
-					@Override
-					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-							IModel<Issue> rowModel) {
-						cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getSubmitDate())));
-					}
-				});
-				break;
-			case IssueConstants.FIELD_UPDATE_DATE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_UPDATE_DATE)) {
-
-					@Override
-					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-							IModel<Issue> rowModel) {
-						cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getUpdateDate())));
-					}
-				});
-				break;
-			case IssueConstants.FIELD_MILESTONE:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_MILESTONE)) {
-
-					@Override
-					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-							IModel<Issue> rowModel) {
-						Issue issue = rowModel.getObject();
-						if (issue.getMilestone() != null) {
-							Fragment fragment = new Fragment(componentId, "linkFrag", IssueListPanel.this);
-							Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneDetailPage.class, 
-									MilestoneDetailPage.paramsOf(issue.getMilestone(), null));
-							link.add(new Label("label", issue.getMilestoneName()));
-							fragment.add(link);
-							cellItem.add(fragment);
-						} else {
-							cellItem.add(new Label(componentId, "<i>No milestone</i>").setEscapeModelStrings(false));
-						}
-					}
-				});
-				break;
-			case IssueConstants.FIELD_VOTE_COUNT:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_VOTE_COUNT)) {
-
-					@Override
-					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-							IModel<Issue> rowModel) {
-						cellItem.add(new Label(componentId, rowModel.getObject().getVoteCount()));
-					}
-				});
-				break;
-			case IssueConstants.FIELD_COMMENT_COUNT:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_COMMENT_COUNT)) {
-
-					@Override
-					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-							IModel<Issue> rowModel) {
-						cellItem.add(new Label(componentId, rowModel.getObject().getVoteCount()));
-					}
-				});
-				break;
-			default:
-				columns.add(new AbstractColumn<Issue, Void>(Model.of(field)) {
-
-					@Override
-					public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-							IModel<Issue> rowModel) {
-						cellItem.add(new FieldValuesPanel(componentId) {
-
-							@Override
-							protected Issue getIssue() {
-								return rowModel.getObject();
-							}
-
-							@Override
-							protected IssueField getField() {
-								Issue issue = rowModel.getObject();
-								if (issue.isFieldVisible(field))
-									return issue.getFields().get(field);
-								else
-									return null;
-							}
-							
-						}.setRenderBodyOnly(true));
-					}
-
-					@Override
-					public String getCssClass() {
-						return "custom-field";
-					}
-					
-				});
+			@Override
+			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+					IModel<Issue> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getNumber()));
 			}
+			
+		});
+		columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_STATE)) {
+
+			@Override
+			public String getCssClass() {
+				return "state";
+			}
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+					IModel<Issue> rowModel) {
+				cellItem.add(new IssueStateLabel(componentId, rowModel));
+			}
+		});
+		columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_TITLE)) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+					IModel<Issue> rowModel) {
+				Fragment fragment = new Fragment(componentId, "linkFrag", IssueListPanel.this);
+				OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
+				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
+						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
+				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
+						IssueActivitiesPage.paramsOf(rowModel.getObject(), position));
+				link.add(new Label("label", rowModel.getObject().getTitle()));
+				fragment.add(link);
+				cellItem.add(fragment);
+			}
+			
+		});
+		for (String field: getGlobalIssueSetting().sortFieldNames(getProject().getIssueSetting().getListFields(true))) {
+			columns.add(new AbstractColumn<Issue, Void>(Model.of(field)) {
+
+				@Override
+				public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+						IModel<Issue> rowModel) {
+					cellItem.add(new FieldValuesPanel(componentId) {
+
+						@Override
+						protected Issue getIssue() {
+							return rowModel.getObject();
+						}
+
+						@Override
+						protected IssueField getField() {
+							Issue issue = rowModel.getObject();
+							if (issue.isFieldVisible(field))
+								return issue.getFields().get(field);
+							else
+								return null;
+						}
+						
+					}.setRenderBodyOnly(true));
+				}
+
+				@Override
+				public String getCssClass() {
+					return "custom-field";
+				}
+				
+			});
 		}
 		
 		add(issuesTable = new HistoryAwareDataTable<Issue, Void>("issues", columns, dataProvider, 

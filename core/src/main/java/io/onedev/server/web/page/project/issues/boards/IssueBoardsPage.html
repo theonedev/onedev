@@ -15,7 +15,7 @@
 						<a wicket:id="backlog" class="backlog btn btn-default"><i class="fa fa-inbox"></i> Backlog</a>
 						<a wicket:id="milestone"></a>
 					</span>
-					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control no-autofocus"></input>
+					<input wicket:id="input" spellcheck="false" autocomplete="off" class="form-control no-autofocus">
 					<span class="input-group-btn">
 						<button wicket:id="submit" type="submit" class="btn btn-default" title="Query"><i class="fa fa-search"></i></button>
 					</span>
@@ -28,7 +28,10 @@
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="noBoardsFrag">
-		<div class="alert alert-info no-boards">No issue boards defined <a wicket:id="newBoard"><i class="fa fa-plus"></i> Add New</a></div>
+		<div class="alert alert-info no-boards">No issue boards defined 
+			<a wicket:id="newBoard"><i class="fa fa-plus"></i> Add New</a>
+			<a wicket:id="useDefault"><i class="fa fa-undo"></i> Use Default</a>
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="hasMilestoneFrag">
 		<a wicket:id="link" title="Milestone" class="milestone-selector btn">
@@ -52,6 +55,7 @@
 				</tr>
 			</table>
 			<a wicket:id="newBoard" class="btn btn-default btn-sm btn-block new-board"><i class="fa fa-plus"></i> Add New Board</a>
+			<a wicket:id="useDefault" class="btn btn-default btn-sm btn-block use-global"><i class="fa fa-undo"></i> Use Default Boards</a>
 		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="milestoneMenuFrag">

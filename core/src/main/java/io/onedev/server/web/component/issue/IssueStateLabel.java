@@ -4,8 +4,10 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.utils.ColorUtils;
 
 @SuppressWarnings("serial")
@@ -29,7 +31,7 @@ public class IssueStateLabel extends Label {
 		super.onInitialize();
 		
 		Issue issue = issueModel.getObject();
-		StateSpec stateSpec = issue.getProject().getIssueWorkflow().getStateSpec(issue.getState());
+		StateSpec stateSpec = OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(issue.getState());
 		if (stateSpec != null) {
 			String fontColor = ColorUtils.isLight(stateSpec.getColor())?"black":"white";
 			String style = String.format("background-color: %s; color: %s;", stateSpec.getColor(), fontColor);

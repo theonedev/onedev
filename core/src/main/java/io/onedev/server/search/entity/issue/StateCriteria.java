@@ -8,6 +8,8 @@ import java.util.Set;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -51,17 +53,22 @@ public class StateCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Collection<String> getUndefinedStates(Project project) {
+	public Collection<String> getUndefinedStates() {
 		List<String> undefinedStates = new ArrayList<>();
-		if (project.getIssueWorkflow().getStateSpec(value) == null)
+		if (OneDev.getInstance(SettingManager.class).getIssueSetting().getStateSpec(value) == null)
 			undefinedStates.add(value);
 		return undefinedStates;
 	}
 	
 	@Override
-	public void onRenameState(String oldState, String newState) {
-		if (value.equals(oldState))
-			value = newState;
+	public void onRenameState(String oldName, String newName) {
+		if (value.equals(oldName))
+			value = newName;
+	}
+	
+	@Override
+	public boolean onDeleteState(String stateName) {
+		return value.equals(stateName);
 	}
 	
 }

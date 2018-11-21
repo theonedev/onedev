@@ -109,7 +109,7 @@ public class BuildListPage extends ProjectPage {
 				getProject().setSavedBuildQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
-			
+
 		});
 		
 		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {

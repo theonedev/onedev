@@ -40,6 +40,7 @@ import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.IssueVoteManager;
 import io.onedev.server.manager.IssueWatchManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueVote;
@@ -54,6 +55,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
@@ -66,7 +68,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.QueryPositionSupport;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.ajaxlistener.AppendLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
@@ -193,7 +194,7 @@ public abstract class IssueSidePanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				User user = SecurityUtils.getUser();
-				String initialState = getProject().getIssueWorkflow().getInitialStateSpec().getName();
+				String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
 				setVisible(SecurityUtils.canWriteCode(getIssue().getProject().getFacade())
 						|| user != null && user.equals(getIssue().getSubmitter()) && getIssue().getState().equals(initialState));
 			}

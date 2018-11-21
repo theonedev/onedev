@@ -34,6 +34,7 @@ import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.setting.BackupSetting;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.model.support.setting.MailSetting;
 import io.onedev.server.model.support.setting.SecuritySetting;
 import io.onedev.server.model.support.setting.SystemSetting;
@@ -56,7 +57,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	private final UserManager userManager;
 	
-	private final SettingManager configManager;
+	private final SettingManager settingManager;
 	
 	private final IdManager idManager;
 	
@@ -74,11 +75,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	@Inject
 	public DefaultDataManager(IdManager idManager, UserManager userManager, 
-			SettingManager configManager, PersistManager persistManager, 
+			SettingManager settingManager, PersistManager persistManager, 
 			MailManager mailManager, Validator validator, TaskScheduler taskScheduler, 
 			PasswordService passwordService) {
 		this.userManager = userManager;
-		this.configManager = configManager;
+		this.settingManager = settingManager;
 		this.validator = validator;
 		this.taskScheduler = taskScheduler;
 		this.idManager = idManager;
@@ -115,15 +116,15 @@ public class DefaultDataManager implements DataManager, Serializable {
 			});
 		}
 
-		Setting systemConfig = configManager.getSetting(Key.SYSTEM);
+		Setting setting = settingManager.getSetting(Key.SYSTEM);
 		SystemSetting systemSetting = null;
 		
-		if (systemConfig == null || systemConfig.getValue() == null) {
+		if (setting == null || setting.getValue() == null) {
 			systemSetting = new SystemSetting();
 			systemSetting.setServerUrl(OneDev.getInstance().guessServerUrl());
 		} else {
-			if (!validator.validate(systemConfig.getValue()).isEmpty())
-				systemSetting = (SystemSetting) systemConfig.getValue();
+			if (!validator.validate(setting.getValue()).isEmpty())
+				systemSetting = (SystemSetting) setting.getValue();
 		}
 		if (systemSetting != null) {
 			manualConfigs.add(new ManualConfig("Specify System Setting", systemSetting) {
@@ -135,26 +136,30 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 				@Override
 				public void complete() {
-					configManager.saveSystemSetting((SystemSetting) getSetting());
+					settingManager.saveSystemSetting((SystemSetting) getSetting());
 				}
 				
 			});
 		}
 
-		Setting securityConfig = configManager.getSetting(Key.SECURITY);
-		if (securityConfig == null) {
-			configManager.saveSecuritySetting(new SecuritySetting());
+		setting = settingManager.getSetting(Key.SECURITY);
+		if (setting == null) {
+			settingManager.saveSecuritySetting(new SecuritySetting());
 		} 
-		Setting authenticatorConfig = configManager.getSetting(Key.AUTHENTICATOR);
-		if (authenticatorConfig == null) {
-			configManager.saveAuthenticator(null);
+		setting = settingManager.getSetting(Key.ISSUE);
+		if (setting == null) {
+			settingManager.saveIssueSetting(new GlobalIssueSetting());
+		} 
+		setting = settingManager.getSetting(Key.AUTHENTICATOR);
+		if (setting == null) {
+			settingManager.saveAuthenticator(null);
 		}
 		
-		Setting mailConfig = configManager.getSetting(Key.MAIL);
-		if (mailConfig == null) {
-			configManager.saveMailSetting(null);
-		} else if (mailConfig.getValue() != null && !validator.validate(mailConfig.getValue()).isEmpty()) {
-			manualConfigs.add(new ManualConfig("Specify Mail Setting", mailConfig.getValue()) {
+		setting = settingManager.getSetting(Key.MAIL);
+		if (setting == null) {
+			settingManager.saveMailSetting(null);
+		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
+			manualConfigs.add(new ManualConfig("Specify Mail Setting", setting.getValue()) {
 
 				@Override
 				public Skippable getSkippable() {
@@ -163,17 +168,17 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void complete() {
-					configManager.saveMailSetting((MailSetting) getSetting());
+					settingManager.saveMailSetting((MailSetting) getSetting());
 				}
 				
 			});
 		}
 		
-		Setting backupConfig = configManager.getSetting(Key.BACKUP);
-		if (backupConfig == null) {
-			configManager.saveBackupSetting(null);
-		} else if (backupConfig.getValue() != null && !validator.validate(backupConfig.getValue()).isEmpty()) {
-			Serializable backupSetting = backupConfig.getValue();
+		setting = settingManager.getSetting(Key.BACKUP);
+		if (setting == null) {
+			settingManager.saveBackupSetting(null);
+		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
+			Serializable backupSetting = setting.getValue();
 			manualConfigs.add(new ManualConfig("Specify Backup Setting", backupSetting) {
 
 				@Override
@@ -183,15 +188,15 @@ public class DefaultDataManager implements DataManager, Serializable {
 
 				@Override
 				public void complete() {
-					configManager.saveBackupSetting((BackupSetting) getSetting());
+					settingManager.saveBackupSetting((BackupSetting) getSetting());
 				}
 				
 			});
 		}
 		
-		Setting licenseKeyConfig = configManager.getSetting(Key.LICENSE);
-		if (licenseKeyConfig == null) {
-			configManager.saveLicense(null);
+		setting = settingManager.getSetting(Key.LICENSE);
+		if (setting== null) {
+			settingManager.saveLicense(null);
 		}
 		
 		return manualConfigs;
@@ -237,13 +242,13 @@ public class DefaultDataManager implements DataManager, Serializable {
 	
 	@Listen
 	public void on(SystemStarting event) {
-		scheduleBackup(configManager.getBackupSetting());
+		scheduleBackup(settingManager.getBackupSetting());
 	}
 	
 	@Sessional
 	protected void notifyBackupError(Exception e) {
 		User root = userManager.getRoot();
-		String url = configManager.getSystemSetting().getServerUrl();
+		String url = settingManager.getSystemSetting().getServerUrl();
 		String body = String.format(""
 				+ "OneDev url: <a href='%s'>%s</a>"
 				+ "<p style='margin: 16px 0;'>"

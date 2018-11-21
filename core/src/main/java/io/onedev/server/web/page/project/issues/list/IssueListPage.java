@@ -19,6 +19,7 @@ import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.model.support.issue.IssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
@@ -49,7 +50,7 @@ public class IssueListPage extends IssuesPage {
 				for (NamedIssueQuery namedQuery: getProject().getIssueQuerySettingOfCurrentUser().getUserQueries())
 					queries.add(namedQuery.getQuery());
 			}
-			for (NamedIssueQuery namedQuery: getProject().getSavedIssueQueries())
+			for (NamedIssueQuery namedQuery: getProject().getIssueSetting().getSavedQueries(true))
 				queries.add(namedQuery.getQuery());
 			for (String each: queries) {
 				try {
@@ -97,7 +98,7 @@ public class IssueListPage extends IssuesPage {
 
 			@Override
 			protected ArrayList<NamedIssueQuery> getProjectQueries() {
-				return getProject().getSavedIssueQueries();
+				return (ArrayList<NamedIssueQuery>) getProject().getIssueSetting().getSavedQueries(false);
 			}
 
 			@Override
@@ -107,8 +108,13 @@ public class IssueListPage extends IssuesPage {
 
 			@Override
 			protected void onSaveProjectQueries(ArrayList<NamedIssueQuery> projectQueries) {
-				getProject().setSavedIssueQueries(projectQueries);
+				getProject().getIssueSetting().setSavedQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
+			}
+
+			@Override
+			protected ArrayList<NamedIssueQuery> getDefaultProjectQueries() {
+				return (ArrayList<NamedIssueQuery>) getGlobalIssueSetting().getDefaultQueries();
 			}
 			
 		});
@@ -175,10 +181,14 @@ public class IssueListPage extends IssuesPage {
 
 									@Override
 									protected void onSaveForAll(AjaxRequestTarget target, String name) {
-										NamedIssueQuery namedQuery = getProject().getSavedIssueQuery(name);
+										IssueSetting setting = getProject().getIssueSetting();
+										if (setting.getSavedQueries(false) == null) {
+											setting.setSavedQueries(new ArrayList<>(getGlobalIssueSetting().getDefaultQueries()));
+										}
+										NamedIssueQuery namedQuery = getProject().getIssueSetting().getSavedQuery(name);
 										if (namedQuery == null) {
 											namedQuery = new NamedIssueQuery(name, query);
-											getProject().getSavedIssueQueries().add(namedQuery);
+											getProject().getIssueSetting().getSavedQueries(true).add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}

@@ -45,7 +45,7 @@ public class DefaultConfigurationManager extends AbstractEntityManager<Configura
     		for (Project project: projectManager.query()) {
     			for (BranchProtection protection: project.getBranchProtections())
     				protection.onRenameConfiguration(oldName, configuration.getName());
-    			project.getIssueWorkflow().onRenameConfiguration(oldName, configuration.getName());
+    			project.getIssueSetting().onRenameConfiguration(oldName, configuration.getName());
     		}
     	}
 	}
@@ -57,7 +57,7 @@ public class DefaultConfigurationManager extends AbstractEntityManager<Configura
 		for (Project project: projectManager.query()) {
 			for (BranchProtection protection: project.getBranchProtections())
 				protection.onDeleteConfiguration(configuration.getName());
-			project.getIssueWorkflow().onDeleteConfiguration(configuration.getName());
+			project.getIssueSetting().onDeleteConfiguration(configuration.getName());
 		}
 	}
 	

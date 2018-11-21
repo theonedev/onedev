@@ -30,6 +30,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.CodeCommentRelationInfoManager;
 import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -338,7 +339,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 	
 	@Override
 	public InputSpec getInputSpec(String inputName) {
-		return getProject().getIssueWorkflow().getFieldSpec(inputName);
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
 	}
 	
 	@Override

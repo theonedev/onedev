@@ -1,5 +1,6 @@
 package io.onedev.server.web.component.configuration;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,11 +23,15 @@ public class ConfigurationSingleChoice extends Select2Choice<String> {
 	}
 
 	private static List<String> getConfigurationNames() {
-		ProjectPage projectPage = (ProjectPage) WicketUtils.getPage();
-		List<String> configurationNames = projectPage.getProject().getConfigurations()
-				.stream().map(it->it.getName()).collect(Collectors.toList());
-		Collections.sort(configurationNames);
-		return configurationNames;
+		if (WicketUtils.getPage() instanceof ProjectPage) {
+			ProjectPage projectPage = (ProjectPage) WicketUtils.getPage();
+			List<String> configurationNames = projectPage.getProject().getConfigurations()
+					.stream().map(it->it.getName()).collect(Collectors.toList());
+			Collections.sort(configurationNames);
+			return configurationNames;
+		} else {
+			return new ArrayList<>();
+		}
 	}
 	
 	@Override

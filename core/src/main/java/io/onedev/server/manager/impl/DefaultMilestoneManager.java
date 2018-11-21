@@ -17,13 +17,15 @@ import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.manager.MilestoneManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
-import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -34,11 +36,18 @@ import io.onedev.utils.StringUtils;
 @Singleton
 public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> implements MilestoneManager {
 
+	private final SettingManager settingManager;
+	
 	@Inject
-	public DefaultMilestoneManager(Dao dao) {
+	public DefaultMilestoneManager(Dao dao, SettingManager settingManager) {
 		super(dao);
+		this.settingManager = settingManager;
 	}
 
+	private GlobalIssueSetting getIssueSetting() {
+		return settingManager.getIssueSetting();
+	}
+	
 	@Transactional
 	@Override
 	public void delete(Milestone milestone, @Nullable Milestone moveIssuesToMilestone) {
@@ -71,7 +80,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 	@Override
 	public void close(Milestone milestone, @Nullable Milestone moveOpenIssuesToMilestone) {
 		List<String> criterias = new ArrayList<>();
-		for (StateSpec state: milestone.getProject().getIssueWorkflow().getStateSpecs()) {
+		for (StateSpec state: getIssueSetting().getStateSpecs()) {
 			if (state.getCategory() == StateSpec.Category.OPEN)
 				criterias.add("state='" + state.getName() + "'");
 		}
@@ -102,7 +111,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 		Issue issue = event.getIssue();
 		Milestone milestone = issue.getMilestone();
 		if (milestone != null) {
-			StateSpec state = issue.getProject().getIssueWorkflow().getStateSpec(issue.getState());
+			StateSpec state = getIssueSetting().getStateSpec(issue.getState());
 			Preconditions.checkNotNull(state);
 			if (state.getCategory() == StateSpec.Category.CLOSED)
 				milestone.setNumOfClosedIssues(milestone.getNumOfClosedIssues()+1);
@@ -119,7 +128,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 			Issue issue = (Issue) event.getEntity();
 			Milestone milestone = issue.getMilestone();
 			if (milestone != null) {
-				StateSpec state = issue.getProject().getIssueWorkflow().getStateSpec(issue.getState());
+				StateSpec state = getIssueSetting().getStateSpec(issue.getState());
 				Preconditions.checkNotNull(state);
 				if (state.getCategory() == StateSpec.Category.CLOSED) 
 					milestone.setNumOfClosedIssues(milestone.getNumOfClosedIssues()-1);
@@ -133,9 +142,9 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 	private void onStateChange(Project project, @Nullable String milestoneName, String oldState, String newState) {
 		Milestone milestone = project.getMilestone(milestoneName);
 		if (milestone != null) {
-			StateSpec oldStateSpec = project.getIssueWorkflow().getStateSpec(oldState);
+			StateSpec oldStateSpec = getIssueSetting().getStateSpec(oldState);
 			Preconditions.checkNotNull(oldStateSpec);
-			StateSpec newStateSpec = project.getIssueWorkflow().getStateSpec(newState);
+			StateSpec newStateSpec = getIssueSetting().getStateSpec(newState);
 			Preconditions.checkNotNull(oldStateSpec);
 			if (oldStateSpec.getCategory() != newStateSpec.getCategory()) {
 				if (oldStateSpec.getCategory() == StateSpec.Category.CLOSED) {
@@ -153,7 +162,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 	private void onMilestoneChange(Project project, String state, @Nullable String oldMilestoneName, @Nullable String newMilestoneName) {
 		Milestone oldMilestone = project.getMilestone(oldMilestoneName);
 		Milestone newMilestone = project.getMilestone(newMilestoneName);
-		StateSpec stateSpec = project.getIssueWorkflow().getStateSpec(state);
+		StateSpec stateSpec = getIssueSetting().getStateSpec(state);
 		Preconditions.checkNotNull(stateSpec);
 		if (stateSpec.getCategory() == StateSpec.Category.CLOSED) {
 			if (oldMilestone != null)

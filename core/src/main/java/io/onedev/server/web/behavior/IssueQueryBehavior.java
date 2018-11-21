@@ -33,13 +33,15 @@ import io.onedev.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.BuildManager;
+import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.PullRequestManager;
-import io.onedev.server.manager.GroupManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParser;
@@ -94,6 +96,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Quoted")) {
@@ -107,12 +111,12 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(IssueConstants.QUERY_FIELDS);
-							for (InputSpec field: project.getIssueWorkflow().getFieldSpecs())
+							for (InputSpec field: issueSetting.getFieldSpecs())
 								candidates.add(field.getName());
 							suggestions.addAll(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(IssueConstants.ORDER_FIELDS.keySet());
-							for (InputSpec field: project.getIssueWorkflow().getFieldSpecs()) {
+							for (InputSpec field: issueSetting.getFieldSpecs()) {
 								if (field instanceof NumberInput || field instanceof ChoiceInput || field instanceof DateInput) 
 									candidates.add(field.getName());
 							}
@@ -122,13 +126,16 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									.findMatchedElementsByLabel("revisionType", true).iterator().next().getMatchedText();
 							switch (revisionType) {
 							case "branch":
-								suggestions.addAll(SuggestionUtils.suggestBranch(project, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
+								if (getProject() != null)
+									suggestions.addAll(SuggestionUtils.suggestBranch(project, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 								break;
 							case "tag":
-								suggestions.addAll(SuggestionUtils.suggestTag(project, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
+								if (getProject() != null)
+									suggestions.addAll(SuggestionUtils.suggestTag(project, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 								break;
 							case "build":
-								suggestions.addAll(SuggestionUtils.suggestBuild(project, unfencedLowerCaseMatchWith, true, ESCAPE_CHARS));
+								if (getProject() != null)
+									suggestions.addAll(SuggestionUtils.suggestBuild(project, unfencedLowerCaseMatchWith, true, ESCAPE_CHARS));
 								break;
 							}
 						} else if ("criteriaValue".equals(spec.getLabel())) {
@@ -146,8 +153,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = IssueQuery.getValue(fieldElements.get(0).getMatchedText());
 								
 								try {
-									IssueQuery.checkField(project, fieldName, operator);
-									InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(fieldName);
+									IssueQuery.checkField(fieldName, operator);
+									InputSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
 									if (fieldSpec instanceof DateInput || fieldName.equals(FIELD_SUBMIT_DATE) 
 											|| fieldName.equals(FIELD_UPDATE_DATE)) {
 										suggestions.addAll(SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, unfencedLowerCaseMatchWith, null));
@@ -178,7 +185,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										List<String> candidates = OneDev.getInstance(GroupManager.class).query().stream().map(it->it.getName()).collect(Collectors.toList());
 										suggestions.addAll(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 									} else if (fieldName.equals(FIELD_STATE)) {
-										List<String> candidates = project.getIssueWorkflow().getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
+										List<String> candidates = issueSetting.getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
 										suggestions.addAll(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith, ESCAPE_CHARS));
 									} else if (fieldSpec instanceof ChoiceInput) {
 										OneContext.push(newOneContext());
@@ -266,7 +273,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 			if (!fieldElements.isEmpty()) {
 				String fieldName = IssueQuery.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
-					IssueQuery.checkField(getProject(), fieldName, IssueQuery.getOperator(suggestedLiteral));
+					IssueQuery.checkField(fieldName, IssueQuery.getOperator(suggestedLiteral));
 				} catch (OneException e) {
 					return null;
 				}

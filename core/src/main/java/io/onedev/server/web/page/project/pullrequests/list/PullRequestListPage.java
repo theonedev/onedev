@@ -181,7 +181,7 @@ public class PullRequestListPage extends ProjectPage {
 				getProject().setSavedPullRequestQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
-			
+
 		});
 		
 		WebMarkupContainer others = new WebMarkupContainer("others") {

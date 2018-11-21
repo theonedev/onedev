@@ -100,12 +100,15 @@ onedev.server = {
 				onedev.server.form.dirtyChanged($(this));
 			});
 		},
-		trackDirty: function(form) {
-			var $form = $(form);
-			if ($form.find(".dirty-aware").length != 0 || $form.hasClass("leave-confirm")) {
+		trackDirty: function(container) {
+			var $form = $(container);
+			if (!$form.is("form")) {
+				$form = $form.closest("form");
+			}
+			if ($form.length != 0 && ($form.find(".dirty-aware").length != 0 || $form.hasClass("leave-confirm"))) {
 				var fieldSelector = ":input:not(.no-dirtytrack):not(input[type=submit]):not(input[type=button]):not(button)"; 
 				var events = "change keyup propertychange input";
-				$form.find(fieldSelector).on(events, function() {
+				$(container).find(fieldSelector).on(events, function() {
 					onedev.server.form.markDirty($form);
 				});
 				if ($form.find(".has-error").length != 0) {
@@ -134,12 +137,10 @@ onedev.server = {
 			
 			$(document).on("elementReplaced", function(event, componentId) {
 				var $component = $("#" + componentId);
-				var $forms = $component.find("form");
-				if ($component.is("form"))
-					$forms = $forms.add($component);
-				$forms.each(function() {
+				$component.find("form").each(function() {
 					onedev.server.form.trackDirty(this);
 				});
+				onedev.server.form.trackDirty($component[0]);
 			});
 			
 			if (Wicket && Wicket.Ajax) {

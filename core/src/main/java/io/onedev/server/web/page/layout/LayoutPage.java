@@ -30,6 +30,7 @@ import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.MyProfilePage;
+import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.security.LoginPage;
@@ -55,7 +56,7 @@ public abstract class LayoutPage extends BasePage {
 		
 		WebMarkupContainer projectsContainer = new WebMarkupContainer("navProjects");
 		projectsContainer.add(new ViewStateAwarePageLink<Void>("link", ProjectListPage.class));
-		if (getPage() instanceof ProjectListPage || getPage() instanceof ProjectPage) 
+		if (getPage() instanceof ProjectListPage || getPage() instanceof ProjectPage || getPage() instanceof NewProjectPage) 
 			projectsContainer.add(AttributeAppender.append("class", "active"));
 		add(projectsContainer);
 		

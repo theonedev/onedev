@@ -10,12 +10,16 @@ import java.util.Set;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueFieldUnary;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.QueryBuildContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 
 public class ChoiceFieldCriteria extends FieldCriteria {
@@ -80,24 +84,26 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
-		Set<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
-		InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(getFieldName());
-		List<String> choices = fieldSpec.getPossibleValues();
-		if (!choices.contains(value))
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
+		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		SpecifiedChoices specifiedChoices = SpecifiedChoices.of(issueSetting.getFieldSpec(getFieldName()));
+		if (specifiedChoices != null && !specifiedChoices.getChoiceValues().contains(value)) {
 			undefinedFieldValues.add(new UndefinedFieldValue(getFieldName(), value));
+		}
 		return undefinedFieldValues;
 	}
 	
 	@Override
-	public void onRenameFieldValue(String fieldName, String oldValue, String newValue) {
-		if (fieldName.equals(getFieldName()) && oldValue.equals(value))
-			value = newValue;
-	}
-
-	@Override
-	public boolean onDeleteFieldValue(String fieldName, String fieldValue) {
-		return fieldName.equals(getFieldName()) && fieldValue.equals(value);
+	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
+		if (fieldName.equals(getFieldName())) {
+			if (valueSetEdit.getDeletions().contains(value))
+				return true;
+			String newValue = valueSetEdit.getRenames().get(value);
+			if (newValue != null)
+				value = newValue;
+		}
+		return false;
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

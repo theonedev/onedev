@@ -9,7 +9,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.IssueBoard;
+import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.web.behavior.WebSocketObserver;
 
 @SuppressWarnings("serial")
@@ -45,7 +45,7 @@ abstract class CardCountLabel extends Label {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(IssueBoard.getWebSocketObservable(getProject().getId()));
+				return Sets.newHashSet(BoardSpec.getWebSocketObservable(getProject().getId()));
 			}
 			
 		});

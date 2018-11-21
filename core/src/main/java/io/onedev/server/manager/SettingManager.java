@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.support.authenticator.Authenticator;
 import io.onedev.server.model.support.setting.BackupSetting;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.model.support.setting.MailSetting;
 import io.onedev.server.model.support.setting.SecuritySetting;
 import io.onedev.server.model.support.setting.SystemSetting;
@@ -88,6 +89,10 @@ public interface SettingManager extends EntityManager<Setting> {
 	SecuritySetting getSecuritySetting();
 	
 	void saveSecuritySetting(SecuritySetting securitySetting);
+	
+	GlobalIssueSetting getIssueSetting();
+	
+	void saveIssueSetting(GlobalIssueSetting issueSetting);
 	
 	@Nullable
 	Authenticator getAuthenticator();

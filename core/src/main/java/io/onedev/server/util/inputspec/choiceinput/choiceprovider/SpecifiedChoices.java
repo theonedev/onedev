@@ -4,9 +4,13 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.Size;
 
+import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 
@@ -35,4 +39,19 @@ public class SpecifiedChoices extends ChoiceProvider {
 			choices.put(choice.getValue(), choice.getColor());
 		return choices;
 	}
+	
+	public List<String> getChoiceValues() {
+		return choices.stream().map(it->it.getValue()).collect(Collectors.toList());
+	}
+	
+	@Nullable
+	public static SpecifiedChoices of(@Nullable InputSpec inputSpec) {
+		if (inputSpec instanceof ChoiceInput) { 
+			ChoiceInput choiceInput = (ChoiceInput) inputSpec;
+			if (choiceInput.getChoiceProvider() instanceof SpecifiedChoices) 
+				return (SpecifiedChoices) choiceInput.getChoiceProvider();
+		}
+		return null;
+	}
+	
 }

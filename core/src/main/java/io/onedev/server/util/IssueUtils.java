@@ -15,8 +15,9 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -35,8 +36,8 @@ public class IssueUtils {
 	@SuppressWarnings("unchecked")
 	public static Class<? extends Serializable> defineBeanClass(Project project) {
 		String className = BEAN_PREFIX + project.getId();
-		IssueWorkflow workflow = project.getIssueWorkflow();
-		return (Class<? extends Serializable>) InputSpec.defineClass(className, workflow.getFieldSpecs());
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return (Class<? extends Serializable>) InputSpec.defineClass(className, issueSetting.getFieldSpecs());
 	}
 	
 	@Nullable

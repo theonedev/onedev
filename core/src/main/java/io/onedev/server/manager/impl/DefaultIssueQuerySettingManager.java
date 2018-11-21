@@ -40,7 +40,7 @@ public class DefaultIssueQuerySettingManager extends AbstractEntityManager<Issue
 		setting.getQueryWatchSupport().getUserQueryWatches().keySet().retainAll(
 				setting.getUserQueries().stream().map(it->it.getName()).collect(Collectors.toSet()));
 		setting.getQueryWatchSupport().getProjectQueryWatches().keySet().retainAll(
-				setting.getProject().getSavedIssueQueries().stream().map(it->it.getName()).collect(Collectors.toSet()));
+				setting.getProject().getIssueSetting().getSavedQueries(true).stream().map(it->it.getName()).collect(Collectors.toSet()));
 		if (setting.getQueryWatchSupport().getProjectQueryWatches().isEmpty() && setting.getUserQueries().isEmpty()) {
 			if (!setting.isNew())
 				delete(setting);

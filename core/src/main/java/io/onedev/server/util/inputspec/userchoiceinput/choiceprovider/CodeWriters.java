@@ -18,7 +18,10 @@ public class CodeWriters implements ChoiceProvider {
 	@Override
 	public List<UserFacade> getChoices(boolean allPossible) {
 		Project project = OneContext.get().getProject();
-		return new ArrayList<>(SecurityUtils.getAuthorizedUsers(project.getFacade(), ProjectPrivilege.CODE_WRITE));
+		if (project != null)
+			return new ArrayList<>(SecurityUtils.getAuthorizedUsers(project.getFacade(), ProjectPrivilege.CODE_WRITE));
+		else
+			return new ArrayList<>();
 	}
 
 }

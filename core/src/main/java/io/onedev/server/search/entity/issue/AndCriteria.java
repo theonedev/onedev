@@ -15,6 +15,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.search.entity.AndCriteriaHelper;
 import io.onedev.server.search.entity.ParensAware;
 import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 
 public class AndCriteria extends IssueCriteria implements ParensAware {
@@ -48,31 +49,40 @@ public class AndCriteria extends IssueCriteria implements ParensAware {
 	}
 
 	@Override
-	public Collection<String> getUndefinedStates(Project project) {
+	public Collection<String> getUndefinedStates() {
 		List<String> undefinedStates = new ArrayList<>();
 		for (IssueCriteria criteria: criterias)
-			undefinedStates.addAll(criteria.getUndefinedStates(project));
+			undefinedStates.addAll(criteria.getUndefinedStates());
 		return undefinedStates;
 	}
 
 	@Override
-	public void onRenameState(String oldState, String newState) {
+	public void onRenameState(String oldName, String newName) {
 		for (IssueCriteria criteria: criterias)
-			criteria.onRenameState(oldState, newState);
+			criteria.onRenameState(oldName, newName);
 	}
 
 	@Override
-	public Collection<String> getUndefinedFields(Project project) {
+	public boolean onDeleteState(String stateName) {
+		for (Iterator<IssueCriteria> it = criterias.iterator(); it.hasNext();) {
+			if (it.next().onDeleteState(stateName))
+				it.remove();
+		}
+		return criterias.isEmpty();
+	}
+	
+	@Override
+	public Collection<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
 		for (IssueCriteria criteria: criterias)
-			undefinedFields.addAll(criteria.getUndefinedFields(project));
+			undefinedFields.addAll(criteria.getUndefinedFields());
 		return undefinedFields;
 	}
 
 	@Override
-	public void onRenameField(String oldField, String newField) {
+	public void onRenameField(String oldName, String newName) {
 		for (IssueCriteria criteria: criterias)
-			criteria.onRenameField(oldField, newField);
+			criteria.onRenameField(oldName, newName);
 	}
 
 	@Override
@@ -85,26 +95,20 @@ public class AndCriteria extends IssueCriteria implements ParensAware {
 	}
 
 	@Override
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
-		Set<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
-		for (IssueCriteria criteria: criterias)
-			undefinedFieldValues.addAll(criteria.getUndefinedFieldValues(project));
-		return undefinedFieldValues;
-	}
-
-	@Override
-	public void onRenameFieldValue(String fieldName, String oldValue, String newValue) {
-		for (IssueCriteria criteria: criterias)
-			criteria.onRenameFieldValue(fieldName, oldValue, newValue);
-	}
-
-	@Override
-	public boolean onDeleteFieldValue(String fieldName, String fieldValue) {
+	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
 		for (Iterator<IssueCriteria> it = criterias.iterator(); it.hasNext();) {
-			if (it.next().onDeleteFieldValue(fieldName, fieldValue))
+			if (it.next().onEditFieldValues(fieldName, valueSetEdit))
 				it.remove();
 		}
 		return criterias.isEmpty();
+	}
+
+	@Override
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
+		Set<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
+		for (IssueCriteria criteria: criterias)
+			undefinedFieldValues.addAll(criteria.getUndefinedFieldValues());
+		return undefinedFieldValues;
 	}
 
 	@Override

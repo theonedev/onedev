@@ -31,9 +31,11 @@ import com.google.common.collect.Lists;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueConstants;
@@ -135,7 +137,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			
 		}).add(newOnChangeBehavior(form)));
 		
-		List<String> customFieldNames = getProject().getIssueWorkflow().getFieldNames();
+		List<String> customFieldNames = getIssueSetting().getFieldNames();
 		form.add(new ListView<String>("customFields", customFieldNames) {
 
 			@Override
@@ -291,15 +293,19 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		
 		add(form);		
 	}
+	
+	private GlobalIssueSetting getIssueSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting();		
+	}
 
 	@Override
 	public List<String> getInputNames() {
-		return getProject().getIssueWorkflow().getFieldNames();
+		return getIssueSetting().getFieldNames();
 	}
 
 	@Override
 	public InputSpec getInputSpec(String inputName) {
-		return getProject().getIssueWorkflow().getFieldSpec(inputName);
+		return getIssueSetting().getFieldSpec(inputName);
 	}
 	
 	@Override

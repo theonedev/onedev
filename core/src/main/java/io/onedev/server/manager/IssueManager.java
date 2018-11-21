@@ -10,13 +10,13 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueCriteria;
+import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValueResolution;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedStateResolution;
 
 public interface IssueManager extends EntityManager<Issue> {
@@ -34,19 +34,19 @@ public interface IssueManager extends EntityManager<Issue> {
 
 	int count(Milestone milestone, User user, @Nullable StateSpec.Category category);
 	
-	Collection<String> getUndefinedStates(Project project);
+	Collection<String> getUndefinedStates();
 	
-	void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions);
+	void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions);
 	
-	Collection<String> getUndefinedFields(Project project);
+	Collection<String> getUndefinedFields();
 	
-	void fixUndefinedFields(Project project, Map<String, UndefinedFieldResolution> resolutions);
+	void fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions);
 	
-	Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project);
+	Collection<UndefinedFieldValue> getUndefinedFieldValues();
 	
-	void fixUndefinedFieldValues(Project project, Map<UndefinedFieldValue, UndefinedFieldValueResolution> resolutions);
+	void fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits);
 	
-	void fixFieldValueOrders(Project project);
+	void fixFieldValueOrders();
 	
 	void delete(User user, Issue issue);
 }

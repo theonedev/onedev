@@ -1,6 +1,7 @@
 package io.onedev.server.util.inputspec.choiceinput.choiceprovider;
 
 import java.io.Serializable;
+import java.util.UUID;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -13,9 +14,20 @@ public class Choice implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private String uuid = UUID.randomUUID().toString();
+	
 	private String value;
 	
 	private String color;
+
+	@Editable
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
 
 	@Editable(order=100)
 	@NotEmpty

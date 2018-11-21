@@ -15,6 +15,8 @@ import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.GroupPage;
 import io.onedev.server.web.page.admin.group.NewGroupPage;
+import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
+import io.onedev.server.web.page.admin.issuesetting.GlobalIssueSettingPage;
 import io.onedev.server.web.page.admin.licensemanagement.LicenseManagementPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
@@ -47,6 +49,7 @@ public abstract class AdministrationPage extends LayoutPage {
 				tabs.add(new AdministrationTab("Group Management", "fa fa-fw fa-group", GroupListPage.class, NewGroupPage.class, GroupPage.class));
 				tabs.add(new AdministrationTab("System Setting", "fa fa-fw fa-sliders", SystemSettingPage.class));
 				tabs.add(new AdministrationTab("Security Setting", "fa fa-fw fa-lock", SecuritySettingPage.class));
+				tabs.add(new AdministrationTab("Issue Setting", "fa fa-fw fa-bug", IssueFieldListPage.class, GlobalIssueSettingPage.class));
 				tabs.add(new AdministrationTab("External Authentication", "fa fa-fw fa-key", AuthenticatorPage.class));
 				tabs.add(new AdministrationTab("Mail Setting", "fa fa-fw fa-envelope", MailSettingPage.class));
 				tabs.add(new AdministrationTab("Database Backup", "fa fa-fw fa-database", DatabaseBackupPage.class));

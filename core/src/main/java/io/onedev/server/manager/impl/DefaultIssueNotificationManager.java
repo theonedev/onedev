@@ -84,7 +84,7 @@ public class DefaultIssueNotificationManager {
 
 				@Override
 				protected NamedQuery getSavedProjectQuery(String name) {
-					return issue.getProject().getSavedIssueQuery(name);
+					return issue.getProject().getIssueSetting().getSavedQuery(name);
 				}
 				
 			}.getWatches().entrySet()) {

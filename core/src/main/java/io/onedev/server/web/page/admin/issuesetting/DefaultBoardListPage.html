@@ -1,0 +1,26 @@
+<wicket:extend>
+	<div class="issue-boards def-list list">
+		<div class="head clearfix">
+			<div class="pull-left">
+				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+			</div>
+		</div>
+		<div class="body">
+			<table wicket:id="issueBoards" class="table table-hover"></table>
+		</div>
+	</div>
+	<wicket:fragment wicket:id="nameColumnFrag">
+		<span class="drag-handle fa fa-arrows" title="Drag to reorder boards"></span>
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="otherColumnFrag">
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="viewBoardFrag">
+		<div class="actions">
+			<a wicket:id="edit" class="btn btn-sm btn-default"><i class="fa fa-pencil"></i> Edit</a>
+			<a wicket:id="delete" class="btn btn-sm btn-default"><i class="fa fa-trash"></i> Delete</a>
+		</div>
+		<div wicket:id="viewer"></div>
+	</wicket:fragment>
+</wicket:extend>

@@ -1,0 +1,49 @@
+.floating.field-spec td.name {
+	min-width: 150px !important;
+} 
+
+.floating.field-spec .property-showCondition .property-inputName td.name, 
+.floating.field-spec .property-choicesProvider .property-inputName td.name,
+.floating.field-spec .property-defaultValueProvider .property-inputName td.name {
+	border-right: none;
+	text-align: left;
+}
+
+.field-spec-edit .property-showCondition>.value label, 
+.field-spec-edit .property-choicesProvider>.value label.name,
+.field-spec-edit .property-choicesProvider>.value .bean.list thead th,
+.field-spec-edit .property-nameOfEmptyValue .control-label {
+	font-weight: normal;
+}
+.floating.field-spec .property-uuid, .field-spec-edit .property-uuid {
+	display: none;
+}
+#issue-setting .issue-states table>tbody>tr>td:first-child a span {
+	border-radius: 3px;
+	padding: 2px 6px;
+	margin-right: 8px;
+}
+#issue-setting .issue-states table .color span {
+	display: block;
+	width: 24px;
+	height: 24px;
+	border-radius: 3px;
+}
+
+#issue-setting .default-queries th {
+	font-weight: bold !important;
+	padding-bottom: 12px;
+}
+#issue-setting .default-queries td {
+	padding: 8px 16px 8px 0;
+}
+#issue-setting .default-queries>.property.editor {
+	padding: 10px;
+	border-radius: 4px;
+	background: #F9F9F9;
+	border: 1px solid #E8E8E8;
+}
+#issue-setting .default-queries .editable .bean.list>thead>tr>th {
+	border-bottom: none;
+	padding-bottom: 4px;
+}

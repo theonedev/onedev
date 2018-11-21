@@ -30,7 +30,7 @@ public class CodeCommentConstants {
 	
 	public static final String FIELD_UPDATE_DATE = "Update Date";
 	
-	public static final String ATTR_UPDATE_DATE = "lastActivity.date";
+	public static final String ATTR_UPDATE_DATE = "updateDate";
 	
 	public static final String ATTR_USER = "user";
 	

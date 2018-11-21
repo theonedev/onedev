@@ -5,9 +5,12 @@ import java.util.List;
 
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
@@ -17,9 +20,10 @@ public class MineCriteria extends IssueCriteria {
 	private static final long serialVersionUID = 1L;
 
 	private IssueCriteria getCriteria(Project project, User user) {
-		IssueCriteria submitterCriteria = new SubmittedByCriteria(user);
+		IssueCriteria submitterCriteria = new SubmittedByCriteria(user, user.getName());
 		List<IssueCriteria> fieldCriterias = new ArrayList<>();
-		for (InputSpec field: project.getIssueWorkflow().getFieldSpecs()) {
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		for (InputSpec field: issueSetting.getFieldSpecs()) {
 			if (field instanceof UserChoiceInput) {
 				IssueCriteria fieldCriteria = new FieldOperatorCriteria(field.getName(), IssueQueryLexer.IsMe);
 				fieldCriterias.add(fieldCriteria);

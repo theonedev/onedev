@@ -263,7 +263,7 @@ public class ProjectCommitsPage extends ProjectPage {
 				getProject().setSavedCommitQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
-			
+
 		});
 		
 		WebMarkupContainer others = new WebMarkupContainer("others") {

@@ -13,6 +13,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
 
 public abstract class IssueCriteria extends EntityCriteria<Issue> {
@@ -28,14 +29,14 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	public void fill(Issue issue, Set<String> initedLists) {
 	}
 	
-	public Collection<String> getUndefinedStates(Project project) {
+	public Collection<String> getUndefinedStates() {
 		return new HashSet<>();
 	}
 
 	public void onRenameState(String oldState, String newState) {
 	}
 	
-	public Collection<String> getUndefinedFields(Project project) {
+	public Collection<String> getUndefinedFields() {
 		return new HashSet<>();
 	}
 	
@@ -45,18 +46,15 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	public boolean onDeleteField(String fieldName) {
 		return false;
 	}
-
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
-		return new HashSet<>();
-	}
-
-	public void onRenameFieldValue(String fieldName, String oldValue, String newValue) {
-	}
-
-	public boolean onDeleteFieldValue(String fieldName, String fieldValue) {
+	
+	public boolean onDeleteState(String stateName) {
 		return false;
 	}
 	
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
+		return new HashSet<>();
+	}
+
 	@Nullable
 	public static IssueCriteria of(List<IssueCriteria> criterias) {
 		if (criterias.size() > 1)
@@ -65,5 +63,9 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 			return criterias.iterator().next();
 		else
 			return null;
+	}
+
+	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
+		return false;
 	}
 }

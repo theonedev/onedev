@@ -13,9 +13,10 @@ import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.support.issue.workflow.TransitionSpec;
-import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.inputspec.InputContext;
@@ -96,7 +97,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 
 	@Override
 	public InputSpec getInputSpec(String inputName) {
-		return getIssue().getProject().getIssueWorkflow().getFieldSpec(inputName);
+		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
 	}
 	
 	@Override

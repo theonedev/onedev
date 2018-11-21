@@ -10,7 +10,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputContext;
@@ -67,8 +70,11 @@ public class UndefinedFieldValueResolution implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getValueChoices() {
-		UndefinedFieldValueContainer container = ((ComponentContext)OneContext.get()).getComponent().findParent(UndefinedFieldValueContainer.class); 
-		InputSpec fieldSpec = Preconditions.checkNotNull(OneContext.get().getProject().getIssueWorkflow().getFieldSpec(container.getFieldName()));
+		UndefinedFieldValueContainer container = ((ComponentContext)OneContext.get())
+				.getComponent()
+				.findParent(UndefinedFieldValueContainer.class); 
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		InputSpec fieldSpec = Preconditions.checkNotNull(issueSetting.getFieldSpec(container.getFieldName()));
 		OneContext.push(new OneContext() {
 
 			@Override

@@ -110,7 +110,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 				getProject().setSavedCodeCommentQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
-			
+
 		});
 		
 		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {

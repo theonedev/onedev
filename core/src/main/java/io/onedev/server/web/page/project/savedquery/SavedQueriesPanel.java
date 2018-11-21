@@ -45,6 +45,7 @@ import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 
 @SuppressWarnings("serial")
 public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
@@ -151,15 +152,11 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				if (SecurityUtils.canAdministrate(getProject().getFacade())) {
-					setVisible(!getUserQueries().isEmpty() || !getProjectQueries().isEmpty());
-				} else {
-					setVisible(SecurityUtils.getUser() != null && !getUserQueries().isEmpty());
-				}
+				setVisible(SecurityUtils.getUser() != null);
 			}
 
 			private Component newUserQueriesEditor(String componentId, ModalPanel modal, ArrayList<T> userQueries) {
-				return new NamedQueriesEditor(componentId, userQueries) {
+				return new NamedQueriesEditor(componentId, userQueries, null) {
 					
 					@Override
 					protected void onSave(AjaxRequestTarget target, ArrayList<T> queries) {
@@ -175,11 +172,13 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					protected void onCancel(AjaxRequestTarget target) {
 						modal.close();
 					}
+
 				};
 			}
 			
-			private Component newProjectQueriesEditor(String componentId, ModalPanel modal, ArrayList<T> projectQueries) {
-				return new NamedQueriesEditor(componentId, projectQueries) {
+			private Component newProjectQueriesEditor(String componentId, ModalPanel modal, ArrayList<T> projectQueries, 
+					@Nullable UseDefaultListener useDefaultListener) {
+				return new NamedQueriesEditor(componentId, projectQueries, useDefaultListener) {
 					
 					@Override
 					protected void onSave(AjaxRequestTarget target, ArrayList<T> queries) {
@@ -192,7 +191,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 					protected void onCancel(AjaxRequestTarget target) {
 						modal.close();
 					}
-					
+
 				};
 			}
 			
@@ -202,28 +201,25 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				List<Tab> tabs = new ArrayList<>();
 
 				ArrayList<T> userQueries = getUserQueries();
-				if (!userQueries.isEmpty()) {
-					tabs.add(new AjaxActionTab(Model.of("For Mine")) {
+				tabs.add(new AjaxActionTab(Model.of("For Mine")) {
 
-						@Override
-						protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-							super.updateAjaxAttributes(attributes);
-							attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
-						}
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+					}
 
-						@Override
-						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-							Component editor = newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries);
-							fragment.replace(editor);
-							target.add(editor);
-						}
-						
-					});
-					fragment.add(newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries));
-				}
+					@Override
+					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
+						Component editor = newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries);
+						fragment.replace(editor);
+						target.add(editor);
+					}
+					
+				});
+				fragment.add(newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries));
 				
-				ArrayList<T> projectQueries = getProjectQueries();
-				if (SecurityUtils.canAdministrate(getProject().getFacade()) && !projectQueries.isEmpty()) {
+				if (SecurityUtils.canAdministrate(getProject().getFacade())) {
 					tabs.add(new AjaxActionTab(Model.of("For All Users")) {
 
 						@Override
@@ -234,14 +230,31 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-							Component editor = newProjectQueriesEditor(TAB_PANEL_ID, modal, projectQueries);
+							ArrayList<T> projectQueries = getProjectQueries();
+							UseDefaultListener useDefaultListener;
+							if (projectQueries == null) {
+								projectQueries = new ArrayList<>(getDefaultProjectQueries());
+								useDefaultListener = null;
+							} else if (getDefaultProjectQueries() != null) {
+								useDefaultListener = new UseDefaultListener() {
+									
+									@Override
+									public void onUseDefault(AjaxRequestTarget target) {
+										target.add(SavedQueriesPanel.this);
+										modal.close();
+										onSaveProjectQueries(null);
+									}
+									
+								};
+							} else {
+								useDefaultListener = null;
+							}
+							Component editor = newProjectQueriesEditor(TAB_PANEL_ID, modal, projectQueries, useDefaultListener);
 							fragment.replace(editor);
 							target.add(editor);
 						}
 						
 					});
-					if (userQueries.isEmpty())
-						fragment.add(newProjectQueriesEditor(TAB_PANEL_ID, modal, projectQueries));
 				}
 				
 				fragment.add(new Tabbable("tab", tabs));
@@ -348,7 +361,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			@Override
 			protected List<T> load() {
 				List<T> namedQueries = new ArrayList<>();
-				for (T namedQuery: getProjectQueries()) {
+				for (T namedQuery: getProjectQueries()!=null?getProjectQueries():getDefaultProjectQueries()) {
 					try {
 						if (SecurityUtils.getUser() != null || !needsLogin(namedQuery))
 							namedQueries.add(namedQuery);
@@ -468,10 +481,13 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 		private final NamedQueriesBean<T> bean;
 		
-		public NamedQueriesEditor(String id, ArrayList<T> queries) {
+		private final UseDefaultListener useDefaultListener;
+		
+		public NamedQueriesEditor(String id, ArrayList<T> queries, @Nullable UseDefaultListener useDefaultListener) {
 			super(id, "editSavedQueriesContentFrag", SavedQueriesPanel.this);
 			bean = newNamedQueriesBean();
 			bean.getQueries().addAll(queries);
+			this.useDefaultListener = useDefaultListener;
 		}
 
 		@Override
@@ -508,13 +524,29 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				}
 				
 			});
-			form.add(new AjaxLink<Void>("cancel") {
+			form.add(new AjaxLink<Void>("useDefault") {
 
 				@Override
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
-					attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+					String message = "This will discard all project specific queries, do you want to continue?";
+					attributes.getAjaxCallListeners().add(new ConfirmListener(message));
 				}
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					useDefaultListener.onUseDefault(target);
+				}
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(useDefaultListener != null);
+				}
+				
+			});
+			
+			form.add(new AjaxLink<Void>("cancel") {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
@@ -529,6 +561,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 		protected abstract void onSave(AjaxRequestTarget target, ArrayList<T> queries);
 		
 		protected abstract void onCancel(AjaxRequestTarget target);
+		
 	}
 	
 	protected abstract NamedQueriesBean<T> newNamedQueriesBean();
@@ -540,10 +573,16 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	@Nullable
 	protected abstract QuerySetting<T> getQuerySetting();
 	
+	@Nullable
 	protected abstract ArrayList<T> getProjectQueries();
 
 	protected abstract void onSaveProjectQueries(ArrayList<T> projectQueries);
 	
 	protected abstract void onSaveQuerySetting(QuerySetting<T> querySetting);
+	
+	@Nullable
+	protected ArrayList<T> getDefaultProjectQueries() {
+		return null;
+	}
 	
 }

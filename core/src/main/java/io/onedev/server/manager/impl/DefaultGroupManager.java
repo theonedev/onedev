@@ -25,20 +25,20 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 
 	private final ProjectManager projectManager;
 	
-	private final SettingManager configManager;
+	private final SettingManager settingManager;
+	
+	private final IssueFieldUnaryManager issueFieldUnaryManager;
 	
 	private final CacheManager cacheManager;
 	
-	private final IssueFieldUnaryManager issueFieldManager;
-	
 	@Inject
-	public DefaultGroupManager(Dao dao, ProjectManager projectManager, SettingManager configManager, 
-			CacheManager cacheManager, IssueFieldUnaryManager issueFieldManager) {
+	public DefaultGroupManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
+			IssueFieldUnaryManager issueFieldUnaryManager, CacheManager cacheManager) {
 		super(dao);
 		this.projectManager = projectManager;
-		this.configManager = configManager;
+		this.settingManager = settingManager;
+		this.issueFieldUnaryManager = issueFieldUnaryManager;
 		this.cacheManager = cacheManager;
-		this.issueFieldManager = issueFieldManager;
 	}
 
 	@Transactional
@@ -50,16 +50,17 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 					protection.onRenameGroup(oldName, group.getName());
 				for (TagProtection protection: project.getTagProtections())
 					protection.onRenameGroup(oldName, group.getName());
-				project.getIssueWorkflow().onRenameGroup(oldName, group.getName());
+				project.getIssueSetting().onRenameGroup(oldName, group.getName());
 			}
 			
-			Authenticator authenticator = configManager.getAuthenticator();
+			Authenticator authenticator = settingManager.getAuthenticator();
 			if (authenticator != null) {
-				authenticator.onRenameGroup(oldName, group.getName()	);
-				configManager.saveAuthenticator(authenticator);
+				authenticator.onRenameGroup(oldName, group.getName());
+				settingManager.saveAuthenticator(authenticator);
 			}
 			
-			issueFieldManager.onRenameGroup(oldName, group.getName());
+			issueFieldUnaryManager.onRenameGroup(oldName, group.getName());
+			settingManager.getIssueSetting().onRenameGroup(oldName, group.getName());
 		}
 		dao.persist(group);
 	}
@@ -76,13 +77,14 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 				if (it.next().onDeleteGroup(group.getName()))
 					it.remove();
 			}
-			project.getIssueWorkflow().onDeleteGroup(group.getName());
+			project.getIssueSetting().onDeleteGroup(group.getName());
 		}
-		Authenticator authenticator = configManager.getAuthenticator();
+		Authenticator authenticator = settingManager.getAuthenticator();
 		if (authenticator != null) { 
 			authenticator.onDeleteGroup(group.getName());
-			configManager.saveAuthenticator(authenticator);
+			settingManager.saveAuthenticator(authenticator);
 		}
+		settingManager.getIssueSetting().onDeleteGroup(group.getName());
 		
 		dao.remove(group);
 	}

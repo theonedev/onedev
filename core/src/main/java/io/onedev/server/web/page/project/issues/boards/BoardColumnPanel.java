@@ -31,15 +31,17 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.IssueManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.IssueBoard;
-import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
-import io.onedev.server.model.support.issue.workflow.TransitionSpec;
-import io.onedev.server.model.support.issue.workflow.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.model.support.issue.IssueSetting;
+import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.ChoiceFieldCriteria;
 import io.onedev.server.search.entity.issue.FieldOperatorCriteria;
 import io.onedev.server.search.entity.issue.IssueCriteria;
@@ -127,6 +129,10 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		return queryModel.getObject();
 	}
 
+	private GlobalIssueSetting getIssueSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -145,11 +151,11 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 							Issue issue = issueDragging.getIssue();
 							if (Objects.equals(issue.getMilestone(), getMilestone())) { 
 								// move issue between board columns
-								IssueWorkflow workflow = getProject().getIssueWorkflow();
+								IssueSetting workflow = getProject().getIssueSetting();
 								String identifyField = getBoard().getIdentifyField();
 								if (identifyField.equals(IssueConstants.FIELD_STATE)) {
 									issue = SerializationUtils.clone(issue);
-									for (TransitionSpec transition: workflow.getTransitionSpecs()) {
+									for (TransitionSpec transition: workflow.getTransitionSpecs(true)) {
 										if (transition.canTransite(issue) 
 												&& transition.getTrigger() instanceof PressButtonTrigger
 												&& ((PressButtonTrigger)transition.getTrigger()).isAuthorized()
@@ -210,14 +216,13 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		String title;
 		String color = null;
 		User user = null;
-		IssueWorkflow workflow = getProject().getIssueWorkflow();
 		String identifyField = getBoard().getIdentifyField();
 		if (getColumn() != null) {
 			title = getColumn();
 			if (identifyField.equals(IssueConstants.FIELD_STATE)) {
-				color = workflow.getStateSpec(getColumn()).getColor();
+				color = getIssueSetting().getStateSpec(getColumn()).getColor();
 			} else {
-				InputSpec field = workflow.getFieldSpec(identifyField);
+				InputSpec field = getIssueSetting().getFieldSpec(identifyField);
 				if (field instanceof ChoiceInput) {
 					ChoiceProvider choiceProvider = ((ChoiceInput)field).getChoiceProvider();
 					OneContext.push(new ComponentContext(this));
@@ -231,7 +236,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				}
 			}
 		} else {
-			title = workflow.getFieldSpec(identifyField).getNameOfEmptyValue();
+			title = getIssueSetting().getFieldSpec(identifyField).getNameOfEmptyValue();
 		}
 
 		WebMarkupContainer head = new WebMarkupContainer("head");
@@ -287,7 +292,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				setVisible(getQuery() != null 
 						&& SecurityUtils.getUser() != null
 						&& (!getBoard().getIdentifyField().equals(IssueConstants.FIELD_STATE) 
-								|| getColumn().equals(getProject().getIssueWorkflow().getInitialStateSpec().getName())));
+								|| getColumn().equals(getIssueSetting().getInitialStateSpec().getName())));
 			}
 			
 		});
@@ -327,9 +332,9 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, getMilestone(), SecurityUtils.getUser());
 					markAccepted(target, issue, true);
 				} else if (fieldName.equals(IssueConstants.FIELD_STATE)) {
-					IssueWorkflow workflow = getProject().getIssueWorkflow();
+					IssueSetting workflow = getProject().getIssueSetting();
 					AtomicReference<TransitionSpec> transitionRef = new AtomicReference<>(null);
-					for (TransitionSpec transition: workflow.getTransitionSpecs()) {
+					for (TransitionSpec transition: workflow.getTransitionSpecs(true)) {
 						if (transition.canTransite(issue) 
 								&& transition.getTrigger() instanceof PressButtonTrigger 
 								&& ((PressButtonTrigger)transition.getTrigger()).isAuthorized() 
@@ -403,7 +408,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 
 	protected abstract Project getProject();
 
-	protected abstract IssueBoard getBoard();
+	protected abstract BoardSpec getBoard();
 
 	@Nullable
 	protected abstract Milestone getMilestone();

@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.inputspec.InputSpec;
 
@@ -73,7 +75,7 @@ public class IssueField implements Serializable {
 
 	@Nullable
 	public Object getValue(Project project) {
-		InputSpec fieldSpec = project.getIssueWorkflow().getFieldSpec(name);
+		InputSpec fieldSpec = OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(name);
 		if (fieldSpec != null) {
 			try {
 				if (!getValues().isEmpty())

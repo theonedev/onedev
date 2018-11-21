@@ -54,7 +54,7 @@ public class PullRequestConstants {
 	
 	public static final String FIELD_UPDATE_DATE = "Update Date";
 	
-	public static final String ATTR_UPDATE_DATE = "lastActivity.date";
+	public static final String ATTR_UPDATE_DATE = "updateDate";
 	
 	public static final String FIELD_CLOSE_DATE = "Close Date";
 	

@@ -6,8 +6,11 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Milestone;
-import io.onedev.server.model.support.issue.workflow.StateSpec;
+import io.onedev.server.model.support.issue.StateSpec;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.web.component.milestone.progress.MilestoneProgressBar;
 
@@ -28,13 +31,14 @@ class IssueStatsPanel extends GenericPanel<Milestone> {
 		
 		add(new MilestoneProgressBar("progress", getModel()));
 		
-		IssueCriteria openCriteria = getMilestone().getProject().getIssueWorkflow().getCategoryCriteria(StateSpec.Category.OPEN);
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();		
+		IssueCriteria openCriteria = issueSetting.getCategoryCriteria(StateSpec.Category.OPEN);
 		Link<Void> link = new BookmarkablePageLink<Void>("open", MilestoneDetailPage.class, 
 				MilestoneDetailPage.paramsOf(getMilestone(), openCriteria.toString()));
 		link.add(new Label("count", getMilestone().getNumOfOpenIssues() + " open"));
 		add(link);
 		
-		IssueCriteria closedCriteria = getMilestone().getProject().getIssueWorkflow().getCategoryCriteria(StateSpec.Category.CLOSED);
+		IssueCriteria closedCriteria = issueSetting.getCategoryCriteria(StateSpec.Category.CLOSED);
 		link = new BookmarkablePageLink<Void>("closed",  MilestoneDetailPage.class, 
 				MilestoneDetailPage.paramsOf(getMilestone(), closedCriteria.toString()));
 		link.add(new Label("count", getMilestone().getNumOfClosedIssues() + " closed"));

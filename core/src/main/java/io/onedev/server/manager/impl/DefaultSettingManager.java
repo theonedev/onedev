@@ -13,6 +13,7 @@ import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.authenticator.Authenticator;
 import io.onedev.server.model.support.setting.BackupSetting;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.model.support.setting.MailSetting;
 import io.onedev.server.model.support.setting.SecuritySetting;
 import io.onedev.server.model.support.setting.SystemSetting;
@@ -35,6 +36,8 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	private volatile Long backupSettingId;
 	
 	private volatile Long securitySettingId;
+	
+	private volatile Long issueSettingId;
 	
 	private volatile Long authenticatorId;
 	
@@ -147,6 +150,32 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
             setting = load(securitySettingId);
         }
         return (SecuritySetting) setting.getValue();
+	}
+
+	@Transactional
+	@Override
+	public void saveIssueSetting(GlobalIssueSetting issueSetting) {
+		Setting setting = getSetting(Key.ISSUE);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(Key.ISSUE);
+		}
+		setting.setValue(issueSetting);
+		dao.persist(setting);
+	}
+	
+	@Sessional
+	@Override
+	public GlobalIssueSetting getIssueSetting() {
+        Setting setting;
+        if (issueSettingId == null) {
+    		setting = getSetting(Key.ISSUE);
+    		Preconditions.checkNotNull(setting);
+    		issueSettingId = setting.getId();
+        } else {
+            setting = load(issueSettingId);
+        }
+        return (GlobalIssueSetting) setting.getValue();
 	}
 
 	@Transactional

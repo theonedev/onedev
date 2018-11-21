@@ -42,7 +42,7 @@ import io.onedev.server.manager.MilestoneManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.IssueBoard;
+import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -50,6 +50,7 @@ import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.issue.board.BoardEditPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.milestone.MilestoneDueLabel;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
@@ -76,7 +77,7 @@ public class IssueBoardsPage extends IssuesPage {
 	
 	private static final String PARAM_BACKLOG_QUERY = "backlog-query";
 
-	private final ArrayList<IssueBoard> boards;
+	private final List<BoardSpec> boards;
 	
 	private final int boardIndex;
 	
@@ -158,10 +159,11 @@ public class IssueBoardsPage extends IssuesPage {
 	public IssueBoardsPage(PageParameters params) {
 		super(params);
 		
-		boards = getProject().getIssueBoards();
+		boards = getProject().getIssueSetting().getBoardSpecs(true);
+		
 		String boardName = params.get(PARAM_BOARD).toString();
 		if (boardName != null) {
-			boardIndex = IssueBoard.getBoardIndex(boards, boardName);
+			boardIndex = BoardSpec.getBoardIndex(boards, boardName);
 			if (boardIndex == -1)
 				throw new OneException("Can not find issue board: " + boardName);
 		} else if (!boards.isEmpty()) {
@@ -223,7 +225,7 @@ public class IssueBoardsPage extends IssuesPage {
 	}
 
 	@Nullable
-	public IssueBoard getBoard() {
+	public BoardSpec getBoard() {
 		if (boardIndex != -1)
 			return boards.get(boardIndex);
 		else
@@ -256,12 +258,31 @@ public class IssueBoardsPage extends IssuesPage {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
 					Fragment menuFragment = new Fragment(id, "boardMenuFrag", IssueBoardsPage.this);
-					if (SecurityUtils.canAdministrate(getProject().getFacade()))
+					if (SecurityUtils.canAdministrate(getProject().getFacade())) {
 						menuFragment.add(AttributeAppender.append("class", "administrative"));
-					menuFragment.add(new ListView<IssueBoard>("boards", boards) {
+					} 
+					menuFragment.add(new Link<Void>("useDefault") {
 
 						@Override
-						protected void populateItem(ListItem<IssueBoard> item) {
+						public void onClick() {
+							getProject().getIssueSetting().setBoardSpecs(null);
+							OneDev.getInstance(ProjectManager.class).save(getProject());
+							setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject()));
+						}
+
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							setVisible(SecurityUtils.canAdministrate(getProject().getFacade()) 
+									&& getProject().getIssueSetting().getBoardSpecs(false) != null);
+						}
+						
+					}.add(new ConfirmOnClick("This will discard all project specific boards, do you want to continue?")));
+					
+					menuFragment.add(new ListView<BoardSpec>("boards", boards) {
+
+						@Override
+						protected void populateItem(ListItem<BoardSpec> item) {
 							item.add(new WebMarkupContainer("dragHandle").setVisible(SecurityUtils.canAdministrate(getProject().getFacade())));
 							
 							PageParameters params = IssueBoardsPage.paramsOf(
@@ -295,13 +316,13 @@ public class IssueBoardsPage extends IssuesPage {
 
 								@Override
 								public void onClick() {
-									IssueBoard boardToRemove = item.getModelObject();
-									IssueBoard currentBoard = getBoard();
+									BoardSpec boardToRemove = item.getModelObject();
+									BoardSpec currentBoard = getBoard();
 									boards.remove(boardToRemove);
-									getProject().setIssueBoards(boards);
+									getProject().getIssueSetting().setBoardSpecs(boards);
 									OneDev.getInstance(ProjectManager.class).save(getProject());
 									
-									IssueBoard nextBoard;
+									BoardSpec nextBoard;
 									if (boardToRemove.getName().equals(currentBoard.getName())) 
 										nextBoard = null;
 									else
@@ -322,9 +343,9 @@ public class IssueBoardsPage extends IssuesPage {
 						
 						@Override
 						protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
-							IssueBoard board = boards.get(from.getItemIndex());
+							BoardSpec board = boards.get(from.getItemIndex());
 							boards.set(from.getItemIndex(), boards.set(to.getItemIndex(), board));
-							getProject().setIssueBoards(boards);
+							getProject().getIssueSetting().setBoardSpecs(boards);
 							OneDev.getInstance(ProjectManager.class).save(getProject());
 							target.add(menuFragment);
 						}
@@ -638,7 +659,7 @@ public class IssueBoardsPage extends IssuesPage {
 					}
 
 					@Override
-					protected IssueBoard getBoard() {
+					protected BoardSpec getBoard() {
 						return IssueBoardsPage.this.getBoard();
 					}
 
@@ -673,6 +694,23 @@ public class IssueBoardsPage extends IssuesPage {
 				}
 				
 			});
+			fragment.add(new Link<Void>("useDefault") {
+
+				@Override
+				protected void onConfigure() {
+					super.onConfigure();
+					setVisible(SecurityUtils.canAdministrate(getProject().getFacade()) 
+							&& getProject().getIssueSetting().getBoardSpecs(false) != null);
+				}
+
+				@Override
+				public void onClick() {
+					getProject().getIssueSetting().setBoardSpecs(null);
+					OneDev.getInstance(ProjectManager.class).save(getProject());
+					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(getProject()));
+				}
+				
+			});
 			add(fragment);
 		}
 	}
@@ -684,7 +722,7 @@ public class IssueBoardsPage extends IssuesPage {
 		response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueBoards.onDomReady();"));
 	}
 	
-	public static PageParameters paramsOf(Project project, @Nullable IssueBoard board, 
+	public static PageParameters paramsOf(Project project, @Nullable BoardSpec board, 
 			@Nullable Milestone milestone, boolean backlog, @Nullable String query, 
 			@Nullable String backlogQuery) {
 		PageParameters params = paramsOf(project);
@@ -716,7 +754,7 @@ public class IssueBoardsPage extends IssuesPage {
 				}
 
 				@Override
-				protected void onBoardCreated(AjaxRequestTarget target, IssueBoard board) {
+				protected void onBoardCreated(AjaxRequestTarget target, BoardSpec board) {
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 							getProject(), board, getMilestone(), backlog, query, backlogQuery));
 					modal.close();
@@ -806,12 +844,9 @@ public class IssueBoardsPage extends IssuesPage {
 			return new BoardEditPanel(id, boards, boardIndex) {
 
 				@Override
-				protected Project getProject() {
-					return IssueBoardsPage.this.getProject();
-				}
-
-				@Override
-				protected void onBoardSaved(AjaxRequestTarget target, IssueBoard board) {
+				protected void onBoardSaved(AjaxRequestTarget target, BoardSpec board) {
+					getProject().getIssueSetting().setBoardSpecs(boards);
+					OneDev.getInstance(ProjectManager.class).save(getProject());
 					setResponsePage(IssueBoardsPage.class, IssueBoardsPage.paramsOf(
 							getProject(), board, getMilestone(), backlog, query, backlogQuery));
 				}

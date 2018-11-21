@@ -54,4 +54,9 @@ public abstract class OneContext {
 
 	public abstract InputContext getInputContext();
 	
+	@Nullable
+	public OneContext getPropertyContext(String propertyName) {
+		return null;
+	}
+	
 }

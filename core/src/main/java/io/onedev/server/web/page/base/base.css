@@ -629,3 +629,41 @@ a.disabled, a[disabled="disabled"] {
 .nav.nav-tabs>li.options {
 	float: right;
 }
+
+.def-list table>tbody>tr>td {
+	padding: 0;
+}
+.def-list table td.norecords-td {
+	padding: 5px;
+}
+.def-list table a {
+	display: block;
+	color: #666;
+	text-decoration: none;
+	padding: 5px;
+}
+.def-list table a {
+	display: block;
+	color: #666;
+	text-decoration: none;
+	padding: 8px;
+}
+.def-list table>tbody>tr>td:first-child>div {
+	position: relative;
+	top: 0;
+}
+.def-list table>tbody>tr>td:first-child>div>.drag-handle {
+	position: absolute;
+	left: 6px;
+	top: 10px;
+}
+.def-list table>tbody>tr>td:first-child>div>a {
+	margin-left: 16px;
+}
+
+.floating.side.def-detail {
+	width: 480px;
+}
+.floating.side.def-detail .actions {
+	margin-bottom: 12px;
+}

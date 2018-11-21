@@ -34,7 +34,10 @@ public class IssueQueryEditor extends PropertyEditor<String> {
 
 			@Override
 			public Project getObject() {
-				return ((ProjectPage) getPage()).getProject();
+				if (getPage() instanceof ProjectPage)
+					return ((ProjectPage) getPage()).getProject();
+				else
+					return null;
 			}
     		
     	}));

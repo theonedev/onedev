@@ -17,8 +17,11 @@ public class SubmittedByCriteria extends IssueCriteria {
 
 	private final User value;
 	
-	public SubmittedByCriteria(User value) {
+	private String rawValue;
+	
+	public SubmittedByCriteria(User value, String rawValue) {
 		this.value = value;
+		this.rawValue = rawValue;
 	}
 
 	@Override
@@ -36,10 +39,10 @@ public class SubmittedByCriteria extends IssueCriteria {
 	public boolean needsLogin() {
 		return false;
 	}
-
+	
 	@Override
 	public String toString() {
-		return IssueQuery.getRuleName(IssueQueryLexer.SubmittedBy) + " " + IssueQuery.quote(value.getName());
+		return IssueQuery.getRuleName(IssueQueryLexer.SubmittedBy) + " " + IssueQuery.quote(rawValue);
 	}
 
 }

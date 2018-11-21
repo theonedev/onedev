@@ -61,7 +61,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
@@ -92,14 +91,11 @@ import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
-import io.onedev.server.model.support.issue.IssueBoard;
-import io.onedev.server.model.support.issue.NamedIssueQuery;
-import io.onedev.server.model.support.issue.workflow.IssueWorkflow;
+import io.onedev.server.model.support.issue.IssueSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.DefaultPrivilege;
-import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.validation.annotation.ProjectName;
@@ -212,13 +208,8 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(length=65535)
 	@JsonView(DefaultView.class)
-	private IssueWorkflow issueWorkflow;
+	private IssueSetting issueSetting;
 	
-	@Lob
-	@Column(length=65535)
-	@JsonView(DefaultView.class)
-	private ArrayList<NamedIssueQuery> savedIssueQueries;
-
 	@Lob
 	@Column(length=65535)
 	@JsonView(DefaultView.class)
@@ -238,16 +229,6 @@ public class Project extends AbstractEntity {
 	@Column(length=65535)
 	@JsonView(DefaultView.class)
 	private ArrayList<NamedBuildQuery> savedBuildQueries;
-	
-	@Lob
-	@Column(length=65535)
-	@JsonView(DefaultView.class)
-	private ArrayList<String> issueListFields;
-	
-	@Lob
-	@Column(length=65535)
-	@JsonView(DefaultView.class)
-	private ArrayList<IssueBoard> issueBoards;
 	
 	@Lob
 	@Column(length=65535)
@@ -893,37 +874,16 @@ public class Project extends AbstractEntity {
 		this.codeComments = codeComments;
 	}
 
-	public IssueWorkflow getIssueWorkflow() {
-		if (issueWorkflow == null) 
-			issueWorkflow = new IssueWorkflow();
-		return issueWorkflow;
+	public IssueSetting getIssueSetting() {
+		if (issueSetting == null) 
+			issueSetting = new IssueSetting();
+		return issueSetting;
 	}
 
-	public void setIssueWorkflow(IssueWorkflow issueWorkflow) {
-		this.issueWorkflow = issueWorkflow;
+	public void setIssueSetting(IssueSetting issueSetting) {
+		this.issueSetting = issueSetting;
 	}
 
-	public ArrayList<NamedIssueQuery> getSavedIssueQueries() {
-		if (savedIssueQueries == null) {
-			savedIssueQueries = new ArrayList<>();
-			savedIssueQueries.add(new NamedIssueQuery("Outstanding", "outstanding"));
-			savedIssueQueries.add(new NamedIssueQuery("My outstanding", "outstanding and mine"));
-			savedIssueQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
-			savedIssueQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-			savedIssueQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
-			savedIssueQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
-			savedIssueQueries.add(new NamedIssueQuery("Critical outstanding", "outstanding and \"Priority\" is \"Critical\""));
-			savedIssueQueries.add(new NamedIssueQuery("Unassigned outstanding", "outstanding and \"Assignee\" is empty"));
-			savedIssueQueries.add(new NamedIssueQuery("Closed", "closed"));
-			savedIssueQueries.add(new NamedIssueQuery("All", "all"));
-		}
-		return savedIssueQueries;
-	}
-
-	public void setSavedIssueQueries(ArrayList<NamedIssueQuery> savedIssueQueries) {
-		this.savedIssueQueries = savedIssueQueries;
-	}
-	
 	public ArrayList<NamedCommitQuery> getSavedCommitQueries() {
 		if (savedCommitQueries == null) {
 			savedCommitQueries = new ArrayList<>();
@@ -961,15 +921,6 @@ public class Project extends AbstractEntity {
 		this.savedPullRequestQueries = savedPullRequestQueries;
 	}
 	
-	@Nullable
-	public NamedIssueQuery getSavedIssueQuery(String name) {
-		for (NamedIssueQuery namedQuery: getSavedIssueQueries()) {
-			if (namedQuery.getName().equals(name))
-				return namedQuery;
-		}
-		return null;
-	}
-
 	@Nullable
 	public NamedCommitQuery getSavedCommitQuery(String name) {
 		for (NamedCommitQuery namedQuery: getSavedCommitQueries()) {
@@ -1036,24 +987,6 @@ public class Project extends AbstractEntity {
 
 	public void setSavedBuildQueries(ArrayList<NamedBuildQuery> savedBuildQueries) {
 		this.savedBuildQueries = savedBuildQueries;
-	}
-
-	public ArrayList<String> getIssueListFields() {
-		if (issueListFields == null) {
-			issueListFields = new ArrayList<>();
-	    	issueListFields.add(IssueConstants.FIELD_NUMBER);
-	    	issueListFields.add(IssueConstants.FIELD_STATE);
-	    	issueListFields.add(IssueConstants.FIELD_TITLE);
-			issueListFields.add("Type");
-			issueListFields.add("Priority");
-			issueListFields.add(IssueConstants.FIELD_SUBMITTER);
-			issueListFields.add("Assignee");
-		}
-		return issueListFields;
-	}
-	
-	public void setIssueListFields(ArrayList<String> issueListFields) {
-		this.issueListFields = issueListFields;
 	}
 
 	public Collection<IssueQuerySetting> getIssueQuerySettings() {
@@ -1156,23 +1089,6 @@ public class Project extends AbstractEntity {
 
 	public void setMilestones(Collection<Milestone> milestones) {
 		this.milestones = milestones;
-	}
-
-	public ArrayList<IssueBoard> getIssueBoards() {
-		if (issueBoards == null) {
-			issueBoards = new ArrayList<>();
-			IssueBoard board = new IssueBoard();
-			board.setName(IssueConstants.FIELD_STATE);
-			board.setIdentifyField(IssueConstants.FIELD_STATE);
-			board.setColumns(Lists.newArrayList("Open", "Assigned", "Closed"));
-			board.setDisplayFields(Lists.newArrayList(IssueConstants.FIELD_STATE, "Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
-			issueBoards.add(board);
-		}
-		return issueBoards;
-	}
-
-	public void setIssueBoards(ArrayList<IssueBoard> issueBoards) {
-		this.issueBoards = issueBoards;
 	}
 
 	public ArrayList<WebHook> getWebHooks() {

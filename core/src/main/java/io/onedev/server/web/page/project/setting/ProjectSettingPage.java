@@ -21,9 +21,8 @@ import io.onedev.server.web.page.project.setting.configuration.ConfigurationEdit
 import io.onedev.server.web.page.project.setting.configuration.ConfigurationListPage;
 import io.onedev.server.web.page.project.setting.configuration.NewConfigurationPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
-import io.onedev.server.web.page.project.setting.issueworkflow.fields.IssueFieldsPage;
-import io.onedev.server.web.page.project.setting.issueworkflow.states.IssueStatesPage;
-import io.onedev.server.web.page.project.setting.issueworkflow.statetransitions.StateTransitionsPage;
+import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
+import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 
@@ -53,10 +52,8 @@ public abstract class ProjectSettingPage extends ProjectPage {
 				tabs.add(new ProjectSettingTab("Authorizations", "fa fa-fw fa-user", ProjectAuthorizationsPage.class));
 				tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
 				tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));
+				tabs.add(new ProjectSettingTab("Issue Setting", "fa fa-fw fa-bug", StateTransitionsPage.class, PromptFieldsUponIssueOpenSettingPage.class));
 				tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-comments", CommitMessageTransformPage.class));
-				tabs.add(new ProjectSettingTab("Issue Fields", "fa fa-fw fa-list-ul", IssueFieldsPage.class));
-				tabs.add(new ProjectSettingTab("Issue States", "fa fa-fw fa-check", IssueStatesPage.class));
-				tabs.add(new ProjectSettingTab("Issue State Transitions", "fa fa-fw fa-exchange", StateTransitionsPage.class));
 				tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", WebHooksPage.class));
 				tabs.add(new ProjectSettingTab("Build Configurations", "fa fa-fw fa-cube", ConfigurationListPage.class, 
 						NewConfigurationPage.class, ConfigurationEditPage.class));
