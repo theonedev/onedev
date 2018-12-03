@@ -812,4 +812,30 @@ public class DatabaseMigrator {
 		configurationsDOM.writeToFile(new File(dataDir, "Configurations.xml"), false);
 		requestBuildsDOM.writeToFile(new File(dataDir, "PullRequestBuilds.xml"), false);
 	}
+	
+	private void migrate17(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Issue")) {
+				FileUtils.deleteFile(file);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element issueWorkflowElement = element.element("issueWorkflow");
+					if (issueWorkflowElement != null)
+						issueWorkflowElement.detach();
+					Element savedIssueQueriesElement = element.element("savedIssueQueries");
+					if (savedIssueQueriesElement != null)
+						savedIssueQueriesElement.detach();
+					Element issueListFieldsElement = element.element("issueListFields");
+					if (issueListFieldsElement != null)
+						issueListFieldsElement.detach();
+					Element issueBoardsElement = element.element("issueBoards");
+					if (issueBoardsElement != null)
+						issueBoardsElement.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
+	
 }
