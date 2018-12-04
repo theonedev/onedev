@@ -9,7 +9,7 @@ body.fullscreen {
 	left: 0;
 	top: 0;
 	width: 100%;
-	z-index: 1000;
+	z-index: 1060;
 	padding: 20px;
 	background: white;
 }

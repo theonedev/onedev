@@ -63,6 +63,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 	@SuppressWarnings("unused")
 	private String buildQuery;
 	
+	private IssueActivitiesPanel activities;
+	
 	public CardDetailPanel(String id, IModel<Issue> model) {
 		super(id, model);
 	}
@@ -75,15 +77,17 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		return getIssue().getProject();
 	}
 	
-	private Component newActivitiesPanel() {
-		return new IssueActivitiesPanel(TAB_CONTENT_ID) {
+	private IssueActivitiesPanel newActivitiesPanel() {
+		IssueActivitiesPanel activities = new IssueActivitiesPanel(TAB_CONTENT_ID) {
 
 			@Override
 			protected Issue getIssue() {
 				return CardDetailPanel.this.getIssue();
 			}
 			
-		}.setOutputMarkupId(true);
+		};
+		activities.setOutputMarkupId(true);
+		return activities;
 	}
 	
 	@Override
@@ -121,9 +125,14 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-				Component content = newActivitiesPanel();
-				CardDetailPanel.this.replace(content);
-				target.add(content);
+				activities = newActivitiesPanel();
+				CardDetailPanel.this.replace(activities);
+				target.add(activities);
+			}
+
+			@Override
+			protected Component renderOptions(String componentId) {
+				return activities.renderOptions(componentId);
 			}
 			
 		});
@@ -258,7 +267,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			}
 			
 		});
-		addOrReplace(newActivitiesPanel());
+		addOrReplace(activities = newActivitiesPanel());
 		
 		super.onBeforeRender();
 	}

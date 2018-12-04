@@ -89,11 +89,4 @@ public class Tabbable extends Panel {
 		super.onBeforeRender();
 	}
 
-	public void renderOptions(Tab tab) {
-		Component options = tab.renderOptions(OPTIONS_ID);
-		if (options != null)
-			replace(options);
-		else
-			replace(new WebMarkupContainer(OPTIONS_ID).setVisible(false));
-	}
 }
