@@ -1,64 +1,48 @@
-.saved-queries>.expanded>.head {
+.saved-queries>.head {
 	white-space: nowrap;
 }
-.saved-queries>.expanded>.head>* {
+.saved-queries>.head>* {
 	display: inline-block;
 }
-.saved-queries>.expanded>.head>.actions {
+.saved-queries>.head>.actions {
 	margin: 8px 0 0 12px;
 }
-.saved-queries>.expanded>.head>.actions>a {
+.saved-queries>.head>.actions>a {
 	color: #444;
+	opacity: 100;
 	margin-right: 8px;
 	font-size: 16px;
 }
-.saved-queries>.expanded>.head>.actions>a[disabled] {
+.saved-queries>.head>.actions>a[disabled] {
 	color: #AAA;
 	cursor: default;
 }
-.saved-queries>.expanded>.head>.actions .collapse {
+.saved-queries>.head>.actions .close-saved-queries {
+	font-size: 17px;
 	display: inline-block;
 }
 
-.saved-queries>.expanded>.body>* {
+.saved-queries>.body>* {
 	margin-bottom: 20px;
 }
-.saved-queries>.expanded>.body>:last-child {
+.saved-queries>.body>:last-child {
 	margin-bottom: 0;
 }
-.saved-queries>.expanded>.body .btn-group {
+.saved-queries>.body .btn-group {
 	white-space: nowrap;
 }
-.saved-queries>.expanded>.body .btn-group .btn {
+.saved-queries>.body .btn-group .btn {
 	float: none;
 	display: inline-block;
 }
-.saved-queries>.expanded>.body .watch-status:after, 
-.saved-queries>.expanded>.body .subscription-status:after {
+.saved-queries>.body .watch-status:after, 
+.saved-queries>.body .subscription-status:after {
 	display: none;
 }
-.saved-queries>.expanded>.body .watch-status:before, 
-.saved-queries>.expanded>.body .subscription-status:before {
+.saved-queries>.body .watch-status:before, 
+.saved-queries>.body .subscription-status:before {
 	line-height: 12px;
 }
-.saved-queries>.collapsed {
-	width: 12px;
-	min-height: 250px;
-}
-.saved-queries>.collapsed>a {
-	display: block;
-	color: #444;
-	font-size: 16px;
-	padding-bottom: 10px;
-}
-.saved-queries>.collapsed>h4 {
-	transform: rotate(90deg);
-	transform-origin: left top 0;
-	letter-spacing: 8px;
-	white-space: nowrap;
-	margin-left: 16px;
-}
-
 .edit-saved-queries th {
 	font-weight: bold !important;
 }
@@ -93,8 +77,10 @@
 	width: 1%;
 }
 .query-save-support>.main {
-	padding-left: 20px;
 	vertical-align: top;
+}
+.query-save-support>.side+.main {
+	padding-left: 20px;
 }
 .query-save-support>.main .save-query {
 	color: #666;

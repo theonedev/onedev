@@ -72,8 +72,8 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Component side;
-		add(side = new SavedQueriesPanel<NamedCodeCommentQuery>("side") {
+		SavedQueriesPanel<NamedCodeCommentQuery> savedQueries;
+		add(savedQueries = new SavedQueriesPanel<NamedCodeCommentQuery>("side") {
 
 			@Override
 			protected NamedQueriesBean<NamedCodeCommentQuery> newNamedQueriesBean() {
@@ -175,7 +175,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 											namedQuery.setQuery(query);
 										}
 										getCodeCommentQuerySettingManager().save(setting);
-										target.add(side);
+										target.add(savedQueries);
 										close();
 									}
 
@@ -189,7 +189,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 											namedQuery.setQuery(query);
 										}
 										OneDev.getInstance(ProjectManager.class).save(getProject());
-										target.add(side);
+										target.add(savedQueries);
 										close();
 									}
 
@@ -202,6 +202,17 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 							}
 							
 						};
+					}
+
+					@Override
+					public boolean isSavedQueriesVisible() {
+						savedQueries.configure();
+						return savedQueries.isVisible();
+					}
+
+					@Override
+					public void showSavedQueries(AjaxRequestTarget target) {
+						savedQueries.show(target);
 					}
 					
 				};

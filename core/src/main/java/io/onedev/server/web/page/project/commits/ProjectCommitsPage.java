@@ -14,6 +14,7 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -77,6 +78,7 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
 import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
+import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.util.VisibleVisitor;
 import io.onedev.server.web.util.model.CommitRefsModel;
@@ -223,8 +225,8 @@ public class ProjectCommitsPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Component side;
-		add(side = new SavedQueriesPanel<NamedCommitQuery>("side") {
+		SavedQueriesPanel<NamedCommitQuery> savedQueries;
+		add(savedQueries = new SavedQueriesPanel<NamedCommitQuery>("side") {
 
 			@Override
 			protected NamedQueriesBean<NamedCommitQuery> newNamedQueriesBean() {
@@ -277,6 +279,31 @@ public class ProjectCommitsPage extends ProjectPage {
 		};
 		add(others);
 		
+		others.add(new AjaxLink<Void>("showSavedQueries") {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				if (event.getPayload() instanceof SavedQueriesClosed) {
+					((SavedQueriesClosed) event.getPayload()).getHandler().add(this);
+				}
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				savedQueries.configure();
+				setVisible(!savedQueries.isVisible());
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				savedQueries.show(target);
+				target.add(this);
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
+		
 		Component querySave;
 		others.add(querySave = new AjaxLink<Void>("saveQuery") {
 
@@ -316,7 +343,7 @@ public class ProjectCommitsPage extends ProjectPage {
 									namedQuery.setQuery(state.query);
 								}
 								getCommitQuerySettingManager().save(setting);
-								target.add(side);
+								target.add(savedQueries);
 								close();
 							}
 
@@ -330,7 +357,7 @@ public class ProjectCommitsPage extends ProjectPage {
 									namedQuery.setQuery(state.query);
 								}
 								OneDev.getInstance(ProjectManager.class).save(getProject());
-								target.add(side);
+								target.add(savedQueries);
 								close();
 							}
 

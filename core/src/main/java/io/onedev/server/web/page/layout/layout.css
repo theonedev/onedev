@@ -34,6 +34,10 @@
 	}
 }
 
+#layout {
+	min-width: 800px;
+}
+
 #layout>.body {
 	padding: 70px 20px 20px 20px;
 	width: 100%;

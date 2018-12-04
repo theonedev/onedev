@@ -4,6 +4,10 @@
 #project-commits>.main>.head>* {
 	margin-bottom: 20px;
 }
+#project-commits>.main>.head>.others>* {
+	margin-right: 16px;
+	color: #666;
+}
 
 #project-commits>.main>.body .no-commits {
 	font-size: 16px;

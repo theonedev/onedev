@@ -11,6 +11,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -55,6 +56,7 @@ import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.VisibleVisitor;
@@ -137,6 +139,30 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			
 		};
 		add(others);
+		
+		others.add(new AjaxLink<Void>("showSavedQueries") {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				if (event.getPayload() instanceof SavedQueriesClosed) {
+					((SavedQueriesClosed) event.getPayload()).getHandler().add(this);
+				}
+			}
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getQuerySaveSupport() != null && !getQuerySaveSupport().isSavedQueriesVisible());
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				getQuerySaveSupport().showSavedQueries(target);
+				target.add(this);
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		Component querySave;
 		others.add(querySave = new AjaxLink<Void>("saveQuery") {

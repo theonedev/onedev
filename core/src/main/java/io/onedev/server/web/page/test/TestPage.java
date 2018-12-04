@@ -12,7 +12,7 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-	}
+		}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {

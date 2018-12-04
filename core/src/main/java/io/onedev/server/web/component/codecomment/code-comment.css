@@ -1,6 +1,10 @@
 .code-comments>.head>* {
 	margin-bottom: 20px;
 }
+.code-comments>.head>.others>* {
+	margin-right: 16px;
+	color: #666;
+}
 .code-comments .new-indicator {
 	width: 4px;
 	padding: 0;

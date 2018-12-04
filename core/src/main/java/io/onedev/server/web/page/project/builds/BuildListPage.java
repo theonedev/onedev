@@ -71,8 +71,8 @@ public class BuildListPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Component side;
-		add(side = new SavedQueriesPanel<NamedBuildQuery>("side") {
+		SavedQueriesPanel<NamedBuildQuery> savedQueries;
+		add(savedQueries = new SavedQueriesPanel<NamedBuildQuery>("side") {
 
 			@Override
 			protected NamedQueriesBean<NamedBuildQuery> newNamedQueriesBean() {
@@ -168,7 +168,7 @@ public class BuildListPage extends ProjectPage {
 											namedQuery.setQuery(query);
 										}
 										getBuildQuerySettingManager().save(setting);
-										target.add(side);
+										target.add(savedQueries);
 										close();
 									}
 
@@ -182,7 +182,7 @@ public class BuildListPage extends ProjectPage {
 											namedQuery.setQuery(query);
 										}
 										OneDev.getInstance(ProjectManager.class).save(getProject());
-										target.add(side);
+										target.add(savedQueries);
 										close();
 									}
 
@@ -195,6 +195,17 @@ public class BuildListPage extends ProjectPage {
 							}
 							
 						};
+					}
+
+					@Override
+					public boolean isSavedQueriesVisible() {
+						savedQueries.configure();
+						return savedQueries.isVisible();
+					}
+
+					@Override
+					public void showSavedQueries(AjaxRequestTarget target) {
+						savedQueries.show(target);
 					}
 					
 				};

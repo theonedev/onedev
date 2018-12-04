@@ -33,7 +33,7 @@ onedev.server.projectBlob = {
 			var $operations = $head.find(">.operations");
 					
 			var headWidth = $head.width();
-			
+
 			// below code moves file navigator to bottom if it is too wide
 			var maxWidth = headWidth - $revisionPicker.outerWidth() - $operations.outerWidth();
 			var maxHeight = $head.height();

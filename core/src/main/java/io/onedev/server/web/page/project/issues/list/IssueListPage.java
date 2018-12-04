@@ -72,8 +72,8 @@ public class IssueListPage extends IssuesPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Component side;
-		add(side = new SavedQueriesPanel<NamedIssueQuery>("side") {
+		SavedQueriesPanel<NamedIssueQuery> savedQueries;
+		add(savedQueries = new SavedQueriesPanel<NamedIssueQuery>("side") {
 
 			@Override
 			protected NamedQueriesBean<NamedIssueQuery> newNamedQueriesBean() {
@@ -175,7 +175,7 @@ public class IssueListPage extends IssuesPage {
 											namedQuery.setQuery(query);
 										}
 										getIssueQuerySettingManager().save(setting);
-										target.add(side);
+										target.add(savedQueries);
 										close();
 									}
 
@@ -193,7 +193,7 @@ public class IssueListPage extends IssuesPage {
 											namedQuery.setQuery(query);
 										}
 										OneDev.getInstance(ProjectManager.class).save(getProject());
-										target.add(side);
+										target.add(savedQueries);
 										close();
 									}
 
@@ -206,6 +206,17 @@ public class IssueListPage extends IssuesPage {
 							}
 							
 						};
+					}
+
+					@Override
+					public boolean isSavedQueriesVisible() {
+						savedQueries.configure();
+						return savedQueries.isVisible();
+					}
+
+					@Override
+					public void showSavedQueries(AjaxRequestTarget target) {
+						savedQueries.show(target);
 					}
 					
 				};
