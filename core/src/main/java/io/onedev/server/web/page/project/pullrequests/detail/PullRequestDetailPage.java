@@ -37,9 +37,8 @@ import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -392,13 +391,6 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		});
 		
 		WebMarkupContainer side = new WebMarkupContainer("side") {
-
-			@Override
-			public void renderHead(IHeaderResponse response) {
-				super.renderHead(response);
-				String script = String.format("onedev.server.requestDetail.onSideDomReady('%s');", getMarkupId());
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -1126,7 +1118,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		
-		response.render(JavaScriptHeaderItem.forReference(new PullRequestDetailResourceReference()));
+		response.render(CssHeaderItem.forReference(new PullRequestDetailCssResourceReference()));
 	}
 	
 	@Override

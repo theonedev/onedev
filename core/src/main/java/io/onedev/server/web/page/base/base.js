@@ -298,7 +298,9 @@ onedev.server = {
 						if ($this.closest(".no-autofocus").length == 0) {
 							if ($this.hasClass("CodeMirror") && $this[0].CodeMirror.options.readOnly == false) {
 								$this[0].CodeMirror.focus();					
-							} else if ($this.closest(".select2-container").length == 0) {
+							} else if ($this.closest(".select2-container").length == 0 
+									&& $this.attr("readonly") != "readonly"
+									&& $this.attr("disabled") != "disabled") {
 								$this.focus();
 							}
 							return false;

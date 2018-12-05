@@ -46,7 +46,7 @@
 .edit-saved-queries th {
 	font-weight: bold !important;
 }
-.edit-saved-queries th.name {
+.edit-saved-queries th.property-name {
 	width: 30%;
 }
 .edit-saved-queries>.property {
@@ -54,9 +54,6 @@
 	background: #F9F9F9;
 	border-radius: 4px;
 	padding: 10px;
-}
-.edit-saved-queries td {
-    padding: 8px 16px 8px 0 !important;
 }
 .edit-saved-queries .editable .bean.list>thead>tr>th {
 	border-bottom: none;
@@ -90,4 +87,3 @@
 	color: #999;
 	cursor: default;
 }
-

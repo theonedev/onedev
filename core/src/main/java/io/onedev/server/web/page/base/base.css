@@ -196,6 +196,7 @@ form>.test-feedback {
 
 .editor>table.list>tbody>tr>td.actions {
 	text-align: right;
+	white-space: nowrap;
 }
 .editor>table.list>tbody>tr>td.actions .fa {
 	vertical-align: center;
@@ -230,9 +231,6 @@ form>.test-feedback {
 .viewer .type-selector, .viewer .no-elements, .editor .no-elements {
 	font-style: italic;
 } 
-.editable .bean.list>thead>tr>th {
-	border-bottom: 1px solid #E0E0E0;
-}
 .editable .viewer .bean.list>thead>tr>th {
 	font-size: 12px;
 	padding-top: 0;
@@ -241,7 +239,12 @@ form>.test-feedback {
 }
 .editable table.bean.list>thead>tr>th, .editable table.bean.list>tbody>tr>td {
 	padding: 5px 10px 5px 0;
-	font-weight: normal;
+}
+.editable table.bean.list>thead>tr>th.actions, .editable table.bean.list>tbody>tr>td.actions {
+	padding-right: 0;
+	padding-left: 10px;
+	width: 1%;
+	vertical-align: middle;
 }
 .editable .editor table.bean.list tr:hover td {
 	background: #F9F9F9;
@@ -664,6 +667,23 @@ a.disabled, a[disabled="disabled"] {
 .floating.side.def-detail {
 	width: 480px;
 }
+@media(max-width: 768px) {
+	.floating.side.def-detail {
+		width: 300px;
+	}
+}
+
 .floating.side.def-detail .actions {
 	margin-bottom: 12px;
+}
+
+@media(min-width: 992px) {
+	.modal-xl {
+		width: 900px;
+	}
+}
+@media(min-width: 1292px) {
+	.modal-xl {
+		width: 1200px;
+	}
 }

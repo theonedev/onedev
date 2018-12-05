@@ -168,7 +168,7 @@
 	min-height: 600px;
 }
 .board-card-detail>.body>.main {
-	margin-right: 240px;
+	margin-right: 320px;
 	padding: 20px;
 }
 .board-card-detail>.body>.main>div {
@@ -179,10 +179,18 @@
 	top: 0;
 	bottom: 0;
 	right: 0;
-	width: 240px;
+	width: 320px;
 	padding: 20px;
 	background: #FAFAFA;
 	overflow: auto;
 	border-left: 2px solid #E0E0E0;
 	border-radius: 0 0 4px 0;
+}
+@media (max-width: 992px) {
+	.board-card-detail>.body>.main {
+		margin-right: 0;
+	}
+	.board-card-detail>.body>.side {
+		display: none;
+	}	
 }

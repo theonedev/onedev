@@ -1,6 +1,12 @@
+#request-detail {
+	display: table;
+	width: 100%;
+}
+#request-detail>* {
+	display: table-cell;
+}
 #request-detail>.main {
-	margin-right: 360px;
-	pading-right: 20px;
+	padding-right: 20px;
 }
 #request-detail>.main>div {
 	margin-bottom: 20px;
@@ -102,15 +108,9 @@
 }
 
 #request-detail>.side {
-	position: fixed;
-	top: 48px;
-	right: 0;
-	bottom: 0;
 	width: 360px;
-	border-left: 2px solid #E0E0E0;
 	padding: 20px;
-	background: #FAFAFA;
-	overflow: auto;
+	background: #F9F9F9;
 }
 #request-detail>.side>* {
 	margin-bottom: 20px;

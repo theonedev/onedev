@@ -22,3 +22,12 @@
 .blob-view>.head .actions>input {
 	vertical-align: top;
 }
+.blob-view>.head .actions label {
+	font-weight: normal;
+	margin-bottom: 0;
+	display: inline-block;
+}
+.blob-view>.head .actions input[type=checkbox] {
+	position: relative;
+	top: 2px;
+}

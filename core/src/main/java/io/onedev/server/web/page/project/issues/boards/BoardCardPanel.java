@@ -36,7 +36,6 @@ import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.modal.ModalPanel.Size;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.QueryPosition;
@@ -118,8 +117,13 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		
 		add(avatarsView);
 
-		add(new ModalLink("detail", Size.LARGE) {
+		add(new ModalLink("detail") {
 
+			@Override
+			protected String getModalCssClass() {
+				return "modal-xl";
+			}
+			
 			private Component newCardDetail(String id, ModalPanel modal, IModel<Issue> issueModel, QueryPosition position) {
 				return new CardDetailPanel(id, issueModel) {
 

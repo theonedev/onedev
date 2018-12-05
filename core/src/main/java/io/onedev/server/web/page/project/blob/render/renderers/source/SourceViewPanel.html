@@ -25,7 +25,7 @@
 	</div>
 	<div wicket:id="symbolTooltip"></div>
 	<wicket:fragment wicket:id="outlineNodeFrag">
-		<img wicket:id="icon"></img> <a wicket:id="link"><span wicket:id="label"></span></a>
+		<img wicket:id="icon"> <a wicket:id="link"><span wicket:id="label"></span></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="outlineSearchFrag">
 	<div class="outline-search">
@@ -34,13 +34,13 @@
 			<h4 class="modal-title">Outline Search</h4>
 		</div>
 		<div class="modal-body">
-			<input wicket:id="input" class="form-control"></input>
+			<input wicket:id="input" class="form-control">
 			<div wicket:id="result" class="result"></div>
 		</div>
 	</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="outlineSearchNodeFrag">
-		<a wicket:id="link" class="selectable"><img wicket:id="icon"></img> <span wicket:id="label"></span></a>
+		<a wicket:id="link" class="selectable"><img wicket:id="icon"> <span wicket:id="label"></span></a>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="newCommentFrag">
 		<form wicket:id="form" class="new-comment leave-confirm">
@@ -55,6 +55,6 @@
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="actionsFrag">
-		<input type="checkbox" wicket:id="outline" class="outline-toggle"> Outline</input>
+		<wicket:enclosure child="outline"><label><input type="checkbox" wicket:id="outline" class="outline-toggle"> Outline</label></wicket:enclosure>
 	</wicket:fragment>
 </wicket:extend>

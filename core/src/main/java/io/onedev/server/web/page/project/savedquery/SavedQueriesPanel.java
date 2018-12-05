@@ -163,6 +163,11 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				setVisible(SecurityUtils.getUser() != null);
 			}
 
+			@Override
+			protected String getModalCssClass() {
+				return "modal-lg";
+			}
+
 			private Component newUserQueriesEditor(String componentId, ModalPanel modal, ArrayList<T> userQueries) {
 				return new NamedQueriesEditor(componentId, userQueries, null) {
 					

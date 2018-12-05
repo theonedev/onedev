@@ -1,18 +1,19 @@
+#issue-detail {
+	display: table;
+	width: 100%;
+}
+#issue-detail>* {
+	display: table-cell;
+}
 #issue-detail>.main {
-	margin-right: 360px;
 	padding-right: 20px;
 }
 #issue-detail>.main>div {
 	margin-bottom: 20px;
 }
 #issue-detail>.side {
-	position: fixed;
-	top: 48px;
-	right: 0;
-	bottom: 0;
 	width: 360px;
-	border-left: 2px solid #E0E0E0;
 	padding: 20px;
-	background: #FAFAFA;
-	overflow: auto;
+	background: #F9F9F9;
+	border-radius: 4px;
 }

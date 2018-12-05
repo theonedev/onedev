@@ -1,6 +1,5 @@
 .project.more-info {
 	padding: 20px;
-	width: 600px;
 }
 .project.more-info>div {
 	margin-bottom: 20px;
@@ -29,6 +28,9 @@
 }
 .project.more-info>.clone {
 	margin-bottom: 20px;
+}
+.project.more-info>.clone>.input-group {
+	width: 100%;
 }
 .project.more-info>.clone input {
 	background: white;

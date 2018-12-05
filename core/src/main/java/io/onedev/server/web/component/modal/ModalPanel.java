@@ -1,5 +1,7 @@
 package io.onedev.server.web.component.modal;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -16,20 +18,10 @@ import io.onedev.server.web.page.base.BasePage;
 @SuppressWarnings("serial")
 public abstract class ModalPanel extends Panel {
 
-	public enum Size {SMALL, MEDIUM, LARGE}
-	
 	private static final String CONTENT_ID = "content";
 	
-	private final Size size;
-	
 	public ModalPanel(AjaxRequestTarget target) {
-		this(target, Size.MEDIUM);
-	}
-	
-	public ModalPanel(AjaxRequestTarget target, Size size) {
 		super(((BasePage)target.getPage()).getRootComponents().newChildId());
-		
-		this.size = size;
 		
 		BasePage page = (BasePage) target.getPage(); 
 		page.getRootComponents().add(this);
@@ -45,11 +37,10 @@ public abstract class ModalPanel extends Panel {
 		add(dialog);
 		
 		dialog.add(newContent(CONTENT_ID));
-		
-		if (size == Size.LARGE)
-			dialog.add(AttributeAppender.append("class", "modal-lg"));
-		else if (size == Size.SMALL)
-			dialog.add(AttributeAppender.append("class", "modal-sm"));
+
+		String cssClass = getCssClass();
+		if (cssClass != null)
+			dialog.add(AttributeAppender.append("class", cssClass));
 		
 		add(new AbstractPostAjaxBehavior() {
 			
@@ -77,6 +68,11 @@ public abstract class ModalPanel extends Panel {
 	}
 	
 	protected abstract Component newContent(String id);
+	
+	@Nullable
+	protected String getCssClass() {
+		return null;
+	}
 
 	public Component getContent() {
 		return get(CONTENT_ID); 

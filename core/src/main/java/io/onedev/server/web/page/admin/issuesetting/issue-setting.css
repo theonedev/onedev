@@ -29,21 +29,6 @@
 	height: 24px;
 	border-radius: 3px;
 }
-
-#issue-setting .default-queries th {
-	font-weight: bold !important;
-	padding-bottom: 12px;
-}
-#issue-setting .default-queries td {
-	padding: 8px 16px 8px 0;
-}
-#issue-setting .default-queries>.property.editor {
-	padding: 10px;
-	border-radius: 4px;
-	background: #F9F9F9;
-	border: 1px solid #E8E8E8;
-}
-#issue-setting .default-queries .editable .bean.list>thead>tr>th {
-	border-bottom: none;
-	padding-bottom: 4px;
+#issue-setting .default-queries th.property-name {
+	width: 30%;
 }

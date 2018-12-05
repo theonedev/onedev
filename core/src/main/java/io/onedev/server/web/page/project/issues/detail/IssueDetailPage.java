@@ -11,9 +11,8 @@ import javax.persistence.EntityNotFoundException;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
@@ -243,8 +242,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new IssueDetailResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.server.issueDetail.onDomReady();"));
+		response.render(CssHeaderItem.forReference(new IssueDetailCssResourceReference()));
 	}
 
 	@Override
