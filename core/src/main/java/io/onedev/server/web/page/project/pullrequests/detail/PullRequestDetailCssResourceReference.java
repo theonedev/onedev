@@ -1,8 +1,8 @@
 package io.onedev.server.web.page.project.pullrequests.detail;
 
-import io.onedev.server.web.page.base.BaseDependentResourceReference;
+import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 
-public class PullRequestDetailCssResourceReference extends BaseDependentResourceReference {
+public class PullRequestDetailCssResourceReference extends BaseDependentCssResourceReference {
 
 	private static final long serialVersionUID = 1L;
 
