@@ -21,7 +21,8 @@ onedev.server.avatarUpload = {
 							var $cropped = $container.find(".cropped");
 							var data = this.cropper.getCroppedCanvas({
 								width: $cropped.width(),
-								height: $cropped.height() 
+								height: $cropped.height(), 
+								fillColor: "#FFF" 
 							}).toDataURL("image/jpeg");
 							$cropped.find("img").attr("src", data);
 							$data.val(data);
