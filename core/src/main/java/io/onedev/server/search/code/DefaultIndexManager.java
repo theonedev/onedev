@@ -37,6 +37,7 @@ import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
+import org.apache.lucene.index.IndexFormatTooOldException;
 import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -71,6 +72,7 @@ import io.onedev.jsymbol.SymbolExtractorRegistry;
 import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.RefUpdated;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.BatchWorkManager;
 import io.onedev.server.manager.ProjectManager;
@@ -82,6 +84,7 @@ import io.onedev.server.util.BatchWorker;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.IndexResult;
 import io.onedev.utils.ExceptionUtils;
+import io.onedev.utils.FileUtils;
 import io.onedev.utils.StringUtils;
 import io.onedev.utils.concurrent.Prioritized;
 
@@ -291,12 +294,6 @@ public class DefaultIndexManager implements IndexManager {
 		writer.addDocument(document);
 	}
 	
-	private IndexWriterConfig newIndexWriterConfig() {
-		IndexWriterConfig config = new IndexWriterConfig(new NGramAnalyzer(NGRAM_SIZE, NGRAM_SIZE));
-		config.setOpenMode(OpenMode.CREATE_OR_APPEND);
-		return config;
-	}
-	
 	private BatchWorker getBatchWorker(Long projectId, Long forkRootId) {
 		return new BatchWorker("project-" + forkRootId + "-indexBlob", 1) {
 
@@ -332,31 +329,21 @@ public class DefaultIndexManager implements IndexManager {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
 					IndexSearcher searcher = new IndexSearcher(reader);
-					if (getIndexVersion().equals(getCommitIndexVersion(searcher, commit))) {
+					if (getIndexVersion().equals(getCommitIndexVersion(searcher, commit)))
 						return new IndexResult(0, 0);
-					} else {
-						try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-							try {
-								logger.debug("Indexing commit (project: {}, commit: {})", project.getName(), commit.getName());
-								indexResult = index(project.getRepository(), commit, writer, searcher);
-								writer.commit();
-							} catch (Exception e) {
-								writer.rollback();
-								throw ExceptionUtils.unchecked(e);
-							}
-						}
-					}
 				}
-			} else {
-				try (IndexWriter writer = new IndexWriter(directory, newIndexWriterConfig())) {
-					try {
-						logger.debug("Indexing commit (project: {}, commit: {})", project.getName(), commit.getName());
-						indexResult = index(project.getRepository(), commit, writer, null);
-						writer.commit();
-					} catch (Exception e) {
-						writer.rollback();
-						throw ExceptionUtils.unchecked(e);
-					}
+			}
+			
+			IndexWriterConfig writerConfig = new IndexWriterConfig(new NGramAnalyzer(NGRAM_SIZE, NGRAM_SIZE));
+			writerConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
+			try (IndexWriter writer = new IndexWriter(directory, writerConfig)) {
+				try {
+					logger.debug("Indexing commit (project: {}, commit: {})", project.getName(), commit.getName());
+					indexResult = index(project.getRepository(), commit, writer, null);
+					writer.commit();
+				} catch (Exception e) {
+					writer.rollback();
+					throw ExceptionUtils.unchecked(e);
 				}
 			}
 		} catch (IOException e) {
@@ -406,6 +393,26 @@ public class DefaultIndexManager implements IndexManager {
 		if (event.getRefName().startsWith(Constants.R_HEADS) && !event.getNewCommitId().equals(ObjectId.zeroId())) {
 			IndexWork work = new IndexWork(BACKEND_INDEXING_PRIORITY, event.getNewCommitId());
 			batchWorkManager.submit(getBatchWorker(event.getProject().getId(), event.getProject().getForkRoot().getId()), work);
+		}
+	}
+	
+	@Sessional
+	@Listen
+	public void on(SystemStarted event) {
+		for (Project project: projectManager.query()) {
+			File indexDir = storageManager.getProjectIndexDir(project.getId());
+			if (indexDir.exists()) {
+				try (Directory directory = FSDirectory.open(indexDir.toPath())) {
+					if (DirectoryReader.indexExists(directory)) {
+						try (IndexReader reader = DirectoryReader.open(directory)) {
+						} catch (IndexFormatTooOldException e) {
+							FileUtils.cleanDir(indexDir);
+						}
+					} 
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		}
 	}
 	
