@@ -40,7 +40,7 @@ public abstract class UserPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new SideBar("userSidebar", "user.miniSidebar") {
+		add(new SideBar("userSidebar", null) {
 
 			@Override
 			protected Component newHead(String componentId) {

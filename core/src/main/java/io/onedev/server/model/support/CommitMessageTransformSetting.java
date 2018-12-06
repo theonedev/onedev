@@ -27,8 +27,8 @@ public class CommitMessageTransformSetting implements Serializable {
 	}
 
 	@Editable(order=200, description="Specify replacement for above matches, for the example "
-			+ "issue key pattern above, you may use <tt>&lt;a href='http://track.example.com/browse/$1'&gt;$1&lt;/a&gt;</tt> to "
-			+ "replace issue keys with issue links. Here <tt>$n</tt> represents nth capturing group in <tt>search for</tt> "
+			+ "issue key pattern above, you may use <tt>&lt;a href='http://track.example.com/browse/\\$1'&gt;\\$1&lt;/a&gt;</tt> to "
+			+ "replace issue keys with issue links. Here <tt>\\$n</tt> represents nth capturing group in <tt>search for</tt> "
 			+ "pattern")
 	@NotEmpty
 	public String getReplaceWith() {

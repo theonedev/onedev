@@ -3,14 +3,13 @@ package io.onedev.server.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.unbescape.java.JavaEscape;
-
 import com.google.common.collect.MapMaker;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.Script;
 import io.onedev.server.exception.ScriptException;
+import io.onedev.utils.StringUtils;
 
 public class GroovyUtils {
 	
@@ -72,7 +71,7 @@ public class GroovyUtils {
     
     public static String evalGString(String gstring, Map<String, Object> variables) {
     	if (gstring.contains("$")) 
-    		return evalScript("\"" + JavaEscape.escapeJava(gstring) + "\"", variables).toString();
+    		return evalScript("\"" + StringUtils.replace(gstring, "\"", "\\\"") + "\"", variables).toString();
     	else
     		return gstring;
     }

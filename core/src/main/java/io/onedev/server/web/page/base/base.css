@@ -231,6 +231,9 @@ form>.test-feedback {
 .viewer .type-selector, .viewer .no-elements, .editor .no-elements {
 	font-style: italic;
 } 
+.editable .bean.list>thead>tr>th {
+	border-bottom: 2px solid #E0E0E0;
+}
 .editable .viewer .bean.list>thead>tr>th {
 	font-size: 12px;
 	padding-top: 0;
@@ -239,6 +242,9 @@ form>.test-feedback {
 }
 .editable table.bean.list>thead>tr>th, .editable table.bean.list>tbody>tr>td {
 	padding: 5px 10px 5px 0;
+}
+.editable table.bean.list>tbody>tr:first-child>td {
+	padding-top: 10px;
 }
 .editable table.bean.list>thead>tr>th.actions, .editable table.bean.list>tbody>tr>td.actions {
 	padding-right: 0;
