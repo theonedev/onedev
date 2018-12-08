@@ -105,7 +105,7 @@ public abstract class IssuesPage extends ProjectPage {
 		}
 		
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new IssuesTab("List", IssueListPage.class) {
+		tabs.add(new IssuesTab("Issue List", IssueListPage.class) {
 
 			@Override
 			public Component render(String componentId) {
@@ -121,7 +121,7 @@ public abstract class IssuesPage extends ProjectPage {
 			}
 			
 		});
-		tabs.add(new IssuesTab("Boards", IssueBoardsPage.class));
+		tabs.add(new IssuesTab("Issue Boards", IssueBoardsPage.class));
 		tabs.add(new IssuesTab("Milestones", MilestoneListPage.class, NewMilestonePage.class, 
 				MilestoneDetailPage.class, MilestoneEditPage.class));
 		

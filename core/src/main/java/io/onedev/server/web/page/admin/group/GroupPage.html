@@ -5,4 +5,14 @@
 			<wicket:child></wicket:child>
 		</div>
 	</div>
+	<wicket:fragment wicket:id="navContextFrag">
+		<a wicket:id="dropdown" class="dropdown group-dropdown">
+			<i class="fa fa-group"></i>
+			<span wicket:id="name" class="ellipsis-text"></span>
+			<i class="fa fa-angle-down"></i>
+		</a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="navContextDropdownFrag">
+		<ul wicket:id="menu" class="menu list-unstyled"></ul>
+	</wicket:fragment>
 </wicket:extend>

@@ -10,10 +10,14 @@ import org.apache.wicket.Page;
 import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -35,8 +39,8 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.sidebar.SideBar;
-import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
@@ -45,17 +49,29 @@ import io.onedev.server.web.page.project.comments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.info.ProjectInfoPanel;
 import io.onedev.server.web.page.project.issues.IssuesPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
 import io.onedev.server.web.page.project.issues.list.IssueListPage;
-import io.onedev.server.web.page.project.moreinfo.MoreInfoPanel;
 import io.onedev.server.web.page.project.pullrequests.InvalidRequestPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+import io.onedev.server.web.page.project.setting.ProjectSettingTab;
+import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
+import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
+import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
+import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
+import io.onedev.server.web.page.project.setting.configuration.ConfigurationEditPage;
+import io.onedev.server.web.page.project.setting.configuration.ConfigurationListPage;
+import io.onedev.server.web.page.project.setting.configuration.NewConfigurationPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
+import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
+import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
+import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
+import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.ProjectStatsPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
@@ -135,107 +151,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			
 			@Override
 			protected List<? extends Tab> newTabs() {
-				List<PageTab> tabs = new ArrayList<>();
-				if (SecurityUtils.canReadCode(getProject().getFacade())) {
-					tabs.add(new ProjectTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, ProjectBlobPage.class));
-					tabs.add(new ProjectTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0,
-							ProjectCommitsPage.class, CommitDetailPage.class) {
-						
-						@Override
-						public Component render(String componentId) {
-							return new ProjectTabLink(componentId, this) {
-
-								@Override
-								protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-									ProjectCommitsPage.State state = new ProjectCommitsPage.State();
-									state.query = "";
-									return new ViewStateAwarePageLink<Void>(linkId, ProjectCommitsPage.class, 
-											ProjectCommitsPage.paramsOf(getProject(), state));
-								}
-							};
-						}
-						
-					});
-					tabs.add(new ProjectTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
-							0, ProjectBranchesPage.class));
-					tabs.add(new ProjectTab(Model.of("Tags"), "fa fa-fw fa-tag", 
-							0, ProjectTagsPage.class));
-					
-					tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
-							0, PullRequestListPage.class, NewPullRequestPage.class, PullRequestDetailPage.class, InvalidRequestPage.class) {
-						
-						@Override
-						public Component render(String componentId) {
-							return new ProjectTabLink(componentId, this) {
-
-								@Override
-								protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-									return new ViewStateAwarePageLink<Void>(linkId, PullRequestListPage.class, 
-											PullRequestListPage.paramsOf(getProject(), "", 0));
-								}
-							};
-						}
-						
-					});
-				}
-				
-				tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, IssuesPage.class, 
-						IssueDetailPage.class, NewIssuePage.class) {
-
-					@Override
-					public Component render(String componentId) {
-						return new ProjectTabLink(componentId, this) {
-
-							@Override
-							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-								return new ViewStateAwarePageLink<Void>(linkId, IssueListPage.class, 
-										IssueListPage.paramsOf(getProject(), "", 0));
-							}
-						};
-					}
-					
-				});
-				
-				tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-cubes", 0, BuildListPage.class) {
-
-					@Override
-					public Component render(String componentId) {
-						return new ProjectTabLink(componentId, this) {
-
-							@Override
-							protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-								return new ViewStateAwarePageLink<Void>(linkId, BuildListPage.class, BuildListPage.paramsOf(getProject(), ""));
-							}
-						};
-					}
-					
-				});
-				
-				if (SecurityUtils.canReadCode(getProject().getFacade())) {
-					tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
-							0, ProjectCodeCommentsPage.class) {
-
-						@Override
-						public Component render(String componentId) {
-							return new ProjectTabLink(componentId, this) {
-
-								@Override
-								protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-									return new ViewStateAwarePageLink<Void>(linkId, ProjectCodeCommentsPage.class, 
-											ProjectCodeCommentsPage.paramsOf(getProject(), ""));
-								}
-							};
-						}
-						
-					});
-					tabs.add(new ProjectTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
-					tabs.add(new ProjectTab(Model.of("Statistics"), "fa fa-fw fa-bar-chart", 0, ProjectContribsPage.class, 
-							ProjectStatsPage.class));
-				}
-				
+				List<ProjectTab> tabs = ProjectPage.this.newTabs();
 				if (SecurityUtils.canAdministrate(getProject().getFacade()))
 					tabs.add(new ProjectTab(Model.of("Setting"), "fa fa-fw fa-cog", 0, GeneralSettingPage.class, ProjectSettingPage.class));
-				
 				return tabs;
 			}
 
@@ -248,7 +166,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new MoreInfoPanel(id, projectModel) {
+						return new ProjectInfoPanel(id, projectModel) {
 							
 							@Override
 							protected void onPromptForkOption(AjaxRequestTarget target) {
@@ -285,6 +203,172 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		return projectModel.getObject();
 	}
 	
+	private List<ProjectTab> newTabs() {
+		List<ProjectTab> tabs = new ArrayList<>();
+		if (SecurityUtils.canReadCode(getProject().getFacade())) {
+			tabs.add(new ProjectTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, ProjectBlobPage.class));
+			tabs.add(new ProjectTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0,
+					ProjectCommitsPage.class, CommitDetailPage.class) {
+				
+				@Override
+				public Component render(String componentId) {
+					return new ProjectTabLink(componentId, this) {
+
+						@Override
+						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+							ProjectCommitsPage.State state = new ProjectCommitsPage.State();
+							state.query = "";
+							return new ViewStateAwarePageLink<Void>(linkId, ProjectCommitsPage.class, 
+									ProjectCommitsPage.paramsOf(getProject(), state));
+						}
+					};
+				}
+				
+			});
+			tabs.add(new ProjectTab(Model.of("Branches"), "fa fa-fw fa-code-fork", 
+					0, ProjectBranchesPage.class));
+			tabs.add(new ProjectTab(Model.of("Tags"), "fa fa-fw fa-tag", 
+					0, ProjectTagsPage.class));
+			
+			tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
+					0, PullRequestListPage.class, NewPullRequestPage.class, PullRequestDetailPage.class, InvalidRequestPage.class) {
+				
+				@Override
+				public Component render(String componentId) {
+					return new ProjectTabLink(componentId, this) {
+
+						@Override
+						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+							return new ViewStateAwarePageLink<Void>(linkId, PullRequestListPage.class, 
+									PullRequestListPage.paramsOf(getProject(), "", 0));
+						}
+					};
+				}
+				
+			});
+		}
+		
+		tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, IssuesPage.class, 
+				IssueDetailPage.class, NewIssuePage.class) {
+
+			@Override
+			public Component render(String componentId) {
+				return new ProjectTabLink(componentId, this) {
+
+					@Override
+					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+						return new ViewStateAwarePageLink<Void>(linkId, IssueListPage.class, 
+								IssueListPage.paramsOf(getProject(), "", 0));
+					}
+				};
+			}
+			
+		});
+		
+		tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-cubes", 0, BuildListPage.class) {
+
+			@Override
+			public Component render(String componentId) {
+				return new ProjectTabLink(componentId, this) {
+
+					@Override
+					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+						return new ViewStateAwarePageLink<Void>(linkId, BuildListPage.class, BuildListPage.paramsOf(getProject(), ""));
+					}
+				};
+			}
+			
+		});
+		
+		if (SecurityUtils.canReadCode(getProject().getFacade())) {
+			tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
+					0, ProjectCodeCommentsPage.class) {
+
+				@Override
+				public Component render(String componentId) {
+					return new ProjectTabLink(componentId, this) {
+
+						@Override
+						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
+							return new ViewStateAwarePageLink<Void>(linkId, ProjectCodeCommentsPage.class, 
+									ProjectCodeCommentsPage.paramsOf(getProject(), ""));
+						}
+					};
+				}
+				
+			});
+			tabs.add(new ProjectTab(Model.of("Compare"), "fa fa-fw fa-ext fa-file-diff", 0, RevisionComparePage.class));
+			tabs.add(new ProjectTab(Model.of("Statistics"), "fa fa-fw fa-bar-chart", 0, ProjectContribsPage.class, 
+					ProjectStatsPage.class));
+		}
+		
+		return tabs;		
+	}
+	
+	@Override
+	protected Component newNavContext(String componentId) {
+		Fragment fragment = new Fragment(componentId, "navContextFrag", this);
+		DropdownLink link = new DropdownLink("dropdown", AlignPlacement.bottom(15)) {
+
+			@Override
+			protected void onInitialize(FloatingPanel dropdown) {
+				super.onInitialize(dropdown);
+				dropdown.add(AttributeAppender.append("class", "nav-context-dropdown project-nav-context-dropdown"));
+			}
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				Fragment fragment = new Fragment(id, "navContextDropdownFrag", ProjectPage.this);
+				fragment.add(new ProjectInfoPanel("info", projectModel) {
+					
+					@Override
+					protected void onPromptForkOption(AjaxRequestTarget target) {
+						dropdown.close();
+					}
+					
+				});
+				fragment.add(new ListView<ProjectTab>("items", newTabs()) {
+
+					@Override
+					protected void populateItem(ListItem<ProjectTab> item) {
+						item.add(new ProjectTabLink("item", item.getModelObject()));
+						if (item.getModelObject().isActive(getPage()))
+							item.add(AttributeAppender.append("class", "active"));
+					}
+					
+				});
+				WebMarkupContainer settingItem = new WebMarkupContainer("setting");
+				settingItem.setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
+				settingItem.add(new Tabbable("menu", newSettingTabs()));
+				if (getPage() instanceof ProjectSettingPage) 
+					settingItem.add(AttributeAppender.append("class", "active expanded"));
+				fragment.add(settingItem);
+				return fragment;
+			}
+			
+		};
+		link.add(new ProjectAvatar("avatar", getProject()));
+		link.add(new Label("name", getProject().getName()));
+		fragment.add(link);
+		
+		return fragment;
+	}
+	
+	protected List<ProjectSettingTab> newSettingTabs() {
+		List<ProjectSettingTab> tabs = new ArrayList<>();
+		tabs.add(new ProjectSettingTab("General Setting", "fa fa-fw fa-sliders", GeneralSettingPage.class));
+		tabs.add(new ProjectSettingTab("Edit Avatar", "fa fa-fw fa-picture-o", AvatarEditPage.class));
+		tabs.add(new ProjectSettingTab("Authorizations", "fa fa-fw fa-user", ProjectAuthorizationsPage.class));
+		tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
+		tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));
+		tabs.add(new ProjectSettingTab("Issue Setting", "fa fa-fw fa-bug", StateTransitionsPage.class, PromptFieldsUponIssueOpenSettingPage.class));
+		tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-comments", CommitMessageTransformPage.class));
+		tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", WebHooksPage.class));
+		tabs.add(new ProjectSettingTab("Build Configurations", "fa fa-fw fa-cube", ConfigurationListPage.class, 
+				NewConfigurationPage.class, ConfigurationEditPage.class));
+		return tabs;
+	}
+
 	@Override
 	protected void onDetach() {
 		projectModel.detach();

@@ -7,9 +7,28 @@
 	</div>
 	<wicket:fragment wicket:id="sidebarHeadFrag">
 		<a wicket:id="link">
-			<img wicket:id="avatar"></img>
+			<img wicket:id="avatar">
 			<span wicket:id="name"></span>
 			<i class="fa fa-angle-down"></i>
 		</a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="navContextFrag">
+		<a wicket:id="dropdown" class="dropdown">
+			<img wicket:id="avatar">
+			<span wicket:id="name" class="ellipsis-text"></span>
+			<i class="fa fa-angle-down"></i>
+		</a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="navContextDropdownFrag">
+		<div wicket:id="info" class="info"></div>
+		<ul class="menu list-unstyled">
+			<li wicket:id="items">
+				<wicket:container wicket:id="item"></wicket:container>
+			</li>
+			<li wicket:id="setting" class="setting">
+				<a onclick="$(this).parent().toggleClass('expanded'); var $floating = $(this).closest('.floating'); $floating.align($floating.data('alignment'));"><i class="fa fa-cog"></i> Settings <i class="fa fa-angle-down"></i></a>
+				<ul wicket:id="menu" class="menu list-unstyled"></ul>
+			</li>
+		</ul>
 	</wicket:fragment>
 </wicket:extend>

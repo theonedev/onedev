@@ -1,3 +1,11 @@
+@media(max-width: 768px) {
+	#project-setting>.sidebar {
+		display: none;
+	}
+	#project-setting>.sidebar+.content {
+		padding-left: 0 !important;
+	}
+}
 #project-setting>.sidebar {
 	left: 240px;
 	background: white;

@@ -1,5 +1,16 @@
+@media(max-width: 768px) {
+	#user>.sidebar {
+		display: none;
+	}
+	#user>.sidebar+.content {
+		padding-left: 0;
+	}	
+}
+.nav-context .user-dropdown .avatar {
+	width: 24px;
+	height: 24px;
+}
 #user>.sidebar {
-	left: 240px;
 	background: white;
 	border-left: none;
 	/* make it absolute as we do not want to make it stay fixed to occupy screen space on mobile screen */

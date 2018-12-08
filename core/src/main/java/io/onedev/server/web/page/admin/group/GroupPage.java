@@ -4,19 +4,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.floating.AlignPlacement;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
+import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.model.EntityModel;
 
@@ -42,23 +49,53 @@ public abstract class GroupPage extends AdministrationPage {
 
 			@Override
 			protected Component newHead(String componentId) {
-				return new Label(componentId, getGroup().getName());
+				String content = "<i class='fa fa-group'></i> " + HtmlEscape.escapeHtml5(getGroup().getName()); 
+				return new Label(componentId, content).setEscapeModelStrings(false);
 			}
 
 			@Override
 			protected List<? extends Tab> newTabs() {
-				List<PageTab> tabs = new ArrayList<>();
-				
-				tabs.add(new GroupTab("Profile", "fa fa-fw fa-list-alt", GroupProfilePage.class));
-				tabs.add(new GroupTab("Members", "fa fa-fw fa-user", GroupMembershipsPage.class));
-				if (SecurityUtils.isAdministrator() && !getGroup().isAdministrator())
-					tabs.add(new GroupTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", GroupAuthorizationsPage.class));
-				return tabs;
+				return GroupPage.this.newTabs();
 			}
 			
 		});
 	}
+	
+	private List<? extends Tab> newTabs() {
+		List<PageTab> tabs = new ArrayList<>();
+		
+		tabs.add(new GroupTab("Profile", "fa fa-fw fa-list-alt", GroupProfilePage.class));
+		tabs.add(new GroupTab("Members", "fa fa-fw fa-user", GroupMembershipsPage.class));
+		if (SecurityUtils.isAdministrator() && !getGroup().isAdministrator())
+			tabs.add(new GroupTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", GroupAuthorizationsPage.class));
+		return tabs;
+	}
 
+	@Override
+	protected Component newNavContext(String componentId) {
+		Fragment fragment = new Fragment(componentId, "navContextFrag", this);
+		DropdownLink link = new DropdownLink("dropdown", AlignPlacement.bottom(15)) {
+
+			@Override
+			protected void onInitialize(FloatingPanel dropdown) {
+				super.onInitialize(dropdown);
+				dropdown.add(AttributeAppender.append("class", "nav-context-dropdown user-nav-context-dropdown"));
+			}
+
+			@Override
+			protected Component newContent(String id, FloatingPanel dropdown) {
+				Fragment fragment = new Fragment(id, "navContextDropdownFrag", GroupPage.this);
+				fragment.add(new Tabbable("menu", newTabs()));
+				return fragment;
+			}
+			
+		};
+		link.add(new Label("name", getGroup().getName()));
+		fragment.add(link);
+		
+		return fragment;
+	}	
+	
 	@Override
 	protected void onDetach() {
 		groupModel.detach();

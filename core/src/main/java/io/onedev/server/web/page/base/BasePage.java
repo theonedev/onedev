@@ -117,6 +117,15 @@ public abstract class BasePage extends WebPage {
 			}
 			
 		});
+
+		StringBuilder builder = new StringBuilder();
+		Class<?> clazz = getClass();
+		while (clazz != BasePage.class) {
+			builder.append(clazz.getSimpleName()).append(" ");
+			clazz = clazz.getSuperclass();
+		}
+		String script = String.format("$('body').addClass('%s');", builder.toString());
+		add(new Label("script", script).setEscapeModelStrings(false));
 		
 		add(new AbstractPostAjaxBehavior() {
 			

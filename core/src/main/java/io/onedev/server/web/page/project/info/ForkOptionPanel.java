@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.moreinfo;
+package io.onedev.server.web.page.project.info;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;

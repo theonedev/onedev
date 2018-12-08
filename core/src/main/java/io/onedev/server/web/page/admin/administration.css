@@ -2,6 +2,10 @@
 	margin-bottom: 20px;
 }
 
+#administration>.server-information>.page-title {
+	border-bottom: none;
+	margin-bottom: 0;
+} 
 .server-information table td {
 	padding: 8px;
 	font-size: 13px;

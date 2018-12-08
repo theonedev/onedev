@@ -1,37 +1,37 @@
-.project.more-info {
+.project-info {
 	padding: 20px;
 }
-.project.more-info>div {
+.project-info>div {
 	margin-bottom: 20px;
 }
-.project.more-info>.general {
+.project-info>.general {
 	border-bottom: 1px solid #ddd;
 	padding-bottom: 20px;
 	font-size: 20px; 
 }
-.project.more-info>.general>a {
+.project-info>.general>a {
 	color: #777;
 }
-.project.more-info>.general>span {
+.project-info>.general>span {
 	margin-right: 16px;
 }
-.project.more-info>.description {
+.project-info>.description {
 	border: 1px solid #DDD;
 	padding: 20px 20px 10px 20px;
 	border-radius: 4px;
 	background: #F5F5F5;
 }
-.project.more-info>.metrics>a, .project.more-info>.metrics>span {
+.project-info>.metrics>a, .project-info>.metrics>span {
 	font-size: 16px;
 	color: #444;
 	margin-right: 20px;
 }
-.project.more-info>.clone {
+.project-info>.clone {
 	margin-bottom: 20px;
 }
-.project.more-info>.clone>.input-group {
+.project-info>.clone>.input-group {
 	width: 100%;
 }
-.project.more-info>.clone input {
+.project-info>.clone input {
 	background: white;
 }

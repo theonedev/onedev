@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.moreinfo;
+package io.onedev.server.web.page.project.info;
 
 import java.util.Collection;
 
@@ -36,11 +36,11 @@ import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 
 @SuppressWarnings("serial")
-public abstract class MoreInfoPanel extends Panel {
+public abstract class ProjectInfoPanel extends Panel {
 
 	private final IModel<Project> projectModel;
 	
-	public MoreInfoPanel(String id, IModel<Project> projectModel) {
+	public ProjectInfoPanel(String id, IModel<Project> projectModel) {
 		super(id);
 		this.projectModel = projectModel;
 	}
@@ -60,6 +60,7 @@ public abstract class MoreInfoPanel extends Panel {
 			link.setVisible(false);
 			add(link);
 		}
+		add(new Label("name", getProject().getName()));
 		add(new Label("id", getProject().getId()));
 		
 		UrlManager urlManager = OneDev.getInstance(UrlManager.class);
@@ -196,7 +197,7 @@ public abstract class MoreInfoPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new MoreInfoResourceReference()));
+		response.render(CssHeaderItem.forReference(new ProjectInfoResourceReference()));
 	}
 
 	protected abstract void onPromptForkOption(AjaxRequestTarget target);

@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.project.setting;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -10,21 +9,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.sidebar.SideBar;
-import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
-import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
-import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
-import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
-import io.onedev.server.web.page.project.setting.configuration.ConfigurationEditPage;
-import io.onedev.server.web.page.project.setting.configuration.ConfigurationListPage;
-import io.onedev.server.web.page.project.setting.configuration.NewConfigurationPage;
-import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
-import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
-import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
-import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
-import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 
 @SuppressWarnings("serial")
 public abstract class ProjectSettingPage extends ProjectPage {
@@ -46,18 +32,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 
 			@Override
 			protected List<? extends Tab> newTabs() {
-				List<PageTab> tabs = new ArrayList<>();
-				tabs.add(new ProjectSettingTab("General Setting", "fa fa-fw fa-sliders", GeneralSettingPage.class));
-				tabs.add(new ProjectSettingTab("Edit Avatar", "fa fa-fw fa-picture-o", AvatarEditPage.class));
-				tabs.add(new ProjectSettingTab("Authorizations", "fa fa-fw fa-user", ProjectAuthorizationsPage.class));
-				tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
-				tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));
-				tabs.add(new ProjectSettingTab("Issue Setting", "fa fa-fw fa-bug", StateTransitionsPage.class, PromptFieldsUponIssueOpenSettingPage.class));
-				tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-comments", CommitMessageTransformPage.class));
-				tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", WebHooksPage.class));
-				tabs.add(new ProjectSettingTab("Build Configurations", "fa fa-fw fa-cube", ConfigurationListPage.class, 
-						NewConfigurationPage.class, ConfigurationEditPage.class));
-				return tabs;
+				return newSettingTabs();
 			}
 			
 		});

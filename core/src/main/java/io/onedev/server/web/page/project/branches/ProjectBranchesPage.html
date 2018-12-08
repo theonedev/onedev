@@ -1,14 +1,15 @@
 <html xmlns:wicket>
 <wicket:extend>
+	<div class="page-title">Branches</div>
 	<div id="project-branches">
 		<div class="list">
 			<div class="head clearfix">
 				<div class="input-group pull-left base">
 					<span class="input-group-addon">Base</span> 
-					<input wicket:id="baseBranch" type="hidden" class="form-control"></input>					
+					<input wicket:id="baseBranch" type="hidden" class="form-control">					
 				</div>
 				<div class="pull-left clearable-wrapper">
-					<input wicket:id="searchBranches" class="form-control search" placeholder="Search branches"></input>
+					<input wicket:id="searchBranches" class="form-control search" placeholder="Search branches">
 				</div>
 				<div class="pull-left">
 					<a wicket:id="createBranch" class="btn btn-success"><i class="fa fa-plus"></i> Create Branch</a>
@@ -55,7 +56,7 @@
 			<div class="center"><ul wicket:id="branchesPageNav"></ul></div>
 			<div wicket:id="noBranches" class="alert alert-warning">No branches found</div>
 			<div id="searching-branches" class="ajax-indicator">
-				<img src="/img/ajax-indicator-big.gif"></img>
+				<img src="/img/ajax-indicator-big.gif">
 			</div>
 		</div>
 	</div>

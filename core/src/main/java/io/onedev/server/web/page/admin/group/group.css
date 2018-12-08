@@ -1,5 +1,12 @@
+@media(max-width: 768px) {
+	#group>.sidebar {
+		display: none;
+	}
+	#group>.sidebar+.content {
+		padding-left: 0;
+	}	
+}
 #group>.sidebar {
-	left: 240px;
 	background: white;
 	border-left: none;
 	/* make it absolute as we do not want to make it stay fixed to occupy screen space on mobile screen */
