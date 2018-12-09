@@ -1,8 +1,6 @@
 package io.onedev.server.web.page.project.setting.configuration;
 
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -81,12 +79,6 @@ public class ConfigurationEditPage extends ProjectSettingPage {
 		}.add(new ConfirmOnClick("Do you really want to delete this configuration?")));
 		
 		add(form);
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ConfigurationCssResourceReference()));
 	}
 
 	public static PageParameters paramsOf(Configuration configuration) {

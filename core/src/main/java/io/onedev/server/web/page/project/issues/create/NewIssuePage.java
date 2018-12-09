@@ -3,8 +3,6 @@ package io.onedev.server.web.page.project.issues.create;
 import java.util.List;
 
 import org.apache.wicket.RestartResponseAtInterceptPageException;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -89,12 +87,6 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 		form.add(editor);
 		
 		add(form);
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new NewIssueResourceReference()));
 	}
 
 	private GlobalIssueSetting getIssueSetting() {

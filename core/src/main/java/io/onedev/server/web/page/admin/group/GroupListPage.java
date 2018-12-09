@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -128,10 +127,8 @@ public class GroupListPage extends AdministrationPage {
 		columns.add(new AbstractColumn<Group, Void>(Model.of("Actions")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId,
-					IModel<Group> rowModel) {
+			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId, IModel<Group> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", GroupListPage.this);
-				fragment.add(AttributeAppender.append("class", "actions"));
 				
 				Group group = rowModel.getObject();
 				
@@ -160,6 +157,11 @@ public class GroupListPage extends AdministrationPage {
 				}.add(new ConfirmOnClick("Do you really want to delete group '" + group.getName() + "'?")));
 				
 				cellItem.add(fragment);
+			}
+
+			@Override
+			public String getCssClass() {
+				return "actions";
 			}
 			
 		});

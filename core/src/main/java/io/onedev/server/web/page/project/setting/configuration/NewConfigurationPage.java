@@ -1,8 +1,6 @@
 package io.onedev.server.web.page.project.setting.configuration;
 
 import org.apache.wicket.Session;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -58,12 +56,6 @@ public class NewConfigurationPage extends ProjectSettingPage {
 	@Override
 	protected boolean isPermitted() {
 		return SecurityUtils.isAdministrator();
-	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ConfigurationCssResourceReference()));
 	}
 	
 }

@@ -322,35 +322,41 @@ public class DefaultIndexManager implements IndexManager {
 			
 		};
 	}
+
+	private IndexResult doIndex(Project project, ObjectId commit, Directory directory, IndexSearcher searcher) {
+		IndexWriterConfig writerConfig = new IndexWriterConfig(new NGramAnalyzer(NGRAM_SIZE, NGRAM_SIZE));
+		writerConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
+		try (IndexWriter writer = new IndexWriter(directory, writerConfig)) {
+			try {
+				logger.debug("Indexing commit (project: {}, commit: {})", project.getName(), commit.getName());
+				IndexResult indexResult = index(project.getRepository(), commit, writer, searcher);
+				writer.commit();
+				return indexResult;
+			} catch (Exception e) {
+				writer.rollback();
+				throw ExceptionUtils.unchecked(e);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
 	
 	private IndexResult doIndex(Project project, ObjectId commit) {
-		IndexResult indexResult;
 		try (Directory directory = FSDirectory.open(storageManager.getProjectIndexDir(project.getId()).toPath())) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
 					IndexSearcher searcher = new IndexSearcher(reader);
 					if (getIndexVersion().equals(getCommitIndexVersion(searcher, commit)))
 						return new IndexResult(0, 0);
+					else
+						return doIndex(project, commit, directory, searcher);
 				}
-			}
-			
-			IndexWriterConfig writerConfig = new IndexWriterConfig(new NGramAnalyzer(NGRAM_SIZE, NGRAM_SIZE));
-			writerConfig.setOpenMode(OpenMode.CREATE_OR_APPEND);
-			try (IndexWriter writer = new IndexWriter(directory, writerConfig)) {
-				try {
-					logger.debug("Indexing commit (project: {}, commit: {})", project.getName(), commit.getName());
-					indexResult = index(project.getRepository(), commit, writer, null);
-					writer.commit();
-				} catch (Exception e) {
-					writer.rollback();
-					throw ExceptionUtils.unchecked(e);
-				}
+			} else {
+				return doIndex(project, commit, directory, null);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-
-		return indexResult;
 	}
 
 	@Override

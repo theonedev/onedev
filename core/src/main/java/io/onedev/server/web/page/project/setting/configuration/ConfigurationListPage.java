@@ -8,14 +8,11 @@ import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
@@ -125,7 +122,6 @@ public class ConfigurationListPage extends ProjectSettingPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Configuration>> cellItem, String componentId, IModel<Configuration> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", ConfigurationListPage.this);
-				fragment.add(AttributeAppender.append("class", "actions"));
 				
 				Configuration configuration = rowModel.getObject();
 				
@@ -164,6 +160,12 @@ public class ConfigurationListPage extends ProjectSettingPage {
 				
 				cellItem.add(fragment);
 			}
+
+			@Override
+			public String getCssClass() {
+				return "actions";
+			}
+
 		});
 		
 		SortableDataProvider<Configuration, Void> dataProvider = new LoadableDetachableDataProvider<Configuration, Void>() {
@@ -212,12 +214,6 @@ public class ConfigurationListPage extends ProjectSettingPage {
 		
 		add(configurationsTable = new HistoryAwareDataTable<Configuration, Void>("configurations", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
-	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ConfigurationCssResourceReference()));
 	}
 
 }

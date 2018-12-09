@@ -1,23 +1,18 @@
-#new-request>.head {
-	font-size: 18px;
-	margin-bottom: 20px;
-	font-weight: bold;
-}
-#new-request>.body>div {
+#new-request>div {
 	margin-bottom: 20px;
 }
-#new-request>.body>.branches {
+#new-request>.branches {
 	margin-bottom: 20px;
 	width: auto;
 }
-#new-request>.body>.branches td {
+#new-request>.branches td {
 	vertical-align: middle;
 	background: #F5F5F5; 
 	border: 1px solid #DDD;
 	border-radius: 4px;
 	padding: 12px;
 }
-#new-request>.body>.branches td.action {
+#new-request>.branches td.action {
 	text-align: center;
 	background: white;
 	border-top: none;
@@ -25,84 +20,84 @@
 	padding-left: 20px;
 	padding-right: 20px;
 }
-#new-request>.body>.branches td.action a {
+#new-request>.branches td.action a {
 	font-size: 18px;
 	color: #666;
 }
-#new-request>.body>.branches .branch .message {
+#new-request>.branches .branch .message {
 	margin-top: 8px;
 }
-#new-request>.body>.branches .branch .message a {
+#new-request>.branches .branch .message a {
 	font-size: 13px;
 	color: #888;
 }
-#new-request>.body>.status .summary {
+#new-request>.status .summary {
 	font-size: 16px; 
 	padding: 0; 
 	margin-bottom: 8px;
 }
 
-#new-request>.body>.status>.can-send form>table>tbody>tr>td {
+#new-request>.status>.can-send form>table>tbody>tr>td {
 	padding: 16px 0; 
 	border-top: 1px dashed #BBB; 
 	border-bottom: 1px dashed #BBB;
 }
-#new-request>.body>.status>.can-send form>table>tbody>tr>td.name {
+#new-request>.status>.can-send form>table>tbody>tr>td.name {
 	width: 200px; 
 	font-size: 18px; 
 	padding-right: 8px;
 }
-#new-request>.body>.status>.can-send form>table>tbody>tr>td.value {
+#new-request>.status>.can-send form>table>tbody>tr>td.value {
 	padding-left: 8px;
 }
-#new-request>.body>.status>.can-send form>table {
+#new-request>.status>.can-send form>table {
 	margin-bottom: 16px;
 }
-#new-request>.body>.status>.can-send form>table>tbody>tr>td.name .required:BEFORE {
+#new-request>.status>.can-send form>table>tbody>tr>td.name .required:BEFORE {
 	content: "*"; 
 	color: red;
 }
 #new-request table.reviewers {
 	width: auto;
 }
-#new-request>.body>.status>.can-send form .alert-danger {
+#new-request>.status>.can-send form .alert-danger {
 	margin-bottom: 0; 
 	margin-top: 16px;
 }
-#new-request>.body>.status>.can-send form .help-block {
+#new-request>.status>.can-send form .help-block {
 	margin-bottom: 0;
 }
-#new-request>.body>.status>.can-send form select {
+#new-request>.status>.can-send form select {
 	width: auto;
 }
-#new-request>.body>.status>.can-send table.reviews td.result {
+#new-request>.status>.can-send table.reviews td.result {
 	display: none;
 }
-#new-request>.body>.nav-tabs {
+#new-request>.nav-tabs {
 	margin-bottom: 20px;
 }
-#new-request>.body>.tab-panel>.diff-option {
+#new-request>.tab-panel>.diff-option {
 	padding: 8px;
 	background: #F2F2F2;
 	border: 1px solid #DDD;
 	z-index: 200;
 	margin-bottom: 16px;
 }
-#new-request>.body>.status>.can-send .merge-strategy .status {
+#new-request>.status>.can-send .merge-strategy .status {
 	margin-top: 10px;
 	font-size: 16px;
 	font-weight: bold;
 }
-#new-request>.body>.status>.can-send .merge-strategy .status .no-conflict {
+#new-request>.status>.can-send .merge-strategy .status .no-conflict {
 	color: #399529;
 } 
-#new-request>.body>.status>.can-send .merge-strategy .status .conflict {
+#new-request>.status>.can-send .merge-strategy .status .conflict {
 	color: #DD4B4B;
 } 
-#new-request>.body>.status>.can-send .merge-strategy .status .calculating {
+#new-request>.status>.can-send .merge-strategy .status .calculating {
 	color: #BC7E12;
 }
-#new-request>.body>.status>.can-send .merge-strategy .status .calculating img {
+#new-request>.status>.can-send .merge-strategy .status .calculating img {
 	width: 24px;
 	height: 24px;
 }

@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -33,6 +32,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
@@ -41,7 +41,6 @@ import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 public class UserListPage extends AdministrationPage {
@@ -133,7 +132,6 @@ public class UserListPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", UserListPage.this);
-				fragment.add(AttributeAppender.append("class", "actions"));
 				
 				fragment.add(new Link<Void>("profile") {
 
@@ -166,6 +164,12 @@ public class UserListPage extends AdministrationPage {
 				
 				cellItem.add(fragment);
 			}
+
+			@Override
+			public String getCssClass() {
+				return "actions";
+			}
+			
 		});
 		
 		SortableDataProvider<User, Void> dataProvider = new LoadableDetachableDataProvider<User, Void>() {

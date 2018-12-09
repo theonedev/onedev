@@ -500,6 +500,14 @@ input.search {
 	margin-right: 20px;
 }
 
+table>tbody>tr>td.actions a {
+	color: #666;
+	margin-right: 8px;
+}
+table>tbody>tr>td.actions a:last-child {
+	margin-right: 0;
+}
+
 .floating>.content>.selection {
 	padding: 16px;
 }
