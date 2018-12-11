@@ -7,19 +7,24 @@
 #milestone-list>.body tbody a {
 	margin-right: 8px;
 }
+#milestone-list>.body tbody .actions {
+	white-space: nowrap;
+}
 #milestone-list>.body tbody .actions a {
 	color: #666;
 }
 
-.issue-stats .progress {
+.issue-stats>.progress {
 	float: left;
-	width: 300px;
+	width: 200px;
+	margin-bottom: 0;
 }
-.issue-stats .text {
+.issue-stats>.text {
 	float: left;
-	margin-right: 20px;
+	margin-right: 16px;
+	margin-bottom: 4px;
 }
-.issue-stats .text a:first-child {
+.issue-stats>.text a:first-child {
 	margin-right: 8px;
 }
 .milestone-sort.active:before {
@@ -34,8 +39,12 @@
 #milestone-detail>* {
 	margin-bottom: 20px;
 }
+#milestone-detail>.title {
+	margin-bottom: 12px;
+}
 #milestone-detail>.title>* {
 	margin-right: 20px;
+	margin-bottom: 8px;
 }
 #milestone-detail>.title>.status {
 	margin-right: 10px;
@@ -53,7 +62,4 @@
 	background: #F5F5F5;
 	border-radius: 4px;
 	padding: 20px;
-}
-#milestone-detail .progress {
-	width: 200px;
 }

@@ -17,16 +17,16 @@
 	border-bottom: none;
 }
 #request-detail>.main>.activities .activity>td.avatar {
-	width: 40px;
+	width: 1px;
 	border-left: 4px solid white;
-	padding-left: 12px;
+	padding-left: 8px;
 }
 #request-detail>.main>.activities .activity>td.avatar .avatar {
 	width: 40px;
 	height: 40px;
 }
 #request-detail>.main>.activities .activity>td.content {
-	padding-left: 20px;
+	padding-left: 16px;
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content .alert {
 	margin: 16px 0;
@@ -111,3 +111,19 @@
 #request-detail>.main>.activities .activity>td.content .plain.diff {
 	margin-bottom: 12px;
 }
+
+@media(max-width: 767px) {
+	#request-detail>.main>.activities .activity>td.avatar .avatar {
+		width: 24px;
+		height: 24px;
+	}
+	#request-detail>.main>.activities .activity>td.content {
+		padding-left: 6px;
+	}
+	#request-detail>.main>.activities .activity>td>.body {
+		margin-top: 12px;
+		margin-left: -24px;
+	}
+}
+
+

@@ -17,16 +17,16 @@
 	border-bottom: none;
 }
 .issue-activities>table>tbody>tr>td.avatar {
-	width: 40px;
+	width: 1px;
 	border-left: 4px solid white;
-	padding-left: 12px;
+	padding-left: 8px;
 }
 .issue-activities>table>tbody>tr>td.avatar .avatar {
 	width: 40px;
 	height: 40px;
 }
 .issue-activities>table>tbody>tr>td.content {
-	padding-left: 20px;
+	padding-left: 16px;
 }
 .issue-activities .activity>.content>.head {
 	color: #888;
@@ -71,4 +71,17 @@
 	font-size: 20px;
 	background: #F9F9F9;
 	border-radius: 4px;	
+}
+@media(max-width: 767px) {
+	.issue-activities>table>tbody>tr>td.avatar .avatar {
+		width: 24px;
+		height: 24px;
+	}
+	.issue-activities>table>tbody>tr>td.content {
+		padding-left: 6px;
+	}
+	.issue-activities .activity>.content>.body {
+		margin-top: 12px;
+		margin-left: -24px;
+	}
 }

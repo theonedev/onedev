@@ -60,6 +60,7 @@ import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
+import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestDeleted;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
@@ -627,6 +628,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		if (!(event instanceof PullRequestDeleted) && !(event instanceof PullRequestMergePreviewCalculated)
 				&& !(event instanceof PullRequestBuildEvent))
 			event.getRequest().setUpdateDate(event.getDate());
+	}
+	
+	@Transactional
+	@Listen
+	public void on(PullRequestCodeCommentEvent event) {
+		event.getRequest().setLastCodeCommentActivityDate(event.getDate());
 	}
 	
 	@Listen

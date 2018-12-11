@@ -5,6 +5,9 @@
 	margin-right: 16px;
 	color: #666;
 }
+.code-comments>.head>.others>*:last-child {
+	margin-right: 0;
+}
 .code-comments .new-indicator {
 	width: 4px;
 	padding: 0;
@@ -107,4 +110,10 @@
 	font-weight: bold;
 	color: #444;
 	margin-bottom: 20px;
+}
+
+@media(max-width: 767px) {
+	.code-comments th.expanded, .code-comments td.expanded {
+		display: none;		
+	}
 }

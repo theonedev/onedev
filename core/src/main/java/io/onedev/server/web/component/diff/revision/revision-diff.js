@@ -54,6 +54,18 @@ onedev.server.revisionDiff = {
 				return;
 		}
 		
+		var additionalWidth = 0;
+		if ($(".revision-diff>.body>.detail>.comment").length != 0)
+			additionalWidth++;
+		if ($(".revision-diff>.body>.detail td.blame").length != 0)
+			additionalWidth++;
+		if ($(".diff-mode-split>.revision-diff").length != 0)
+			additionalWidth++;
+
+		$(".revision-diff").removeClass("additionalWidth1")
+				.removeClass("additionalWidth2").removeClass("additionalWidth3")
+				.addClass("additionalWidth" + additionalWidth);
+
 		var $detail = $(".revision-diff>.body>.detail");
 		var $comment = $detail.children(".comment");
 		var $diffs = $detail.children(".diffs");
@@ -65,7 +77,7 @@ onedev.server.revisionDiff = {
 			var scrollTop = $(window).scrollTop();
 			$comment.css("left", $detail.offset().left - scrollLeft);
 			var topOffset = $diffs.offset().top - scrollTop;
-			var headHeight = $("#layout>.head").outerHeight();
+			var headHeight = $("#layout>.navbar").outerHeight();
 			if (topOffset <= headHeight) {
 				$comment.css("top", headHeight);
 			} else {

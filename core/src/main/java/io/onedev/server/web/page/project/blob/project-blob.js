@@ -28,6 +28,17 @@ onedev.server.projectBlob = {
 		$(window).resize(function(e) {
 			e.stopPropagation();
 
+			var additionalWidth = 0;
+			if ($(".source-view .CodeMirror-annotations").length != 0)
+				additionalWidth ++;
+			if ($(".source-view>.comment").length != 0)
+				additionalWidth ++;
+			if ($(".source-view>.outline").length != 0)
+				additionalWidth ++;
+			
+			$("body").removeClass("additionalWidth1").removeClass("additionalWidth2")
+					.removeClass("additionalWidth3").addClass("additionalWidth" + additionalWidth);
+			
 			var $head = $("#project-blob>.head");
 			var $revisionPicker = $head.find(">.revision-picker");
 			var $operations = $head.find(">.operations");
@@ -52,7 +63,7 @@ onedev.server.projectBlob = {
 
 			var $blobContent = $("#project-blob>.blob-content");
 			
-			var minWindowWidth = onedev.server.projectBlob.parseCssDimension($("#layout").css("min-width"));
+			var minWindowWidth = onedev.server.projectBlob.parseCssDimension($("body").css("min-width"));
 
 			var windowWidth = $(window).width();
 			if (windowWidth < minWindowWidth) {

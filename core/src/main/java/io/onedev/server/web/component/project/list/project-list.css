@@ -1,3 +1,9 @@
+@media(max-width: 767px) {
+	table.project-list th.expanded, table.project-list td.expanded {
+		display: none;
+	} 
+}
+
 table.project-list {
 	font-size: 13px;
 }
@@ -11,3 +17,4 @@ table.project-list td.project, table.project-list td.author {
 table.project-list td.commit-date {
 	color: #888;
 }
+

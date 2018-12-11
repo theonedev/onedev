@@ -20,7 +20,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigatorLabel;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -576,16 +575,6 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						issue.isVisitedAfter(issue.getUpdateDate())?"issue":"issue new"));
 				return item;
 			}
-		});
-		
-		others.add(new NavigatorLabel("pageInfo", issuesTable) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(issuesTable.getItemCount() != 0);
-			}
-			
 		});
 		
 		setOutputMarkupId(true);

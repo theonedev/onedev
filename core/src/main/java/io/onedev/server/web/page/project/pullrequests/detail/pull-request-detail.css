@@ -1,3 +1,15 @@
+body.PullRequestDetailPage {
+	min-width: 760px;
+}
+@media(max-width: 1270px) {
+    ul.nav-tabs>li.collapsed {
+        display: block;
+    }
+    ul.nav-tabs>li.expanded {
+        display: none;
+    }
+}
+
 #request-detail {
 	display: table;
 	width: 100%;
@@ -11,6 +23,9 @@
 #request-detail>.main>div {
 	margin-bottom: 20px;
 }
+#request-detail>.main>.title>* {
+	display: inline;
+}
 #request-detail>.main>.title {
 	font-size: 20px;
 	font-weight: bold;
@@ -22,12 +37,7 @@
 	margin-left: 8px;
 }
 #request-detail>.main>.title input[type=text] {
-	width: 400px;
 	font-weight: normal;
-}
-#request-detail>.main>.title .input-clear {
-	right: auto;
-	left: 373px;
 }
 #request-detail>.main>.title .alert {
 	font-weight: normal;
@@ -36,6 +46,10 @@
 #request-detail>.main>.status-and-branches {
 	font-size: 16px;
 	line-height: 20px;
+	margin-bottom: 12px;
+}
+#request-detail>.main>.status-and-branches>* {
+	margin-bottom: 8px;
 }
 #request-detail>.main>.status-and-branches>.status {
 	font-size: 16px;
@@ -72,11 +86,12 @@
 	margin-bottom: 16px;
 } 
 
-#request-detail>.main>ul.tabs>li>a .fa-circle {
+ul>li>a.code-comments .fa-circle {
 	color: #4667EE;
 	display: none;
+	margin-left: 4px;
 }
-#request-detail>.main>ul.tabs>li>a.new .fa-circle {
+ul>li>a.code-comments.new .fa-circle {
 	display: inline;
 }
 
@@ -89,10 +104,6 @@
 	position: absolute;
 	color: #666;
 	top: 0;
-}
-#request-detail>.side>.nav a[disabled] {
-	color: #BBB;
-	cursor: default;
 }
 
 #request-detail>.side>.nav .prev {

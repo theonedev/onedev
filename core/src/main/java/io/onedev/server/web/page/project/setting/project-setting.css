@@ -1,4 +1,7 @@
-@media(max-width: 768px) {
+body.BranchProtectionPage, body.WebHooksPage {
+	min-width: 768px;
+}
+@media(max-width: 767px) {
 	#project-setting>.sidebar {
 		display: none;
 	}

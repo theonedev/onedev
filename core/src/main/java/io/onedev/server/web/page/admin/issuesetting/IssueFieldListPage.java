@@ -113,6 +113,12 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 				String label = StringUtils.describe(getSetting().getDefaultListFields().contains(field.getName()));
 				cellItem.add(new ColumnFragment(componentId, rowModel, label, false));
 			}
+
+			@Override
+			public String getCssClass() {
+				return "display-in-issue-list";
+			}
+			
 		});		
 		
 		IDataProvider<InputSpec> dataProvider = new ListDataProvider<InputSpec>() {

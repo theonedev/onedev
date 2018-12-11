@@ -14,9 +14,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigatorLabel;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -89,8 +87,6 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 		}
 		
 	};
-	
-	private DataTable<Build, Void> buildsTable;
 	
 	private SortableDataProvider<Build, Void> dataProvider;	
 	
@@ -331,18 +327,8 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			}
 		});
 		
-		add(buildsTable = new HistoryAwareDataTable<Build, Void>("builds", columns, dataProvider, 
+		add(new HistoryAwareDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
-		
-		others.add(new NavigatorLabel("pageInfo", buildsTable) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(buildsTable.getItemCount() != 0);
-			}
-			
-		});
 		
 		setOutputMarkupId(true);
 	}

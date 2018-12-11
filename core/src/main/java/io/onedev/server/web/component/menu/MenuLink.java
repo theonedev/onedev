@@ -51,7 +51,7 @@ public abstract class MenuLink extends DropdownLink {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new MenuResourceReference()));
+		response.render(CssHeaderItem.forReference(new MenuCssResourceReference()));
 	}
 
 	protected abstract List<MenuItem> getMenuItems(FloatingPanel dropdown);

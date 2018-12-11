@@ -68,16 +68,15 @@ body {
 table .row-selector {
 	width: 24px;
 }
+table>thead>tr>th {
+	white-space: nowrap;
+}
+
 .navigator {
 	text-align: center;
 }
 .navigatorLabel {
 	display: none;
-}
-
-a.disabled {
-	color: #999 !important;
-	text-decoration: none;
 }
 
 a.wicket_orderUp:after, a.wicket_orderDown:after, a.wicket_orderNone:after { 
@@ -494,10 +493,11 @@ input.search {
 }
 
 .list>.head {
-	margin-bottom: 20px;
+	margin-bottom: 12px;
 }
 .list>.head>.pull-left {
 	margin-right: 20px;
+	margin-bottom: 8px;
 }
 
 table>tbody>tr>td.actions a {
@@ -626,6 +626,8 @@ a.input-clear.input-group-clear {
 
 a.disabled, a[disabled="disabled"] {
 	cursor: default;
+	color: #AAA !important;
+	text-decoration: none;
 }
 
 .floating {
@@ -681,7 +683,7 @@ a.disabled, a[disabled="disabled"] {
 .floating.side.def-detail {
 	width: 480px;
 }
-@media(max-width: 768px) {
+@media(max-width: 767px) {
 	.floating.side.def-detail {
 		width: 300px;
 	}
@@ -691,13 +693,3 @@ a.disabled, a[disabled="disabled"] {
 	margin-bottom: 12px;
 }
 
-@media(min-width: 992px) {
-	.modal-xl {
-		width: 900px;
-	}
-}
-@media(min-width: 1292px) {
-	.modal-xl {
-		width: 1200px;
-	}
-}

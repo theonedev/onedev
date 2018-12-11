@@ -45,5 +45,10 @@ public abstract class ActionTab extends Tab {
 		onSelect(tabLink);
 	}
 
+	@Override
+	public String getTitle() {
+		return titleModel.getObject();
+	}
+
 	protected abstract void onSelect(Component tabLink);
 }

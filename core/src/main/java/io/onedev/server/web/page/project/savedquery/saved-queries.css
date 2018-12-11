@@ -13,10 +13,6 @@
 	margin-right: 8px;
 	font-size: 16px;
 }
-.saved-queries>.head>.actions>a[disabled] {
-	color: #AAA;
-	cursor: default;
-}
 .saved-queries>.head>.actions .close-saved-queries {
 	font-size: 17px;
 	display: inline-block;
@@ -75,15 +71,8 @@
 }
 .query-save-support>.main {
 	vertical-align: top;
+	min-width: 330px;
 }
 .query-save-support>.side+.main {
 	padding-left: 20px;
-}
-.query-save-support>.main .save-query {
-	color: #666;
-}
-.query-save-support>.main .save-query[disabled] {
-	text-decoration: none;
-	color: #999;
-	cursor: default;
 }

@@ -1,5 +1,13 @@
-.markdown-editor.compact-mode .normal-mode, .markdown-editor.normal-mode .compact-mode {
-	display: none;
+@media(max-width: 767px) {
+	.markdown-editor .normal-mode {
+		display: none;
+	}
+}
+@media(min-width: 768px) {
+	.markdown-editor.compact-mode .normal-mode, 
+	.markdown-editor.normal-mode .compact-mode {
+		display: none;
+	}
 }
 body.fullscreen {
 	overflow: hidden;

@@ -1,13 +1,17 @@
 <wicket:extend>
 	<div id="request-detail">
 		<div class="main">
-			<div wicket:id="requestHead" class="title clearfix">
-				<div wicket:id="title" class="title pull-left"></div>
+			<div wicket:id="requestHead" class="title">
+				<div wicket:id="title" class="title"></div>
 				<a wicket:id="editLink" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
-				<form wicket:id="editForm" class="pull-left form-inline clearable-wrapper">
-					<input wicket:id="title" type="text" placeholder="Input title" class="form-control">
-					<input wicket:id="save" type="submit" value="Save" class="btn btn-primary"/>
-					<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"/>
+				<form wicket:id="editForm" class="form">
+					<div class="clearable-wrapper">
+						<input wicket:id="title" type="text" placeholder="Input title" class="form-control">
+					</div>
+					<div class="actions">
+						<input wicket:id="save" type="submit" value="Save" class="btn btn-primary"/>
+						<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"/>
+					</div>
 				</form>
 			</div>
 			<div wicket:id="statusAndBranches" class="status-and-branches clearfix">
@@ -117,6 +121,6 @@
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="codeCommentsTabLinkFrag">
-		<a wicket:id="link"><i class="fa fa-circle"></i> Code Comments</a>
+		<a wicket:id="link" class="code-comments">Code Comments <i class="fa fa-circle"></i></a>
 	</wicket:fragment>
 </wicket:extend>

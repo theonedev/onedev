@@ -400,7 +400,7 @@ onedev.server.sourceView = {
 		comments.push(comment);
 		onedev.server.sourceView.addCommentGutter(line, comments);
 		onedev.server.sourceView.highlightCommentTrigger();				
-		onedev.server.sourceView.onLayoutChange();
+		$(window).resize();
 	},
 	onCommentDeleted: function(comment) {
 		var $sourceView = $(".source-view");
@@ -423,13 +423,9 @@ onedev.server.sourceView = {
 			onedev.server.sourceView.addCommentGutter(line, comments);
 		}
 		onedev.server.sourceView.highlightCommentTrigger();				
-		onedev.server.sourceView.onLayoutChange();
+		$(window).resize();
 		
 		onedev.server.sourceView.mark(undefined);
-	},
-	onLayoutChange: function() {
-		$sourceView = $('.source-view');
-		$sourceView.triggerHandler('autofit', [$sourceView.outerWidth(), $sourceView.outerHeight()]);
 	},
 	onAddComment: function(mark) {
 		onedev.server.sourceView.exitFullScreen();
@@ -440,7 +436,7 @@ onedev.server.sourceView = {
 
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		onedev.server.codemirror.clearSelection(cm);
-		onedev.server.sourceView.onLayoutChange();
+		$(window).resize();
 
 		// Mark again to make sure marked text still exists in viewport after layout change
 		onedev.server.sourceView.mark(mark);
@@ -455,7 +451,7 @@ onedev.server.sourceView = {
 		$sourceView.data("openComment", comment);
 		$sourceView.data("mark", comment.mark);
 		onedev.server.sourceView.highlightCommentTrigger();
-		onedev.server.sourceView.onLayoutChange();
+		$(window).resize();
 		
 		// Mark again to make sure marked text still exists in viewport after layout change
 		onedev.server.sourceView.mark(comment.mark);
@@ -464,12 +460,12 @@ onedev.server.sourceView = {
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
 		onedev.server.sourceView.highlightCommentTrigger();
-		onedev.server.sourceView.onLayoutChange();
+		$(window).resize();
 		onedev.server.sourceView.mark(undefined);
 	},
 	onToggleOutline: function() {
 		onedev.server.sourceView.exitFullScreen();
-		onedev.server.sourceView.onLayoutChange();
+		$(window).resize();
 		$(".outline-toggle").prop("checked", $(".source-view>.outline").is(":visible"));
 	},
 	highlightCommentTrigger: function() {

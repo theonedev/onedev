@@ -121,7 +121,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected String getModalCssClass() {
-				return "modal-xl";
+				return "modal-lg";
 			}
 			
 			private Component newCardDetail(String id, ModalPanel modal, IModel<Issue> issueModel, QueryPosition position) {

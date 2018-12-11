@@ -1,3 +1,14 @@
+body.IssueDetailPage {
+	min-width: 760px;
+}
+@media(max-width: 1090px) {
+    ul.nav-tabs>li.collapsed {
+        display: block;
+    }
+    ul.nav-tabs>li.expanded {
+        display: none;
+    }
+}
 #issue-detail {
 	display: table;
 	width: 100%;

@@ -6,7 +6,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
@@ -33,6 +32,7 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
@@ -41,7 +41,6 @@ import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
@@ -75,8 +74,13 @@ public class ProjectListPanel extends Panel {
 				link.add(new Label("name", project.getName()));
 				fragment.add(link);
 				cellItem.add(fragment);
-				cellItem.add(AttributeAppender.append("class", "project"));
 			}
+
+			@Override
+			public String getCssClass() {
+				return "project";
+			}
+			
 		});
 
 		columns.add(new AbstractColumn<ProjectFacade, Void>(Model.of("Last Author")) {
@@ -92,8 +96,13 @@ public class ProjectListPanel extends Panel {
 				} else {
 					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
 				}
-				cellItem.add(AttributeAppender.append("class", "author"));
 			}
+
+			@Override
+			public String getCssClass() {
+				return "author expanded";
+			}
+			
 		});
 		
 		columns.add(new AbstractColumn<ProjectFacade, Void>(Model.of("Last Commit Message")) {
@@ -113,8 +122,13 @@ public class ProjectListPanel extends Panel {
 				} else {
 					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
 				}
-				cellItem.add(AttributeAppender.append("class", "commit-message"));
 			}
+
+			@Override
+			public String getCssClass() {
+				return "commit-message";
+			}
+			
 		});
 		
 		columns.add(new AbstractColumn<ProjectFacade, Void>(Model.of("Last Commit Date")) {
@@ -129,8 +143,13 @@ public class ProjectListPanel extends Panel {
 				} else {
 					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
 				}
-				cellItem.add(AttributeAppender.append("class", "commit-date"));
 			}
+			
+			@Override
+			public String getCssClass() {
+				return "commit-date expanded";
+			}
+			
 		});
 		
 		SortableDataProvider<ProjectFacade, Void> dataProvider = new LoadableDetachableDataProvider<ProjectFacade, Void>() {

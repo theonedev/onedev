@@ -153,4 +153,9 @@ public class PageTab extends Tab {
 		return false;
 	}
 
+	@Override
+	public String getTitle() {
+		return titleModel.getObject();
+	}
+
 }

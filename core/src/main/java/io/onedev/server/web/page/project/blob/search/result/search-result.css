@@ -16,9 +16,6 @@
 .search-result>.head a {
 	color: #666;
 }
-.search-result>.head a[disabled=disabled] {
-	color: #AAA;
-}
 .search-result>.head em {
 	margin-right: 8px;
 }

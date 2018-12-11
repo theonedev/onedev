@@ -17,9 +17,6 @@
 #project-branches>.list>table>tbody>tr:hover .detail .make-default {
 	display: inline;
 }
-#project-branches>.list>table td.detail>.title {
-	height: 24px;
-}
 #project-branches>.list>table td.detail>.title>.name {
 	font-weight: bold;
 	font-size: 15px;

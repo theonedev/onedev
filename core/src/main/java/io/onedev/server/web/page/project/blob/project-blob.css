@@ -1,3 +1,15 @@
+body.ProjectBlobPage {
+	min-width: 600px;
+}
+body.ProjectBlobPage.additionalWidth1 {
+	min-width: 900px;
+}
+body.ProjectBlobPage.additionalWidth2 {
+	min-width: 1200px;
+}
+body.ProjectBlobPage.additionalWidth3 {
+	min-width: 1500px;
+}
 #project-blob {
 	margin: -20px;
 	background: white;

@@ -14,9 +14,11 @@
 }
 #project-commits>.main>.body li {
 	padding: 4px 0;
+	position: relative;
 }
 #project-commits>.main>.body li.commit>.avatar {
 	margin-top: 4px;
+	position: absolute;
 }
 #project-commits>.main>.body .label {
 	margin: 3px 0 0 4px;
@@ -29,9 +31,10 @@
 	font-size: 15px;
 }
 #project-commits>.main>.body .commit>.detail {
-	padding-left: 8px; 
+	padding-left: 48px; 
 	padding-right: 8px;
 }
+
 #project-commits>.main>.body li.commit:hover, #project-commits>.main>.body li.commit.hover {
 	background: #F7ECB9;
 }
@@ -44,14 +47,8 @@
 #project-commits>.main>.body .message-and-labels {
 	margin-bottom: 4px;
 }
-#project-commits>.main>.body .actions {
+#project-commits>.main>.body .actions>* {
 	margin: 6px 0 0 8px;
-}
-#project-commits>.main>.body .hash {
-	margin-top: 6px;
-}
-#project-commits>.main>.body .actions .compare {
-	color: #777;
 }
 #project-commits>.main>.body>.list {
 	margin-bottom: 0;
@@ -69,3 +66,10 @@
 	text-align: left;
 	border-bottom: 1px solid #EEE;
 }
+
+@media(max-width: 767px) {
+	#project-commits li.commit>.actions {
+		display: none;
+	}
+}
+

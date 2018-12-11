@@ -481,7 +481,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 						public void onClick(AjaxRequestTarget target) {
 							clearComment(target);
 							target.appendJavaScript("onedev.server.sourceView.mark(undefined);");
-							target.appendJavaScript("onedev.server.sourceView.onLayoutChange();");
+							target.appendJavaScript("$(window).resize();");
 							context.onMark(target, null);
 						}
 						

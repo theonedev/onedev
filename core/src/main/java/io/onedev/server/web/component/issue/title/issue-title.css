@@ -9,12 +9,7 @@
 	margin-left: 8px;
 }
 .issue-title input[type=text] {
-	width: 600px;
 	font-weight: normal;
-}
-.issue-title .input-clear {
-	right: auto;
-	left: 573px;
 }
 .issue-title .alert {
 	font-weight: normal;

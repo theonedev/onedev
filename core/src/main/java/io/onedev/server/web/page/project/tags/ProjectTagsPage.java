@@ -267,11 +267,12 @@ public class ProjectTagsPage extends ProjectPage {
 				link.add(new Label("name", tagName));
 				item.add(link);
 				
+				String tagCommitHash = ref.getPeeledObj().name();
 				item.add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 					@Override
 					protected List<Build> load() {
-						return OneDev.getInstance(BuildManager.class).query(getProject(), ref.getPeeledObj().name());
+						return OneDev.getInstance(BuildManager.class).query(getProject(), tagCommitHash);
 					}
 					
 				}));

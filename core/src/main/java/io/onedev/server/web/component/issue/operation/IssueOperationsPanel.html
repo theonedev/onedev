@@ -1,14 +1,10 @@
 <wicket:panel>
 	<div class="issue-operations">
 		<div class="state-and-actions clearfix">
-			<span wicket:id="state" class="pull-left"></span>
-			<div class="transition-actions pull-left">
-				<wicket:enclosure child="transitions">
-				<span class="btn-group">
-					<a wicket:id="transitions" class="btn btn-default btn-sm"><span wicket:id="label"></span></a>
-				</span>
-				</wicket:enclosure>
-			</div>
+			<div wicket:id="state" class="pull-left"></div>
+			<wicket:enclosure child="transitions">
+			<a wicket:id="transitions" class="btn btn-default btn-sm pull-left"><span wicket:id="label"></span></a>
+			</wicket:enclosure>
 			<a wicket:id="newIssue" class="new-issue pull-left btn btn-success btn-sm"><i class="fa fa-plus"></i> New Issue</a>
 		</div>
 		<div wicket:id="actionOptions" class="action-options"></div>
@@ -26,7 +22,7 @@
 	<wicket:fragment wicket:id="titleEditFrag">
 		<div wicket:id="feedback"></div>
 		<form wicket:id="form" class="form-inline clearable-wrapper">
-			<input wicket:id="title" type="text" placeholder="Input title" class="form-control"></input>
+			<input wicket:id="title" type="text" placeholder="Input title" class="form-control">
 			<input wicket:id="save" type="submit" value="Save" class="btn btn-primary"/>
 			<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"/>
 		</form>

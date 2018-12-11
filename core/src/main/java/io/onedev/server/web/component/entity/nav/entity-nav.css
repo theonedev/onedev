@@ -8,10 +8,6 @@
 	color: #666;
 	top: 0;
 }
-.entity-nav  a[disabled] {
-	color: #BBB;
-	cursor: default;
-}
 .entity-nav  .prev {
 	left: 0;
 }

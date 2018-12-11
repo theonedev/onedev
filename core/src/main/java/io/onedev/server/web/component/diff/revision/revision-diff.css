@@ -1,3 +1,16 @@
+.revision-diff {
+	min-width: 600px;
+}
+.revision-diff.additionalWidth1 {
+	min-width: 900px;
+}
+.revision-diff.additionalWidth2 {
+	min-width: 1200px;
+}
+.revision-diff.additionalWidth3 {
+	min-width: 1500px;
+}
+
 .revision-diff>.revisions-indexing {
 	padding: 8px 8px 9px 8px;
 	background: #fcf8e3;

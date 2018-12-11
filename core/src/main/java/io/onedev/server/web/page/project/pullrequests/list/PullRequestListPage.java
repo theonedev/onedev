@@ -17,7 +17,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigatorLabel;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -363,6 +362,15 @@ public class PullRequestListPage extends ProjectPage {
 
 		});
 		
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Status")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
+				cellItem.add(new RequestStatusLabel(componentId, rowModel));
+			}
+
+		});
+		
 		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Title")) {
 
 			@Override
@@ -390,15 +398,6 @@ public class PullRequestListPage extends ProjectPage {
 
 		});
 		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Status")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				cellItem.add(new RequestStatusLabel(componentId, rowModel));
-			}
-
-		});
-		
 		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Source")) {
 
 			@Override
@@ -412,6 +411,11 @@ public class PullRequestListPage extends ProjectPage {
 				}
 			}
 
+			@Override
+			public String getCssClass() {
+				return "expanded";
+			}
+
 		});
 		
 		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Last Update")) {
@@ -422,6 +426,11 @@ public class PullRequestListPage extends ProjectPage {
 				cellItem.add(new Label(componentId, DateUtils.formatAge(request.getUpdateDate())));
 			}
 
+			@Override
+			public String getCssClass() {
+				return "expanded";
+			}
+			
 		});
 		
 		SortableDataProvider<PullRequest, Void> dataProvider = new SortableDataProvider<PullRequest, Void>() {
@@ -493,16 +502,6 @@ public class PullRequestListPage extends ProjectPage {
 						request.isVisitedAfter(request.getUpdateDate())?"request":"request new"));
 				return item;
 			}
-		});
-		
-		others.add(new NavigatorLabel("pageInfo", requestsTable) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(requestsTable.getItemCount() != 0);
-			}
-			
 		});
 		
 	}

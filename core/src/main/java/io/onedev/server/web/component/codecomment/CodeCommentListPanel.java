@@ -15,9 +15,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigatorLabel;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -86,8 +84,6 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 		}
 		
 	};
-	
-	private DataTable<CodeComment, Void> commentsTable;
 	
 	public CodeCommentListPanel(String id, IModel<String> queryModel) {
 		super(id, queryModel);
@@ -320,9 +316,14 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 				cellItem.add(new Label(componentId, DateUtils.formatAge(comment.getUpdateDate())));
 			}
 
+			@Override
+			public String getCssClass() {
+				return "expanded";
+			}
+
 		});
 		
-		add(commentsTable = new HistoryAwareDataTable<CodeComment, Void>("comments", columns, dataProvider, 
+		add(new HistoryAwareDataTable<CodeComment, Void>("comments", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
 
 			@Override
@@ -335,15 +336,6 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 			}
 		});
 		
-		others.add(new NavigatorLabel("pageInfo", commentsTable) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(commentsTable.getItemCount() != 0);
-			}
-			
-		});
 	}
 	
 	@Override

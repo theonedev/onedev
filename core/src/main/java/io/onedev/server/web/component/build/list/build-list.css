@@ -8,3 +8,6 @@
 	margin-right: 16px;
 	color: #666;
 }
+.build-list>.head>.others>*:last-child {
+	margin-right: 0;
+}

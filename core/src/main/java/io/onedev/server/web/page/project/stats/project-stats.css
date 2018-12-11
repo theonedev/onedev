@@ -1,3 +1,6 @@
+body.SourceLinesPage {
+	min-width: 300px;
+}
 #project-contribs .options {
 	margin-bottom: 20px;
 	padding-bottom: 8px;

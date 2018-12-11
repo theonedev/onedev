@@ -444,12 +444,12 @@ public class ProjectBranchesPage extends ProjectPage {
 				item.add(link);
 				
 				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId());
-				
+				String lastCommitHash = lastCommit.name();
 				item.add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 					@Override
 					protected List<Build> load() {
-						return OneDev.getInstance(BuildManager.class).query(getProject(), lastCommit.name());
+						return OneDev.getInstance(BuildManager.class).query(getProject(), lastCommitHash);
 					}
 					
 				}));

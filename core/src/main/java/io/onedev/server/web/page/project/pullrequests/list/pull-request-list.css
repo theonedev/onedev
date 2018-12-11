@@ -1,3 +1,6 @@
+#request-list>.main {
+	min-width: 330px;
+}
 #request-list>.main>.head {
 	position: relative;
 }
@@ -5,7 +8,7 @@
 	margin-bottom: 20px;
 }
 #request-list>.main>.head>form {
-	margin-right: 168px;
+	margin-right: 100px;
 }
 #request-list>.main>.head>.open-new {
 	position: absolute;
@@ -16,10 +19,8 @@
 	margin-right: 16px;
 	color: #666;
 }
-#request-list>.main>.head>.others a[disabled] {
-	text-decoration: none;
-	color: #999;
-	cursor: default;
+#request-list>.main>.head>.others>*:last-child {
+	margin-right: 0;
 }
 #request-list>.main>.body .new-indicator {
 	width: 4px;
@@ -27,4 +28,9 @@
 }
 #request-list>.main>.body tr.request.new td.new-indicator {
 	background: #4667EE;
+}
+@media(max-width: 767px) {
+	#request-list th.expanded, #request-list td.expanded {
+		display: none;		
+	}
 }

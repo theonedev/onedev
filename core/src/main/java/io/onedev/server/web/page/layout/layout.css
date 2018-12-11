@@ -53,7 +53,7 @@
 	padding: 4px 20px 0 20px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767px) {
 	.navbar .help .icon, 
 	.navbar .signed-in .avatar, 
 	.navbar .signed-in .dropdown-header, 

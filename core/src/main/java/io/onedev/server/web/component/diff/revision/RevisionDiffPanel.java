@@ -987,6 +987,15 @@ public class RevisionDiffPanel extends Panel {
 			
 		});
 		
+		add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return "diff-mode-" + diffMode.name().toLowerCase();
+			}
+			
+		}));
+		
 		setOutputMarkupId(true);
 	}
 	

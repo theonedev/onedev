@@ -65,7 +65,6 @@ onedev.server.markdown = {
 			$previewLink.removeClass("active");
 			$splitLink.removeClass("active");
 			onLayoutChange();
-			console.log(onedev.server.markdown.getCookiePrefix($container)+".split");
 			Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".split", false, {expires: Infinity});
 		});
 		$previewLink.click(function() {

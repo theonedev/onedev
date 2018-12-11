@@ -1,9 +1,13 @@
 .issue-operations>div {
 	margin-bottom: 20px;
 }
+.issue-operations>.state-and-actions {
+	margin-bottom: 12px;
+}
 .issue-operations>.state-and-actions>.issue-state {
 	font-size: 20px;
 }
 .issue-operations>.state-and-actions>* {
-	margin-right: 20px;
+	margin-right: 10px;
+	margin-bottom: 8px;
 }

@@ -15,6 +15,8 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -134,6 +136,11 @@ public abstract class IssuePullRequestsPanel extends Panel {
 				}
 			}
 
+			@Override
+			public String getCssClass() {
+				return "expanded";
+			}
+
 		});
 		
 		SortableDataProvider<PullRequest, Void> dataProvider = new LoadableDetachableDataProvider<PullRequest, Void>() {
@@ -169,5 +176,11 @@ public abstract class IssuePullRequestsPanel extends Panel {
 	}
 
 	protected abstract Issue getIssue();
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new IssuePullRequestsCssResourceReference()));
+	}
 	
 }

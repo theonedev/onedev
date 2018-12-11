@@ -3,9 +3,11 @@
 }
 .commit-list>div>ul li {
 	padding: 4px 0;
+	position: relative;
 }
 .commit-list>div>ul .commit>.avatar {
 	margin-top: 4px;
+	position: absolute;
 }
 .commit-list>div>ul .label {
 	margin: 3px 0 0 4px;
@@ -21,7 +23,7 @@
 	font-size: 15px;
 }
 .commit-list>div>ul .commit>.detail {
-	padding-left: 8px; 
+	padding-left: 48px; 
 	padding-right: 8px;
 }
 .commit-list>div>ul .commit:hover, .commit-list>div>ul .commit.hover {
@@ -45,9 +47,11 @@
 .commit-list .alert {
 	margin-bottom: 12px;
 }
-.commit-list .pull-right {
-	margin-top: 6px;
+.commit-list .actions {
+	margin: 6px 0 0 8px;
 }
-.commit-list .build-status {
-	margin-right: 4px;
+@media(max-width: 767px) {
+	.commit-list li.commit>.actions {
+		display: none;
+	}
 }

@@ -384,14 +384,14 @@ onedev.server.stats = {
 			var useKilo;
 			var option = {
 				title: {
-					text: 'Source lines of code on ' + defaultBranch + ' branch',
+					text: 'SLOC on ' + defaultBranch,
 					left: 'center',
 					top: 10
 				},
 				grid: {
 					left: '60px',
 					right: '40px',
-					top: '80px',
+					top: '120px',
 					bottom: '40px'
 				},
 				xAxis: {
