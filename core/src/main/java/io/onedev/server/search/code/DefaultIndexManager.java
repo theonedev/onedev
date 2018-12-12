@@ -97,7 +97,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private static final int BACKEND_INDEXING_PRIORITY = 50;
 	
-	private static final int DATA_VERSION = 4;
+	private static final int DATA_VERSION = 5;
 	
 	private final StorageManager storageManager;
 	

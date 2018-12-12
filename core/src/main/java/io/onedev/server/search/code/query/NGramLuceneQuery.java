@@ -21,7 +21,7 @@ public class NGramLuceneQuery extends NGramPhraseQuery {
 		Preconditions.checkArgument(fieldValue.length()>=gramSize);
 		PhraseQuery.Builder builder = new PhraseQuery.Builder();
 		try (NGramTokenizer tokenizer = new NGramTokenizer(gramSize, gramSize)) {
-			tokenizer.setReader(new StringReader(fieldValue));
+			tokenizer.setReader(new StringReader(fieldValue.toLowerCase()));
 			tokenizer.reset();
 			while (tokenizer.incrementToken()) { 
 				builder.add(new Term(fieldName, 
