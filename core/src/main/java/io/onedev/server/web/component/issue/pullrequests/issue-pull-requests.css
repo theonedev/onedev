@@ -1,4 +1,4 @@
-@media(max-width: 767px) {
+@media(max-width: 991px) {
 	.issue-pull-requests th.expanded, .issue-pull-requests td.expanded {
 		display: none;		
 	}

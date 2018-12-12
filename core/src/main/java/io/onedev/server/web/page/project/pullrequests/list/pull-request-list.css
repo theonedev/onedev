@@ -29,7 +29,7 @@
 #request-list>.main>.body tr.request.new td.new-indicator {
 	background: #4667EE;
 }
-@media(max-width: 767px) {
+@media(max-width: 991px) {
 	#request-list th.expanded, #request-list td.expanded {
 		display: none;		
 	}

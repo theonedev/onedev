@@ -10,5 +10,4 @@ public interface QuerySaveSupport extends Serializable {
 	
 	boolean isSavedQueriesVisible();
 	
-	void showSavedQueries(AjaxRequestTarget target);
 }

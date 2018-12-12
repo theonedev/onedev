@@ -18,8 +18,8 @@ import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.IssueSetting;
+import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
@@ -214,11 +214,6 @@ public class IssueListPage extends IssuesPage {
 						return savedQueries.isVisible();
 					}
 
-					@Override
-					public void showSavedQueries(AjaxRequestTarget target) {
-						savedQueries.show(target);
-					}
-					
 				};
 			}
 

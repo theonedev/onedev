@@ -62,9 +62,9 @@ onedev.server.revisionDiff = {
 		if ($(".diff-mode-split>.revision-diff").length != 0)
 			additionalWidth++;
 
-		$(".revision-diff").removeClass("additionalWidth1")
-				.removeClass("additionalWidth2").removeClass("additionalWidth3")
-				.addClass("additionalWidth" + additionalWidth);
+		$(".revision-diff").removeClass("additionalWidth1").removeClass("additionalWidth2").removeClass("additionalWidth3");
+		if (additionalWidth != 0)
+			$(".revision-diff").addClass("additionalWidth" + additionalWidth);
 
 		var $detail = $(".revision-diff>.body>.detail");
 		var $comment = $detail.children(".comment");

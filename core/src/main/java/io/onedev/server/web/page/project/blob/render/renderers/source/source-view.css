@@ -28,9 +28,9 @@
 .source-view>.comment>.ui-resizable-handle {
 	position: absolute;
 	border-right: 1px solid #E0E0E0;
-	background: #EEE url(vgrabber.png) no-repeat scroll right center;
+	background: #F2F2F2 url(vgrabber.png) no-repeat scroll center center;
     cursor: e-resize;
-    width: 4px;
+    width: 8px;
     right: 0;
     top: 0;
 }
@@ -56,9 +56,9 @@
 .source-view>.outline>.ui-resizable-handle {
 	position: absolute;
 	border-left: 1px solid #E0E0E0;
-	background: #EEE url(vgrabber.png) no-repeat scroll left center;
+	background: #F2F2F2 url(vgrabber.png) no-repeat scroll center center;
     cursor: w-resize;
-    width: 4px;
+    width: 8px;
     left: 0;
     top: 0;
 }
@@ -67,12 +67,12 @@
 }
 .source-view>.outline>.content>.head {
 	font-size: 16px;
-	padding: 4px 8px;
+	padding: 4px 8px 4px 12px;
 	background: #F2F2F2;
 }
 .source-view>.outline>.content>.body {
 	font-size: 13px;
-	padding: 4px;
+	padding: 4px 4px 4px 8px;
 	overflow: auto; 
 }
 .source-view>.outline>.content>.body .tree-content.active {

@@ -13,7 +13,9 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -115,24 +117,28 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	}
 
 	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		if (event.getPayload() instanceof SavedQueriesOpened) {
+			SavedQueriesOpened savedQueriesOpened = (SavedQueriesOpened) event.getPayload();
+			toggle(savedQueriesOpened.getHandler());
+		}
+	}
+	
+	@Override
 	protected void onConfigure() {
 		super.onConfigure();
 		setVisible(!closed);
 	}
 
-	private void toggle(AjaxRequestTarget target) {
+	private void toggle(IPartialPageRequestHandler handler) {
 		WebResponse response = (WebResponse) RequestCycle.get().getResponse();
 		Cookie cookie = new Cookie(getCookieName(), closed?"no":"yes");
 		cookie.setPath("/");
 		cookie.setMaxAge(Integer.MAX_VALUE);
 		response.addCookie(cookie);
 		closed = !closed;
-		target.add(this);
-	}
-	
-	public void show(AjaxRequestTarget target) {
-		if (closed)
-			toggle(target);
+		handler.add(this);
 	}
 	
 	@Override

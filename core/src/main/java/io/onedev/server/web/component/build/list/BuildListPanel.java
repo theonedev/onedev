@@ -11,6 +11,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
@@ -55,6 +56,7 @@ import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.page.project.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.VisibleVisitor;
@@ -154,7 +156,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().showSavedQueries(target);
+				send(getPage(), Broadcast.BREADTH, new SavedQueriesOpened(target));
 				target.add(this);
 			}
 			

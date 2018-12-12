@@ -1,5 +1,5 @@
 body.ProjectBlobPage {
-	min-width: 600px;
+	min-width: 768px;
 }
 body.ProjectBlobPage.additionalWidth1 {
 	min-width: 900px;
@@ -88,14 +88,14 @@ body.ProjectBlobPage.additionalWidth3 {
 	font-size: 13px;
 }
 #project-blob>.search-result {
-	height: 150px;
-	border-top: 1px solid #CCC;
+	height: 200px;
+	border-top: 1px solid #E0E0E0;
 	top: 0 !important;
 }
 #project-blob>.search-result>.ui-resizable-handle {
-	background: #EEE url(hgrabber.png) no-repeat scroll center top;
+	background: #F2F2F2 url(hgrabber.png) no-repeat scroll center center;
     cursor: n-resize;
-    height: 4px;
+    height: 8px;
     top: 0;
     position: relative;
 }

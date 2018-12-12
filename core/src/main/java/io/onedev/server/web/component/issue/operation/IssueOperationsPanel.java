@@ -13,6 +13,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.event.Broadcast;
+import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -45,6 +47,8 @@ import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
+import io.onedev.server.web.component.moreinfoside.MoreInfoSideClosed;
+import io.onedev.server.web.component.moreinfoside.MoreInfoSideOpened;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -200,6 +204,27 @@ public abstract class IssueOperationsPanel extends Panel {
 			query = null;
 		
 		add(newCreateIssueButton("newIssue", query));
+		
+		add(new AjaxLink<Void>("moreInfo") {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				if (event.getPayload() instanceof MoreInfoSideClosed) {
+					MoreInfoSideClosed moreInfoSideClosed = (MoreInfoSideClosed) event.getPayload();
+					setVisible(true);
+					moreInfoSideClosed.getHandler().add(this);
+				}
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				setVisible(false);
+				target.add(this);
+				send(getPage(), Broadcast.BREADTH, new MoreInfoSideOpened(target));
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		newEmptyActionOptions(null);
 	}

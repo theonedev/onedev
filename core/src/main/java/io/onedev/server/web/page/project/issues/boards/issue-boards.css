@@ -6,10 +6,13 @@
 }
 
 .board-menu {
-	padding: 8px 26px;
+	padding: 20px;
 }
 .milestone-menu {
 	padding: 8px 12px;
+}
+.board-menu table {
+	margin-bottom: 0;
 }
 .board-menu table td, .milestone-menu table td {
 	padding: 4px 0;
@@ -22,7 +25,7 @@
 
 .administrative .board-menu, .administrative .milestone-menu {
 	min-width: 300px;
-	padding: 8px 12px;
+	padding: 20px;
 }
 
 .board-menu>a, .milestone-menu>a {
@@ -163,28 +166,38 @@
 	font-size: 14px;
 	margin-top: -2px;
 }
+.board-card-detail>.modal-header {
+	padding-right: 30px;
+	position: relative;
+}
+.board-card-detail>.modal-header>.close {
+	position: absolute;
+	right: 10px;
+	top: 20px;
+}
 .board-card-detail>.body {
 	position: relative;
 	min-height: 600px;
 }
 .board-card-detail>.body>.main {
-	margin-right: 320px;
 	padding: 20px;
 }
 .board-card-detail>.body>.main>div {
 	margin-bottom: 20px;
 }
-.board-card-detail>.body>.side {
+.board-card-detail>.body>.main>div:last-child {
+	margin-bottom: 0;
+}
+.board-card-detail>.body>.more-info-side {
 	position: absolute;
 	top: 0;
-	bottom: 0;
-	right: 0;
 	width: 320px;
-	padding: 20px;
-	background: #FAFAFA;
-	overflow: auto;
-	border-left: 2px solid #E0E0E0;
 	border-radius: 0 0 4px 0;
+}
+.board-card-detail>.body .issue-info>.nav {
+	padding-right: 20px;
+	border-right: 1px solid #D8D8D8;
+	margin-right: 30px;
 }
 @media (max-width: 992px) {
 	.board-card-detail>.body>.main {

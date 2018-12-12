@@ -72,7 +72,7 @@
 	background: #F9F9F9;
 	border-radius: 4px;	
 }
-@media(max-width: 767px) {
+@media(max-width: 991px) {
 	.issue-activities>table>tbody>tr>td.avatar .avatar {
 		width: 24px;
 		height: 24px;

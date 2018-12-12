@@ -67,7 +67,7 @@
 	border-bottom: 1px solid #EEE;
 }
 
-@media(max-width: 767px) {
+@media(max-width: 991px) {
 	#project-commits li.commit>.actions {
 		display: none;
 	}

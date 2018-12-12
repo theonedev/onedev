@@ -112,8 +112,22 @@
 	margin-bottom: 20px;
 }
 
-@media(max-width: 767px) {
+@media(max-width: 991px) {
 	.code-comments th.expanded, .code-comments td.expanded {
 		display: none;		
+	}
+	.code-comment>.section>.user-avatar img {
+		width: 24px;
+		height: 24px;
+	}
+	.code-comment>.section>.detail {
+		padding-left: 32px;
+	}
+	.code-comment>.section>.detail>.body {
+		padding-top: 12px;
+		margin-left: -26px;
+	}
+	.code-comment>.section>.detail>.foot {
+		margin-left: -26px;
 	}
 }

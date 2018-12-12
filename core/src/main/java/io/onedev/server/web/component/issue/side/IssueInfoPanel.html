@@ -1,5 +1,5 @@
 <wicket:panel>
-	<div class="issue-side">
+	<div class="issue-info">
 		<div wicket:id="issueNav" class="nav"></div>
 		<div wicket:id="fields" class="fields"></div>
 		<div class="milestone">
@@ -51,7 +51,7 @@
 		<form wicket:id="form" class="fields-edit leave-confirm">
 			<div wicket:id="editor"></div>
 			<div class="actions">
-				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save"></input>
+				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">
 				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
 			</div>
 		</form>
@@ -63,7 +63,7 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="milestoneEditFrag">
 		<form wicket:id="form">
-			<input wicket:id="milestone" type="hidden" class="form-control"></input>
+			<input wicket:id="milestone" type="hidden" class="form-control">
 			<div class="actions">
 				<a wicket:id="save" class="dirty-aware btn btn-primary btn-sm">Save</a>
 				<a wicket:id="cancel" class="btn btn-default btn-sm">Cancel</a>

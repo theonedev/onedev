@@ -15,7 +15,7 @@ public class JQueryUIResourceReference extends JavaScriptResourceReference {
 	private static final long serialVersionUID = 1L;
 
 	public JQueryUIResourceReference() {
-		super(JQueryUIResourceReference.class, "jquery-ui.min.js");
+		super(JQueryUIResourceReference.class, "jquery.ui.touch-punch.min.js");
 	}
 
 	@Override
@@ -23,6 +23,8 @@ public class JQueryUIResourceReference extends JavaScriptResourceReference {
 		List<HeaderItem> dependencies = new ArrayList<>();
 		dependencies.add(JavaScriptHeaderItem.forReference(
 				Application.get().getJavaScriptLibrarySettings().getJQueryReference()));
+		dependencies.add(JavaScriptHeaderItem.forReference(new JavaScriptResourceReference(
+				JQueryUIResourceReference.class, "jquery-ui.min.js")));
 		dependencies.add(CssHeaderItem.forReference(
 				new CssResourceReference(JQueryUIResourceReference.class, "jquery-ui.min.css")));
 		return dependencies;

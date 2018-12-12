@@ -210,11 +210,6 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 						return savedQueries.isVisible();
 					}
 
-					@Override
-					public void showSavedQueries(AjaxRequestTarget target) {
-						savedQueries.show(target);
-					}
-					
 				};
 			}
 			

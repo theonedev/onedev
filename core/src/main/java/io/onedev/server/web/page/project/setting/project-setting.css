@@ -9,6 +9,14 @@ body.BranchProtectionPage, body.WebHooksPage {
 		padding-left: 0 !important;
 	}
 }
+@media(max-width: 991px) {
+    ul.nav-tabs>li.collapsed {
+        display: block;
+    }
+    ul.nav-tabs>li.expanded {
+        display: none;
+    }
+}
 #project-setting>.sidebar {
 	left: 240px;
 	background: white;
@@ -34,7 +42,7 @@ body.BranchProtectionPage, body.WebHooksPage {
 #project-setting .general-setting form .delete {
 	margin-right: 0;
 }
-#project-setting .panel-list .drag-handle {
+#project-setting .panel-list .drag-indicator {
 	margin-right: 8px;
 }
 #project-setting .panel-list .panel-heading a {

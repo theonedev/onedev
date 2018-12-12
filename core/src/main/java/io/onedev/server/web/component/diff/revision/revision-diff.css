@@ -105,7 +105,7 @@
 	position: relative;
 }
 .revision-diff>.body>.detail>.comment {
-	border: 1px solid #DDD;
+	border: 1px solid #E0E0E0;
 	margin-right: 12px;
 	padding-right: 3px;	
 	background: white;
@@ -130,9 +130,9 @@
 }
 .revision-diff>.body>.detail>.comment>.ui-resizable-handle {
 	position: absolute;
-	background: #EEE url(vgrabber.png) no-repeat scroll right center;
+	background: #F2F2F2 url(vgrabber.png) no-repeat scroll center center;
     cursor: e-resize;
-    width: 3px;
+    width: 8px;
     right: 0;
     top: 0;
 }

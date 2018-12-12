@@ -115,8 +115,5 @@ onedev.server.issueBoards = {
 	markAccepted: function(issueId, accepted) {
 		var $card = $("#issue-boards .column .body .ui-draggable.issue-dragging[data-issue='" + issueId + "']");
 		$card.data("accepted", accepted);
-	}, 
-	onCardDetailLoad: function(containerId) { 
-		new PerfectScrollbar($("#" + containerId + ">.board-card-detail>.body>.side")[0]).update();
-	}
+	} 
 }

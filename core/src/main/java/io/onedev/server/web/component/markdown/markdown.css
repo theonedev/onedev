@@ -1,9 +1,9 @@
-@media(max-width: 767px) {
+@media(max-width: 991px) {
 	.markdown-editor .normal-mode {
 		display: none;
 	}
 }
-@media(min-width: 768px) {
+@media(min-width: 992px) {
 	.markdown-editor.compact-mode .normal-mode, 
 	.markdown-editor.normal-mode .compact-mode {
 		display: none;
@@ -69,10 +69,10 @@ body.fullscreen {
 	left: 4px;
 }
 .markdown-editor .ui-resizable-handle {
-	background: #EEE url(hgrabber.png) no-repeat scroll center top;
+	background: #EEE url(hgrabber.png) no-repeat scroll center center;
     cursor: s-resize;
-    height: 2px;
-    bottom: -3px;
+    height: 8px;
+    bottom: -8px;
 }
 
 .markdown-editor>.head>.emojis {

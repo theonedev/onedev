@@ -1,30 +1,41 @@
-body.IssueDetailPage {
-	min-width: 760px;
+#issue-detail>.main>div {
+	margin-bottom: 20px;
 }
+#issue-detail>.main>div:last-child {
+	margin-bottom: 0;
+}
+#issue-detail .issue-info>.nav {
+	padding-right: 20px;
+	border-right: 1px solid #D8D8D8;
+	margin-right: 30px;
+}
+
 @media(max-width: 1090px) {
     ul.nav-tabs>li.collapsed {
         display: block;
     }
     ul.nav-tabs>li.expanded {
         display: none;
-    }
+	}
 }
-#issue-detail {
-	display: table;
-	width: 100%;
-}
-#issue-detail>* {
-	display: table-cell;
-}
-#issue-detail>.main {
-	padding-right: 20px;
-}
-#issue-detail>.main>div {
-	margin-bottom: 20px;
-}
-#issue-detail>.side {
-	width: 360px;
-	padding: 20px;
-	background: #F9F9F9;
-	border-radius: 4px;
+
+@media(min-width: 1150px) {
+	#issue-detail>.main {
+		padding-right: 360px;
+	}
+	#issue-detail .more-info-side {
+		box-shadow: none;
+		border-left-width: 2px;
+	}
+	#issue-detail .more-info-side.closed {
+		display: block;
+	}
+	#issue-detail .issue-operations a.more-info, #issue-detail .more-info-side>a.close {
+		display: none;
+	}
+	#issue-detail .issue-info .nav {
+		padding-right: 0;
+		border-right: none;
+		margin-right: 0;
+	}
 }

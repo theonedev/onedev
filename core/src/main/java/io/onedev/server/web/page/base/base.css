@@ -7,8 +7,8 @@ body {
 .pointer {
 	cursor: pointer;
 }
-.drag-handle {
-	cursor: move;
+.drag-indicator {
+	color: #999;
 }
 
 .has-error.form-control {
@@ -671,7 +671,7 @@ a.disabled, a[disabled="disabled"] {
 	position: relative;
 	top: 0;
 }
-.def-list table>tbody>tr>td:first-child>div>.drag-handle {
+.def-list table>tbody>tr>td:first-child>div>.drag-indicator {
 	position: absolute;
 	left: 6px;
 	top: 10px;
@@ -685,7 +685,7 @@ a.disabled, a[disabled="disabled"] {
 }
 @media(max-width: 767px) {
 	.floating.side.def-detail {
-		width: 300px;
+		width: 360px;
 	}
 }
 

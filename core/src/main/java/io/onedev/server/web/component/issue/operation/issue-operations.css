@@ -3,6 +3,8 @@
 }
 .issue-operations>.state-and-actions {
 	margin-bottom: 12px;
+	padding-right: 30px;
+	position: relative;
 }
 .issue-operations>.state-and-actions>.issue-state {
 	font-size: 20px;
@@ -10,4 +12,13 @@
 .issue-operations>.state-and-actions>* {
 	margin-right: 10px;
 	margin-bottom: 8px;
+}
+.issue-operations>.state-and-actions>.more-info {
+	position: absolute;
+	right: 0;
+	top: -3px;
+	font-size: 24px;
+	margin: 0;
+	color: #666;
+	transform: rotate(-90deg);
 }

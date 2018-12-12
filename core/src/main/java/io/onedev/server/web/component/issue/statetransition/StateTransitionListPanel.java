@@ -158,7 +158,7 @@ public abstract class StateTransitionListPanel extends Panel {
 				target.add(StateTransitionListPanel.this);
 			}
 			
-		}.sortable("tbody").handle(".drag-handle").helperClass("sort-helper"));
+		}.sortable("tbody").helperClass("sort-helper"));
 		
 		setOutputMarkupId(true);
 	}

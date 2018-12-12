@@ -112,7 +112,7 @@
 	margin-bottom: 12px;
 }
 
-@media(max-width: 767px) {
+@media(max-width: 991px) {
 	#request-detail>.main>.activities .activity>td.avatar .avatar {
 		width: 24px;
 		height: 24px;
@@ -123,6 +123,9 @@
 	#request-detail>.main>.activities .activity>td>.body {
 		margin-top: 12px;
 		margin-left: -24px;
+	}
+	#request-detail>.main>.activities .activity td.hash-and-status {
+		display: none;
 	}
 }
 

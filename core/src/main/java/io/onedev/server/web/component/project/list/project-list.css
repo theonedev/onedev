@@ -1,4 +1,4 @@
-@media(max-width: 767px) {
+@media(max-width: 991px) {
 	table.project-list th.expanded, table.project-list td.expanded {
 		display: none;
 	} 

@@ -20,6 +20,7 @@
 					<a wicket:id="user"></a> wants to merge into <a wicket:id="target" class="branch"></a> 
 					from <a wicket:id="source" class="branch"></a> <span wicket:id="date"></span>
 				</div>
+				<a wicket:id="moreInfo" class="more-info" title="More info"><span class="glyphicon glyphicon-open"></span></a>
 			</div>
 			<div wicket:id="requestSummary" class="summary">
 				<div wicket:id="discardedNote" class="discarded alert alert-danger">
@@ -78,38 +79,7 @@
 			<ul wicket:id="requestTabs" class="tabs nav nav-tabs"></ul>
 			<wicket:child></wicket:child>
 		</div>
-		<div wicket:id="side" class="side">
-			<div wicket:id="requestNav" class="nav"></div>
-			<wicket:enclosure child="reviews">
-			<div class="reviews">
-				<div class="head">Reviews</div>
-				<div wicket:id="reviews" class="body"></div>
-			</div>
-			</wicket:enclosure>
-			<wicket:enclosure child="builds">
-			<div class="builds">
-				<div wicket:id="buildsTitle" class="head">Builds</div> 
-				<div class="body">
-					<div wicket:id="builds"></div>
-				</div>
-			</div>
-			</wicket:enclosure>
-			<div wicket:id="mergeStrategy" class="merge-strategy">
-				<div class="head">Merge Strategy</div>
-				<div class="body">
-					<select wicket:id="editor" class="form-control"></select> 
-					<span wicket:id="viewer"></span>
-					<div wicket:id="help" class="help-block"></div>
-				</div>
-			</div>
-			<div wicket:id="watches" class="watches"></div>
-			<div wicket:id="manage" class="manage">
-				<a wicket:id="synchronize" class="check btn btn-default">Synchronize</a>
-				<p class="help-block">In case the pull request status is out of sync with underlying 
-				repository, you may synchronize them manually here</p>
-				<a wicket:id="delete" class="delete btn btn-danger">Delete</a>
-			</div>
-		</div>
+		<div wicket:id="moreInfo"></div>
 	</div>
 	<wicket:fragment wicket:id="operationConfirmFrag">
 		<div wicket:id="hint" class="hint"></div>
@@ -122,5 +92,37 @@
 	</wicket:fragment>
 	<wicket:fragment wicket:id="codeCommentsTabLinkFrag">
 		<a wicket:id="link" class="code-comments">Code Comments <i class="fa fa-circle"></i></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="moreInfoFrag">
+		<div wicket:id="requestNav" class="nav"></div>
+		<wicket:enclosure child="reviews">
+		<div class="reviews">
+			<div class="head">Reviews</div>
+			<div wicket:id="reviews" class="body"></div>
+		</div>
+		</wicket:enclosure>
+		<wicket:enclosure child="builds">
+		<div class="builds">
+			<div wicket:id="buildsTitle" class="head">Builds</div> 
+			<div class="body">
+				<div wicket:id="builds"></div>
+			</div>
+		</div>
+		</wicket:enclosure>
+		<div wicket:id="mergeStrategy" class="merge-strategy">
+			<div class="head">Merge Strategy</div>
+			<div class="body">
+				<select wicket:id="editor" class="form-control"></select> 
+				<span wicket:id="viewer"></span>
+				<div wicket:id="help" class="help-block"></div>
+			</div>
+		</div>
+		<div wicket:id="watches" class="watches"></div>
+		<div wicket:id="manage" class="manage">
+			<a wicket:id="synchronize" class="check btn btn-default">Synchronize</a>
+			<p class="help-block">In case the pull request status is out of sync with underlying 
+			repository, you may synchronize them manually here</p>
+			<a wicket:id="delete" class="delete btn btn-danger">Delete</a>
+		</div>
 	</wicket:fragment>
 </wicket:extend>

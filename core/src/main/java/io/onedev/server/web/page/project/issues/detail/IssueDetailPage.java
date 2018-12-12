@@ -36,9 +36,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
-import io.onedev.server.web.component.issue.side.IssueSidePanel;
+import io.onedev.server.web.component.issue.side.IssueInfoPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.moreinfoside.MoreInfoSidePanel;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -111,7 +112,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 			protected Component newCreateIssueButton(String componentId, String templateQuery) {
 				return new BookmarkablePageLink<Void>(componentId, NewIssuePage.class, NewIssuePage.paramsOf(getProject(), templateQuery));
 			}
-			
+
 		});
 
 		List<Tab> tabs = new ArrayList<>();
@@ -143,49 +144,56 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
 		
-		add(new IssueSidePanel("side") {
+		add(new MoreInfoSidePanel("moreInfo") {
 
 			@Override
-			protected Issue getIssue() {
-				return IssueDetailPage.this.getIssue();
-			}
-
-			@Override
-			protected QueryPositionSupport<Issue> getQueryPositionSupport() {
-				return new QueryPositionSupport<Issue>() {
+			protected Component newContent(String componentId) {
+				return new IssueInfoPanel(componentId) {
 
 					@Override
-					public QueryPosition getPosition() {
-						return position;
+					protected Issue getIssue() {
+						return IssueDetailPage.this.getIssue();
 					}
 
 					@Override
-					public void navTo(AjaxRequestTarget target, Issue entity, QueryPosition position) {
-						PageParameters params = IssueDetailPage.paramsOf(entity, position);
-						setResponsePage(getPageClass(), params);
+					protected QueryPositionSupport<Issue> getQueryPositionSupport() {
+						return new QueryPositionSupport<Issue>() {
+
+							@Override
+							public QueryPosition getPosition() {
+								return position;
+							}
+
+							@Override
+							public void navTo(AjaxRequestTarget target, Issue entity, QueryPosition position) {
+								PageParameters params = IssueDetailPage.paramsOf(entity, position);
+								setResponsePage(getPageClass(), params);
+							}
+							
+						};
+					}
+
+					@Override
+					protected Component newDeleteLink(String componentId) {
+						Link<Void> deleteLink = new Link<Void>(componentId) {
+
+							@Override
+							public void onClick() {
+								OneDev.getInstance(IssueManager.class).delete(SecurityUtils.getUser(), getIssue());
+								PageParameters params = IssueListPage.paramsOf(
+										getProject(), 
+										QueryPosition.getQuery(position), 
+										QueryPosition.getPage(position) + 1); 
+								setResponsePage(IssueListPage.class, params);
+							}
+							
+						};
+						deleteLink.add(new ConfirmOnClick("Do you really want to delete this issue?"));
+						deleteLink.setVisible(SecurityUtils.canAdministrate(getIssue().getProject().getFacade()));
+						return deleteLink;
 					}
 					
 				};
-			}
-
-			@Override
-			protected Component newDeleteLink(String componentId) {
-				Link<Void> deleteLink = new Link<Void>(componentId) {
-
-					@Override
-					public void onClick() {
-						OneDev.getInstance(IssueManager.class).delete(SecurityUtils.getUser(), getIssue());
-						PageParameters params = IssueListPage.paramsOf(
-								getProject(), 
-								QueryPosition.getQuery(position), 
-								QueryPosition.getPage(position) + 1); 
-						setResponsePage(IssueListPage.class, params);
-					}
-					
-				};
-				deleteLink.add(new ConfirmOnClick("Do you really want to delete this issue?"));
-				deleteLink.setVisible(SecurityUtils.canAdministrate(getIssue().getProject().getFacade()));
-				return deleteLink;
 			}
 			
 		});

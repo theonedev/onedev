@@ -94,6 +94,9 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
+import io.onedev.server.web.component.moreinfoside.MoreInfoSideClosed;
+import io.onedev.server.web.component.moreinfoside.MoreInfoSideOpened;
+import io.onedev.server.web.component.moreinfoside.MoreInfoSidePanel;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.review.ReviewListPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
@@ -390,92 +393,99 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			
 		});
 		
-		WebMarkupContainer side = new WebMarkupContainer("side") {
+		add(new MoreInfoSidePanel("moreInfo") {
 
 			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-
-				if (event.getPayload() instanceof PageDataChanged) {
-					PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-					IPartialPageRequestHandler partialPageRequestHandler = pageDataChanged.getHandler();
-					partialPageRequestHandler.add(this);
-				}
-				
-			}
-			
-		};
-		side.setOutputMarkupId(true);
-		add(side);
-		
-		side.add(new EntityNavPanel<PullRequest>("requestNav") {
-
-			@Override
-			protected EntityQuery<PullRequest> parse(String queryString) {
-				return PullRequestQuery.parse(getProject(), queryString, true);
-			}
-
-			@Override
-			protected PullRequest getEntity() {
-				return getPullRequest();
-			}
-
-			@Override
-			protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count) {
-				return getPullRequestManager().query(getProject(), getLoginUser(), query, offset, count);
-			}
-
-			@Override
-			protected QueryPositionSupport<PullRequest> getQueryPositionSupport() {
-				return new QueryPositionSupport<PullRequest>() {
+			protected Component newContent(String componentId) {
+				Fragment fragment = new Fragment(componentId, "moreInfoFrag", PullRequestDetailPage.this) {
 
 					@Override
-					public QueryPosition getPosition() {
-						return position;
-					}
+					public void onEvent(IEvent<?> event) {
+						super.onEvent(event);
 
-					@Override
-					public void navTo(AjaxRequestTarget target, PullRequest entity, QueryPosition position) {
-						PageParameters params = PullRequestDetailPage.paramsOf(request, position);
-						setResponsePage(getPageClass(), params);
+						if (event.getPayload() instanceof PageDataChanged) {
+							PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
+							IPartialPageRequestHandler partialPageRequestHandler = pageDataChanged.getHandler();
+							partialPageRequestHandler.add(this);
+						}
+						
 					}
 					
 				};
+				fragment.add(new EntityNavPanel<PullRequest>("requestNav") {
+
+					@Override
+					protected EntityQuery<PullRequest> parse(String queryString) {
+						return PullRequestQuery.parse(getProject(), queryString, true);
+					}
+
+					@Override
+					protected PullRequest getEntity() {
+						return getPullRequest();
+					}
+
+					@Override
+					protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count) {
+						return getPullRequestManager().query(getProject(), getLoginUser(), query, offset, count);
+					}
+
+					@Override
+					protected QueryPositionSupport<PullRequest> getQueryPositionSupport() {
+						return new QueryPositionSupport<PullRequest>() {
+
+							@Override
+							public QueryPosition getPosition() {
+								return position;
+							}
+
+							@Override
+							public void navTo(AjaxRequestTarget target, PullRequest entity, QueryPosition position) {
+								PageParameters params = PullRequestDetailPage.paramsOf(request, position);
+								setResponsePage(getPageClass(), params);
+							}
+							
+						};
+					}
+					
+				});
+				
+				fragment.add(newMergeStrategyContainer());
+				fragment.add(new ReviewListPanel("reviews", requestModel));
+				
+				BranchProtection protection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
+				if (protection != null && !protection.getConfigurations().isEmpty() && protection.isBuildMerges()) {
+					fragment.add(new Label("buildsTitle", "Builds (On Merged Commit)"));
+				} else {
+					fragment.add(new Label("buildsTitle", "Builds"));
+				}
+				fragment.add(new PullRequestBuildsPanel("builds", requestModel));
+				
+				fragment.add(new EntityWatchesPanel("watches") {
+
+					@Override
+					protected void onSaveWatch(EntityWatch watch) {
+						OneDev.getInstance(PullRequestWatchManager.class).save((PullRequestWatch) watch);
+					}
+
+					@Override
+					protected void onDeleteWatch(EntityWatch watch) {
+						OneDev.getInstance(PullRequestWatchManager.class).delete((PullRequestWatch) watch);
+					}
+
+					@Override
+					protected AbstractEntity getEntity() {
+						return getPullRequest();
+					}
+					
+				});
+				
+				fragment.add(newManageContainer());
+
+				fragment.setOutputMarkupId(true);
+				return fragment;
 			}
 			
 		});
-		
-		side.add(newMergeStrategyContainer());
-		side.add(new ReviewListPanel("reviews", requestModel));
-		
-		BranchProtection protection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
-		if (protection != null && !protection.getConfigurations().isEmpty() && protection.isBuildMerges()) {
-			side.add(new Label("buildsTitle", "Builds (On Merged Commit)"));
-		} else {
-			side.add(new Label("buildsTitle", "Builds"));
-		}
-		side.add(new PullRequestBuildsPanel("builds", requestModel));
-		
-		side.add(new EntityWatchesPanel("watches") {
-
-			@Override
-			protected void onSaveWatch(EntityWatch watch) {
-				OneDev.getInstance(PullRequestWatchManager.class).save((PullRequestWatch) watch);
-			}
-
-			@Override
-			protected void onDeleteWatch(EntityWatch watch) {
-				OneDev.getInstance(PullRequestWatchManager.class).delete((PullRequestWatch) watch);
-			}
-
-			@Override
-			protected AbstractEntity getEntity() {
-				return getPullRequest();
-			}
-			
-		});
-		
-		side.add(newManageContainer());
 	}
 	
 	private WebMarkupContainer newManageContainer() {
@@ -654,6 +664,28 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				
 			});
 		}
+		
+		statusAndBranchesContainer.add(new AjaxLink<Void>("moreInfo") {
+
+			@Override
+			public void onEvent(IEvent<?> event) {
+				super.onEvent(event);
+				if (event.getPayload() instanceof MoreInfoSideClosed) {
+					MoreInfoSideClosed moreInfoSideClosed = (MoreInfoSideClosed) event.getPayload();
+					setVisible(true);
+					moreInfoSideClosed.getHandler().add(this);
+				}
+			}
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				setVisible(false);
+				target.add(this);
+				send(getPage(), Broadcast.BREADTH, new MoreInfoSideOpened(target));
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
+		
 		return statusAndBranchesContainer;
 	}
 

@@ -283,7 +283,7 @@ public class IssueBoardsPage extends IssuesPage {
 
 						@Override
 						protected void populateItem(ListItem<BoardSpec> item) {
-							item.add(new WebMarkupContainer("dragHandle").setVisible(SecurityUtils.canAdministrate(getProject().getFacade())));
+							item.add(new WebMarkupContainer("dragIndicator").setVisible(SecurityUtils.canAdministrate(getProject().getFacade())));
 							
 							PageParameters params = IssueBoardsPage.paramsOf(
 									getProject(), item.getModelObject(), getMilestone(), 
@@ -332,25 +332,24 @@ public class IssueBoardsPage extends IssuesPage {
 								}
 
 							}.add(new ConfirmOnClick("Do you really want to delete board '" + item.getModelObject().getName() + "'?") ));
-							
-							if (item.getModelObject().getName().equals(getBoard().getName()))
-								item.add(AttributeAppender.append("class", "active"));
 						}
 						
 					});
 					
-					menuFragment.add(new SortBehavior() {
-						
-						@Override
-						protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
-							BoardSpec board = boards.get(from.getItemIndex());
-							boards.set(from.getItemIndex(), boards.set(to.getItemIndex(), board));
-							getProject().getIssueSetting().setBoardSpecs(boards);
-							OneDev.getInstance(ProjectManager.class).save(getProject());
-							target.add(menuFragment);
-						}
-						
-					}.handle(".drag-handle").items(".board"));
+					if (SecurityUtils.canAdministrate(getProject().getFacade())) {
+						menuFragment.add(new SortBehavior() {
+							
+							@Override
+							protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+								BoardSpec board = boards.get(from.getItemIndex());
+								boards.set(from.getItemIndex(), boards.set(to.getItemIndex(), board));
+								getProject().getIssueSetting().setBoardSpecs(boards);
+								OneDev.getInstance(ProjectManager.class).save(getProject());
+								target.add(menuFragment);
+							}
+							
+						}.items(".board"));
+					}
 					
 					menuFragment.add(new CreateBoardLink("newBoard") {
 

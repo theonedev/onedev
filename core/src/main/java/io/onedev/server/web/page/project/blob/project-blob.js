@@ -36,8 +36,9 @@ onedev.server.projectBlob = {
 			if ($(".source-view>.outline").length != 0)
 				additionalWidth ++;
 			
-			$("body").removeClass("additionalWidth1").removeClass("additionalWidth2")
-					.removeClass("additionalWidth3").addClass("additionalWidth" + additionalWidth);
+			$("body").removeClass("additionalWidth1").removeClass("additionalWidth2").removeClass("additionalWidth3");
+			if (additionalWidth != 0)
+				$("body").addClass("additionalWidth" + additionalWidth);
 			
 			var $head = $("#project-blob>.head");
 			var $revisionPicker = $head.find(">.revision-picker");

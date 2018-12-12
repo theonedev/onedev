@@ -203,11 +203,6 @@ public class BuildListPage extends ProjectPage {
 						return savedQueries.isVisible();
 					}
 
-					@Override
-					public void showSavedQueries(AjaxRequestTarget target) {
-						savedQueries.show(target);
-					}
-					
 				};
 			}
 

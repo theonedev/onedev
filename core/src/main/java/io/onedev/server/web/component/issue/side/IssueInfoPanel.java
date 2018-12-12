@@ -71,11 +71,11 @@ import io.onedev.server.web.util.QueryPositionSupport;
 import io.onedev.server.web.util.ajaxlistener.AppendLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
-public abstract class IssueSidePanel extends Panel {
+public abstract class IssueInfoPanel extends Panel {
 
 	private static final int MAX_DISPLAY_AVATARS = 20;
 	
-	public IssueSidePanel(String id) {
+	public IssueInfoPanel(String id) {
 		super(id);
 	}
 
@@ -102,7 +102,7 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected QueryPositionSupport<Issue> getQueryPositionSupport() {
-				return IssueSidePanel.this.getQueryPositionSupport();
+				return IssueInfoPanel.this.getQueryPositionSupport();
 			}
 			
 		});
@@ -131,6 +131,8 @@ public abstract class IssueSidePanel extends Panel {
 		});
 		
 		add(newDeleteLink("delete"));
+		
+		setOutputMarkupId(true);
 	}
 
 	private Component newFieldsContainer() {
@@ -169,7 +171,7 @@ public abstract class IssueSidePanel extends Panel {
 
 					@Override
 					protected Issue getIssue() {
-						return IssueSidePanel.this.getIssue();
+						return IssueInfoPanel.this.getIssue();
 					}
 
 					@Override
@@ -201,7 +203,7 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("fields", "fieldsEditFrag", IssueSidePanel.this);
+				Fragment fragment = new Fragment("fields", "fieldsEditFrag", IssueInfoPanel.this);
 				Form<?> form = new Form<Void>("form");
 
 				Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getProject());
@@ -220,7 +222,7 @@ public abstract class IssueSidePanel extends Panel {
 						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues, SecurityUtils.getUser());
 						
 						Component fieldsContainer = newFieldsContainer();
-						IssueSidePanel.this.replace(fieldsContainer);
+						IssueInfoPanel.this.replace(fieldsContainer);
 						target.add(fieldsContainer);
 					}
 
@@ -237,7 +239,7 @@ public abstract class IssueSidePanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Component fieldsContainer = newFieldsContainer();
-						IssueSidePanel.this.replace(fieldsContainer);
+						IssueInfoPanel.this.replace(fieldsContainer);
 						target.add(fieldsContainer);
 					}
 					
@@ -245,7 +247,7 @@ public abstract class IssueSidePanel extends Panel {
 				fragment.add(form);
 				fragment.setOutputMarkupId(true);
 				
-				IssueSidePanel.this.replace(fragment);
+				IssueInfoPanel.this.replace(fragment);
 				target.add(fragment);
 			}
 			
@@ -289,7 +291,7 @@ public abstract class IssueSidePanel extends Panel {
 			
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment =  new Fragment("milestone", "milestoneEditFrag", IssueSidePanel.this);
+				Fragment fragment =  new Fragment("milestone", "milestoneEditFrag", IssueInfoPanel.this);
 				Form<?> form = new Form<Void>("form");
 				
 				List<String> milestones = getProject().getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
@@ -314,7 +316,7 @@ public abstract class IssueSidePanel extends Panel {
 						Milestone milestone = getProject().getMilestone(milestoneName);
 						getIssueChangeManager().changeMilestone(getIssue(), milestone, SecurityUtils.getUser());
 						Component container = newMilestoneContainer();
-						IssueSidePanel.this.replace(container);
+						IssueInfoPanel.this.replace(container);
 						target.add(container);
 					}
 
@@ -324,14 +326,14 @@ public abstract class IssueSidePanel extends Panel {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						Component container = newMilestoneContainer();
-						IssueSidePanel.this.replace(container);
+						IssueInfoPanel.this.replace(container);
 						target.add(container);
 					}
 					
 				});
 				fragment.add(form);
 				fragment.setOutputMarkupId(true);
-				IssueSidePanel.this.replace(fragment);
+				IssueInfoPanel.this.replace(fragment);
 				target.add(fragment);
 			}
 
@@ -490,7 +492,7 @@ public abstract class IssueSidePanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new IssueSideCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new IssueInfoCssResourceReference()));
 	}
 
 	protected abstract Issue getIssue();

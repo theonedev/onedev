@@ -1,7 +1,7 @@
 .search-result>.head {
 	padding: 4px 10px;
 	font-size: 16px;
-	border-bottom: 1px solid #DDD;
+	border-bottom: 1px solid #E0E0E0;
 	background: white;
 }
 .search-result>.head .actions {

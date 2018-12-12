@@ -11,8 +11,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -44,8 +42,9 @@ import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
-import io.onedev.server.web.component.issue.side.IssueSidePanel;
+import io.onedev.server.web.component.issue.side.IssueInfoPanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
+import io.onedev.server.web.component.moreinfoside.MoreInfoSidePanel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
@@ -117,7 +116,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 			protected Component newCreateIssueButton(String componentId, String templateQuery) {
 				return new WebMarkupContainer(componentId).setVisible(false);
 			}
-			
+
 		});
 
 		List<Tab> tabs = new ArrayList<>();
@@ -233,37 +232,44 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		
 		addOrReplace(new Tabbable("tabs", tabs).setOutputMarkupId(true));
 		
-		addOrReplace(new IssueSidePanel("side") {
+		addOrReplace(new MoreInfoSidePanel("moreInfo") {
 
 			@Override
-			protected Issue getIssue() {
-				return CardDetailPanel.this.getIssue();
-			}
-
-			@Override
-			protected QueryPositionSupport<Issue> getQueryPositionSupport() {
-				return CardDetailPanel.this.getQueryPositionSupport();
-			}
-
-			@Override
-			protected Component newDeleteLink(String componentId) {
-				AjaxLink<Void> deleteLink = new AjaxLink<Void>(componentId) {
-
+			protected Component newContent(String componentId) {
+				return new IssueInfoPanel(componentId) {
+					
 					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this issue?"));
+					protected Issue getIssue() {
+						return CardDetailPanel.this.getIssue();
 					}
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
-						OneDev.getInstance(IssueManager.class).delete(SecurityUtils.getUser(), getIssue());
-						onDeletedIssue(target);
+					protected QueryPositionSupport<Issue> getQueryPositionSupport() {
+						return CardDetailPanel.this.getQueryPositionSupport();
+					}
+
+					@Override
+					protected Component newDeleteLink(String componentId) {
+						AjaxLink<Void> deleteLink = new AjaxLink<Void>(componentId) {
+
+							@Override
+							protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+								super.updateAjaxAttributes(attributes);
+								attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this issue?"));
+							}
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								OneDev.getInstance(IssueManager.class).delete(SecurityUtils.getUser(), getIssue());
+								onDeletedIssue(target);
+							}
+							
+						};
+						deleteLink.setVisible(SecurityUtils.canAdministrate(getIssue().getProject().getFacade()));
+						return deleteLink;
 					}
 					
 				};
-				deleteLink.setVisible(SecurityUtils.canAdministrate(getIssue().getProject().getFacade()));
-				return deleteLink;
 			}
 			
 		});
@@ -351,14 +357,6 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
 	}
 	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		String script = String.format("onedev.server.issueBoards.onCardDetailLoad('%s')", getMarkupId());
-		// Use onload to make sure perfect scrollbar working 
-		response.render(OnLoadHeaderItem.forScript(script));
-	}
-
 	protected abstract void onClose(AjaxRequestTarget target);
 	
 	@Nullable

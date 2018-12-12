@@ -32,7 +32,7 @@
 #issue-setting .default-queries th.property-name {
 	width: 30%;
 }
-@media(max-width: 767px) {
+@media(max-width: 991px) {
 	#issue-setting .display-in-issue-list, .field-spec .property-displayInIssueList, 
 	.field-spec-edit .property-displayInIssueList {
 		display: none;

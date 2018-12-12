@@ -1,4 +1,4 @@
-@media(max-width: 767px) {
+@media(max-width: 991px) {
 	.issue-list a.list-fields, 
 	.issue-list th.custom-field, 
 	.issue-list td.custom-field {
