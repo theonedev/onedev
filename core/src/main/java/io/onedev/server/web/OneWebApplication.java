@@ -110,7 +110,7 @@ public class OneWebApplication extends WebApplication {
 						&& !(component instanceof AbstractErrorPage) 
 						&& !(component instanceof BasePage)
 						&& !(component instanceof BrowserInfoPage)) {
-					throw new RuntimeException("Page classes should extend from BasePage.");
+//					throw new RuntimeException("Page classes should extend from BasePage.");
 				}
 			}
 		});

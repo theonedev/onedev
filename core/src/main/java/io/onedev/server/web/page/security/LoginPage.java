@@ -10,8 +10,8 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.CheckBox;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.PasswordTextField;
+import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.slf4j.Logger;
@@ -20,8 +20,8 @@ import org.slf4j.LoggerFactory;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.MailManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.WebSession;
@@ -42,6 +42,7 @@ public class LoginPage extends BasePage {
 	public LoginPage() {
 		if (SecurityUtils.getSubject().isAuthenticated())
 			throw new RestartResponseException(getApplication().getHomePage());
+		setStatelessHint(true);
 	}
 	
 	@Override
@@ -50,7 +51,7 @@ public class LoginPage extends BasePage {
 		
 		add(new NotificationPanel("feedback"));
 		
-		Form<?> form = new Form<Void>("form") {
+		StatelessForm<?> form = new StatelessForm<Void>("form") {
 
 			@Override
 			protected void onSubmit() {

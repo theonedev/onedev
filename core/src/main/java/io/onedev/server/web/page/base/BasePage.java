@@ -127,96 +127,102 @@ public abstract class BasePage extends WebPage {
 		String script = String.format("$('body').addClass('%s');", builder.toString());
 		add(new Label("script", script).setEscapeModelStrings(false));
 		
-		add(new AbstractPostAjaxBehavior() {
-			
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.setMethod(Method.POST);
-			}
-
-			@Override
-			protected void respond(AjaxRequestTarget target) {
-				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				String encodedData = params.getParameterValue("data").toString();
-				
-				byte[] bytes = Base64.decodeBase64(encodedData.getBytes());
-				Serializable data = (Serializable) SerializationUtils.deserialize(bytes);
-				onPopState(target, data);
-				target.appendJavaScript("onedev.server.viewState.getFromHistoryAndSetToView();");
-			}
-			
-			@Override
-			public void renderHead(Component component, IHeaderResponse response) {
-				super.renderHead(component, response);
-
-				String script = String.format("onedev.server.history.init(%s);", 
-						getCallbackFunction(explicit("data"))); 
-				response.render(OnDomReadyHeaderItem.forScript(script));
-			}
-
-		});
-		
 		sessionFeedback = new SessionFeedbackPanel("sessionFeedback");
 		add(sessionFeedback);			
 		sessionFeedback.setOutputMarkupId(true);
-		
-		int sessionTimeout = AppLoader.getInstance(ServletContextHandler.class)
-				.getSessionHandler().getSessionManager().getMaxInactiveInterval();
-		add(new WebMarkupContainer("keepSessionAlive")
-				.add(new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
-		
+
 		add(rootComponents = new RepeatingView("rootComponents"));
 		
-		add(new WebSocketBehavior() {
-
-			@Override
-			protected void onMessage(WebSocketRequestHandler handler, TextMessage message) {
-				super.onMessage(handler, message);
+		if (!getStatelessHint()) {
+			add(new AbstractPostAjaxBehavior() {
 				
-				if (message.getText().startsWith(WebSocketManager.OBSERVABLE_CHANGED)) {
-					String observable = message.getText().substring(WebSocketManager.OBSERVABLE_CHANGED.length()+1);
-					for (WebSocketObserver observer: findWebSocketObservers()) {
-						if (observer.getObservables().contains(observable))
-							observer.onObservableChanged(handler, observable);
-					}
-				} else if (message.getText().equals(WebSocketManager.CONNECTION_OPENED)) {
-					/* 
-					 * re-render interesting parts upon websocket connecting after a page is opened, 
-					 * this is necessary in case some web socket render request is sent between the 
-					 * gap of opening a page and a websocket connection is established. For instance
-					 * when someone creates a pull request, the server will re-render integration 
-					 * preview section of the page after preview is calculated and this may happen 
-					 * before the web socket connection is established. Requiring the page to 
-					 * re-render the integration preview section after connecting will make it 
-					 * displaying correctly    
-					 */
-					for (WebSocketObserver observer: findWebSocketObservers())
-						observer.onConnectionOpened(handler);
-				} 
-		 
-			}
-			
-		});
+				@Override
+				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+					super.updateAjaxAttributes(attributes);
+					attributes.setMethod(Method.POST);
+				}
+
+				@Override
+				protected void respond(AjaxRequestTarget target) {
+					IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
+					String encodedData = params.getParameterValue("data").toString();
 					
-		add(new WebSocketObserver() {
+					byte[] bytes = Base64.decodeBase64(encodedData.getBytes());
+					Serializable data = (Serializable) SerializationUtils.deserialize(bytes);
+					onPopState(target, data);
+					target.appendJavaScript("onedev.server.viewState.getFromHistoryAndSetToView();");
+				}
+				
+				@Override
+				public void renderHead(Component component, IHeaderResponse response) {
+					super.renderHead(component, response);
 
-			@Override
-			public Collection<String> getObservables() {
-				return getWebSocketObservables();
-			}
+					String script = String.format("onedev.server.history.init(%s);", 
+							getCallbackFunction(explicit("data"))); 
+					response.render(OnDomReadyHeaderItem.forScript(script));
+				}
 
-			@Override
-			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				send(BasePage.this, Broadcast.BREADTH, new PageDataChanged(handler));
-			}
-
-			@Override
-			public void onConnectionOpened(IPartialPageRequestHandler handler) {
-				send(BasePage.this, Broadcast.BREADTH, new PageDataChanged(handler, true));
-			}
+			});
 			
-		});
+			int sessionTimeout = AppLoader.getInstance(ServletContextHandler.class)
+					.getSessionHandler().getSessionManager().getMaxInactiveInterval();
+			add(new WebMarkupContainer("keepSessionAlive")
+					.add(new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
+			
+			add(new WebSocketBehavior() {
+
+				@Override
+				protected void onMessage(WebSocketRequestHandler handler, TextMessage message) {
+					super.onMessage(handler, message);
+					
+					if (message.getText().startsWith(WebSocketManager.OBSERVABLE_CHANGED)) {
+						String observable = message.getText().substring(WebSocketManager.OBSERVABLE_CHANGED.length()+1);
+						for (WebSocketObserver observer: findWebSocketObservers()) {
+							if (observer.getObservables().contains(observable))
+								observer.onObservableChanged(handler, observable);
+						}
+					} else if (message.getText().equals(WebSocketManager.CONNECTION_OPENED)) {
+						/* 
+						 * re-render interesting parts upon websocket connecting after a page is opened, 
+						 * this is necessary in case some web socket render request is sent between the 
+						 * gap of opening a page and a websocket connection is established. For instance
+						 * when someone creates a pull request, the server will re-render integration 
+						 * preview section of the page after preview is calculated and this may happen 
+						 * before the web socket connection is established. Requiring the page to 
+						 * re-render the integration preview section after connecting will make it 
+						 * displaying correctly    
+						 */
+						for (WebSocketObserver observer: findWebSocketObservers())
+							observer.onConnectionOpened(handler);
+					} 
+			 
+				}
+				
+			});
+						
+			add(new WebSocketObserver() {
+
+				@Override
+				public Collection<String> getObservables() {
+					return getWebSocketObservables();
+				}
+
+				@Override
+				public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+					send(BasePage.this, Broadcast.BREADTH, new PageDataChanged(handler));
+				}
+
+				@Override
+				public void onConnectionOpened(IPartialPageRequestHandler handler) {
+					send(BasePage.this, Broadcast.BREADTH, new PageDataChanged(handler, true));
+				}
+				
+			});			
+		} else {
+			
+			add(new WebMarkupContainer("keepSessionAlive"));
+		}
+
 	}
 	
 	public FeedbackPanel getSessionFeedback() {
