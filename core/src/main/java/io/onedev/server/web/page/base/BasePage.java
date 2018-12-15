@@ -133,7 +133,7 @@ public abstract class BasePage extends WebPage {
 
 		add(rootComponents = new RepeatingView("rootComponents"));
 		
-		if (!getStatelessHint()) {
+		if (!(getPage() instanceof LoginPage)) {
 			add(new AbstractPostAjaxBehavior() {
 				
 				@Override

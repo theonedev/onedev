@@ -42,7 +42,6 @@ public class LoginPage extends BasePage {
 	public LoginPage() {
 		if (SecurityUtils.getSubject().isAuthenticated())
 			throw new RestartResponseException(getApplication().getHomePage());
-		setStatelessHint(true);
 	}
 	
 	@Override
