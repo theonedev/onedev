@@ -22,7 +22,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.utils.license.LicenseDetail;
 
 @Singleton
 public class DefaultSettingManager extends AbstractEntityManager<Setting> implements SettingManager {
@@ -40,8 +39,6 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	private volatile Long issueSettingId;
 	
 	private volatile Long authenticatorId;
-	
-	private volatile Long licenseId;
 	
 	@Inject
 	public DefaultSettingManager(Dao dao, DataManager dataManager) {
@@ -216,30 +213,4 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 		dao.persist(setting);
 	}
 
-	@Sessional
-	@Override
-	public LicenseDetail getLicense() {
-        Setting setting;
-        if (licenseId == null) {
-    		setting = getSetting(Key.LICENSE);
-    		Preconditions.checkNotNull(setting);
-            licenseId = setting.getId();
-        } else {
-            setting = load(licenseId);
-        }
-        return (LicenseDetail) setting.getValue(); 
-	}
-
-	@Transactional
-	@Override
-	public void saveLicense(LicenseDetail license) {
-		Setting setting = getSetting(Key.LICENSE);
-		if (setting == null) {
-			setting = new Setting();
-			setting.setKey(Key.LICENSE);
-		}
-		setting.setValue(license);
-		dao.persist(setting);
-	}
-	
 }

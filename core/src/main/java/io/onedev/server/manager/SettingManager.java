@@ -10,7 +10,6 @@ import io.onedev.server.model.support.setting.MailSetting;
 import io.onedev.server.model.support.setting.SecuritySetting;
 import io.onedev.server.model.support.setting.SystemSetting;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.utils.license.LicenseDetail;
 
 public interface SettingManager extends EntityManager<Setting> {
 	
@@ -98,10 +97,5 @@ public interface SettingManager extends EntityManager<Setting> {
 	Authenticator getAuthenticator();
 	
 	void saveAuthenticator(@Nullable Authenticator authenticator);
-	
-	@Nullable
-	LicenseDetail getLicense();
-	
-	void saveLicense(@Nullable LicenseDetail license);
 	
 }

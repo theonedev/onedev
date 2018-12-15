@@ -1,37 +1,21 @@
-Software License Agreement for OneDev.
+The MIT License
 
-This is a legal agreement between you and OneDev Pty covering your 
-use of OneDev (the "Software"). Be sure to read the following 
-agreement before using the Software. BY USING THE SOFTWARE, YOU ARE 
-AGREEING TO BE BOUND BY THE TERMS OF THIS AGREEMENT. IF YOU DO NOT 
-AGREE TO THE TERMS OF THIS AGREEMENT, DO NOT USE THE SOFTWARE AND 
-DESTROY ALL COPIES IN YOUR POSSESSION.  
+Copyright (c) 2018 OneDev Pty
 
-The Software is owned by OneDev Pty and is protected by 
-international treaty provisions.  Therefore, you must treat the 
-Software like any other copyrighted material (e.  g., a book or 
-musical recording).  
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-OneDev Pty grants you the right to use OneDev for free for 10 
-named users on unlimited servers. Additional users require license 
-generated from onedev.io account. Licenses generated from single 
-onedev.io account should only be used in a single OneDev instance, 
-except for those used for backup and other non-production purposes. 
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
 
-You may not rent or lease the Software, nor may you modify, adapt, 
-translate, reverse engineer, decompile, or disassemble the Software.  
-If you violate any part of this agreement, your right to use this 
-Software terminates automatically and you must then destroy all copies 
-of the Software in your possession.  
-
-The Software and its related documentation are provided "AS IS" and 
-without warranty of any kind and OneDev Pty expressly disclaims all 
-other warranties, expressed or implied, including, but not limited to, 
-the implied warranties of merchantability and fitness for a particular 
-purpose. Under no circumstances shall OneDev Pty be liable for any 
-incidental, special, or consequential damages that result from the use 
-or inability to use the Software or related documentation, even if 
-OneDev Pty has been advised of the possibility of such damages. In no 
-event shall OneDev Pty liability exceed the license fee paid, if any.  
-
-Copyright (C) 2016-2018 by OneDev Pty All rights reserved. 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE

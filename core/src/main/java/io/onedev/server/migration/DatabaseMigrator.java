@@ -838,4 +838,17 @@ public class DatabaseMigrator {
 		}
 	}	
 	
+	private void migrate18(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("LICENSE"))
+						element.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
+	
 }

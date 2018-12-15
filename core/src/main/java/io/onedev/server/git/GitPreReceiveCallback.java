@@ -22,7 +22,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequestUpdate;
@@ -30,12 +29,10 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.PullRequestConstants;
 import io.onedev.utils.StringUtils;
-import io.onedev.utils.license.LicenseDetail;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -47,13 +44,10 @@ public class GitPreReceiveCallback extends HttpServlet {
 	
 	private final UserManager userManager;
 	
-	private final SettingManager configManager;
-	
 	@Inject
-	public GitPreReceiveCallback(ProjectManager projectManager, UserManager userManager, SettingManager configManager) {
+	public GitPreReceiveCallback(ProjectManager projectManager, UserManager userManager) {
 		this.projectManager = projectManager;
 		this.userManager = userManager;
-		this.configManager = configManager;
 	}
 	
 	private void error(Output output, @Nullable String refName, String... messages) {
@@ -76,18 +70,6 @@ public class GitPreReceiveCallback extends HttpServlet {
 	@Sessional
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		int userCount = userManager.count(EntityCriteria.of(User.class));
-		int licenseLimit = LicenseDetail.FREE_LICENSE_USERS;
-		LicenseDetail license = configManager.getLicense();
-		if (license != null && license.getRemainingDays() >= 0) {
-			licenseLimit += license.getLicensedUsers();
-		} 
-		if (userCount > licenseLimit) {
-			String message = String.format("Push is disabled as number of users in system exceeds license limit");
-			response.sendError(HttpServletResponse.SC_FORBIDDEN, message);
-			return;
-		}
-		
         String clientIp = request.getHeader("X-Forwarded-For");
         if (clientIp == null) clientIp = request.getRemoteAddr();
 

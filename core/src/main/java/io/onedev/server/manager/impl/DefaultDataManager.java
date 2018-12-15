@@ -26,9 +26,9 @@ import io.onedev.launcher.loader.Listen;
 import io.onedev.launcher.loader.ManagedSerializedForm;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.DataManager;
 import io.onedev.server.manager.MailManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
@@ -192,11 +192,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 				}
 				
 			});
-		}
-		
-		setting = settingManager.getSetting(Key.LICENSE);
-		if (setting== null) {
-			settingManager.saveLicense(null);
 		}
 		
 		return manualConfigs;
