@@ -27,7 +27,7 @@ public abstract class MoreInfoSidePanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				String script = String.format("$('#%s').toggleClass('closed');", MoreInfoSidePanel.this.getMarkupId());
+				String script = String.format("$('#%s').hide('slide', {direction: 'right', duration: 200});", MoreInfoSidePanel.this.getMarkupId());
 				target.appendJavaScript(script);
 				send(getPage(), Broadcast.BREADTH, new MoreInfoSideClosed(target));
 			}
@@ -42,7 +42,7 @@ public abstract class MoreInfoSidePanel extends Panel {
 		super.onEvent(event);
 		if (event.getPayload() instanceof MoreInfoSideOpened) {
 			MoreInfoSideOpened moreInfoSideOpened = (MoreInfoSideOpened) event.getPayload();
-			String script = String.format("$('#%s').toggleClass('closed');", getMarkupId());
+			String script = String.format("$('#%s').show('slide', {direction: 'right', duration: 200});", getMarkupId());
 			moreInfoSideOpened.getHandler().appendJavaScript(script);
 		}
 	}

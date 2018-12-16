@@ -26,9 +26,7 @@
 	#issue-detail .more-info-side {
 		box-shadow: none;
 		border-left-width: 2px;
-	}
-	#issue-detail .more-info-side.closed {
-		display: block;
+		display: block !important;
 	}
 	#issue-detail .issue-operations a.more-info, #issue-detail .more-info-side>a.close {
 		display: none;

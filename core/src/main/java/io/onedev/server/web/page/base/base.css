@@ -239,6 +239,12 @@ form>.test-feedback {
 	line-height: 22px;
 	white-space: nowrap;
 }
+.editable table.bean.list>thead>tr>th.reorder {
+	width: 1%;
+}
+.editable table.bean.list>tbody>tr>td.reorder {
+	vertical-align: middle;
+}
 .editable table.bean.list>thead>tr>th, .editable table.bean.list>tbody>tr>td {
 	padding: 5px 10px 5px 0;
 }

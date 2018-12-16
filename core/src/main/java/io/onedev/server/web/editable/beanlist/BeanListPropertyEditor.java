@@ -217,7 +217,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				onPropertyUpdating(target);
 			}
 			
-		}.sortable("tbody").handle(".handle").helperClass("sort-helper"));
+		}.sortable("tbody").helperClass("sort-helper"));
 
 		return listEditor;		
 	}

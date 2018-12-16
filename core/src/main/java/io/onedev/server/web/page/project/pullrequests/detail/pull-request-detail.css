@@ -164,6 +164,7 @@ ul>li>a.code-comments.new .fa-circle {
 	#request-detail .more-info-side {
 		box-shadow: none;
 		border-left-width: 2px;
+		display: block !important;
 	}
 	#request-detail .more-info-side.closed {
 		display: block;
