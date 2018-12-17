@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -40,9 +41,13 @@ public class ProjectListPage extends LayoutPage {
 
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
+	private static final String PARAM_QUERY = "query";
+	
 	private static final String PARAM_ORPHAN = "orphan";
 	
 	private boolean showOrphanProjects;
+	
+	private String query;
 	
 	private final IModel<List<ProjectFacade>> orphanProjectsModel = new LoadableDetachableModel<List<ProjectFacade>>() {
 
@@ -72,7 +77,7 @@ public class ProjectListPage extends LayoutPage {
 
 				@Override
 				public double getMatchScore(ProjectFacade object) {
-					return MatchScoreUtils.getMatchScore(object.getName(), searchInput);
+					return MatchScoreUtils.getMatchScore(object.getName(), query);
 				}
 				
 			});
@@ -82,6 +87,7 @@ public class ProjectListPage extends LayoutPage {
 	
 	public ProjectListPage(PageParameters params) {
 		super(params);
+		query = params.get(PARAM_QUERY).toString();
 		showOrphanProjects = params.get(PARAM_ORPHAN).toBoolean(false);
 	}
 	
@@ -96,7 +102,7 @@ public class ProjectListPage extends LayoutPage {
 
 				@Override
 				public double getMatchScore(ProjectFacade object) {
-					return MatchScoreUtils.getMatchScore(object.getName(), searchInput);
+					return MatchScoreUtils.getMatchScore(object.getName(), query);
 				}
 				
 			});
@@ -106,19 +112,19 @@ public class ProjectListPage extends LayoutPage {
 	
 	private ProjectListPanel projectList;
 	
-	private String searchInput;
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
 		TextField<String> searchField;
-		add(searchField = new TextField<String>("filterProjects", Model.of("")));
+		add(searchField = new TextField<String>("filterProjects", Model.of(query)));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
-				searchInput = searchField.getInput();
+				query = searchField.getInput();
+				if (StringUtils.isBlank(query))
+					query = null;
 				target.add(projectList);
 			}
 
@@ -194,6 +200,8 @@ public class ProjectListPage extends LayoutPage {
 			public PageParameters newPageParameters(int currentPage) {
 				PageParameters params = new PageParameters();
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				if (query != null)
+					params.add(PARAM_QUERY, query);
 				if (showOrphanProjects)
 					params.add(PARAM_ORPHAN, showOrphanProjects);
 				return params;

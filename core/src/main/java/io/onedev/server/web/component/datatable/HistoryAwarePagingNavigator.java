@@ -75,17 +75,19 @@ public class HistoryAwarePagingNavigator extends BootstrapPagingNavigator {
 	@Override
 	protected AbstractLink newPagingNavigationLink(String id, IPageable pageable, int pageNumber) {
 		AbstractLink link;
+		int absolutePageNumber;
+		if (pageNumber == -1)
+			absolutePageNumber = (int) (getPageable().getPageCount()-1);
+		else
+			absolutePageNumber = pageNumber;
 		if (pagingHistorySupport != null) {
 			link = new BookmarkablePageLink<Void>(id, getPage().getClass(),
-					pagingHistorySupport.newPageParameters(pageNumber)) {
+					pagingHistorySupport.newPageParameters(absolutePageNumber)) {
 				
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					if (pageNumber == -1)
-						setEnabled(getPageable().getPageCount() - 1 != pageable.getCurrentPage());
-					else
-						setEnabled(pageNumber != pageable.getCurrentPage());
+					setEnabled(absolutePageNumber != pageable.getCurrentPage());
 				}
 				
 			};

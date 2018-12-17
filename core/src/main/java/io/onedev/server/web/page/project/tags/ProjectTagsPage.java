@@ -3,6 +3,8 @@ package io.onedev.server.web.page.project.tags;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -20,7 +22,6 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.PageableListView;
-import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -42,6 +43,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.build.status.BuildsStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
@@ -57,7 +59,6 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 import io.onedev.utils.StringUtils;
 
@@ -66,14 +67,56 @@ public class ProjectTagsPage extends ProjectPage {
 
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
+	private static final String PARAM_QUERY = "query";
+	
 	private WebMarkupContainer tagsContainer;
 	
-	private PagingNavigator pagingNavigator;
+	private PageableListView<RefInfo> tagsView;
 	
-	private WebMarkupContainer noTagsContainer;
+	private final PagingHistorySupport pagingHistorySupport;	
+	
+	private String query;
+	
+	private final IModel<List<RefInfo>> tagsModel = new LoadableDetachableModel<List<RefInfo>>() {
+
+		@Override
+		protected List<RefInfo> load() {
+			List<RefInfo> refs = getProject().getTags();
+			if (query != null) {
+				for (Iterator<RefInfo> it = refs.iterator(); it.hasNext();) {
+					String tag = GitUtils.ref2tag(it.next().getRef().getName());
+					if (!tag.toLowerCase().contains(query.trim().toLowerCase()))
+						it.remove();
+				}
+			}
+			return refs;
+		}
+		
+	}; 
 	
 	public ProjectTagsPage(PageParameters params) {
 		super(params);
+		
+		query = params.get(PARAM_QUERY).toString();
+		
+		pagingHistorySupport = new PagingHistorySupport() {
+			
+			@Override
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = paramsOf(getProject());
+				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				if (query != null)
+					params.add(PARAM_QUERY, query);
+				return params;
+			}
+			
+			@Override
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+			}
+			
+		};
+		
 	}
 	
 	@Override
@@ -81,14 +124,16 @@ public class ProjectTagsPage extends ProjectPage {
 		super.onInitialize();
 		
 		TextField<String> searchField;
-		add(searchField = new TextField<String>("searchTags", Model.of("")));
+		add(searchField = new TextField<String>("searchTags", Model.of(query)));
 		searchField.add(new OnTypingDoneBehavior(200) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
+				query = searchField.getInput();
+				if (StringUtils.isBlank(query))
+					query = null;
 				target.add(tagsContainer);
-				target.add(pagingNavigator);
-				target.add(noTagsContainer);
+				newPagingNavigation(target);
 			}
 			
 		});
@@ -197,10 +242,7 @@ public class ProjectTagsPage extends ProjectPage {
 								getProject().tag(tagName, tagRevision, getLoginUser().asPerson(), tagMessage);
 								modal.close();
 								target.add(tagsContainer);
-								target.add(pagingNavigator);
-								target.add(noTagsContainer);
-								searchField.setModelObject(null);
-								target.add(searchField);
+								newPagingNavigation(target);
 							}
 						}
 					}
@@ -220,25 +262,6 @@ public class ProjectTagsPage extends ProjectPage {
 			
 		});
 		
-		IModel<List<RefInfo>> tagsModel = new LoadableDetachableModel<List<RefInfo>>() {
-
-			@Override
-			protected List<RefInfo> load() {
-				List<RefInfo> refs = getProject().getTags();
-				String searchFor = searchField.getModelObject();
-				if (StringUtils.isNotBlank(searchFor)) {
-					searchFor = searchFor.trim().toLowerCase();
-					for (Iterator<RefInfo> it = refs.iterator(); it.hasNext();) {
-						String tag = GitUtils.ref2tag(it.next().getRef().getName());
-						if (!tag.toLowerCase().contains(searchFor))
-							it.remove();
-					}
-				}
-				return refs;
-			}
-			
-		}; 
-		
 		add(tagsContainer = new WebMarkupContainer("tagsContainer") {
 
 			@Override
@@ -250,8 +273,6 @@ public class ProjectTagsPage extends ProjectPage {
 		});
 		tagsContainer.setOutputMarkupPlaceholderTag(true);
 		
-		PageableListView<RefInfo> tagsView;
-
 		tagsContainer.add(tagsView = new PageableListView<RefInfo>("tags", tagsModel, 
 				io.onedev.server.web.WebConstants.PAGE_SIZE) {
 
@@ -335,8 +356,7 @@ public class ProjectTagsPage extends ProjectPage {
 					public void onClick(AjaxRequestTarget target) {
 						getProject().deleteTag(tagName);
 						target.add(tagsContainer);
-						target.add(pagingNavigator);
-						target.add(noTagsContainer);
+						newPagingNavigation(target);
 					}
 
 					@Override
@@ -357,45 +377,29 @@ public class ProjectTagsPage extends ProjectPage {
 			
 		});
 
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
-			
-			@Override
-			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getProject());
-				params.add(PARAM_CURRENT_PAGE, currentPage+1);
-				return params;
-			}
-			
-			@Override
-			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
-			}
-			
-		};
-		
 		tagsView.setCurrentPage(pagingHistorySupport.getCurrentPage());
-		
-		add(pagingNavigator = new HistoryAwarePagingNavigator("tagsPageNav", tagsView, pagingHistorySupport) {
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(tagsView.getPageCount() > 1);
-			}
-			
-		});
+		newPagingNavigation(null);
+	}
+	
+	private void newPagingNavigation(@Nullable AjaxRequestTarget target) {
+		Component pagingNavigator = new HistoryAwarePagingNavigator("tagsPageNav", tagsView, pagingHistorySupport);
+		pagingNavigator.setVisible(tagsView.getPageCount() > 1);
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 		
-		add(noTagsContainer = new WebMarkupContainer("noTags") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(tagsModel.getObject().isEmpty());
-			}
-			
-		});
+		Component noTagsContainer = new WebMarkupContainer("noTags");
+		noTagsContainer.setVisible(tagsModel.getObject().isEmpty());
 		noTagsContainer.setOutputMarkupPlaceholderTag(true);
+		
+		if (target != null) {
+			replace(pagingNavigator);
+			replace(noTagsContainer);
+			target.add(pagingNavigator);
+			target.add(noTagsContainer);
+		} else {
+			add(pagingNavigator);
+			add(noTagsContainer);
+		}
 	}
 	
 	@Override

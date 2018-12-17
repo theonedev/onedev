@@ -181,7 +181,7 @@ public class DefaultBoardListPage extends GlobalIssueSettingPage {
 				target.add(boardsTable);
 			}
 			
-		}.sortable("tbody").helperClass("sort-helper"));
+		}.sortable("tbody"));
 	}
 	
 	private void newBoardDetail(AjaxRequestTarget target, int index) {

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -76,7 +77,9 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
-	private String searchInput;
+	private static final String PARAM_QUERY = "query";
+	
+	private String query;
 	
 	private DataTable<Long, Void> authorizationsTable;
 	
@@ -187,6 +190,7 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 	
 	public ProjectAuthorizationsPage(PageParameters params) {
 		super(params);
+		query = params.get(PARAM_QUERY).toString();
 	}
 
 	@Override
@@ -216,12 +220,14 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 		
 		TextField<String> searchField;
 		
-		add(searchField = new TextField<String>("filterUsers", Model.of("")));
+		add(searchField = new TextField<String>("filterUsers", Model.of(query)));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
-				searchInput = searchField.getInput();
+				query = searchField.getInput();
+				if (StringUtils.isBlank(query))
+					query = null;
 				target.add(authorizationsTable);
 			}
 			
@@ -452,7 +458,7 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 
 					@Override
 					public double getMatchScore(Long object) {
-						return cacheManager.getUser(object).getMatchScore(searchInput);
+						return cacheManager.getUser(object).getMatchScore(query);
 					}
 					
 				});
@@ -484,6 +490,8 @@ public class ProjectAuthorizationsPage extends ProjectSettingPage {
 			public PageParameters newPageParameters(int currentPage) {
 				PageParameters params = paramsOf(getProject());
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				if (query != null)
+					params.add(PARAM_QUERY, query);
 				return params;
 			}
 			

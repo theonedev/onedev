@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -31,6 +34,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.ConfigurationManager;
 import io.onedev.server.model.Configuration;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.configuration.DoNotCleanup;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
@@ -46,20 +50,24 @@ import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 @SuppressWarnings("serial")
 public class ConfigurationListPage extends ProjectSettingPage {
 
-	public ConfigurationListPage(PageParameters params) {
-		super(params);
-	}
-
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
+	
+	private static final String PARAM_QUERY = "query";
 	
 	private DataTable<Configuration, Void> configurationsTable;
 	
-	private String searchInput;
+	private String query;
 	
+	public ConfigurationListPage(PageParameters params) {
+		super(params);
+		query = params.get(PARAM_QUERY).toString();
+	}
+
 	private EntityCriteria<Configuration> getCriteria() {
 		EntityCriteria<Configuration> criteria = EntityCriteria.of(Configuration.class);
-		if (searchInput != null) 
-			criteria.add(Restrictions.ilike("name", searchInput, MatchMode.ANYWHERE));
+		criteria.add(Restrictions.eq("project", getProject()));
+		if (query != null) 
+			criteria.add(Restrictions.ilike("name", query, MatchMode.ANYWHERE));
 		return criteria;
 	}
 	
@@ -73,12 +81,14 @@ public class ConfigurationListPage extends ProjectSettingPage {
 		super.onInitialize();
 		
 		TextField<String> searchField;
-		add(searchField = new TextField<String>("filterConfigurations", Model.of("")));
+		add(searchField = new TextField<String>("filterConfigurations", Model.of(query)));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
-				searchInput = searchField.getInput();
+				query = searchField.getInput();
+				if (StringUtils.isBlank(query))
+					query = null;
 				target.add(configurationsTable);
 			}
 
@@ -200,7 +210,7 @@ public class ConfigurationListPage extends ProjectSettingPage {
 			
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = new PageParameters();
+				PageParameters params = paramsOf(getProject(), query);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -216,4 +226,11 @@ public class ConfigurationListPage extends ProjectSettingPage {
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 
+	public static PageParameters paramsOf(Project project, @Nullable String query) {
+		PageParameters params = paramsOf(project);
+		if (query != null)
+			params.add(PARAM_QUERY, query);
+		return params;
+	}
+	
 }

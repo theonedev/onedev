@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.PercentValidator;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -85,7 +86,6 @@ import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class ProjectBranchesPage extends ProjectPage {
@@ -93,6 +93,8 @@ public class ProjectBranchesPage extends ProjectPage {
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
 	private static final String PARAM_BASE = "base";
+	
+	private static final String PARAM_QUERY = "query";
 	
 	// use a small page size to load page quickly
 	private static final int PAGE_SIZE = 10;
@@ -104,12 +106,10 @@ public class ProjectBranchesPage extends ProjectPage {
 		@Override
 		protected List<RefInfo> load() {
 			List<RefInfo> refs = getProject().getBranches();
-			String searchFor = searchField.getModelObject();
-			if (StringUtils.isNotBlank(searchFor)) {
-				searchFor = searchFor.trim().toLowerCase();
+			if (query != null) {
 				for (Iterator<RefInfo> it = refs.iterator(); it.hasNext();) {
 					String branch = GitUtils.ref2branch(it.next().getRef().getName());
-					if (!branch.toLowerCase().contains(searchFor))
+					if (!branch.toLowerCase().contains(query.trim().toLowerCase()))
 						it.remove();
 				}
 			}
@@ -122,13 +122,9 @@ public class ProjectBranchesPage extends ProjectPage {
 	
 	private PageableListView<RefInfo> branchesView;
 	
-	private Component pagingNavigator;
-	
 	private WebMarkupContainer branchesContainer; 
 	
-	private WebMarkupContainer noBranchesContainer;
-	
-	private TextField<String> searchField;
+	private String query;
 	
 	private final IModel<Map<ObjectId, AheadBehind>> aheadBehindsModel = 
 			new LoadableDetachableModel<Map<ObjectId, AheadBehind>>() {
@@ -248,10 +244,14 @@ public class ProjectBranchesPage extends ProjectPage {
 		
 	};
 	
-	public static PageParameters paramsOf(Project project, @Nullable String baseBranch) {
+	private final PagingHistorySupport pagingHistorySupport;
+	
+	public static PageParameters paramsOf(Project project, @Nullable String baseBranch, @Nullable String query) {
 		PageParameters params = paramsOf(project);
 		if (baseBranch != null)
 			params.add(PARAM_BASE, baseBranch);
+		if (query != null)
+			params.add(PARAM_QUERY, query);
 		return params;
 	}
 	
@@ -261,6 +261,24 @@ public class ProjectBranchesPage extends ProjectPage {
 		baseBranch = params.get(PARAM_BASE).toString();
 		if (baseBranch == null)
 			baseBranch = Preconditions.checkNotNull(getProject().getDefaultBranch());
+		query = params.get(PARAM_QUERY).toString();
+		
+		pagingHistorySupport = new PagingHistorySupport() {
+			
+			@Override
+			public PageParameters newPageParameters(int currentPage) {
+				PageParameters params = paramsOf(getProject(), baseBranch, query);
+				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				return params;
+			}
+			
+			@Override
+			public int getCurrentPage() {
+				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+			}
+			
+		};
+		
 	}
 	
 	@Override
@@ -297,18 +315,14 @@ public class ProjectBranchesPage extends ProjectPage {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				target.add(branchesContainer);
-				target.add(pagingNavigator);
-				target.add(noBranchesContainer);
-				searchField.setModelObject(null);
-				target.add(searchField);
+				newPagingNavigation(target);
 				
 				pushState(target);
 			}
 			
 		});
 		
-		add(searchField = new TextField<String>("searchBranches", Model.of("")));
-		searchField.add(new OnSearchingBehavior());
+		add(new TextField<String>("searchBranches", Model.of(query)).add(new OnSearchingBehavior()));
 
 		add(new ModalLink("createBranch") {
 
@@ -395,10 +409,7 @@ public class ProjectBranchesPage extends ProjectPage {
 								project.createBranch(branchName, branchRevision);
 								modal.close();
 								target.add(branchesContainer);
-								target.add(pagingNavigator);
-								target.add(noBranchesContainer);
-								searchField.setModelObject(null);
-								target.add(searchField);
+								newPagingNavigation(target);
 							}
 						}
 					}
@@ -644,9 +655,8 @@ public class ProjectBranchesPage extends ProjectPage {
 									baseBranch = getProject().getDefaultBranch();
 									target.add(baseChoice);
 								}
-								target.add(pagingNavigator);
 								target.add(branchesContainer);
-								target.add(noBranchesContainer);
+								newPagingNavigation(target);
 								modal.close();
 							}
 							
@@ -694,45 +704,29 @@ public class ProjectBranchesPage extends ProjectPage {
 			
 		});
 
-		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
-			
-			@Override
-			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getProject(), baseBranch);
-				params.add(PARAM_CURRENT_PAGE, currentPage+1);
-				return params;
-			}
-			
-			@Override
-			public int getCurrentPage() {
-				return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
-			}
-			
-		};
-		
 		branchesView.setCurrentPage(pagingHistorySupport.getCurrentPage());
 		
-		add(pagingNavigator = new HistoryAwarePagingNavigator("branchesPageNav", branchesView, pagingHistorySupport) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(branchesView.getPageCount() > 1);
-			}
-			
-		});
+		newPagingNavigation(null);
+	}
+	
+	private void newPagingNavigation(@Nullable AjaxRequestTarget target) {
+		Component pagingNavigator = new HistoryAwarePagingNavigator("branchesPageNav", branchesView, pagingHistorySupport);
+		pagingNavigator.setVisible(branchesView.getPageCount() > 1);
 		pagingNavigator.setOutputMarkupPlaceholderTag(true);
 		
-		add(noBranchesContainer = new WebMarkupContainer("noBranches") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(branchesModel.getObject().isEmpty());
-			}
-			
-		});
+		Component noBranchesContainer = new WebMarkupContainer("noBranches");
+		noBranchesContainer.setVisible(branchesModel.getObject().isEmpty());
 		noBranchesContainer.setOutputMarkupPlaceholderTag(true);
+		
+		if (target != null) {
+			replace(pagingNavigator);
+			replace(noBranchesContainer);
+			target.add(pagingNavigator);
+			target.add(noBranchesContainer);
+		} else {
+			add(pagingNavigator);
+			add(noBranchesContainer);
+		}
 	}
 	
 	@Override
@@ -758,9 +752,14 @@ public class ProjectBranchesPage extends ProjectPage {
 
 		@Override
 		protected void onTypingDone(AjaxRequestTarget target) {
+			@SuppressWarnings("unchecked")
+			TextField<String> searchField = (TextField<String>) getComponent();
+			query = searchField.getInput();
+			if (StringUtils.isBlank(query))
+				query = null;
+			
 			target.add(branchesContainer);
-			target.add(pagingNavigator);
-			target.add(noBranchesContainer);
+			newPagingNavigation(target);
 		}
 
 		@Override
@@ -771,19 +770,23 @@ public class ProjectBranchesPage extends ProjectPage {
 	}
 
 	private void pushState(AjaxRequestTarget target) {
-		PageParameters params = paramsOf(getProject(), baseBranch);
+		PageParameters params = paramsOf(getProject(), baseBranch, query);
 		CharSequence url = RequestCycle.get().urlFor(ProjectBranchesPage.class, params);
-		pushState(target, url.toString(), baseBranch);
+		State state = new State();
+		state.baseBranch = baseBranch;
+		state.query = query;
+		pushState(target, url.toString(), state);
 	}
 	
 	@Override
 	protected void onPopState(AjaxRequestTarget target, Serializable data) {
 		super.onPopState(target, data);
-		baseBranch = (String) data;
+		State state = (State) data;
+		baseBranch = state.baseBranch;
+		query = state.query;
 		target.add(baseChoice);
 		target.add(branchesContainer);
-		target.add(noBranchesContainer);
-		target.add(pagingNavigator);
+		newPagingNavigation(target);
 	}
 
 	@Override
@@ -791,4 +794,9 @@ public class ProjectBranchesPage extends ProjectPage {
 		return SecurityUtils.canReadCode(getProject().getFacade());
 	}
 
+	private static class State implements Serializable {
+		String baseBranch;
+		
+		String query;
+	}
 }

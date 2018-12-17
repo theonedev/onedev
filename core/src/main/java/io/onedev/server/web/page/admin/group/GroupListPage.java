@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
@@ -43,14 +44,20 @@ public class GroupListPage extends AdministrationPage {
 
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
+	private static final String PARAM_QUERY = "query";
+	
 	private DataTable<Group, Void> groupsTable;
 	
-	private String searchInput;
+	private String query;
+
+	public GroupListPage(PageParameters params) {
+		query = params.get(PARAM_QUERY).toString();
+	}
 	
 	private EntityCriteria<Group> getCriteria() {
 		EntityCriteria<Group> criteria = EntityCriteria.of(Group.class);
-		if (searchInput != null) 
-			criteria.add(Restrictions.ilike("name", searchInput, MatchMode.ANYWHERE));
+		if (query != null) 
+			criteria.add(Restrictions.ilike("name", query, MatchMode.ANYWHERE));
 		return criteria;
 	}
 	
@@ -59,12 +66,14 @@ public class GroupListPage extends AdministrationPage {
 		super.onInitialize();
 		
 		TextField<String> searchField;
-		add(searchField = new TextField<String>("filterGroups", Model.of("")));
+		add(searchField = new TextField<String>("filterGroups", Model.of(query)));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
-				searchInput = searchField.getInput();
+				query = searchField.getInput();
+				if (StringUtils.isBlank(query))
+					query = null;
 				target.add(groupsTable);
 			}
 
@@ -200,6 +209,8 @@ public class GroupListPage extends AdministrationPage {
 			public PageParameters newPageParameters(int currentPage) {
 				PageParameters params = new PageParameters();
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				if (query != null)
+					params.add(PARAM_QUERY, query);
 				return params;
 			}
 			

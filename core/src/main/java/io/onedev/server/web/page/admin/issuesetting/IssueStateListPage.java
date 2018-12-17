@@ -189,7 +189,7 @@ public class IssueStateListPage extends GlobalIssueSettingPage {
 				target.add(statesTable);
 			}
 			
-		}.sortable("tbody").helperClass("sort-helper"));
+		}.sortable("tbody"));
 	}
 	
 	private void newStateDetail(AjaxRequestTarget target, int index) {

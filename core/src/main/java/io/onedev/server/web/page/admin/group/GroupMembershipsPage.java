@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -63,7 +64,9 @@ public class GroupMembershipsPage extends GroupPage {
 
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
-	private String searchInput;
+	private static final String PARAM_QUERY = "query";
+	
+	private String query;
 	
 	private DataTable<Membership, Void> membershipsTable;
 	
@@ -71,12 +74,13 @@ public class GroupMembershipsPage extends GroupPage {
 	
 	public GroupMembershipsPage(PageParameters params) {
 		super(params);
+		query = params.get(PARAM_QUERY).toString();
 	}
 
 	private EntityCriteria<Membership> getCriteria() {
 		EntityCriteria<Membership> criteria = EntityCriteria.of(Membership.class);
-		if (searchInput != null)
-			criteria.createCriteria("user").add(Restrictions.ilike("name", searchInput, MatchMode.ANYWHERE)); 
+		if (query != null)
+			criteria.createCriteria("user").add(Restrictions.ilike("name", query, MatchMode.ANYWHERE)); 
 		criteria.add(Restrictions.eq("group", getGroup()));
 		return criteria;
 	}
@@ -87,12 +91,14 @@ public class GroupMembershipsPage extends GroupPage {
 		
 		TextField<String> searchField;
 		
-		add(searchField = new TextField<String>("filterUsers", Model.of("")));
+		add(searchField = new TextField<String>("filterUsers", Model.of(query)));
 		searchField.add(new OnTypingDoneBehavior(100) {
 
 			@Override
 			protected void onTypingDone(AjaxRequestTarget target) {
-				searchInput = searchField.getInput();
+				query = searchField.getInput();
+				if (StringUtils.isBlank(query))
+					query = null;
 				target.add(membershipsTable);
 			}
 			
@@ -262,6 +268,8 @@ public class GroupMembershipsPage extends GroupPage {
 			public PageParameters newPageParameters(int currentPage) {
 				PageParameters params = paramsOf(getGroup());
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
+				if (query != null)
+					params.add(PARAM_QUERY, query);
 				return params;
 			}
 			
