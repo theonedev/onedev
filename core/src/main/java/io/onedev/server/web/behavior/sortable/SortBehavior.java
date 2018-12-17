@@ -4,6 +4,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.MarkupContainer;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
@@ -147,6 +148,7 @@ public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 	public void renderHead(Component component, IHeaderResponse response) {
 		super.renderHead(component, response);
 		response.render(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
+		response.render(CssHeaderItem.forReference(new SortableCssResourceReference()));
 		response.render(OnLoadHeaderItem.forScript(getSortScript()));
 	}
 	
@@ -175,8 +177,8 @@ public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 			script.append("change:" + change + ",");
 		if (update != null)
 			script.append("update:" + update + ",");
-		
 		script.append("stop:function(event, ui){");
+		if (helperClass != null)
 			script.append("ui.item.removeClass('" + helperClass + "');");			
 		script.append("var fromList=ui.item.fromList; var fromItem=ui.item.fromItem;" +
 				"var toList=" + listIndex + "; var toItem=" + itemIndex + ";" +

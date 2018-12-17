@@ -202,13 +202,6 @@ form>.test-feedback {
 	font-size: 16px;
 	color: #444;
 }
-.editor>table.list>tbody>tr>td.actions .handle {
-	cursor: move; 
-}
-.editor>table.list .sort-helper {
-	border: 2px solid #DDD; 
-	background: #F5F5F5;
-}
 
 .editor>input.enable {
 	margin-bottom: 12px;
@@ -238,12 +231,6 @@ form>.test-feedback {
 	padding-top: 0;
 	line-height: 22px;
 	white-space: nowrap;
-}
-.editable table.bean.list>thead>tr>th.reorder {
-	width: 1%;
-}
-.editable table.bean.list>tbody>tr>td.reorder {
-	vertical-align: middle;
 }
 .editable table.bean.list>thead>tr>th, .editable table.bean.list>tbody>tr>td {
 	padding: 5px 10px 5px 0;

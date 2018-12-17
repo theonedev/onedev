@@ -153,7 +153,7 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 				target.add(fieldsTable);
 			}
 			
-		}.sortable("tbody").helperClass("sort-helper"));
+		}.sortable("tbody").helperClass("table-sort-helper"));
 	}
 	
 	private int getFieldSpecIndex(String fieldName) {
