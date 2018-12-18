@@ -26,7 +26,7 @@ public class IssueChangeEvent extends IssueEvent implements MarkdownAware {
 
 	@Override
 	public boolean affectsBoards() {
-		return true;
+		return change.affectsBoards();
 	}
 
 }

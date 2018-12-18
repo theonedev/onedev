@@ -51,4 +51,9 @@ public class IssueReferencedFromCodeCommentData implements IssueChangeData {
 		return null;
 	}
 
+	@Override
+	public boolean affectsBoards() {
+		return false;
+	}
+
 }

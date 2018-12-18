@@ -161,4 +161,9 @@ public class IssueFieldChangeData implements IssueChangeData {
 		return newGroups;
 	}
 
+	@Override
+	public boolean affectsBoards() {
+		return true;
+	}
+
 }

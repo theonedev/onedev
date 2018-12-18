@@ -79,5 +79,10 @@ public class IssueMilestoneChangeData implements IssueChangeData {
 	public Map<String, Group> getNewGroups(Project project) {
 		return null;
 	}
+
+	@Override
+	public boolean affectsBoards() {
+		return true;
+	}
 	
 }

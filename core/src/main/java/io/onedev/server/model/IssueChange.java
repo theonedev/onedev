@@ -80,5 +80,9 @@ public class IssueChange extends AbstractEntity {
 	public String getAnchor() {
 		return getClass().getSimpleName() + "-" + getId();
 	}
+	
+	public boolean affectsBoards() {
+		return data.affectsBoards();
+	}
 
 }

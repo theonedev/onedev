@@ -46,7 +46,7 @@ public class UserDetailPanel extends Panel {
 			
 			User user = OneDev.getInstance(UserManager.class).findByEmail(gitUserIdent.getEmail());
 			if (user != null) {
-				label = HtmlEscape.escapeHtml5(user.getDisplayName()) + " <i>(Name in OneDev)</i>"; 
+				label = HtmlEscape.escapeHtml5(user.getName()) + " <i>(Account in OneDev)</i>"; 
 				fragment.add(new Label("onedevName", label).setEscapeModelStrings(false));
 			} else {
 				fragment.add(new Label("onedevName", "<i>No OneDev account</i>").setEscapeModelStrings(false));

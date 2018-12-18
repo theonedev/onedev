@@ -1,3 +1,7 @@
+/* Make sure we have enough room for query input in mobile devices */
+#issue-boards>.head {
+	min-width: 570px;
+}
 #issue-boards .no-boards {
 	font-size: 16px;
 }

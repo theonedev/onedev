@@ -50,5 +50,10 @@ public class IssueReferencedFromIssueData implements IssueChangeData {
 	public Map<String, Group> getNewGroups(Project project) {
 		return null;
 	}
+
+	@Override
+	public boolean affectsBoards() {
+		return false;
+	}
 	
 }

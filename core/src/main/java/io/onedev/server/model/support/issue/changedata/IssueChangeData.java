@@ -28,4 +28,5 @@ public interface IssueChangeData extends Serializable {
 	@Nullable
 	Map<String, Group> getNewGroups(Project project);
 	
+	boolean affectsBoards();
 }
