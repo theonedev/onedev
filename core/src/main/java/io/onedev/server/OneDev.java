@@ -6,8 +6,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -22,12 +20,12 @@ import io.onedev.launcher.loader.AbstractPlugin;
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.launcher.loader.ManagedSerializedForm;
-import io.onedev.server.manager.SettingManager;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.manager.DataManager;
+import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.UnitOfWork;
@@ -44,8 +42,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	public static final String NAME = "OneDev";
 	
 	private static final Logger logger = LoggerFactory.getLogger(OneDev.class);
-	
-	private static final Pattern DOCLINK_PATTERN = Pattern.compile("\\d+\\.\\d+");
 	
 	private final JettyRunner jettyRunner;
 	
@@ -198,11 +194,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	}	
 	
 	public String getDocLink() {
-		String productVersion = AppLoader.getProduct().getVersion();
-		Matcher matcher = DOCLINK_PATTERN.matcher(productVersion);
-		if (!matcher.find())
-			throw new RuntimeException("Unexpected product version format: " + productVersion);
-		return "https://code.onedev.io/projects/onedev-docs/blob/" + matcher.group();
+		return "https://github.com/theonedev/onedev/wiki";
 	}
 	
 }

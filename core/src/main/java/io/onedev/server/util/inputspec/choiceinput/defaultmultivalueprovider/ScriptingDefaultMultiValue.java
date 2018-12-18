@@ -18,7 +18,7 @@ public class ScriptingDefaultMultiValue implements DefaultMultiValueProvider {
 	private String script;
 
 	@Editable(description="Groovy script to be evaluated. It should return list of string. "
-			+ "Check <a href='$onedev.docLink/scripting.md' target='_blank'>scripting help</a> for details")
+			+ "Check <a href='$onedev.docLink/Scripting' target='_blank'>scripting help</a> for details")
 	@NotEmpty
 	@Script
 	@OmitName

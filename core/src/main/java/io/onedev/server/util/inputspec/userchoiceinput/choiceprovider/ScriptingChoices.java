@@ -26,7 +26,7 @@ public class ScriptingChoices implements ChoiceProvider {
 	private String script;
 
 	@Editable(description="Groovy script to be evaluated. The return value should be a list of user facade object to be used as choices. "
-			+ "Check <a href='$onedev.docLink/scripting.md' target='_blank'>scripting help</a> for details")
+			+ "Check <a href='$onedev.docLink/Scripting' target='_blank'>scripting help</a> for details")
 	@NotEmpty
 	@Script
 	@OmitName

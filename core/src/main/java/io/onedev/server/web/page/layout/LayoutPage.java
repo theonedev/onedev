@@ -165,7 +165,7 @@ public abstract class LayoutPage extends BasePage {
 		
 		Plugin product = AppLoader.getProduct();
 		add(new Label("productVersion", product.getVersion()));
-		add(new ExternalLink("docLink", OneDev.getInstance().getDocLink() + "/readme.md"));
+		add(new ExternalLink("docLink", OneDev.getInstance().getDocLink() + "/"));
 		
 		WebMarkupContainer notSignedInContainer = new WebMarkupContainer("notSignedIn");
 		notSignedInContainer.add(new Link<Void>("signIn") {
