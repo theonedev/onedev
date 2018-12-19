@@ -31,6 +31,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Throwables;
 
@@ -50,6 +51,7 @@ public class UnexpectedExceptionPage extends BaseErrorPage {
 	private final String description;
 	
 	public UnexpectedExceptionPage(Exception exception) {
+		super(new PageParameters());
 		description = "Error Details: \n\n" + StringUtils.replace(Throwables.getStackTraceAsString(exception).trim(), "    ", "\t");
 	}
 	

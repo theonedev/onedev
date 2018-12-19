@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ResourceLink;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Joiner;
 
@@ -17,6 +18,10 @@ public class ServerLogPage extends AdministrationPage {
 
 	private static final int MAX_DISPLAY_LINES = 5000;
 	
+	public ServerLogPage(PageParameters params) {
+		super(params);
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

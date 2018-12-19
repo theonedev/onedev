@@ -55,6 +55,8 @@ public class UserListPage extends AdministrationPage {
 	private String query;
 	
 	public UserListPage(PageParameters params) {
+		super(params);
+		
 		query = params.get(PARAM_QUERY).toString();
 	}
 	

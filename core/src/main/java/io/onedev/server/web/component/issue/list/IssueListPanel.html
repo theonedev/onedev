@@ -23,8 +23,10 @@
 			<table wicket:id="issues" class="table"></table>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="linkFrag">
-		<a wicket:id="link"><span wicket:id="label"></span></a>
+	<wicket:fragment wicket:id="titleFrag">
+		<span wicket:id="number" class="number"></span> 
+		<a wicket:id="title" class="title"><span wicket:id="label"></span></a> 
+		<span wicket:id="state" class="state"></span>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="listFieldsFrag">
 		<div class="issue-list-fields">

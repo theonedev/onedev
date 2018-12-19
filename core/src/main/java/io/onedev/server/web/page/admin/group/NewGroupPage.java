@@ -8,6 +8,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
@@ -29,6 +30,10 @@ public class NewGroupPage extends AdministrationPage {
 	
 	private CheckBox canCreateProjectsInput;
 	
+	public NewGroupPage(PageParameters params) {
+		super(params);
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

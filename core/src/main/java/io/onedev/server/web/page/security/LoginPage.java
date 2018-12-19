@@ -14,6 +14,7 @@ import org.apache.wicket.markup.html.form.PasswordTextField;
 import org.apache.wicket.markup.html.form.StatelessForm;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +40,8 @@ public class LoginPage extends BasePage {
 
 	private boolean rememberMe;
 	
-	public LoginPage() {
+	public LoginPage(PageParameters params) {
+		super(params);
 		if (SecurityUtils.getSubject().isAuthenticated())
 			throw new RestartResponseException(getApplication().getHomePage());
 	}

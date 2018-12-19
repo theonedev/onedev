@@ -22,6 +22,7 @@ import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 
@@ -44,6 +45,10 @@ public class DefaultBoardListPage extends GlobalIssueSettingPage {
 
 	private DataTable<BoardSpec, Void> boardsTable;
 	
+	public DefaultBoardListPage(PageParameters params) {
+		super(params);
+	}
+
 	private int getBoardSpecIndex(String boardName) {
 		for (int i=0; i<getSetting().getDefaultBoardSpecs().size(); i++) {
 			if (getSetting().getDefaultBoardSpecs().get(i).getName().equals(boardName))

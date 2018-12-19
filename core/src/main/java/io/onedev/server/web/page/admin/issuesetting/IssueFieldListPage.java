@@ -22,6 +22,7 @@ import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 
@@ -42,6 +43,10 @@ import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 public class IssueFieldListPage extends GlobalIssueSettingPage {
+
+	public IssueFieldListPage(PageParameters params) {
+		super(params);
+	}
 
 	private DataTable<InputSpec, Void> fieldsTable;
 	

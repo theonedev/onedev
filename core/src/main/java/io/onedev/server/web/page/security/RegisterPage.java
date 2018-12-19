@@ -6,6 +6,7 @@ import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.SubmitLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
@@ -24,7 +25,9 @@ import io.onedev.server.web.page.project.ProjectListPage;
 @SuppressWarnings("serial")
 public class RegisterPage extends BasePage {
 	
-	public RegisterPage() {
+	public RegisterPage(PageParameters params) {
+		super(params);
+		
 		if (!OneDev.getInstance(SettingManager.class).getSecuritySetting().isEnableSelfRegister())
 			throw new UnauthenticatedException("User self-register is disabled");
 		if (getLoginUser() != null)

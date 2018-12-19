@@ -5,6 +5,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.slf4j.Logger;
@@ -30,6 +31,10 @@ public class MailSettingPage extends AdministrationPage {
 
 	private static final Logger logger = LoggerFactory.getLogger(MailSettingPage.class);
 	
+	public MailSettingPage(PageParameters params) {
+		super(params);
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

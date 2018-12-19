@@ -494,42 +494,29 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			});
 		}
 		
-		columns.add(new AbstractColumn<Issue, Void>(Model.of("#")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-					IModel<Issue> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getNumber()));
-			}
-			
-		});
-		columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_STATE)) {
-
-			@Override
-			public String getCssClass() {
-				return "state";
-			}
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-					IModel<Issue> rowModel) {
-				cellItem.add(new IssueStateLabel(componentId, rowModel));
-			}
-		});
 		columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_TITLE)) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
 					IModel<Issue> rowModel) {
-				Fragment fragment = new Fragment(componentId, "linkFrag", IssueListPanel.this);
+				Issue issue = rowModel.getObject();
+				Fragment fragment = new Fragment(componentId, "titleFrag", IssueListPanel.this);
+				fragment.add(new Label("number", "#" + issue.getNumber()));
 				OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
 				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
 						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
-				Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
-						IssueActivitiesPage.paramsOf(rowModel.getObject(), position));
-				link.add(new Label("label", rowModel.getObject().getTitle()));
+				Link<Void> link = new BookmarkablePageLink<Void>("title", IssueActivitiesPage.class, 
+						IssueActivitiesPage.paramsOf(issue, position));
+				link.add(new Label("label", issue.getTitle()));
 				fragment.add(link);
+				fragment.add(new IssueStateLabel("state", rowModel));
+				
 				cellItem.add(fragment);
+			}
+			
+			@Override
+			public String getCssClass() {
+				return "issue";
 			}
 			
 		});

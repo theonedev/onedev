@@ -13,4 +13,7 @@ public class WebConstants {
 	
 	/* commit constants */
 	public static final int MAX_DISPLAY_COMMITS = 500;
+	
+	public static final int NARROW_SCREEN = 768;
+	
 }

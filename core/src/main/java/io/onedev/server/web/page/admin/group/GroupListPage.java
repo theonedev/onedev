@@ -51,6 +51,7 @@ public class GroupListPage extends AdministrationPage {
 	private String query;
 
 	public GroupListPage(PageParameters params) {
+		super(params);
 		query = params.get(PARAM_QUERY).toString();
 	}
 	

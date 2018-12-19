@@ -52,6 +52,7 @@ import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
@@ -355,49 +356,30 @@ public class PullRequestListPage extends ProjectPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("#")) {
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of(PullRequestConstants.FIELD_TITLE)) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getNumber()));
-			}
-
-		});
-		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Status")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				cellItem.add(new RequestStatusLabel(componentId, rowModel));
-			}
-
-		});
-		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Title")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
+				PullRequest request = rowModel.getObject();
 				OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
 				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
 						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
 				
-				cellItem.add(new BookmarkablePageLink<Void>(componentId, PullRequestActivitiesPage.class, 
-						PullRequestActivitiesPage.paramsOf(rowModel.getObject(), position)) {
-
-					@Override
-					public IModel<?> getBody() {
-						return Model.of(rowModel.getObject().getTitle());
-					}
-
-					@Override
-					protected void onComponentTag(ComponentTag tag) {
-						super.onComponentTag(tag);
-						tag.setName("a");
-					}
-					
-				});
+				Fragment fragment = new Fragment(componentId, "titleFrag", PullRequestListPage.this);
+				fragment.add(new Label("number", "#" + request.getNumber()));
+				Link<Void> link = new BookmarkablePageLink<Void>("title", PullRequestActivitiesPage.class, 
+						PullRequestActivitiesPage.paramsOf(rowModel.getObject(), position));
+				link.add(new Label("label", request.getTitle()));
+				fragment.add(link);
+				fragment.add(new RequestStatusLabel("status", rowModel));
+				cellItem.add(fragment);
 			}
 
+			@Override
+			public String getCssClass() {
+				return "title";
+			}
+			
 		});
 		
 		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Source")) {
@@ -415,7 +397,7 @@ public class PullRequestListPage extends ProjectPage {
 
 			@Override
 			public String getCssClass() {
-				return "expanded";
+				return "source expanded";
 			}
 
 		});
@@ -430,7 +412,7 @@ public class PullRequestListPage extends ProjectPage {
 
 			@Override
 			public String getCssClass() {
-				return "expanded";
+				return "last-update expanded";
 			}
 			
 		});

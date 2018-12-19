@@ -58,10 +58,6 @@ public abstract class BasePage extends WebPage {
 	
 	private RepeatingView rootComponents;
 	
-	public BasePage() {
-		checkReady();
-	}
-
 	public BasePage(PageParameters params) {
 		super(params);
 		checkReady();

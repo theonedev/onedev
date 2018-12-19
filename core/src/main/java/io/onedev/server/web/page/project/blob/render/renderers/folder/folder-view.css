@@ -1,3 +1,8 @@
+@media(max-width: 767px) {
+	.folder-view .expanded {
+		display: none;
+	}
+}
 .folder-view {
 	overflow: auto;
 }

@@ -1,3 +1,12 @@
+@media(min-width: 360px) {
+    #new-request>ul.nav-tabs>li.collapsed {
+        display: none;
+    }
+    #new-request>ul.nav-tabs>li.expanded {
+        display: block;
+    }
+}
+
 #new-request>div {
 	margin-bottom: 20px;
 }

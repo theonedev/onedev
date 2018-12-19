@@ -10,6 +10,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
@@ -29,7 +30,9 @@ public class ServerInitPage extends BasePage {
 
 	private InitStage initStage;
 	
-	public ServerInitPage() {
+	public ServerInitPage(PageParameters params) {
+		super(params);
+		
 		InitStage initStage = OneDev.getInstance().getInitStage();
 		if (initStage != null) {
 			if (!initStage.getManualConfigs().isEmpty()) {

@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.admin.issuesetting;
 
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
@@ -8,6 +9,10 @@ import io.onedev.server.web.editable.PropertyContext;
 
 @SuppressWarnings("serial")
 public class DefaultQueryListPage extends GlobalIssueSettingPage {
+
+	public DefaultQueryListPage(PageParameters params) {
+		super(params);
+	}
 
 	@Override
 	protected void onInitialize() {

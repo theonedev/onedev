@@ -36,6 +36,8 @@ public abstract class UserPage extends AdministrationPage {
 	protected final IModel<User> userModel;
 	
 	public UserPage(PageParameters params) {
+		super(params);
+		
 		User user = OneDev.getInstance(UserManager.class).load(params.get(PARAM_USER).toLong());
 		userModel = new EntityModel<User>(user);
 	}

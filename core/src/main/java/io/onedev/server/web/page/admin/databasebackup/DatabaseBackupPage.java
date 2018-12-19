@@ -7,6 +7,7 @@ import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ResourceLink;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
 import io.onedev.server.OneDev;
@@ -20,6 +21,10 @@ import io.onedev.utils.ZipUtils;
 
 @SuppressWarnings("serial")
 public class DatabaseBackupPage extends AdministrationPage {
+
+	public DatabaseBackupPage(PageParameters params) {
+		super(params);
+	}
 
 	@Override
 	protected void onInitialize() {

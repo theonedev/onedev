@@ -6,6 +6,7 @@ import java.util.List;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
@@ -20,7 +21,8 @@ public class GlobalIssueSettingPage extends AdministrationPage {
 
 	private final GlobalIssueSetting setting;
 	
-	public GlobalIssueSettingPage() {
+	public GlobalIssueSettingPage(PageParameters params) {
+		super(params);
 		setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 

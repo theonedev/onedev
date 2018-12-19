@@ -1,14 +1,11 @@
-body.ProjectBlobPage {
-	min-width: 768px;
-}
 body.ProjectBlobPage.additionalWidth1 {
-	min-width: 900px;
+	min-width: 700px;
 }
 body.ProjectBlobPage.additionalWidth2 {
-	min-width: 1200px;
+	min-width: 1000px;
 }
 body.ProjectBlobPage.additionalWidth3 {
-	min-width: 1500px;
+	min-width: 1300px;
 }
 #project-blob {
 	margin: -20px;
@@ -42,8 +39,11 @@ body.ProjectBlobPage.additionalWidth3 {
 #project-blob>.head>a.revision-picker, #project-blob>.head>.blob-navigator, #project-blob>.blob-navigator>div {
 	padding: 5px 8px;
 }
-#project-blob>.head>.blob-navigator, #project-blob>.blob-navigator>div {
+#project-blob>.head>.blob-navigator {
 	padding: 5px 8px 0px 8px;
+}
+#project-blob>.blob-navigator>div {
+	padding: 0px 8px;
 }
 #project-blob>.head>.blob-navigator form.name input {
 	height: 30px;

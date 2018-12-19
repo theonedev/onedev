@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.form.Button;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.slf4j.Logger;
@@ -41,6 +42,10 @@ public class AuthenticatorPage extends AdministrationPage {
 	
 	private AuthenticationToken token = new AuthenticationToken();
 	
+	public AuthenticatorPage(PageParameters params) {
+		super(params);
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

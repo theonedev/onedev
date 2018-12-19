@@ -6,6 +6,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Throwables;
 
@@ -21,6 +22,7 @@ public class ExpectedExceptionPage extends BaseErrorPage {
 	private final String detailMessage;
 	
 	public ExpectedExceptionPage(Exception exception) {
+		super(new PageParameters());
 		title = exception.getMessage();
 		detailMessage = Throwables.getStackTraceAsString(exception);
 	}

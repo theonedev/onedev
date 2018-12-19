@@ -227,7 +227,7 @@ onedev.server.sourceView = {
 		var $outline = $sourceView.children(".outline");
 		var outlineWidth = Cookies.get(outlineWidthCookieKey);
 		if (!outlineWidth)
-			outlineWidth = 350;
+			outlineWidth = 300;
 		$outline.outerWidth(outlineWidth);
 		var $outlineResizeHandle = $outline.children(".ui-resizable-handle");
 		$outline.resizable({

@@ -8,6 +8,7 @@ import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +28,10 @@ import io.onedev.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
 public class ForgetPage extends BasePage {
+
+	public ForgetPage(PageParameters params) {
+		super(params);
+	}
 
 	private static final Logger logger = LoggerFactory.getLogger(ForgetPage.class);
 	

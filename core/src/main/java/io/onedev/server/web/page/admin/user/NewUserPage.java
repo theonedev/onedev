@@ -7,6 +7,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
@@ -24,6 +25,10 @@ public class NewUserPage extends AdministrationPage {
 	
 	private boolean continueToAdd;
 	
+	public NewUserPage(PageParameters params) {
+		super(params);
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

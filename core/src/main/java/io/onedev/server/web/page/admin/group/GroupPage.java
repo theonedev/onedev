@@ -35,6 +35,8 @@ public abstract class GroupPage extends AdministrationPage {
 	protected final IModel<Group> groupModel;
 	
 	public GroupPage(PageParameters params) {
+		super(params);
+		
 		Long groupId = params.get(PARAM_GROUP).toLong();
 		
 		Group group = OneDev.getInstance(GroupManager.class).load(groupId);

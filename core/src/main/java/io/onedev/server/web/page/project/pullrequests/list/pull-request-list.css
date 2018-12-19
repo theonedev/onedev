@@ -26,11 +26,17 @@
 	width: 4px;
 	padding: 0;
 }
+#request-list>.main>.body td.title>div>* {
+	margin-right: 4px;
+}
+#request-list>.main>.body td.title .number {
+	font-weight: bold;
+}
 #request-list>.main>.body tr.request.new td.new-indicator {
 	background: #4667EE;
 }
 @media(max-width: 991px) {
-	#request-list th.expanded, #request-list td.expanded {
+	#request-list thead, #request-list td.expanded {
 		display: none;		
 	}
 }

@@ -643,6 +643,12 @@ onedev.server = {
 		});
 		installClearer($(document));
 	},
+
+	setupModalOverlays: function() {
+		$(document).on('hidden.bs.modal', '.modal', function () {
+			$('.modal:visible').length && $(document.body).addClass('modal-open');
+		});		
+	},
 	
 	onDomReady: function() {
 		onedev.server.setupAjaxLoadingIndicator();
@@ -653,12 +659,13 @@ onedev.server = {
 		onedev.server.ajaxRequests.track();
 		onedev.server.setupInputClear();
 		onedev.server.setupAlertClose();
-		
+		onedev.server.setupModalOverlays();
+
 		$(document).keydown(function(e) {
 			if (e.keyCode == 27)
 				e.preventDefault();
 		});
-		
+
 		window.onunload = function() {
 			onedev.server.form.clearAutosavings($("form.leave-confirm.dirty"));
 		};
@@ -678,7 +685,7 @@ onedev.server = {
 		setTimeout(function() {
 			onedev.server.history.setVisited();
 		}, 100);
-		
+
 		/*
 		 * Disable this as calling replaceState in beforeunload also affects 
 		 * state of the page to be loaded
@@ -689,4 +696,5 @@ onedev.server = {
 		});
 		*/
 	}
+	
 };

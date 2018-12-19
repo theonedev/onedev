@@ -1,6 +1,6 @@
 @media(max-width: 991px) {
+	.issue-list thead,
 	.issue-list a.list-fields, 
-	.issue-list th.custom-field, 
 	.issue-list td.custom-field {
 		display: none;
 	}
@@ -26,6 +26,12 @@
 }
 .issue-list>.head>.others>*:last-child {
 	margin-right: 0;
+}
+.issue-list>.body td.title>div>* {
+	margin-right: 4px;
+}
+.issue-list>.body td.title .number {
+	font-weight: bold;
 }
 .issue-list>.body td.submitter,
 .issue-list>.body th.custom-field, 

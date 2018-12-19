@@ -5,6 +5,7 @@ import java.util.Date;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.progress.ProgressBar;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.progress.ProgressBar.Type;
@@ -15,6 +16,10 @@ import io.onedev.utils.FileUtils;
 @SuppressWarnings("serial")
 public class ServerInformationPage extends AdministrationPage {
 	
+	public ServerInformationPage(PageParameters params) {
+		super(params);
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
