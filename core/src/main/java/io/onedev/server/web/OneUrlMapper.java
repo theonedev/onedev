@@ -4,6 +4,7 @@ import org.apache.wicket.core.request.handler.BookmarkablePageRequestHandler;
 import org.apache.wicket.core.request.handler.IPageClassRequestHandler;
 import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
+import org.apache.wicket.markup.html.pages.BrowserInfoPage;
 import org.apache.wicket.protocol.http.WebApplication;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
@@ -92,6 +93,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 
 	public OneUrlMapper(WebApplication app) {
 		add(new OnePageMapper("init", ServerInitPage.class));
+		add(new OnePageMapper("loading", BrowserInfoPage.class));
 		addProjectPages();
 		addMyPages();
 		addAdministrationPages();
