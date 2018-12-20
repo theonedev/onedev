@@ -27,10 +27,13 @@
 .issue-list>.head>.others>*:last-child {
 	margin-right: 0;
 }
-.issue-list>.body td.title>div>* {
-	margin-right: 4px;
+.issue-list>.body td.summary>div>* {
+	margin-right: 8px;
 }
-.issue-list>.body td.title .number {
+.issue-list>.body td.summary>div>*:last-child {
+	margin-right: 0;
+}
+.issue-list>.body td.summary .number {
 	font-weight: bold;
 }
 .issue-list>.body td.submitter,

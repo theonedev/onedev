@@ -52,7 +52,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
@@ -494,13 +493,13 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			});
 		}
 		
-		columns.add(new AbstractColumn<Issue, Void>(Model.of(IssueConstants.FIELD_TITLE)) {
+		columns.add(new AbstractColumn<Issue, Void>(Model.of("Summary")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
 					IModel<Issue> rowModel) {
 				Issue issue = rowModel.getObject();
-				Fragment fragment = new Fragment(componentId, "titleFrag", IssueListPanel.this);
+				Fragment fragment = new Fragment(componentId, "summaryFrag", IssueListPanel.this);
 				fragment.add(new Label("number", "#" + issue.getNumber()));
 				OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
 				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
@@ -516,7 +515,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			
 			@Override
 			public String getCssClass() {
-				return "issue";
+				return "summary";
 			}
 			
 		});

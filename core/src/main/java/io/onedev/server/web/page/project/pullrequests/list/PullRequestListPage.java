@@ -52,7 +52,6 @@ import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
@@ -356,7 +355,7 @@ public class PullRequestListPage extends ProjectPage {
 			
 		});
 		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of(PullRequestConstants.FIELD_TITLE)) {
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Summary")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
@@ -365,7 +364,7 @@ public class PullRequestListPage extends ProjectPage {
 				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
 						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
 				
-				Fragment fragment = new Fragment(componentId, "titleFrag", PullRequestListPage.this);
+				Fragment fragment = new Fragment(componentId, "summaryFrag", PullRequestListPage.this);
 				fragment.add(new Label("number", "#" + request.getNumber()));
 				Link<Void> link = new BookmarkablePageLink<Void>("title", PullRequestActivitiesPage.class, 
 						PullRequestActivitiesPage.paramsOf(rowModel.getObject(), position));
@@ -377,7 +376,7 @@ public class PullRequestListPage extends ProjectPage {
 
 			@Override
 			public String getCssClass() {
-				return "title";
+				return "summary";
 			}
 			
 		});
