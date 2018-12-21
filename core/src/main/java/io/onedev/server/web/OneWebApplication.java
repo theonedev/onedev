@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -55,19 +53,14 @@ import de.agilecoders.wicket.core.settings.BootstrapSettings;
 import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.error.BaseErrorPage;
-import io.onedev.server.web.page.error.ExpectedExceptionPage;
-import io.onedev.server.web.page.error.UnexpectedExceptionPage;
+import io.onedev.server.web.page.error.ErrorPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
 import io.onedev.server.web.util.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.websocket.WebSocketManager;
-import io.onedev.utils.ExceptionUtils;
 
 @Singleton
 public class OneWebApplication extends WebApplication {
-	
-	private final Set<ExpectedExceptionContribution> expectedExceptionContributions;
 	
 	@Override
 	public RuntimeConfigurationType getConfigurationType() {
@@ -224,11 +217,6 @@ public class OneWebApplication extends WebApplication {
 		};
 	}
 	
-	@Inject
-	public OneWebApplication(Set<ExpectedExceptionContribution> expectedExceptionContributions) {
-		this.expectedExceptionContributions = expectedExceptionContributions;
-	}
-	
 	public static OneWebApplication get() {
 		return (OneWebApplication) Application.get();
 	}
@@ -258,7 +246,7 @@ public class OneWebApplication extends WebApplication {
 					 *  user can know which page is actually causing the error. This behavior is common
 					 *  for main stream applications.   
 					 */
-					if (requestHandler.getPage() instanceof BaseErrorPage) 
+					if (requestHandler.getPage() instanceof ErrorPage) 
 						return true;
 				}
 				return super.shouldPreserveClientUrl();
@@ -272,17 +260,9 @@ public class OneWebApplication extends WebApplication {
 	}
 
 	protected Page mapExceptions(Exception e) {
-		for (ExpectedExceptionContribution contribution: expectedExceptionContributions) {
-			for (Class<? extends Exception> expectedExceptionClass: contribution.getExpectedExceptionClasses()) {
-				Exception expectedException = ExceptionUtils.find(e, expectedExceptionClass);
-				if (expectedException != null)
-					return new ExpectedExceptionPage(expectedException);
-			}
-		}
-
 		HttpServletResponse response = (HttpServletResponse) RequestCycle.get().getResponse().getContainerResponse();
 		if (!response.isCommitted())
-			return new UnexpectedExceptionPage(e);
+			return new ErrorPage(e);
 		else
 			return null;
 	}

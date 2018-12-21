@@ -243,7 +243,7 @@ import io.onedev.server.web.util.markdown.CommitProcessor;
 import io.onedev.server.web.util.markdown.IssueProcessor;
 import io.onedev.server.web.util.markdown.MentionProcessor;
 import io.onedev.server.web.util.markdown.PullRequestProcessor;
-import io.onedev.server.web.util.markdown.RelativeUrlProcessor;
+import io.onedev.server.web.util.markdown.UrlProcessor;
 import io.onedev.server.web.websocket.CodeCommentEventBroadcaster;
 import io.onedev.server.web.websocket.CommitIndexedBroadcaster;
 import io.onedev.server.web.websocket.DefaultWebSocketManager;
@@ -438,7 +438,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(MarkdownProcessor.class, new PullRequestProcessor());
 		contribute(MarkdownProcessor.class, new IssueProcessor());
 		contribute(MarkdownProcessor.class, new CommitProcessor());
-		contribute(MarkdownProcessor.class, new RelativeUrlProcessor());
+		contribute(MarkdownProcessor.class, new UrlProcessor());
 
 		contribute(ResourcePackScopeContribution.class, new ResourcePackScopeContribution() {
 			

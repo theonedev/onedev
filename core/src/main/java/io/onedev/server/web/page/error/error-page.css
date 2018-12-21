@@ -26,30 +26,3 @@ body.error .center-box .detail>.body {
 	word-wrap: break-word;
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
-
-body.error .center-box textarea {
-	height: 600px;
-}
-
-body.error .has-errors, body.error .submitting {
-	display: none;
-}
-
-body.error form .actions {
-	margin-bottom: 20px;
-}
-body.error td.name {
-	font-weight: bold;
-	color: #444;
-	width: 140px;
-}
-body.error form .error {
-	margin-top: 8px;
-	color: #A00;	
-	display: none;
-}
-
-body.error .caption {
-	font-size: 16px;
-	font-weight: bold;
-}

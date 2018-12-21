@@ -28,7 +28,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.utils.PathUtils;
 import io.onedev.utils.UrlUtils;
 
-public class RelativeUrlProcessor implements MarkdownProcessor {
+public class UrlProcessor implements MarkdownProcessor {
 
 	@Override
 	public void process(Project project, Document rendered, Object context) {
@@ -93,7 +93,7 @@ public class RelativeUrlProcessor implements MarkdownProcessor {
 							url = url.trim();
 							if (UrlUtils.isRelative(url) && !url.startsWith("#")) {
 								Element element = (Element) node;
-								element.attr("src", resolveUrl(blobRenderContext.getDirectoryUrl(), url));
+								element.attr("src", blobRenderContext.appendRaw(resolveUrl(blobRenderContext.getDirectoryUrl(), url)));
 								try {
 									String basePath = blobRenderContext.getDirectory();
 									String referencedPath = PathUtils.resolve(basePath, UrlUtils.trimHashAndQuery(URLDecoder.decode(url, Charsets.UTF_8.name())));

@@ -1,8 +1,13 @@
 package io.onedev.server.web.page.error;
 
+import java.io.Serializable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -10,20 +15,31 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Throwables;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.web.ExpectedExceptionContribution;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectListPage;
 
 @SuppressWarnings("serial")
-public class ExpectedExceptionPage extends BaseErrorPage {
+public class ErrorPage extends BasePage {
 	
-	private final String title;
+	private String title;
 	
-	private final String detailMessage;
+	private String detailMessage;
 	
-	public ExpectedExceptionPage(Exception exception) {
+	public ErrorPage(Exception exception) {
 		super(new PageParameters());
-		title = exception.getMessage();
+		
+		for (ExpectedExceptionContribution contribution: OneDev.getExtensions(ExpectedExceptionContribution.class)) {
+			if (contribution.getExpectedExceptionClasses().contains(exception.getClass())) {
+				title = exception.getMessage();
+				break;
+			}
+		}
+		if (title == null)
+			title = "An unexpected exception occurred";
 		detailMessage = Throwables.getStackTraceAsString(exception);
 	}
 	
@@ -43,7 +59,7 @@ public class ExpectedExceptionPage extends BaseErrorPage {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				Fragment fragment = new Fragment("detail", "detailFrag", ExpectedExceptionPage.this);
+				Fragment fragment = new Fragment("detail", "detailFrag", ErrorPage.this);
 				fragment.add(new MultilineLabel("body", detailMessage));				
 				container.replace(fragment);
 				target.add(container);
@@ -52,6 +68,24 @@ public class ExpectedExceptionPage extends BaseErrorPage {
 
 		});
 		container.add(new WebMarkupContainer("detail"));
+	}
+	
+	@Override
+	public boolean isErrorPage() {
+		return true;
+	}
+
+	@Override
+	protected void onPopState(AjaxRequestTarget target, Serializable data) {
+		super.onPopState(target, data);
+		target.appendJavaScript("location.reload();");
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new ErrorPageResourceReference()));
+		response.render(OnDomReadyHeaderItem.forScript("$('html,body').addClass('error');"));
 	}
 	
 }
