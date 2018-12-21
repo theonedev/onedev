@@ -22,10 +22,8 @@ onedev.server.sidebar = {
 				$links.each(function() {
 					$(this).attr("title", $(this).find(".text").text());
 				});
-				$miniToggle.attr("title", "Expand");
 			} else {
 				$links.removeAttr("title");
-				$miniToggle.attr("title", "Collapse");
 			}
 		}
 
