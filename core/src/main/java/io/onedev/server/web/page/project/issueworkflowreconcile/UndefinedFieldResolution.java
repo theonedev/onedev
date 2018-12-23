@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issues.workflowreconcile;
+package io.onedev.server.web.page.project.issueworkflowreconcile;
 
 import java.io.Serializable;
 import java.util.ArrayList;

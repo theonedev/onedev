@@ -23,9 +23,6 @@
 #project-commits>.main>.body .label {
 	margin: 3px 0 0 4px;
 }
-#project-commits>.main>.body a {
-	color: #555;
-}
 #project-commits>.main>.body a.summary {
 	font-weight: bold;
 	font-size: 15px;

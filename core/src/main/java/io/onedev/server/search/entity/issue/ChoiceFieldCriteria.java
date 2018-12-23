@@ -20,7 +20,7 @@ import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
 
 public class ChoiceFieldCriteria extends FieldCriteria {
 

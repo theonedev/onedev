@@ -1,9 +1,6 @@
 <wicket:extend>
 	<div id="issues">
-		<wicket:enclosure child="reconcile">
-		<div class="alert alert-warning">Issue workflow has been changed, please 
-		<a wicket:id="reconcile">reconcile</a> existing issues with the change</div>
-		</wicket:enclosure>
+		<div wicket:id="workflowChangeAlert"></div>
 		<ul wicket:id="issuesTabs" class="nav nav-tabs"></ul>
 		<wicket:child></wicket:child>
 	</div>

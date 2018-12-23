@@ -17,10 +17,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldResolution.FixType;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedStateResolution;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateResolution;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution.FixType;
 
 public class IssueSetting implements Serializable {
 	

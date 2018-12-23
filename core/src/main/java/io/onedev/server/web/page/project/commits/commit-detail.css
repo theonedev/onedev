@@ -12,7 +12,7 @@
 #commit-detail>.info>.message {
 	background: #F9F9F9;
 	border-bottom: 1px dashed #E0E0E0;
-	padding: 8px 12px;
+	padding: 8px 12px 0 12px;
 	border-radius: 4px 4px 0 0;
 }
 #commit-detail>.info>.message>.subject>.pull-left {
@@ -20,9 +20,11 @@
 	font-weight: bold;
 	padding-top: 2px;
 	color: #555;
+	margin-bottom: 8px;
 }
 #commit-detail>.info>.message>.subject>.pull-right {
 	margin-left: 8px;
+	margin-bottom: 8px;
 }
 #commit-detail>.info>.message>.subject .btn-group .fa {
 	color: #666;
@@ -58,31 +60,27 @@
 	color: #444;
 }
 #commit-detail>.info>.contribution-and-parents {
-	padding: 12px;
+	padding: 16px 12px 0 54px;
+	position: relative;
 }
-#commit-detail>.info>.contribution-and-parents a {
-	color: #444;
+#commit-detail>.info>.contribution-and-parents>* {
+	margin-bottom: 16px;
+	margin-right: 20px;
 }
-#commit-detail>.info>.contribution-and-parents .contributor-avatars {
+#commit-detail>.info>.contribution-and-parents>*:last-child {
+	margin-right: 0;
+}
+#commit-detail>.info>.contribution-and-parents .avatars {
+	position: absolute;
+	left: 12px;
+	top: 10px;
+}
+#commit-detail>.info>.contribution-and-parents .parents>div>* {
 	margin-right: 4px;
 }
-#commit-detail>.info>.contribution-and-parents div.commit {
-	margin: 8px 20px 0 20px;
+#commit-detail>.info>.contribution-and-parents .parents>div>*:last-child {
+	margin-right: 0;
 }
-#commit-detail>.info>.contribution-and-parents .hash {
-	color: #444;
-}
-#commit-detail>.info>.contribution-and-parents label {
-	color: #666;
-	font-weight: normal;
-	margin-right: 8px;
-}
-#commit-detail>.info>.contribution-and-parents>.parents .single {
-	margin-top: 7px;
-}
-#commit-detail>.info>.contribution-and-parents>.parents .multiple {
-	margin-top: 3px;
-}
-#commit-detail>.info>.contribution-and-parents .btn-group.parent {
-	margin-right: 8px;
+#commit-detail>.info>.contribution-and-parents .parents .fa {
+	font-size: 12px;
 }

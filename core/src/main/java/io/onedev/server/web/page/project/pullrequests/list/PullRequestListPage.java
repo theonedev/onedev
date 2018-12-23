@@ -52,12 +52,16 @@ import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
@@ -371,6 +375,10 @@ public class PullRequestListPage extends ProjectPage {
 				link.add(new Label("label", request.getTitle()));
 				fragment.add(link);
 				fragment.add(new RequestStatusLabel("status", rowModel));
+				UserIdent submitterIdent = UserIdent.of(UserFacade.of(request.getSubmitter()), request.getSubmitterName());
+				fragment.add(new UserIdentPanel("submitter", submitterIdent, Mode.NAME));
+				fragment.add(new Label("submitDate", DateUtils.formatAge(request.getSubmitDate())));
+				fragment.add(new Label("comments", request.getCommentCount()));
 				cellItem.add(fragment);
 			}
 

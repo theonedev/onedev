@@ -70,7 +70,7 @@ import io.onedev.server.util.inputspec.numberinput.NumberInput;
 import io.onedev.server.util.inputspec.textinput.TextInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.web.page.admin.issuesetting.GlobalIssueSettingPage;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.util.WicketUtils;
 
 public class IssueQuery extends EntityQuery<Issue> {

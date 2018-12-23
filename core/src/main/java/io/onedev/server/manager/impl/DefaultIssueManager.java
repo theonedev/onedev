@@ -64,9 +64,9 @@ import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedStateResolution;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateResolution;
 
 @Singleton
 public class DefaultIssueManager extends AbstractEntityManager<Issue> implements IssueManager {

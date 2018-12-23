@@ -52,7 +52,10 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.IssueField;
+import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
@@ -63,6 +66,8 @@ import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
@@ -509,6 +514,13 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 				link.add(new Label("label", issue.getTitle()));
 				fragment.add(link);
 				fragment.add(new IssueStateLabel("state", rowModel));
+				
+				UserIdent submitterIdent = UserIdent.of(UserFacade.of(issue.getSubmitter()), issue.getSubmitterName());
+				fragment.add(new UserIdentPanel("submitter", submitterIdent, Mode.NAME));
+				fragment.add(new Label("submitDate", DateUtils.formatAge(issue.getSubmitDate())));
+				
+				fragment.add(new Label("votes", issue.getVoteCount()));
+				fragment.add(new Label("comments", issue.getCommentCount()));
 				
 				cellItem.add(fragment);
 			}

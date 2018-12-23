@@ -16,7 +16,7 @@ import io.onedev.server.search.entity.OrCriteriaHelper;
 import io.onedev.server.search.entity.ParensAware;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
 
 public class OrCriteria extends IssueCriteria implements ParensAware {
 	

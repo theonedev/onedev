@@ -24,9 +24,22 @@
 		</div>
 	</div>
 	<wicket:fragment wicket:id="summaryFrag">
-		<span wicket:id="state" class="state"></span>
-		<span wicket:id="number" class="number"></span> 
-		<a wicket:id="title" class="title"><span wicket:id="label"></span></a> 
+		<div class="first-line">
+			<a wicket:id="title" class="title"><span wicket:id="label"></span></a> 
+			<span wicket:id="number" class="number"></span> 
+		</div>
+		<div class="second-line clearfix">
+			<span wicket:id="state" class="state pull-left"></span>
+			<div class="submission pull-left">
+				submitted by <a wicket:id="submitter"></a> <span wicket:id="submitDate"></span>
+			</div>
+			<div class="pull-left votes" title="Votes">
+				<span class="fa fa-thumbs-o-up"></span> <span wicket:id="votes"></span>
+			</div>
+			<div class="pull-left comments" title="Comments">
+				<span class="fa fa-comments-o"></span> <span wicket:id="comments"></span>
+			</div>
+		</div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="listFieldsFrag">
 		<div class="issue-list-fields">

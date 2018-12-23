@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.issues.create;
 import java.util.List;
 
 import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -22,6 +23,7 @@ import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.issue.create.NewIssueEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
+import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.page.security.LoginPage;
 
 @SuppressWarnings("serial")
@@ -64,6 +66,14 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		add(new WorkflowChangeAlertPanel("workflowChangeAlert") {
+
+			@Override
+			protected void onCompleted(AjaxRequestTarget target) {
+				setResponsePage(getPageClass(), getPageParameters());
+			}
+			
+		});
 		NewIssueEditor editor = new NewIssueEditor("newIssue") {
 
 			@Override

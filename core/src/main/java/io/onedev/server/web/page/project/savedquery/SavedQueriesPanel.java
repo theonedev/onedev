@@ -154,7 +154,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			closed = "yes".equals(cookie.getValue());
 		} else {
 			LayoutPage page = (LayoutPage) getPage();
-			closed = page.getClientProperties().getBrowserWidth() < WebConstants.NARROW_SCREEN;
+			closed = page.getClientProperties().getScreenWidth() < WebConstants.NARROW_SCREEN;
 		}
 		
 		add(new AjaxLink<Void>("close") {

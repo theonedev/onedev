@@ -32,9 +32,9 @@ import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedStateResolution;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateResolution;
 
 @Editable
 public class BoardSpec implements Serializable {

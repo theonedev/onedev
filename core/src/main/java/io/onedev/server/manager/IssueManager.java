@@ -15,9 +15,9 @@ import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedStateResolution;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateResolution;
 
 public interface IssueManager extends EntityManager<Issue> {
 	

@@ -1,3 +1,9 @@
+div.revision-selector ul.nav-tabs>li.collapsed {
+	display: none !important;
+}
+div.revision-selector ul.nav-tabs>li.expanded {
+	display: block !important;
+}
 div.revision-selector input.revision {
 	margin-bottom: 12px;
 	background: url(search.gif) no-repeat right 6px center;

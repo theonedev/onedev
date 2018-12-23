@@ -10,7 +10,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.search.entity.NotCriteriaHelper;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
 
 public class NotCriteria extends IssueCriteria {
 	

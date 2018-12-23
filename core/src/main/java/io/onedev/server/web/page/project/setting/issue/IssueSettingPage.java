@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.Model;
@@ -19,6 +20,7 @@ import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 @SuppressWarnings("serial")
@@ -31,6 +33,15 @@ public abstract class IssueSettingPage extends ProjectSettingPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		add(new WorkflowChangeAlertPanel("workflowChangeAlert") {
+			
+			@Override
+			protected void onCompleted(AjaxRequestTarget target) {
+				setResponsePage(getPageClass(), getPageParameters());
+			}
+			
+		});
 		
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new PageTab(Model.of("State Transitions"), StateTransitionsPage.class) {

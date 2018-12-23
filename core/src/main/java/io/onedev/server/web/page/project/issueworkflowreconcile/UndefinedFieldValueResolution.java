@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issues.workflowreconcile;
+package io.onedev.server.web.page.project.issueworkflowreconcile;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.workflowreconcile.WorkflowReconcilePanel.UndefinedFieldValueContainer;
+import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowReconcilePanel.UndefinedFieldValueContainer;
 import io.onedev.server.web.util.ComponentContext;
 import io.onedev.server.web.util.WicketUtils;
 

@@ -331,8 +331,9 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 					@Override
 					protected void populateItem(ListItem<ProjectTab> item) {
-						item.add(new ProjectTabLink("item", item.getModelObject()));
-						if (item.getModelObject().isActive(getPage()))
+						ProjectTab tab = item.getModelObject();
+						item.add(tab.render("item"));
+						if (tab.isActive(getPage()))
 							item.add(AttributeAppender.append("class", "active"));
 					}
 					

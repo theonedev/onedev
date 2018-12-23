@@ -6,23 +6,16 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.modal.ModalLink;
-import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -34,7 +27,7 @@ import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneListPage;
 import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
-import io.onedev.server.web.page.project.issues.workflowreconcile.WorkflowReconcilePanel;
+import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowChangeAlertPanel;
 
 @SuppressWarnings("serial")
 public abstract class IssuesPage extends ProjectPage {
@@ -51,60 +44,14 @@ public abstract class IssuesPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (SecurityUtils.canAdministrate(getProject().getFacade())) {
-			add(new ModalLink("reconcile") {
+		add(new WorkflowChangeAlertPanel("workflowChangeAlert") {
 
-				@Override
-				protected Component newContent(String id, ModalPanel modal) {
-					return new WorkflowReconcilePanel(id) {
-						
-						@Override
-						protected Project getProject() {
-							return IssuesPage.this.getProject();
-						}
-
-						@Override
-						protected void onCancel(AjaxRequestTarget target) {
-							modal.close();
-						}
-
-						@Override
-						protected void onCompleted(AjaxRequestTarget target) {
-							setResponsePage(IssuesPage.this);
-						}
-						
-					};
-				}
-
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(!getGlobalIssueSetting().isReconciled());
-				}
-
-				@Override
-				public IModel<?> getBody() {
-					return Model.of("reconcile");
-				}
-				
-			});
-		} else {
-			add(new Label("reconcile", "contact project administrator to reconcile") {
-
-				@Override
-				protected void onComponentTag(ComponentTag tag) {
-					super.onComponentTag(tag);
-					tag.setName("span");
-				}
-				
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(!getGlobalIssueSetting().isReconciled());
-				}
-				
-			});
-		}
+			@Override
+			protected void onCompleted(AjaxRequestTarget target) {
+				setResponsePage(getPageClass(), getPageParameters());
+			}
+			
+		});
 		
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new IssuesTab("Issue List", IssueListPage.class) {

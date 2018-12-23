@@ -27,16 +27,33 @@
 .issue-list>.head>.others>*:last-child {
 	margin-right: 0;
 }
-.issue-list>.body td.summary>div>* {
-	margin-right: 8px;
+.issue-list>.body td a {
+	color: #444;
 }
-.issue-list>.body td.summary>div>*:last-child {
-	margin-right: 0;
-}
-.issue-list>.body td.summary .number {
+.issue-list>.body td.summary .first-line {
+	margin-bottom: 8px;
+	font-size: 16px;
 	font-weight: bold;
 }
-.issue-list>.body td.submitter,
+.issue-list>.body td.summary .title {
+	margin-right: 8px;
+}
+.issue-list>.body td.summary .second-line>* {
+	margin-right: 12px;
+}
+.issue-list>.body td.summary .second-line>*:last-child {
+	margin-right: 0;
+}
+.issue-list>.body td.summary .state {
+	width: 120px;
+	padding: 6px 8px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+.issue-list>.body td.summary .second-line {
+	color: #888;
+}
+
 .issue-list>.body th.custom-field, 
 .issue-list>.body td.custom-field {
 	white-space: nowrap;

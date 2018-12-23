@@ -81,7 +81,6 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 			try {
 				Subject subject = (Subject) request.getHttpServletRequest().getAttribute(WebSocketFilter.SHIRO_SUBJECT);
 		        ThreadContext.bind(subject);
-
 		        runnable.run();
 			} finally {
 				ThreadContext.unbindSubject();

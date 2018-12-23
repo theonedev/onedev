@@ -1,11 +1,13 @@
 package io.onedev.server.web.component.user.tokengenerate;
 
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.codec.Base64;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.form.IFormSubmitter;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -34,6 +36,16 @@ public class TokenGeneratePanel extends GenericPanel<User> {
 		TokenGenerateBean bean = new TokenGenerateBean();
 		
 		Form<?> form = new Form<Void>("form") {
+
+			@Override
+			public void process(IFormSubmitter submittingComponent) {
+				SecurityUtils.getSubject().runAs(getUser().getPrincipals());
+				try {
+					super.process(submittingComponent);
+				} finally {
+					SecurityUtils.getSubject().releaseRunAs();
+				}
+			}
 
 			@Override
 			protected void onSubmit() {

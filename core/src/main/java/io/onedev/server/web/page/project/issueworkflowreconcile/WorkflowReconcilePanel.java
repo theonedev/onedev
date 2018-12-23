@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issues.workflowreconcile;
+package io.onedev.server.web.page.project.issueworkflowreconcile;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,11 +25,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.SettingManager;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.project.issues.workflowreconcile.UndefinedFieldValueResolution.FixType;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValueResolution.FixType;
 import io.onedev.server.web.util.ajaxlistener.ChangeTextListener;
 import io.onedev.server.web.util.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.util.ajaxlistener.SelfDisableListener;
@@ -392,8 +391,6 @@ public abstract class WorkflowReconcilePanel extends Panel {
 		response.render(CssHeaderItem.forReference(new WorkflowReconcileResourceReference()));
 	}
 
-	protected abstract Project getProject();
-	
 	protected abstract void onCompleted(AjaxRequestTarget target);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);

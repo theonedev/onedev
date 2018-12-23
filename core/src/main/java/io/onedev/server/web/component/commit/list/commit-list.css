@@ -15,9 +15,6 @@
 .commit-list>div>ul .browse {
 	margin-left: 8px;
 }
-.commit-list>div>ul a {
-	color: #555;
-}
 .commit-list>div>ul a.summary {
 	font-weight: bold;
 	font-size: 15px;

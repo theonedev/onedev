@@ -47,6 +47,7 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.list.IssueListPage;
+import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
@@ -87,6 +88,14 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		add(new WorkflowChangeAlertPanel("workflowChangeAlert") {
+
+			@Override
+			protected void onCompleted(AjaxRequestTarget target) {
+				setResponsePage(getPageClass(), getPageParameters());
+			}
+			
+		});
 		add(new IssueTitlePanel("title") {
 
 			@Override
