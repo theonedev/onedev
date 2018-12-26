@@ -1,3 +1,8 @@
+@media(max-width: 767px) {
+	.build-list .expanded {
+		display: none;
+	}
+}
 .build-list>.head {
 	position: relative;
 }

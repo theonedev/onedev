@@ -180,10 +180,14 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				update.setHeadCommitHash(request.getHeadCommitHash());
 				update.setMergeBaseCommitHash(request.getBaseCommitHash());
 
-				request.setMergeStrategy(MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY);
-				
 				OneDev.getInstance(PullRequestManager.class).checkQuality(request);
+				
+				if (request.isAllReviewsApproved())
+					request.setMergeStrategy(MergeStrategy.DO_NOT_MERGE);
+				else
+					request.setMergeStrategy(MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY);
 			}
+			
 			requestModel = new LoadableDetachableModel<PullRequest>() {
 
 				@Override
@@ -616,17 +620,17 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			
 		});
 
-		WebMarkupContainer mergeStrategyContainer = new WebMarkupContainer("mergeStrategy") {
+		form.add(newMergeStrategyContainer());
+		
+		form.add(new ReviewListPanel("reviewers", requestModel));
 
-			@Override
-			protected void onBeforeRender() {
-				addOrReplace(newMergeStatusContainer());
-				super.onBeforeRender();
-			}
-			
-		};
-		mergeStrategyContainer.setOutputMarkupId(true);
-		form.add(mergeStrategyContainer);
+		form.add(new PullRequestBuildsPanel("builds", requestModel));
+		
+		return fragment;
+	}
+	
+	private Component newMergeStrategyContainer() {
+		WebMarkupContainer container = new WebMarkupContainer("mergeStrategy");
 		
 		IModel<MergeStrategy> mergeStrategyModel = new IModel<MergeStrategy>() {
 
@@ -654,31 +658,18 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				target.add(mergeStrategyContainer);
+				Component newContainer = newMergeStrategyContainer();
+				container.replaceWith(newContainer);
+				target.add(newContainer);
 			}
 			
 		});
 		
-		mergeStrategyContainer.add(mergeStrategyDropdown);
+		container.add(mergeStrategyDropdown);
 		
-		mergeStrategyContainer.add(new Label("help", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return getPullRequest().getMergeStrategy().getDescription();
-			}
-			
-		}));
+		container.add(new Label("help", getPullRequest().getMergeStrategy().getDescription()));
 		
-		form.add(new ReviewListPanel("reviewers", requestModel));
-
-		form.add(new PullRequestBuildsPanel("builds", requestModel));
-		
-		return fragment;
-	}
-	
-	private Component newMergeStatusContainer() {
-		WebMarkupContainer container = new AjaxLazyLoadPanel("status") {
+		container.add(new AjaxLazyLoadPanel("status") {
 			
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
@@ -724,8 +715,10 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				return component;
 			}
 			
-		};
-		container.setOutputMarkupPlaceholderTag(true);		
+		});
+		
+		container.setOutputMarkupId(true);		
+		
 		return container;
 	}
 

@@ -1,5 +1,5 @@
-.floating.field-spec td.name {
-	min-width: 150px !important;
+.floating.field-spec>.content>.body>div>.bean.viewer>.properties>table>tbody>tr>td.name {
+	min-width: 150px;
 } 
 
 .floating.field-spec .property-showCondition .property-inputName td.name, 
@@ -9,9 +9,10 @@
 	text-align: left;
 }
 
-.field-spec-edit .property-showCondition>.value label, 
-.field-spec-edit .property-choicesProvider>.value label.name,
-.field-spec-edit .property-choicesProvider>.value .bean.list thead th,
+.field-spec .property-showCondition .property-inputName td.name, 
+.field-spec-edit .property-showCondition .property-inputName label.name, 
+.field-spec-edit .property-choiceProvider>.value label.name,
+.field-spec-edit .property-choiceProvider>.value .bean.list thead th,
 .field-spec-edit .property-nameOfEmptyValue .control-label {
 	font-weight: normal;
 }

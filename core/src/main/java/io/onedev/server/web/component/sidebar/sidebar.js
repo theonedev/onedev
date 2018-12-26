@@ -28,13 +28,14 @@ onedev.server.sidebar = {
 		}
 
 		$miniToggle.click(function() {
-			$sidebar.toggleClass("minimized", 100);
-			if (miniCookieKey) {
-				var cookieValue = $sidebar.hasClass("minimized")?"yes":"no";
-				Cookies.set(miniCookieKey, cookieValue, {expires: Infinity});
-			}
-			onMiniToggled();
-			$(window).resize();
+			$sidebar.toggleClass("minimized", 100, function() {
+				if (miniCookieKey) {
+					var cookieValue = $sidebar.hasClass("minimized")?"yes":"no";
+					Cookies.set(miniCookieKey, cookieValue, {expires: Infinity});
+				}
+				onMiniToggled();
+				$(window).resize();
+			});
 		});
 
 		onMiniToggled();

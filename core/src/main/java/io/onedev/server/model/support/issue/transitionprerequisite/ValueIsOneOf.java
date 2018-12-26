@@ -15,7 +15,7 @@ import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 
-@Editable(order=100, name="has value of")
+@Editable(order=100, name="has any value of")
 public class ValueIsOneOf implements ValueMatcher {
 
 	private static final long serialVersionUID = 1L;

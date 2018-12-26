@@ -194,6 +194,9 @@
 .board-card-detail>.body>.main>div:last-child {
 	margin-bottom: 0;
 }
+.board-card-detail>.body>.main .commits {
+	margin-bottom: 20px;
+}
 .board-card-detail>.body>.more-info-side {
 	position: absolute;
 	top: 0;
@@ -205,6 +208,7 @@
 	border-right: 1px solid #D8D8D8;
 	margin-right: 30px;
 }
+
 @media (max-width: 992px) {
 	.board-card-detail>.body>.main {
 		margin-right: 0;

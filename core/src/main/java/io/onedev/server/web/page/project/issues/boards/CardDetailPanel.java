@@ -12,6 +12,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -145,7 +146,8 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 					@Override
 					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-						Component content = new CommitListPanel(TAB_CONTENT_ID, new AbstractReadOnlyModel<Project>() {
+						Fragment fragment = new Fragment(TAB_CONTENT_ID, "commitsFrag", CardDetailPanel.this);
+						fragment.add(new CommitListPanel("commits", new AbstractReadOnlyModel<Project>() {
 
 							@Override
 							public Project getObject() {
@@ -159,9 +161,10 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 								return getIssue().getCommits();
 							}
 							
-						}).setOutputMarkupId(true);
-						CardDetailPanel.this.replace(content);
-						target.add(content);
+						}));
+						fragment.setOutputMarkupId(true);
+						CardDetailPanel.this.replace(fragment);
+						target.add(fragment);
 					}
 					
 				});

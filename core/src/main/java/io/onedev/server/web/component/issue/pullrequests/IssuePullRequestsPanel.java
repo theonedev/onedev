@@ -18,8 +18,6 @@ import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvid
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
@@ -34,10 +32,10 @@ import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
-import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
+import io.onedev.server.web.component.pullrequest.summary.PullRequestSummaryPanel;
 
 @SuppressWarnings("serial")
 public abstract class IssuePullRequestsPanel extends Panel {
@@ -89,36 +87,16 @@ public abstract class IssuePullRequestsPanel extends Panel {
 		
 		List<IColumn<PullRequest, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("#")) {
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Summary")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId,
-					IModel<PullRequest> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getNumber()));
-			}
-		});
-		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Title")) {
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
+				cellItem.add(new PullRequestSummaryPanel(componentId, rowModel));
+			}	
 
 			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId,
-					IModel<PullRequest> rowModel) {
-				Fragment fragment = new Fragment(componentId, "titleFrag", IssuePullRequestsPanel.this);
-				Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, 
-						PullRequestActivitiesPage.paramsOf(rowModel.getObject(), null));
-				link.add(new Label("label", rowModel.getObject().getTitle()));
-				fragment.add(link);
-				
-				cellItem.add(fragment);
-			}
-		});
-		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("State")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId,
-					IModel<PullRequest> rowModel) {
-				cellItem.add(new RequestStatusLabel(componentId, rowModel));
+			public String getCssClass() {
+				return "summary";
 			}
 			
 		});
@@ -138,9 +116,24 @@ public abstract class IssuePullRequestsPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "expanded";
+				return "source expanded";
 			}
 
+		});
+		
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Last Update")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
+				PullRequest request = rowModel.getObject();
+				cellItem.add(new Label(componentId, DateUtils.formatAge(request.getUpdateDate())));
+			}
+
+			@Override
+			public String getCssClass() {
+				return "last-update expanded";
+			}
+			
 		});
 		
 		SortableDataProvider<PullRequest, Void> dataProvider = new LoadableDetachableDataProvider<PullRequest, Void>() {

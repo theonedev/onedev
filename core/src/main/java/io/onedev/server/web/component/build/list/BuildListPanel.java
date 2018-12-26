@@ -295,7 +295,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 
 				@Override
 				public String getCssClass() {
-					return "commit";
+					return "commit expanded";
 				}
 
 				@Override
@@ -319,7 +319,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 
 			@Override
 			public String getCssClass() {
-				return "date";
+				return "date expanded";
 			}
 
 			@Override

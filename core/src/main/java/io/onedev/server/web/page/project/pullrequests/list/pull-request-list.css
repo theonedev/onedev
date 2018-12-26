@@ -29,27 +29,6 @@
 #request-list>.main>.body td a {
 	color: #444;
 }
-#request-list>.main>.body td.summary .first-line {
-	margin-bottom: 8px;
-	font-weight: bold;
-	font-size: 16px;
-}
-#request-list>.main>.body td.summary .title {
-	margin-right: 8px;
-}
-#request-list>.main>.body td.summary .second-line>* {
-	margin-right: 12px;
-}
-#request-list>.main>.body td.summary .second-line>*:last-child {
-	margin-right: 0;
-}
-#request-list>.main>.body td.summary .status {
-	width: 75px;
-	padding: 6px 8px;
-}
-#request-list>.main>.body td.summary .second-line {
-	color: #888;
-}
 
 #request-list>.main>.body tr.request.new td.new-indicator {
 	background: #4667EE;

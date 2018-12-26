@@ -433,25 +433,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					pullRequestReviewManager.saveReviews(request);
 					pullRequestBuildManager.saveBuilds(request);
 					
-					boolean allReviewsApproved = true;
-					for (PullRequestReview review: request.getReviews()) {
-						if (review.getExcludeDate() == null && 
-								(review.getResult() == null || !review.getResult().isApproved())) {
-							allReviewsApproved = false;
-							break;
-						}
-					}
-					boolean allBuildsSuccessful = true;
-					for (PullRequestBuild build: request.getBuilds()) {
-						if (build.getBuild() == null || build.getBuild().getStatus() != Build.Status.SUCCESS) {
-							allBuildsSuccessful = false;
-							break;
-						}
-					}
-					
 					MergePreview mergePreview = request.getMergePreview();
 					
-					if (allReviewsApproved && allBuildsSuccessful
+					if (request.isAllReviewsApproved() && request.isAllBuildsSuccessful()
 							&& mergePreview != null && mergePreview.getMerged() != null) {
 						merge(request);
 					}

@@ -31,7 +31,6 @@ public class ShowCondition implements Serializable {
 	@Editable(order=100, name="resource.input.input")
 	@ChoiceProvider("getNameChoices")
 	@NotEmpty
-	@OmitName
 	public String getInputName() {
 		return inputName;
 	}

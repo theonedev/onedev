@@ -809,6 +809,25 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		return fixedIssues;
 	}
 	
+	public boolean isAllReviewsApproved() {
+		for (PullRequestReview review: getReviews()) {
+			if (review.getExcludeDate() == null && 
+					(review.getResult() == null || !review.getResult().isApproved())) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean isAllBuildsSuccessful() {
+		for (PullRequestBuild build: getBuilds()) {
+			if (build.getBuild() == null || build.getBuild().getStatus() != Build.Status.SUCCESS) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public static class ComparingInfo implements Serializable {
 		
 		private static final long serialVersionUID = 1L;

@@ -52,19 +52,14 @@ import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
+import io.onedev.server.web.component.pullrequest.summary.PullRequestSummaryPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
-import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
 import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
@@ -363,23 +358,16 @@ public class PullRequestListPage extends ProjectPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				PullRequest request = rowModel.getObject();
-				OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
-				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
-						(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
-				
-				Fragment fragment = new Fragment(componentId, "summaryFrag", PullRequestListPage.this);
-				fragment.add(new Label("number", "#" + request.getNumber()));
-				Link<Void> link = new BookmarkablePageLink<Void>("title", PullRequestActivitiesPage.class, 
-						PullRequestActivitiesPage.paramsOf(rowModel.getObject(), position));
-				link.add(new Label("label", request.getTitle()));
-				fragment.add(link);
-				fragment.add(new RequestStatusLabel("status", rowModel));
-				UserIdent submitterIdent = UserIdent.of(UserFacade.of(request.getSubmitter()), request.getSubmitterName());
-				fragment.add(new UserIdentPanel("submitter", submitterIdent, Mode.NAME));
-				fragment.add(new Label("submitDate", DateUtils.formatAge(request.getSubmitDate())));
-				fragment.add(new Label("comments", request.getCommentCount()));
-				cellItem.add(fragment);
+				cellItem.add(new PullRequestSummaryPanel(componentId, rowModel) {
+
+					@Override
+					protected QueryPosition getQueryPosition() {
+						OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
+						return new QueryPosition(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
+								(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
+					}
+					
+				});
 			}
 
 			@Override
@@ -464,7 +452,6 @@ public class PullRequestListPage extends ProjectPage {
 			}
 			
 		};
-		
 		
 		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {
 
