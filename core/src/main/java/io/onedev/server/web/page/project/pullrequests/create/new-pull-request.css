@@ -110,3 +110,7 @@
 	width: 24px;
 	height: 24px;
 }
+#new-request>.status>.can-send .merge-strategy .merge-without-review {
+	margin-top: 20px;
+	margin-bottom: 0;
+}

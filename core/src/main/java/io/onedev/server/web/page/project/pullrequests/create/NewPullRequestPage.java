@@ -185,7 +185,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				if (request.isAllReviewsApproved())
 					request.setMergeStrategy(MergeStrategy.DO_NOT_MERGE);
 				else
-					request.setMergeStrategy(MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY);
+					request.setMergeStrategy(MergeStrategy.CREATE_MERGE_COMMIT);
 			}
 			
 			requestModel = new LoadableDetachableModel<PullRequest>() {
@@ -713,6 +713,18 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				component.add(AttributeAppender.append("class", "calculating"));
 				component.setEscapeModelStrings(false);
 				return component;
+			}
+			
+		});
+		
+		container.add(new Label("mergeWithoutReviewNote", "This pull request will be merged into target branch automatically "
+				+ "as it is submitted by qualified user. Use strategy \"Do Not Merge\" if you want to review without "
+				+ "merging now") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isAllReviewsApproved() && getPullRequest().getMergeStrategy() != MergeStrategy.DO_NOT_MERGE);
 			}
 			
 		});
