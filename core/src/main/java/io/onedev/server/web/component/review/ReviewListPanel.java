@@ -31,14 +31,14 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.JsoupUtils;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.websocket.PageDataChanged;
+import io.onedev.utils.HtmlUtils;
 
 @SuppressWarnings("serial")
 public class ReviewListPanel extends GenericPanel<PullRequest> {
@@ -148,7 +148,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 						if (result != null && result.getComment() != null) {
 							MarkdownManager markdownManager = OneDev.getInstance(MarkdownManager.class);
 							String rendered = markdownManager.render(result.getComment());
-							builder.append("<div class='comment'>").append(JsoupUtils.clean(rendered).body().html()).append("</div>");
+							builder.append("<div class='comment'>").append(HtmlUtils.clean(rendered).body().html()).append("</div>");
 						}
 						Label label = new Label(id, builder.toString());
 						label.add(AttributeAppender.append("class", "review-action"));

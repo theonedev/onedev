@@ -6,6 +6,8 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -29,7 +31,7 @@ public class NewProjectPage extends LayoutPage {
 		
 		Project project = new Project();
 		
-		BeanEditor editor = BeanContext.editBean("editor", project);
+		BeanEditor editor = BeanContext.editBean("editor", project, Sets.newHashSet("commitMessageTransforms"), true);
 		
 		Form<?> form = new Form<Void>("form") {
 

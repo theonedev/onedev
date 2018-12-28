@@ -51,11 +51,11 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.CommitMessageTransformer;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
 import io.onedev.server.web.component.build.status.BuildsStatusPanel;
-import io.onedev.server.web.component.commit.message.CommitMessageLabel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
@@ -123,7 +123,8 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new CommitMessageLabel("text", projectModel, Model.of(getCommit().getShortMessage())));
+		String transformed = new CommitMessageTransformer(getProject(), null).transform(getCommit().getShortMessage());
+		add(new Label("title", transformed).setEscapeModelStrings(false));
 
 		BlobIdent blobIdent = new BlobIdent(getCommit().name(), null, FileMode.TYPE_TREE);
 		ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
@@ -150,7 +151,8 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		
 		String message = GitUtils.getDetailMessage(getCommit());
 		if (message != null) {
-			add(new CommitMessageLabel("detail", projectModel, Model.of(message)));
+			transformed = new CommitMessageTransformer(getProject(), null).transform(message);
+			add(new Label("detail", transformed).setEscapeModelStrings(false));
 		} else {
 			add(new WebMarkupContainer("detail").setVisible(false));
 		}

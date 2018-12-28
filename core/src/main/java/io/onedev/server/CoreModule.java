@@ -237,8 +237,6 @@ import io.onedev.server.web.page.layout.MainNavContribution;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.util.avatar.AvatarManager;
 import io.onedev.server.web.util.avatar.DefaultAvatarManager;
-import io.onedev.server.web.util.commitmessagetransform.CommitMessageTransformer;
-import io.onedev.server.web.util.commitmessagetransform.PatternCommitMessageTransformer;
 import io.onedev.server.web.util.markdown.CommitProcessor;
 import io.onedev.server.web.util.markdown.IssueProcessor;
 import io.onedev.server.web.util.markdown.MentionProcessor;
@@ -414,8 +412,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WebSocketPolicy.class).toProvider(WebSocketPolicyProvider.class);
 		bind(EditSupportRegistry.class).to(DefaultEditSupportRegistry.class);
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
-
-		contribute(CommitMessageTransformer.class, PatternCommitMessageTransformer.class);
 		
 		contributeFromPackage(EditSupport.class, EditSupport.class);
 		

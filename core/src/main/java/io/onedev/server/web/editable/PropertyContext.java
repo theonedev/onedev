@@ -11,6 +11,7 @@ import org.apache.wicket.model.Model;
 
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.util.OneContext;
+import io.onedev.utils.ClassUtils;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
@@ -41,7 +42,7 @@ public abstract class PropertyContext<T> implements Serializable {
 	public static PropertyEditor<Serializable> editModel(String componentId, 
 			final IModel<Serializable> beanModel, String propertyName) {
 		
-		final PropertyContext<Serializable> editContext = of(beanModel.getObject().getClass(), propertyName);
+		final PropertyContext<Serializable> editContext = of(ClassUtils.unproxy(beanModel.getObject().getClass()), propertyName);
 		return editContext.renderForEdit(componentId, new IModel<Serializable>() {
 
 			@Override
@@ -86,7 +87,7 @@ public abstract class PropertyContext<T> implements Serializable {
 	}
 
 	public static Component viewModel(String componentId, final IModel<Serializable> beanModel, String propertyName) {
-		final PropertyContext<Serializable> editContext = of(beanModel.getObject().getClass(), propertyName);
+		final PropertyContext<Serializable> editContext = of(ClassUtils.unproxy(beanModel.getObject().getClass()), propertyName);
 		return editContext.renderForView(componentId, new LoadableDetachableModel<Serializable>() {
 
 			@Override

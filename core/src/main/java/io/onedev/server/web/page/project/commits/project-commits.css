@@ -21,11 +21,12 @@
 	position: absolute;
 }
 #project-commits>.main>.body .label {
-	margin: 3px 0 0 4px;
+	margin-right: 8px;
 }
-#project-commits>.main>.body a.summary {
+#project-commits>.main>.body .summary a {
 	font-weight: bold;
 	font-size: 15px;
+	line-height: 12px;
 }
 #project-commits>.main>.body .commit>.detail {
 	padding-left: 48px; 
@@ -43,6 +44,12 @@
 }
 #project-commits>.main>.body .message-and-labels {
 	margin-bottom: 4px;
+}
+#project-commits>.main>.body .message-and-labels .commit-message {
+	margin-right: 8px;
+}
+#project-commits>.main>.body .message-and-labels .commit-message .ellipsis-expander {
+	margin-bottom: 2px;
 }
 #project-commits>.main>.body .actions>* {
 	margin: 6px 0 0 8px;

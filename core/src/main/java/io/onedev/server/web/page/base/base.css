@@ -242,7 +242,6 @@ form>.test-feedback {
 	padding-right: 0;
 	padding-left: 10px;
 	width: 1%;
-	vertical-align: middle;
 }
 .editable .editor table.bean.list tr:hover td {
 	background: #F9F9F9;

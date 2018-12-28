@@ -15,8 +15,8 @@ import com.google.common.collect.ImmutableSet;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.server.util.JsoupUtils;
-import io.onedev.server.util.TextNodeVisitor;
+import io.onedev.utils.HtmlUtils;
+import io.onedev.utils.TextNodeVisitor;
 
 public class MentionParser {
 	
@@ -35,7 +35,7 @@ public class MentionParser {
 			
 			@Override
 			protected boolean isApplicable(TextNode node) {
-				if (JsoupUtils.hasAncestor(node, IGNORED_TAGS))
+				if (HtmlUtils.hasAncestor(node, IGNORED_TAGS))
 					return false;
 				
 				return node.getWholeText().contains("@"); // fast scan here, do pattern match later
@@ -59,9 +59,9 @@ public class MentionParser {
 				} else {
 					userTag = "@" + userName;
 				}
-				JsoupUtils.appendReplacement(matcher, node, matcher.group(1) + userTag + matcher.group(3));
+				HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + userTag + matcher.group(3));
 			}
-			JsoupUtils.appendTail(matcher, node);
+			HtmlUtils.appendTail(matcher, node);
 		}
 
 		return mentions;

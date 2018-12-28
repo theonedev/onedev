@@ -8,8 +8,8 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jsoup.nodes.Document;
 
 import com.vladsch.flexmark.Extension;
@@ -28,8 +28,8 @@ import com.vladsch.flexmark.util.options.MutableDataSet;
 
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.JsoupUtils;
 import io.onedev.server.util.markdown.MarkdownProcessor;
+import io.onedev.utils.HtmlUtils;
 
 @Singleton
 public class DefaultMarkdownManager implements MarkdownManager {
@@ -85,7 +85,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 
 	@Override
 	public String process(Project project, String rendered, @Nullable Object context) {
-		Document document = JsoupUtils.clean(rendered);
+		Document document = HtmlUtils.clean(rendered);
 		for (MarkdownProcessor htmlTransformer: htmlTransformers)
 			htmlTransformer.process(project, document, context);
 		return document.body().html();

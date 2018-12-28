@@ -111,3 +111,6 @@ body.BranchProtectionPage, body.WebHooksPage {
 #project-setting .avatar-edit form>button {
 	margin-top: 20px;
 }
+#project-setting .commit-message-transforms th {
+	font-weight: normal;
+}

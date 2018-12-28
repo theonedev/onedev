@@ -41,7 +41,7 @@ public abstract class OneContext {
 	}
 	
 	public String getDocLink() {
-		return OneDev.getInstance().getDocLink();
+		return OneDev.getInstance().getDocRoot();
 	}
 
 	public EditContext getEditContext() {

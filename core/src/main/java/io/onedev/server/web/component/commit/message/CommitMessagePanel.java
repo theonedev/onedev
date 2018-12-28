@@ -4,44 +4,46 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.AbstractLink;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.util.CommitMessageTransformer;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.utils.Highlighter;
 import io.onedev.utils.Transformer;
 
 @SuppressWarnings("serial")
-public class ExpandableCommitMessagePanel extends Panel {
+public class CommitMessagePanel extends Panel {
 
 	private final IModel<Project> projectModel;
 	
 	private final IModel<RevCommit> commitModel;
 	
-	private final IModel<List<Pattern>> patternsModel;
+	private final IModel<List<Pattern>> highlightPatternsModel;
 	
-	public ExpandableCommitMessagePanel(String id, IModel<Project> projectModel, 
-			IModel<RevCommit> commitModel, IModel<List<Pattern>> patternsModel) {
+	public CommitMessagePanel(String id, IModel<Project> projectModel, 
+			IModel<RevCommit> commitModel, IModel<List<Pattern>> highlightPatternsModel) {
 		super(id);
 		
 		this.projectModel = projectModel;
 		this.commitModel = commitModel;
-		this.patternsModel = patternsModel;
+		this.highlightPatternsModel = highlightPatternsModel;
 	}
 
-	public ExpandableCommitMessagePanel(String id, IModel<Project> projectModel, IModel<RevCommit> commitModel) {
+	public CommitMessagePanel(String id, IModel<Project> projectModel, IModel<RevCommit> commitModel) {
 		this(id, projectModel, commitModel, new LoadableDetachableModel<List<Pattern>>() {
 
 			@Override
@@ -52,38 +54,45 @@ public class ExpandableCommitMessagePanel extends Panel {
 		});
 	}
 	
-	private String highlight(String text) {
-		return Highlighter.highlightPatterns(text, patternsModel.getObject(), new Transformer<String>() {
+	private String highlight(String text, @Nullable String commitUrl) {
+		return Highlighter.highlightPatterns(text, highlightPatternsModel.getObject(), new Transformer<String>() {
 
 			@Override
 			public String transform(String text) {
-				return "<span class='highlight'>" + HtmlEscape.escapeHtml5(text) + "</span>";
+				String transformed = new CommitMessageTransformer(getProject(), commitUrl).transform(text);
+				return "<span class='highlight'>" + transformed + "</span>";
 			}
 			
 		}, new Transformer<String>() {
 
 			@Override
 			public String transform(String text) {
-				return HtmlEscape.escapeHtml5(text);
+				return new CommitMessageTransformer(getProject(), commitUrl).transform(text);
 			}
 			
 		});
+	}
+	
+	private Project getProject() {
+		return projectModel.getObject();
+	}
+	
+	private RevCommit getCommit() {
+		return commitModel.getObject();
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		AbstractLink link = new ViewStateAwarePageLink<Void>("link",
-				CommitDetailPage.class,
-				CommitDetailPage.paramsOf(projectModel.getObject(), commitModel.getObject().name()));
+		PageParameters params = CommitDetailPage.paramsOf(getProject(), getCommit().name()); 
+		String commitUrl = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 		
-		add(link);
-		link.add(new Label("label", new AbstractReadOnlyModel<String>() {
+		add(new Label("summary", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return highlight(commitModel.getObject().getShortMessage());
+				return highlight(getCommit().getShortMessage(), commitUrl);
 			}
 			
 		}).setEscapeModelStrings(false));
@@ -92,7 +101,7 @@ public class ExpandableCommitMessagePanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return highlight(GitUtils.getDetailMessage(commitModel.getObject()));
+				return highlight(GitUtils.getDetailMessage(getCommit()), null);
 			}
 			
 		}) {
@@ -101,7 +110,7 @@ public class ExpandableCommitMessagePanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitUtils.getDetailMessage(commitModel.getObject()) != null);
+				setVisible(GitUtils.getDetailMessage(getCommit()) != null);
 			}
 		}.setEscapeModelStrings(false));
 		
@@ -110,7 +119,7 @@ public class ExpandableCommitMessagePanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(GitUtils.getDetailMessage(commitModel.getObject()) != null);
+				setVisible(GitUtils.getDetailMessage(getCommit()) != null);
 			}
 		};
 		add(detailedToggle);
@@ -126,7 +135,7 @@ public class ExpandableCommitMessagePanel extends Panel {
 	protected void onDetach() {
 		projectModel.detach();
 		commitModel.detach();
-		patternsModel.detach();
+		highlightPatternsModel.detach();
 		
 		super.onDetach();
 	}

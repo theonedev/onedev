@@ -38,7 +38,7 @@ import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.status.BuildsStatusPanel;
 import io.onedev.server.web.component.commit.graph.CommitGraphResourceReference;
 import io.onedev.server.web.component.commit.graph.CommitGraphUtils;
-import io.onedev.server.web.component.commit.message.ExpandableCommitMessagePanel;
+import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
@@ -134,7 +134,7 @@ public class CommitListPanel extends Panel {
 					fragment.add(new ContributorAvatars("avatar", 
 							commit.getAuthorIdent(), commit.getCommitterIdent()));
 
-					fragment.add(new ExpandableCommitMessagePanel("message", projectModel, item.getModel()));
+					fragment.add(new CommitMessagePanel("message", projectModel, item.getModel()));
 
 					RepeatingView labelsView = new RepeatingView("labels");
 

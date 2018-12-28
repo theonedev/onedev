@@ -16,7 +16,7 @@ public class ScriptingDefaultValue implements DefaultValueProvider {
 	private String script;
 
 	@Editable(description="Groovy script to be evaluated. It should return name of a group. "
-			+ "Check <a href='$onedev.docLink/Scripting' target='_blank'>scripting help</a> for details")
+			+ "Check <a href='$docRoot/Scripting' target='_blank'>scripting help</a> for details")
 	@NotEmpty
 	@Script
 	@OmitName

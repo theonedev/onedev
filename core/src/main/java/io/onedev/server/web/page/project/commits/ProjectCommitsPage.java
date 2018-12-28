@@ -69,7 +69,7 @@ import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.status.BuildsStatusPanel;
 import io.onedev.server.web.component.commit.graph.CommitGraphResourceReference;
 import io.onedev.server.web.component.commit.graph.CommitGraphUtils;
-import io.onedev.server.web.component.commit.message.ExpandableCommitMessagePanel;
+import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -537,7 +537,7 @@ public class ProjectCommitsPage extends ProjectPage {
 			item = new Fragment(itemId, "commitFrag", this);
 			item.add(new ContributorAvatars("avatar", commit.getAuthorIdent(), commit.getCommitterIdent()));
 
-			item.add(new ExpandableCommitMessagePanel("message", projectModel, new LoadableDetachableModel<RevCommit>() {
+			item.add(new CommitMessagePanel("message", projectModel, new LoadableDetachableModel<RevCommit>() {
 
 				@Override
 				protected RevCommit load() {

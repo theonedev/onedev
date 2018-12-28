@@ -14,14 +14,15 @@ import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.GroovyUtils;
-import io.onedev.server.util.JsoupUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.BeanUtils;
+import io.onedev.utils.HtmlUtils;
 import io.onedev.utils.ReflectionUtils;
+import io.onedev.utils.StringUtils;
 
 public class PropertyDescriptor implements Serializable {
 
@@ -156,8 +157,8 @@ public class PropertyDescriptor implements Serializable {
 			OneContext.push(new ComponentContext(component));
 			try {
 				description = Application.get().getResourceSettings().getLocalizer().getString(description, component, description);
-				description = GroovyUtils.evalGString(description);
-				return JsoupUtils.clean(description).body().html();
+				description = StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
+				return HtmlUtils.clean(description).body().html();
 			} finally {
 				OneContext.pop();
 			}

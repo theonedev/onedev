@@ -50,8 +50,8 @@
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status>div {
 	margin-left: 8px;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content a {
-	color: #555;
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content a.commit {
+	color: #444;
 }
 
 #request-detail>.main>.activities .activity>td>.content {

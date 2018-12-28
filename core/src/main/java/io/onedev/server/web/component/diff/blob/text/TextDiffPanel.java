@@ -582,7 +582,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				callback, blameMessageBehavior.getCallback(),
 				commentSupport!=null, unableCommentMessage, jsonOfMark, jsonOfCommentInfo, 
 				jsonOfOldCommentInfos, jsonOfNewCommentInfos, dirtyContainerId, 
-				OneDev.getInstance().getDocLink());
+				OneDev.getInstance().getDocRoot());
 		
 		response.render(OnDomReadyHeaderItem.forScript(script));
 

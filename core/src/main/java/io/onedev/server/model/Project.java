@@ -85,7 +85,7 @@ import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.support.BranchProtection;
-import io.onedev.server.model.support.CommitMessageTransformSetting;
+import io.onedev.server.model.support.CommitMessageTransform;
 import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
@@ -117,7 +117,7 @@ import io.onedev.utils.StringUtils;
 public class Project extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	private static final int LAST_COMMITS_CACHE_THRESHOLD = 1000;
 	
 	public static final int MAX_UPLOAD_SIZE = 10; // In mega bytes
@@ -138,7 +138,7 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(length=65535, name="COMMIT_MSG_TRANSFORM")
 	@JsonView(DefaultView.class)
-	private CommitMessageTransformSetting commitMessageTransformSetting;
+	private ArrayList<CommitMessageTransform> commitMessageTransforms = new ArrayList<>();
 	
 	@Column(nullable=false)
 	private String uuid = UUID.randomUUID().toString();
@@ -270,7 +270,7 @@ public class Project extends AbstractEntity {
 		this.name = name;
 	}
 
-	@Editable(order=200, description="Optionally describe the project")
+	@Editable(order=200)
 	@Markdown
 	public String getDescription() {
 		return description;
@@ -292,14 +292,15 @@ public class Project extends AbstractEntity {
 		this.defaultPrivilege = defaultPrivilege;
 	}
 
+	@Editable
 	@Nullable
 	@Valid
-	public CommitMessageTransformSetting getCommitMessageTransformSetting() {
-		return commitMessageTransformSetting;
+	public ArrayList<CommitMessageTransform> getCommitMessageTransforms() {
+		return commitMessageTransforms;
 	}
 
-	public void setCommitMessageTransformSetting(CommitMessageTransformSetting commitMessageTransformSetting) {
-		this.commitMessageTransformSetting = commitMessageTransformSetting;
+	public void setCommitMessageTransforms(ArrayList<CommitMessageTransform> commitMessageTransforms) {
+		this.commitMessageTransforms = commitMessageTransforms;
 	}
 
 	public String getUUID() {
@@ -1275,5 +1276,5 @@ public class Project extends AbstractEntity {
 		}
 		return null;
 	}
-	
+
 }

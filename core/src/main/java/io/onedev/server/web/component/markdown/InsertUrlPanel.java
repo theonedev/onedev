@@ -57,6 +57,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobUploadException;
 import io.onedev.utils.PathUtils;
 import io.onedev.utils.StringUtils;
+import io.onedev.utils.UrlUtils;
 
 @SuppressWarnings("serial")
 abstract class InsertUrlPanel extends Panel {
@@ -132,7 +133,7 @@ abstract class InsertUrlPanel extends Panel {
 					target.add(fragment);
 				} else {
 					if (text == null)
-						text = StringUtils.describeUrl(url);
+						text = UrlUtils.describe(url);
 					markdownEditor.insertUrl(target, isImage, url, text, null);
 					onClose(target);
 				}
@@ -213,7 +214,7 @@ abstract class InsertUrlPanel extends Panel {
 					String referenceUrl = urlFor(ProjectBlobPage.class, 
 							ProjectBlobPage.paramsOf(context.getProject(), blobIdent)).toString();
 					String relativized = PathUtils.relativize(baseUrl, referenceUrl);		
-					markdownEditor.insertUrl(target, isImage, relativized, StringUtils.describeUrl(blobIdent.getName()), null);
+					markdownEditor.insertUrl(target, isImage, relativized, UrlUtils.describe(blobIdent.getName()), null);
 					onClose(target);
 				}
 
@@ -268,7 +269,7 @@ abstract class InsertUrlPanel extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								String displayName = StringUtils.describeUrl(attachmentName);
+								String displayName = UrlUtils.describe(attachmentName);
 								markdownEditor.insertUrl(target, true, attachmentUrl, displayName, null);
 								onClose(target);
 							}
@@ -310,7 +311,7 @@ abstract class InsertUrlPanel extends Panel {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								String displayName = StringUtils.describeUrl(attachmentName);
+								String displayName = UrlUtils.describe(attachmentName);
 								markdownEditor.insertUrl(target, false, attachmentUrl, displayName, null);
 								onClose(target);
 							}
@@ -366,7 +367,7 @@ abstract class InsertUrlPanel extends Panel {
 						throw new RuntimeException(e);
 					}
 					markdownEditor.insertUrl(target, isImage, 
-							attachmentSupport.getAttachmentUrl(attachmentName), StringUtils.describeUrl(attachmentName), null);
+							attachmentSupport.getAttachmentUrl(attachmentName), UrlUtils.describe(attachmentName), null);
 					onClose(target);
 				}
 
@@ -449,7 +450,7 @@ abstract class InsertUrlPanel extends Panel {
 						} else {
 							url = fileName;
 						}
-						markdownEditor.insertUrl(target, isImage, url, StringUtils.describeUrl(fileName), null);
+						markdownEditor.insertUrl(target, isImage, url, UrlUtils.describe(fileName), null);
 						onClose(target);
 					} catch (BlobUploadException e) {
 						form.error(e.getMessage());

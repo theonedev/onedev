@@ -3,7 +3,6 @@ package io.onedev.server.migration;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -845,6 +844,24 @@ public class DatabaseMigrator {
 				for (Element element: dom.getRootElement().elements()) {
 					if (element.elementTextTrim("key").equals("LICENSE"))
 						element.detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}	
+	
+	private void migrate19(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element commitMessageTransformsElement = element.addElement("commitMessageTransforms");
+					Element commitMessageTransformSettingElement = element.element("commitMessageTransformSetting");
+					if (commitMessageTransformSettingElement != null) {
+						commitMessageTransformSettingElement.detach();
+						commitMessageTransformSettingElement.setName("io.onedev.server.model.support.CommitMessageTransform");
+						commitMessageTransformsElement.add(commitMessageTransformSettingElement);
+					}
 				}
 				dom.writeToFile(file, false);
 			}

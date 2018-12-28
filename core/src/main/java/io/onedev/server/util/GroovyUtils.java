@@ -9,7 +9,6 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.Script;
 import io.onedev.server.exception.ScriptException;
-import io.onedev.utils.StringUtils;
 
 public class GroovyUtils {
 	
@@ -67,17 +66,6 @@ public class GroovyUtils {
     
     public static Object evalScript(String scriptText) {
     	return evalScript(scriptText, new HashMap<>());
-    }
-    
-    public static String evalGString(String gstring, Map<String, Object> variables) {
-    	if (gstring.contains("$")) 
-    		return evalScript("\"" + StringUtils.replace(gstring, "\"", "\\\"") + "\"", variables).toString();
-    	else
-    		return gstring;
-    }
-    
-    public static String evalGString(String gstring) {
-    	return evalGString(gstring, new HashMap<>());
     }
     
 }

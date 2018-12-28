@@ -571,7 +571,7 @@ onedev.server.markdown = {
 	    if (canReferenceEntity) {
 	    	function getReferencePullRequestProject() {
 	    		var input = $input.val().substring(0, $input.caret());
-	    		var match = /.*pull\s*request\s+([\w\.-]*)\s*#/gi.exec(input);
+	    		var match = /.*pull\s*request\s+([\w\.-]*)#/gi.exec(input);
 	    		if (match)
 	    			return match[1];		
 	    		else
@@ -580,7 +580,7 @@ onedev.server.markdown = {
 
 	    	function getReferenceIssueProject() {
 	    		var input = $input.val().substring(0, $input.caret())
-	    		var match = /.*issue\s+([\w\.-]*)\s*#/gi.exec(input);
+	    		var match = /.*issue\s+([\w\.-]*)#/gi.exec(input);
 	    		if (match)
 	    			return match[1];		
 	    		else

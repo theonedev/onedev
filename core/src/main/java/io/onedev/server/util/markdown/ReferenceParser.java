@@ -19,11 +19,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.JsoupUtils;
 import io.onedev.server.util.Referenceable;
-import io.onedev.server.util.TextNodeVisitor;
+import io.onedev.utils.HtmlUtils;
 import io.onedev.utils.ReflectionUtils;
 import io.onedev.utils.StringUtils;
+import io.onedev.utils.TextNodeVisitor;
 import io.onedev.utils.WordUtils;
 
 public abstract class ReferenceParser<T extends Referenceable> {
@@ -63,7 +63,7 @@ public abstract class ReferenceParser<T extends Referenceable> {
 			
 			@Override
 			protected boolean isApplicable(TextNode node) {
-				if (JsoupUtils.hasAncestor(node, IGNORED_TAGS))
+				if (HtmlUtils.hasAncestor(node, IGNORED_TAGS))
 					return false;
 				
 				String text = StringUtils.deleteWhitespace(node.getWholeText()).toLowerCase();
@@ -97,9 +97,9 @@ public abstract class ReferenceParser<T extends Referenceable> {
 				} else {
 					referenceTag = referenceText; 
 				}
-				JsoupUtils.appendReplacement(matcher, node, matcher.group(1) + matcher.group(2) + referenceTag + matcher.group(5));
+				HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + matcher.group(2) + referenceTag + matcher.group(5));
 			}
-			JsoupUtils.appendTail(matcher, node);
+			HtmlUtils.appendTail(matcher, node);
 		}
 
 		return references;

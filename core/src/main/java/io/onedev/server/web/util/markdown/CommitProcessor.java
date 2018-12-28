@@ -14,10 +14,10 @@ import com.google.common.collect.ImmutableSet;
 
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.JsoupUtils;
-import io.onedev.server.util.TextNodeVisitor;
 import io.onedev.server.util.markdown.MarkdownProcessor;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.utils.HtmlUtils;
+import io.onedev.utils.TextNodeVisitor;
 
 public class CommitProcessor implements MarkdownProcessor {
 	
@@ -39,7 +39,7 @@ public class CommitProcessor implements MarkdownProcessor {
 				
 				@Override
 				protected boolean isApplicable(TextNode node) {
-					return !JsoupUtils.hasAncestor(node, IGNORED_TAGS);
+					return !HtmlUtils.hasAncestor(node, IGNORED_TAGS);
 				}
 			};
 			
@@ -57,9 +57,9 @@ public class CommitProcessor implements MarkdownProcessor {
 					} else {
 						commitTag = commitId.name();
 					}
-					JsoupUtils.appendReplacement(matcher, node, matcher.group(1) + commitTag + matcher.group(3));
+					HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + commitTag + matcher.group(3));
 				}
-				JsoupUtils.appendTail(matcher, node);
+				HtmlUtils.appendTail(matcher, node);
 			}
 		}
 	}

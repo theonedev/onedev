@@ -18,6 +18,7 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
+import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 public class GeneralSettingPage extends ProjectSettingPage {
@@ -52,7 +53,7 @@ public class GeneralSettingPage extends ProjectSettingPage {
 				editor.getBeanDescriptor().copyProperties(object, getProject());
 			}
 			
-		});
+		}, Sets.newHashSet("commitMessageTransforms"), true);
 		
 		Form<?> form = new Form<Void>("form") {
 

@@ -193,7 +193,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		return new ManagedSerializedForm(OneDev.class);
 	}	
 	
-	public String getDocLink() {
+	public String getDocRoot() {
 		return "https://github.com/theonedev/onedev/wiki";
 	}
 	
