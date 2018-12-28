@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server-parent</artifactId>
-		<version>2.0-beta-build119</version>
+		<version>2.0-beta-build120</version>
 	</parent>
 	<build>
 		<plugins>
@@ -148,11 +148,6 @@
 			<version>5.2.4.Final</version>
 		</dependency>
 		<dependency>
-			<groupId>org.reflections</groupId>
-			<artifactId>reflections</artifactId>
-			<version>0.9.9</version>
-		</dependency>
-		<dependency>
 			<groupId>org.unbescape</groupId>
 			<artifactId>unbescape</artifactId>
 			<version>1.1.2.RELEASE</version>
@@ -236,7 +231,7 @@
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>codeassist</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.hk2</groupId>
@@ -385,12 +380,12 @@
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>jsymbol</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
 			<artifactId>jsyntax</artifactId>
-			<version>1.0.1</version>
+			<version>1.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
@@ -448,7 +443,7 @@
 		<groovy.version>2.4.14</groovy.version>
 		<wicket.version>7.10.0</wicket.version>
 		<wicketbootstrap.version>0.10.17</wicketbootstrap.version>
-		<launcher.version>1.0.2</launcher.version>
+		<launcher.version>1.0.3</launcher.version>
 		<jersey.version>2.13</jersey.version>
 		<jetty.version>9.3.24.v20180605</jetty.version>
 		<jackson.version>2.9.7</jackson.version>

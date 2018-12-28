@@ -5,7 +5,7 @@
     <parent> 
         <groupId>io.onedev</groupId>  
         <artifactId>server-parent</artifactId>  
-        <version>2.0-beta-build119</version> 
+        <version>2.0-beta-build120</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -87,7 +87,7 @@
         <dependency> 
             <groupId>io.onedev</groupId>  
             <artifactId>server-core</artifactId>  
-            <version>2.0-beta-build119</version> 
+            <version>2.0-beta-build120</version> 
         </dependency>  
     </dependencies>  
     <properties> 
