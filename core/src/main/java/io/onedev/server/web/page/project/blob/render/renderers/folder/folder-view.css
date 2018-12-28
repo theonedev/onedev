@@ -10,7 +10,7 @@
 	padding: 6px 12px; 
 	border-top: 1px solid #EEE; 
 }
-.folder-view>table>tbody>tr>td:not(.path) a {
+.folder-view>table>tbody>tr:not(.parent)>td:not(.path) a {
 	color: #444;
 }
 
