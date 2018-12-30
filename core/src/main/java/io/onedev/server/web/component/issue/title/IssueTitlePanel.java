@@ -5,6 +5,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
@@ -18,6 +19,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 
 @SuppressWarnings("serial")
 public abstract class IssueTitlePanel extends Panel {
@@ -105,6 +107,7 @@ public abstract class IssueTitlePanel extends Panel {
 			}
 			
 		});
+		titleViewer.add(new WebMarkupContainer("copy").add(new CopyClipboardBehavior(Model.of("#" + getIssue().getNumber() + ": " + getIssue().getTitle()))));
 		
 		titleViewer.setOutputMarkupId(true);
 		

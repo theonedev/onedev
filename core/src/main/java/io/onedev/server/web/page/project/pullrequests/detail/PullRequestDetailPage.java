@@ -256,7 +256,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				}
 
 				target.add(requestHead);
-				target.appendJavaScript("$(window).resize();");
+				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 			
 		});
@@ -267,7 +267,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			public void onClick(AjaxRequestTarget target) {
 				isEditingTitle = false;
 				target.add(requestHead);
-				target.appendJavaScript("$(window).resize();");
+				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 			
 		});
@@ -301,7 +301,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 						}
 					}
 					WicketUtils.markLastVisibleChild(this);
-					pageDataChanged.getHandler().appendJavaScript("$(window).resize();");
+					pageDataChanged.getHandler().appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 				}
 			}
 
@@ -440,7 +440,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 
 							@Override
 							public void navTo(AjaxRequestTarget target, PullRequest entity, QueryPosition position) {
-								PageParameters params = PullRequestDetailPage.paramsOf(request, position);
+								PageParameters params = PullRequestDetailPage.paramsOf(entity, position);
 								setResponsePage(getPageClass(), params);
 							}
 							
@@ -804,7 +804,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				reviewUpdateId = getPullRequest().getLatestUpdate().getId();
 				operationsContainer.replace(newOperationConfirm(confirmId, APPROVE, operationsContainer));
 				target.add(operationsContainer);
-				target.appendJavaScript("$(window).resize();");
+				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 
 			@Override
@@ -822,7 +822,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				reviewUpdateId = getPullRequest().getLatestUpdate().getId();
 				operationsContainer.replace(newOperationConfirm(confirmId, REQUEST_FOR_CHANGES, operationsContainer));
 				target.add(operationsContainer);
-				target.appendJavaScript("$(window).resize();");
+				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 
 			@Override
@@ -839,7 +839,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, DISCARD, operationsContainer));
 				target.add(operationsContainer);
-				target.appendJavaScript("$(window).resize();");
+				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 			
 			@Override
@@ -855,7 +855,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, REOPEN, operationsContainer));
 				target.add(operationsContainer);
-				target.appendJavaScript("$(window).resize();");
+				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 			
 			@Override
@@ -871,7 +871,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, DELETE_SOURCE_BRANCH, operationsContainer));
 				target.add(operationsContainer);
-				target.appendJavaScript("$(window).resize();");
+				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 			
 			@Override
@@ -887,7 +887,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			public void onClick(AjaxRequestTarget target) {
 				operationsContainer.replace(newOperationConfirm(confirmId, RESTORE_SOURCE_BRANCH, operationsContainer));
 				target.add(operationsContainer);
-				target.appendJavaScript("$(window).resize();");
+				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 			
 			@Override
@@ -968,13 +968,13 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 					
 					target.add(feedback);
 					target.add(hint);
-					target.appendJavaScript("$(window).resize();");
+					target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 					reviewUpdateId = getPullRequest().getLatestUpdate().getId();
 				} else if (!operation.canOperate(request)) {
 					error("Not allowed to " + getOperationName(operation) + " at this point");
 					target.add(feedback);
 					target.add(hint);
-					target.appendJavaScript("$(window).resize();");
+					target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 				} else {
 					operation.operate(request, noteInput.getModelObject());
 					setResponsePage(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest(), position));
@@ -1011,7 +1011,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			public void onClick(AjaxRequestTarget target) {
 				fragment.replaceWith(new WebMarkupContainer(id).setVisible(false));
 				target.add(operationsContainer);
-				target.appendJavaScript("$(window).resize();");
+				target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 			}
 			
 		});		

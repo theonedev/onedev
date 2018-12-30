@@ -1,5 +1,6 @@
 package io.onedev.server.util;
 
+import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -46,15 +47,20 @@ public class CommitMessageTransformer implements Transformer<String> {
 		this.commitUrl = commitUrl;
 	}
 	
-	@Override
-	public String transform(String commitMessage) {
+	public static String transform(String commitMessage, Collection<CommitMessageTransform> transforms) {
 		commitMessage = HtmlEscape.escapeHtml5(commitMessage);
 		try {
-			for (CommitMessageTransform transform: project.getCommitMessageTransforms())
+			for (CommitMessageTransform transform: transforms)
 				commitMessage = commitMessage.replaceAll(transform.getSearchFor(), transform.getReplaceWith());
 		} catch (Exception e) {
 			logger.error("Error transforming commit message", e);
 		}
+		return commitMessage;
+	}
+	
+	@Override
+	public String transform(String commitMessage) {
+		commitMessage = transform(commitMessage, project.getCommitMessageTransforms());
 		
 		commitMessage = linkEntities(project, commitMessage, new EntityInfoProvider() {
 

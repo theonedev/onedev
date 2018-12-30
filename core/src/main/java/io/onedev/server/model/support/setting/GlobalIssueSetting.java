@@ -108,7 +108,7 @@ public class GlobalIssueSetting implements Serializable {
 
 		Choice normal = new Choice();
 		normal.setValue("Normal");
-		normal.setColor("#009a1a");
+		normal.setColor("#9fc5e8");
 		choices.add(normal);
 
 		Choice major = new Choice();

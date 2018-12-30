@@ -40,8 +40,10 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 
 import io.onedev.launcher.loader.Listen;
+import io.onedev.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.entity.EntityRemoved;
+import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.git.Contribution;
 import io.onedev.server.git.Contributor;
@@ -54,8 +56,10 @@ import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.git.command.RevListCommand.Order;
 import io.onedev.server.manager.BatchWorkManager;
 import io.onedev.server.manager.CommitInfoManager;
+import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.StorageManager;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -279,6 +283,10 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	private final ExecutorService executorService;
 	
+	private final ListenerRegistry listenerRegistry;
+	
+	private final IssueManager issueManager;
+	
 	private final Map<Long, List<String>> filesCache = new ConcurrentHashMap<>();
 	
 	private final Map<Long, Integer> commitCountCache = new ConcurrentHashMap<>();
@@ -287,12 +295,15 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	
 	@Inject
 	public DefaultCommitInfoManager(ProjectManager projectManager, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork, ExecutorService executorService) {
+			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork, ExecutorService executorService, 
+			ListenerRegistry listenerRegistry, IssueManager issueManager) {
 		this.projectManager = projectManager;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
 		this.unitOfWork = unitOfWork;
 		this.executorService = executorService;
+		this.listenerRegistry = listenerRegistry;
+		this.issueManager = issueManager;
 	}
 	
 	private boolean isCommitCollected(byte[] commitBytes) {
@@ -318,6 +329,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		
 		Repository repository = project.getRepository();
 
+		Collection<Long> fixedIssueNumbers = new HashSet<>();
+		
 		env.executeInTransaction(new TransactionalExecutable() {
 			
 			@Override
@@ -371,7 +384,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 									commitsStore.put(txn, parentCommitKey, new ArrayByteIterable(newParentCommitBytes));
 								}
 								
-								for (Long issueNumber: IssueUtils.parseFixedIssues(nextCommit.getFullMessage())) {
+								for (Long issueNumber: IssueUtils.parseFixedIssues(project, nextCommit.getFullMessage())) {
 									ByteIterable issueKey = new LongByteIterable(issueNumber);
 									Collection<ObjectId> fixCommits = readCommits(fixCommitsStore, txn, issueKey);
 									
@@ -385,8 +398,10 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 											break;
 										}
 									}
-									if (addNextCommit)
+									if (addNextCommit) {
 										fixCommits.add(nextCommit);
+										fixedIssueNumbers.add(issueNumber);
+									}
 									writeCommits(fixCommitsStore, txn, issueKey, fixCommits);
 								}
 							}								
@@ -403,6 +418,12 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			}
 			
 		});			
+		
+		for (Long issueNumber: fixedIssueNumbers) {
+			Issue issue = issueManager.find(project, issueNumber);
+			if (issue != null)
+				listenerRegistry.post(new IssueCommitted(issue));
+		}
 
 		if (GitUtils.branch2ref(project.getDefaultBranch()).equals(refName)) {
 			ObjectId lastCommitId = 

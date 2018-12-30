@@ -58,6 +58,7 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
+import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
@@ -513,6 +514,8 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						IssueActivitiesPage.paramsOf(issue, position));
 				link.add(new Label("label", issue.getTitle()));
 				fragment.add(link);
+				fragment.add(new WebMarkupContainer("copy").add(new CopyClipboardBehavior(Model.of("#" + issue.getNumber() + ": " + issue.getTitle()))));
+				
 				fragment.add(new IssueStateLabel("state", rowModel));
 				
 				UserIdent submitterIdent = UserIdent.of(UserFacade.of(issue.getSubmitter()), issue.getSubmitterName());

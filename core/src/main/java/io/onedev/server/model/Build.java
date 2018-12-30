@@ -153,7 +153,7 @@ public class Build extends AbstractEntity {
 
 						RevCommit commit;
 						while ((commit = revWalk.next()) != null) 
-							fixedIssueNumbers.get().addAll(IssueUtils.parseFixedIssues(commit.getFullMessage()));
+							fixedIssueNumbers.get().addAll(IssueUtils.parseFixedIssues(project, commit.getFullMessage()));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

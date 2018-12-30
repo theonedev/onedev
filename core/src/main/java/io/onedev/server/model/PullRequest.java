@@ -799,7 +799,7 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 		if (fixedIssues == null) {
 			fixedIssues = new HashSet<>();
 			for (RevCommit commit: getCommits()) {
-				for (Long issueNumber: IssueUtils.parseFixedIssues(commit.getFullMessage())) {
+				for (Long issueNumber: IssueUtils.parseFixedIssues(getTargetProject(), commit.getFullMessage())) {
 					Issue issue = OneDev.getInstance(IssueManager.class).find(getTargetProject(), issueNumber);
 					if (issue != null)
 						fixedIssues.add(issue);

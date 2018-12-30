@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -160,6 +161,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 					GitUtils.branch2ref(source.getBranch()));
 			if (baseCommitId != null) {
 				PullRequest request = new PullRequest();
+				request.setTitle(StringUtils.capitalize(source.getBranch().replace('-', ' ').replace('_', ' ').toLowerCase()));
 				pullRequestRef.set(request);
 				request.setTarget(target);
 				request.setSource(source);

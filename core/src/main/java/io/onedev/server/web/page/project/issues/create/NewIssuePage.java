@@ -80,6 +80,11 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 			protected Project getProject() {
 				return NewIssuePage.this.getProject();
 			}
+
+			@Override
+			protected IssueCriteria getTemplate() {
+				return templateModel.getObject();
+			}
 			
 		};		
 		Form<?> form = new Form<Void>("form") {

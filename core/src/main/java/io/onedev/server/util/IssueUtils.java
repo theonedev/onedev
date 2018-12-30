@@ -10,6 +10,11 @@ import java.util.StringTokenizer;
 
 import javax.annotation.Nullable;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
@@ -71,15 +76,29 @@ public class IssueUtils {
 		return fieldValues;
 	}
 	
-	public static Collection<Long> parseFixedIssues(String str) {
+	public static Collection<Long> parseFixedIssues(Project project, String commitMessage) {
 		Collection<Long> issueNumbers = new HashSet<>();
+
+		/*
+		 * Transform commit message with defined transformers first in order not to process issue keys pointing 
+		 * to external issue trackers
+		 */
+		commitMessage = CommitMessageTransformer.transform(commitMessage, project.getCommitMessageTransforms());
 		
-		StringTokenizer tokenizer = new StringTokenizer(str);
-		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			if (FIX_ISSUE_WORDS.contains(token.toLowerCase())) {
-				while (FIX_ISSUE_WORDS.contains(parseIssueNumbers(tokenizer, issueNumbers)))
-					parseIssueNumbers(tokenizer, issueNumbers);
+		// Only process top level text node to skip transformed links above
+		Element body = Jsoup.parseBodyFragment(commitMessage).body();
+		for (int i=0; i<body.childNodeSize(); i++) {
+			Node node = body.childNode(i);
+			if (node instanceof TextNode) {
+				TextNode textNode = (TextNode) body.childNode(i);
+				StringTokenizer tokenizer = new StringTokenizer(textNode.getWholeText());
+				while (tokenizer.hasMoreTokens()) {
+					String token = tokenizer.nextToken();
+					if (FIX_ISSUE_WORDS.contains(token.toLowerCase())) {
+						while (FIX_ISSUE_WORDS.contains(parseIssueNumbers(tokenizer, issueNumbers)))
+							parseIssueNumbers(tokenizer, issueNumbers);
+					}
+				}
 			}
 		}
 		

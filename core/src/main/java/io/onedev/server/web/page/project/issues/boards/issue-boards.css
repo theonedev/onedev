@@ -59,7 +59,7 @@
 }
 #issue-boards>.body>.column {
 	flex: 1 1 auto;
-	min-width: 300px;
+	min-width: 360px;
 	height: 100%;
 	/* hack to makes all column of same width and same space */
 	padding-right: 20px;
@@ -93,6 +93,7 @@
 	position: relative;
 	padding: 16px 16px 0 16px;
 	height: 100%;
+	overflow: auto;
 } 
 #issue-boards>.body>.column>.content>.body.issue-droppable.ui-droppable-active {
 	background: #FDF2C5;
@@ -121,17 +122,26 @@
 	box-shadow: 2px 2px 6px 2px rgba(0, 0, 0, 0.3);	
 	border-width: 1px;
 	font-weight: normal;
+	white-space: normal;
 }
 
 #issue-boards>.body .card {
 	font-size: 13px;
 }
-#issue-boards>.body .card .head {
-	margin-bottom: 8px;
-}
 #issue-boards>.body .card .head>* {
-	margin-right: 8px;
+	margin: 0 8px 8px 0;
 }
+#issue-boards>.body .card .head .field-values .value span {
+	background: #EEE;
+	padding: .2em .6em .3em;
+	border-radius: .25em;
+	font-size: 75%;
+	font-weight: bold;
+	line-height: 1;
+	white-space: nowrap;
+	vertical-align: baseline;
+}
+
 #issue-boards>.body .card .head>.avatars {
 	margin-right: 0;
 }

@@ -6,7 +6,7 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.web.editable.annotation.Editable;
 
-@Editable(order=100, name="Users allowed to write code")
+@Editable(order=100, name="Users allowed to read issues")
 public class IssueReaders implements UserMatcher {
 
 	private static final long serialVersionUID = 1L;

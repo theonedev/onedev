@@ -38,6 +38,13 @@
 .issue-list>.body td.summary .title {
 	margin-right: 8px;
 }
+.issue-list>.body td.summary .number {
+	margin-right: 4px;
+}
+.issue-list>.body td.summary .copy {
+	font-size: 14px;
+}
+
 .issue-list>.body td.summary .second-line>* {
 	margin-right: 12px;
 }

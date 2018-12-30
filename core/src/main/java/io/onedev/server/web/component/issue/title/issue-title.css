@@ -7,6 +7,12 @@
 .issue-title a.edit {
 	color: #666;
 	margin-left: 8px;
+	font-size: 16px;
+}
+.issue-title a.copy {
+	color: #666;
+	margin-left: 4px;
+	font-size: 16px;
 }
 .issue-title input[type=text] {
 	font-weight: normal;

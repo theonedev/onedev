@@ -10,10 +10,10 @@ body.BranchProtectionPage, body.WebHooksPage {
 	}
 }
 @media(max-width: 991px) {
-    ul.nav-tabs>li.collapsed {
+    #project-setting .issue-setting ul.nav-tabs>li.collapsed {
         display: block;
     }
-    ul.nav-tabs>li.expanded {
+    #project-setting .issue-setting ul.nav-tabs>li.expanded {
         display: none;
     }
 }
