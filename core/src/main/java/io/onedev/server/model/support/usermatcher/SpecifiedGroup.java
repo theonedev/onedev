@@ -13,7 +13,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.GroupChoice;
 import io.onedev.server.web.editable.annotation.OmitName;
 
-@Editable(order=300, name="Specified group")
+@Editable(order=600, name="Specified group")
 public class SpecifiedGroup implements UserMatcher {
 
 	private static final long serialVersionUID = 1L;

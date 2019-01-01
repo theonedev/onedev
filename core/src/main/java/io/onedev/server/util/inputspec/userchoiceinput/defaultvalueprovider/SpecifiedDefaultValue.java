@@ -1,17 +1,13 @@
 package io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider;
 
 import java.util.List;
-
-import javax.validation.Validator;
+import java.util.stream.Collectors;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.server.OneDev;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.UserChoice;
@@ -42,11 +38,7 @@ public class SpecifiedDefaultValue implements DefaultValueProvider {
 
 	@SuppressWarnings("unused")
 	private static List<UserFacade> getValueChoices() {
-		ChoiceProvider choiceProvider = (ChoiceProvider) OneContext.get().getEditContext(1).getInputValue("choiceProvider");
-		if (choiceProvider != null && OneDev.getInstance(Validator.class).validate(choiceProvider).isEmpty())
-			return choiceProvider.getChoices(true);
-		else
-			return Lists.newArrayList();
+		return OneDev.getInstance(UserManager.class).query().stream().map(user->user.getFacade()).collect(Collectors.toList());
 	}
 	
 }

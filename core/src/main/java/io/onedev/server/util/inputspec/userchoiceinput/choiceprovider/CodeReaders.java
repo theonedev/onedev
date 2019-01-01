@@ -10,7 +10,7 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.editable.annotation.Editable;
 
-@Editable(order=130, name="Users with code read privilege")
+@Editable(order=130, name="Users allowed to read code")
 public class CodeReaders implements ChoiceProvider {
 
 	private static final long serialVersionUID = 1L;

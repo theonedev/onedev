@@ -37,8 +37,6 @@ import io.onedev.server.web.editable.PathSegment.Property;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Vertical;
-import io.onedev.server.web.editable.bean.BeanPropertyEditor;
-import io.onedev.server.web.editable.polymorphic.PolymorphicPropertyEditor;
 import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.StringUtils;
 
@@ -180,28 +178,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						
-						if (StringUtils.isNotBlank(getModelValue())) {
-							/*
-							 * Hide the description when bean editor is in-place as we do not want to confuse the bean editor 
-							 * property help with this help
-							 */
-							if (propertyEditor instanceof PolymorphicPropertyEditor || propertyEditor instanceof BeanPropertyEditor) {
-								BeanEditor childBeanEditor = propertyEditor.visitChildren(BeanEditor.class, new IVisitor<BeanEditor, BeanEditor>() {
-
-									@Override
-									public void component(BeanEditor object, IVisit<BeanEditor> visit) {
-										visit.stop(object);
-									}
-
-								});
-								setVisible(childBeanEditor == null || !childBeanEditor.isVisible());
-							} else {
-								setVisible(true);
-							}
-						} else {
-							setVisible(false);
-						}
+						setVisible(StringUtils.isNotBlank(getModelValue()));
 					}
 					
 				};
@@ -293,20 +270,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 			@Override
 			public void validate(IValidatable<Serializable> validatable) {
-				OneContext.push(new ComponentContext(BeanEditor.this) {
-
-					@Override
-					public OneContext getPropertyContext(String propertyName) {
-						for (Component item: propertiesView) {
-							int propertyIndex = (int) item.getDefaultModelObject();
-							PropertyContext<Serializable> propertyContext = propertyContexts.get(propertyIndex); 
-							if (propertyContext.getPropertyName().equals(propertyName))
-								return new ComponentContext(item);
-						}
-						return null;
-					}
-					
-				});
+				OneContext.push(getOneContext());
 				try {
 					Validator validator = AppLoader.getInstance(Validator.class);
 					for (ConstraintViolation<Serializable> violation: validator.validate(validatable.getValue())) {
@@ -382,6 +346,23 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		});
 		
 		return bean;
+	}
+	
+	public OneContext getOneContext() {
+		return new ComponentContext(this) {
+
+			@Override
+			public OneContext getPropertyContext(String propertyName) {
+				for (Component item: propertiesView) {
+					int propertyIndex = (int) item.getDefaultModelObject();
+					PropertyContext<Serializable> propertyContext = propertyContexts.get(propertyIndex); 
+					if (propertyContext.getPropertyName().equals(propertyName))
+						return new ComponentContext(item);
+				}
+				return null;
+			}
+			
+		};
 	}
 	
 	private abstract class PropertyContainer extends WebMarkupContainer implements EditContext {

@@ -22,7 +22,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -56,24 +58,35 @@ public class IssueUtils {
 		}
 	}
 	
-	public static Collection<String> getPropertyNames(Class<?> fieldBeanClass, Collection<String> fieldNames) {
+	public static Collection<String> getPropertyNames(Project project, Class<?> fieldBeanClass, 
+			Collection<String> fieldNames) {
 		Collection<String> propertyNames = new HashSet<>();
+		SettingManager settingManager = OneDev.getInstance(SettingManager.class); 
+		User user = SecurityUtils.getUser();
 		for (PropertyDescriptor property: new BeanDescriptor(fieldBeanClass).getPropertyDescriptors()) {
-			if (fieldNames.contains(property.getDisplayName()))
-				propertyNames.add(property.getPropertyName());
+			if (fieldNames.contains(property.getDisplayName())) {
+				InputSpec field = settingManager.getIssueSetting().getFieldSpec(property.getDisplayName());
+				if (field != null && field.getAllowedWriters().matches(project, user))
+					propertyNames.add(property.getPropertyName());
+			}
 		}
 		return propertyNames;
 	}
 	
-	public static Map<String, Object> getFieldValues(Serializable fieldBean, Collection<String> fieldNames) {
-		Map<String, Object> fieldValues = new HashMap<>();
-		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
-		for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
-			if (fieldNames.contains(propertyDescriptor.getDisplayName()))
-				fieldValues.put(propertyDescriptor.getDisplayName(), propertyDescriptor.getPropertyValue(fieldBean));
+	public static Map<String, Object> getFieldValues(OneContext context, Serializable fieldBean, Collection<String> fieldNames) {
+		OneContext.push(context);
+		try {
+			Map<String, Object> fieldValues = new HashMap<>();
+			BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
+			for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
+				if (fieldNames.contains(propertyDescriptor.getDisplayName()))
+					fieldValues.put(propertyDescriptor.getDisplayName(), propertyDescriptor.getPropertyValue(fieldBean));
+			}
+			
+			return fieldValues;
+		} finally {
+			OneContext.pop();
 		}
-		
-		return fieldValues;
 	}
 	
 	public static Collection<Long> parseFixedIssues(Project project, String commitMessage) {

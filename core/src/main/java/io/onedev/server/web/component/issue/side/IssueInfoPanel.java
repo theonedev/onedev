@@ -65,6 +65,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.component.user.list.UserListLink;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.QueryPositionSupport;
@@ -209,18 +210,19 @@ public abstract class IssueInfoPanel extends Panel {
 				Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getProject());
 				Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true); 
 
-				Collection<String> propertyNames = IssueUtils.getPropertyNames(fieldBeanClass, getIssue().getFieldNames());
-				form.add(BeanContext.editBean("editor", fieldBean, propertyNames, false));
+				Collection<String> propertyNames = IssueUtils.getPropertyNames(getIssue().getProject(), 
+						fieldBeanClass, getIssue().getFieldNames());
+				BeanEditor beanEditor = BeanContext.editBean("editor", fieldBean, propertyNames, false); 
+				form.add(beanEditor);
 				
 				form.add(new AjaxButton("save") {
 
 					@Override
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
-						
-						Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean, getIssue().getFieldNames());
+
+						Map<String, Object> fieldValues = IssueUtils.getFieldValues(beanEditor.getOneContext(), fieldBean, getIssue().getFieldNames());
 						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues, SecurityUtils.getUser());
-						
 						Component fieldsContainer = newFieldsContainer();
 						IssueInfoPanel.this.replace(fieldsContainer);
 						target.add(fieldsContainer);

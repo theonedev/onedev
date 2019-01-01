@@ -17,7 +17,7 @@ public class FieldBean implements Serializable {
 	private boolean promptUponIssueOpen = true;
 	
 	private boolean displayInIssueList = true;
-	
+
 	@Editable(name="Type", order=100)
 	@NotNull(message="may not be empty")
 	public InputSpec getField() {
@@ -45,5 +45,5 @@ public class FieldBean implements Serializable {
 	public void setDisplayInIssueList(boolean displayInIssueList) {
 		this.displayInIssueList = displayInIssueList;
 	}
-	
+
 }

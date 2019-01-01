@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -15,6 +16,8 @@ import org.unbescape.java.JavaEscape;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.server.model.support.usermatcher.Anyone;
+import io.onedev.server.model.support.usermatcher.UserMatcher;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.ValueSetEdit;
@@ -69,6 +72,8 @@ public abstract class InputSpec implements Serializable {
 	private String nameOfEmptyValue;
 	
 	private ShowCondition showCondition;
+	
+	private UserMatcher allowedWriters = new Anyone();
 	
 	@Editable(order=10)
 	@InputName
@@ -131,6 +136,16 @@ public abstract class InputSpec implements Serializable {
 		this.nameOfEmptyValue = nameOfEmptyValue;
 	}
 	
+	@Editable(order=65, name="Can Be Changed By", description="resource.input.allowedWriters")
+	@NotNull
+	public UserMatcher getAllowedWriters() {
+		return allowedWriters;
+	}
+
+	public void setAllowedWriters(UserMatcher allowedWriters) {
+		this.allowedWriters = allowedWriters;
+	}
+
 	@SuppressWarnings("unused")
 	private static boolean isNameOfEmptyValueVisible() {
 		return (boolean) OneContext.get().getEditContext().getInputValue("allowEmpty");

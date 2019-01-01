@@ -1,6 +1,7 @@
 package io.onedev.server.web.component.issue.list;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -137,7 +138,12 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			
 		}).add(newOnChangeBehavior(form)));
 		
-		List<String> customFieldNames = getIssueSetting().getFieldNames();
+		List<String> customFieldNames = new ArrayList<>();
+		for (InputSpec field: getIssueSetting().getFieldSpecs()) {
+			if (field.getAllowedWriters().matches(getProject(), SecurityUtils.getUser()))
+				customFieldNames.add(field.getName());
+		}
+		
 		form.add(new ListView<String>("customFields", customFieldNames) {
 
 			@Override
@@ -244,8 +250,8 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						else
 							milestone = null;
 						
-						Map<String, Object> fieldValues = IssueUtils.getFieldValues(customFieldsBean, selectedFields);
-						
+						Map<String, Object> fieldValues = IssueUtils.getFieldValues(customFieldsEditor.getOneContext(), 
+								customFieldsBean, selectedFields);
 						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
 								getIssueIterator(), state, milestone, fieldValues, comment, SecurityUtils.getUser());
 						onUpdated(target);

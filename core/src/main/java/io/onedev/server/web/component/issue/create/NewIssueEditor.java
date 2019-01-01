@@ -100,8 +100,8 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		milestoneChoice.setRequired(false);
 		add(milestoneChoice);
 		
-		Collection<String> properties = IssueUtils.getPropertyNames(fieldBeanClass, 
-				getProject().getIssueSetting().getPromptFieldsUponIssueOpen(true));
+		Collection<String> properties = IssueUtils.getPropertyNames(getProject(), 
+				fieldBeanClass, getProject().getIssueSetting().getPromptFieldsUponIssueOpen(true));
 		add(fieldEditor = new BeanContext(fieldBean.getClass(), properties, false).renderForEdit("fields", Model.of(fieldBean)));
 	}
 	
@@ -157,7 +157,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			issue.setMilestone(getProject().getMilestone(milestoneChoice.getConvertedInput()));
 			
 			Collection<String> fieldNames = getProject().getIssueSetting().getPromptFieldsUponIssueOpen(true); 
-			issue.setFieldValues(IssueUtils.getFieldValues(fieldEditor.getConvertedInput(), fieldNames));
+			issue.setFieldValues(IssueUtils.getFieldValues(fieldEditor.getOneContext(), fieldEditor.getConvertedInput(), fieldNames));
 			setConvertedInput(issue);
 		} catch (ConversionException e) {
 			error(newValidationError(e));

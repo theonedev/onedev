@@ -117,7 +117,8 @@ public abstract class IssueOperationsPanel extends Panel {
 								
 							};
 							
-							Collection<String> propertyNames = IssueUtils.getPropertyNames(fieldBeanClass, trigger.getPromptFields());
+							Collection<String> propertyNames = IssueUtils.getPropertyNames(getIssue().getProject(), 
+									fieldBeanClass, trigger.getPromptFields());
 							BeanEditor editor = BeanContext.editBean("fields", fieldBean, propertyNames, false); 
 							form.add(editor);
 							
@@ -147,7 +148,7 @@ public abstract class IssueOperationsPanel extends Panel {
 									super.onSubmit(target, form);
 
 									getIssue().removeFields(transition.getRemoveFields());
-									Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean, trigger.getPromptFields());
+									Map<String, Object> fieldValues = IssueUtils.getFieldValues(editor.getOneContext(), fieldBean, trigger.getPromptFields());
 									IssueChangeManager manager = OneDev.getInstance(IssueChangeManager.class);
 									manager.changeState(getIssue(), transition.getToState(), fieldValues, comment, SecurityUtils.getUser());
 									onStateChanged(target);

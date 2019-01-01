@@ -47,7 +47,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 		PressButtonTrigger trigger = (PressButtonTrigger) getTransition().getTrigger();
 		
 		BeanEditor editor = BeanContext.editBean("editor", fieldBean, 
-				IssueUtils.getPropertyNames(fieldBeanClass, trigger.getPromptFields()), false); 
+				IssueUtils.getPropertyNames(getIssue().getProject(), fieldBeanClass, trigger.getPromptFields()), false); 
 		form.add(editor);
 		
 		form.add(new AjaxButton("ok") {
@@ -57,7 +57,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 				super.onSubmit(target, form);
 				
 				getIssue().removeFields(getTransition().getRemoveFields());
-				Map<String, Object> fieldValues = IssueUtils.getFieldValues(fieldBean, trigger.getPromptFields());
+				Map<String, Object> fieldValues = IssueUtils.getFieldValues(editor.getOneContext(), fieldBean, trigger.getPromptFields());
 				OneDev.getInstance(IssueChangeManager.class).changeState(getIssue(), getTransition().getToState(), fieldValues, null, SecurityUtils.getUser());
 				onSaved(target);
 			}

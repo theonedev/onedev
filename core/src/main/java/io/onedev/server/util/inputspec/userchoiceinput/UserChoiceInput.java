@@ -1,18 +1,17 @@
 package io.onedev.server.util.inputspec.userchoiceinput;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.manager.UserManager;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.IssueReaders;
 import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.GroupUsers;
+import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.IssueReaders;
 import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -50,12 +49,7 @@ public class UserChoiceInput extends InputSpec {
 
 	@Override
 	public List<String> getPossibleValues() {
-		List<String> possibleValues = new ArrayList<>();
-		if (OneDev.getInstance(Validator.class).validate(getChoiceProvider()).isEmpty()) {
-			for (UserFacade user: getChoiceProvider().getChoices(true))
-				possibleValues.add(user.getName());
-		}
-		return possibleValues;
+		return OneDev.getInstance(UserManager.class).query().stream().map(user->user.getName()).collect(Collectors.toList());
 	}
 
 	@Override
