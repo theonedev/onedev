@@ -83,11 +83,6 @@ public class UserAuthorizationsPage extends UserPage {
 		@Override
 		protected Map<Long, UserAuthorizationFacade> load() {
 			Map<Long, UserAuthorizationFacade> authorizations = new HashMap<>();
-			for (UserAuthorizationFacade authorization: 
-					OneDev.getInstance(CacheManager.class).getUserAuthorizations().values()) {
-				if (authorization.getUserId().equals(getUser().getId()))
-					authorizations.put(authorization.getProjectId(), authorization);
-			}
 			return authorizations;
 		}
 		
