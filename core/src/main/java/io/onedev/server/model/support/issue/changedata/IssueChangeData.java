@@ -9,7 +9,6 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentSupport;
 
@@ -22,11 +21,9 @@ public interface IssueChangeData extends Serializable {
 	@Nullable
 	CommentSupport getCommentSupport();
 	
-	@Nullable
-	Map<String, User> getNewUsers(Project project);
+	Map<String, User> getNewUsers();
 	
-	@Nullable
-	Map<String, Group> getNewGroups(Project project);
+	Map<String, Group> getNewGroups();
 	
 	boolean affectsBoards();
 }

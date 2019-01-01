@@ -1,7 +1,11 @@
 package io.onedev.server.event.issue;
 
+import java.util.Map;
+
 import io.onedev.server.event.MarkdownAware;
+import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
+import io.onedev.server.model.User;
 
 public class IssueChangeEvent extends IssueEvent implements MarkdownAware {
 
@@ -27,6 +31,16 @@ public class IssueChangeEvent extends IssueEvent implements MarkdownAware {
 	@Override
 	public boolean affectsBoards() {
 		return change.affectsBoards();
+	}
+
+	@Override
+	public Map<String, User> getNewUsers() {
+		return change.getData().getNewUsers();
+	}
+
+	@Override
+	public Map<String, Group> getNewGroups() {
+		return change.getData().getNewGroups();
 	}
 
 }

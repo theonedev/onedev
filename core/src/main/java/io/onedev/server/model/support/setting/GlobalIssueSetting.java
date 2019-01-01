@@ -21,9 +21,6 @@ import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
-import io.onedev.server.model.support.issue.transitionprerequisite.TransitionPrerequisite;
-import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsEmpty;
-import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsNotEmpty;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.usermatcher.CodeWriters;
 import io.onedev.server.search.entity.issue.IssueCriteria;
@@ -132,6 +129,9 @@ public class GlobalIssueSetting implements Serializable {
 
 		UserChoiceInput assignee = new UserChoiceInput();
 		assignee.setChoiceProvider(new io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.CodeWriters());
+		assignee.setCanBeChangedBy(new CodeWriters());
+		assignee.setAllowEmpty(true);
+		assignee.setNameOfEmptyValue("Not assigned");
 		assignee.setName("Assignee");
 		
 		fieldSpecs.add(assignee);
@@ -182,13 +182,6 @@ public class GlobalIssueSetting implements Serializable {
 		
 		stateSpecs.add(open);
 		
-		StateSpec assigned = new StateSpec();
-		assigned.setName("Assigned");
-		assigned.setCategory(StateSpec.Category.OPEN);
-		assigned.setColor("#6fa8dc");
-		
-		stateSpecs.add(assigned);
-		
 		StateSpec closed = new StateSpec();
 		closed.setColor("#5cb85c");
 		closed.setName("Closed");
@@ -198,19 +191,8 @@ public class GlobalIssueSetting implements Serializable {
 		
 		TransitionSpec transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Open"));
-		transition.setToState("Assigned");
-		PressButtonTrigger pressButton = new PressButtonTrigger();
-		pressButton.setButtonLabel("Assign");
-		pressButton.setAuthorized(new CodeWriters());
-		pressButton.setPromptFields(Lists.newArrayList("Assignee"));
-		transition.setTrigger(pressButton);
-		
-		defaultTransitionSpecs.add(transition);
-		
-		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Open", "Assigned"));
 		transition.setToState("Closed");
-		pressButton = new PressButtonTrigger();
+		PressButtonTrigger pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Close");
 		pressButton.setAuthorized(new CodeWriters());
 		pressButton.setPromptFields(Lists.newArrayList("Resolution", "Duplicate With"));
@@ -221,23 +203,6 @@ public class GlobalIssueSetting implements Serializable {
 		transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Closed"));
 		transition.setToState("Open");
-		transition.setPrerequisite(new TransitionPrerequisite());
-		transition.getPrerequisite().setInputName("Assignee");
-		transition.getPrerequisite().setValueMatcher(new ValueIsEmpty());
-		pressButton = new PressButtonTrigger();
-		pressButton.setButtonLabel("Reopen");
-		transition.setRemoveFields(Lists.newArrayList("Resolution", "Duplicate With"));
-		pressButton.setAuthorized(new CodeWriters());
-		transition.setTrigger(pressButton);
-		
-		defaultTransitionSpecs.add(transition);
-		
-		transition = new TransitionSpec();
-		transition.setFromStates(Lists.newArrayList("Closed"));
-		transition.setToState("Assigned");
-		transition.setPrerequisite(new TransitionPrerequisite());
-		transition.getPrerequisite().setInputName("Assignee");
-		transition.getPrerequisite().setValueMatcher(new ValueIsNotEmpty());
 		pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Reopen");
 		transition.setRemoveFields(Lists.newArrayList("Resolution", "Duplicate With"));
@@ -248,6 +213,7 @@ public class GlobalIssueSetting implements Serializable {
 		
 		defaultPromptFieldsUponIssueOpen.add("Type");
 		defaultPromptFieldsUponIssueOpen.add("Priority");
+		defaultPromptFieldsUponIssueOpen.add("Assignee");
 		
 		BoardSpec board = new BoardSpec();
 		board.setName(IssueConstants.FIELD_STATE);

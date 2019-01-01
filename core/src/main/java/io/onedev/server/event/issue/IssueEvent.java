@@ -1,8 +1,11 @@
 package io.onedev.server.event.issue;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.onedev.server.event.ProjectEvent;
+import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 
@@ -20,4 +23,13 @@ public abstract class IssueEvent extends ProjectEvent {
 	}
 	
 	public abstract boolean affectsBoards();
+	
+	public Map<String, User> getNewUsers() {
+		return new HashMap<>();
+	}
+	
+	public Map<String, Group> getNewGroups() {
+		return new HashMap<>();
+	}
+	
 }

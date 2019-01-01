@@ -260,7 +260,8 @@ form>.test-feedback {
 	border-radius: 0 4px 4px 0;
 }
 .select2-container .avatar {
-	margin-right: 4px;
+	margin-right: 4px;	
+	margin-top: -2px;
 }
 	
 /* Ajax Loading Indicator */

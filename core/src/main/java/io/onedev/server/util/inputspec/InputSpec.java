@@ -73,7 +73,7 @@ public abstract class InputSpec implements Serializable {
 	
 	private ShowCondition showCondition;
 	
-	private UserMatcher allowedWriters = new Anyone();
+	private UserMatcher canBeChangedBy = new Anyone();
 	
 	@Editable(order=10)
 	@InputName
@@ -136,14 +136,14 @@ public abstract class InputSpec implements Serializable {
 		this.nameOfEmptyValue = nameOfEmptyValue;
 	}
 	
-	@Editable(order=65, name="Can Be Changed By", description="resource.input.allowedWriters")
+	@Editable(order=65, description="resource.input.canBeChangedBy")
 	@NotNull
-	public UserMatcher getAllowedWriters() {
-		return allowedWriters;
+	public UserMatcher getCanBeChangedBy() {
+		return canBeChangedBy;
 	}
 
-	public void setAllowedWriters(UserMatcher allowedWriters) {
-		this.allowedWriters = allowedWriters;
+	public void setCanBeChangedBy(UserMatcher canBeChangedBy) {
+		this.canBeChangedBy = canBeChangedBy;
 	}
 
 	@SuppressWarnings("unused")

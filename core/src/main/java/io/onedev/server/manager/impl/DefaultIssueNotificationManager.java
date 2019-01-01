@@ -23,7 +23,6 @@ import io.onedev.server.manager.UrlManager;
 import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueWatch;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
@@ -126,26 +125,20 @@ public class DefaultIssueNotificationManager {
 				}
 			} 		
 
-			if (event instanceof IssueChangeEvent) {
-				IssueChange change = ((IssueChangeEvent) event).getChange();
-				Map<String, Group> newGroups = change.getData().getNewGroups(issue.getProject());
-				if (newGroups != null) {
-					for (Group group: newGroups.values()) {
-						for (User member: group.getMembers())
-							watch(issue, member, true);
-					}
-				}
-				String url = urlManager.urlFor(issue);
-				Map<String, User> newUsers = change.getData().getNewUsers(issue.getProject());
-				if (newUsers != null) {
-					for (Map.Entry<String, User> entry: newUsers.entrySet()) {
-						String subject = String.format("You are designated as \"%s\" of issue #%d: %s", 
-								entry.getKey(), issue.getNumber(), issue.getTitle());
-						String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-						mailManager.sendMailAsync(Lists.newArrayList(entry.getValue().getEmail()), subject, body.toString());
-						notifiedUsers.add(entry.getValue());
-					}
-				}
+			Map<String, Group> newGroups = event.getNewGroups();
+			Map<String, User> newUsers = event.getNewUsers();
+			
+			for (Group group: newGroups.values()) {
+				for (User member: group.getMembers())
+					watch(issue, member, true);
+			}
+			String url = urlManager.urlFor(issue);
+			for (Map.Entry<String, User> entry: newUsers.entrySet()) {
+				String subject = String.format("You are now \"%s\" of issue #%d: %s", 
+						entry.getKey(), issue.getNumber(), issue.getTitle());
+				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+				mailManager.sendMailAsync(Lists.newArrayList(entry.getValue().getEmail()), subject, body.toString());
+				notifiedUsers.add(entry.getValue());
 			}
 					
 			Collection<User> usersToNotify = new HashSet<>();
@@ -164,7 +157,6 @@ public class DefaultIssueNotificationManager {
 			}
 
 			if (!usersToNotify.isEmpty()) {
-				String url = urlManager.urlFor(issue);
 				String subject = String.format("New activities in issue #%d - %s", issue.getNumber(), issue.getTitle());
 				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
 				mailManager.sendMailAsync(usersToNotify.stream().map(User::getEmail).collect(Collectors.toList()), subject, body);

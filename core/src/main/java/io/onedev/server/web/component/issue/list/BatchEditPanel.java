@@ -140,7 +140,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		
 		List<String> customFieldNames = new ArrayList<>();
 		for (InputSpec field: getIssueSetting().getFieldSpecs()) {
-			if (field.getAllowedWriters().matches(getProject(), SecurityUtils.getUser()))
+			if (field.getCanBeChangedBy().matches(getProject(), SecurityUtils.getUser()))
 				customFieldNames.add(field.getName());
 		}
 		

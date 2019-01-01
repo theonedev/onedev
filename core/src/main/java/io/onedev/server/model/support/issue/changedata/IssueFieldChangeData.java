@@ -13,7 +13,6 @@ import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.util.IssueField;
@@ -67,43 +66,6 @@ public class IssueFieldChangeData implements IssueChangeData {
 		return newLines;
 	}
 	
-	protected Map<String, String> getNewUsers() {
-		Map<String, String> newUsers = new HashMap<>();
-		for (IssueField oldField: oldFields.values()) {
-			IssueField newField = newFields.get(oldField.getName());
-			if (newField != null && !describe(oldField).equals(describe(newField)) 
-					&& newField.getType().equals(InputSpec.USER) && !newField.getValues().isEmpty()) 
-				newUsers.put(newField.getName(), newField.getValues().iterator().next());
-		}
-		for (IssueField newField: newFields.values()) {
-			if (!oldFields.containsKey(newField.getName()) && newField.getType().equals(InputSpec.USER) 
-					&& !newField.getValues().isEmpty()) { 
-				newUsers.put(newField.getName(), newField.getValues().iterator().next());
-			}
-		}
-		return newUsers;
-	}
-	
-	protected Map<String, String> getNewGroups() {
-		Map<String, String> newGroups = new HashMap<>();
-		for (IssueField oldField: oldFields.values()) {
-			IssueField newField = newFields.get(oldField.getName());
-			if (newField != null 
-					&& !describe(oldField).equals(describe(newField)) 
-					&& newField.getType().equals(InputSpec.GROUP) 
-					&& !newField.getValues().isEmpty()) 
-				newGroups.put(newField.getName(), newField.getValues().iterator().next());
-		}
-		for (IssueField newField: newFields.values()) {
-			if (!oldFields.containsKey(newField.getName()) 
-					&& newField.getType().equals(InputSpec.GROUP) 
-					&& !newField.getValues().isEmpty()) { 
-				newGroups.put(newField.getName(), newField.getValues().iterator().next());
-			}
-		}
-		return newGroups;
-	}
-	
 	private Map<String, IssueField> copyNonEmptyFields(Map<String, IssueField> fields) {
 		Map<String, IssueField> copy = new LinkedHashMap<>();
 		for (Map.Entry<String, IssueField> entry: fields.entrySet()) {
@@ -140,27 +102,57 @@ public class IssueFieldChangeData implements IssueChangeData {
 	}
 
 	@Override
-	public Map<String, User> getNewUsers(Project project) {
+	public Map<String, User> getNewUsers() {
+		UserManager userManager = OneDev.getInstance(UserManager.class);
 		Map<String, User> newUsers = new HashMap<>();
-		for (Map.Entry<String, String> entry: getNewUsers().entrySet()) {
-			User user = OneDev.getInstance(UserManager.class).findByName(entry.getValue());
-			if (user != null)
-				newUsers.put(entry.getKey(), user);
+		for (IssueField oldField: oldFields.values()) {
+			IssueField newField = newFields.get(oldField.getName());
+			if (newField != null && !describe(oldField).equals(describe(newField)) 
+					&& newField.getType().equals(InputSpec.USER) && !newField.getValues().isEmpty()) { 
+				User user = userManager.findByName(newField.getValues().iterator().next());
+				if (user != null)
+					newUsers.put(newField.getName(), user);
+			}
+		}
+		for (IssueField newField: newFields.values()) {
+			if (!oldFields.containsKey(newField.getName()) && newField.getType().equals(InputSpec.USER) 
+					&& !newField.getValues().isEmpty()) { 
+				User user = userManager.findByName(newField.getValues().iterator().next());
+				if (user != null)
+					newUsers.put(newField.getName(), user);
+			}
 		}
 		return newUsers;
 	}
 
+	
 	@Override
-	public Map<String, Group> getNewGroups(Project project) {
+	public Map<String, Group> getNewGroups() {
 		Map<String, Group> newGroups = new HashMap<>();
-		for (Map.Entry<String, String> entry: getNewGroups().entrySet()) {
-			Group group = OneDev.getInstance(GroupManager.class).find(entry.getValue());
-			if (group != null)
-				newGroups.put(entry.getKey(), group);
+		GroupManager groupManager = OneDev.getInstance(GroupManager.class);
+		for (IssueField oldField: oldFields.values()) {
+			IssueField newField = newFields.get(oldField.getName());
+			if (newField != null 
+					&& !describe(oldField).equals(describe(newField)) 
+					&& newField.getType().equals(InputSpec.GROUP) 
+					&& !newField.getValues().isEmpty()) { 
+				Group group = groupManager.find(newField.getValues().iterator().next());
+				if (group != null)
+					newGroups.put(newField.getName(), group);
+			}
+		}
+		for (IssueField newField: newFields.values()) {
+			if (!oldFields.containsKey(newField.getName()) 
+					&& newField.getType().equals(InputSpec.GROUP) 
+					&& !newField.getValues().isEmpty()) { 
+				Group group = groupManager.find(newField.getValues().iterator().next());
+				if (group != null)
+					newGroups.put(newField.getName(), group);
+			}
 		}
 		return newGroups;
 	}
-
+	
 	@Override
 	public boolean affectsBoards() {
 		return true;

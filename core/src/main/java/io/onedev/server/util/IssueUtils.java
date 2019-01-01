@@ -66,7 +66,7 @@ public class IssueUtils {
 		for (PropertyDescriptor property: new BeanDescriptor(fieldBeanClass).getPropertyDescriptors()) {
 			if (fieldNames.contains(property.getDisplayName())) {
 				InputSpec field = settingManager.getIssueSetting().getFieldSpec(property.getDisplayName());
-				if (field != null && field.getAllowedWriters().matches(project, user))
+				if (field != null && field.getCanBeChangedBy().matches(project, user))
 					propertyNames.add(property.getPropertyName());
 			}
 		}

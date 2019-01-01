@@ -1,12 +1,12 @@
 package io.onedev.server.model.support.issue.changedata;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.wicket.Component;
 
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
@@ -41,13 +41,13 @@ public class IssueTitleChangeData implements IssueChangeData {
 	}
 	
 	@Override
-	public Map<String, User> getNewUsers(Project project) {
-		return null;
+	public Map<String, User> getNewUsers() {
+		return new HashMap<>();
 	}
 
 	@Override
-	public Map<String, Group> getNewGroups(Project project) {
-		return null;
+	public Map<String, Group> getNewGroups() {
+		return new HashMap<>();
 	}
 
 	@Override
