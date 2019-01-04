@@ -159,21 +159,19 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Override
 	public void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment, @Nullable User user) {
 		String prevState = issue.getState();
-		if (!prevState.equals(state)) {
-			Map<String, IssueField> prevFields = issue.getFields();
-			issue.setState(state);
+		Map<String, IssueField> prevFields = issue.getFields();
+		issue.setState(state);
 
-			issue.setFieldValues(fieldValues);
-			
-			issueFieldUnaryManager.saveFields(issue);
-			
-			IssueChange change = new IssueChange();
-			change.setIssue(issue);
-			change.setDate(new Date());
-			change.setUser(user);
-			change.setData(new IssueStateChangeData(prevState, issue.getState(), prevFields, issue.getFields(), comment));
-			save(change);
-		}
+		issue.setFieldValues(fieldValues);
+		
+		issueFieldUnaryManager.saveFields(issue);
+		
+		IssueChange change = new IssueChange();
+		change.setIssue(issue);
+		change.setDate(new Date());
+		change.setUser(user);
+		change.setData(new IssueStateChangeData(prevState, issue.getState(), prevFields, issue.getFields(), comment));
+		save(change);
 	}
 	
 	@Transactional

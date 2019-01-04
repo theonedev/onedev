@@ -203,8 +203,12 @@ public class BoardSpec implements Serializable {
 		if (getIdentifyField().equals(IssueConstants.FIELD_STATE)) {
 			for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
 				int index = getColumns().indexOf(entry.getKey());
-				if (index != -1)
-					getColumns().set(index, entry.getValue().getNewState());
+				if (index != -1) {
+					if (getColumns().contains(entry.getValue().getNewState())) 
+						getColumns().remove(index);
+					else 
+						getColumns().set(index, entry.getValue().getNewState());
+				}
 			}
 		}
 	}
@@ -261,8 +265,12 @@ public class BoardSpec implements Serializable {
 				if (getIdentifyField().equals(entry.getKey()))
 					setIdentifyField(resolution.getNewField());
 				int index = getDisplayFields().indexOf(entry.getKey());
-				if (index != -1)
-					getDisplayFields().set(index, resolution.getNewField());
+				if (index != -1) {
+					if (getDisplayFields().contains(resolution.getNewField()))
+						getDisplayFields().remove(index);
+					else
+						getDisplayFields().set(index, resolution.getNewField());
+				}
 			} else {
 				getDisplayFields().remove(entry.getKey());
 				if (getIdentifyField().equals(entry.getKey())) 
@@ -327,9 +335,12 @@ public class BoardSpec implements Serializable {
 	public void onRenameField(GlobalIssueSetting issueSetting, String oldName, String newName) {
 		if (getIdentifyField().equals(oldName))
 			setIdentifyField(newName);
-		if (getDisplayFields().contains(oldName)) {
-			getDisplayFields().remove(oldName);
-			getDisplayFields().add(newName);
+		int index = getDisplayFields().indexOf(oldName);
+		if (index != -1) {
+			if (getDisplayFields().contains(newName))
+				getDisplayFields().remove(index);
+			else
+				getDisplayFields().set(index, newName);
 		}
 		if (getBaseQuery() != null) {
 			try {
@@ -353,9 +364,12 @@ public class BoardSpec implements Serializable {
 
 	public void onRenameState(String oldName, String newName) {
 		if (getIdentifyField().equals(IssueConstants.FIELD_STATE)) {
-			for (int i=0; i<getColumns().size(); i++) {
-				if (getColumns().get(i).equals(oldName))
-					getColumns().set(i, newName);
+			int index = getColumns().indexOf(oldName);
+			if (index != -1) {
+				if (getColumns().contains(newName))
+					getColumns().remove(index);
+				else
+					getColumns().set(index, newName);
 			}
 		}
 		
@@ -409,12 +423,8 @@ public class BoardSpec implements Serializable {
 	}
 
 	public boolean onDeleteState(String stateName) {
-		if (getIdentifyField().equals(IssueConstants.FIELD_STATE)) {
-			for (Iterator<String> it = getColumns().iterator(); it.hasNext();) {
-				if (it.next().equals(stateName))
-					it.remove();
-			}
-		}
+		if (getIdentifyField().equals(IssueConstants.FIELD_STATE)) 
+			getColumns().remove(stateName);
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
@@ -444,10 +454,14 @@ public class BoardSpec implements Serializable {
 	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
 		if (fieldName.equals(getIdentifyField())) {
 			getColumns().removeAll(valueSetEdit.getDeletions());
-			for (int i=0; i<getColumns().size(); i++) {
-				String newValue = valueSetEdit.getRenames().get(getColumns().get(i));
-				if (newValue != null)
-					getColumns().set(i, newValue);
+			for (Map.Entry<String, String> entry: valueSetEdit.getRenames().entrySet()) {
+				int index = getColumns().indexOf(entry.getKey());
+				if (index != -1) {
+					if (getColumns().contains(entry.getValue()))
+						getColumns().remove(index);
+					else
+						getColumns().set(index, entry.getValue());
+				}
 			}
 		}
 		if (getBaseQuery() != null) {

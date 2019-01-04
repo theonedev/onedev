@@ -1,21 +1,27 @@
 package io.onedev.server.util.inputspec.choiceinput.choiceprovider;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.Size;
 
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 
 @Editable(order=100, name="Use specified choices")
-public class SpecifiedChoices extends ChoiceProvider {
+@ClassValidating
+public class SpecifiedChoices extends ChoiceProvider implements Validatable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -52,6 +58,21 @@ public class SpecifiedChoices extends ChoiceProvider {
 				return (SpecifiedChoices) choiceInput.getChoiceProvider();
 		}
 		return null;
+	}
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		Set<String> existing = new HashSet<>();
+		for (Choice choice: choices) {
+			if (existing.contains(choice.getValue())) {
+				context.disableDefaultConstraintViolation();
+				context.buildConstraintViolationWithTemplate("Duplicate choice: " + choice.getValue()).addConstraintViolation();
+				return false;
+			} else {
+				existing.add(choice.getValue());
+			}
+		}
+		return true;
 	}
 	
 }

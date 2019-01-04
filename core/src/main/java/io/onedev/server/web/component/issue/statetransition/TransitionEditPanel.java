@@ -19,7 +19,6 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
@@ -78,18 +77,11 @@ abstract class TransitionEditPanel extends Panel implements InputContext {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				if (transition.getFromStates().contains(transition.getToState())) {
-					String error = "Can not do transition between same state";
-					editor.getErrorContext(new PathSegment.Property("fromStates")).addError(error);
-					editor.getErrorContext(new PathSegment.Property("toState")).addError(error);
-					target.add(form);
-				} else {
-					if (transitionIndex != -1)
-						transitions.set(transitionIndex, transition);
-					else 
-						transitions.add(transition);
-					onChanged(target);
-				}
+				if (transitionIndex != -1)
+					transitions.set(transitionIndex, transition);
+				else 
+					transitions.add(transition);
+				onChanged(target);
 			}
 			
 		});

@@ -272,6 +272,11 @@ public class IssueSetting implements Serializable {
 			for (BoardSpec board: boardSpecs)
 				undefinedStates.addAll(board.getUndefinedStates(project));
 		}
+		
+		if (transitionSpecs != null) {
+			for (TransitionSpec transition: transitionSpecs) 
+				undefinedStates.addAll(transition.getUndefinedStates());
+		}
 
 		return undefinedStates;
 	}
@@ -292,6 +297,11 @@ public class IssueSetting implements Serializable {
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs)
 				board.fixUndefinedStates(project, resolutions);
+		}
+		
+		if (transitionSpecs != null) {
+			for (TransitionSpec transition: transitionSpecs)
+				transition.fixUndefinedStates(resolutions);
 		}
 	}
 	

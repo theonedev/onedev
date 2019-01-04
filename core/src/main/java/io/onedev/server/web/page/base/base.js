@@ -282,7 +282,11 @@ onedev.server = {
 				var focusibleSelector = "input[type=text]:visible, input:not([type]):visible, textarea:visible, .CodeMirror:visible";
 				
 				var inErrorSelector = ".has-error:visible:first";
-				var $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
+                var $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
+                if ($inError.length == 0) {
+				    inErrorSelector = ".feedbackPanelERROR:visible:first";
+                    $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
+                }
 				if ($inError.length != 0) {
 					var $focusable = $inError.find(focusibleSelector).addBack(focusibleSelector);
 					if ($focusable.hasClass("CodeMirror") && $this[0].CodeMirror.options.readOnly == false) {
