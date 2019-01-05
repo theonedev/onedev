@@ -1,1 +1,1 @@
-The practical Git management server. [Learn more](https://onedev.io).
+The opinionated and practical Git management server. [Learn more](https://onedev.io).
