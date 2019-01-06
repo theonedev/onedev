@@ -27,6 +27,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
@@ -84,13 +85,11 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				String identifyField = getBoard().getIdentifyField();
 				if (identifyField.equals(IssueConstants.FIELD_STATE)) {
 					criterias.add(new StateCriteria(getColumn()));
+				} else if (getColumn() != null) {
+					criterias.add(new ChoiceFieldCriteria(identifyField, 
+							getColumn(), -1, IssueQueryLexer.Is, false));
 				} else {
-					if (getColumn() != null) {
-						criterias.add(new ChoiceFieldCriteria(identifyField, 
-								getColumn(), -1, IssueQueryLexer.Is, false));
-					} else {
-						criterias.add(new FieldOperatorCriteria(identifyField, IssueQueryLexer.IsEmpty));
-					}
+					criterias.add(new FieldOperatorCriteria(identifyField, IssueQueryLexer.IsEmpty));
 				}
 				return new IssueQuery(IssueCriteria.of(criterias), boardQuery.getSorts());
 			} else {
@@ -218,25 +217,29 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		User user = null;
 		String identifyField = getBoard().getIdentifyField();
 		if (getColumn() != null) {
-			title = getColumn();
+			title = HtmlEscape.escapeHtml5(getColumn());
 			if (identifyField.equals(IssueConstants.FIELD_STATE)) {
 				color = getIssueSetting().getStateSpec(getColumn()).getColor();
 			} else {
-				InputSpec field = getIssueSetting().getFieldSpec(identifyField);
-				if (field instanceof ChoiceInput) {
-					ChoiceProvider choiceProvider = ((ChoiceInput)field).getChoiceProvider();
+				InputSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
+				if (fieldSpec instanceof ChoiceInput) {
+					ChoiceProvider choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
 					OneContext.push(new ComponentContext(this));
 					try {
 						color = choiceProvider.getChoices(true).get(getColumn());
 					} finally {
 						OneContext.pop();
 					}
-				} else if (field instanceof UserChoiceInput) {
+				} else if (fieldSpec instanceof UserChoiceInput) {
 					user = OneDev.getInstance(UserManager.class).findByName(getColumn());
 				}
 			}
 		} else {
-			title = getIssueSetting().getFieldSpec(identifyField).getNameOfEmptyValue();
+			InputSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
+			if (fieldSpec != null) 
+				title = "<i>" + HtmlEscape.escapeHtml5(fieldSpec.getNameOfEmptyValue()) + "</i>";
+			else
+				title = "<i>No value</i>";
 		}
 
 		WebMarkupContainer head = new WebMarkupContainer("head");
@@ -244,7 +247,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 			head.add(new WebMarkupContainer("title").setVisible(false));
 			head.add(new UserIdentPanel("userIdent", UserIdent.of(UserFacade.of(user)), Mode.AVATAR_AND_NAME));
 		} else {
-			head.add(new Label("title", title));
+			head.add(new Label("title", title).setEscapeModelStrings(false));
 			head.add(new WebMarkupContainer("userIdent").setVisible(false));
 		}
 		
@@ -413,6 +416,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 	@Nullable
 	protected abstract Milestone getMilestone();
 	
+	@Nullable
 	protected abstract String getColumn();
 	
 	@Nullable

@@ -1,6 +1,5 @@
 package io.onedev.server.web.editable.configuration;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -25,16 +24,17 @@ public class ConfigurationMultiChoiceEditor extends PropertyEditor<List<String>>
 		super(id, propertyDescriptor, propertyModel);
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	List<String> configurationNames = new ArrayList<>();
+    	List<String> configurations;
 		if (getModelObject() != null)
-			configurationNames.addAll(getModelObject());
+			configurations = getModelObject();
+		else
+			configurations = new ArrayList<>();
 		
-		input = new ConfigurationMultiChoice("input", new Model((Serializable) configurationNames));
+		input = new ConfigurationMultiChoice("input", Model.of(configurations));
         input.setConvertEmptyInputStringToNull(true);
         input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
         
@@ -48,11 +48,11 @@ public class ConfigurationMultiChoiceEditor extends PropertyEditor<List<String>>
 
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
-		List<String> configurationNames = new ArrayList<>();
-		Collection<String> model = input.getConvertedInput();
-		if (model != null) 
-			configurationNames.addAll(model);
-		return configurationNames;
+		Collection<String> convertedInput = input.getConvertedInput();
+		if (convertedInput != null)
+			return new ArrayList<>(convertedInput);
+		else
+			return null;
 	}
 
 }

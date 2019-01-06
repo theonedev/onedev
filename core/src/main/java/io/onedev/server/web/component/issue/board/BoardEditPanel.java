@@ -51,6 +51,10 @@ public abstract class BoardEditPanel extends Panel {
 		else
 			board = new BoardSpec();
 		
+		board.getEditColumns().clear();
+		for (String column: board.getColumns()) 
+			board.getEditColumns().add(column!=null?column:BoardSpec.NULL_COLUMN);
+		
 		BeanEditor editor = BeanContext.editBean("editor", board);
 		
 		Form<?> form = new Form<Void>("form");
@@ -72,6 +76,10 @@ public abstract class BoardEditPanel extends Panel {
 							.addError("This name has already been used by another board");
 				}
 				if (!editor.hasErrors(true)) {
+					board.getColumns().clear();
+					for (String column: board.getEditColumns()) 
+						board.getColumns().add(column.equals(BoardSpec.NULL_COLUMN)?null:column);
+					
 					if (boardIndex != -1) {
 						boards.set(boardIndex, board);
 					} else {

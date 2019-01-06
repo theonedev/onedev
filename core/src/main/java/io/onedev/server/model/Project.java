@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -204,6 +205,8 @@ public class Project extends AbstractEntity {
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
+	
+	private transient List<Milestone> sortedMilestones;
 	
 	@Lob
 	@Column(length=65535)
@@ -1092,6 +1095,21 @@ public class Project extends AbstractEntity {
 		this.milestones = milestones;
 	}
 
+	public List<Milestone> getSortedMilestones() {
+		if (sortedMilestones == null) {
+			sortedMilestones = new ArrayList<>(getMilestones());
+			Collections.sort(sortedMilestones, new Comparator<Milestone>() {
+
+				@Override
+				public int compare(Milestone o1, Milestone o2) {
+					return o1.getDueDate().compareTo(o2.getDueDate());
+				}
+				
+			});
+		}
+		return sortedMilestones;
+	}
+	
 	public ArrayList<WebHook> getWebHooks() {
 		if (webHooks == null)
 			webHooks = new ArrayList<>();

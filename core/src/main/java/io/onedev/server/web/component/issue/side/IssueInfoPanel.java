@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -296,9 +297,13 @@ public abstract class IssueInfoPanel extends Panel {
 				Fragment fragment =  new Fragment("milestone", "milestoneEditFrag", IssueInfoPanel.this);
 				Form<?> form = new Form<Void>("form");
 				
-				List<String> milestones = getProject().getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
-				StringSingleChoice choice = new StringSingleChoice("milestone", 
-						new PropertyModel<String>(this, "milestoneName"), milestones) {
+				List<Milestone> milestones = getProject().getSortedMilestones();
+				
+				Map<String, String> choices = new LinkedHashMap<>();
+				for (Milestone milestone: milestones)
+					choices.put(milestone.getName(), milestone.getName());
+				
+				StringSingleChoice choice = new StringSingleChoice("milestone", new PropertyModel<String>(this, "milestoneName"), choices) {
 
 					@Override
 					protected void onInitialize() {

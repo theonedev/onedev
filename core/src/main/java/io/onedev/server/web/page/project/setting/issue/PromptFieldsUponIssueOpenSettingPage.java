@@ -2,6 +2,8 @@ package io.onedev.server.web.page.project.setting.issue;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.wicket.Session;
@@ -41,6 +43,10 @@ public class PromptFieldsUponIssueOpenSettingPage extends IssueSettingPage {
 			
 		};
 		
+		Map<String, String> choices = new LinkedHashMap<>();
+		for (String fieldName: getGlobalSetting().getFieldNames())
+			choices.put(fieldName, fieldName);
+		
 		form.add(new StringMultiChoice("fields", new IModel<Collection<String>>() {
 
 			@Override
@@ -57,7 +63,7 @@ public class PromptFieldsUponIssueOpenSettingPage extends IssueSettingPage {
 				fieldSet = new HashSet<>(object);
 			}
 			
-		}, getGlobalSetting().getFieldNames()));
+		}, choices));
 		
 		form.add(new Link<Void>("useDefault") {
 

@@ -16,7 +16,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.transitionprerequisite.TransitionPrerequisite;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsNotAnyOf;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsOneOf;
@@ -320,7 +319,7 @@ public class TransitionSpec implements Serializable {
 		return false;
 	}
 	
-	public boolean fixUndefinedFieldValues(Project project, Map<String, ValueSetEdit> valueSetEdits) {
+	public boolean fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits) {
 		for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
 			if (onEditFieldValues(entry.getKey(), entry.getValue()))
 				return true;

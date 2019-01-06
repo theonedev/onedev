@@ -51,35 +51,36 @@ onedev.server.issueBoards = {
 	}, 
 	onCardDomReady: function(cardId, callback) {
 		var $card = $("#" + cardId);
-		var $body = $card.closest(".body");
-		var bodyContentWidth;
+        var $body = $card.closest(".body");
+        var $container = $body.parent().closest(".body");
+		var containerContentWidth;
 		if (callback) {
 			$card.draggable({
 				helper: "clone", 
-				appendTo: $body.parent().closest(".body"),
+				appendTo: $container,
 				scroll: false,
 				start: function(event, ui) {
 					// pretend that we are in ajax operation to prevent websocket auto-update while dragging
 					onedev.server.ajaxRequests.count++;					
 					$card.addClass("issue-dragging");
 					$(ui.helper).outerWidth($card.outerWidth());
-					bodyContentWidth = $body.prop("scrollWidth");
+					containerContentWidth = $container.prop("scrollWidth");
 					callback($card.data("issue"));
 				}, 
 				drag: function(event, ui) {
 					var left = ui.position.left;
 					var right = left + $(ui.helper).outerWidth();
-					if (left < $body.scrollLeft()) { 
+					if (left < $container.scrollLeft()) { 
 						if (left >= 0)
-							$body.scrollLeft(left);
+							$container.scrollLeft(left);
 						else
-							$body.scrollLeft(0);
+							$container.scrollLeft(0);
 					}
-					if ($body.scrollLeft() < right - $body.outerWidth()) {
-						if (right <= bodyContentWidth)
-							$body.scrollLeft(right - $body.outerWidth());
+					if ($container.scrollLeft() < right - $container.outerWidth()) {
+						if (right <= containerContentWidth)
+							$container.scrollLeft(right - $container.outerWidth());
 						else
-							$body.scrollLeft(bodyContentWidth - $body.outerWidth());
+							$container.scrollLeft(containerContentWidth - $container.outerWidth());
 					}
 				},
 				stop: function(event, ui) {

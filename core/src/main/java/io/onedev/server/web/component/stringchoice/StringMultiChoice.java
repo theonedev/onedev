@@ -1,7 +1,7 @@
 package io.onedev.server.web.component.stringchoice;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.model.IModel;
 
@@ -10,7 +10,7 @@ import io.onedev.server.web.component.select2.Select2MultiChoice;
 @SuppressWarnings("serial")
 public class StringMultiChoice extends Select2MultiChoice<String> {
 
-	public StringMultiChoice(String id, IModel<Collection<String>> model, List<String> choices) {
+	public StringMultiChoice(String id, IModel<Collection<String>> model, Map<String, String> choices) {
 		super(id, model, new StringChoiceProvider(choices));
 	}
 
@@ -20,7 +20,6 @@ public class StringMultiChoice extends Select2MultiChoice<String> {
 		getSettings().setFormatResult("onedev.server.choiceFormatter.formatResult");
 		getSettings().setFormatSelection("onedev.server.choiceFormatter.formatSelection");
 		getSettings().setEscapeMarkup("onedev.server.choiceFormatter.escapeMarkup");
-		
 		setConvertEmptyInputStringToNull(true);
 	}
 

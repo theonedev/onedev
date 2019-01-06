@@ -1,13 +1,11 @@
 package io.onedev.server.web.editable.choice;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.MapUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
@@ -29,18 +27,18 @@ import io.onedev.utils.ReflectionUtils;
 @SuppressWarnings("serial")
 public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 
-	private final Map<String, String> choices = new LinkedHashMap<>();
-	
 	private Select2MultiChoice<String> input;
 	
 	public MultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked"})
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		Map<String, String> choices;
 		
 		OneContext oneContext = new ComponentContext(this);
 		
@@ -53,28 +51,23 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 			Preconditions.checkNotNull(choiceProvider);
 			Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value());
 			if (result instanceof List) {
+				choices = new LinkedHashMap<>();
 				for (String each: (List<String>)result) 
 					choices.put(each, each);
 			} else {
-				choices.putAll(((Map)result));
+				choices = (Map<String, String>)result;
 			}
 		} finally {
 			OneContext.pop();
 		}
 		
-		Map<String, String> invertedChoices = MapUtils.invertMap(choices);
-        Collection<String> selections = new ArrayList<>();
-        if (getModelObject() != null) {
-        	for (String value: getModelObject()) {
-        		String key = invertedChoices.get(value);
-        		if (key != null)
-        			selections.add(key);
-        	}
-        }
-        
-		IModel<Collection<String>> model = new Model((Serializable) selections);
-        
-		input = new StringMultiChoice("input", model, new ArrayList<>(choices.keySet())) {
+		List<String> selections;
+		if (getModelObject() != null)
+			selections = getModelObject();
+		else
+			selections = new ArrayList<>();
+		
+		input = new StringMultiChoice("input", Model.of(selections), choices) {
 
 			@Override
 			protected void onInitialize() {
@@ -105,10 +98,11 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 	
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
-		List<String> values = new ArrayList<>();
-		for (String each: input.getConvertedInput())
-			values.add(choices.get(each));
-		return values;
+		Collection<String> convertedInput = input.getConvertedInput();
+		if (convertedInput != null)
+			return new ArrayList<>(convertedInput);
+		else
+			return new ArrayList<>();
 	}
 
 }

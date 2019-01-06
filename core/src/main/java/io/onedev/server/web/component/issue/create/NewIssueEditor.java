@@ -3,8 +3,9 @@ package io.onedev.server.web.component.issue.create;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -21,6 +22,7 @@ import org.apache.wicket.util.convert.ConversionException;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueCriteria;
@@ -86,9 +88,13 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			
 		});
 
-		List<String> milestones = getProject().getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
-		milestoneChoice = new StringSingleChoice("milestone", 
-				Model.of(issue.getMilestoneName()), milestones) {
+		List<Milestone> milestones = getProject().getSortedMilestones();
+		
+		Map<String, String> choices = new LinkedHashMap<>();
+		for (Milestone milestone: milestones)
+			choices.put(milestone.getName(), milestone.getName());
+		
+		milestoneChoice = new StringSingleChoice("milestone", Model.of(issue.getMilestoneName()), choices) {
 
 			@Override
 			protected void onInitialize() {

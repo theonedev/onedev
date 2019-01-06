@@ -18,9 +18,9 @@ import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution.FixType;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateResolution;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution.FixType;
 
 public class IssueSetting implements Serializable {
 	
@@ -199,12 +199,12 @@ public class IssueSetting implements Serializable {
 		}
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs) 
-				undefinedFields.addAll(board.getUndefinedFields(project));
+				undefinedFields.addAll(board.getUndefinedFields());
 		}
 		return undefinedFields;
 	}
 
-	public void fixUndefinedFields(Project project, Map<String, UndefinedFieldResolution> resolutions) {
+	public void fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
 		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 			if (listFields != null) {
 				listFields.remove(entry.getKey());
@@ -221,7 +221,7 @@ public class IssueSetting implements Serializable {
 			for (Iterator<NamedIssueQuery> it = savedQueries.iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
+					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
 					boolean remove = false;
 					for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 						UndefinedFieldResolution resolution = entry.getValue();
@@ -250,7 +250,7 @@ public class IssueSetting implements Serializable {
 		
 		if (boardSpecs != null) {
 			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) {
-				if (it.next().fixUndefinedFields(project, resolutions))
+				if (it.next().fixUndefinedFields(resolutions))
 					it.remove();
 			}		
 		}
@@ -270,7 +270,7 @@ public class IssueSetting implements Serializable {
 
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs)
-				undefinedStates.addAll(board.getUndefinedStates(project));
+				undefinedStates.addAll(board.getUndefinedStates());
 		}
 		
 		if (transitionSpecs != null) {
@@ -281,11 +281,11 @@ public class IssueSetting implements Serializable {
 		return undefinedStates;
 	}
 
-	public void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions) {
+	public void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
 		if (savedQueries != null) {
 			for (NamedIssueQuery namedQuery: savedQueries) {
 				try {
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
+					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
 					for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 						query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 					namedQuery.setQuery(query.toString());
@@ -296,7 +296,7 @@ public class IssueSetting implements Serializable {
 		
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs)
-				board.fixUndefinedStates(project, resolutions);
+				board.fixUndefinedStates(resolutions);
 		}
 		
 		if (transitionSpecs != null) {
@@ -305,19 +305,19 @@ public class IssueSetting implements Serializable {
 		}
 	}
 	
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
 		if (savedQueries != null) {
 			for (NamedIssueQuery namedQuery: savedQueries) {
 				try {
-					undefinedFieldValues.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedFieldValues());
+					undefinedFieldValues.addAll(IssueQuery.parse(null, namedQuery.getQuery(), false).getUndefinedFieldValues());
 				} catch (Exception e) {
 				}
 			}
 		}
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs)
-				undefinedFieldValues.addAll(board.getUndefinedFieldValues(project));
+				undefinedFieldValues.addAll(board.getUndefinedFieldValues());
 		}
 		if (transitionSpecs != null) {
 			for (TransitionSpec transition: transitionSpecs)
@@ -326,13 +326,13 @@ public class IssueSetting implements Serializable {
 		return undefinedFieldValues;
 	}
 	
-	public void fixUndefinedFieldValues(Project project, Map<String, ValueSetEdit> valueSetEdits) {
+	public void fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits) {
 		if (savedQueries != null) {
 			for (Iterator<NamedIssueQuery> it = savedQueries.iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
 					boolean remove = false;
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
+					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
 					for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
 						if (query.onEditFieldValues(entry.getKey(), entry.getValue())) {
 							remove = true;
@@ -349,7 +349,7 @@ public class IssueSetting implements Serializable {
 		}
 		if (boardSpecs != null) {
 			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) {
-				if (it.next().fixUndefinedFieldValues(project, valueSetEdits)) {
+				if (it.next().fixUndefinedFieldValues(valueSetEdits)) {
 					it.remove();
 					break;
 				}
@@ -357,7 +357,7 @@ public class IssueSetting implements Serializable {
 		}
 		if (transitionSpecs != null) {
 			for (Iterator<TransitionSpec> it = transitionSpecs.iterator(); it.hasNext();) {
-				if (it.next().fixUndefinedFieldValues(project, valueSetEdits)) {
+				if (it.next().fixUndefinedFieldValues(valueSetEdits)) {
 					it.remove();
 					break;
 				}
