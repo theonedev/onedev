@@ -21,6 +21,7 @@ import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectListPage;
+import io.onedev.utils.ExceptionUtils;
 
 @SuppressWarnings("serial")
 public class ErrorPage extends BasePage {
@@ -33,9 +34,13 @@ public class ErrorPage extends BasePage {
 		super(new PageParameters());
 		
 		for (ExpectedExceptionContribution contribution: OneDev.getExtensions(ExpectedExceptionContribution.class)) {
-			if (contribution.getExpectedExceptionClasses().contains(exception.getClass())) {
-				title = exception.getMessage();
-				break;
+			for (Class<? extends Exception> expectedExceptionClass: contribution.getExpectedExceptionClasses()) {
+				System.out.println(expectedExceptionClass);
+				Exception expectedException = ExceptionUtils.find(exception, expectedExceptionClass);
+				if (expectedException != null)
+					title = expectedException.getMessage();
+				if (title != null)
+					break;
 			}
 		}
 		if (title == null)
