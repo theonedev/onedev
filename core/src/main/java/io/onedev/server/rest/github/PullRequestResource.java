@@ -18,9 +18,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.criterion.Restrictions;
 
@@ -52,18 +52,16 @@ public class PullRequestResource {
 		this.pullRequestManager = pullRequestManager;
 	}
 
-	private Project getProject(String projectName) {
-		return Preconditions.checkNotNull(projectManager.find(projectName));
-	}
-	
 	@Path("/{name}/pulls/{pullRequestNumber}")
 	@GET
 	public Response getPullRequest(@PathParam("name") String projectName, 
 			@PathParam("pullRequestNumber") Long pullRequestNumber, @Context UriInfo uriInfo) {
-		Project project = getProject(projectName);
+		Project project = projectManager.find(projectName);
+		if (project == null)
+			return GithubUtils.buildErrorResponse(Status.NOT_FOUND, "Unable to find project '" + projectName + "'");
 
 		if (!SecurityUtils.canReadCode(project.getFacade()))
-    		throw new UnauthorizedException("Unauthorized access to project '" + projectName + "'");
+    		return GithubUtils.buildErrorResponse(Status.FORBIDDEN, "Unauthorized access to project '" + projectName + "'");
 		
 		PullRequest request = Preconditions.checkNotNull(pullRequestManager.find(project, pullRequestNumber));
 		
@@ -75,10 +73,12 @@ public class PullRequestResource {
 	@GET
 	public Response getCommits(@PathParam("name") String projectName, 
 			@PathParam("pullRequestNumber") Long pullRequestNumber) {
-		Project project = getProject(projectName);
-
+		Project project = projectManager.find(projectName);
+		if (project == null)
+			return GithubUtils.buildErrorResponse(Status.NOT_FOUND, "Unable to find project '" + projectName + "'");
+			
 		if (!SecurityUtils.canReadCode(project.getFacade()))
-    		throw new UnauthorizedException("Unauthorized access to project '" + projectName + "'");
+    		return GithubUtils.buildErrorResponse(Status.FORBIDDEN, "Unauthorized access to project '" + projectName + "'");
 		
 		PullRequest request = pullRequestManager.find(project, pullRequestNumber);
 		List<Map<String, Object>> entity = new ArrayList<>();
@@ -187,10 +187,12 @@ public class PullRequestResource {
     		@PathParam("name") String projectName, @QueryParam("base") String branch, 
     		@QueryParam("state") String state, @QueryParam("per_page") Integer perPage, 
     		@QueryParam("page") Integer page, @Context UriInfo uriInfo) {
-		Project project = getProject(projectName);
-
+		Project project = projectManager.find(projectName);
+		if (project == null)
+			return GithubUtils.buildErrorResponse(Status.NOT_FOUND, "Unable to find project '" + projectName + "'");
+			
 		if (!SecurityUtils.canReadCode(project.getFacade()))
-    		throw new UnauthorizedException("Unauthorized access to project '" + projectName + "'");
+    		return GithubUtils.buildErrorResponse(Status.FORBIDDEN, "Unauthorized access to project '" + projectName + "'");
 		
 		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
     	criteria.add(PullRequest.CriterionHelper.ofTargetProject(project));
