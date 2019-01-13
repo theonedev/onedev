@@ -1,1 +1,1 @@
-The practical Git management server. [Learn more](https://onedev.io).
+Self-hosted git server with unique features. [Learn more](https://onedev.io).

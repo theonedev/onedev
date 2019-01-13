@@ -315,9 +315,7 @@ public class GlobalIssueSetting implements Serializable {
 	
 	public void onDeleteState(String stateName) {
 		for (Iterator<TransitionSpec> it = getDefaultTransitionSpecs().iterator(); it.hasNext();) {
-			TransitionSpec transition = it.next();
-			transition.getFromStates().remove(stateName);
-			if (transition.getFromStates().isEmpty() || transition.getToState().equals(stateName))
+			if (it.next().onDeleteState(stateName))
 				it.remove();
 		}
 		for (Iterator<BoardSpec> it = getDefaultBoardSpecs().iterator(); it.hasNext();) {
@@ -339,13 +337,8 @@ public class GlobalIssueSetting implements Serializable {
 	}
 	
 	public void onRenameState(String oldName, String newName) {
-		for (TransitionSpec transition: getDefaultTransitionSpecs()) {
-			int index = transition.getFromStates().indexOf(oldName);
-			if (index != -1)
-				transition.getFromStates().set(index, newName);
-			if (transition.getToState().equals(oldName))
-				transition.setToState(newName);
-		}
+		for (TransitionSpec transition: getDefaultTransitionSpecs())
+			transition.onRenameState(oldName, newName);
 		for (BoardSpec board: getDefaultBoardSpecs())
 			board.onRenameState(oldName, newName);
 		for (NamedIssueQuery namedQuery: getDefaultQueries()) {

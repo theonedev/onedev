@@ -1,9 +1,9 @@
 package io.onedev.server.web.editable.enumeration;
 
-import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -39,19 +39,19 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		List<String> choices = new ArrayList<>();
+		Map<String, String> choices = new LinkedHashMap<>();
         for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
             Enum<?> value = (Enum<?>) it.next();
-            choices.add(getDisplayValue(value.toString()));
+            choices.put(value.name(), getDisplayValue(value.toString()));
         }
 
-        String stringValue;
+        String selection;
         if (getModelObject() != null)
-        	stringValue = getDisplayValue(getModelObject().toString());
+        	selection = getModelObject().name();
         else
-        	stringValue = null;
+        	selection = null;
         
-		input = new StringSingleChoice("input", Model.of(stringValue), choices) {
+		input = new StringSingleChoice("input", Model.of(selection), choices) {
 
 			@Override
 			protected void onInitialize() {
@@ -83,13 +83,11 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 
 	@Override
 	protected Enum<?> convertInputToValue() throws ConversionException {
-		String displayValue = input.getConvertedInput();
-        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
-            Enum<?> value = (Enum<?>) it.next();
-            if (getDisplayValue(value.toString()).equals(displayValue)) 
-            	return value;
-        }
-        return null;
+		String convertedInput = input.getConvertedInput();
+		if (convertedInput != null) 
+			return Enum.valueOf(enumClass, convertedInput);
+		else
+			return null;
 	}
 
 }

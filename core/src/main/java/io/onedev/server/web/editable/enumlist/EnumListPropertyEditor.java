@@ -1,11 +1,11 @@
 package io.onedev.server.web.editable.enumlist;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -42,20 +42,19 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<String> choices = new ArrayList<>();
+		Map<String, String> choices = new LinkedHashMap<>();
         for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
             Enum<?> value = (Enum<?>) it.next();
-            choices.add(getDisplayValue(value.toString()));
+            choices.put(value.name(), getDisplayValue(value.toString()));
         }
 
         List<String> selections = new ArrayList<>();
         if (getModelObject() != null) {
-        	for (Enum<?> each: getModelObject())
-        		selections.add(getDisplayValue(each.toString()));
+        	for (Enum<?> each: getModelObject()) 
+        		selections.add(each.name());
         }
-		IModel<Collection<String>> model = new Model((Serializable) selections);
         
-        input = new StringMultiChoice("input", model, choices) {
+        input = new StringMultiChoice("input", Model.of(selections), choices) {
 
         	@Override
         	protected void onInitialize() {
@@ -86,15 +85,9 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
 	@Override
 	protected List<Enum<?>> convertInputToValue() throws ConversionException {
 		List<Enum<?>> values = new ArrayList<>();
-		
-		for (String stringValue: input.getConvertedInput()) {
-	        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
-	            Enum<?> value = (Enum<?>) it.next();
-	            if (getDisplayValue(value.toString()).equals(stringValue)) { 
-	            	values.add(value);
-	            	break;
-	            }
-	        }
+		if (input.getConvertedInput() != null) {
+			for (String each: input.getConvertedInput())
+				values.add(Enum.valueOf(enumClass, each));
 		}
         return values;
 	}

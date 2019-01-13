@@ -252,7 +252,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 		
 		for (Project project: projectManager.query()) {
-			project.getIssueSetting().fixUndefinedStates(project, resolutions);
+			project.getIssueSetting().fixUndefinedStates(resolutions);
 		}
 		
 		for (IssueQuerySetting setting: issueQuerySettingManager.query()) {
@@ -357,14 +357,14 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 		
 		for (Project project: projectManager.query()) {
-			project.getIssueSetting().fixUndefinedFields(project, resolutions);
+			project.getIssueSetting().fixUndefinedFields(resolutions);
 		}
 		
 		for (IssueQuerySetting setting: issueQuerySettingManager.query()) {
 			for (Iterator<NamedIssueQuery> it = setting.getUserQueries().iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
-					IssueQuery query = IssueQuery.parse(setting.getProject(), namedQuery.getQuery(), false);
+					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
 					boolean remove = false;
 					for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 						UndefinedFieldResolution resolution = entry.getValue();
@@ -402,9 +402,8 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			}
 		}
 
-		for (Project project: projectManager.query()) {
-			undefinedFieldValues.addAll(project.getIssueSetting().getUndefinedFieldValues(project));
-		}
+		for (Project project: projectManager.query())
+			undefinedFieldValues.addAll(project.getIssueSetting().getUndefinedFieldValues());
 		
 		for (IssueQuerySetting setting: issueQuerySettingManager.query()) {
 			for (NamedIssueQuery namedQuery: setting.getUserQueries()) {
@@ -439,14 +438,14 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 		
 		for (Project project: projectManager.query()) {
-			project.getIssueSetting().fixUndefinedFieldValues(project, valueSetEdits);
+			project.getIssueSetting().fixUndefinedFieldValues(valueSetEdits);
 		}
 		
 		for (IssueQuerySetting setting: issueQuerySettingManager.query()) {
 			for (Iterator<NamedIssueQuery> it = setting.getUserQueries().iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
-					IssueQuery query = IssueQuery.parse(setting.getProject(), namedQuery.getQuery(), false);
+					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
 					if (query.fixUndefinedFieldValues(valueSetEdits))
 						it.remove();
 					else

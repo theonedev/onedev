@@ -23,12 +23,15 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.issue.board.BoardEditPanel;
@@ -147,7 +150,18 @@ public class DefaultBoardListPage extends GlobalIssueSettingPage {
 					}
 					
 				};
-				link.add(new Label("label", StringUtils.join(rowModel.getObject().getColumns())));
+				List<String> columnsForDisplay = new ArrayList<>();
+				for (String column: rowModel.getObject().getColumns()) {
+					if (column == null) {
+						GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+						InputSpec field = issueSetting.getFieldSpec(board.getIdentifyField());
+						if (field != null)
+							columnsForDisplay.add("<i>" + HtmlEscape.escapeHtml5(field.getNameOfEmptyValue()) + "</i>");
+					} else {
+						columnsForDisplay.add(HtmlEscape.escapeHtml5(column));
+					}
+				}
+				link.add(new Label("label", StringUtils.join(columnsForDisplay)).setEscapeModelStrings(false));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}

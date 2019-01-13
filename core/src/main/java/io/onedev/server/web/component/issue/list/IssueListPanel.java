@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -258,6 +260,9 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 				Fragment fragment = new Fragment(id, "listFieldsFrag", IssueListPanel.this);
 				Form<?> form = new Form<Void>("form");
 				fieldSet = getProject().getIssueSetting().getListFields(true);
+				Map<String, String> choices = new LinkedHashMap<>();
+				for (String fieldName: getGlobalIssueSetting().getFieldNames())
+					choices.put(fieldName, fieldName);
 				form.add(new StringMultiChoice("fields", new IModel<Collection<String>>() {
 
 					@Override
@@ -274,7 +279,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						fieldSet = new HashSet<>(object);
 					}
 					
-				}, getGlobalIssueSetting().getFieldNames()));
+				}, choices));
 				
 				form.add(new AjaxLink<Void>("close") {
 

@@ -344,20 +344,28 @@ public abstract class InputSpec implements Serializable {
 			if (showCondition.getValueMatcher() instanceof ValueIsOneOf) {
 				ValueIsOneOf valueIsOneOf = (ValueIsOneOf) showCondition.getValueMatcher(); 
 				valueIsOneOf.getValues().removeAll(valueSetEdit.getDeletions());
-				for (int i=0; i<valueIsOneOf.getValues().size(); i++) {
-					String newValue = valueSetEdit.getRenames().get(valueIsOneOf.getValues().get(i));
-					if (newValue != null)
-						valueIsOneOf.getValues().set(i, newValue);
+				for (Map.Entry<String, String> entry: valueSetEdit.getRenames().entrySet()) {
+					int index = valueIsOneOf.getValues().indexOf(entry.getKey());
+					if (index != -1) {
+						if (valueIsOneOf.getValues().contains(entry.getValue()))
+							valueIsOneOf.getValues().remove(index);
+						else
+							valueIsOneOf.getValues().set(index, entry.getValue());
+					}
 				}
 				if (valueIsOneOf.getValues().isEmpty())
 					showCondition = null;
 			} else if (showCondition.getValueMatcher() instanceof ValueIsNotAnyOf) {
 				ValueIsNotAnyOf valueIsNotAnyOf = (ValueIsNotAnyOf) showCondition.getValueMatcher();
 				valueIsNotAnyOf.getValues().removeAll(valueSetEdit.getDeletions());
-				for (int i=0; i<valueIsNotAnyOf.getValues().size(); i++) {
-					String newValue = valueSetEdit.getRenames().get(valueIsNotAnyOf.getValues().get(i));
-					if (newValue != null)
-						valueIsNotAnyOf.getValues().set(i, newValue);
+				for (Map.Entry<String, String> entry: valueSetEdit.getRenames().entrySet()) {
+					int index = valueIsNotAnyOf.getValues().indexOf(entry.getKey());
+					if (index != -1) {
+						if (valueIsNotAnyOf.getValues().contains(entry.getValue()))
+							valueIsNotAnyOf.getValues().remove(index);
+						else
+							valueIsNotAnyOf.getValues().set(index, entry.getValue());
+					}
 				}
 				if (valueIsNotAnyOf.getValues().isEmpty())
 					showCondition = null;

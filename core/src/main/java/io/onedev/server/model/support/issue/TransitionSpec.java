@@ -16,7 +16,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.transitionprerequisite.TransitionPrerequisite;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsNotAnyOf;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsOneOf;
@@ -36,8 +35,9 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution.FixType;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateResolution;
 import io.onedev.utils.StringUtils;
 
 @Editable
@@ -125,8 +125,7 @@ public class TransitionSpec implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getFieldChoices() {
 		List<String> fields = new ArrayList<>();
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		for (InputSpec field: issueSetting.getFieldSpecs())
+		for (InputSpec field: getGlobalIssueSetting().getFieldSpecs())
 			fields.add(field.getName());
 		return fields;
 	}
@@ -200,19 +199,37 @@ public class TransitionSpec implements Serializable {
 		return false;
 	}
 	
+	public void onRenameState(String oldName, String newName) {
+		int index = fromStates.indexOf(oldName);
+		if (index != -1) {
+			if (fromStates.contains(newName))
+				fromStates.remove(index);
+			else
+				fromStates.set(index, newName);
+		}
+		if (toState.equals(oldName))
+			toState = newName;
+	}
+	
 	public void onRenameField(String oldName, String newName) {
 		if (getPrerequisite() != null && getPrerequisite().getInputName().equals(oldName))
 			getPrerequisite().setInputName(newName);
 		if (getTrigger() instanceof PressButtonTrigger) {
 			PressButtonTrigger trigger = (PressButtonTrigger) getTrigger();
-			for (int i=0; i<trigger.getPromptFields().size(); i++) {
-				if (trigger.getPromptFields().get(i).equals(oldName))
-					trigger.getPromptFields().set(i, newName);
+			int index = trigger.getPromptFields().indexOf(oldName);
+			if (index != -1) {
+				if (trigger.getPromptFields().contains(newName))				
+					trigger.getPromptFields().remove(index);
+				else
+					trigger.getPromptFields().set(index, newName);
 			}
 		}
-		for (int i=0; i<getRemoveFields().size(); i++) {
-			if (getRemoveFields().get(i).equals(oldName))
-				getRemoveFields().set(i, newName);
+		int index = getRemoveFields().indexOf(oldName);
+		if (index != -1) {
+			if (getRemoveFields().contains(newName))				
+				getRemoveFields().remove(index);
+			else
+				getRemoveFields().set(index, newName);
 		}
 	}
 	
@@ -232,6 +249,11 @@ public class TransitionSpec implements Serializable {
 		}
 		
 		return false;
+	}
+	
+	public boolean onDeleteState(String stateName) {
+		fromStates.remove(stateName);
+		return fromStates.isEmpty() || toState.equals(stateName);
 	}
 
 	public Collection<String> getUndefinedFields(GlobalIssueSetting globalSetting) {
@@ -267,20 +289,28 @@ public class TransitionSpec implements Serializable {
 			if (getPrerequisite().getValueMatcher() instanceof ValueIsOneOf) {
 				ValueIsOneOf valueIsOneOf = (ValueIsOneOf) getPrerequisite().getValueMatcher(); 
 				valueIsOneOf.getValues().removeAll(valueSetEdit.getDeletions());
-				for (int i=0; i<valueIsOneOf.getValues().size(); i++) {
-					String newValue = valueSetEdit.getRenames().get(valueIsOneOf.getValues().get(i));
-					if (newValue != null)
-						valueIsOneOf.getValues().set(i, newValue);
+				for (Map.Entry<String, String> entry: valueSetEdit.getRenames().entrySet()) {
+					int index = valueIsOneOf.getValues().indexOf(entry.getKey());
+					if (index != -1) {
+						if (valueIsOneOf.getValues().contains(entry.getValue()))
+							valueIsOneOf.getValues().remove(index);
+						else
+							valueIsOneOf.getValues().set(index, entry.getValue());
+					}
 				}
 				if (valueIsOneOf.getValues().isEmpty())
 					setPrerequisite(null);
 			} else if (getPrerequisite().getValueMatcher() instanceof ValueIsNotAnyOf) {
 				ValueIsNotAnyOf valueIsNotAnyOf = (ValueIsNotAnyOf) getPrerequisite().getValueMatcher();
 				valueIsNotAnyOf.getValues().removeAll(valueSetEdit.getDeletions());
-				for (int i=0; i<valueIsNotAnyOf.getValues().size(); i++) {
-					String newValue = valueSetEdit.getRenames().get(valueIsNotAnyOf.getValues().get(i));
-					if (newValue != null)
-						valueIsNotAnyOf.getValues().set(i, newValue);
+				for (Map.Entry<String, String> entry: valueSetEdit.getRenames().entrySet()) {
+					int index = valueIsNotAnyOf.getValues().indexOf(entry.getKey());
+					if (index != -1) {
+						if (valueIsNotAnyOf.getValues().contains(entry.getValue()))
+							valueIsNotAnyOf.getValues().remove(index);
+						else
+							valueIsNotAnyOf.getValues().set(index, entry.getValue());
+					}
 				}
 				if (valueIsNotAnyOf.getValues().isEmpty())
 					setPrerequisite(null);
@@ -289,7 +319,7 @@ public class TransitionSpec implements Serializable {
 		return false;
 	}
 	
-	public boolean fixUndefinedFieldValues(Project project, Map<String, ValueSetEdit> valueSetEdits) {
+	public boolean fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits) {
 		for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
 			if (onEditFieldValues(entry.getKey(), entry.getValue()))
 				return true;
@@ -299,9 +329,8 @@ public class TransitionSpec implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getStateChoices() {
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		List<String> stateNames = new ArrayList<>();
-		for (StateSpec state: issueSetting.getStateSpecs())
+		for (StateSpec state: getGlobalIssueSetting().getStateSpecs())
 			stateNames.add(state.getName());
 		return stateNames;
 	}
@@ -328,13 +357,16 @@ public class TransitionSpec implements Serializable {
 		}
 		return false;
 	}
+	
+	private static GlobalIssueSetting getGlobalIssueSetting() {
+		return OneDev.getInstance(SettingManager.class).getIssueSetting();
+	}
 
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>(); 
 		if (prerequisite != null) {
 			ValueMatcher valueMatcher = prerequisite.getValueMatcher(); 
-			GlobalIssueSetting globalIssueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(globalIssueSetting.getFieldSpec(prerequisite.getInputName()));
+			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getGlobalIssueSetting().getFieldSpec(prerequisite.getInputName()));
 			if (specifiedChoices != null) {
 				if (valueMatcher instanceof ValueIsOneOf) {
 					ValueIsOneOf valueIsOneOf = (ValueIsOneOf) valueMatcher;
@@ -353,5 +385,30 @@ public class TransitionSpec implements Serializable {
 		}
 		return undefinedFieldValues;
 	}
-	
+
+	public Collection<? extends String> getUndefinedStates() {
+		Collection<String> undefinedStates = new HashSet<>();
+		if (getGlobalIssueSetting().getStateSpec(toState) == null)
+			undefinedStates.add(toState);
+		for (String fromState: fromStates) {
+			if (getGlobalIssueSetting().getStateSpec(fromState) == null)
+				undefinedStates.add(fromState);
+		}
+		return undefinedStates;
+	}
+
+	public void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+		for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
+			if (toState.equals(entry.getKey()))
+				toState = entry.getValue().getNewState();
+			int index = fromStates.indexOf(entry.getKey());
+			if (index != -1) {
+				if (fromStates.contains(entry.getValue().getNewState()))				
+					fromStates.remove(index);
+				else
+					fromStates.set(index, entry.getValue().getNewState());
+			}
+		}
+	}
+
 }

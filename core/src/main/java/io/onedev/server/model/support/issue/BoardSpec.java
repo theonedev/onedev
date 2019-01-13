@@ -29,6 +29,7 @@ import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
+import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.IssueQuery;
@@ -41,6 +42,8 @@ public class BoardSpec implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String NULL_COLUMN = StringChoiceProvider.SPECIAL_CHOICE_PREFIX + "Null";
+	
 	private String name;
 	
 	private String baseQuery;
@@ -52,6 +55,8 @@ public class BoardSpec implements Serializable {
 	private List<String> columns = new ArrayList<>();
 	
 	private List<String> displayFields = Lists.newArrayList(IssueConstants.FIELD_STATE);
+	
+	private List<String> editColumns;
 
 	@Editable(order=100)
 	@NotEmpty
@@ -97,16 +102,26 @@ public class BoardSpec implements Serializable {
 		this.identifyField = identifyField;
 	}
 
-	@Editable(order=400, description="Specify columns of the board. Each column corresponds to "
-			+ "a value of the issue field specified above")
-	@Size(min=2, message="At least two columns need to be defined")
-	@ChoiceProvider("getColumnChoices")
 	public List<String> getColumns() {
 		return columns;
 	}
 
 	public void setColumns(List<String> columns) {
 		this.columns = columns;
+	}
+
+	@Editable(order=400, description="Specify columns of the board. Each column corresponds to "
+			+ "a value of the issue field specified above")
+	@Size(min=2, message="At least two columns need to be defined")
+	@ChoiceProvider("getColumnChoices")
+	public List<String> getEditColumns() {
+		if (editColumns == null)
+			editColumns = new ArrayList<>();
+		return editColumns;
+	}
+
+	public void setEditColumns(List<String> editColumns) {
+		this.editColumns = editColumns;
 	}
 
 	@Editable(order=500, description="Specify fields to display in board card except issue number and title")
@@ -152,10 +167,12 @@ public class BoardSpec implements Serializable {
 				choices.put(state.getName(), state.getName());
 		} else if (fieldName != null) {
 			InputSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
-			for (String each: fieldSpec.getPossibleValues())
-				choices.put(each, each);
-			if (fieldSpec.isAllowEmpty())
-				choices.put(fieldSpec.getNameOfEmptyValue(), null);
+			if (fieldSpec != null) {
+				for (String each: fieldSpec.getPossibleValues())
+					choices.put(each, each);
+				if (fieldSpec.isAllowEmpty())
+					choices.put(NULL_COLUMN, fieldSpec.getNameOfEmptyValue());
+			}
 		} 
 		return choices;
 	}
@@ -172,11 +189,11 @@ public class BoardSpec implements Serializable {
 		return -1;
 	}
 	
-	public Set<String> getUndefinedStates(Project project) {
+	public Set<String> getUndefinedStates() {
 		Set<String> undefinedStates = new HashSet<>();
 		if (getBaseQuery() != null) {
 			try {
-				undefinedStates.addAll(io.onedev.server.search.entity.issue.IssueQuery.parse(project, getBaseQuery(), false).getUndefinedStates());
+				undefinedStates.addAll(io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false).getUndefinedStates());
 			} catch (Exception e) {
 			}
 		}
@@ -189,11 +206,11 @@ public class BoardSpec implements Serializable {
 		return undefinedStates;
 	}
 	
-	public void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions) {
+	public void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(project, getBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false);
 				for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 					query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 				setBaseQuery(query.toString());
@@ -203,17 +220,21 @@ public class BoardSpec implements Serializable {
 		if (getIdentifyField().equals(IssueConstants.FIELD_STATE)) {
 			for (Map.Entry<String, UndefinedStateResolution> entry: resolutions.entrySet()) {
 				int index = getColumns().indexOf(entry.getKey());
-				if (index != -1)
-					getColumns().set(index, entry.getValue().getNewState());
+				if (index != -1) {
+					if (getColumns().contains(entry.getValue().getNewState())) 
+						getColumns().remove(index);
+					else 
+						getColumns().set(index, entry.getValue().getNewState());
+				}
 			}
 		}
 	}
 	
-	public Set<String> getUndefinedFields(Project project) {
+	public Set<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
 		if (getBaseQuery() != null) {
 			try {
-				undefinedFields.addAll(io.onedev.server.search.entity.issue.IssueQuery.parse(project, getBaseQuery(), false).getUndefinedFields());
+				undefinedFields.addAll(io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false).getUndefinedFields());
 			} catch (Exception e) {
 			}
 		}
@@ -232,11 +253,11 @@ public class BoardSpec implements Serializable {
 		return undefinedFields;
 	}
 	
-	public boolean fixUndefinedFields(Project project, Map<String, UndefinedFieldResolution> resolutions) {
+	public boolean fixUndefinedFields(Map<String, UndefinedFieldResolution> resolutions) {
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(project, getBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false);
 				boolean remove = false;
 				for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 					UndefinedFieldResolution resolution = entry.getValue();
@@ -261,8 +282,12 @@ public class BoardSpec implements Serializable {
 				if (getIdentifyField().equals(entry.getKey()))
 					setIdentifyField(resolution.getNewField());
 				int index = getDisplayFields().indexOf(entry.getKey());
-				if (index != -1)
-					getDisplayFields().set(index, resolution.getNewField());
+				if (index != -1) {
+					if (getDisplayFields().contains(resolution.getNewField()))
+						getDisplayFields().remove(index);
+					else
+						getDisplayFields().set(index, resolution.getNewField());
+				}
 			} else {
 				getDisplayFields().remove(entry.getKey());
 				if (getIdentifyField().equals(entry.getKey())) 
@@ -272,26 +297,7 @@ public class BoardSpec implements Serializable {
 		return false;
 	}
 	
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues(Project project) {
-		Set<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
-		if (getBaseQuery() != null) {
-			try {
-				undefinedFieldValues.addAll(io.onedev.server.search.entity.issue.IssueQuery.parse(project, getBaseQuery(), true).getUndefinedFieldValues());
-			} catch (Exception e) {
-			}
-		}
-		if (!getIdentifyField().equals(IssueConstants.FIELD_STATE)) {
-			for (String column: getColumns()) {
-				SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getGlobalIssueSetting().getFieldSpec(getIdentifyField()));
-				if (specifiedChoices != null && !specifiedChoices.getChoiceValues().contains(column))
-					undefinedFieldValues.add(new UndefinedFieldValue(getIdentifyField(), column));
-			}
-		}
-		
-		return undefinedFieldValues;
-	}
-	
-	public boolean fixUndefinedFieldValues(Project project, Map<String, ValueSetEdit> valueSetEdits) {
+	public boolean fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits) {
 		for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
 			if (onEditFieldValues(entry.getKey(), entry.getValue()))
 				return true;
@@ -327,9 +333,12 @@ public class BoardSpec implements Serializable {
 	public void onRenameField(GlobalIssueSetting issueSetting, String oldName, String newName) {
 		if (getIdentifyField().equals(oldName))
 			setIdentifyField(newName);
-		if (getDisplayFields().contains(oldName)) {
-			getDisplayFields().remove(oldName);
-			getDisplayFields().add(newName);
+		int index = getDisplayFields().indexOf(oldName);
+		if (index != -1) {
+			if (getDisplayFields().contains(newName))
+				getDisplayFields().remove(index);
+			else
+				getDisplayFields().set(index, newName);
 		}
 		if (getBaseQuery() != null) {
 			try {
@@ -353,9 +362,12 @@ public class BoardSpec implements Serializable {
 
 	public void onRenameState(String oldName, String newName) {
 		if (getIdentifyField().equals(IssueConstants.FIELD_STATE)) {
-			for (int i=0; i<getColumns().size(); i++) {
-				if (getColumns().get(i).equals(oldName))
-					getColumns().set(i, newName);
+			int index = getColumns().indexOf(oldName);
+			if (index != -1) {
+				if (getColumns().contains(newName))
+					getColumns().remove(index);
+				else
+					getColumns().set(index, newName);
 			}
 		}
 		
@@ -409,12 +421,8 @@ public class BoardSpec implements Serializable {
 	}
 
 	public boolean onDeleteState(String stateName) {
-		if (getIdentifyField().equals(IssueConstants.FIELD_STATE)) {
-			for (Iterator<String> it = getColumns().iterator(); it.hasNext();) {
-				if (it.next().equals(stateName))
-					it.remove();
-			}
-		}
+		if (getIdentifyField().equals(IssueConstants.FIELD_STATE)) 
+			getColumns().remove(stateName);
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
@@ -444,10 +452,14 @@ public class BoardSpec implements Serializable {
 	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
 		if (fieldName.equals(getIdentifyField())) {
 			getColumns().removeAll(valueSetEdit.getDeletions());
-			for (int i=0; i<getColumns().size(); i++) {
-				String newValue = valueSetEdit.getRenames().get(getColumns().get(i));
-				if (newValue != null)
-					getColumns().set(i, newValue);
+			for (Map.Entry<String, String> entry: valueSetEdit.getRenames().entrySet()) {
+				int index = getColumns().indexOf(entry.getKey());
+				if (index != -1) {
+					if (getColumns().contains(entry.getValue()))
+						getColumns().remove(index);
+					else
+						getColumns().set(index, entry.getValue());
+				}
 			}
 		}
 		if (getBaseQuery() != null) {
@@ -472,17 +484,16 @@ public class BoardSpec implements Serializable {
 			} catch (Exception e) {
 			}
 		}
-		
 		return getColumns().size() < 2;
 	}
 
-	public Collection<UndefinedFieldValue> getUndefinedFieldValues(GlobalIssueSetting globalSetting) {
+	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>(); 
 		if (!identifyField.equals(IssueConstants.FIELD_STATE)) {
-			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(globalSetting.getFieldSpec(identifyField));
+			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getGlobalIssueSetting().getFieldSpec(identifyField));
 			if (specifiedChoices != null) {
-				for (String column: columns) {
-					if (!specifiedChoices.getChoiceValues().contains(column))
+				for (String column: getColumns()) {
+					if (column != null && !specifiedChoices.getChoiceValues().contains(column)) 
 						undefinedFieldValues.add(new UndefinedFieldValue(identifyField, column));
 				}
 			}

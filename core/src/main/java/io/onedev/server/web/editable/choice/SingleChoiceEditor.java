@@ -1,11 +1,9 @@
 package io.onedev.server.web.editable.choice;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.MapUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.markup.html.form.FormComponent;
@@ -27,18 +25,18 @@ import io.onedev.utils.ReflectionUtils;
 @SuppressWarnings("serial")
 public class SingleChoiceEditor extends PropertyEditor<String> {
 
-	private Map<String, String> choices = new LinkedHashMap<>();
-	
 	private FormComponent<String> input;
 	
 	public SingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked"})
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		Map<String, String> choices;
 		
 		OneContext oneContext = new ComponentContext(this);
 		
@@ -51,18 +49,17 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 			Preconditions.checkNotNull(choiceProvider);
 			Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value());
 			if (result instanceof List) {
+				choices = new LinkedHashMap<>();
 				for (String each: (List<String>)result) 
 					choices.put(each, each);
 			} else {
-				choices.putAll(((Map)result));
+				choices = ((Map<String, String>)result);
 			}
 		} finally {
 			OneContext.pop();
 		}
 
-		String key = MapUtils.invertMap(choices).get(getModelObject());
-		
-		input = new StringSingleChoice("input", Model.of(key), new ArrayList<>(choices.keySet())) {
+		input = new StringSingleChoice("input", Model.of(getModelObject()), choices) {
 
 			@Override
 			protected void onInitialize() {
@@ -94,7 +91,7 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 
 	@Override
 	protected String convertInputToValue() throws ConversionException {
-		return choices.get(input.getConvertedInput());
+		return input.getConvertedInput();
 	}
 
 }

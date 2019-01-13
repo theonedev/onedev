@@ -2,6 +2,15 @@ var onedev = {};
 String.prototype.escape = function() {
 	return (this + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
 };
+String.prototype.escapeHtml = function() {
+    return this
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ };
+ 
 onedev.server = {
 	setupCollapse: function(triggerId, targetId) {
 		var trigger = $("#" + triggerId);
@@ -282,7 +291,11 @@ onedev.server = {
 				var focusibleSelector = "input[type=text]:visible, input:not([type]):visible, textarea:visible, .CodeMirror:visible";
 				
 				var inErrorSelector = ".has-error:visible:first";
-				var $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
+                var $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
+                if ($inError.length == 0) {
+				    inErrorSelector = ".feedbackPanelERROR:visible:first";
+                    $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
+                }
 				if ($inError.length != 0) {
 					var $focusable = $inError.find(focusibleSelector).addBack(focusibleSelector);
 					if ($focusable.hasClass("CodeMirror") && $this[0].CodeMirror.options.readOnly == false) {
@@ -356,11 +369,17 @@ onedev.server = {
 	
 	choiceFormatter: {
 		formatSelection: function(choice) {
-			return choice.id;
+            if (choice.id && choice.id.indexOf("<$OneDevSpecialChoice$>") == 0)
+                return "<i>" + choice.name.escapeHtml() + "</i>";
+            else
+                return choice.name.escapeHtml();
 		},
 		
 		formatResult: function(choice) {
-			return choice.id;
+            if (choice.id && choice.id.indexOf("<$OneDevSpecialChoice$>") == 0)
+                return "<i>" + choice.name.escapeHtml() + "</i>";
+            else
+                return choice.name.escapeHtml();
 		},
 		
 		escapeMarkup: function(m) {
