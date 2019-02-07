@@ -9,6 +9,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -18,7 +20,6 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
-import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 public class GeneralSettingPage extends ProjectSettingPage {
@@ -53,7 +54,7 @@ public class GeneralSettingPage extends ProjectSettingPage {
 				editor.getBeanDescriptor().copyProperties(object, getProject());
 			}
 			
-		}, Sets.newHashSet("commitMessageTransforms"), true);
+		}, Lists.newArrayList("name", "description", "defaultPrivilege"), false);
 		
 		Form<?> form = new Form<Void>("form") {
 

@@ -65,6 +65,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRe
 import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergePreviewPage;
 import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
+import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
 import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
 import io.onedev.server.web.page.project.setting.configuration.ConfigurationEditPage;
@@ -74,6 +75,7 @@ import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
 import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
+import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
@@ -231,12 +233,14 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		
 		add(new OnePageMapper("projects/${project}/settings/general", GeneralSettingPage.class));
 		add(new OnePageMapper("projects/${project}/settings/authorizations", ProjectAuthorizationsPage.class));
+		add(new OnePageMapper("projects/${project}/settings/avatar-edit", AvatarEditPage.class));
 		add(new OnePageMapper("projects/${project}/settings/branch-protection", BranchProtectionPage.class));
 		add(new OnePageMapper("projects/${project}/settings/tag-protection", TagProtectionPage.class));
 		add(new OnePageMapper("projects/${project}/settings/issue/state-transitions", StateTransitionsPage.class));
 		add(new OnePageMapper("projects/${project}/settings/issue/prompt-fields-upon-issue-open", 
 				PromptFieldsUponIssueOpenSettingPage.class));
 		add(new OnePageMapper("projects/${project}/settings/commit-message-transform", CommitMessageTransformPage.class));
+		add(new OnePageMapper("projects/${project}/settings/web-hooks", WebHooksPage.class));
 		add(new OnePageMapper("projects/${project}/settings/configurations", ConfigurationListPage.class));
 		add(new OnePageMapper("projects/${project}/settings/configurations/new", NewConfigurationPage.class));
 		add(new OnePageMapper("projects/${project}/settings/configurations/${configuration}", ConfigurationEditPage.class));

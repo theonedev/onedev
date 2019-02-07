@@ -80,7 +80,7 @@ public class BeanContext implements Serializable {
 	
 	@SuppressWarnings("unchecked")
 	public static BeanEditor editModel(String componentId, 
-			IModel<? extends Serializable> beanModel, Set<String> properties, boolean excluded) {
+			IModel<? extends Serializable> beanModel, Collection<String> properties, boolean excluded) {
 		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
 		BeanContext beanContext = new BeanContext(beanClass, properties, excluded);
 		return beanContext.renderForEdit(componentId, (IModel<Serializable>)beanModel);

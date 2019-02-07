@@ -8,6 +8,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -35,7 +37,8 @@ abstract class ForkOptionPanel extends Panel {
 		project.setForkedFrom(getProject());
 		project.setName(getProject().getName() + "." + SecurityUtils.getUser().getName());
 		
-		BeanEditor editor = BeanContext.editBean("editor", project);
+		BeanEditor editor = BeanContext.editBean("editor", project, 
+				Lists.newArrayList("name", "description", "defaultPrivilege"), false);
 		
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
