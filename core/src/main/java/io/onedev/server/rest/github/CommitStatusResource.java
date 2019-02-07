@@ -15,16 +15,15 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang3.math.NumberUtils;
-import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.ConfigurationManager;
 import io.onedev.server.manager.ProjectManager;
@@ -58,22 +57,18 @@ public class CommitStatusResource {
 		this.configurationManager = configurationManager;
 	}
 	
-	private Project getProject(String projectName) {
-		Project project = projectManager.find(projectName);
-		if (project == null)
-			throw new OneException("Unable to find project: " + projectName);
-		return project;
-	}
-	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("/{projectName}/statuses/{commit}")
     @POST
     public Response save(@PathParam("projectName") String projectName, @PathParam("commit") String commitHash, 
     		Map<String, String> commitStatus, @Context UriInfo uriInfo) {
 
-		Project project = getProject(projectName);
+		Project project = projectManager.find(projectName);
+		if (project == null)
+			return GithubUtils.buildErrorResponse(Status.NOT_FOUND, "Unable to find project: " + projectName);
+		
     	if (!SecurityUtils.canWriteCode(project.getFacade()))
-    		throw new UnauthorizedException();
+    		return GithubUtils.buildErrorResponse(Status.FORBIDDEN, "Code write permission is desired to update commit status");
     	
     	String context = commitStatus.get("context");
     	if (context == null)
@@ -82,7 +77,7 @@ public class CommitStatusResource {
     	Configuration configuration = configurationManager.find(project, context);
     	if (configuration == null) {
     		String message = String.format("Unable to find configuration (project: %s, name: %s)", project.getName(), context);
-    		throw new OneException(message);
+        	return GithubUtils.buildErrorResponse(Status.NOT_FOUND, message);
     	}
     	
     	ObjectId commit = ObjectId.fromString(commitHash);

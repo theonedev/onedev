@@ -64,11 +64,12 @@ public class PullRequestReview extends AbstractEntity {
 		this.request = request;
 	}
 
+	@Nullable
 	public ReviewResult getResult() {
 		return result;
 	}
 
-	public void setResult(ReviewResult result) {
+	public void setResult(@Nullable ReviewResult result) {
 		this.result = result;
 	}
 

@@ -12,8 +12,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.apache.shiro.authz.UnauthorizedException;
+import javax.ws.rs.core.Response.Status;
 
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -37,26 +36,27 @@ public class RepositoryResource {
     @GET
     public Response get(@PathParam("name") String name) {
     	Project project = projectManager.find(name);
+		if (project == null)
+			return GithubUtils.buildErrorResponse(Status.NOT_FOUND, "Unable to find project '" + name + "'");
+			
+		if (!SecurityUtils.canReadCode(project.getFacade()))
+    		return GithubUtils.buildErrorResponse(Status.FORBIDDEN, "Unauthorized access to project '" + name + "'");
     	
-    	if (!SecurityUtils.canReadCode(project.getFacade())) {
-			throw new UnauthorizedException("Unauthorized access to project " + project.getName());
-    	} else {
-    		Map<String, Object> entity = new HashMap<>();
-    		Map<String, String> permissionsMap = new HashMap<>();
-    		entity.put("name", project.getName());
-    		permissionsMap.put("admin", String.valueOf(SecurityUtils.canAdministrate(project.getFacade())));
-    		permissionsMap.put("push", String.valueOf(SecurityUtils.canWriteCode(project.getFacade())));
-    		permissionsMap.put("pull", "true");
-    		entity.put("permissions", permissionsMap);
-    		
-    		Map<String, String> ownerMap = new HashMap<>();
-    		ownerMap.put("login", "projects");
-    		ownerMap.put("id", "1000000");
-    		
-    		entity.put("owner", ownerMap);
-    		
-    		return Response.ok(entity, RestConstants.JSON_UTF8).build();
-    	}
+		Map<String, Object> entity = new HashMap<>();
+		Map<String, String> permissionsMap = new HashMap<>();
+		entity.put("name", project.getName());
+		permissionsMap.put("admin", String.valueOf(SecurityUtils.canAdministrate(project.getFacade())));
+		permissionsMap.put("push", String.valueOf(SecurityUtils.canWriteCode(project.getFacade())));
+		permissionsMap.put("pull", "true");
+		entity.put("permissions", permissionsMap);
+		
+		Map<String, String> ownerMap = new HashMap<>();
+		ownerMap.put("login", "projects");
+		ownerMap.put("id", "1000000");
+		
+		entity.put("owner", ownerMap);
+		
+		return Response.ok(entity, RestConstants.JSON_UTF8).build();
     }
 
 }
