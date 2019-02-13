@@ -1,4 +1,4 @@
-# Self hosted git server with unique features
+# OneDev is a self-hosted git server with thoughtful features
 
 ### Language aware code navigation and search
 
