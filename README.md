@@ -1,4 +1,4 @@
-# Thoughtful git server. Simple to install and maintain.
+# Thoughtful git server. Easy to install and maintain.
 
 ### Language aware code navigation and search
 
