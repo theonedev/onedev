@@ -56,7 +56,7 @@ public abstract class BlobViewPanel extends Panel {
 	
 	protected abstract boolean isEditSupported();
 	
-	protected abstract boolean isBlameSupported();
+	protected abstract boolean isViewPlainSupported();
 	
 	protected WebMarkupContainer newOptions(String id) {
 		WebMarkupContainer options = new WebMarkupContainer(id);
@@ -201,6 +201,34 @@ public abstract class BlobViewPanel extends Panel {
 		
 		add(new ResourceLink<Void>("raw", new RawBlobResourceReference(), 
 				RawBlobResource.paramsOf(context.getProject(), context.getBlobIdent())));
+		add(new CheckBox("viewPlain", Model.of(context.getMode() == Mode.VIEW_PLAIN)) {
+			
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(isViewPlainSupported());
+			}
+
+		}.add(new OnChangeAjaxBehavior() {
+			
+			@Override
+			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+				super.updateAjaxAttributes(attributes);
+				attributes.setMethod(Method.POST);
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener());
+				attributes.getAjaxCallListeners().add(new TrackViewStateListener(true));
+			}
+			
+			@Override
+			protected void onUpdate(AjaxRequestTarget target) {
+				if (context.getMode() == Mode.VIEW)
+					context.onModeChange(target, Mode.VIEW_PLAIN);
+				else
+					context.onModeChange(target, Mode.VIEW);
+			}
+			
+		}));
+
 		add(new CheckBox("blame", Model.of(context.getMode() == Mode.BLAME)) {
 			
 			@Override
@@ -228,7 +256,7 @@ public abstract class BlobViewPanel extends Panel {
 			}
 			
 		}));
-
+		
 		add(newAdditionalActions("extraActions"));
 		newChangeActions(null);
 		

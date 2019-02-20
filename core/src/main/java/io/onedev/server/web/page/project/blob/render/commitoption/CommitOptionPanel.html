@@ -11,18 +11,18 @@
 				</div>
 				<div wicket:id="changes" class="changes"></div>
 			</div>
-			<form wicket:id="form" class="leave-confirm">			
+			<form wicket:id="form">			
 				<div class="form-group">
-					<label>Summary Commit Message</label>
-					<input wicket:id="summaryCommitMessage" class="summary-commit-message form-control"></input>
+					<label>Commit Summary</label>
+					<input wicket:id="commitSummary" class="commit-summary form-control">
 				</div>
 				<div class="form-group">
-					<label>Detail Commit Message</label>
-					<textarea wicket:id="detailCommitMessage" class="detail-commit-message form-control" rows="5"></textarea>
+					<label>Commit Detail</label>
+					<textarea wicket:id="commitDetail" class="commit-detail form-control" rows="5"></textarea>
 				</div>
 				<div class="actions">
-					<input wicket:id="save" type="submit" class="btn btn-primary" value="Commit"></input>
-					<input wicket:id="cancel" type="button" class="btn btn-default" value="Cancel"></input>
+					<input wicket:id="save" type="submit" class="btn btn-primary" value="Commit">
+					<input wicket:id="cancel" type="button" class="btn btn-default" value="Cancel">
 				</div>
 			</form>
 		</div>

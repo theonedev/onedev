@@ -78,9 +78,9 @@ public class CommitOptionPanel extends Panel {
 	
 	private final Provider<byte[]> newContentProvider;
 	
-	private String summaryCommitMessage;
+	private String commitSummary;
 	
-	private String detailCommitMessage;
+	private String commitDetail;
 	
 	private BlobChange change;
 	
@@ -187,7 +187,7 @@ public class CommitOptionPanel extends Panel {
 		Form<?> form = new Form<Void>("form");
 		add(form);
 
-		form.add(new TextField<String>("summaryCommitMessage", new IModel<String>() {
+		form.add(new TextField<String>("commitSummary", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -195,12 +195,12 @@ public class CommitOptionPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return summaryCommitMessage;
+				return commitSummary;
 			}
 
 			@Override
 			public void setObject(String object) {
-				summaryCommitMessage = object;
+				commitSummary = object;
 			}
 			
 		}) {
@@ -213,7 +213,7 @@ public class CommitOptionPanel extends Panel {
 			
 		});
 		
-		form.add(new TextArea<String>("detailCommitMessage", new IModel<String>() {
+		form.add(new TextArea<String>("commitDetail", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -221,12 +221,12 @@ public class CommitOptionPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return detailCommitMessage;
+				return commitDetail;
 			}
 
 			@Override
 			public void setObject(String object) {
-				detailCommitMessage = object;
+				commitDetail = object;
 			}
 			
 		}));
@@ -303,11 +303,11 @@ public class CommitOptionPanel extends Panel {
 			target.add(feedback);
 			return false;
 		} else {
-			String commitMessage = summaryCommitMessage;
+			String commitMessage = commitSummary;
 			if (StringUtils.isBlank(commitMessage))
 				commitMessage = getDefaultCommitMessage();
-			if (StringUtils.isNotBlank(detailCommitMessage))
-				commitMessage += "\n\n" + detailCommitMessage;
+			if (StringUtils.isNotBlank(commitDetail))
+				commitMessage += "\n\n" + commitDetail;
 			User user = Preconditions.checkNotNull(OneDev.getInstance(UserManager.class).getCurrent());
 
 			String refName = GitUtils.branch2ref(context.getBlobIdent().revision);

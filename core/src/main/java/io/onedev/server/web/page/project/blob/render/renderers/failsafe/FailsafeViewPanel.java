@@ -26,7 +26,7 @@ public class FailsafeViewPanel extends BlobViewPanel {
 	}
 
 	@Override
-	protected boolean isBlameSupported() {
+	protected boolean isViewPlainSupported() {
 		return false;
 	}
 

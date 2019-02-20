@@ -59,7 +59,7 @@ public class GitLinkPanel extends BlobViewPanel {
 	}
 
 	@Override
-	protected boolean isBlameSupported() {
+	protected boolean isViewPlainSupported() {
 		return false;
 	}
 

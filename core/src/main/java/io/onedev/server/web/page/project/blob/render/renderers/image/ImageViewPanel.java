@@ -36,7 +36,7 @@ public class ImageViewPanel extends BlobViewPanel {
 	}
 
 	@Override
-	protected boolean isBlameSupported() {
+	protected boolean isViewPlainSupported() {
 		return false;
 	}
 

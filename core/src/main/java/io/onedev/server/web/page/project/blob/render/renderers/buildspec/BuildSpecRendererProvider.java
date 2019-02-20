@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.markdown;
+package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
 import javax.annotation.Nullable;
 
@@ -6,22 +6,23 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.web.PrioritizedComponentRenderer;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.page.project.blob.render.renderers.source.SourceViewPanel;
 
-@SuppressWarnings("serial")
-public class MarkdownRendererProvider implements BlobRendererContribution {
+public class BuildSpecRendererProvider implements BlobRendererContribution {
 
-	private boolean isMarkdown(@Nullable String blobPath) {
-		return blobPath != null && blobPath.endsWith(".md");
+	private static final long serialVersionUID = 1L;
+
+	private boolean isBuildSpec(@Nullable String blobPath) {
+		return "onedev.buildspec".equals(blobPath);
 	}
 	
 	@Override
 	public PrioritizedComponentRenderer getRenderer(BlobRenderContext context) {
-		if (context.getMode() == Mode.ADD && isMarkdown(context.getNewPath()) 
+		if (context.getMode() == Mode.ADD && isBuildSpec(context.getNewPath()) 
 				|| context.getMode() == Mode.EDIT 
-					&& isMarkdown(context.getBlobIdent().path) 
+					&& isBuildSpec(context.getBlobIdent().path) 
 					&& context.getProject().getBlob(context.getBlobIdent()).getText() != null) {
 			return new PrioritizedComponentRenderer() {
 				
@@ -29,7 +30,7 @@ public class MarkdownRendererProvider implements BlobRendererContribution {
 
 				@Override
 				public Component render(String componentId) {
-					return new MarkdownBlobEditPanel(componentId, context);
+					return new BuildSpecEditPanel(componentId, context);
 				}
 				
 				@Override
@@ -37,9 +38,9 @@ public class MarkdownRendererProvider implements BlobRendererContribution {
 					return 0;
 				}
 			};
-		} else if ((context.getMode() == Mode.VIEW || context.getMode() == Mode.BLAME) 
+		} else if ((context.getMode() == Mode.VIEW || context.getMode() == Mode.VIEW_PLAIN || context.getMode() == Mode.BLAME) 
 				&& context.getBlobIdent().isFile() 
-				&& isMarkdown(context.getBlobIdent().path) 
+				&& isBuildSpec(context.getBlobIdent().path) 
 				&& context.getProject().getBlob(context.getBlobIdent()).getText() != null) {
 			return new PrioritizedComponentRenderer() {
 				
@@ -47,10 +48,12 @@ public class MarkdownRendererProvider implements BlobRendererContribution {
 
 				@Override
 				public Component render(String componentId) {
-					if (context.getMark() != null || context.getMode() == Mode.BLAME) 
+					if (context.getMark() != null || context.getMode() == Mode.BLAME)
 						return new SourceViewPanel(componentId, context, false);
+					else if (context.getMode() == Mode.VIEW_PLAIN) 
+						return new SourceViewPanel(componentId, context, true);
 					else
-						return new MarkdownBlobViewPanel(componentId, context);
+						return new BuildSpecViewPanel(componentId, context);
 				}
 				
 				@Override

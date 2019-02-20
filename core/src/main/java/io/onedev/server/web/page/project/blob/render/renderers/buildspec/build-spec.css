@@ -1,0 +1,17 @@
+.build-spec {
+    padding: 20px;
+}
+.build-spec>.invalid>.title {
+    font-size: 20px;
+    color: red;
+    margin-bottom: 20px;
+}
+.build-spec>.invalid>.error-message {
+	white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 13px;
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.build-spec>.empty {
+    font-size: 20px;
+}

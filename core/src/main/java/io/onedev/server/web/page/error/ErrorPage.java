@@ -35,7 +35,6 @@ public class ErrorPage extends BasePage {
 		
 		for (ExpectedExceptionContribution contribution: OneDev.getExtensions(ExpectedExceptionContribution.class)) {
 			for (Class<? extends Exception> expectedExceptionClass: contribution.getExpectedExceptionClasses()) {
-				System.out.println(expectedExceptionClass);
 				Exception expectedException = ExceptionUtils.find(exception, expectedExceptionClass);
 				if (expectedException != null)
 					title = expectedException.getMessage();

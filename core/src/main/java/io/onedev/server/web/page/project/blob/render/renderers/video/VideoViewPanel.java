@@ -40,7 +40,7 @@ public class VideoViewPanel extends BlobViewPanel {
 	}
 
 	@Override
-	protected boolean isBlameSupported() {
+	protected boolean isViewPlainSupported() {
 		return false;
 	}
 

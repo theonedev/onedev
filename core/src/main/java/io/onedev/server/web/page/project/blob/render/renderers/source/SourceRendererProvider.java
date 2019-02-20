@@ -39,7 +39,7 @@ public class SourceRendererProvider implements BlobRendererContribution {
 
 				@Override
 				public Component render(String componentId) {
-					return new SourceViewPanel(componentId, context);
+					return new SourceViewPanel(componentId, context, false);
 				}
 				
 				@Override

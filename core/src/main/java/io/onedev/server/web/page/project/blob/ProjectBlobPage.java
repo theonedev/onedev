@@ -188,9 +188,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			if (!SecurityUtils.canModify(getProject(), state.blobIdent.revision, path))
 				unauthorized();
 		}
-
-		Boolean raw = params.get(PARAM_RAW).toOptionalBoolean();
-		if (raw != null && raw) {
+		
+		if (params.get(PARAM_RAW).toBoolean(false)) {
 			RequestCycle.get().scheduleRequestHandlerAfterCurrent(
 					new ResourceReferenceRequestHandler(new RawBlobResourceReference(), getPageParameters()));
 		}
@@ -415,7 +414,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 				super.onConfigure();
 				
 				Project project = getProject();
-				if ((state.mode == Mode.VIEW || state.mode == Mode.BLAME) 
+				if ((state.mode == Mode.VIEW || state.mode == Mode.VIEW_PLAIN || state.mode == Mode.BLAME) 
 						&& isOnBranch() && state.blobIdent.isTree() 
 						&& SecurityUtils.canWriteCode(project.getFacade())) {
 					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
@@ -956,6 +955,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		
 		public Mode mode = Mode.VIEW;
 		
+		public boolean renderSource;
+		
 		public String query;
 		
 		public String initialNewPath;
@@ -981,7 +982,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		if (mode != Mode.ADD || state.mode != Mode.ADD) {
 			state.mode = mode;
 			pushState(target);
-			if (state.mode == Mode.VIEW || state.mode == Mode.EDIT || state.mode == Mode.ADD) {
+			if (state.mode == Mode.VIEW || state.mode == Mode.VIEW_PLAIN || state.mode == Mode.EDIT || state.mode == Mode.ADD) {
 				newBlobNavigator(target);
 				newBlobOperations(target);
 			}
@@ -1212,5 +1213,5 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 }

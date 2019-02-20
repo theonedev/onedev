@@ -149,8 +149,12 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	
 	private BlameMessageBehavior blameMessageBehavior;
 	
-	public SourceViewPanel(String id, BlobRenderContext context) {
+	private final boolean viewPlainMode;
+	
+	public SourceViewPanel(String id, BlobRenderContext context, boolean viewPlainMode) {
 		super(id, context);
+		
+		this.viewPlainMode = viewPlainMode;
 		
 		Blob blob = context.getProject().getBlob(context.getBlobIdent());
 		
@@ -957,11 +961,6 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	}
 	
 	@Override
-	protected boolean isBlameSupported() {
-		return true;
-	}
-
-	@Override
 	public void mark(AjaxRequestTarget target, TextRange mark) {
 		String script;
 		if (mark != null) {
@@ -1182,6 +1181,11 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 			});
 		} 
 		return menuItems;
+	}
+
+	@Override
+	protected boolean isViewPlainSupported() {
+		return viewPlainMode;
 	}
 	
 }

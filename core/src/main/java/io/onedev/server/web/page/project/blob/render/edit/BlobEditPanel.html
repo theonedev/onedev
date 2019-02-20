@@ -1,7 +1,8 @@
 <wicket:panel>
 	<div class="blob-edit autofit">
 		<div class="head clearfix">
-			<div class="pull-left active tab edit"><a><i class="fa fa-pencil"></i> Edit file</a></div>
+			<div class="pull-left active tab edit"><a><i class="fa fa-pencil"></i> Edit</a></div>
+			<div wicket:id="editPlainTab" class="pull-left tab edit-plain"><a><i class="fa fa-pencil"></i> Edit Source</a></div>
 			<div wicket:id="saveTab" class="pull-left save tab"><a><i class="fa fa-floppy-o"></i> Save</a></div>
 			<div class="pull-left cancel"><a wicket:id="cancelLink" tabindex="-1">Cancel</a></div>
 			<div wicket:id="editOptions" class="options pull-right expanded"></div>
@@ -9,7 +10,9 @@
 		<div class="body">
 			<form wicket:id="content" class="content leave-confirm">
 				<div wicket:id="editor" class="editor"></div>
-				<a wicket:id="submit" class="submit">submit</a>
+                <div wicket:id="plainEditor" class="plain-editor"></div>
+                <input wicket:id="tabSelectionInfo" type="hidden" class="tab-selection-info">
+                <a wicket:id="submit" class="submit">submit</a>
 			</form>
 			<div wicket:id="commitOptions" class="commit-options"></div>
 		</div>

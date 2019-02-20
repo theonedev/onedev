@@ -23,6 +23,7 @@ import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
+import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport;
 import io.onedev.server.web.page.project.blob.render.view.Markable;
 
 @SuppressWarnings("serial")
@@ -37,7 +38,7 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 	}
 
 	@Override
-	protected FormComponentPanel<byte[]> newContentEditor(String componentId, byte[] initialContent) {
+	protected FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
 		sourceFormComponent = new SourceFormComponent(componentId, initialContent);
 		return sourceFormComponent;
 	}
@@ -177,6 +178,11 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 					sourceFormComponent.getMarkupId());
 		}
 		target.appendJavaScript(script);
+	}
+
+	@Override
+	protected PlainEditSupport getPlainEditSupport() {
+		return null;
 	}
 
 }

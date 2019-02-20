@@ -21,7 +21,17 @@ import io.onedev.server.search.code.hit.QueryHit;
 
 public interface BlobRenderContext extends Serializable {
 
-	public enum Mode {VIEW, BLAME, ADD, EDIT, DELETE}
+	public enum Mode {
+		VIEW, 
+		/*
+		 * Some blob can be rendered in a way for easier understanding, such as onedev.buildspec, 
+		 * In these cases, the VIEW_PLAIN mode enables to view plain text of the blob
+		 */
+		VIEW_PLAIN, 
+		BLAME, 
+		ADD, 
+		EDIT, 
+		DELETE}
 	
 	Project getProject();
 	
@@ -59,7 +69,7 @@ public interface BlobRenderContext extends Serializable {
 	String getRootDirectoryUrl();
 	
 	Mode getMode();
-
+	
 	boolean isOnBranch();
 	
 	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos);

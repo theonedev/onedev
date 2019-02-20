@@ -7,10 +7,31 @@ onedev.server.blobEdit = {
 		var $content = $body.children(".content");
 		
 	    $head.find(".edit>a").click(function() {
-	    	onedev.server.blobEdit.selectTab($(this).parent());
+            if (!$(this).parent().hasClass("active")) {
+                if ($head.find(".edit-plain").hasClass("active"))
+                    $content.children(".tab-selection-info").val("edit-plain edit");
+                else
+                    $content.children(".tab-selection-info").val("save edit");
+                $content.children(".submit").click();
+            }
+	    });
+	    $head.find(".edit-plain>a").click(function() {
+            if (!$(this).parent().hasClass("active")) {
+                if ($head.find(".edit").hasClass("active"))
+                    $content.children(".tab-selection-info").val("edit edit-plain");
+                else
+                    $content.children(".tab-selection-info").val("save edit-plain");
+                $content.children(".submit").click();
+            }
 	    });
 	    $head.find(".save>a").click(function() {
-	    	$body.children(".content").children(".submit").click();
+            if (!$(this).parent().hasClass("active")) {
+                if ($head.find(".edit").hasClass("active"))
+                    $content.children(".tab-selection-info").val("edit save");
+                else
+                    $content.children(".tab-selection-info").val("edit-plain save");
+                $content.children(".submit").click();
+            }
 	    });
 	    
 	    if ($body.find(".autofit").length != 0)
@@ -50,21 +71,24 @@ onedev.server.blobEdit = {
     	
 		$body.children().hide();
 
-		if ($tab.hasClass("edit")) {
-			$body.children(".content").show();
-		} else {
-			$body.children(".commit-options").show();
-		}
 		if ($body.find(".autofit:visible").length != 0)
 			$body.css("overflow", "visible");
 		else
 			$body.css("overflow", "auto");
-		
+        
+        var $content = $body.children(".content");
 		if ($tab.hasClass("edit")) {
-			$body.children(".content").show();
+			$content.show();
+			$content.children(".editor").show();
+            $content.children(".plain-editor").hide();
+        } else if ($tab.hasClass("edit-plain")) {
+			$content.show();
+			$content.children(".editor").hide();
+            $content.children(".plain-editor").show();
 		} else {
 			$body.children(".commit-options").show();
-		}
+        }
+        $(window).resize();
 	},
 	onNameChanging: function(containerId, addingFile, recreateCallback) {
 		var $body = $("#" + containerId + ">.blob-edit>.body");

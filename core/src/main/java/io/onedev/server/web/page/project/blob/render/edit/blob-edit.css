@@ -18,7 +18,7 @@
 .blob-edit>.head .edit {
 	margin-left: 12px;
 }
-.blob-edit>.head .save {
+.blob-edit>.head .edit-plain, .blob-edit>.head .save {
 	margin-left: 2px;
 }
 .blob-edit>.head .options {
@@ -43,6 +43,7 @@
 	overflow: auto;
 }
 .blob-edit>.body>.content>.submit, 
+.blob-edit>.body>.content>.plain-editor, 
 .blob-edit>.body>.commit-options, 
 .blob-edit>.body>.dirty-check {
 	display: none;

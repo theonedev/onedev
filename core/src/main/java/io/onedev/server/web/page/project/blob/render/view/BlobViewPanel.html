@@ -17,8 +17,13 @@
 					<a wicket:id="edit"><i class="fa fa-pencil"></i> Edit</a>
 					<a wicket:id="delete"><i class="fa fa-trash"></i> Delete</a>
 					</wicket:container>
-					<a wicket:id="raw"><i class="fa fa-file-o"></i> Raw</a>
+                    <a wicket:id="raw"><i class="fa fa-file-o"></i> Raw</a>
+                    <wicket:enclosure child="viewPlain">
+					<label><input type="checkbox" wicket:id="viewPlain"> View Source</label>
+                    </wicket:enclosure>
+                    <wicket:enclosure child="blame">
 					<label><input type="checkbox" wicket:id="blame"> Blame</label>
+                    </wicket:enclosure>
 					<wicket:container wicket:id="extraActions"></wicket:container>
 				</div>
 			</div>
