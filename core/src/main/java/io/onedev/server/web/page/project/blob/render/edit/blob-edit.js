@@ -4,10 +4,10 @@ onedev.server.blobEdit = {
 		var $blobEdit = $container.children(".blob-edit");
 		var $head = $blobEdit.children(".head");
 		var $body = $blobEdit.children(".body");
-		var $content = $body.children(".content");
 		
 	    $head.find(".edit>a").click(function() {
             if (!$(this).parent().hasClass("active")) {
+        		var $content = $body.children(".content");
                 if ($head.find(".edit-plain").hasClass("active"))
                     $content.children(".tab-selection-info").val("edit-plain edit");
                 else
@@ -17,6 +17,7 @@ onedev.server.blobEdit = {
 	    });
 	    $head.find(".edit-plain>a").click(function() {
             if (!$(this).parent().hasClass("active")) {
+        		var $content = $body.children(".content");
                 if ($head.find(".edit").hasClass("active"))
                     $content.children(".tab-selection-info").val("edit edit-plain");
                 else
@@ -26,6 +27,7 @@ onedev.server.blobEdit = {
 	    });
 	    $head.find(".save>a").click(function() {
             if (!$(this).parent().hasClass("active")) {
+        		var $content = $body.children(".content");
                 if ($head.find(".edit").hasClass("active"))
                     $content.children(".tab-selection-info").val("edit save");
                 else
@@ -38,6 +40,7 @@ onedev.server.blobEdit = {
 	    	$body.css("overflow", "visible");
 	    
 	    $blobEdit.on("getViewState", function(e) {
+        	var $content = $body.children(".content");
 	    	if ($content.is(":visible"))
 	    		return {scroll:{left: $body.scrollLeft(), top: $body.scrollTop()}};			
 	    	else
@@ -45,6 +48,7 @@ onedev.server.blobEdit = {
 		});
 		
 	    $blobEdit.on("setViewState", function(e, viewState) {
+        	var $content = $body.children(".content");
 			if ($content.is(":visible") && viewState.scroll) {
 				$body.scrollLeft(viewState.scroll.left);
 				$body.scrollTop(viewState.scroll.top);
@@ -62,7 +66,7 @@ onedev.server.blobEdit = {
 	},
 	selectTab: function($tab) {
 		onedev.server.viewState.getFromViewAndSetToHistory();
-		
+        
     	var $active = $tab.parent().find(".tab.active");
     	$active.removeClass("active");
     	$tab.addClass("active");
