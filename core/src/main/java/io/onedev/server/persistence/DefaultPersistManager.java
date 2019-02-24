@@ -249,6 +249,13 @@ public class DefaultPersistManager implements PersistManager {
 				}
 			}
 			if (!versionTableExists) {
+				try (ResultSet resultset = conn.getMetaData().getTables(null, null, versionTableName, null)) {
+					if (resultset.next()) {
+						versionTableExists = true;
+					}
+				}
+			}
+			if (!versionTableExists) {
 				return null;
 			} else {
 				try (	Statement stmt = conn.createStatement();
