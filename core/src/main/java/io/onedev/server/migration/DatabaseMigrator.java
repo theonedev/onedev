@@ -756,6 +756,7 @@ public class DatabaseMigrator {
 								configurationElement.addElement("id").setText(String.valueOf(configurationId));
 								configurationElement.addElement("project").setText(project);
 								configurationElement.addElement("name").setText(verification);
+								configurationElement.addElement("buildCleanupRule").addAttribute("class", "io.onedev.server.model.support.configuration.DoNotCleanup");
 							}
 							for (String request: openRequests) {
 								Element requestBuildElement = requestBuildListElement.addElement("io.onedev.server.model.PullRequestBuild");
