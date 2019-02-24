@@ -39,7 +39,7 @@ class BuildSpecEditor extends FormComponentPanel<byte[]> {
 			try {
 				buildSpec = (BuildSpec) VersionedDocument.fromXML(buildSpecString).toBean();
 			} catch (Exception e) {
-				Fragment fragment = new Fragment("buildSpec", "invalidFrag", this);
+				Fragment fragment = new Fragment("content", "invalidFrag", this);
 				fragment.add(new MultilineLabel("errorMessage", Throwables.getStackTraceAsString(e)));
 				add(fragment);
 			}
@@ -47,8 +47,10 @@ class BuildSpecEditor extends FormComponentPanel<byte[]> {
 			buildSpec = new BuildSpec();
 		}
 		
-		if (buildSpec != null)
-			add(beanEditor = BeanContext.editBean("buildSpec", buildSpec));
+		if (buildSpec != null) {
+			Fragment fragment = new Fragment("content", "validFrag", this);
+			fragment.add(beanEditor = BeanContext.editBean("buildSpec", buildSpec));
+		}
 	}
 
 	@Override

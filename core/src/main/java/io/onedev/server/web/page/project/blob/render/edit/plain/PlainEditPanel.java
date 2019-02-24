@@ -10,10 +10,13 @@ import org.apache.wicket.model.Model;
 @SuppressWarnings("serial")
 public class PlainEditPanel extends FormComponentPanel<String> {
 	
+	private final String fileName;
+	
 	private TextArea<String> input;
 	
-	public PlainEditPanel(String id, String initialContent) {
+	public PlainEditPanel(String id, String fileName, String initialContent) {
 		super(id, Model.of(initialContent));
+		this.fileName = fileName;
 	}
 
 	@Override
@@ -32,7 +35,10 @@ public class PlainEditPanel extends FormComponentPanel<String> {
 
 	@Override
 	public void convertInput() {
-		setConvertedInput(input.getConvertedInput());
+		if (input.getConvertedInput() != null)
+			setConvertedInput(input.getConvertedInput());
+		else
+			setConvertedInput("");
 	}
 
 	@Override
@@ -40,7 +46,8 @@ public class PlainEditPanel extends FormComponentPanel<String> {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new PlainEditResourceReference()));
 		
-		String script = String.format("onedev.server.plainEdit.onDomReady('%s');", getMarkupId());
+		String script = String.format("onedev.server.plainEdit.onDomReady('%s', '%s');", 
+				getMarkupId(), fileName);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

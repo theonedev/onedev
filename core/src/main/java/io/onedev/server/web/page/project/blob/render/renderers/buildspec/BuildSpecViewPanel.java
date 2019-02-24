@@ -31,14 +31,16 @@ public class BuildSpecViewPanel extends BlobViewPanel {
 		if (StringUtils.isNotBlank(buildSpecString)) {
 			try {
 				BuildSpec buildSpec = (BuildSpec) VersionedDocument.fromXML(buildSpecString).toBean();
-				add(BeanContext.viewBean("buildSpec", buildSpec));
+				Fragment fragment = new Fragment("content", "validFrag", this);
+				fragment.add(BeanContext.viewBean("buildSpec", buildSpec));
+				add(fragment);
 			} catch (Exception e) {
-				Fragment fragment = new Fragment("buildSpec", "invalidFrag", this);
+				Fragment fragment = new Fragment("content", "invalidFrag", this);
 				fragment.add(new MultilineLabel("errorMessage", Throwables.getStackTraceAsString(e)));
 				add(fragment);
 			}
 		} else {
-			add(new Fragment("buildSpec", "emptyFrag", this));
+			add(new Fragment("content", "emptyFrag", this));
 		}
 	}
 	

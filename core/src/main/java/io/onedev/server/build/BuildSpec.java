@@ -10,6 +10,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 public class BuildSpec implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String BLOB_PATH = "onedev-buildspec.xml";
 
 	private List<JobSpec> jobs = new ArrayList<>();
 

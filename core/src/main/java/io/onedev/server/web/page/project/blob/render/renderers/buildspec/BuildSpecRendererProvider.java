@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
+import io.onedev.server.build.BuildSpec;
 import io.onedev.server.web.PrioritizedComponentRenderer;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
@@ -15,7 +16,7 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 	private static final long serialVersionUID = 1L;
 
 	private boolean isBuildSpec(@Nullable String blobPath) {
-		return "onedev.buildspec".equals(blobPath);
+		return BuildSpec.BLOB_PATH.equals(blobPath);
 	}
 	
 	@Override

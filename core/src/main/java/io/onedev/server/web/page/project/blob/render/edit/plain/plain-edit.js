@@ -1,5 +1,5 @@
 onedev.server.plainEdit = {
-	onDomReady: function(containerId) {
+	onDomReady: function(containerId, fileName) {
 		var $container = $("#" + containerId);
 		var $plainEdit = $container.children(".plain-edit");
 		var $source = $plainEdit.children(".source");
@@ -20,7 +20,7 @@ onedev.server.plainEdit = {
 			highlightIdentifiers: {delay: 500}
 		});
 		
-		onedev.server.codemirror.setMode(cm, "buildspec.xml");
+		onedev.server.codemirror.setMode(cm, fileName);
 		
 		/*
 		 * AreYouSure can not track dirty correctly for CodeMirror generated

@@ -1,5 +1,8 @@
 <wicket:extend>
-    <div wicket:id="buildSpec" class="build-spec"></div>
+    <div wicket:id="content" class="build-spec build-spec-viewer"></div>
+    <wicket:fragment wicket:id="validFrag">
+        <div wicket:id="buildSpec" class="valid"></div>
+    </wicket:fragment>
     <wicket:fragment wicket:id="invalidFrag">
         <div class="invalid">
             <div class="title">Error rendering build spec</div>

@@ -8,6 +8,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 
+import io.onedev.server.build.BuildSpec;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditPanel;
@@ -99,7 +100,7 @@ public class BuildSpecEditPanel extends BlobEditPanel {
 
 			@Override
 			public FormComponentPanel<String> newEditor(String componentId, String initialContent) {
-				return plainEditor = new PlainEditPanel(componentId, initialContent);
+				return plainEditor = new PlainEditPanel(componentId, BuildSpec.BLOB_PATH, initialContent);
 			}
 			
 		};
