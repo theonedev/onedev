@@ -161,16 +161,17 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		String blobName = context.getBlobIdent().getName();
 		SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobName);
 		if (extractor != null) {
-			try {
-				SearchManager searchManager = OneDev.getInstance(SearchManager.class);
-				List<Symbol> cachedSymbols = searchManager.getSymbols(context.getProject(), blob.getBlobId(), 
-						blob.getIdent().path);
-				if (cachedSymbols != null)
-					symbols.addAll(cachedSymbols);
-				else 
+			SearchManager searchManager = OneDev.getInstance(SearchManager.class);
+			List<Symbol> cachedSymbols = searchManager.getSymbols(context.getProject(), blob.getBlobId(), 
+					blob.getIdent().path);
+			if (cachedSymbols != null) {
+				symbols.addAll(cachedSymbols);
+			} else {
+				try {
 					symbols.addAll(extractor.extract(null, StringUtils.removeBOM(blob.getText().getContent())));
-			} catch (Throwable e) {
-				logger.warn("Error extracting symbols from blob: " + context.getBlobIdent(), e);
+				} catch (Throwable e) {
+					logger.trace("Can not extract symbols from blob: " + context.getBlobIdent(), e);
+				}
 			}
 		}
 		

@@ -770,26 +770,16 @@ public class DatabaseMigrator {
 						String submitterClass = submitterElement.attributeValue("class");
 						submitterClass = submitterClass.replace("io.onedev.server.model.support.submitter.", 
 								"io.onedev.server.model.support.usermatcher.");
-						submitterClass = submitterClass.replace("SpecifiedGroup", "SpecifiedTeam");
 						submitterElement.attribute("class").setValue(submitterClass);
-						Element groupNameElement = submitterElement.element("groupName");
-						if (groupNameElement != null)
-							groupNameElement.setName("teamName");
 						
 						Element reviewRequirementSpecElement = branchProtectionElement.element("reviewRequirementSpec");
 						if (reviewRequirementSpecElement != null) {
 							reviewRequirementSpecElement.setName("reviewRequirement");
-							String reviewRequirement = reviewRequirementSpecElement.getText();
-							reviewRequirement = reviewRequirement.replace("group(", "team(");
-							reviewRequirementSpecElement.setText(reviewRequirement);
 						}
 						
 						for (Element fileProtectionElement: branchProtectionElement.element("fileProtections").elements()) {
 							reviewRequirementSpecElement = fileProtectionElement.element("reviewRequirementSpec");
 							reviewRequirementSpecElement.setName("reviewRequirement");
-							String reviewRequirement = reviewRequirementSpecElement.getText();
-							reviewRequirement = reviewRequirement.replace("group(", "team(");
-							reviewRequirementSpecElement.setText(reviewRequirement);
 						}
 					}
 					for (Element tagProtectionElement: element.element("tagProtections").elements()) {
@@ -797,11 +787,7 @@ public class DatabaseMigrator {
 						String submitterClass = submitterElement.attributeValue("class");
 						submitterClass = submitterClass.replace("io.onedev.server.model.support.submitter.", 
 								"io.onedev.server.model.support.usermatcher.");
-						submitterClass = submitterClass.replace("SpecifiedGroup", "SpecifiedTeam");
 						submitterElement.attribute("class").setValue(submitterClass);
-						Element groupNameElement = submitterElement.element("groupName");
-						if (groupNameElement != null)
-							groupNameElement.setName("teamName");
 					}
 				}				
 				dom.writeToFile(file, false);

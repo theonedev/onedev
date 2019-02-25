@@ -263,13 +263,18 @@ public class DefaultIndexManager implements IndexManager {
 				document.add(new TextField(BLOB_TEXT.name(), content, Store.NO));
 				
 				if (extractor != null) {
+					List<Symbol> symbols = null;
 					try {
-						List<Symbol> symbols = extractor.extract(blobName, StringUtils.removeBOM(content));
+						symbols = extractor.extract(blobName, StringUtils.removeBOM(content));
+					} catch (Throwable e) {
+						logger.trace("Can not extract symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
+					}
+					if (symbols != null) {
 						for (Symbol symbol: symbols) {
 							String fieldValue = symbol.getName();
 							if (fieldValue != null && symbol.isSearchable()) {
 								fieldValue = fieldValue.toLowerCase();
-
+	
 								String fieldName;
 								if (symbol.isPrimary())
 									fieldName = BLOB_PRIMARY_SYMBOLS.name();
@@ -280,8 +285,6 @@ public class DefaultIndexManager implements IndexManager {
 						}
 						byte[] bytesOfSymbols = SerializationUtils.serialize((Serializable) symbols);
 						document.add(new StoredField(BLOB_SYMBOL_LIST.name(), bytesOfSymbols));
-					} catch (Throwable e) {
-						logger.warn("Error extracting symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}
 				} 
 			} else {

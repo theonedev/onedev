@@ -123,6 +123,19 @@ public class UpgradeCommand extends DefaultPersistManager {
 			logger.error("Please stop server running at \"{}\" before upgrading", Bootstrap.installDir.getAbsolutePath());
 			System.exit(1);
 		}
+
+		for (File file: new File(upgradeDir, "lib").listFiles()) {
+			if (file.getName().contains("mariadb") || file.getName().contains("mysql") 
+					|| file.getName().contains("ojdbc") || file.getName().contains("postgresql") 
+					|| file.getName().contains("sqljdbc")) {
+				try {
+					FileUtils.moveFileToDirectory(file, new File(upgradeDir, "site/lib"), true);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+		cleanAndCopy(new File(upgradeDir, "site/lib"), new File(Bootstrap.installDir, "site/lib"));
 		
 		AtomicReference<String> oldDataVersion = new AtomicReference<>(null);
 		int ret = buildCommandline(upgradeDir, "check_data_version").execute(new LineConsumer() {
