@@ -41,6 +41,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.IssueSetting;
+import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
@@ -223,7 +224,9 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		if (getColumn() != null) {
 			title = HtmlEscape.escapeHtml5(getColumn());
 			if (identifyField.equals(IssueConstants.FIELD_STATE)) {
-				color = getIssueSetting().getStateSpec(getColumn()).getColor();
+				StateSpec stateSpec = getIssueSetting().getStateSpec(getColumn());
+				if (stateSpec != null)
+					color = stateSpec.getColor();
 			} else {
 				InputSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
 				if (fieldSpec instanceof ChoiceInput) {

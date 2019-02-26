@@ -218,7 +218,7 @@ public class GlobalIssueSetting implements Serializable {
 		BoardSpec board = new BoardSpec();
 		board.setName(IssueConstants.FIELD_STATE);
 		board.setIdentifyField(IssueConstants.FIELD_STATE);
-		board.setColumns(Lists.newArrayList("Open", "Assigned", "Closed"));
+		board.setColumns(Lists.newArrayList("Open", "Closed"));
 		board.setDisplayFields(Lists.newArrayList(IssueConstants.FIELD_STATE, "Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
 		defaultBoardSpecs.add(board);
 		
