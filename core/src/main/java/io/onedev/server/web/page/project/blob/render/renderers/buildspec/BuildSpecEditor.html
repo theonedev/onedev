@@ -1,7 +1,20 @@
 <wicket:panel>
     <div wicket:id="content" class="build-spec build-spec-editor"></div>
     <wicket:fragment wicket:id="validFrag">
-        <div wicket:id="buildSpec" class="valid"></div>
+        <div class="valid">
+            <div class="jobs specs">
+                <div class="head">
+                    Jobs
+                </div>
+                <div class="body">
+                    <div wicket:id="jobs" class="job">
+                        <div wicket:id="editor"></div>
+                        <a wicket:id="delete" class="delete"><i class="fa fa-trash"></i> Delete</a>
+                    </div>
+                    <a wicket:id="addJob" class="add"><i class="fa fa-plus"></i> Add</a>
+                </div>
+            </div>
+        </div>
     </wicket:fragment>
     <wicket:fragment wicket:id="invalidFrag">
         <div class="invalid">

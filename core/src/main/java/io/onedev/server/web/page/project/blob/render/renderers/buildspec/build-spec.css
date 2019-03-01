@@ -15,3 +15,23 @@
 .build-spec>.empty {
     font-size: 20px;
 }
+
+.build-spec>.valid>div {
+    border: 1px solid #DDD;
+    border-radius: 4px;
+}
+.build-spec>.valid>div>.head {
+    border-bottom: 1px solid #DDD;
+    padding: 8px 12px;
+    font-weight: bold;
+    font-size: 15px;
+}
+.build-spec>.valid>div>.body {
+    padding: 20px;
+}
+.build-spec>.valid>div>.body>div {
+    border: 1px solid #DDD;
+    margin-bottom: 20px;
+    padding: 20px;
+    border-radius: 4px;
+}

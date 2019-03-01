@@ -35,8 +35,8 @@ onedev.server.blobEdit = {
                 $content.children(".submit").click();
             }
 	    });
-	    
-	    if ($body.find(".autofit").length != 0)
+
+	    if ($body.find(".autofit:visible").length != 0)
 	    	$body.css("overflow", "visible");
 	    
 	    $blobEdit.on("getViewState", function(e) {
@@ -92,6 +92,7 @@ onedev.server.blobEdit = {
 		} else {
 			$body.children(".commit-options").show();
         }
+
         $(window).resize();
 	},
 	onNameChanging: function(containerId, addingFile, recreateCallback) {
