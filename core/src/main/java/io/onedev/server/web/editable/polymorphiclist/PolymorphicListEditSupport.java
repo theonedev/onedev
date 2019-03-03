@@ -54,4 +54,9 @@ public class PolymorphicListEditSupport implements EditSupport {
 		return null;
 	}
 
+	@Override
+	public int getPriority() {
+		return DEFAULT_PRIORITY;
+	}
+	
 }

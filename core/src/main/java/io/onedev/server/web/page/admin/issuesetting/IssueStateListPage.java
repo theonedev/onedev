@@ -162,6 +162,20 @@ public class IssueStateListPage extends GlobalIssueSettingPage {
 			
 		});		
 		
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
+				cellItem.add(new Label(componentId, "<a title='Click the row for more info'><i class='fa fa-ellipsis-h'></i></a>").setEscapeModelStrings(false));
+			}
+
+			@Override
+			public String getCssClass() {
+				return "ellipsis";
+			}
+			
+		});		
+		
 		IDataProvider<StateSpec> dataProvider = new ListDataProvider<StateSpec>() {
 
 			@Override

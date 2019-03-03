@@ -8,8 +8,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Horizontal;
 
 @Editable
+@Horizontal
 public class JobSpec implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -21,7 +23,7 @@ public class JobSpec implements Serializable {
 	private List<InputSpec> params = new ArrayList<>();
 	
 	private List<StepSpec> steps = new ArrayList<>();
-
+	
 	@Editable(order=100)
 	@NotEmpty
 	public String getName() {

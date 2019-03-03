@@ -139,17 +139,11 @@ form>.test-feedback {
 }
 
 /* Editor and Viewer */
-.editable table.list {
-	margin-bottom: 0;
-}
-.editable table.list>tfoot>tr.add-element>td {
-	padding: 12px 0;
-}
 
-.editable>.bean>table {
+.editable>.bean-properties>table {
 	width: 100%;
 }
-.editable>.bean>table>tbody>tr>td {
+.editable>.bean-properties>table>tbody>tr>td {
 	vertical-align: top;
 	padding: 0 8px 16px 0;
 }
@@ -159,100 +153,73 @@ form>.test-feedback {
 	margin-bottom: 0;
 }
  
-.editable>.bean>table>tbody>tr>td.name {
-	font-size: 12px;
-	line-height: 22px;
+.editable>.bean-properties>table>tbody>tr>td.name {
 	font-weight: bold;
 	border-right: 1px solid #E0E0E0;
 	text-align: right; 
 	white-space: nowrap; 
-	width: 20%;
+    width: 20%;
+    font-size: 12px;
+    line-height: 20px;
 }
-.editable>.bean>table>tbody>tr>td.value {
+.editable>.bean-properties>table>tbody>tr>td.value {
 	padding-left: 8px;
 }
 
-.editable>table.polymorphic.vertical.list>tbody>tr>td>.type-selector {
-	margin-bottom: 8px;
+.property-editor>.polymorphic-list>table>tbody>tr>td {
+    border-top: 2px solid #BBB;
+    padding-top: 20px;
 }
-.editable>.polymorphic.vertical>div.type-selector {
-	margin-bottom: 8px;
+.property-editor>.polymorphic-list>table>tbody>tr>td>.head {
+	margin-bottom: 20px;
 }
-
-.editable>.polymorphic.horizontal>table {
-	width: 100%;
+.property-editor>.polymorphic-list>table>tbody>tr>td>.head>.actions {
+    font-size: 18px;
+    margin-left: 20px;
 }
-.editable>.polymorphic.horizontal>table>tbody>tr>td {
-	vertical-align: top;
+.property-editor>.polymorphic-list>table>tbody>tr>td>.head>.actions a {
+    color: #666;
 }
-.editable>.polymorphic.horizontal>table>tbody>tr>td:first-child {
-	padding-right: 8px;
+.property-viewer>.polymorphic-list>tbody>tr>td {
+    border-top: 2px solid #BBB;
+    padding-top: 12px;
+    padding-bottom: 12px;
 }
-
-.editor>table.list .help-block {
-	display: none;
-}
-
-.editor>table.list>tbody>tr>td.actions {
-	text-align: right;
-	white-space: nowrap;
-}
-.editor>table.list>tbody>tr>td.actions .fa {
-	vertical-align: center;
-	font-size: 16px;
-	color: #444;
+.property-viewer>.polymorphic-list>tbody>tr>td>.type-selector {
+    margin-bottom: 12px;
 }
 
-.editor>input.enable {
+.editable>.polymorphic>.type-selector {
+	margin-bottom: 15px;
+}
+
+.bean-editor>input.enable {
 	margin-bottom: 12px;
 }
 
-.editor .password-confirm {
+.bean-editor .password-confirm {
 	margin-top: 12px;
 }
 
-.property.editor>.bean.editor {
+.property.editor>.bean-editor {
 	border-top: 1px dotted #BBB;
 	margin-top: 4px;
 	padding-top: 12px;
 	margin-bottom: 12px;
 }
-.viewer .bean>table>tbody>tr.name-omitted>td {
+.bean-viewer .bean-properties>table>tbody>tr.name-omitted>td {
 	padding-left: 0;
 }
-.viewer .type-selector, .viewer .no-elements, .editor .no-elements {
+.bean-viewer .type-selector {
 	font-style: italic;
 } 
-.editable .bean.list>thead>tr>th {
-	border-bottom: 2px solid #E0E0E0;
-}
-.editable .viewer .bean.list>thead>tr>th {
-	font-size: 12px;
-	padding-top: 0;
-	line-height: 22px;
-	white-space: nowrap;
-}
-.editable table.bean.list>thead>tr>th, .editable table.bean.list>tbody>tr>td {
-	padding: 5px 10px 5px 0;
-}
-.editable table.bean.list>tbody>tr:first-child>td {
-	padding-top: 10px;
-}
-.editable table.bean.list>thead>tr>th.actions, .editable table.bean.list>tbody>tr>td.actions {
-	padding-right: 0;
-	padding-left: 10px;
-	width: 1%;
-}
-.editable .editor table.bean.list tr:hover td {
-	background: #F9F9F9;
-}
-.editable .editor table.bean.list tr.add-element:hover td {
-	background: none;
-}
 
+.bean-editor .bean-list>table>tbody>tr>td {
+    border-top: none;
+} 
 
 /* Select2 */
-.editor .select2-container {
+.bean-editor .select2-container {
 	width: 100%;
 }
 .input-group .select2-container.form-control .select2-choice, 
@@ -684,4 +651,12 @@ a.disabled, a[disabled="disabled"] {
 
 .floating.side.def-detail .actions {
 	margin-bottom: 12px;
+}
+
+td.no-elements {
+    font-style: italic;
+}
+
+td.ellipsis {
+    font-size: 16px;
 }

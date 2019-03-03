@@ -17,21 +17,29 @@
 }
 
 .build-spec>.valid>div {
-    border: 1px solid #DDD;
     border-radius: 4px;
 }
 .build-spec>.valid>div>.head {
-    border-bottom: 1px solid #DDD;
-    padding: 8px 12px;
     font-weight: bold;
-    font-size: 15px;
-}
-.build-spec>.valid>div>.body {
-    padding: 20px;
+    font-size: 18px;
+    margin-bottom: 20px;
 }
 .build-spec>.valid>div>.body>div {
-    border: 1px solid #DDD;
     margin-bottom: 20px;
-    padding: 20px;
     border-radius: 4px;
+    border: 2px solid #BBB;
+    padding: 20px;
 }
+.build-spec>.valid .bean-properties>table>tbody>tr>td.name {
+    width: 200px;
+}
+.build-spec>.valid .bean-properties>table>tbody>tr>td.value .form-control {
+    height: 32px;
+    font-size: 13px;
+}
+.build-spec>.valid .def-list table>tbody>tr>td:first-child>div>a {
+    margin-left: 0;
+}
+.floating.job-param>.content>.body>.bean-viewer>.bean-properties>table>tbody>tr>td.name {
+	min-width: 150px;
+} 

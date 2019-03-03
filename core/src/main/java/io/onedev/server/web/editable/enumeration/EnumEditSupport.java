@@ -46,4 +46,9 @@ public class EnumEditSupport implements EditSupport {
         }
 	}
 
+	@Override
+	public int getPriority() {
+		return DEFAULT_PRIORITY;
+	}
+	
 }

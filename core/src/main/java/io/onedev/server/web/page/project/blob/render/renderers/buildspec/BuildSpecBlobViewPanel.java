@@ -4,10 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.RepeatingView;
 
 import com.google.common.base.Throwables;
 
 import io.onedev.server.build.BuildSpec;
+import io.onedev.server.build.JobSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.web.component.MultilineLabel;
@@ -16,9 +18,9 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 
 @SuppressWarnings("serial")
-public class BuildSpecViewPanel extends BlobViewPanel {
+public class BuildSpecBlobViewPanel extends BlobViewPanel {
 
-	public BuildSpecViewPanel(String id, BlobRenderContext context) {
+	public BuildSpecBlobViewPanel(String id, BlobRenderContext context) {
 		super(id, context);
 	}
 
@@ -32,7 +34,11 @@ public class BuildSpecViewPanel extends BlobViewPanel {
 			try {
 				BuildSpec buildSpec = (BuildSpec) VersionedDocument.fromXML(buildSpecString).toBean();
 				Fragment fragment = new Fragment("content", "validFrag", this);
-				fragment.add(BeanContext.viewBean("buildSpec", buildSpec));
+				RepeatingView jobsView = new RepeatingView("jobs");
+				for (JobSpec job: buildSpec.getJobs()) {
+					jobsView.add(BeanContext.viewBean(jobsView.newChildId(), job));
+				}
+				fragment.add(jobsView);
 				add(fragment);
 			} catch (Exception e) {
 				Fragment fragment = new Fragment("content", "invalidFrag", this);

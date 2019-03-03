@@ -1,7 +1,6 @@
 package io.onedev.server.web.editable.polymorphic;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +12,6 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -31,9 +29,7 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.editable.annotation.Vertical;
 
 @SuppressWarnings("serial")
 public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
@@ -42,10 +38,6 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	
 	private final List<Class<?>> implementations = new ArrayList<>();
 
-	private final boolean vertical;
-	
-	private Fragment fragment;
-	
 	public PolymorphicPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Serializable> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 		
@@ -58,14 +50,6 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 				"Can not find implementations for '" + baseClass + "'.");
 		
 		EditableUtils.sortAnnotatedElements(implementations);
-		
-		Method propertyGetter = propertyDescriptor.getPropertyGetter();
-		if (propertyGetter.getAnnotation(Vertical.class) != null)
-			vertical = true;
-		else if (propertyGetter.getAnnotation(Horizontal.class) != null)
-			vertical = false;
-		else 
-			vertical = true;
 	}
 
 	private String getDisplayName(Class<?> clazz) {
@@ -78,16 +62,6 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (vertical) {
-			fragment = new Fragment("content", "verticalFrag", this);
-			fragment.add(AttributeAppender.append("class", " vertical"));
-		} else {
-			fragment = new Fragment("content", "horizontalFrag", this);
-			fragment.add(AttributeAppender.append("class", " horizontal"));
-		}
-		
-		add(fragment);
-		
 		List<String> implementationNames = new ArrayList<String>();
 		for (Class<?> each: implementations)
 			implementationNames.add(getDisplayName(each));
@@ -105,7 +79,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			
 		}));
 		
-		fragment.add(typeSelectorContainer);
+		add(typeSelectorContainer);
 		
 		DropDownChoice<String> typeSelector = new DropDownChoice<String>("typeSelector", new IModel<String>() {
 			
@@ -115,7 +89,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 			@Override
 			public String getObject() {
-				Component beanEditor = fragment.get(BEAN_EDITOR_ID);
+				Component beanEditor = PolymorphicPropertyEditor.this.get(BEAN_EDITOR_ID);
 				if (beanEditor instanceof BeanEditor) {
 					return EditableUtils.getDisplayName(((BeanEditor) beanEditor).getBeanDescriptor().getBeanClass());
 				} else {
@@ -136,7 +110,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 						break;
 					}
 				}
-				fragment.replace(newBeanEditor(propertyValue));
+				PolymorphicPropertyEditor.this.replace(newBeanEditor(propertyValue));
 			}
 			
 		}, implementationNames) {
@@ -161,13 +135,13 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				onPropertyUpdating(target);
-				target.add(fragment.get(BEAN_EDITOR_ID));
+				target.add(get(BEAN_EDITOR_ID));
 			}
 			
 		});
 		typeSelectorContainer.add(typeSelector);
 		
-		fragment.add(newBeanEditor(getModelObject()));
+		add(newBeanEditor(getModelObject()));
 	}
 	
 	@Override
@@ -199,12 +173,12 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 	@Override
 	public ErrorContext getErrorContext(PathSegment pathSegment) {
-		return ((ErrorContext) fragment.get(BEAN_EDITOR_ID)).getErrorContext(pathSegment);
+		return ((ErrorContext) get(BEAN_EDITOR_ID)).getErrorContext(pathSegment);
 	}
 
 	@Override
 	protected Serializable convertInputToValue() throws ConversionException {
-		Component beanEditor = fragment.get(BEAN_EDITOR_ID);
+		Component beanEditor = get(BEAN_EDITOR_ID);
 		if (beanEditor instanceof BeanEditor) 
 			return ((BeanEditor) beanEditor).getConvertedInput();
 		else 

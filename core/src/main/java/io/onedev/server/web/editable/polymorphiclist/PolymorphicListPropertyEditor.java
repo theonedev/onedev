@@ -3,7 +3,6 @@ package io.onedev.server.web.editable.polymorphiclist;
 import static de.agilecoders.wicket.jquery.JQuery.$;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -17,10 +16,8 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.ConversionException;
@@ -39,8 +36,6 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.Vertical;
 import io.onedev.utils.ClassUtils;
 
 @SuppressWarnings("serial")
@@ -50,7 +45,9 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	
 	private final List<Class<?>> implementations;
 	
-	private final boolean horizontal;
+	private RepeatingView rows;
+	
+	private WebMarkupContainer noElements;
 	
 	public PolymorphicListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
@@ -67,14 +64,6 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				"Can not find implementations for '" + baseClass + "'.");
 		
 		EditableUtils.sortAnnotatedElements(implementations);
-
-		Method propertyGetter = propertyDescriptor.getPropertyGetter();
-		if (propertyGetter.getAnnotation(Horizontal.class) != null)
-			horizontal = true;
-		else if (propertyGetter.getAnnotation(Vertical.class) != null)
-			horizontal = false;
-		else 
-			horizontal = true;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -101,56 +90,17 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		super.onInitialize();
 
 		List<Serializable> list = getModelObject();
-		if (list == null && getDescriptor().isPropertyRequired())
+		if (list == null)
 			list = newList(); 
-		add(newListEditor(list));
-	}
-
-	@Override
-	protected String getErrorClass() {
-		return null;
-	}
-
-	private Component newListEditor(List<Serializable> list) {
-		final WebMarkupContainer table = new WebMarkupContainer("listEditor");
-		if (horizontal)
-			table.add(AttributeAppender.append("class", " horizontal"));
-		else
-			table.add(AttributeAppender.append("class", " vertical"));
-
-		table.setOutputMarkupId(true);
-		table.setOutputMarkupPlaceholderTag(true);
-
-		final RepeatingView rows = new RepeatingView("elements");
-		table.add(rows);
 		
-		if (list != null) {
-			for (Serializable element: list) {
-				addRow(rows, element);
-			}
-		} else {
-			table.setVisible(false);
+		rows = new RepeatingView("elements");
+		add(rows);
+		
+		for (Serializable element: list) {
+			addRow(element);
 		}
 		
-		final WebMarkupContainer noElements = new WebMarkupContainer("noElements") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(rows.size() == 0);
-			}
-			
-		};
-		noElements.setOutputMarkupPlaceholderTag(true);
-		table.add(noElements);
-		
-		table.add(new AjaxButton("addElement") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(new Label("label", "Add " + EditableUtils.getDisplayName(baseClass)));
-			}
+		add(new AjaxButton("addElement") {
 
 			@SuppressWarnings("deprecation")
 			@Override
@@ -169,26 +119,35 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				} catch (InstantiationException | IllegalAccessException e) {
 					throw new RuntimeException(e);
 				}
-				Component newRow = addRow(rows, newElement);
+				Component newRow = addRow(newElement);
 				
 				String script = String.format("$('<tr id=\"%s\"></tr>')", newRow.getMarkupId());
 				if (lastRow != null)
 					script += ".insertAfter('#" + lastRow.getMarkupId() + "');";
 				else
-					script += ".appendTo('#" + table.getMarkupId() + ">tbody');";
+					script += ".appendTo('#" + PolymorphicListPropertyEditor.this.getMarkupId() + ">div>table>tbody');";
 
 				target.prependJavaScript(script);
 				target.add(newRow);
-				
-				if (rows.size() == 1)
-					target.add(noElements);
+				target.add(noElements);
 				
 				onPropertyUpdating(target);
 			}
 			
 		}.setDefaultFormProcessing(false));
 		
-		table.add(new SortBehavior() {
+		add(noElements = new WebMarkupContainer("noElements") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(rows.size() == 0);
+			}
+			
+		});
+		noElements.setOutputMarkupPlaceholderTag(true);
+		
+		add(new SortBehavior() {
 
 			@SuppressWarnings("deprecation")
 			@Override
@@ -208,8 +167,8 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 
 				// Do not use code above as removing components outside of a container and add again 
 				// can cause the fenced feedback panel not functioning properly
-				int fromIndex = from.getItemIndex() - 1;
-				int toIndex = to.getItemIndex() - 1;
+				int fromIndex = from.getItemIndex();
+				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
 						rows.swap(fromIndex+i, fromIndex+i+1);
@@ -220,18 +179,19 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				onPropertyUpdating(target);
 			}
 			
-		}.sortable("tbody").handle(".handle").helperClass("sort-helper"));
-
-		return table;		
+		}.sortable("tbody"));		
+		
+		setOutputMarkupId(true);
 	}
 
-	private WebMarkupContainer addRow(final RepeatingView rows, Serializable element) {
-		final Fragment row;
-		if (horizontal)
-			row = new Fragment(rows.newChildId(), "horizontalFrag", this);
-		else 
-			row = new Fragment(rows.newChildId(), "verticalFrag", this);
-		
+	@Override
+	protected String getErrorClass() {
+		return null;
+	}
+
+	private WebMarkupContainer addRow(Serializable element) {
+		WebMarkupContainer row = new WebMarkupContainer(rows.newChildId());
+		row.setOutputMarkupId(true);
 		rows.add(row);
 		
 		List<String> implementationNames = new ArrayList<String>();
@@ -301,11 +261,8 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				target.appendJavaScript(String.format("onedev.server.form.markDirty($('#%s'));", form.getMarkupId(true)));
 				target.appendJavaScript($(row).chain("remove").get());
 				rows.remove(row);
+				target.add(noElements);
 
-				if (rows.size() == 0) {
-					WebMarkupContainer table = (WebMarkupContainer) PolymorphicListPropertyEditor.this.get("listEditor");
-					target.add(table.get("noElements"));
-				}
 				onPropertyUpdating(target);
 			}
 
@@ -340,8 +297,6 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	public ErrorContext getErrorContext(PathSegment pathSegment) {
 		int index = ((PathSegment.Element) pathSegment).getIndex();
 
-		RepeatingView rows = (RepeatingView) get("listEditor").get("elements");
-		
 		int currentIndex = 0;
 		Iterator<Component> it = rows.iterator();
 		Component row = it.next();
@@ -355,7 +310,6 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	@Override
 	protected List<Serializable> convertInputToValue() throws ConversionException {
 		List<Serializable> newList = newList();
-		RepeatingView rows = (RepeatingView) get("listEditor").get("elements");
 		for (Component row: rows) {
 			BeanEditor elementEditor = (BeanEditor) row.get("elementEditor");
 			newList.add(elementEditor.getConvertedInput());

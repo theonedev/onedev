@@ -1,4 +1,4 @@
-.floating.field-spec>.content>.body>div>.bean.viewer>.properties>table>tbody>tr>td.name {
+.floating.field-spec>.content>.body>div>.bean-viewer>.bean-properties>table>tbody>tr>td.name {
 	min-width: 150px;
 } 
 

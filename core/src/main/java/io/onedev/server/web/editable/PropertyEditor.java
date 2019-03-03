@@ -60,7 +60,7 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 
 			@Override
 			protected String load() {
-				String classes = " property editor editable ";
+				String classes = " property-editor editable ";
 				if (hasErrors(true) && getErrorClass() != null)
 					classes += getErrorClass();
 				return classes;

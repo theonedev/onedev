@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -44,6 +43,10 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	private final List<PropertyContext<Serializable>> propertyContexts;
 	
 	private final Class<?> elementClass;
+	
+	private RepeatingView rows;
+	
+	private WebMarkupContainer noElements;
 	
 	public BeanListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
@@ -84,32 +87,10 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		super.onInitialize();
 		
 		List<Serializable> list = getModelObject();
-		if (list == null && getDescriptor().isPropertyRequired())
+		if (list == null)
 			list = newList(); 
-		add(newListEditor(list));
-	}
-
-	@Override
-	protected String getErrorClass() {
-		return null;
-	}
-
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
 		
-		if (event.getPayload() instanceof PropertyUpdating) {
-			event.stop();
-			onPropertyUpdating(((PropertyUpdating)event.getPayload()).getHandler());
-		}		
-	}
-	
-	private Component newListEditor(List<Serializable> list) {
-		WebMarkupContainer listEditor = new WebMarkupContainer("listEditor");
-
-		listEditor.setOutputMarkupPlaceholderTag(true);
-		
-		listEditor.add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
+		add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
 
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
@@ -136,26 +117,14 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 			
 		});
 		
-		RepeatingView rows = new RepeatingView("elements");
-		listEditor.add(rows);
+		rows = new RepeatingView("elements");
+		add(rows);
 		
-		if (list != null) {
-			for (Serializable element: list) {
-				addRow(rows, element);
-			}
-		} else {
-			listEditor.setVisible(false);
+		for (Serializable element: list) {
+			addRow(element);
 		}
 		
-		WebMarkupContainer newRow = new WebMarkupContainer("newRow");
-		newRow.add(AttributeModifier.append("colspan", propertyContexts.size() + 1));
-		newRow.add(new AjaxButton("addElement") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(new Label("label", "Add " + EditableUtils.getDisplayName(elementClass)));
-			}
+		add(new AjaxButton("addElement") {
 
 			@SuppressWarnings("deprecation")
 			@Override
@@ -168,24 +137,40 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				else 
 					lastRow = null;
 				
-				Component newRow = addRow(rows, newElement());
+				Component newRow = addRow(newElement());
 				String script = String.format("$('<tr id=\"%s\"></tr>')", newRow.getMarkupId());
 				if (lastRow != null)
 					script += ".insertAfter('#" + lastRow.getMarkupId() + "');";
 				else
-					script += ".appendTo('#" + listEditor.getMarkupId() + ">tbody');";
+					script += ".appendTo('#" + BeanListPropertyEditor.this.getMarkupId() + ">div>table>tbody');";
 
 				target.prependJavaScript(script);
 				target.add(newRow);
-				
+				target.add(noElements);
+
 				onPropertyUpdating(target);
 			}
 
 		}.setDefaultFormProcessing(false));
 		
-		listEditor.add(newRow);
+		add(noElements = new WebMarkupContainer("noElements") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				add(new WebMarkupContainer("td").add(AttributeAppender.append("colspan", propertyContexts.size())));
+				setOutputMarkupPlaceholderTag(true);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(rows.size() == 0);
+			}
+			
+		});
 		
-		listEditor.add(new SortBehavior() {
+		add(new SortBehavior() {
 
 			@SuppressWarnings("deprecation")
 			@Override
@@ -217,12 +202,27 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				onPropertyUpdating(target);
 			}
 			
-		}.sortable("tbody"));
-
-		return listEditor;		
+		}.sortable("tbody"));	
+		
+		setOutputMarkupId(true);
 	}
 
-	private WebMarkupContainer addRow(RepeatingView rows, Serializable element) {
+	@Override
+	protected String getErrorClass() {
+		return null;
+	}
+
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		
+		if (event.getPayload() instanceof PropertyUpdating) {
+			event.stop();
+			onPropertyUpdating(((PropertyUpdating)event.getPayload()).getHandler());
+		}		
+	}
+	
+	private WebMarkupContainer addRow(Serializable element) {
 		WebMarkupContainer row = new WebMarkupContainer(rows.newChildId());
 		row.setOutputMarkupId(true);
 		rows.add(row);
@@ -256,6 +256,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 				target.appendJavaScript($(row).chain("remove").get());
 				target.appendJavaScript(String.format("onedev.server.form.markDirty($('#%s'));", form.getMarkupId(true)));
 				rows.remove(row);
+				target.add(noElements);
 				onPropertyUpdating(target);
 			}
 
@@ -266,9 +267,6 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	
 	@SuppressWarnings("unchecked")
 	private List<PropertyEditor<Serializable>> getPropertyEditorsAtRow(int index) {
-		WebMarkupContainer table = (WebMarkupContainer) get("listEditor");
-		RepeatingView rows = (RepeatingView) table.get("elements");
-
 		int currentIndex = 0;
 		Iterator<Component> it = rows.iterator();
 		Component row = it.next();
@@ -332,7 +330,6 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	protected List<Serializable> convertInputToValue() throws ConversionException {
 		List<Serializable> newList = newList();
 		
-		RepeatingView rows = (RepeatingView) get("listEditor").get("elements");
 		for (Component row: rows) {
 			Serializable element = newElement();
 			newList.add(element);

@@ -7,6 +7,10 @@ import io.onedev.launcher.loader.ExtensionPoint;
 @ExtensionPoint
 public interface EditSupport extends Serializable {
 	
+	int DEFAULT_PRIORITY = 100;
+	
 	PropertyContext<?> getEditContext(PropertyDescriptor descriptor);
+	
+	int getPriority();
 	
 }

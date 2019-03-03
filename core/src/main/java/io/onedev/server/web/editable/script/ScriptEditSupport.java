@@ -51,4 +51,9 @@ public class ScriptEditSupport implements EditSupport {
 		}
 	}
 
+	@Override
+	public int getPriority() {
+		return DEFAULT_PRIORITY;
+	}
+	
 }

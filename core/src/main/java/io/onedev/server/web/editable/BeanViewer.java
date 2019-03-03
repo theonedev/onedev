@@ -75,7 +75,7 @@ public class BeanViewer extends Panel implements EditContext {
 
 		});
 		
-		add(AttributeAppender.append("class", "bean viewer editable"));
+		add(AttributeAppender.append("class", "bean-viewer editable"));
 	}
 
 	@Override

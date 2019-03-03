@@ -1,109 +1,121 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
+import static de.agilecoders.wicket.jquery.JQuery.$;
+
+import java.io.Serializable;
+import java.nio.charset.Charset;
+
 import org.apache.wicket.Component;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.attributes.IAjaxCallListener;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.RepeatingView;
+import org.apache.wicket.model.Model;
+
+import com.google.common.base.Charsets;
+import com.google.common.base.Throwables;
 
 import io.onedev.server.build.BuildSpec;
+import io.onedev.server.build.JobSpec;
+import io.onedev.server.migration.VersionedDocument;
+import io.onedev.server.util.ContentDetector;
+import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
-import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditPanel;
-import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport;
+import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
-public class BuildSpecEditPanel extends BlobEditPanel {
+class BuildSpecEditPanel extends FormComponentPanel<byte[]> {
 
-	private PlainEditPanel plainEditor;
+	private RepeatingView jobsView;
 	
-	public BuildSpecEditPanel(String id, BlobRenderContext context) {
-		super(id, context);
+	private Serializable parseResult;
+	
+	public BuildSpecEditPanel(String id, BlobRenderContext context, byte[] initialContent) {
+		super(id, Model.of(initialContent));
+		
+		Charset detectedCharset = ContentDetector.detectCharset(getModelObject());
+		Charset charset = detectedCharset!=null?detectedCharset:Charset.defaultCharset();
+		String buildSpecString = new String(getModelObject(), charset); 
+		if (StringUtils.isNotBlank(buildSpecString)) {
+			try {
+				parseResult = (Serializable) VersionedDocument.fromXML(buildSpecString).toBean();
+			} catch (Exception e) {
+				parseResult = e;
+			}
+		} else {
+			parseResult = new BuildSpec();
+		}
 	}
 
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new BuildSpecCssResourceReference()));
-	}
-
-	@Override
-	protected FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
-		return new BuildSpecEditor(componentId, context, initialContent);
-	}
-
-	@Override
-	protected Component newContentSubmitLink(String componentId) {
-		return new AjaxSubmitLink(componentId) {
+	private WebMarkupContainer newJobContainer(String componentId, JobSpec job) {
+		WebMarkupContainer container = new WebMarkupContainer(jobsView.newChildId());
+		container.add(BeanContext.editBean("editor", job));
+		container.add(new AjaxLink<Void>("delete") {
 
 			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new IAjaxCallListener() {
-					
-					@Override
-					public CharSequence getSuccessHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getPrecondition(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getInitHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getFailureHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getDoneHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getCompleteHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getBeforeSendHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getBeforeHandler(Component component) {
-						return String.format("onedev.server.plainEdit.onSubmit('%s');", 
-								plainEditor.getMarkupId());
-					}
-					
-					@Override
-					public CharSequence getAfterHandler(Component component) {
-						return null;
-					}
-				});
+			public void onClick(AjaxRequestTarget target) {
+				target.appendJavaScript($(container).chain("remove").get());
+				jobsView.remove(container);
 			}
 			
-		};
+		});
+		container.setOutputMarkupId(true);
+		return container;
 	}
 	
 	@Override
-	protected PlainEditSupport getPlainEditSupport() {
-		return new PlainEditSupport() {
+	protected void onInitialize() {
+		super.onInitialize();
 
-			@Override
-			public FormComponentPanel<String> newEditor(String componentId, String initialContent) {
-				return plainEditor = new PlainEditPanel(componentId, BuildSpec.BLOB_PATH, initialContent);
-			}
+		Fragment fragment;
+		if (parseResult instanceof BuildSpec) {
+			fragment = new Fragment("content", "validFrag", this);
+			BuildSpec buildSpec = (BuildSpec) parseResult;
+			jobsView = new RepeatingView("jobs");
+			fragment.add(jobsView);
 			
-		};
+			for (JobSpec job: buildSpec.getJobs()) {
+				jobsView.add(newJobContainer(jobsView.newChildId(), job));
+			}
+			fragment.add(new AjaxLink<Void>("addJob") {
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					JobSpec job = new JobSpec();
+					WebMarkupContainer jobContainer = newJobContainer(jobsView.newChildId(), job);
+					jobsView.add(jobContainer);
+					String script = String.format("$(\"#%s\").before(\"<div id='%s'></div>\");", 
+							getMarkupId(), jobContainer.getMarkupId());
+					target.prependJavaScript(script);
+					target.add(jobContainer);
+				}
+				
+			}.setOutputMarkupId(true));
+			
+		} else {
+			fragment = new Fragment("content", "invalidFrag", this);
+			fragment.add(new MultilineLabel("errorMessage", Throwables.getStackTraceAsString((Throwable) parseResult)));
+		}
+		add(fragment);
+	}
+
+	@Override
+	public void convertInput() {
+		if (parseResult instanceof BuildSpec) {
+			BuildSpec buildSpec = (BuildSpec) parseResult;
+			buildSpec.getJobs().clear();
+			for (Component child: jobsView) {
+				BeanEditor jobEditor = (BeanEditor) child.get("editor");
+				buildSpec.getJobs().add((JobSpec) jobEditor.getConvertedInput());
+			}
+			setConvertedInput(VersionedDocument.fromBean(buildSpec).toXML().getBytes(Charsets.UTF_8));
+		} else {
+			setConvertedInput(getModelObject());
+		}
 	}
 
 }

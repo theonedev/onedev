@@ -127,6 +127,20 @@ public abstract class StateTransitionListPanel extends Panel {
 			
 		});		
 		
+		columns.add(new AbstractColumn<TransitionSpec, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
+				cellItem.add(new Label(componentId, "<a title='Click the row for more info'><i class='fa fa-ellipsis-h'></i></a>").setEscapeModelStrings(false));
+			}
+
+			@Override
+			public String getCssClass() {
+				return "ellipsis";
+			}
+			
+		});		
+		
 		IDataProvider<TransitionSpec> dataProvider = new ListDataProvider<TransitionSpec>() {
 
 			@Override

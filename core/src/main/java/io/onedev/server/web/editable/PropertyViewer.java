@@ -20,7 +20,7 @@ public abstract class PropertyViewer extends Panel {
 		super.onInitialize();
 
 		add(newContent("content", descriptor));
-		add(AttributeAppender.append("class", "property viewer editable"));
+		add(AttributeAppender.append("class", "property-viewer editable"));
 	}
 	
 	protected abstract Component newContent(String id, PropertyDescriptor descriptor);

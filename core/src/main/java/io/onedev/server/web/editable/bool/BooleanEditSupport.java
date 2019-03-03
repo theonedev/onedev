@@ -60,4 +60,9 @@ public class BooleanEditSupport implements EditSupport {
 		}
 	}
 
+	@Override
+	public int getPriority() {
+		return DEFAULT_PRIORITY;
+	}
+	
 }

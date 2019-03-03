@@ -1,17 +1,13 @@
-<wicket:panel>
-    <div wicket:id="content" class="build-spec build-spec-editor"></div>
+<wicket:extend>
+    <div wicket:id="content" class="build-spec build-spec-view"></div>
     <wicket:fragment wicket:id="validFrag">
         <div class="valid">
-            <div class="jobs specs">
+            <div class="jobs">
                 <div class="head">
                     Jobs
                 </div>
                 <div class="body">
-                    <div wicket:id="jobs" class="job">
-                        <div wicket:id="editor"></div>
-                        <a wicket:id="delete" class="delete"><i class="fa fa-trash"></i> Delete</a>
-                    </div>
-                    <a wicket:id="addJob" class="add"><i class="fa fa-plus"></i> Add</a>
+                    <div wicket:id="jobs" class="job"></div>
                 </div>
             </div>
         </div>
@@ -22,4 +18,7 @@
             <div wicket:id="errorMessage" class="error-message"></div>
         </div>
     </wicket:fragment>
-</wicket:panel>
+    <wicket:fragment wicket:id="emptyFrag">
+        <div class="empty">Build spec not defined</div>
+    </wicket:fragment>
+</wicket:extend>

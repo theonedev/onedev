@@ -301,7 +301,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			
 		});
 		
-		add(AttributeAppender.append("class", " bean editor editable"));
+		add(AttributeAppender.append("class", "bean-editor editable"));
 		
 		setOutputMarkupId(true);
 	}

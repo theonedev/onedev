@@ -50,4 +50,9 @@ public class PolymorphicEditSuport implements EditSupport {
 		}
 	}
 
+	@Override
+	public int getPriority() {
+		return DEFAULT_PRIORITY;
+	}
+	
 }

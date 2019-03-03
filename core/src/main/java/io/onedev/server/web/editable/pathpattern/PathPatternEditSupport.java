@@ -55,4 +55,9 @@ public class PathPatternEditSupport implements EditSupport {
         }
 	}
 
+	@Override
+	public int getPriority() {
+		return DEFAULT_PRIORITY;
+	}
+	
 }

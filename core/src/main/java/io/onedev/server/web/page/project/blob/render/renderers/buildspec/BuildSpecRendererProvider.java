@@ -31,7 +31,7 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 
 				@Override
 				public Component render(String componentId) {
-					return new BuildSpecEditPanel(componentId, context);
+					return new BuildSpecBlobEditPanel(componentId, context);
 				}
 				
 				@Override
@@ -54,7 +54,7 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 					else if (context.getMode() == Mode.VIEW_PLAIN) 
 						return new SourceViewPanel(componentId, context, true);
 					else
-						return new BuildSpecViewPanel(componentId, context);
+						return new BuildSpecBlobViewPanel(componentId, context);
 				}
 				
 				@Override

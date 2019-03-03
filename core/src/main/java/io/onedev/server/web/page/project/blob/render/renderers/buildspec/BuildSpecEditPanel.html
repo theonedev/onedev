@@ -1,0 +1,25 @@
+<wicket:panel>
+    <div wicket:id="content" class="build-spec build-spec-edit"></div>
+    <wicket:fragment wicket:id="validFrag">
+        <div class="valid">
+            <div class="jobs">
+                <div class="head">
+                    Jobs
+                </div>
+                <div class="body">
+                    <div wicket:id="jobs" class="job">
+                        <div wicket:id="editor"></div>
+                        <a wicket:id="delete" class="delete btn btn-danger"><i class="fa fa-trash"></i> Delete</a>
+                    </div>
+                    <a wicket:id="addJob" class="add btn btn-block btn-success"><i class="fa fa-plus"></i> Add Job</a>
+                </div>
+            </div>
+        </div>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="invalidFrag">
+        <div class="invalid">
+            <div class="title">Error rendering build spec</div>
+            <div wicket:id="errorMessage" class="error-message"></div>
+        </div>
+    </wicket:fragment>
+</wicket:panel>
