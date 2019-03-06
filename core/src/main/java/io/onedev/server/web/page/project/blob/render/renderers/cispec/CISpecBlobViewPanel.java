@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -8,8 +8,8 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 
 import com.google.common.base.Throwables;
 
-import io.onedev.server.build.BuildSpec;
-import io.onedev.server.build.JobSpec;
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.JobSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.web.component.MultilineLabel;
@@ -18,9 +18,9 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 
 @SuppressWarnings("serial")
-public class BuildSpecBlobViewPanel extends BlobViewPanel {
+public class CISpecBlobViewPanel extends BlobViewPanel {
 
-	public BuildSpecBlobViewPanel(String id, BlobRenderContext context) {
+	public CISpecBlobViewPanel(String id, BlobRenderContext context) {
 		super(id, context);
 	}
 
@@ -29,13 +29,13 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 		super.onInitialize();
 		
 		Blob blob = context.getProject().getBlob(context.getBlobIdent());
-		String buildSpecString = blob.getText().getContent();
-		if (StringUtils.isNotBlank(buildSpecString)) {
+		String ciSpecString = blob.getText().getContent();
+		if (StringUtils.isNotBlank(ciSpecString)) {
 			try {
-				BuildSpec buildSpec = (BuildSpec) VersionedDocument.fromXML(buildSpecString).toBean();
+				CISpec ciSpec = (CISpec) VersionedDocument.fromXML(ciSpecString).toBean();
 				Fragment fragment = new Fragment("content", "validFrag", this);
 				RepeatingView jobsView = new RepeatingView("jobs");
-				for (JobSpec job: buildSpec.getJobs()) {
+				for (JobSpec job: ciSpec.getJobs()) {
 					jobsView.add(BeanContext.viewBean(jobsView.newChildId(), job));
 				}
 				fragment.add(jobsView);
@@ -53,7 +53,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new BuildSpecCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new CISpecCssResourceReference()));
 	}
 
 	@Override

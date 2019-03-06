@@ -1,4 +1,4 @@
-package io.onedev.server.build;
+package io.onedev.server.ci;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec;
 
 import static de.agilecoders.wicket.jquery.JQuery.$;
 
@@ -17,8 +17,8 @@ import org.apache.wicket.model.Model;
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 
-import io.onedev.server.build.BuildSpec;
-import io.onedev.server.build.JobSpec;
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.JobSpec;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.web.component.MultilineLabel;
@@ -28,26 +28,26 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
-class BuildSpecEditPanel extends FormComponentPanel<byte[]> {
+class CISpecEditPanel extends FormComponentPanel<byte[]> {
 
 	private RepeatingView jobsView;
 	
 	private Serializable parseResult;
 	
-	public BuildSpecEditPanel(String id, BlobRenderContext context, byte[] initialContent) {
+	public CISpecEditPanel(String id, BlobRenderContext context, byte[] initialContent) {
 		super(id, Model.of(initialContent));
 		
 		Charset detectedCharset = ContentDetector.detectCharset(getModelObject());
 		Charset charset = detectedCharset!=null?detectedCharset:Charset.defaultCharset();
-		String buildSpecString = new String(getModelObject(), charset); 
-		if (StringUtils.isNotBlank(buildSpecString)) {
+		String ciSpecString = new String(getModelObject(), charset); 
+		if (StringUtils.isNotBlank(ciSpecString)) {
 			try {
-				parseResult = (Serializable) VersionedDocument.fromXML(buildSpecString).toBean();
+				parseResult = (Serializable) VersionedDocument.fromXML(ciSpecString).toBean();
 			} catch (Exception e) {
 				parseResult = e;
 			}
 		} else {
-			parseResult = new BuildSpec();
+			parseResult = new CISpec();
 		}
 	}
 
@@ -72,13 +72,13 @@ class BuildSpecEditPanel extends FormComponentPanel<byte[]> {
 		super.onInitialize();
 
 		Fragment fragment;
-		if (parseResult instanceof BuildSpec) {
+		if (parseResult instanceof CISpec) {
 			fragment = new Fragment("content", "validFrag", this);
-			BuildSpec buildSpec = (BuildSpec) parseResult;
+			CISpec ciSpec = (CISpec) parseResult;
 			jobsView = new RepeatingView("jobs");
 			fragment.add(jobsView);
 			
-			for (JobSpec job: buildSpec.getJobs()) {
+			for (JobSpec job: ciSpec.getJobs()) {
 				jobsView.add(newJobContainer(jobsView.newChildId(), job));
 			}
 			fragment.add(new AjaxLink<Void>("addJob") {
@@ -105,14 +105,14 @@ class BuildSpecEditPanel extends FormComponentPanel<byte[]> {
 
 	@Override
 	public void convertInput() {
-		if (parseResult instanceof BuildSpec) {
-			BuildSpec buildSpec = (BuildSpec) parseResult;
-			buildSpec.getJobs().clear();
+		if (parseResult instanceof CISpec) {
+			CISpec ciSpec = (CISpec) parseResult;
+			ciSpec.getJobs().clear();
 			for (Component child: jobsView) {
 				BeanEditor jobEditor = (BeanEditor) child.get("editor");
-				buildSpec.getJobs().add((JobSpec) jobEditor.getConvertedInput());
+				ciSpec.getJobs().add((JobSpec) jobEditor.getConvertedInput());
 			}
-			setConvertedInput(VersionedDocument.fromBean(buildSpec).toXML().getBytes(Charsets.UTF_8));
+			setConvertedInput(VersionedDocument.fromBean(ciSpec).toXML().getBytes(Charsets.UTF_8));
 		} else {
 			setConvertedInput(getModelObject());
 		}

@@ -235,7 +235,7 @@ import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.layout.MainNavContribution;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
-import io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider;
+import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecRendererProvider;
 import io.onedev.server.web.util.avatar.AvatarManager;
 import io.onedev.server.web.util.avatar.DefaultAvatarManager;
 import io.onedev.server.web.util.markdown.CommitProcessor;
@@ -415,7 +415,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
 		
 		contributeFromPackage(EditSupport.class, EditSupport.class);
-		contributeFromPackage(EditSupport.class, BuildSpecRendererProvider.class);
+		contributeFromPackage(EditSupport.class, CISpecRendererProvider.class);
 		
 		bind(WebApplication.class).to(OneWebApplication.class);
 		bind(Application.class).to(OneWebApplication.class);

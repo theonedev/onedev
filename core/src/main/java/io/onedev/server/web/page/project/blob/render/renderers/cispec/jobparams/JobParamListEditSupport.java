@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.buildspec.jobparams;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobparams;
 
 import java.io.Serializable;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.build.JobSpec;
+import io.onedev.server.ci.JobSpec;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditableUtils;

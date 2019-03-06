@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -8,30 +8,30 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 
-import io.onedev.server.build.BuildSpec;
+import io.onedev.server.ci.CISpec;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport;
 
 @SuppressWarnings("serial")
-public class BuildSpecBlobEditPanel extends BlobEditPanel {
+public class CISpecBlobEditPanel extends BlobEditPanel {
 
 	private PlainEditPanel plainEditor;
 	
-	public BuildSpecBlobEditPanel(String id, BlobRenderContext context) {
+	public CISpecBlobEditPanel(String id, BlobRenderContext context) {
 		super(id, context);
 	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new BuildSpecCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new CISpecCssResourceReference()));
 	}
 
 	@Override
 	protected FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
-		return new BuildSpecEditPanel(componentId, context, initialContent);
+		return new CISpecEditPanel(componentId, context, initialContent);
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class BuildSpecBlobEditPanel extends BlobEditPanel {
 
 			@Override
 			public FormComponentPanel<String> newEditor(String componentId, String initialContent) {
-				return plainEditor = new PlainEditPanel(componentId, BuildSpec.BLOB_PATH, initialContent);
+				return plainEditor = new PlainEditPanel(componentId, CISpec.BLOB_PATH, initialContent);
 			}
 			
 		};

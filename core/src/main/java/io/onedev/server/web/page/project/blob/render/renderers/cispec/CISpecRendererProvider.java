@@ -1,29 +1,29 @@
-package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
-import io.onedev.server.build.BuildSpec;
+import io.onedev.server.ci.CISpec;
 import io.onedev.server.web.PrioritizedComponentRenderer;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.page.project.blob.render.renderers.source.SourceViewPanel;
 
-public class BuildSpecRendererProvider implements BlobRendererContribution {
+public class CISpecRendererProvider implements BlobRendererContribution {
 
 	private static final long serialVersionUID = 1L;
 
-	private boolean isBuildSpec(@Nullable String blobPath) {
-		return BuildSpec.BLOB_PATH.equals(blobPath);
+	private boolean isCISpec(@Nullable String blobPath) {
+		return CISpec.BLOB_PATH.equals(blobPath);
 	}
 	
 	@Override
 	public PrioritizedComponentRenderer getRenderer(BlobRenderContext context) {
-		if (context.getMode() == Mode.ADD && isBuildSpec(context.getNewPath()) 
+		if (context.getMode() == Mode.ADD && isCISpec(context.getNewPath()) 
 				|| context.getMode() == Mode.EDIT 
-					&& isBuildSpec(context.getBlobIdent().path) 
+					&& isCISpec(context.getBlobIdent().path) 
 					&& context.getProject().getBlob(context.getBlobIdent()).getText() != null) {
 			return new PrioritizedComponentRenderer() {
 				
@@ -31,7 +31,7 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 
 				@Override
 				public Component render(String componentId) {
-					return new BuildSpecBlobEditPanel(componentId, context);
+					return new CISpecBlobEditPanel(componentId, context);
 				}
 				
 				@Override
@@ -41,7 +41,7 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 			};
 		} else if ((context.getMode() == Mode.VIEW || context.getMode() == Mode.VIEW_PLAIN || context.getMode() == Mode.BLAME) 
 				&& context.getBlobIdent().isFile() 
-				&& isBuildSpec(context.getBlobIdent().path) 
+				&& isCISpec(context.getBlobIdent().path) 
 				&& context.getProject().getBlob(context.getBlobIdent()).getText() != null) {
 			return new PrioritizedComponentRenderer() {
 				
@@ -54,7 +54,7 @@ public class BuildSpecRendererProvider implements BlobRendererContribution {
 					else if (context.getMode() == Mode.VIEW_PLAIN) 
 						return new SourceViewPanel(componentId, context, true);
 					else
-						return new BuildSpecBlobViewPanel(componentId, context);
+						return new CISpecBlobViewPanel(componentId, context);
 				}
 				
 				@Override

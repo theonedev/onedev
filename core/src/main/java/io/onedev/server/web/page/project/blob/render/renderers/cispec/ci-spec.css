@@ -1,43 +1,43 @@
-.build-spec {
+.ci-spec {
     padding: 20px;
 }
-.build-spec>.invalid>.title {
+.ci-spec>.invalid>.title {
     font-size: 20px;
     color: red;
     margin-bottom: 20px;
 }
-.build-spec>.invalid>.error-message {
+.ci-spec>.invalid>.error-message {
 	white-space: pre-wrap;
     word-wrap: break-word;
     font-size: 13px;
     font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
-.build-spec>.empty {
+.ci-spec>.empty {
     font-size: 20px;
 }
 
-.build-spec>.valid>div {
+.ci-spec>.valid>div {
     border-radius: 4px;
 }
-.build-spec>.valid>div>.head {
+.ci-spec>.valid>div>.head {
     font-weight: bold;
     font-size: 18px;
     margin-bottom: 20px;
 }
-.build-spec>.valid>div>.body>div {
+.ci-spec>.valid>div>.body>div {
     margin-bottom: 20px;
     border-radius: 4px;
     border: 2px solid #BBB;
     padding: 20px;
 }
-.build-spec>.valid .bean-properties>table>tbody>tr>td.name {
+.ci-spec>.valid .bean-properties>table>tbody>tr>td.name {
     width: 200px;
 }
-.build-spec>.valid .bean-properties>table>tbody>tr>td.value .form-control {
+.ci-spec>.valid .bean-properties>table>tbody>tr>td.value .form-control {
     height: 32px;
     font-size: 13px;
 }
-.build-spec>.valid .def-list table>tbody>tr>td:first-child>div>a {
+.ci-spec>.valid .def-list table>tbody>tr>td:first-child>div>a {
     margin-left: 0;
 }
 .floating.job-param>.content>.body>.bean-viewer>.bean-properties>table>tbody>tr>td.name {

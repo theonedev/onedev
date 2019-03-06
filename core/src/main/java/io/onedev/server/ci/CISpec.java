@@ -1,4 +1,4 @@
-package io.onedev.server.build;
+package io.onedev.server.ci;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -7,11 +7,11 @@ import java.util.List;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public class BuildSpec implements Serializable {
+public class CISpec implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String BLOB_PATH = "onedev-buildspec.xml";
+	public static final String BLOB_PATH = "onedev-ci.xml";
 
 	private List<JobSpec> jobs = new ArrayList<>();
 
