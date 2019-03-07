@@ -212,7 +212,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					}
 					
 					private OneContext newOneContext() {
-						return new OneContext() {
+						return new OneContext(IssueQueryBehavior.this.getComponent()) {
 
 							@Override
 							public Project getProject() {
@@ -235,7 +235,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							public InputContext getInputContext() {
 								throw new UnsupportedOperationException();
 							}
-							
+
 						};
 					}
 

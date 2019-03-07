@@ -25,7 +25,6 @@ import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowReconcilePanel.UndefinedFieldValueContainer;
-import io.onedev.server.web.util.ComponentContext;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable
@@ -70,12 +69,11 @@ public class UndefinedFieldValueResolution implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getValueChoices() {
-		UndefinedFieldValueContainer container = ((ComponentContext)OneContext.get())
-				.getComponent()
+		UndefinedFieldValueContainer container = OneContext.get().getComponent()
 				.findParent(UndefinedFieldValueContainer.class); 
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		InputSpec fieldSpec = Preconditions.checkNotNull(issueSetting.getFieldSpec(container.getFieldName()));
-		OneContext.push(new OneContext() {
+		OneContext.push(new OneContext(container) {
 
 			@Override
 			public Project getProject() {
@@ -99,7 +97,7 @@ public class UndefinedFieldValueResolution implements Serializable {
 			public InputContext getInputContext() {
 				throw new UnsupportedOperationException();
 			}
-			
+
 		});
 		try {
 			return new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());

@@ -103,8 +103,14 @@ public abstract class StateTransitionListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
-				String label = StringUtils.join(rowModel.getObject().getFromStates());
-				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), label, "firstColumnFrag"));
+				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), true) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, StringUtils.join(rowModel.getObject().getFromStates()));
+					}
+					
+				});
 			}
 		});		
 		
@@ -112,7 +118,14 @@ public abstract class StateTransitionListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), rowModel.getObject().getToState(), "otherColumnsFrag"));
+				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), false) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, rowModel.getObject().getToState());
+					}
+					
+				});
 			}
 			
 		});		
@@ -121,8 +134,14 @@ public abstract class StateTransitionListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
-				String label = EditableUtils.getDisplayName(rowModel.getObject().getTrigger().getClass());
-				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), label, "otherColumnsFrag"));
+				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), false) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, EditableUtils.getDisplayName(rowModel.getObject().getTrigger().getClass()));
+					}
+					
+				});
 			}
 			
 		});		
@@ -131,7 +150,14 @@ public abstract class StateTransitionListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
-				cellItem.add(new Label(componentId, "<a title='Click the row for more info'><i class='fa fa-ellipsis-h'></i></a>").setEscapeModelStrings(false));
+				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), false) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+					}
+					
+				});
 			}
 
 			@Override
@@ -191,17 +217,14 @@ public abstract class StateTransitionListPanel extends Panel {
 		return -1;
 	}
 	
-	private class ColumnFragment extends Fragment {
+	private abstract class ColumnFragment extends Fragment {
 
 		private final int index;
 		
-		private final String label;
-		
-		public ColumnFragment(String id, TransitionSpec transition, String label, String columnFrag) {
-			super(id, columnFrag, StateTransitionListPanel.this);
+		public ColumnFragment(String id, TransitionSpec transition, boolean firstColumn) {
+			super(id, firstColumn?"firstColumnFrag":"otherColumnsFrag", StateTransitionListPanel.this);
 			this.index = getTransitionSpecIndex(transition);
 			Preconditions.checkState(this.index != -1);
-			this.label = label;
 		}
 		
 		private TransitionSpec getTransition() {
@@ -284,12 +307,11 @@ public abstract class StateTransitionListPanel extends Panel {
 				}
 				
 			};
-			if (label != null)
-				link.add(new Label("label", label));
-			else
-				link.add(new Label("label", "&nbsp;").setEscapeModelStrings(false));
+			link.add(newLabel("label"));
 			add(link);
 		}
+		
+		protected abstract Component newLabel(String componentId);
 		
 	}
 	

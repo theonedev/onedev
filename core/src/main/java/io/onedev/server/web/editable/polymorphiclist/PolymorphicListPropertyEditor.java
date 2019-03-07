@@ -12,7 +12,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -247,12 +246,6 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		row.add(new FencedFeedbackPanel("feedback", elementEditor));		
 
 		row.add(new AjaxButton("deleteElement") {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(AttributeAppender.replace("title", "Delete this " + EditableUtils.getDisplayName(baseClass).toLowerCase()));
-			}
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {

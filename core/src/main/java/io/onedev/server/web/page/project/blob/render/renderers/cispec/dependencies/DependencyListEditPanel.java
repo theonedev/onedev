@@ -1,0 +1,244 @@
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.dependencies;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.event.IEvent;
+import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.panel.Fragment;
+import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.data.IDataProvider;
+import org.apache.wicket.markup.repeater.data.ListDataProvider;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
+import org.apache.wicket.util.convert.ConversionException;
+
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.DependencySpec;
+import io.onedev.server.ci.JobSpec;
+import io.onedev.server.web.behavior.sortable.SortBehavior;
+import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.ErrorContext;
+import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.PropertyUpdating;
+import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecEditPanel;
+
+@SuppressWarnings("serial")
+public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
+
+	private final List<DependencySpec> dependencies;
+	
+	public DependencyListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
+		super(id, propertyDescriptor, model);
+		
+		dependencies = new ArrayList<>();
+		for (Serializable each: model.getObject()) {
+			dependencies.add((DependencySpec) each);
+		}
+	}
+	
+	private int getDependencyIndex(String jobSpec) {
+		for (int i=0; i<dependencies.size(); i++) {
+			if (dependencies.get(i).getJob().equals(jobSpec))
+				return i;
+		}
+		return -1;
+	}
+	
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
+		add(new ModalLink("addNew") {
+
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				return new DependencyEditPanel(id, dependencies, -1) {
+
+					@Override
+					protected void onCancel(AjaxRequestTarget target) {
+						modal.close();
+					}
+
+					@Override
+					protected void onSave(AjaxRequestTarget target) {
+						modal.close();
+						target.add(DependencyListEditPanel.this);
+					}
+
+					@Override
+					public CISpec getEditingCISpec() {
+						return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getEditingCISpec();
+					}
+
+					@Override
+					public JobSpec getBelongingJob() {
+						return (JobSpec) DependencyListEditPanel.this.findParent(BeanEditor.class).getConvertedInput();
+					}
+
+				};
+			}
+			
+		});
+		
+		List<IColumn<DependencySpec, Void>> columns = new ArrayList<>();
+		
+		columns.add(new AbstractColumn<DependencySpec, Void>(Model.of("Job")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<DependencySpec>> cellItem, String componentId, IModel<DependencySpec> rowModel) {
+				Fragment fragment = new Fragment(componentId, "jobColumnFrag", DependencyListEditPanel.this);
+				ModalLink link = new ModalLink("link") {
+
+					@Override
+					protected Component newContent(String id, ModalPanel modal) {
+						return new DependencyEditPanel(id, dependencies, getDependencyIndex(rowModel.getObject().getJob())) {
+
+							@Override
+							protected void onCancel(AjaxRequestTarget target) {
+								modal.close();
+							}
+
+							@Override
+							protected void onSave(AjaxRequestTarget target) {
+								modal.close();
+								target.add(DependencyListEditPanel.this);
+							}
+
+							@Override
+							public CISpec getEditingCISpec() {
+								return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getEditingCISpec();
+							}
+
+							@Override
+							public JobSpec getBelongingJob() {
+								return (JobSpec) DependencyListEditPanel.this.findParent(BeanEditor.class).getConvertedInput();
+							}
+
+						};
+					}
+					
+				};
+				link.add(new Label("label", rowModel.getObject().getJob()));
+				fragment.add(link);
+				
+				cellItem.add(fragment);
+			}
+		});		
+		
+		columns.add(new AbstractColumn<DependencySpec, Void>(Model.of("Artifacts")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<DependencySpec>> cellItem, String componentId, IModel<DependencySpec> rowModel) {
+				if (StringUtils.isNotBlank(rowModel.getObject().getArtifacts()))
+					cellItem.add(new Label(componentId, rowModel.getObject().getArtifacts()));
+				else
+					cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
+			}
+			
+		});		
+		
+		columns.add(new AbstractColumn<DependencySpec, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<DependencySpec>> cellItem, String componentId, IModel<DependencySpec> rowModel) {
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", DependencyListEditPanel.this);
+				fragment.add(new AjaxLink<Void>("delete") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						dependencies.remove(rowModel.getObject());
+						target.add(DependencyListEditPanel.this);
+					}
+					
+				});
+				cellItem.add(fragment);
+			}
+
+			@Override
+			public String getCssClass() {
+				return "actions";
+			}
+			
+		});		
+		
+		IDataProvider<DependencySpec> dataProvider = new ListDataProvider<DependencySpec>() {
+
+			@Override
+			protected List<DependencySpec> getData() {
+				return dependencies;			
+			}
+
+		};
+		
+		DataTable<DependencySpec, Void> dataTable;
+		add(dataTable = new DataTable<DependencySpec, Void>("dependencies", columns, dataProvider, Integer.MAX_VALUE));
+		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
+		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
+		
+		dataTable.add(new SortBehavior() {
+
+			@Override
+			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				int fromIndex = from.getItemIndex();
+				int toIndex = to.getItemIndex();
+				if (fromIndex < toIndex) {
+					for (int i=0; i<toIndex-fromIndex; i++) 
+						Collections.swap(dependencies, fromIndex+i, fromIndex+i+1);
+				} else {
+					for (int i=0; i<fromIndex-toIndex; i++) 
+						Collections.swap(dependencies, fromIndex-i, fromIndex-i-1);
+				}
+				target.add(DependencyListEditPanel.this);
+			}
+			
+		}.sortable("tbody"));
+		
+		setOutputMarkupId(true);		
+	}
+
+	@Override
+	protected String getErrorClass() {
+		return null;
+	}
+
+	@Override
+	public void onEvent(IEvent<?> event) {
+		super.onEvent(event);
+		
+		if (event.getPayload() instanceof PropertyUpdating) {
+			event.stop();
+			onPropertyUpdating(((PropertyUpdating)event.getPayload()).getHandler());
+		}		
+	}
+
+	@Override
+	protected List<Serializable> convertInputToValue() throws ConversionException {
+		List<Serializable> value = new ArrayList<>();
+		for (DependencySpec each: dependencies)
+			value.add(each);
+		return value;
+	}
+
+	@Override
+	public ErrorContext getErrorContext(PathSegment pathSegment) {
+		return null;
+	}
+	
+}

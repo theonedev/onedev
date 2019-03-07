@@ -4,12 +4,18 @@ import java.util.Stack;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
+
+import com.google.common.base.Preconditions;
+
 import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.inputspec.InputContext;
+import io.onedev.server.web.util.ProjectAware;
+import io.onedev.server.web.util.WicketUtils;
 
-public abstract class OneContext {
+public class OneContext {
 
 	private static ThreadLocal<Stack<OneContext>> stack =  new ThreadLocal<Stack<OneContext>>() {
 
@@ -19,6 +25,12 @@ public abstract class OneContext {
 		}
 	
 	};
+	
+	private Component component;
+	
+	public OneContext(Component component) {
+		this.component = component;
+	}
 	
 	public static void push(OneContext context) {
 		stack.get().push(context);
@@ -48,11 +60,25 @@ public abstract class OneContext {
 		return getEditContext(0);
 	}
 	
-	public abstract Project getProject();
+	public Project getProject() {
+		ProjectAware projectAware = component.findParent(ProjectAware.class);
+		if (projectAware != null) 
+			return projectAware.getProject();
+		else
+			return null;
+	}
 
-	public abstract EditContext getEditContext(int level);
+	public EditContext getEditContext(int level) {
+		return WicketUtils.findParents(getComponent(), EditContext.class).get(level);
+	}
 
-	public abstract InputContext getInputContext();
+	public InputContext getInputContext() {
+		return Preconditions.checkNotNull(WicketUtils.findInnermost(component, InputContext.class));
+	}
+	
+	public Component getComponent() {
+		return component;
+	}
 	
 	@Nullable
 	public OneContext getPropertyContext(String propertyName) {

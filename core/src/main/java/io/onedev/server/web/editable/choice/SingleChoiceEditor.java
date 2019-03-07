@@ -19,7 +19,6 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.ReflectionUtils;
 
 @SuppressWarnings("serial")
@@ -38,7 +37,7 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 		
 		Map<String, String> choices;
 		
-		OneContext oneContext = new ComponentContext(this);
+		OneContext oneContext = new OneContext(this);
 		
 		OneContext.push(oneContext);
 		try {

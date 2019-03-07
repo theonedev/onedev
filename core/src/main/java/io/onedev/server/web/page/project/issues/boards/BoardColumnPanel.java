@@ -68,7 +68,6 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.issues.list.IssueListPage;
-import io.onedev.server.web.util.ComponentContext;
 
 @SuppressWarnings("serial")
 abstract class BoardColumnPanel extends Panel implements EditContext {
@@ -231,7 +230,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				InputSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
 				if (fieldSpec instanceof ChoiceInput) {
 					ChoiceProvider choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
-					OneContext.push(new ComponentContext(this));
+					OneContext.push(new OneContext(this));
 					try {
 						color = choiceProvider.getChoices(true).get(getColumn());
 					} finally {

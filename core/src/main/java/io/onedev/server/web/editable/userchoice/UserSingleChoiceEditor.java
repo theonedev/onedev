@@ -24,7 +24,6 @@ import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.UserChoice;
-import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.ReflectionUtils;
 
 @SuppressWarnings("serial")
@@ -44,7 +43,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		OneContext oneContext = new ComponentContext(this);
+		OneContext oneContext = new OneContext(this);
 		
 		OneContext.push(oneContext);
 		try {

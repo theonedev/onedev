@@ -5,6 +5,8 @@ import static de.agilecoders.wicket.jquery.JQuery.$;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -28,7 +30,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
-class CISpecEditPanel extends FormComponentPanel<byte[]> {
+public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 
 	private RepeatingView jobsView;
 	
@@ -105,17 +107,26 @@ class CISpecEditPanel extends FormComponentPanel<byte[]> {
 
 	@Override
 	public void convertInput() {
-		if (parseResult instanceof CISpec) {
-			CISpec ciSpec = (CISpec) parseResult;
-			ciSpec.getJobs().clear();
-			for (Component child: jobsView) {
-				BeanEditor jobEditor = (BeanEditor) child.get("editor");
-				ciSpec.getJobs().add((JobSpec) jobEditor.getConvertedInput());
-			}
-			setConvertedInput(VersionedDocument.fromBean(ciSpec).toXML().getBytes(Charsets.UTF_8));
+		CISpec editingCISpec = getEditingCISpec();
+		if (editingCISpec != null) {
+			setConvertedInput(VersionedDocument.fromBean(editingCISpec).toXML().getBytes(Charsets.UTF_8));
 		} else {
 			setConvertedInput(getModelObject());
 		}
 	}
 
+	@Nullable
+	public CISpec getEditingCISpec() {
+		if (parseResult instanceof CISpec) {
+			CISpec ciSpec = new CISpec();
+			for (Component child: jobsView) {
+				BeanEditor jobEditor = (BeanEditor) child.get("editor");
+				ciSpec.getJobs().add((JobSpec) jobEditor.getConvertedInput());
+			}
+			return ciSpec;
+		} else {
+			return null;
+		}
+	}
+	
 }

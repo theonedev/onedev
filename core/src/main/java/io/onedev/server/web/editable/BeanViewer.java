@@ -16,8 +16,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.util.ComponentContext;
 
 @SuppressWarnings("serial")
 public class BeanViewer extends Panel implements EditContext {
@@ -67,7 +67,7 @@ public class BeanViewer extends Panel implements EditContext {
 				Serializable propertyValue = (Serializable) propertyContext.getPropertyValue(bean);
 				valueTd.add(propertyContext.renderForView("content", Model.of(propertyValue)));
 				
-				item.setVisible(propertyContext.isPropertyVisible(new ComponentContext(BeanViewer.this), beanDescriptor) 
+				item.setVisible(propertyContext.isPropertyVisible(new OneContext(BeanViewer.this), beanDescriptor) 
 						&& !propertyContext.isPropertyExcluded());
 				
 				item.add(AttributeAppender.append("class", "property-" + propertyContext.getPropertyName()));

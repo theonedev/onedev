@@ -37,7 +37,6 @@ import io.onedev.server.web.editable.PathSegment.Property;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Vertical;
-import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
@@ -162,7 +161,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 				Serializable propertyValue;		
 				
-				OneContext context = new ComponentContext(this);
+				OneContext context = new OneContext(this);
 				
 				OneContext.push(context);
 				try {
@@ -228,7 +227,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!propertyContext.getDescriptor().isPropertyExcluded() 
-						&& propertyContext.getDescriptor().isPropertyVisible(new ComponentContext(this), beanDescriptor));
+						&& propertyContext.getDescriptor().isPropertyVisible(new OneContext(this), beanDescriptor));
 			}
 
 		};
@@ -282,7 +281,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 								int propertyIndex = (int) item.getDefaultModelObject();
 								PropertyContext<Serializable> propertyContext = propertyContexts.get(propertyIndex); 
 								if (propertyContext.getPropertyName().equals(property.getName()) 
-										&& propertyContext.getDescriptor().isPropertyVisible(new ComponentContext(item), beanDescriptor)
+										&& propertyContext.getDescriptor().isPropertyVisible(new OneContext(item), beanDescriptor)
 										&& !propertyContext.getDescriptor().isPropertyExcluded()) {
 									found = true;
 									break;
@@ -349,7 +348,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	}
 	
 	public OneContext getOneContext() {
-		return new ComponentContext(this) {
+		return new OneContext(this) {
 
 			@Override
 			public OneContext getPropertyContext(String propertyName) {
@@ -357,7 +356,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 					int propertyIndex = (int) item.getDefaultModelObject();
 					PropertyContext<Serializable> propertyContext = propertyContexts.get(propertyIndex); 
 					if (propertyContext.getPropertyName().equals(propertyName))
-						return new ComponentContext(item);
+						return new OneContext(item);
 				}
 				return null;
 			}

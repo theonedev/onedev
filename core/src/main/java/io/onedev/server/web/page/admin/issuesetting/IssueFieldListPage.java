@@ -87,7 +87,14 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, rowModel.getObject().getName(), true));
+				cellItem.add(new ColumnFragment(componentId, rowModel, true) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, rowModel.getObject().getName());
+					}
+					
+				});
 			}
 		});		
 		
@@ -96,7 +103,14 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
 				InputSpec field = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, rowModel, EditableUtils.getDisplayName(field.getClass()), false));
+				cellItem.add(new ColumnFragment(componentId, rowModel, false) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, EditableUtils.getDisplayName(field.getClass()));
+					}
+					
+				});
 			}
 		});		
 		
@@ -104,9 +118,15 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				InputSpec field = rowModel.getObject();
-				String label = StringUtils.describe(getSetting().getDefaultPromptFieldsUponIssueOpen().contains(field.getName()));
-				cellItem.add(new ColumnFragment(componentId, rowModel, label, false));
+				cellItem.add(new ColumnFragment(componentId, rowModel, false) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						InputSpec field = rowModel.getObject();
+						return new Label(componentId, StringUtils.describe(getSetting().getDefaultPromptFieldsUponIssueOpen().contains(field.getName())));
+					}
+					
+				});
 			}
 		});		
 		
@@ -114,9 +134,15 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				InputSpec field = rowModel.getObject();
-				String label = StringUtils.describe(getSetting().getDefaultListFields().contains(field.getName()));
-				cellItem.add(new ColumnFragment(componentId, rowModel, label, false));
+				cellItem.add(new ColumnFragment(componentId, rowModel, false) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						InputSpec field = rowModel.getObject();
+						return new Label(componentId, StringUtils.describe(getSetting().getDefaultListFields().contains(field.getName())));
+					}
+					
+				});
 			}
 
 			@Override
@@ -130,7 +156,14 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				cellItem.add(new Label(componentId, "<a title='Click the row for more info'><i class='fa fa-ellipsis-h'></i></a>").setEscapeModelStrings(false));
+				cellItem.add(new ColumnFragment(componentId, rowModel, false) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+					}
+					
+				});
 			}
 
 			@Override
@@ -183,22 +216,21 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 		return -1;
 	}
 	
-	private class ColumnFragment extends Fragment {
+	private abstract class ColumnFragment extends Fragment {
 
 		private final int index;
 		
-		private final String label;
-		
-		public ColumnFragment(String id, IModel<InputSpec> model, String label, boolean nameColumn) {
+		public ColumnFragment(String id, IModel<InputSpec> model, boolean nameColumn) {
 			super(id, nameColumn?"nameColumnFrag":"otherColumnFrag", IssueFieldListPage.this, model);
 			this.index = getFieldSpecIndex(getField().getName());
 			Preconditions.checkState(this.index != -1);
-			this.label = label;
 		}
 		
 		private InputSpec getField() {
 			return (InputSpec) getDefaultModelObject();
 		}
+		
+		protected abstract Component newLabel(String componentId);
 
 		@Override
 		protected void onInitialize() {
@@ -287,10 +319,6 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 				}
 				
 			};
-			if (label != null)
-				link.add(new Label("label", label));
-			else
-				link.add(new Label("label", "&nbsp;").setEscapeModelStrings(false));
 			add(link);
 		}
 		

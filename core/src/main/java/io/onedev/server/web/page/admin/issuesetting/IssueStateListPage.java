@@ -166,7 +166,22 @@ public class IssueStateListPage extends GlobalIssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				cellItem.add(new Label(componentId, "<a title='Click the row for more info'><i class='fa fa-ellipsis-h'></i></a>").setEscapeModelStrings(false));
+				Fragment fragment = new Fragment(componentId, "otherColumnFrag", IssueStateListPage.this);
+				StateSpec state = rowModel.getObject();
+				int index = getStateSpecIndex(state.getName());				
+				Preconditions.checkState(index != -1);
+				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						newStateDetail(target, index);
+					}
+					
+				};
+				link.add(new Label("label", "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false));
+				fragment.add(link);
+				cellItem.add(fragment);
+				
 			}
 
 			@Override

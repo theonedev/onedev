@@ -7,10 +7,10 @@
 	border-color: #a94442;
 }
 .script-support .CodeMirror {
-	height: 500px;
-}
-.property.viewer .script-support .CodeMirror {
 	height: auto;
+}
+.script-support .CodeMirror-scroll {
+    min-height: 120px;
 }
 .property.viewer .CodeMirror .CodeMirror-cursor {
 	border-left: none;

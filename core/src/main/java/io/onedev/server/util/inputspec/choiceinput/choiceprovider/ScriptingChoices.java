@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Script;
 
@@ -29,7 +28,6 @@ public class ScriptingChoices extends ChoiceProvider {
 	@NotEmpty
 	@Script
 	@OmitName
-	@Multiline
 	public String getScript() {
 		return script;
 	}

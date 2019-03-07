@@ -18,7 +18,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
-import io.onedev.server.web.util.ComponentContext;
 import io.onedev.utils.BeanUtils;
 import io.onedev.utils.HtmlUtils;
 import io.onedev.utils.ReflectionUtils;
@@ -154,7 +153,7 @@ public class PropertyDescriptor implements Serializable {
 	public String getDescription(Component component) {
 		String description = getDescription();
 		if (description != null) {
-			OneContext.push(new ComponentContext(component));
+			OneContext.push(new OneContext(component));
 			try {
 				description = Application.get().getResourceSettings().getLocalizer().getString(description, component, description);
 				description = StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());

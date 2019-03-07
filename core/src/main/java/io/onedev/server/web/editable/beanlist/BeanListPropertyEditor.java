@@ -244,12 +244,6 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		row.add(new AjaxButton("deleteElement") {
 
 			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(AttributeAppender.replace("title", "Delete this " + EditableUtils.getDisplayName(elementClass).toLowerCase()));
-			}
-
-			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 

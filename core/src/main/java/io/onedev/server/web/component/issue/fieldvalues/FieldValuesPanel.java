@@ -34,14 +34,13 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.server.web.util.ComponentContext;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.utils.ColorUtils;
 
 @SuppressWarnings("serial")
@@ -111,7 +110,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						InputSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
 						if (fieldSpec != null && fieldSpec instanceof ChoiceInput) {
 							ChoiceProvider choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
-							OneContext.push(new ComponentContext(this));
+							OneContext.push(new OneContext(this));
 							try {
 								String backgroundColor = choiceProvider.getChoices(false).get(value);
 								if (backgroundColor != null) {
