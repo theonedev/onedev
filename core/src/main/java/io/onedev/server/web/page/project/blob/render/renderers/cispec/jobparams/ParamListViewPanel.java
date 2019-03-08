@@ -23,8 +23,6 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
@@ -33,11 +31,11 @@ import io.onedev.utils.StringUtils;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
-public class JobParamListViewPanel extends Panel {
+public class ParamListViewPanel extends Panel {
 
 	private final List<InputSpec> params = new ArrayList<>();
 	
-	public JobParamListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
+	public ParamListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
@@ -54,7 +52,7 @@ public class JobParamListViewPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel) {
+				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
@@ -70,7 +68,7 @@ public class JobParamListViewPanel extends Panel {
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
 				InputSpec param = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, rowModel) {
+				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
@@ -85,7 +83,7 @@ public class JobParamListViewPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel) {
+				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
@@ -100,7 +98,7 @@ public class JobParamListViewPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel) {
+				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
@@ -139,28 +137,15 @@ public class JobParamListViewPanel extends Panel {
 		});
 	}
 
-	private int getParamIndex(String paramName) {
-		for (int i=0; i<params.size(); i++) {
-			if (params.get(i).getName().equals(paramName))
-				return i;
-		}
-		return -1;
-	}
-	
 	private abstract class ColumnFragment extends Fragment {
 
 		private final int index;
 		
-		public ColumnFragment(String id, IModel<InputSpec> model) {
-			super(id, "columnFrag", JobParamListViewPanel.this, model);
-			this.index = getParamIndex(getParam().getName());
-			Preconditions.checkState(this.index != -1);
+		public ColumnFragment(String id, int index) {
+			super(id, "columnFrag", ParamListViewPanel.this);
+			this.index = index;
 		}
 		
-		private InputSpec getParam() {
-			return (InputSpec) getDefaultModelObject();
-		}
-
 		protected abstract Component newLabel(String componentId);
 		
 		@Override
@@ -174,7 +159,8 @@ public class JobParamListViewPanel extends Panel {
 
 						@Override
 						protected String getTitle() {
-							return getParam().getName() + " (type: " + EditableUtils.getDisplayName(getParam().getClass()) + ")";
+							InputSpec param = params.get(index);
+							return param.getName() + " (type: " + EditableUtils.getDisplayName(param.getClass()) + ")";
 						}
 
 						@Override
@@ -185,7 +171,7 @@ public class JobParamListViewPanel extends Panel {
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.viewBean(id, getParam(), Sets.newHashSet("name"), true);
+							return BeanContext.viewBean(id, params.get(index), Sets.newHashSet("name"), true);
 						}
 
 					};

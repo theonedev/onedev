@@ -165,6 +165,9 @@ form>.test-feedback {
 .editable>.bean-properties>table>tbody>tr>td.value {
 	padding-left: 8px;
 }
+.editable table {
+    margin-bottom: 0;
+}
 
 .property-editor>.polymorphic-list>table>tbody>tr>td {
     border-top: 2px solid #BBB;

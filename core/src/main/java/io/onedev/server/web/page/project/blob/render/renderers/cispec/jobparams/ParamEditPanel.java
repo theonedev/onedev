@@ -19,13 +19,13 @@ import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
-abstract class JobParamEditPanel extends Panel implements InputContext {
+abstract class ParamEditPanel extends Panel implements InputContext {
 
 	private final List<InputSpec> params;
 	
 	private final int paramIndex;
 	
-	public JobParamEditPanel(String id, List<InputSpec> params, int paramIndex) {
+	public ParamEditPanel(String id, List<InputSpec> params, int paramIndex) {
 		super(id);
 	
 		this.params = params;
@@ -36,7 +36,7 @@ abstract class JobParamEditPanel extends Panel implements InputContext {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		JobParamBean bean = new JobParamBean();
+		ParamBean bean = new ParamBean();
 		if (paramIndex != -1)
 			bean.setParam(params.get(paramIndex));
 
@@ -55,7 +55,7 @@ abstract class JobParamEditPanel extends Panel implements InputContext {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(JobParamEditPanel.this));
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(ParamEditPanel.this));
 			}
 
 			@Override
@@ -106,7 +106,7 @@ abstract class JobParamEditPanel extends Panel implements InputContext {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(JobParamEditPanel.this));
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(ParamEditPanel.this));
 			}
 
 			@Override

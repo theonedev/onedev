@@ -43,3 +43,7 @@
 .floating.job-param>.content>.body>.bean-viewer>.bean-properties>table>tbody>tr>td.name {
 	min-width: 150px;
 } 
+
+.trigger-list>.body>table>thead, .trigger-list>table>thead {
+    display: none;
+}

@@ -20,7 +20,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 
 import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.JobSpec;
+import io.onedev.server.ci.Job;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.web.component.MultilineLabel;
@@ -53,7 +53,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 		}
 	}
 
-	private WebMarkupContainer newJobContainer(String componentId, JobSpec job) {
+	private WebMarkupContainer newJobContainer(String componentId, Job job) {
 		WebMarkupContainer container = new WebMarkupContainer(jobsView.newChildId());
 		container.add(BeanContext.editBean("editor", job));
 		container.add(new AjaxLink<Void>("delete") {
@@ -80,14 +80,14 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 			jobsView = new RepeatingView("jobs");
 			fragment.add(jobsView);
 			
-			for (JobSpec job: ciSpec.getJobs()) {
+			for (Job job: ciSpec.getJobs()) {
 				jobsView.add(newJobContainer(jobsView.newChildId(), job));
 			}
 			fragment.add(new AjaxLink<Void>("addJob") {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					JobSpec job = new JobSpec();
+					Job job = new Job();
 					WebMarkupContainer jobContainer = newJobContainer(jobsView.newChildId(), job);
 					jobsView.add(jobContainer);
 					String script = String.format("$(\"#%s\").before(\"<div id='%s'></div>\");", 
@@ -107,7 +107,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 
 	@Override
 	public void convertInput() {
-		CISpec editingCISpec = getEditingCISpec();
+		CISpec editingCISpec = getCISpec();
 		if (editingCISpec != null) {
 			setConvertedInput(VersionedDocument.fromBean(editingCISpec).toXML().getBytes(Charsets.UTF_8));
 		} else {
@@ -116,12 +116,12 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 	}
 
 	@Nullable
-	public CISpec getEditingCISpec() {
+	public CISpec getCISpec() {
 		if (parseResult instanceof CISpec) {
 			CISpec ciSpec = new CISpec();
 			for (Component child: jobsView) {
 				BeanEditor jobEditor = (BeanEditor) child.get("editor");
-				ciSpec.getJobs().add((JobSpec) jobEditor.getConvertedInput());
+				ciSpec.getJobs().add((Job) jobEditor.getConvertedInput());
 			}
 			return ciSpec;
 		} else {

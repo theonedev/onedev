@@ -9,7 +9,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import com.google.common.base.Throwables;
 
 import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.JobSpec;
+import io.onedev.server.ci.Job;
 import io.onedev.server.git.Blob;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.web.component.MultilineLabel;
@@ -35,7 +35,7 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 				CISpec ciSpec = (CISpec) VersionedDocument.fromXML(ciSpecString).toBean();
 				Fragment fragment = new Fragment("content", "validFrag", this);
 				RepeatingView jobsView = new RepeatingView("jobs");
-				for (JobSpec job: ciSpec.getJobs()) {
+				for (Job job: ciSpec.getJobs()) {
 					jobsView.add(BeanContext.viewBean(jobsView.newChildId(), job));
 				}
 				fragment.add(jobsView);

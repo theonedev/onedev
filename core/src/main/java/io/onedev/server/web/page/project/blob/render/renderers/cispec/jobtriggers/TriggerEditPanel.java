@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.cispec.dependencies;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobtriggers;
 
 import java.util.List;
 
@@ -10,37 +10,32 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.Dependency;
-import io.onedev.server.ci.Job;
+import io.onedev.server.ci.jobtrigger.JobTrigger;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
-public abstract class DependencyEditPanel extends Panel {
+abstract class TriggerEditPanel extends Panel {
 
-	private final List<Dependency> dependencies;
+	private final List<JobTrigger> triggers;
 	
-	private final int dependencyIndex;
+	private final int triggerIndex;
 	
-	public DependencyEditPanel(String id, List<Dependency> dependencies, int dependencyIndex) {
+	public TriggerEditPanel(String id, List<JobTrigger> triggers, int triggerIndex) {
 		super(id);
 	
-		this.dependencies = dependencies;
-		this.dependencyIndex = dependencyIndex;
+		this.triggers = triggers;
+		this.triggerIndex = triggerIndex;
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Dependency dependency;
-		if (dependencyIndex != -1)
-			dependency = dependencies.get(dependencyIndex);
-		else
-			dependency = new Dependency();
+		TriggerBean bean = new TriggerBean();
+		if (triggerIndex != -1)
+			bean.setTrigger(triggers.get(triggerIndex));
 
 		Form<?> form = new Form<Void>("form") {
 
@@ -57,7 +52,7 @@ public abstract class DependencyEditPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(DependencyEditPanel.this));
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(TriggerEditPanel.this));
 			}
 
 			@Override
@@ -67,7 +62,7 @@ public abstract class DependencyEditPanel extends Panel {
 			
 		});
 		
-		BeanEditor editor = BeanContext.editBean("editor", dependency);
+		BeanEditor editor = BeanContext.editBean("editor", bean);
 		form.add(editor);
 		form.add(new AjaxButton("save") {
 
@@ -75,22 +70,12 @@ public abstract class DependencyEditPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				if (dependencyIndex != -1) { 
-					Dependency oldDependency = dependencies.get(dependencyIndex);
-					if (!dependency.getJob().equals(oldDependency.getJob()) && getDependency(dependency.getJob()) != null) {
-						editor.getErrorContext(new PathSegment.Property("job"))
-								.addError("Dependency to this job is already defined");
-					}
-				} else if (getDependency(dependency.getJob()) != null) {
-					editor.getErrorContext(new PathSegment.Property("job"))
-							.addError("Dependency to this job is already defined");
-				}
-
+				JobTrigger trigger = bean.getTrigger();
 				if (!editor.hasErrors(true)) {
-					if (dependencyIndex != -1) {
-						dependencies.set(dependencyIndex, dependency);
+					if (triggerIndex != -1) {
+						triggers.set(triggerIndex, trigger);
 					} else {
-						dependencies.add(dependency);
+						triggers.add(trigger);
 					}
 					onSave(target);
 				} else {
@@ -105,7 +90,7 @@ public abstract class DependencyEditPanel extends Panel {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(DependencyEditPanel.this));
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(TriggerEditPanel.this));
 			}
 
 			@Override
@@ -119,20 +104,8 @@ public abstract class DependencyEditPanel extends Panel {
 		add(form);
 	}
 
-	private Dependency getDependency(String job) {
-		for (Dependency dependency: dependencies) {
-			if (job.equals(dependency.getJob()))
-				return dependency;
-		}
-		return null;
-	}
-	
 	protected abstract void onSave(AjaxRequestTarget target);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 
-	public abstract CISpec getCISpec();
-	
-	public abstract Job getBelongingJob();
-	
 }

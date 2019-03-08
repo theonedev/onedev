@@ -13,14 +13,14 @@ public class CISpec implements Serializable {
 	
 	public static final String BLOB_PATH = "onedev-ci.xml";
 
-	private List<JobSpec> jobs = new ArrayList<>();
+	private List<Job> jobs = new ArrayList<>();
 
 	@Editable
-	public List<JobSpec> getJobs() {
+	public List<Job> getJobs() {
 		return jobs;
 	}
 
-	public void setJobs(List<JobSpec> jobs) {
+	public void setJobs(List<Job> jobs) {
 		this.jobs = jobs;
 	}
 	

@@ -8,7 +8,7 @@ import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public class JobParamBean implements Serializable {
+public class ParamBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

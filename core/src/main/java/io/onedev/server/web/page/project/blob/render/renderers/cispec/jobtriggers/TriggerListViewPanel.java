@@ -1,10 +1,9 @@
-package io.onedev.server.web.page.project.blob.render.renderers.cispec.dependencies;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobtriggers;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -24,67 +23,48 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.server.ci.Dependency;
+import io.onedev.server.ci.jobtrigger.JobTrigger;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
-import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
-public class DependencyListViewPanel extends Panel {
+public class TriggerListViewPanel extends Panel {
 
-	private final List<Dependency> dependencies = new ArrayList<>();
+	private final List<JobTrigger> triggers = new ArrayList<>();
 	
-	public DependencyListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
+	public TriggerListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
-			dependencies.add((Dependency) each);
+			triggers.add((JobTrigger) each);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<IColumn<Dependency, Void>> columns = new ArrayList<>();
+		List<IColumn<JobTrigger, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Dependency, Void>(Model.of("Job")) {
+		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("Description")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
+			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getJob());
+						return new Label(componentId, rowModel.getObject().getDescription());
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<Dependency, Void>(Model.of("Artifacts")) {
+		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						String artifacts = rowModel.getObject().getArtifacts();
-						if (StringUtils.isNotBlank(artifacts))
-							return new Label(componentId, artifacts);
-						else
-							return new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false);
-					}
-					
-				});
-			}
-		});		
-		
-		columns.add(new AbstractColumn<Dependency, Void>(Model.of("")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
+			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
@@ -93,6 +73,7 @@ public class DependencyListViewPanel extends Panel {
 					}
 					
 				});
+				
 			}
 
 			@Override
@@ -102,16 +83,16 @@ public class DependencyListViewPanel extends Panel {
 			
 		});		
 		
-		IDataProvider<Dependency> dataProvider = new ListDataProvider<Dependency>() {
+		IDataProvider<JobTrigger> dataProvider = new ListDataProvider<JobTrigger>() {
 
 			@Override
-			protected List<Dependency> getData() {
-				return dependencies;
+			protected List<JobTrigger> getData() {
+				return triggers;
 			}
 
 		};
 		
-		add(new DataTable<Dependency, Void>("dependencies", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new DataTable<JobTrigger, Void>("triggers", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
@@ -128,7 +109,7 @@ public class DependencyListViewPanel extends Panel {
 		private final int index;
 		
 		public ColumnFragment(String id, int index) {
-			super(id, "columnFrag", DependencyListViewPanel.this);
+			super(id, "columnFrag", TriggerListViewPanel.this);
 			this.index = index;
 		}
 		
@@ -145,18 +126,18 @@ public class DependencyListViewPanel extends Panel {
 
 						@Override
 						protected String getTitle() {
-							return dependencies.get(index).getJob();
+							return EditableUtils.getDisplayName(triggers.get(index).getClass());
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "dependency def-detail"));
+							add(AttributeAppender.append("class", "job-trigger def-detail"));
 						}
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.viewBean(id, dependencies.get(index), Sets.newHashSet("job"), true);
+							return BeanContext.viewBean(id, triggers.get(index));
 						}
 
 					};

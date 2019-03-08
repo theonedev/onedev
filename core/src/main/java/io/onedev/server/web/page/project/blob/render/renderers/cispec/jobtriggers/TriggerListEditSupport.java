@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobparams;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobtriggers;
 
 import java.io.Serializable;
 import java.util.List;
@@ -6,8 +6,8 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.ci.JobSpec;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.ci.Job;
+import io.onedev.server.ci.jobtrigger.JobTrigger;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.EmptyValueLabel;
@@ -17,13 +17,13 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 
 @SuppressWarnings("serial")
-public class JobParamListEditSupport implements EditSupport {
+public class TriggerListEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
-		if (descriptor.getBeanClass() == JobSpec.class && List.class.isAssignableFrom(descriptor.getPropertyClass())) {
+		if (descriptor.getBeanClass() == Job.class && List.class.isAssignableFrom(descriptor.getPropertyClass())) {
 			final Class<?> elementClass = EditableUtils.getElementClass(descriptor.getPropertyGetter().getGenericReturnType());
-			if (elementClass == InputSpec.class) {
+			if (elementClass == JobTrigger.class) {
 				return new PropertyContext<List<Serializable>>(descriptor) {
 
 					@Override
@@ -33,7 +33,7 @@ public class JobParamListEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
-									return new JobParamListViewPanel(id, elementClass, model.getObject());
+									return new TriggerListViewPanel(id, elementClass, model.getObject());
 								} else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 								}
@@ -44,7 +44,7 @@ public class JobParamListEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<Serializable>> renderForEdit(String componentId, IModel<List<Serializable>> model) {
-						return new JobParamListEditPanel(componentId, descriptor, model);
+						return new TriggerListEditPanel(componentId, descriptor, model);
 					}
 					
 				};

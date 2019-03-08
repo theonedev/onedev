@@ -1,11 +1,10 @@
-package io.onedev.server.web.page.project.blob.render.renderers.cispec.dependencies;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobparams;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -25,32 +24,30 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.Dependency;
-import io.onedev.server.ci.Job;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
-import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecEditPanel;
+import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
-public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
+public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 
-	private final List<Dependency> dependencies;
+	private final List<InputSpec> params;
 	
-	public DependencyListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
+	public ParamListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
-		dependencies = new ArrayList<>();
+		params = new ArrayList<>();
 		for (Serializable each: model.getObject()) {
-			dependencies.add((Dependency) each);
+			params.add((InputSpec) each);
 		}
 	}
 	
@@ -61,7 +58,7 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new DependencyEditPanel(id, dependencies, -1) {
+				return new ParamEditPanel(id, params, -1) {
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
@@ -71,17 +68,7 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 					@Override
 					protected void onSave(AjaxRequestTarget target) {
 						modal.close();
-						target.add(DependencyListEditPanel.this);
-					}
-
-					@Override
-					public CISpec getCISpec() {
-						return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getCISpec();
-					}
-
-					@Override
-					public Job getBelongingJob() {
-						return (Job) DependencyListEditPanel.this.findParent(BeanEditor.class).getConvertedInput();
+						target.add(ParamListEditPanel.this);
 					}
 
 				};
@@ -89,18 +76,18 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 			
 		});
 		
-		List<IColumn<Dependency, Void>> columns = new ArrayList<>();
+		List<IColumn<InputSpec, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Dependency, Void>(Model.of("Job")) {
+		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Name")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
-				Fragment fragment = new Fragment(componentId, "jobColumnFrag", DependencyListEditPanel.this);
+			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+				Fragment fragment = new Fragment(componentId, "nameColumnFrag", ParamListEditPanel.this);
 				ModalLink link = new ModalLink("link") {
 
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
-						return new DependencyEditPanel(id, dependencies, cellItem.findParent(Item.class).getIndex()) {
+						return new ParamEditPanel(id, params, cellItem.findParent(Item.class).getIndex()) {
 
 							@Override
 							protected void onCancel(AjaxRequestTarget target) {
@@ -110,53 +97,48 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 							@Override
 							protected void onSave(AjaxRequestTarget target) {
 								modal.close();
-								target.add(DependencyListEditPanel.this);
-							}
-
-							@Override
-							public CISpec getCISpec() {
-								return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getCISpec();
-							}
-
-							@Override
-							public Job getBelongingJob() {
-								return (Job) DependencyListEditPanel.this.findParent(BeanEditor.class).getConvertedInput();
+								target.add(ParamListEditPanel.this);
 							}
 
 						};
 					}
 					
 				};
-				link.add(new Label("label", rowModel.getObject().getJob()));
+				link.add(new Label("label", rowModel.getObject().getName()));
 				fragment.add(link);
 				
 				cellItem.add(fragment);
 			}
 		});		
 		
-		columns.add(new AbstractColumn<Dependency, Void>(Model.of("Artifacts")) {
+		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Type")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
-				if (StringUtils.isNotBlank(rowModel.getObject().getArtifacts()))
-					cellItem.add(new Label(componentId, rowModel.getObject().getArtifacts()));
-				else
-					cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
+			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+				cellItem.add(new Label(componentId, EditableUtils.getDisplayName(rowModel.getObject().getClass())));
+			}
+		});		
+		
+		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Allow Empty")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+				cellItem.add(new Label(componentId, StringUtils.describe(rowModel.getObject().isAllowEmpty())));
 			}
 			
 		});		
 		
-		columns.add(new AbstractColumn<Dependency, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
-				Fragment fragment = new Fragment(componentId, "actionColumnFrag", DependencyListEditPanel.this);
+			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", ParamListEditPanel.this);
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						dependencies.remove(rowModel.getObject());
-						target.add(DependencyListEditPanel.this);
+						params.remove(rowModel.getObject());
+						target.add(ParamListEditPanel.this);
 					}
 					
 				});
@@ -170,17 +152,17 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 			
 		});		
 		
-		IDataProvider<Dependency> dataProvider = new ListDataProvider<Dependency>() {
+		IDataProvider<InputSpec> dataProvider = new ListDataProvider<InputSpec>() {
 
 			@Override
-			protected List<Dependency> getData() {
-				return dependencies;			
+			protected List<InputSpec> getData() {
+				return params;			
 			}
 
 		};
 		
-		DataTable<Dependency, Void> dataTable;
-		add(dataTable = new DataTable<Dependency, Void>("dependencies", columns, dataProvider, Integer.MAX_VALUE));
+		DataTable<InputSpec, Void> dataTable;
+		add(dataTable = new DataTable<InputSpec, Void>("params", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
 		
@@ -192,12 +174,12 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
-						Collections.swap(dependencies, fromIndex+i, fromIndex+i+1);
+						Collections.swap(params, fromIndex+i, fromIndex+i+1);
 				} else {
 					for (int i=0; i<fromIndex-toIndex; i++) 
-						Collections.swap(dependencies, fromIndex-i, fromIndex-i-1);
+						Collections.swap(params, fromIndex-i, fromIndex-i-1);
 				}
-				target.add(DependencyListEditPanel.this);
+				target.add(ParamListEditPanel.this);
 			}
 			
 		}.sortable("tbody"));
@@ -223,7 +205,7 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 	@Override
 	protected List<Serializable> convertInputToValue() throws ConversionException {
 		List<Serializable> value = new ArrayList<>();
-		for (Dependency each: dependencies)
+		for (InputSpec each: params)
 			value.add(each);
 		return value;
 	}

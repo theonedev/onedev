@@ -5,7 +5,7 @@ import java.io.Serializable;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public class StepSpec implements Serializable {
+public class Step implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

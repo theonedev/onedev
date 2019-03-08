@@ -13,7 +13,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.page.project.blob.render.renderers.cispec.dependencies.DependencyEditPanel;
 
 @Editable
-public class DependencySpec implements Serializable {
+public class Dependency implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -56,8 +56,8 @@ public class DependencySpec implements Serializable {
 	private static List<String> getJobChoices() {
 		DependencyEditPanel editor = OneContext.get().getComponent().findParent(DependencyEditPanel.class);
 		List<String> choices = new ArrayList<>();
-		JobSpec belongingJob = editor.getBelongingJob();
-		for (JobSpec job: editor.getEditingCISpec().getJobs()) {
+		Job belongingJob = editor.getBelongingJob();
+		for (Job job: editor.getCISpec().getJobs()) {
 			choices.add(job.getName());
 		}
 		choices.remove(belongingJob.getName());
