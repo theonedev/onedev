@@ -6,15 +6,15 @@ import java.util.List;
 
 import org.junit.Test;
 
-import io.onedev.codeassist.CodeAssist;
-import io.onedev.codeassist.FenceAware;
-import io.onedev.codeassist.InputStatus;
-import io.onedev.codeassist.InputSuggestion;
-import io.onedev.codeassist.grammar.LexerRuleRefElementSpec;
-import io.onedev.codeassist.parser.TerminalExpect;
+import io.onedev.commons.codeassist.CodeAssist;
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 
-public class TestPullRequestQueryGrammar {
+public class PullRequestQueryGrammarTest {
 
 	private CodeAssist codeAssist = new CodeAssist(PullRequestQueryLexer.class, false) {
 

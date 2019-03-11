@@ -50,8 +50,8 @@ import org.apache.wicket.util.IProvider;
 import org.apache.wicket.util.time.Duration;
 
 import de.agilecoders.wicket.core.settings.BootstrapSettings;
-import io.onedev.launcher.bootstrap.Bootstrap;
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.error.ErrorPage;
 import io.onedev.server.web.page.project.ProjectListPage;

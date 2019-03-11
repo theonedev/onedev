@@ -9,9 +9,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.util.OneContext;
-import io.onedev.utils.ClassUtils;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")

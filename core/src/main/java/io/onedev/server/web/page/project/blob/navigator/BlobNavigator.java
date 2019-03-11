@@ -38,6 +38,7 @@ import org.eclipse.jgit.lib.FileMode;
 
 import com.google.common.base.Splitter;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.GitUtils;
@@ -50,7 +51,6 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class BlobNavigator extends Panel {

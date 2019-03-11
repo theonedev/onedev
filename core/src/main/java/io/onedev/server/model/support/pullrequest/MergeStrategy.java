@@ -6,10 +6,10 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 
+import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.PullRequest;
-import io.onedev.utils.WordUtils;
 
 public enum MergeStrategy {
 	CREATE_MERGE_COMMIT("Add all commits from source branch to target branch with a merge commit.") {

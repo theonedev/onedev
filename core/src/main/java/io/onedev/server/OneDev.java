@@ -15,11 +15,14 @@ import org.apache.shiro.util.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.launcher.bootstrap.Bootstrap;
-import io.onedev.launcher.loader.AbstractPlugin;
-import io.onedev.launcher.loader.AppLoader;
-import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.launcher.loader.ManagedSerializedForm;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.loader.AbstractPlugin;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.init.InitStage;
+import io.onedev.commons.utils.init.ManualConfig;
+import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
@@ -33,9 +36,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.jetty.JettyRunner;
 import io.onedev.server.util.serverconfig.ServerConfig;
 import io.onedev.server.web.websocket.WebSocketManager;
-import io.onedev.utils.init.InitStage;
-import io.onedev.utils.init.ManualConfig;
-import io.onedev.utils.schedule.TaskScheduler;
 
 public class OneDev extends AbstractPlugin implements Serializable {
 

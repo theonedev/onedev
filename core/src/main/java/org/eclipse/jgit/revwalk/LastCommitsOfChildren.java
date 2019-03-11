@@ -27,9 +27,9 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import org.eclipse.jgit.util.RawParseUtils;
 
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.git.GitUtils;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.StringUtils;
 
 /**
  * This class calculates last commits of children of a git tree.

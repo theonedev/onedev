@@ -20,7 +20,9 @@ import org.hibernate.StaleStateException;
 import org.unbescape.javascript.JavaScriptEscape;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.utils.ColorUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.MarkdownManager;
@@ -37,8 +39,6 @@ import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.avatar.AvatarManager;
-import io.onedev.utils.ColorUtils;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class MarkdownViewer extends GenericPanel<String> {

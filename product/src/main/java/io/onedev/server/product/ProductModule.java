@@ -4,10 +4,10 @@ import java.io.File;
 
 import org.hibernate.cfg.Environment;
 
-import io.onedev.launcher.loader.AbstractPluginModule;
-import io.onedev.launcher.bootstrap.Bootstrap;
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.StringUtils;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.loader.AbstractPluginModule;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.persistence.HibernateProperties;
 import io.onedev.server.util.jetty.ServerConfigurator;
 import io.onedev.server.util.jetty.ServletConfigurator;

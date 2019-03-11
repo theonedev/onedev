@@ -15,7 +15,7 @@ import org.hibernate.type.Type;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;

@@ -21,7 +21,9 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.MembershipManager;
@@ -44,8 +46,6 @@ import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.StringUtils;
 
 @Singleton
 public class OneAuthorizingRealm extends AuthorizingRealm {

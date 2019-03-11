@@ -6,10 +6,10 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.ci.Job;
 import io.onedev.server.ci.jobtrigger.JobTrigger;
 import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -22,7 +22,7 @@ public class TriggerListEditSupport implements EditSupport {
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (descriptor.getBeanClass() == Job.class && List.class.isAssignableFrom(descriptor.getPropertyClass())) {
-			final Class<?> elementClass = EditableUtils.getElementClass(descriptor.getPropertyGetter().getGenericReturnType());
+			final Class<?> elementClass = ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType());
 			if (elementClass == JobTrigger.class) {
 				return new PropertyContext<List<Serializable>>(descriptor) {
 

@@ -12,7 +12,7 @@ import javax.inject.Singleton;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.manager.UrlManager;

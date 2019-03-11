@@ -44,6 +44,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.PathUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.UrlUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.model.Project;
@@ -55,9 +58,6 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobUploadException;
-import io.onedev.utils.PathUtils;
-import io.onedev.utils.StringUtils;
-import io.onedev.utils.UrlUtils;
 
 @SuppressWarnings("serial")
 abstract class InsertUrlPanel extends Panel {

@@ -1,42 +1,44 @@
-package io.onedev.server.web.editable.branchpattern;
+package io.onedev.server.web.editable.stringlist;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.commons.utils.ReflectionUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.BranchPattern;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @SuppressWarnings("serial")
-public class BranchPatternEditSupport implements EditSupport {
+public class StringListEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Method propertyGetter = descriptor.getPropertyGetter();
-        if (propertyGetter.getAnnotation(BranchPattern.class) != null) {
-        	if (propertyGetter.getReturnType() != String.class) {
-	    		throw new RuntimeException("Annotation 'BranchPattern' should be applied to property "
-	    				+ "with type 'String'.");
-        	}
-    		return new PropertyContext<String>(descriptor) {
+    	Class<?> returnType = propertyGetter.getReturnType();
+    	Type genericReturnType = propertyGetter.getGenericReturnType();
+    	if (returnType == List.class && ReflectionUtils.getCollectionElementType(genericReturnType) == String.class) {
+    		return new PropertyContext<List<String>>(descriptor) {
 
 				@Override
-				public PropertyViewer renderForView(String componentId, final IModel<String> model) {
+				public PropertyViewer renderForView(String componentId, final IModel<List<String>> model) {
 					return new PropertyViewer(componentId, descriptor) {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-					        String refMatch = model.getObject();
-					        if (refMatch != null) {
-					        	return new Label(id, refMatch);
+					        List<String> tags = model.getObject();
+					        if (tags != null && !tags.isEmpty()) {
+					        	return new MultilineLabel(id, StringUtils.join(tags, "\n"));
 					        } else {
 								NameOfEmptyValue nameOfEmptyValue = propertyDescriptor.getPropertyGetter().getAnnotation(NameOfEmptyValue.class);
 								if (nameOfEmptyValue != null)
@@ -50,8 +52,8 @@ public class BranchPatternEditSupport implements EditSupport {
 				}
 
 				@Override
-				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new BranchPatternEditor(componentId, descriptor, model);
+				public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
+		        	return new StringListPropertyEditor(componentId, descriptor, model);
 				}
     			
     		};
@@ -62,7 +64,7 @@ public class BranchPatternEditSupport implements EditSupport {
 
 	@Override
 	public int getPriority() {
-		return DEFAULT_PRIORITY;
+		return DEFAULT_PRIORITY * 2;
 	}
 	
 }

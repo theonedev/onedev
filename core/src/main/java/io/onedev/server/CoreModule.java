@@ -64,9 +64,12 @@ import com.thoughtworks.xstream.core.JVM;
 import com.thoughtworks.xstream.mapper.MapperWrapper;
 import com.vladsch.flexmark.Extension;
 
-import io.onedev.launcher.bootstrap.Bootstrap;
-import io.onedev.launcher.loader.AbstractPlugin;
-import io.onedev.launcher.loader.AbstractPluginModule;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.loader.AbstractPlugin;
+import io.onedev.commons.launcher.loader.AbstractPluginModule;
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.schedule.DefaultTaskScheduler;
+import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.command.ApplyDBConstraintsCommand;
 import io.onedev.server.command.BackupDBCommand;
 import io.onedev.server.command.CheckDataVersionCommand;
@@ -250,9 +253,6 @@ import io.onedev.server.web.websocket.IssueEventBroadcaster;
 import io.onedev.server.web.websocket.PullRequestEventBroadcaster;
 import io.onedev.server.web.websocket.WebSocketManager;
 import io.onedev.server.web.websocket.WebSocketPolicyProvider;
-import io.onedev.utils.ClassUtils;
-import io.onedev.utils.schedule.DefaultTaskScheduler;
-import io.onedev.utils.schedule.TaskScheduler;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.

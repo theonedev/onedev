@@ -25,6 +25,7 @@ import org.eclipse.jgit.transport.PacketLineOut;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.utils.concurrent.PrioritizedRunnable;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
 import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
@@ -40,7 +41,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.serverconfig.ServerConfig;
-import io.onedev.utils.concurrent.PrioritizedRunnable;
 
 @Singleton
 public class GitFilter implements Filter {

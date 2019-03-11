@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import io.onedev.commons.utils.matchscore.MatchScoreProvider;
+import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
-import io.onedev.utils.matchscore.MatchScoreProvider;
-import io.onedev.utils.matchscore.MatchScoreUtils;
 
 public class UserChoiceProvider extends AbstractUserChoiceProvider {
 

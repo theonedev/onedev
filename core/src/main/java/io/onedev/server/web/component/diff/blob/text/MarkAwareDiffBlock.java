@@ -3,7 +3,7 @@ package io.onedev.server.web.component.diff.blob.text;
 import java.io.Serializable;
 import java.util.List;
 
-import io.onedev.jsyntax.Tokenized;
+import io.onedev.commons.jsyntax.Tokenized;
 
 public class MarkAwareDiffBlock implements Serializable {
 

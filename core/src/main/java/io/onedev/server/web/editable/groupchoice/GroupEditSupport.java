@@ -8,8 +8,8 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.util.StringUtils;
 
+import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -25,7 +25,7 @@ public class GroupEditSupport implements EditSupport {
 		Method propertyGetter = descriptor.getPropertyGetter();
         if (propertyGetter.getAnnotation(GroupChoice.class) != null) {
         	if (Collection.class.isAssignableFrom(propertyGetter.getReturnType()) 
-        			&& EditableUtils.getElementClass(propertyGetter.getGenericReturnType()) == String.class) {
+        			&& ReflectionUtils.getCollectionElementType(propertyGetter.getGenericReturnType()) == String.class) {
         		return new PropertyContext<Collection<String>>(descriptor) {
 
 					@Override

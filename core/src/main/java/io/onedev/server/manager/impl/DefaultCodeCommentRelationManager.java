@@ -5,8 +5,8 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.launcher.loader.Listen;
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentCreated;

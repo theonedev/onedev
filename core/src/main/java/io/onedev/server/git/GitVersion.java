@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
-import io.onedev.utils.StringUtils;
+import io.onedev.commons.utils.StringUtils;
 
 public class GitVersion implements Comparable<GitVersion> {
 

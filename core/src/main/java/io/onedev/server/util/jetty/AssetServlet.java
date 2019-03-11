@@ -19,7 +19,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletMapping;
 import org.eclipse.jetty.util.resource.Resource;
 
-import io.onedev.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
 
 /**
  * Asset servlet to serve static web assets with some default parameters.

@@ -7,9 +7,13 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import io.onedev.server.OneDev;
@@ -81,9 +85,18 @@ public class ReviewRequirement {
 	}
 
 	public static RequirementContext parse(String requirementString) {
-		ANTLRInputStream is = new ANTLRInputStream(requirementString); 
+		CharStream is = CharStreams.fromString(requirementString); 
 		ReviewRequirementLexer lexer = new ReviewRequirementLexer(is);
 		lexer.removeErrorListeners();
+		lexer.addErrorListener(new BaseErrorListener() {
+
+			@Override
+			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
+					int charPositionInLine, String msg, RecognitionException e) {
+				throw new OneException("Malformed review requirement");
+			}
+			
+		});
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		ReviewRequirementParser parser = new ReviewRequirementParser(tokens);
 		parser.removeErrorListeners();

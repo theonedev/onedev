@@ -15,14 +15,14 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.utils.concurrent.Prioritized;
+import io.onedev.commons.utils.concurrent.PrioritizedRunnable;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.manager.BatchWorkManager;
 import io.onedev.server.manager.WorkExecutor;
 import io.onedev.server.util.BatchWorker;
-import io.onedev.utils.concurrent.Prioritized;
-import io.onedev.utils.concurrent.PrioritizedRunnable;
 
 @Singleton
 public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {

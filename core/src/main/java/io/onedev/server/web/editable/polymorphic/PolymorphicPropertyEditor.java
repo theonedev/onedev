@@ -19,8 +19,8 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.launcher.loader.AppLoader;
-import io.onedev.launcher.loader.ImplementationRegistry;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.ImplementationRegistry;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;

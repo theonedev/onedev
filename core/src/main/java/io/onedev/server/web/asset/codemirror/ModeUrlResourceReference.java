@@ -9,7 +9,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
 import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceReference;
-import io.onedev.utils.StringUtils;
+import io.onedev.commons.utils.StringUtils;
 
 public class ModeUrlResourceReference extends JavaScriptResourceReference {
 

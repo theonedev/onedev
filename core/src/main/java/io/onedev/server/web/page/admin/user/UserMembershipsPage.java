@@ -33,6 +33,8 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import io.onedev.commons.utils.matchscore.MatchScoreProvider;
+import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.GroupManager;
@@ -52,8 +54,6 @@ import io.onedev.server.web.component.select2.ResponseFiller;
 import io.onedev.server.web.component.select2.SelectToAddChoice;
 import io.onedev.server.web.page.admin.group.GroupProfilePage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.utils.matchscore.MatchScoreProvider;
-import io.onedev.utils.matchscore.MatchScoreUtils;
 
 @SuppressWarnings("serial")
 public class UserMembershipsPage extends UserPage {

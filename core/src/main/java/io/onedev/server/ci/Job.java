@@ -10,6 +10,7 @@ import io.onedev.server.ci.jobtrigger.JobTrigger;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
+import io.onedev.server.web.editable.annotation.PathPatterns;
 
 @Editable
 @Horizontal
@@ -41,7 +42,8 @@ public class Job implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200)
+	@Editable(order=200, name="Prompt Parameters", description="Specify parameters to prompt when the job "
+			+ "is triggered manually")
 	public List<InputSpec> getParams() {
 		return params;
 	}
@@ -59,7 +61,8 @@ public class Job implements Serializable {
 		this.steps = steps;
 	}
 	
-	@Editable(order=400)
+	@Editable(name="Dependency Jobs", order=400, description="Job dependencies determines the order and "
+			+ "concurrency when run different jobs")
 	public List<Dependency> getDependencies() {
 		return dependencies;
 	}
@@ -68,7 +71,8 @@ public class Job implements Serializable {
 		this.dependencies = dependencies;
 	}
 
-	@Editable(order=500)
+	@Editable(order=500, description="Use triggers to run the job automatically under certain conditions. "
+			+ "The condition will be checked in order and the first matching trigger will take effect")
 	public List<JobTrigger> getTriggers() {
 		return triggers;
 	}
@@ -77,7 +81,9 @@ public class Job implements Serializable {
 		this.triggers = triggers;
 	}
 
-	@Editable(order=500)
+	@Editable(order=600, description="Optionally specify space-separated artifact paths to publish. "
+			+ "Artifact path is relative to job workspace. Use * or ? for wildcard match")
+	@PathPatterns
 	public String getArtifacts() {
 		return artifacts;
 	}
@@ -86,7 +92,7 @@ public class Job implements Serializable {
 		this.artifacts = artifacts;
 	}
 
-	@Editable(order=600, description="Timeout in seconds")
+	@Editable(order=600, description="Specify timeout in seconds")
 	public long getTimeout() {
 		return timeout;
 	}

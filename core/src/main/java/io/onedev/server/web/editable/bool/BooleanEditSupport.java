@@ -6,6 +6,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -13,7 +14,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class BooleanEditSupport implements EditSupport {

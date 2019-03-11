@@ -12,6 +12,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.AttachmentManager;
 import io.onedev.server.manager.ProjectManager;
@@ -22,9 +25,6 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.util.resource.AttachmentResource;
 import io.onedev.server.web.util.resource.AttachmentResourceReference;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.StringUtils;
 
 public class ProjectAttachmentSupport implements AttachmentSupport {
 

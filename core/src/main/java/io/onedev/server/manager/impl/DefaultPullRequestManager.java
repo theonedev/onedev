@@ -52,8 +52,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.launcher.loader.Listen;
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.concurrent.Prioritized;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildEvent;
@@ -125,8 +127,6 @@ import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.concurrent.Prioritized;
 
 @Singleton
 public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest> implements PullRequestManager {
@@ -678,7 +678,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				PullRequestUpdate update = request.getSortedUpdates().get(i);
 				for (String file: update.getChangedFiles()) {
 					FileProtection fileProtection = branchProtection.getFileProtection(file);
-					if (fileProtection != null && !checkedFileProtections.contains(fileProtection)) {
+					if (fileProtection != null  
+							&& !checkedFileProtections.contains(fileProtection)) {
 						checkedFileProtections.add(fileProtection);
 						checkReviews(ReviewRequirement.fromString(fileProtection.getReviewRequirement()), update);
 					}

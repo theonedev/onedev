@@ -14,9 +14,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.web.component.select2.Select2MultiChoice;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -31,7 +31,7 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
 	
 	public EnumListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Enum<?>>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
-		enumClass = (Class<Enum>) EditableUtils.getElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());
+		enumClass = (Class<Enum>) ReflectionUtils.getCollectionElementType(propertyDescriptor.getPropertyGetter().getGenericReturnType());
 	}
 
 	private String getDisplayValue(String choice) {

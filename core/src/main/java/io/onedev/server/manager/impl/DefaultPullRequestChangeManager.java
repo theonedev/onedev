@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 
 import com.google.common.base.Objects;
 
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.manager.PullRequestChangeManager;
 import io.onedev.server.model.PullRequest;

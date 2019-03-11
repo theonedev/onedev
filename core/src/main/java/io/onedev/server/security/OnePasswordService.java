@@ -6,7 +6,7 @@ import org.apache.shiro.authc.credential.PasswordService;
 
 import com.pmease.security.shiro.bcrypt.BCryptPasswordService;
 
-import io.onedev.utils.StringUtils;
+import io.onedev.commons.utils.StringUtils;
 
 @Singleton
 public class OnePasswordService implements PasswordService {

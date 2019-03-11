@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.annotation.Nullable;
 
-import io.onedev.launcher.loader.ExtensionPoint;
+import io.onedev.commons.launcher.loader.ExtensionPoint;
 import io.onedev.server.web.PrioritizedComponentRenderer;
 
 @ExtensionPoint

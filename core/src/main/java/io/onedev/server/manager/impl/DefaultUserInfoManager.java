@@ -10,7 +10,7 @@ import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.event.codecomment.CodeCommentDeleted;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.entity.EntityRemoved;

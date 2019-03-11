@@ -9,7 +9,8 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.manager.SettingManager;
@@ -18,7 +19,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.utils.FileUtils;
 
 @Singleton
 public class DefaultStorageManager implements StorageManager {

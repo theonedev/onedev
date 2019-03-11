@@ -11,15 +11,15 @@ import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.persistence.DefaultPersistManager;
 import io.onedev.server.persistence.HibernateProperties;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.ZipUtils;
 
 @Singleton
 public class BackupDBCommand extends DefaultPersistManager {

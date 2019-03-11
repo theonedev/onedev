@@ -14,14 +14,14 @@ import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.utils.BeanUtils;
+import io.onedev.commons.utils.HtmlUtils;
+import io.onedev.commons.utils.ReflectionUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
-import io.onedev.utils.BeanUtils;
-import io.onedev.utils.HtmlUtils;
-import io.onedev.utils.ReflectionUtils;
-import io.onedev.utils.StringUtils;
 
 public class PropertyDescriptor implements Serializable {
 

@@ -7,7 +7,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.utils.concurrent.Prioritized;
+import io.onedev.commons.utils.concurrent.Prioritized;
 
 public abstract class BatchWorker {
 	

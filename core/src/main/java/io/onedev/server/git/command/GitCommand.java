@@ -10,12 +10,12 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.git.GitVersion;
 import io.onedev.server.git.config.GitConfig;
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.command.Commandline;
-import io.onedev.utils.command.LineConsumer;
 
 public abstract class GitCommand<V> implements Callable<V> {
 

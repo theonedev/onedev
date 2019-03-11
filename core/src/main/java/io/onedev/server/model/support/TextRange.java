@@ -8,7 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-import io.onedev.jsymbol.TokenPosition;
+import io.onedev.commons.jsymbol.TokenPosition;
 
 public class TextRange implements Serializable {
 	

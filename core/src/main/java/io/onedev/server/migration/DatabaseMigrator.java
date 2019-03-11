@@ -15,8 +15,8 @@ import org.dom4j.Element;
 
 import com.google.common.base.Charsets;
 
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.StringUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
 
 @Singleton
 @SuppressWarnings("unused")

@@ -3,7 +3,8 @@ package io.onedev.server.util.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import io.onedev.server.exception.OneException;
+import org.apache.commons.lang3.StringUtils;
+
 import io.onedev.server.web.editable.annotation.ReviewRequirement;
 
 public class ReviewRequirementValidator implements ConstraintValidator<ReviewRequirement, String> {
@@ -20,9 +21,12 @@ public class ReviewRequirementValidator implements ConstraintValidator<ReviewReq
 			try {
 				io.onedev.server.util.reviewrequirement.ReviewRequirement.fromString(value);
 				return true;
-			} catch (OneException e) {
+			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();
-				constraintContext.buildConstraintViolationWithTemplate(e.getMessage()).addConstraintViolation();
+				if (StringUtils.isNotBlank(e.getMessage()))
+					constraintContext.buildConstraintViolationWithTemplate(e.getMessage()).addConstraintViolation();
+				else
+					constraintContext.buildConstraintViolationWithTemplate("Malformed review requirement").addConstraintViolation();
 				return false;
 			}
 		}

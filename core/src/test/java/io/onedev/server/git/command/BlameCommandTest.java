@@ -6,10 +6,10 @@ import java.util.Collection;
 
 import org.junit.Test;
 
+import io.onedev.commons.utils.Range;
 import io.onedev.server.git.AbstractGitTest;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.command.BlameCommand;
-import io.onedev.utils.Range;
 
 public class BlameCommandTest extends AbstractGitTest {
 

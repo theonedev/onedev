@@ -8,7 +8,7 @@ import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import com.google.inject.Inject;
 
-import io.onedev.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExceptionUtils;
 
 public class TransactionInterceptor implements MethodInterceptor {
 

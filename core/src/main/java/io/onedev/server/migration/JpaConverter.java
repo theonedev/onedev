@@ -23,13 +23,13 @@ import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.mapper.Mapper;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ReflectionUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.utils.ClassUtils;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.ReflectionUtils;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class JpaConverter extends ReflectionConverter {

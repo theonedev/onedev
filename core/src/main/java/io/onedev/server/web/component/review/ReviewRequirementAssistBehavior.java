@@ -3,18 +3,19 @@ package io.onedev.server.web.component.review;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import com.google.common.base.Optional;
 
-import io.onedev.codeassist.FenceAware;
-import io.onedev.codeassist.InputSuggestion;
-import io.onedev.codeassist.grammar.LexerRuleRefElementSpec;
-import io.onedev.codeassist.grammar.RuleRefElementSpec;
-import io.onedev.codeassist.parser.ParseExpect;
-import io.onedev.codeassist.parser.TerminalExpect;
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
+import io.onedev.commons.codeassist.grammar.RuleRefElementSpec;
+import io.onedev.commons.codeassist.parser.ParseExpect;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.reviewrequirement.ReviewRequirementParser;
@@ -43,6 +44,10 @@ public class ReviewRequirementAssistBehavior extends ANTLRAssistBehavior {
 		projectModel.detach();
 	}
 
+	private List<InputSuggestion> escape(List<InputSuggestion> suggestions) {
+		return suggestions.stream().map(it->it.escape(ESCAPE_CHARS)).collect(Collectors.toList());
+	}
+	
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
@@ -54,10 +59,10 @@ public class ReviewRequirementAssistBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String unfencedMatchWith) {
 						Project project = projectModel.getObject();
 						if (terminalExpect.findExpectByRule("userCriteria") != null) {
-							return SuggestionUtils.suggestUser(project, ProjectPrivilege.CODE_READ, 
-									unfencedMatchWith, ESCAPE_CHARS);
+							return escape(SuggestionUtils.suggestUsers(project, ProjectPrivilege.CODE_READ, 
+									unfencedMatchWith));
 						} else {
-							return SuggestionUtils.suggestGroup(unfencedMatchWith, ESCAPE_CHARS);
+							return escape(SuggestionUtils.suggestGroups(unfencedMatchWith));
 						}
 					}
 

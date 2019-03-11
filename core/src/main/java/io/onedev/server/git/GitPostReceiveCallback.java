@@ -18,13 +18,13 @@ import org.eclipse.jgit.lib.RefUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.UnitOfWork;
-import io.onedev.utils.StringUtils;
 
 import com.google.common.base.Preconditions;
 

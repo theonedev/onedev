@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.support.authenticator.Authenticated;
@@ -33,7 +34,6 @@ import io.onedev.server.web.editable.PropertyUpdating;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.utils.ExceptionUtils;
 
 @SuppressWarnings("serial")
 public class AuthenticatorPage extends AdministrationPage {

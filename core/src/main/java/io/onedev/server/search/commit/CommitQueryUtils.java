@@ -8,9 +8,10 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -21,6 +22,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.stringmatch.WildcardUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.exception.OneException;
@@ -34,8 +37,6 @@ import io.onedev.server.search.commit.CommitQueryParser.CriteriaContext;
 import io.onedev.server.search.commit.CommitQueryParser.QueryContext;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.utils.StringUtils;
-import io.onedev.utils.stringmatch.WildcardUtils;
 
 public class CommitQueryUtils {
 	
@@ -44,7 +45,7 @@ public class CommitQueryUtils {
 	@Nullable
 	public static QueryContext parse(@Nullable String queryString) {
 		if (queryString != null) {
-			ANTLRInputStream is = new ANTLRInputStream(queryString); 
+			CharStream is = CharStreams.fromString(queryString); 
 			CommitQueryLexer lexer = new CommitQueryLexer(is);
 			lexer.removeErrorListeners();
 			lexer.addErrorListener(new BaseErrorListener() {

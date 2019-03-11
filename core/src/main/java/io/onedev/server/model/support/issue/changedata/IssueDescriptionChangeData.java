@@ -6,12 +6,12 @@ import java.util.Map;
 
 import org.apache.wicket.Component;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
-import io.onedev.utils.StringUtils;
 
 public class IssueDescriptionChangeData implements IssueChangeData {
 

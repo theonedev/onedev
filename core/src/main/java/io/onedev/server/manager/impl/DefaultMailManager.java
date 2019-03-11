@@ -14,8 +14,8 @@ import org.apache.commons.mail.HtmlEmail;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.launcher.bootstrap.Bootstrap;
 import io.onedev.server.manager.SettingManager;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.server.manager.MailManager;
 import io.onedev.server.model.support.setting.MailSetting;
 import io.onedev.server.persistence.annotation.Sessional;

@@ -46,6 +46,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.git.BlobIdent;
@@ -65,6 +66,7 @@ import io.onedev.server.search.commit.CommitQueryParser.QueryContext;
 import io.onedev.server.search.commit.CommitQueryUtils;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Constants;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.status.BuildsStatusPanel;
 import io.onedev.server.web.component.commit.graph.CommitGraphResourceReference;
@@ -84,7 +86,6 @@ import io.onedev.server.web.page.project.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.util.VisibleVisitor;
 import io.onedev.server.web.util.model.CommitRefsModel;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class ProjectCommitsPage extends ProjectPage {
@@ -609,7 +610,8 @@ public class ProjectCommitsPage extends ProjectPage {
 				RevisionComparePage.State compareState = new RevisionComparePage.State();
 				compareState.leftSide = new ProjectAndRevision(getProject(), commit.name());
 				compareState.rightSide = new ProjectAndRevision(getProject(), state.compareWith);
-				compareState.pathFilter = path;
+				if (path != null)
+					compareState.pathFilter = PatternSet.quoteIfNecessary(path);
 				compareState.tabPanel = RevisionComparePage.TabPanel.CHANGES;
 				
 				params = RevisionComparePage.paramsOf(getProject(), compareState);

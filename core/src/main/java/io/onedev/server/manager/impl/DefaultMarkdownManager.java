@@ -26,10 +26,10 @@ import com.vladsch.flexmark.parser.ParserEmulationProfile;
 import com.vladsch.flexmark.util.options.MutableDataHolder;
 import com.vladsch.flexmark.util.options.MutableDataSet;
 
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.markdown.MarkdownProcessor;
-import io.onedev.utils.HtmlUtils;
 
 @Singleton
 public class DefaultMarkdownManager implements MarkdownManager {

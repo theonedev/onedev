@@ -22,17 +22,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
-import io.onedev.codeassist.InputCompletion;
-import io.onedev.codeassist.InputStatus;
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.RangeUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.AlignTarget;
 import io.onedev.server.web.component.floating.Alignment;
 import io.onedev.server.web.component.floating.ComponentTarget;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.utils.Range;
-import io.onedev.utils.RangeUtils;
 
 @SuppressWarnings("serial")
 public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {

@@ -53,13 +53,13 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.git.command.FetchCommand;
 import io.onedev.server.git.command.IsAncestorCommand;
 import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.git.exception.RefUpdateException;
 import io.onedev.server.util.diff.WhitespaceOption;
-import io.onedev.utils.LockUtils;
-import io.onedev.utils.PathUtils;
 
 public class GitUtils {
 	

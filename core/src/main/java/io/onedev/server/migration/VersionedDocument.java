@@ -44,10 +44,10 @@ import com.thoughtworks.xstream.io.xml.Dom4JReader;
 import com.thoughtworks.xstream.io.xml.Dom4JWriter;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 
-import io.onedev.launcher.loader.AppLoader;
-import io.onedev.utils.ClassUtils;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.FileUtils;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
 
 public final class VersionedDocument implements Document, Externalizable {
 

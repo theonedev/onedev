@@ -3,10 +3,10 @@ package io.onedev.server.util.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.PullRequestQuery;
-import io.onedev.utils.StringUtils;
 
 public class PullRequestQueryValidator implements ConstraintValidator<PullRequestQuery, String> {
 

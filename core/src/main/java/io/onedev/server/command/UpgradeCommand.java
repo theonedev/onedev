@@ -20,8 +20,12 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
 
-import io.onedev.launcher.bootstrap.Bootstrap;
-import io.onedev.launcher.loader.PluginManager;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.loader.PluginManager;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.migration.DatabaseMigrator;
 import io.onedev.server.migration.MigrationHelper;
 import io.onedev.server.persistence.DefaultPersistManager;
@@ -29,10 +33,6 @@ import io.onedev.server.persistence.HibernateProperties;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.StringUtils;
-import io.onedev.utils.command.Commandline;
-import io.onedev.utils.command.LineConsumer;
 
 @Singleton
 public class UpgradeCommand extends DefaultPersistManager {
@@ -75,8 +75,10 @@ public class UpgradeCommand extends DefaultPersistManager {
 			bootstrapClass = "com.gitplex.launcher.bootstrap.Bootstrap";
 		} else if (version.startsWith("1.0.1")) {
 			bootstrapClass = "com.turbodev.launcher.bootstrap.Bootstrap";
-		} else {
+		} else if (version.startsWith("2.0.")){
 			bootstrapClass = "io.onedev.launcher.bootstrap.Bootstrap";
+		} else {
+			bootstrapClass = "io.onedev.commons.launcher.bootstrap.Bootstrap";
 		}
 		Commandline cmdline= new Commandline(System.getProperty("java.home") + "/bin/java");
 		cmdline.addArgs("-Xmx" + Runtime.getRuntime().maxMemory()/1024/1024 + "m",  "-classpath", "*", bootstrapClass, 
@@ -446,11 +448,13 @@ public class UpgradeCommand extends DefaultPersistManager {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
 			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, Charsets.UTF_8);
 			wrapperConf = StringUtils.replace(wrapperConf, "com.gitplex.commons.bootstrap.Bootstrap", 
-					"io.onedev.launcher.bootstrap.Bootstrap");
+					"io.onedev.commons.launcher.bootstrap.Bootstrap");
 			wrapperConf = StringUtils.replace(wrapperConf, "com.gitplex.launcher.bootstrap.Bootstrap", 
-					"io.onedev.launcher.bootstrap.Bootstrap");
+					"io.onedev.commons.launcher.bootstrap.Bootstrap");
 			wrapperConf = StringUtils.replace(wrapperConf, "com.turbodev.launcher.bootstrap.Bootstrap", 
-					"io.onedev.launcher.bootstrap.Bootstrap");
+					"io.onedev.commons.launcher.bootstrap.Bootstrap");
+			wrapperConf = StringUtils.replace(wrapperConf, "io.onedev.launcher.bootstrap.Bootstrap", 
+					"io.onedev.commons.launcher.bootstrap.Bootstrap");
 			FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, Charsets.UTF_8);
 			
 			File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");

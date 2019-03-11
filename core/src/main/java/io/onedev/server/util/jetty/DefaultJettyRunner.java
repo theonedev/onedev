@@ -18,8 +18,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import com.google.inject.servlet.GuiceFilter;
 
-import io.onedev.launcher.bootstrap.Bootstrap;
-import io.onedev.utils.ExceptionUtils;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.utils.ExceptionUtils;
 
 @Singleton
 public class DefaultJettyRunner implements JettyRunner, Provider<ServletContextHandler> {

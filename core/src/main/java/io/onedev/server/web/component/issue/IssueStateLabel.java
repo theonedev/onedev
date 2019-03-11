@@ -4,11 +4,11 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.commons.utils.ColorUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.utils.ColorUtils;
 
 @SuppressWarnings("serial")
 public class IssueStateLabel extends Label {

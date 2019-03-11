@@ -4,10 +4,10 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.model.LoadableDetachableModel;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.utils.ClassUtils;
 
 public class EntityModel<T extends AbstractEntity> extends LoadableDetachableModel<T> {
 

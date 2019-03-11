@@ -6,9 +6,9 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.request.resource.PackageResourceReference;
 
-import io.onedev.jsymbol.util.HighlightableLabel;
-import io.onedev.jsymbol.util.NoAntiCacheImage;
-import io.onedev.utils.Range;
+import io.onedev.commons.jsymbol.util.HighlightableLabel;
+import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
+import io.onedev.commons.utils.Range;
 
 public class PathHit extends QueryHit {
 

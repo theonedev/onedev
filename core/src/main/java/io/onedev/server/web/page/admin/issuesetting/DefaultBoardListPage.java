@@ -27,6 +27,7 @@ import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.support.issue.BoardSpec;
@@ -40,7 +41,6 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
-import io.onedev.utils.StringUtils;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")

@@ -21,8 +21,10 @@ import org.hibernate.query.Query;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 
-import io.onedev.launcher.loader.Listen;
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.schedule.SchedulableTask;
+import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.build.BuildStarted;
@@ -47,8 +49,6 @@ import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.BuildQueryBuildContext;
 import io.onedev.server.util.BuildConstants;
-import io.onedev.utils.schedule.SchedulableTask;
-import io.onedev.utils.schedule.TaskScheduler;
 
 @Singleton
 public class DefaultBuildManager extends AbstractEntityManager<Build> implements BuildManager, SchedulableTask {

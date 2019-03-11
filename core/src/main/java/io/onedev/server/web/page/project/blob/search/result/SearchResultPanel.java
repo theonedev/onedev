@@ -28,8 +28,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import io.onedev.jsymbol.TokenPosition;
-import io.onedev.jsymbol.util.HighlightableLabel;
+import io.onedev.commons.jsymbol.TokenPosition;
+import io.onedev.commons.jsymbol.util.HighlightableLabel;
+import io.onedev.commons.utils.Range;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.support.TextRange;
 import io.onedev.server.search.code.hit.FileHit;
@@ -38,7 +39,6 @@ import io.onedev.server.search.code.hit.TextHit;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.utils.Range;
 
 @SuppressWarnings("serial")
 public abstract class SearchResultPanel extends Panel {

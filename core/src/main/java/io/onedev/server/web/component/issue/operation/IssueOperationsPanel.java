@@ -29,6 +29,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueChangeManager;
 import io.onedev.server.manager.SettingManager;
@@ -53,7 +54,6 @@ import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public abstract class IssueOperationsPanel extends Panel {

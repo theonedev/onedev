@@ -4,8 +4,9 @@ import static io.onedev.server.search.code.IndexConstants.NGRAM_SIZE;
 
 import java.util.List;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -27,7 +28,7 @@ public class RegexLiterals {
 	private final List<List<LeafLiterals>> rows;
 	
 	public RegexLiterals(String regex) {
-		ANTLRInputStream stream = new ANTLRInputStream(regex);
+		CharStream stream = CharStreams.fromString(regex);
 		PCRELexer lexer = new PCRELexer(stream);
 		lexer.removeErrorListeners();
 		lexer.addErrorListener(ErrorListener.INSTANCE);

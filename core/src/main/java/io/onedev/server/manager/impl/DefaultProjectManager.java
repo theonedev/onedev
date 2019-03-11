@@ -29,7 +29,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -59,9 +62,6 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.web.util.avatar.AvatarManager;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.StringUtils;
 
 @Singleton
 public class DefaultProjectManager extends AbstractEntityManager<Project> implements ProjectManager {
@@ -331,8 +331,10 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			
 			if (file != null) {
 				FileProtection fileProtection = branchProtection.getFileProtection(file);
-				if (fileProtection != null && !ReviewRequirement.fromString(fileProtection.getReviewRequirement()).satisfied(user))
+				if (fileProtection != null 
+						&& !ReviewRequirement.fromString(fileProtection.getReviewRequirement()).satisfied(user)) {
 					return true;
+				}
 			}
 		}			
 		return false;
@@ -354,8 +356,10 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			
 			for (String changedFile: getChangedFiles(project, oldObjectId, newObjectId, gitEnvs)) {
 				FileProtection fileProtection = branchProtection.getFileProtection(changedFile);
-				if (fileProtection != null && !ReviewRequirement.fromString(fileProtection.getReviewRequirement()).satisfied(user))
+				if (fileProtection != null  
+						&& !ReviewRequirement.fromString(fileProtection.getReviewRequirement()).satisfied(user)) {
 					return true;
+				}
 			}
 		}
 		return false;

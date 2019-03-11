@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.MailManager;
@@ -24,7 +25,6 @@ import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.utils.ExceptionUtils;
 
 @SuppressWarnings("serial")
 public class MailSettingPage extends AdministrationPage {

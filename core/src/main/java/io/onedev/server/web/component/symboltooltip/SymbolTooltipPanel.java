@@ -29,7 +29,7 @@ import org.apache.wicket.request.resource.ResourceReference;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.jsymbol.Symbol;
+import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;

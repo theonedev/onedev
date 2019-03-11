@@ -8,11 +8,11 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.resource.DynamicImageResource;
 import org.apache.wicket.request.resource.PackageResourceReference;
 
+import io.onedev.commons.utils.Provider;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.utils.Provider;
 
 @SuppressWarnings("serial")
 public class ImageDiffPanel extends Panel {

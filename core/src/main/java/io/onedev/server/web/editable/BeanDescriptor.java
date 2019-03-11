@@ -12,9 +12,9 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.BeanUtils;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.utils.BeanUtils;
 
 @SuppressWarnings("serial")
 public class BeanDescriptor implements Serializable {

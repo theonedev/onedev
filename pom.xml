@@ -3,16 +3,16 @@
     <modelVersion>4.0.0</modelVersion>  
     <parent>
     	<groupId>io.onedev</groupId>
-    	<artifactId>launcher</artifactId>
-    	<version>1.0.3</version>
-		<relativePath>../launcher</relativePath>
+    	<artifactId>parent</artifactId>
+    	<version>1.0.2</version>
     </parent>
-    <artifactId>server-parent</artifactId>  
-    <version>2.0.6</version>  
+    <artifactId>server</artifactId>  
+    <version>2.1.2</version>  
     <packaging>pom</packaging>  
-    <build>
-    	<pluginManagement>
-    		<plugins>
+    <build> 
+        <finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>  
+        <pluginManagement> 
+            <plugins> 
                 <plugin> 
                     <groupId>org.antlr</groupId>  
                     <artifactId>antlr4-maven-plugin</artifactId>  
@@ -30,8 +30,117 @@
 	                    <visitor>true</visitor> 
                     </configuration> 
                 </plugin>  
-    		</plugins>
-    	</pluginManagement>
+                <plugin> 
+                    <groupId>org.eclipse.m2e</groupId>  
+                    <artifactId>lifecycle-mapping</artifactId>  
+                    <version>1.0.0</version>  
+                    <configuration> 
+                        <lifecycleMappingMetadata> 
+                            <pluginExecutions> 
+                                <pluginExecution> 
+                                    <pluginExecutionFilter> 
+                                        <groupId>io.onedev</groupId>  
+                                        <artifactId>plugin-maven</artifactId>  
+                                        <versionRange>[1.0.3,]</versionRange>  
+                                        <goals> 
+                                            <goal>generate-artifact-descriptor</goal>  
+                                            <goal>generate-plugin-descriptor</goal>  
+                                            <goal>generate-product-descriptor</goal>  
+                                            <goal>copy-product-resources</goal> 
+                                            <goal>create-product-sandbox</goal>  
+                                        </goals> 
+                                    </pluginExecutionFilter>  
+                                    <action> 
+                                        <execute> 
+                                            <runOnIncremental>true</runOnIncremental>  
+                                            <runOnConfiguration>true</runOnConfiguration> 
+                                        </execute> 
+                                    </action> 
+                                </pluginExecution>  
+                                <pluginExecution> 
+                                    <pluginExecutionFilter> 
+                                        <groupId>org.codehaus.gmaven</groupId>  
+                                        <artifactId>groovy-maven-plugin</artifactId>  
+                                        <versionRange>[2.0,]</versionRange>  
+                                        <goals>
+                                        	<goal>execute</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>  
+                                    <action> 
+                                        <execute> 
+                                            <runOnIncremental>true</runOnIncremental>  
+                                            <runOnConfiguration>true</runOnConfiguration> 
+                                        </execute> 
+                                    </action> 
+                                </pluginExecution>  
+                                <pluginExecution> 
+                                    <pluginExecutionFilter> 
+                                        <groupId>org.apache.maven.plugins</groupId>  
+                                        <artifactId>maven-jar-plugin</artifactId>  
+                                        <versionRange>[1.0.0,]</versionRange>  
+                                        <goals> 
+                                            <goal>jar</goal> 
+                                        </goals> 
+                                    </pluginExecutionFilter>  
+                                    <action> 
+                                        <ignore/> 
+                                    </action> 
+                                </pluginExecution> 
+                            </pluginExecutions> 
+                        </lifecycleMappingMetadata> 
+                    </configuration> 
+                </plugin>  
+                <plugin> 
+                    <artifactId>maven-jar-plugin</artifactId>  
+                    <version>3.0.2</version>  
+                    <executions> 
+                        <execution> 
+                            <id>default-jar</id>  
+                            <phase>never</phase>  
+                            <configuration> 
+                                <finalName>unwanted</finalName>  
+                                <classifier>unwanted</classifier> 
+                            </configuration> 
+                        </execution> 
+                    </executions> 
+                </plugin>  
+                <plugin> 
+                    <groupId>io.onedev</groupId>  
+                    <artifactId>plugin-maven</artifactId>  
+                    <version>1.0.3</version>  
+                    <executions> 
+                        <execution> 
+                            <id>generate-artifact-descriptor</id>  
+                            <phase>compile</phase>  
+                            <goals> 
+                                <goal>generate-artifact-descriptor</goal> 
+                            </goals> 
+                        </execution>  
+                        <execution> 
+                            <id>generate-plugin-descriptor</id>  
+                            <phase>compile</phase>  
+                            <goals> 
+                                <goal>generate-plugin-descriptor</goal> 
+                            </goals> 
+                        </execution>  
+                        <execution> 
+                            <id>create-product-sandbox</id>  
+                            <phase>compile</phase>  
+                            <goals> 
+                                <goal>create-product-sandbox</goal> 
+                            </goals> 
+                        </execution> 
+                        <execution> 
+                            <id>package-artifact</id>  
+                            <phase>package</phase>  
+                            <goals> 
+                                <goal>package-artifact</goal> 
+                            </goals> 
+                        </execution>  
+                    </executions> 
+                </plugin>  
+            </plugins> 
+        </pluginManagement>  
 		<resources>
 			<resource>
 				<directory>src/main/java</directory>
@@ -49,11 +158,41 @@
 				</includes>
 			</resource>
 		</resources>
-    </build>
+    </build>  	
     <modules> 
         <module>core</module>
         <module>product</module>
     </modules>  
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>io.onedev</groupId>
+				<artifactId>commons-launcher-loader</artifactId>
+				<version>${commons.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.onedev</groupId>
+				<artifactId>commons-launcher-loader</artifactId>
+				<type>test-jar</type>
+				<version>${commons.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.onedev</groupId>
+				<artifactId>commons-codeassist</artifactId>
+				<version>${commons.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.onedev</groupId>
+				<artifactId>commons-jsymbol</artifactId>
+				<version>${commons.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.onedev</groupId>
+				<artifactId>commons-jsyntax</artifactId>
+				<version>${commons.version}</version>
+			</dependency>		
+		</dependencies>
+	</dependencyManagement>
 	<repositories>
 		<repository>
 			<id>pmeaseRepo</id>
@@ -70,4 +209,8 @@
 			</snapshots>
 		</repository>
 	</repositories>
+	<properties>
+		<commons.version>1.0.7</commons.version>
+		<antlr.version>4.7.2</antlr.version>
+	</properties>
 </project>

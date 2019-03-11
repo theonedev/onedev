@@ -2,8 +2,11 @@ package io.onedev.server.web.editable.string;
 
 import java.lang.reflect.Method;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.markup.html.form.TextField;
@@ -13,6 +16,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
@@ -48,6 +52,13 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		}
 		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));		
 		
+		InputAssistBehavior inputAssistBehavior = getInputAssistBehavior();
+		if (inputAssistBehavior != null) {
+			input.add(inputAssistBehavior);
+			input.add(AttributeAppender.append("spellcheck", "false"));
+			input.add(AttributeAppender.append("autocomplete", "off"));
+		}
+		
 		input.add(new OnTypingDoneBehavior() {
 
 			@Override
@@ -71,4 +82,9 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		return input.getConvertedInput();
 	}
 
+	@Nullable
+	protected InputAssistBehavior getInputAssistBehavior() {
+		return null;
+	}
+	
 }

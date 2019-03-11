@@ -8,8 +8,8 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.base.Charsets;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.ContentDetector;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 class SourceFormComponent extends FormComponentPanel<byte[]> {

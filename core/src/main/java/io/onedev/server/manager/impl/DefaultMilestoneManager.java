@@ -12,7 +12,8 @@ import org.hibernate.query.Query;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueOpened;
@@ -31,7 +32,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.utils.StringUtils;
 
 @Singleton
 public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> implements MilestoneManager {

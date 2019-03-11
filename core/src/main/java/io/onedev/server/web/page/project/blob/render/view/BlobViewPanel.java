@@ -23,6 +23,7 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.manager.ProjectManager;
@@ -37,7 +38,6 @@ import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.util.resource.RawBlobResource;
 import io.onedev.server.web.util.resource.RawBlobResourceReference;
-import io.onedev.utils.FileUtils;
 
 @SuppressWarnings("serial")
 public abstract class BlobViewPanel extends Panel {

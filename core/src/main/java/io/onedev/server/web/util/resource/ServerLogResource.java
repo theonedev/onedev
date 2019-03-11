@@ -11,9 +11,9 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.request.resource.AbstractResource;
 
-import io.onedev.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.utils.FileUtils;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;

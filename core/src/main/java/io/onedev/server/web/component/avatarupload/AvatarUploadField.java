@@ -23,9 +23,9 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class AvatarUploadField extends FormComponentPanel<String> {

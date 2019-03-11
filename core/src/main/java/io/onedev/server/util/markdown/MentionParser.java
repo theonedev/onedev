@@ -12,11 +12,11 @@ import org.jsoup.select.NodeTraversor;
 
 import com.google.common.collect.ImmutableSet;
 
+import io.onedev.commons.utils.HtmlUtils;
+import io.onedev.commons.utils.TextNodeVisitor;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.utils.HtmlUtils;
-import io.onedev.utils.TextNodeVisitor;
 
 public class MentionParser {
 	

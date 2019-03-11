@@ -4,10 +4,10 @@ import java.util.List;
 
 import org.apache.wicket.Component;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
-import io.onedev.utils.StringUtils;
 
 public class PullRequestDescriptionChangeData implements PullRequestChangeData {
 

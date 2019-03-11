@@ -11,7 +11,8 @@ import org.eclipse.jgit.transport.RefSpec;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.manager.PullRequestCommentManager;
@@ -25,7 +26,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.utils.ExceptionUtils;
 
 @Singleton
 public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullRequestUpdate> 

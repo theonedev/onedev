@@ -8,9 +8,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.hibernate.Session;
 import org.hibernate.query.Query;
 
+import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
-import io.onedev.utils.ReflectionUtils;
 
 public abstract class AbstractEntityManager<T extends AbstractEntity> implements EntityManager<T> {
 

@@ -11,8 +11,8 @@ import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.OptimisticLock;
 
+import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.model.User;
-import io.onedev.utils.WordUtils;
 
 @Embeddable
 public class CloseInfo implements Serializable {

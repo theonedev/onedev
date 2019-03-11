@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
 
 @SuppressWarnings("serial")
 public class JsonOptions extends LinkedHashMap<String, String> {

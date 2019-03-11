@@ -18,12 +18,12 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import io.onedev.commons.utils.Highlighter;
+import io.onedev.commons.utils.Transformer;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.CommitMessageTransformer;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.utils.Highlighter;
-import io.onedev.utils.Transformer;
 
 @SuppressWarnings("serial")
 public class CommitMessagePanel extends Panel {

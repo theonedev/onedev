@@ -11,8 +11,8 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.utils.ClassUtils;
 
 @SuppressWarnings("serial")
 public class BeanContext implements Serializable {

@@ -24,6 +24,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.ConfigurationManager;
 import io.onedev.server.manager.ProjectManager;
@@ -32,7 +33,6 @@ import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Project;
 import io.onedev.server.rest.RestConstants;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.utils.StringUtils;
 
 @Path("/repos/projects")
 @Consumes(MediaType.WILDCARD)

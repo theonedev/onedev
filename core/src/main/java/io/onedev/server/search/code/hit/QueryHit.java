@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.image.Image;
 
-import io.onedev.jsymbol.TokenPosition;
+import io.onedev.commons.jsymbol.TokenPosition;
 
 public abstract class QueryHit implements Serializable {
 	

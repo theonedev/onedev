@@ -17,6 +17,8 @@ import org.jsoup.select.NodeVisitor;
 
 import com.google.common.base.Charsets;
 
+import io.onedev.commons.utils.PathUtils;
+import io.onedev.commons.utils.UrlUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
@@ -25,8 +27,6 @@ import io.onedev.server.util.markdown.MarkdownProcessor;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
-import io.onedev.utils.PathUtils;
-import io.onedev.utils.UrlUtils;
 
 public class UrlProcessor implements MarkdownProcessor {
 

@@ -3,7 +3,7 @@ package io.onedev.server.manager.impl;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.manager.IssueCommentManager;
 import io.onedev.server.model.IssueComment;

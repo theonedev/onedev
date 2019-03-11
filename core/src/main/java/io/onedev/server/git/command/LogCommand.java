@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.git.GitUtils;
-import io.onedev.utils.command.Commandline;
-import io.onedev.utils.command.LineConsumer;
 
 public abstract class LogCommand extends GitCommand<Void> {
 

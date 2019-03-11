@@ -1,7 +1,7 @@
 package io.onedev.server.manager;
 
+import io.onedev.commons.utils.concurrent.Prioritized;
 import io.onedev.server.util.BatchWorker;
-import io.onedev.utils.concurrent.Prioritized;
 
 public interface BatchWorkManager {
 

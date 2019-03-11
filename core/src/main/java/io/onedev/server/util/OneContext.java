@@ -8,7 +8,7 @@ import org.apache.wicket.Component;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.inputspec.InputContext;

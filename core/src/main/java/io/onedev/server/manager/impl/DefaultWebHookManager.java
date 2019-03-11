@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.onedev.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.persistence.annotation.Sessional;

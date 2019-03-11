@@ -12,12 +12,12 @@ import org.jsoup.select.NodeTraversor;
 
 import com.google.common.collect.ImmutableSet;
 
+import io.onedev.commons.utils.HtmlUtils;
+import io.onedev.commons.utils.TextNodeVisitor;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.markdown.MarkdownProcessor;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.utils.HtmlUtils;
-import io.onedev.utils.TextNodeVisitor;
 
 public class CommitProcessor implements MarkdownProcessor {
 	

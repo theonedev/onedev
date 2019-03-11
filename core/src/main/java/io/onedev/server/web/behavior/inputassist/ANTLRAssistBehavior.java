@@ -8,9 +8,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
@@ -22,15 +22,15 @@ import org.antlr.v4.runtime.TokenStream;
 
 import com.google.common.base.Optional;
 
-import io.onedev.codeassist.AntlrUtils;
-import io.onedev.codeassist.CodeAssist;
-import io.onedev.codeassist.InputCompletion;
-import io.onedev.codeassist.InputStatus;
-import io.onedev.codeassist.InputSuggestion;
-import io.onedev.codeassist.parser.TerminalExpect;
-import io.onedev.codeassist.parser.ParseExpect;
-import io.onedev.utils.Range;
-import io.onedev.utils.StringUtils;
+import io.onedev.commons.codeassist.AntlrUtils;
+import io.onedev.commons.codeassist.CodeAssist;
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.parser.ParseExpect;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
@@ -135,7 +135,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 		
 		Lexer lexer;
 		try {
-			lexer = getLexerCtor().newInstance(new ANTLRInputStream(inputContent));
+			lexer = getLexerCtor().newInstance(CharStreams.fromString(inputContent));
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
 				| InvocationTargetException e) {
 			throw new RuntimeException(e);

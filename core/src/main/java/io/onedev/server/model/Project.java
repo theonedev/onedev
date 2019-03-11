@@ -63,7 +63,13 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlameBlock;
@@ -99,16 +105,11 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.DefaultPrivilege;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.jackson.DefaultView;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.LockUtils;
-import io.onedev.utils.PathUtils;
-import io.onedev.utils.Range;
-import io.onedev.utils.StringUtils;
 
 @Entity
 @Table(indexes={@Index(columnList="o_forkedFrom_id")})
@@ -1124,8 +1125,8 @@ public class Project extends AbstractEntity {
 	public TagProtection getTagProtection(String tagName, User user) {
 		for (TagProtection protection: tagProtections) {
 			if (protection.isEnabled() 
-					&& PathUtils.matchChildAware(protection.getTag(), tagName)
-					&& protection.getSubmitter().matches(this, user)) {
+					&& protection.getSubmitter().matches(this, user)
+					&& PatternSet.fromString(protection.getTags()).matches(new ChildAwareMatcher(), tagName)) {
 				return protection;
 			}
 		}
@@ -1136,8 +1137,8 @@ public class Project extends AbstractEntity {
 	public BranchProtection getBranchProtection(String branchName, @Nullable User user) {
 		for (BranchProtection protection: branchProtections) {
 			if (protection.isEnabled() 
-					&& PathUtils.matchChildAware(protection.getBranch(), branchName)
-					&& protection.getSubmitter().matches(this, user)) {
+					&& protection.getSubmitter().matches(this, user) 
+					&& PatternSet.fromString(protection.getBranches()).matches(new ChildAwareMatcher(), branchName)) {
 				return protection;
 			}
 		}

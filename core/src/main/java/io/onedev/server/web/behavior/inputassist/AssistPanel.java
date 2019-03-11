@@ -11,10 +11,10 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
-import io.onedev.codeassist.InputCompletion;
-import io.onedev.codeassist.InputStatus;
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.commons.utils.Range;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
-import io.onedev.utils.Range;
 
 @SuppressWarnings("serial")
 class AssistPanel extends Panel {

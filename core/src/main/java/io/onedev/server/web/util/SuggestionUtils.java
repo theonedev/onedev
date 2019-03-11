@@ -9,14 +9,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Preconditions;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.stringmatch.PatternApplied;
+import io.onedev.commons.utils.stringmatch.WildcardUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -34,64 +35,47 @@ import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.facade.ConfigurationFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
-import io.onedev.utils.Range;
-import io.onedev.utils.stringmatch.PatternApplied;
-import io.onedev.utils.stringmatch.WildcardUtils;
 
 public class SuggestionUtils {
 	
-	public static List<InputSuggestion> suggest(List<String> candidates, String matchWith, @Nullable String escapeChars) {
+	public static List<InputSuggestion> suggest(List<String> candidates, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (String candidate: candidates) {
-			Range match = Range.match(candidate, matchWith, true, false, true);
-			if (match != null) {
-				InputSuggestion suggestion = new InputSuggestion(candidate, null, match); 
-				if (escapeChars != null)
-					suggestion = suggestion.escape(escapeChars);
-				suggestions.add(suggestion);
-			}
+			Range match = Range.match(candidate, matchWith, true, false, false);
+			if (match != null) 
+				suggestions.add(new InputSuggestion(candidate, null, match));
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestBranch(Project project, String matchWith, @Nullable String escapeChars) {
+	public static List<InputSuggestion> suggestBranches(Project project, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (RefInfo ref: project.getBranches()) {
 			String branch = GitUtils.ref2branch(ref.getRef().getName());
 			int index = branch.toLowerCase().indexOf(matchWith);
-			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
-				Range match = new Range(index, index+matchWith.length());
-				InputSuggestion suggestion = new InputSuggestion(branch, match);
-				if (escapeChars != null)
-					suggestion = suggestion.escape(escapeChars);
-				suggestions.add(suggestion);
-			}
+			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
+				suggestions.add(new InputSuggestion(branch, new Range(index, index+matchWith.length())));
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestTag(Project project, String matchWith, @Nullable String escapeChars) {
+	public static List<InputSuggestion> suggestTags(Project project, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (RefInfo ref: project.getTags()) {
 			String tag = GitUtils.ref2tag(ref.getRef().getName());
 			int index = tag.toLowerCase().indexOf(matchWith);
-			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
-				Range match = new Range(index, index+matchWith.length());
-				InputSuggestion suggestion = new InputSuggestion(tag, match); 
-				if (escapeChars != null)
-					suggestions.add(suggestion.escape(escapeChars));
-				suggestions.add(suggestion);
-			}
+			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
+				suggestions.add(new InputSuggestion(tag, new Range(index, index+matchWith.length())));
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestUser(String matchWith, @Nullable String escapeChars) {
+	public static List<InputSuggestion> suggestUsers(String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (UserFacade user: OneDev.getInstance(CacheManager.class).getUsers().values()) {
@@ -102,21 +86,21 @@ public class SuggestionUtils {
 					description = user.getDisplayName();
 				else
 					description = null;
-				suggestions.add(new InputSuggestion(user.getName(), description, match).escape(escapeChars));
+				suggestions.add(new InputSuggestion(user.getName(), description, match));
 			}
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestIssue(Project project, String matchWith, @Nullable String escapeChars) {
+	public static List<InputSuggestion> suggestIssues(Project project, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (Issue issue: OneDev.getInstance(IssueManager.class).query(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS))
-			suggestions.add(new InputSuggestion("#" + issue.getNumber(), issue.getTitle(), null).escape(escapeChars));
+			suggestions.add(new InputSuggestion("#" + issue.getNumber(), issue.getTitle(), null));
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestBuild(Project project, String matchWith, boolean withConfiguration, @Nullable String escapeChars) {
+	public static List<InputSuggestion> suggestBuilds(Project project, String matchWith, boolean withConfiguration) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (Build build: OneDev.getInstance(BuildManager.class).query(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
@@ -134,15 +118,12 @@ public class SuggestionUtils {
 				Range match = Range.match(build.getVersion(), matchWith, true, false, true);
 				suggestion = new InputSuggestion(build.getVersion(), null, match);
 			}
-			if (escapeChars != null)
-				suggestion = suggestion.escape(escapeChars);
 			suggestions.add(suggestion);
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestUser(Project project, ProjectPrivilege privilege, String matchWith, 
-			@Nullable String escapeChars) {
+	public static List<InputSuggestion> suggestUsers(Project project, ProjectPrivilege privilege, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
@@ -151,38 +132,30 @@ public class SuggestionUtils {
 			int index = name.toLowerCase().indexOf(matchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
 				Range match = new Range(index, index+matchWith.length());
-				InputSuggestion suggestion = new InputSuggestion(name, user.getDisplayName(), match); 
-				if (escapeChars != null)
-					suggestion = suggestion.escape(escapeChars);
-				suggestions.add(suggestion);
+				suggestions.add(new InputSuggestion(name, user.getDisplayName(), match));
 			}
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestGroup(String matchWith, @Nullable String escapeChars) {
+	public static List<InputSuggestion> suggestGroups(String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (Group group: OneDev.getInstance(GroupManager.class).query()) {
 			String name = group.getName();
 			int index = name.toLowerCase().indexOf(matchWith);
-			if (index != -1) {
-				Range match = new Range(index, index+matchWith.length());
-				InputSuggestion suggestion = new InputSuggestion(name, match);
-				if (escapeChars != null)
-					suggestion = suggestion.escape(escapeChars);
-				suggestions.add(suggestion);
-			}
+			if (index != -1) 
+				suggestions.add(new InputSuggestion(name, new Range(index, index+matchWith.length())));
 		}
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestPath(Project project, String matchWith, @Nullable String escapeChars) {
+	public static List<InputSuggestion> suggestBlobs(Project project, String matchWith) {
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-		return suggestPath(commitInfoManager.getFiles(project), matchWith, escapeChars);
+		return suggestPaths(commitInfoManager.getFiles(project), matchWith);
 	}
 	
-	public static List<InputSuggestion> suggestConfiguration(Project project, String matchWith, @Nullable String escapeChars) {
+	public static List<InputSuggestion> suggestConfigurations(Project project, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		List<ConfigurationFacade> configurations = new ArrayList<>(OneDev.getInstance(CacheManager.class).getConfigurations().values());
@@ -198,12 +171,8 @@ public class SuggestionUtils {
 			if (matchWith.contains(Build.FQN_SEPARATOR)) 
 				matchWith = StringUtils.substringAfter(matchWith, Build.FQN_SEPARATOR);
 			Range match = Range.match(configuration.getName(), matchWith, true, false, true);
-			if (match != null) {
-				InputSuggestion suggestion = new InputSuggestion(configuration.getName(), null, match);
-				if (escapeChars != null)
-					suggestion = suggestion.escape(escapeChars);
-				suggestions.add(suggestion);
-			}
+			if (match != null) 
+				suggestions.add(new InputSuggestion(configuration.getName(), null, match));
 		}
 		return suggestions;
 	}
@@ -223,7 +192,7 @@ public class SuggestionUtils {
 		return children;
 	}
 	
-	public static List<InputSuggestion> suggestPath(List<String> files, String matchWith, @Nullable String escapeChars) {
+	public static List<InputSuggestion> suggestPaths(List<String> files, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		
@@ -275,10 +244,7 @@ public class SuggestionUtils {
 				caret = text.length();
 			else
 				caret = -1;
-			InputSuggestion suggestion = new InputSuggestion(text, caret, null, entry.getValue()); 
-			if (escapeChars != null)
-				suggestion = suggestion.escape(escapeChars);
-			suggestions.add(suggestion);
+			suggestions.add(new InputSuggestion(text, caret, null, entry.getValue()));
 		}
 		
 		return suggestions;		

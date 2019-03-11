@@ -16,8 +16,8 @@ import org.apache.wicket.util.lang.Objects;
 
 import com.google.common.base.Optional;
 
-import io.onedev.launcher.loader.Listen;
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueCommitted;

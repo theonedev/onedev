@@ -14,13 +14,13 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.protocol.http.WebSession;
 
+import io.onedev.commons.utils.ReflectionUtils;
+import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
-import io.onedev.utils.ReflectionUtils;
-import io.onedev.utils.WordUtils;
 
 @SuppressWarnings("serial")
 public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {

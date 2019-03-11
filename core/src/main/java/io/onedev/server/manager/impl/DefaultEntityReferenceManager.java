@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
-import io.onedev.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentUpdated;
 import io.onedev.server.event.entity.EntityPersisted;

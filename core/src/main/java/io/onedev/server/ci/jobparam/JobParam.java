@@ -27,7 +27,8 @@ public class JobParam implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200, name="Values")
+	@Editable(order=200, name="Values", description="Specify parameter values here. Multiple values tell "
+			+ "the job to run multiple times, each time with one value")
 	@NotNull
 	public ValueProvider getValueProvider() {
 		return valueProvider;

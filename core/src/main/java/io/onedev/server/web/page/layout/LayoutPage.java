@@ -19,8 +19,8 @@ import org.apache.wicket.protocol.http.ClientProperties;
 import org.apache.wicket.protocol.http.request.WebClientInfo;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.launcher.loader.AppLoader;
-import io.onedev.launcher.loader.Plugin;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.Plugin;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.User;

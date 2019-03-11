@@ -38,9 +38,12 @@ import org.unbescape.javascript.JavaScriptEscape;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.onedev.jsyntax.TextToken;
-import io.onedev.jsyntax.TokenUtils;
-import io.onedev.jsyntax.Tokenized;
+import io.onedev.commons.jsyntax.TextToken;
+import io.onedev.commons.jsyntax.TokenUtils;
+import io.onedev.commons.jsyntax.Tokenized;
+import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.RangeUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;
@@ -77,9 +80,6 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergePreviewPage;
-import io.onedev.utils.Range;
-import io.onedev.utils.RangeUtils;
-import io.onedev.utils.StringUtils;
 
 import com.google.common.base.Preconditions;
 

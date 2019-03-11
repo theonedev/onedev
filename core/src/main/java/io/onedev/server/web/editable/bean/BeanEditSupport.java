@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
@@ -13,7 +14,6 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.utils.ClassUtils;
 
 @SuppressWarnings("serial")
 public class BeanEditSupport implements EditSupport {

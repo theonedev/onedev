@@ -5,8 +5,8 @@ import java.io.File;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.launcher.bootstrap.Bootstrap;
-import io.onedev.utils.StringUtils;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.serverconfig.ServerConfig;
 import io.onedev.server.util.serverconfig.SslConfig;
 

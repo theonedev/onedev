@@ -19,9 +19,10 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.jsyntax.TextToken;
-import io.onedev.jsyntax.TokenUtils;
-import io.onedev.jsyntax.Tokenized;
+import io.onedev.commons.jsyntax.TextToken;
+import io.onedev.commons.jsyntax.TokenUtils;
+import io.onedev.commons.jsyntax.Tokenized;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.diff.DiffBlock;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.util.diff.DiffUtils;
@@ -29,7 +30,6 @@ import io.onedev.server.util.diff.LineDiff;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class PlainDiffPanel extends Panel {

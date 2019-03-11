@@ -16,12 +16,12 @@ import org.eclipse.jgit.lib.RefUpdate;
 import org.junit.Assert;
 import org.mockito.Mockito;
 
-import io.onedev.launcher.loader.AppLoader;
-import io.onedev.launcher.loader.AppLoaderMocker;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoaderMocker;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.GitCommand;
 import io.onedev.server.git.config.GitConfig;
-import io.onedev.utils.FileUtils;
 
 public abstract class AbstractGitTest extends AppLoaderMocker {
 

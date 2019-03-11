@@ -15,13 +15,13 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.base.Throwables;
 
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.web.ExpectedExceptionContribution;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectListPage;
-import io.onedev.utils.ExceptionUtils;
 
 @SuppressWarnings("serial")
 public class ErrorPage extends BasePage {

@@ -4,8 +4,8 @@
     <artifactId>server-product</artifactId>  
     <parent> 
         <groupId>io.onedev</groupId>  
-        <artifactId>server-parent</artifactId>  
-        <version>2.0.6</version> 
+        <artifactId>server</artifactId>  
+        <version>2.1.2</version> 
     </parent>  
     <build> 
         <plugins> 
@@ -13,6 +13,13 @@
                 <groupId>io.onedev</groupId>  
                 <artifactId>plugin-maven</artifactId>  
                 <executions> 
+                    <execution> 
+                        <id>generate-product-descriptor</id>  
+                        <phase>compile</phase>  
+                        <goals> 
+                            <goal>generate-product-descriptor</goal> 
+                        </goals> 
+                    </execution>  
                     <execution> 
                         <id>copy-product-resources</id>  
                         <phase>compile</phase>  
@@ -87,12 +94,12 @@
         <dependency> 
             <groupId>io.onedev</groupId>  
             <artifactId>server-core</artifactId>  
-            <version>2.0.6</version> 
+            <version>${project.version}</version> 
         </dependency>  
     </dependencies>  
     <properties> 
         <executables>bin/*.sh, boot/wrapper-*</executables>  
-        <bootstrapClass>io.onedev.launcher.bootstrap.Bootstrap</bootstrapClass>  
+        <bootstrapClass>io.onedev.commons.launcher.bootstrap.Bootstrap</bootstrapClass>  
         <moduleClass>io.onedev.server.product.ProductModule</moduleClass>  
         <aggregation>true</aggregation> 
     </properties> 

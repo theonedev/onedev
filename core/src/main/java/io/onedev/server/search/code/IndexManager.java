@@ -4,8 +4,8 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.jsymbol.Symbol;
-import io.onedev.jsymbol.SymbolExtractor;
+import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.jsymbol.SymbolExtractor;
 import io.onedev.server.model.Project;
 
 public interface IndexManager {

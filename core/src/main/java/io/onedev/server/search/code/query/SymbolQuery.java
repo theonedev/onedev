@@ -16,13 +16,13 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import io.onedev.jsymbol.Symbol;
+import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.stringmatch.WildcardUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.search.code.SearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.SymbolHit;
-import io.onedev.utils.Range;
-import io.onedev.utils.stringmatch.WildcardUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;

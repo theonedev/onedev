@@ -14,7 +14,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.validation.INullAcceptingValidator;
 import org.apache.wicket.validation.IValidatable;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.util.OneContext;
 
 @SuppressWarnings("serial")

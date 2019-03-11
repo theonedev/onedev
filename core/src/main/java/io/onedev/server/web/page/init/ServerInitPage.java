@@ -12,6 +12,9 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.commons.utils.init.InitStage;
+import io.onedev.commons.utils.init.ManualConfig;
+import io.onedev.commons.utils.init.Skippable;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
@@ -21,9 +24,6 @@ import io.onedev.server.web.component.wizard.ManualConfigStep;
 import io.onedev.server.web.component.wizard.Wizard;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.ProjectListPage;
-import io.onedev.utils.init.InitStage;
-import io.onedev.utils.init.ManualConfig;
-import io.onedev.utils.init.Skippable;
 
 @SuppressWarnings("serial")
 public class ServerInitPage extends BasePage {

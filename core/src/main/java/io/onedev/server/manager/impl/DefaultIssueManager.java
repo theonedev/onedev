@@ -26,8 +26,8 @@ import org.hibernate.query.Query;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.launcher.loader.Listen;
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.issue.IssueDeleted;
 import io.onedev.server.event.issue.IssueEvent;

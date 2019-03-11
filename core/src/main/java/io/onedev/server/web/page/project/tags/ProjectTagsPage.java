@@ -34,6 +34,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTag;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -60,7 +61,6 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class ProjectTagsPage extends ProjectPage {

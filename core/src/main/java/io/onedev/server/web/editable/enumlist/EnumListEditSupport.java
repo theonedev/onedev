@@ -6,8 +6,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -20,7 +20,7 @@ public class EnumListEditSupport implements EditSupport {
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
-			final Class<?> elementClass = EditableUtils.getElementClass(descriptor.getPropertyGetter().getGenericReturnType());
+			final Class<?> elementClass = ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType());
 			if (elementClass != null && Enum.class.isAssignableFrom(elementClass)) {
 	            return new PropertyContext<List<Enum<?>>>(descriptor) {
 

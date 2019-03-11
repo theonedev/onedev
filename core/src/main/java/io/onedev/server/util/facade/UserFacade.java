@@ -2,8 +2,8 @@ package io.onedev.server.util.facade;
 
 import javax.annotation.Nullable;
 
+import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.model.User;
-import io.onedev.utils.matchscore.MatchScoreUtils;
 
 public class UserFacade extends EntityFacade {
 

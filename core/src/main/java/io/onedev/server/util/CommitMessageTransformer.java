@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
+import io.onedev.commons.utils.Transformer;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.IssueManager;
 import io.onedev.server.manager.ProjectManager;
@@ -28,7 +29,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.CommitMessageTransform;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.utils.Transformer;
 
 public class CommitMessageTransformer implements Transformer<String> {
 

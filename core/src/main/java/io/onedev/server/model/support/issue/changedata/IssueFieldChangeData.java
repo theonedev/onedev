@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.wicket.Component;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.GroupManager;
 import io.onedev.server.manager.UserManager;
@@ -18,7 +19,6 @@ import io.onedev.server.util.CommentSupport;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
-import io.onedev.utils.StringUtils;
 
 public class IssueFieldChangeData implements IssueChangeData {
 

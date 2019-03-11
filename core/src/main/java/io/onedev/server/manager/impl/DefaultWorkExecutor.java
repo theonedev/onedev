@@ -9,12 +9,12 @@ import java.util.concurrent.TimeoutException;
 
 import javax.inject.Singleton;
 
-import io.onedev.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.utils.concurrent.PrioritizedCallable;
+import io.onedev.commons.utils.concurrent.PrioritizedExecutor;
+import io.onedev.commons.utils.concurrent.PrioritizedRunnable;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.manager.WorkExecutor;
-import io.onedev.utils.concurrent.PrioritizedCallable;
-import io.onedev.utils.concurrent.PrioritizedExecutor;
-import io.onedev.utils.concurrent.PrioritizedRunnable;
 
 @Singleton
 public class DefaultWorkExecutor implements WorkExecutor {

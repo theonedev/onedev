@@ -13,10 +13,10 @@ import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import io.onedev.commons.utils.PathUtils;
+import io.onedev.commons.utils.Range;
 import io.onedev.server.search.code.hit.PathHit;
 import io.onedev.server.search.code.hit.QueryHit;
-import io.onedev.utils.PathUtils;
-import io.onedev.utils.Range;
 
 public class PathQuery extends BlobQuery {
 

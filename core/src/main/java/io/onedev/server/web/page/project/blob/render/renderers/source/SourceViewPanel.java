@@ -56,10 +56,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.jsymbol.Symbol;
-import io.onedev.jsymbol.SymbolExtractor;
-import io.onedev.jsymbol.SymbolExtractorRegistry;
-import io.onedev.jsymbol.TokenPosition;
+import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.jsymbol.SymbolExtractor;
+import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
+import io.onedev.commons.jsymbol.TokenPosition;
+import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.matchscore.MatchScoreProvider;
+import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
@@ -79,6 +83,7 @@ import io.onedev.server.search.code.SearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
@@ -104,10 +109,6 @@ import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.websocket.PageDataChanged;
-import io.onedev.utils.Range;
-import io.onedev.utils.StringUtils;
-import io.onedev.utils.matchscore.MatchScoreProvider;
-import io.onedev.utils.matchscore.MatchScoreUtils;
 
 /**
  * Make sure to add only one source view panel per page
@@ -763,7 +764,8 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	private CompareContext getCompareContext() {
 		CompareContext compareContext = new CompareContext();
 		compareContext.setCompareCommit(context.getCommit().name());
-		compareContext.setPathFilter(context.getBlobIdent().path);
+		if (context.getBlobIdent().path != null)
+			compareContext.setPathFilter(PatternSet.quoteIfNecessary(context.getBlobIdent().path));
 		return compareContext;
 	}
 	
@@ -843,7 +845,8 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 				blameInfo.abbreviatedHash = GitUtils.abbreviateSHA(blame.getCommit().getHash(), 7);
 				CommitDetailPage.State state = new CommitDetailPage.State();
 				state.revision = blame.getCommit().getHash();
-				state.pathFilter = context.getBlobIdent().path;
+				if (context.getBlobIdent().path != null)
+					state.pathFilter = PatternSet.quoteIfNecessary(context.getBlobIdent().path);
 				PageParameters params = CommitDetailPage.paramsOf(context.getProject(), state);
 				blameInfo.url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 				blameInfo.ranges = blame.getRanges();

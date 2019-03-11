@@ -58,10 +58,14 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.codeassist.InputCompletion;
-import io.onedev.codeassist.InputStatus;
-import io.onedev.codeassist.InputSuggestion;
-import io.onedev.jsymbol.util.NoAntiCacheImage;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
+import io.onedev.commons.utils.PathComparator;
+import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.stringmatch.Matcher;
+import io.onedev.commons.utils.stringmatch.WildcardUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
@@ -79,8 +83,9 @@ import io.onedev.server.search.code.IndexManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.behavior.PatternSetAssistBehavior;
 import io.onedev.server.web.component.codecomment.CodeCommentPanel;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
 import io.onedev.server.web.component.diff.blob.SourceAware;
@@ -96,10 +101,6 @@ import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.SuggestionUtils;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.websocket.PageDataChanged;
-import io.onedev.utils.PathComparator;
-import io.onedev.utils.Range;
-import io.onedev.utils.StringUtils;
-import io.onedev.utils.stringmatch.WildcardUtils;
 
 /**
  * Make sure to add only one revision diff panel on a page
@@ -152,7 +153,7 @@ public class RevisionDiffPanel extends Panel {
 			List<DiffEntry> diffEntries = diffEntriesModel.getObject();
 			
 			Set<String> changedPaths = new HashSet<>();
-			List<BlobChange> allChanges = new ArrayList<>();
+			List<BlobChange> changes = new ArrayList<>();
 			for (DiffEntry entry: diffEntries) {
     			BlobChange change = new BlobChange(oldRev, newRev, entry, whitespaceOptionModel.getObject()) {
 
@@ -162,7 +163,7 @@ public class RevisionDiffPanel extends Panel {
 					}
 
 	    		};
-	    		allChanges.add(change);
+	    		changes.add(change);
 	    		changedPaths.addAll(change.getPaths());
 			}
 
@@ -172,7 +173,7 @@ public class RevisionDiffPanel extends Panel {
 						&& !markedPaths.contains(comment.getMarkPos().getPath())) {
 					BlobIdent oldBlobIdent = new BlobIdent(oldRev, comment.getMarkPos().getPath(), FileMode.TYPE_FILE);
 					BlobIdent newBlobIdent = new BlobIdent(newRev, comment.getMarkPos().getPath(), FileMode.TYPE_FILE);
-					allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
+					changes.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
 
 						@Override
 						public Blob getBlob(BlobIdent blobIdent) {
@@ -188,7 +189,7 @@ public class RevisionDiffPanel extends Panel {
 			if (mark != null && !changedPaths.contains(mark.getPath()) && !markedPaths.contains(mark.getPath())) {
 				BlobIdent oldBlobIdent = new BlobIdent(oldRev, mark.getPath(), FileMode.TYPE_FILE);
 				BlobIdent newBlobIdent = new BlobIdent(newRev, mark.getPath(), FileMode.TYPE_FILE);
-				allChanges.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
+				changes.add(new BlobChange(null, oldBlobIdent, newBlobIdent, whitespaceOptionModel.getObject()) {
 
 					@Override
 					public Blob getBlob(BlobIdent blobIdent) {
@@ -199,48 +200,41 @@ public class RevisionDiffPanel extends Panel {
 				markedPaths.add(mark.getPath());
 			}
 			
-			List<BlobChange> filterChanges;
-    		String matchWith = pathFilterModel.getObject();
-    		if (StringUtils.isNotBlank(matchWith)) {
-        		matchWith = matchWith.toLowerCase().trim();
-        		boolean exclude = false;
-        		if (matchWith.startsWith("-")) {
-        			matchWith = matchWith.substring(1).trim();
-        			exclude = true;
-        		}
-    			matchWith = StringUtils.stripStart(matchWith, "/");
-    			matchWith = StringUtils.stripEnd(matchWith, "/");
+			List<BlobChange> filteredChanges = new ArrayList<>();
+    		String patternSetString = pathFilterModel.getObject();
+    		if (StringUtils.isNotBlank(patternSetString)) {
+    			try {
+    				PatternSet patternSet = PatternSet.fromString(patternSetString);
+    				Matcher matcher = new Matcher() {
 
-    			List<BlobChange> matchChanges = new ArrayList<>();
-    	    	for (BlobChange change: allChanges) {
-        			String oldPath = change.getOldBlobIdent().path;
-        			if (oldPath == null)
-        				oldPath = "";
-        			else
-        				oldPath = oldPath.toLowerCase();
-        			String newPath = change.getNewBlobIdent().path;
-        			if (newPath == null)
-        				newPath = "";
-        			else
-        				newPath = newPath.toLowerCase();
-        			if (matchWith.equals(oldPath) || matchWith.equals(newPath)) {
-        				matchChanges.add(change);
-        			} else if (oldPath.startsWith(matchWith + "/") || newPath.startsWith(matchWith + "/")) {
-        				matchChanges.add(change);
-        			} else if (WildcardUtils.matchString(matchWith, oldPath) 
-        					|| WildcardUtils.matchString(matchWith, newPath)){
-        				matchChanges.add(change);
-        			}
-    	    	}
-    	    	
-    			if (exclude) {
-    				filterChanges = new ArrayList<>(allChanges);
-    				filterChanges.removeAll(matchChanges);
-    			} else {
-    				filterChanges = matchChanges;
+						@Override
+						public boolean matches(String pattern, String value) {
+							pattern = pattern.toLowerCase();
+	    	    			pattern = StringUtils.stripStart(pattern, "/");
+	    	    			pattern = StringUtils.stripEnd(pattern, "/");
+	    	    			return pattern.equals(value) || value.startsWith(pattern + "/") || WildcardUtils.matchString(pattern, value);
+						}
+    					
+    				};
+    				for (BlobChange change: changes) {
+	        			String oldPath = change.getOldBlobIdent().path;
+	        			if (oldPath == null)
+	        				oldPath = "";
+	        			else
+	        				oldPath = oldPath.toLowerCase();
+	        			String newPath = change.getNewBlobIdent().path;
+	        			if (newPath == null)
+	        				newPath = "";
+	        			else
+	        				newPath = newPath.toLowerCase();
+    					if (patternSet.matches(matcher, oldPath) || patternSet.matches(matcher, newPath)) {
+    						filteredChanges.add(change);
+    					}
+    				}
+    			} catch (Exception e) {
     			}
     		} else {
-    			filterChanges = new ArrayList<>(allChanges);
+    			filteredChanges.addAll(changes);
     		}
 			
 	    	// for some unknown reason, some paths in the diff entries is DELETE/ADD 
@@ -248,7 +242,7 @@ public class RevisionDiffPanel extends Panel {
 	    	// MODIFICATION entry
 	    	Map<String, BlobIdent> deleted = new HashMap<>();
 	    	Map<String, BlobIdent> added = new HashMap<>();
-	    	for (BlobChange change: filterChanges) {
+	    	for (BlobChange change: filteredChanges) {
 	    		if (change.getType() == ChangeType.DELETE)
 	    			deleted.put(change.getPath(), change.getOldBlobIdent());
 	    		else if (change.getType() == ChangeType.ADD) 
@@ -256,7 +250,7 @@ public class RevisionDiffPanel extends Panel {
 	    	}
 	    	
 	    	List<BlobChange> normalizedChanges = new ArrayList<>();
-	    	for (BlobChange change: filterChanges) {
+	    	for (BlobChange change: filteredChanges) {
 	    		BlobIdent oldBlobIdent = deleted.get(change.getPath());
 	    		BlobIdent newBlobIdent = added.get(change.getPath());
 	    		if (oldBlobIdent != null && newBlobIdent != null) {
@@ -614,50 +608,40 @@ public class RevisionDiffPanel extends Panel {
 		List<String> listOfInvolvedPaths = new ArrayList<>(setOfInvolvedPaths);
 		listOfInvolvedPaths.sort(new PathComparator());
 		
-		filterInput.add(new InputAssistBehavior() {
-			
+		filterInput.add(new PatternSetAssistBehavior() {
+
 			@Override
-			protected List<InputCompletion> getSuggestions(InputStatus inputStatus) {
-				List<InputCompletion> completions = new ArrayList<>();
-				String matchWith = inputStatus.getContentBeforeCaret().trim();
-				boolean exclude = false;
-				if (matchWith.startsWith("-")) {
-					matchWith = matchWith.substring(1).trim();
-					exclude = true;
-				}
-				
-				for (InputSuggestion suggestion: SuggestionUtils.suggestPath(listOfInvolvedPaths, matchWith, null)) {
-					int caret = suggestion.getCaret();
-					if (caret == -1)
-						caret = suggestion.getContent().length();
-					String suggestedContent = suggestion.getContent();
-					if (exclude) 
-						suggestedContent = "-" + suggestedContent;
-					completions.add(new InputCompletion(suggestedContent, suggestedContent, caret, null, suggestion.getMatch()));
-				}
-				return completions;
-			}
-			
-			@Override
-			protected List<String> getHints(InputStatus inputStatus) {
-				return Lists.newArrayList("Use '*' to match any part of the path", "Prefix path with '-' to exclude");
+			protected List<InputSuggestion> suggest(String matchWith) {
+				return SuggestionUtils.suggestPaths(listOfInvolvedPaths, matchWith);
 			}
 
 			@Override
-			protected List<Range> getErrors(String inputContent) {
-				return null;
-			}
-			
-			@Override
-			protected int getAnchor(String content) {
-				for (int i=0; i<content.length(); i++) {
-					if (!Character.isWhitespace(content.charAt(i)))
-						return i;
-				}
-				return content.length();
+			protected List<String> getHints(TerminalExpect terminalExpect) {
+				return Lists.newArrayList(
+						"Path containing spaces or starting with dash needs to be quoted",
+						"Use * or ? for wildcard match"
+						);
 			}
 			
 		});
+		
+		WebMarkupContainer invalidPathFilter;
+		add(invalidPathFilter = new WebMarkupContainer("invalidPathFilter") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				try {
+					if (StringUtils.isNotBlank(pathFilterModel.getObject()))
+						PatternSet.fromString(pathFilterModel.getObject());
+					setVisible(false);
+				} catch (Exception e) {
+					setVisible(true);
+				}
+			}
+			
+		});
+		invalidPathFilter.setOutputMarkupPlaceholderTag(true);
 		
 		pathFilterForm.add(new AjaxButton("submit") {
 
@@ -672,11 +656,12 @@ public class RevisionDiffPanel extends Panel {
 				super.onSubmit(target, form);
 				body.replace(commentContainer = newCommentContainer());
 				target.add(body);
+				target.add(invalidPathFilter);
 			}
 			
 		});
 		add(pathFilterForm);
-		
+
 		body.add(commentContainer = newCommentContainer());
 		
 		Component totalFilesLink;

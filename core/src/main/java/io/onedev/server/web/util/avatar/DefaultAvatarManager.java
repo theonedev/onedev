@@ -15,7 +15,10 @@ import org.apache.commons.codec.binary.Hex;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 
-import io.onedev.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.User;
@@ -27,9 +30,6 @@ import io.onedev.server.util.userident.RemovedUserIdent;
 import io.onedev.server.util.userident.SystemUserIdent;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.LockUtils;
-import io.onedev.utils.StringUtils;
 
 @Singleton
 public class DefaultAvatarManager implements AvatarManager {

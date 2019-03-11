@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -17,12 +18,12 @@ import io.onedev.server.model.support.usermatcher.Anyone;
 import io.onedev.server.model.support.usermatcher.SpecifiedGroup;
 import io.onedev.server.model.support.usermatcher.SpecifiedUser;
 import io.onedev.server.model.support.usermatcher.UserMatcher;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
-import io.onedev.server.web.editable.annotation.BranchPattern;
+import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.ConfigurationChoice;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.utils.PathUtils;
 
 @Editable
 public class BranchProtection implements Serializable {
@@ -31,7 +32,7 @@ public class BranchProtection implements Serializable {
 
 	private boolean enabled = true;
 	
-	private String branch;
+	private String branches;
 	
 	private UserMatcher submitter = new Anyone();
 	
@@ -57,16 +58,15 @@ public class BranchProtection implements Serializable {
 		this.enabled = enabled;
 	}
 
-	@Editable(order=100, description="Specify branch to be protected. Wildcard may be used to "
-			+ "specify multiple branches")
-	@BranchPattern
+	@Editable(order=100, description="Specify space-separated branches to be protected. Use * or ? for wildcard match")
+	@BranchPatterns
 	@NotEmpty
-	public String getBranch() {
-		return branch;
+	public String getBranches() {
+		return branches;
 	}
 
-	public void setBranch(String branch) {
-		this.branch = branch;
+	public void setBranches(String branches) {
+		this.branches = branches;
 	}
 
 	@Editable(order=150, name="If Submitted By", description="This protection rule will apply "
@@ -154,7 +154,7 @@ public class BranchProtection implements Serializable {
 	@Nullable
 	public FileProtection getFileProtection(String file) {
 		for (FileProtection protection: fileProtections) {
-			if (PathUtils.matchChildAware(protection.getPath(), file))
+			if (PatternSet.fromString(protection.getPaths()).matches(new ChildAwareMatcher(), file))
 				return protection;
 		}
 		return null;
@@ -268,7 +268,11 @@ public class BranchProtection implements Serializable {
 	}
 	
 	public boolean onBranchDeleted(String branchName) {
-		return branchName.equals(getBranch());
+		PatternSet patternSet = PatternSet.fromString(getBranches());
+		patternSet.getIncludes().remove(branchName);
+		patternSet.getExcludes().remove(branchName);
+		setBranches(patternSet.toString());
+		return getBranches().length() == 0;
 	}
 
 }

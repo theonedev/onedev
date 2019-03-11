@@ -21,9 +21,16 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.launcher.bootstrap.Bootstrap;
-import io.onedev.launcher.loader.Listen;
-import io.onedev.launcher.loader.ManagedSerializedForm;
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.ZipUtils;
+import io.onedev.commons.utils.init.ManualConfig;
+import io.onedev.commons.utils.init.Skippable;
+import io.onedev.commons.utils.schedule.SchedulableTask;
+import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.manager.DataManager;
@@ -42,13 +49,6 @@ import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.ZipUtils;
-import io.onedev.utils.init.ManualConfig;
-import io.onedev.utils.init.Skippable;
-import io.onedev.utils.schedule.SchedulableTask;
-import io.onedev.utils.schedule.TaskScheduler;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {

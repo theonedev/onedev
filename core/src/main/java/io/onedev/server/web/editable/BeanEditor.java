@@ -30,14 +30,14 @@ import org.apache.wicket.util.visit.IVisitor;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.PathSegment.Property;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Vertical;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class BeanEditor extends ValueEditor<Serializable> {

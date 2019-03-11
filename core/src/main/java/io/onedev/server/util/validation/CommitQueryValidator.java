@@ -3,9 +3,9 @@ package io.onedev.server.util.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.search.commit.CommitQueryUtils;
 import io.onedev.server.web.editable.annotation.CommitQuery;
-import io.onedev.utils.StringUtils;
 
 public class CommitQueryValidator implements ConstraintValidator<CommitQuery, String> {
 

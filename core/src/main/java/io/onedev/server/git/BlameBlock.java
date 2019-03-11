@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import io.onedev.utils.Range;
+import io.onedev.commons.utils.Range;
 
 public class BlameBlock {
 	

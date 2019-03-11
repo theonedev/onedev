@@ -16,6 +16,7 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.unbescape.html.HtmlEscape;
 
+import io.onedev.commons.utils.ColorUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.BuildManager;
 import io.onedev.server.manager.IssueManager;
@@ -41,7 +42,6 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.utils.ColorUtils;
 
 @SuppressWarnings("serial")
 public abstract class FieldValuesPanel extends Panel implements EditContext {

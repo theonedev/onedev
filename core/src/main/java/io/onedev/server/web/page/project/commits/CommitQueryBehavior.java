@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.wicket.Component;
@@ -12,11 +13,15 @@ import org.apache.wicket.model.IModel;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
-import io.onedev.codeassist.FenceAware;
-import io.onedev.codeassist.InputSuggestion;
-import io.onedev.codeassist.grammar.LexerRuleRefElementSpec;
-import io.onedev.codeassist.parser.TerminalExpect;
-import io.onedev.codeassist.parser.ParseExpect;
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
+import io.onedev.commons.codeassist.parser.ParseExpect;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.stringmatch.PatternApplied;
+import io.onedev.commons.utils.stringmatch.WildcardUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.NameAndEmail;
 import io.onedev.server.manager.CommitInfoManager;
@@ -25,10 +30,6 @@ import io.onedev.server.search.commit.CommitQueryParser;
 import io.onedev.server.util.Constants;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
-import io.onedev.utils.Range;
-import io.onedev.utils.StringUtils;
-import io.onedev.utils.stringmatch.PatternApplied;
-import io.onedev.utils.stringmatch.WildcardUtils;
 
 @SuppressWarnings("serial")
 public class CommitQueryBehavior extends ANTLRAssistBehavior {
@@ -57,6 +58,10 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 		projectModel.detach();
 	}
 
+	private List<InputSuggestion> escape(List<InputSuggestion> suggestions) {
+		return suggestions.stream().map(it->it.escape(ESCAPE_CHARS)).collect(Collectors.toList());
+	}
+	
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
@@ -72,13 +77,13 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 						Project project = projectModel.getObject();
 						switch (tokenType) {
 						case CommitQueryParser.BRANCH:
-							suggestions.addAll(SuggestionUtils.suggestBranch(project, unfencedMatchWith, ESCAPE_CHARS));
+							suggestions.addAll(escape(SuggestionUtils.suggestBranches(project, unfencedMatchWith)));
 							break;
 						case CommitQueryParser.TAG:
-							suggestions.addAll(SuggestionUtils.suggestTag(project, unfencedMatchWith, ESCAPE_CHARS));
+							suggestions.addAll(escape(SuggestionUtils.suggestTags(project, unfencedMatchWith)));
 							break;
 						case CommitQueryParser.BUILD:
-							suggestions.addAll(SuggestionUtils.suggestBuild(project, unfencedMatchWith, true, ESCAPE_CHARS));
+							suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedMatchWith, true)));
 							break;
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
@@ -106,11 +111,11 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 							List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
 							candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
 							candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
-							suggestions.addAll(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith, null));
+							suggestions.addAll(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith));
 							CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
 							break;
 						case CommitQueryParser.PATH:
-							suggestions.addAll(SuggestionUtils.suggestPath(projectModel.getObject(), unfencedMatchWith, ESCAPE_CHARS));
+							suggestions.addAll(escape(SuggestionUtils.suggestBlobs(projectModel.getObject(), unfencedMatchWith)));
 							break;
 						default: 
 							return null;

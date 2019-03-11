@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import org.jsoup.nodes.Document;
 
-import io.onedev.launcher.loader.ExtensionPoint;
+import io.onedev.commons.launcher.loader.ExtensionPoint;
 import io.onedev.server.model.Project;
 
 @ExtensionPoint

@@ -18,14 +18,15 @@
 				<td class="path-filter">
 					<form wicket:id="pathFilter">
 						<div class="input-group">
-							<input wicket:id="input" class="form-control no-autofocus" spellcheck="false" autocomplete="off" placeholder="Filter by path" type="text">
+                            <input wicket:id="input" class="form-control no-autofocus" spellcheck="false" autocomplete="off" placeholder="Filter by path" type="text">
 							<span class="input-group-btn">
 								<button wicket:id="submit" title="Filter" class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
 							</span>
 						</div>
 					</form>
 				</td>
-			</tr>
+            </tr>
+            <tr wicket:id="invalidPathFilter" class="invalid-path-filter"><td colspan="3"><div class="alert alert-danger">Malformed path filter</div></td></tr>
 		</table>
 		<div wicket:id="body" class="body">
 			<div class="title">
@@ -49,7 +50,7 @@
 					<div class="ui-resizable-handle ui-resizable-e"></div>
 					<div class="content">
 						<div wicket:id="head" class="head clearfix">
-							<a wicket:id="context" class="pull-left context close" title="Show this comment by comparing with specified revision"><i class="fa fa-ext fa-file-diff"></i></a>
+							<a wicket:id="context" class="pull-left context close" title="Compare with another revision"><i class="fa fa-ext fa-file-diff"></i></a>
 							<a wicket:id="locate" class="pull-left locate close"><i class="fa fa-hand-o-right"></i></a>
 							<a wicket:id="close" class="pull-left close" title="Hide comment"><i class="fa fa-times"></i></a>
 						</div>

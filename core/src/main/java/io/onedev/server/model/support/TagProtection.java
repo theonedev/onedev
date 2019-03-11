@@ -10,8 +10,9 @@ import io.onedev.server.model.support.usermatcher.Anyone;
 import io.onedev.server.model.support.usermatcher.SpecifiedGroup;
 import io.onedev.server.model.support.usermatcher.SpecifiedUser;
 import io.onedev.server.model.support.usermatcher.UserMatcher;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.TagPattern;
+import io.onedev.server.web.editable.annotation.TagPatterns;
 
 @Editable
 public class TagProtection implements Serializable {
@@ -20,7 +21,7 @@ public class TagProtection implements Serializable {
 
 	private boolean enabled = true;
 	
-	private String tag;
+	private String tags;
 	
 	private UserMatcher submitter = new Anyone();
 	
@@ -38,15 +39,15 @@ public class TagProtection implements Serializable {
 		this.enabled = enabled;
 	}
 
-	@Editable(order=100, description="Specify tag to be protected. Wildcard can be used to match multiple tags")
-	@TagPattern
+	@Editable(order=100, description="Specify space-separated tags to be protected. Use * or ? for wildcard match")
+	@TagPatterns
 	@NotEmpty
-	public String getTag() {
-		return tag;
+	public String getTags() {
+		return tags;
 	}
 
-	public void setTag(String tag) {
-		this.tag = tag;
+	public void setTags(String tags) {
+		this.tags = tags;
 	}
 
 	@Editable(order=150, name="If Performed By", description="This protection rule will apply "
@@ -122,7 +123,11 @@ public class TagProtection implements Serializable {
 	}
 
 	public boolean onTagDeleted(String tagName) {
-		return tagName.equals(getTag());
+		PatternSet patternSet = PatternSet.fromString(getTags());
+		patternSet.getIncludes().remove(tagName);
+		patternSet.getExcludes().remove(tagName);
+		setTags(patternSet.toString());
+		return getTags().length() == 0;
 	}
 	
 }

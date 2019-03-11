@@ -10,6 +10,7 @@ import io.onedev.server.ci.jobparam.JobParam;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.page.project.blob.render.renderers.cispec.dependencies.DependencyEditPanel;
 
 @Editable
@@ -34,7 +35,8 @@ public class Dependency implements Serializable {
 		this.job = job;
 	}
 
-	@Editable(order=200)
+	@Editable(order=200, description="Specify parameters of the dependency job. Dependency is satisfied only when "
+			+ "there are builds of the job with same set of parameters specified here")
 	public List<JobParam> getParams() {
 		return params;
 	}
@@ -43,7 +45,9 @@ public class Dependency implements Serializable {
 		this.params = params;
 	}
 
-	@Editable(order=200)
+	@Editable(order=300, description="Optionally specify space-separated artifact paths to retrieve. Path is relative to "
+			+ "build artifacts directory. Use * or ? for wildcard match")
+	@Multiline
 	public String getArtifacts() {
 		return artifacts;
 	}

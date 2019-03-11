@@ -13,6 +13,7 @@ import org.unbescape.java.JavaEscape;
 
 import com.google.common.base.Splitter;
 
+import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.manager.BuildManager;
@@ -26,7 +27,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
-import io.onedev.utils.WordUtils;
 
 public abstract class EntityQuery<T extends AbstractEntity> implements Serializable {
 

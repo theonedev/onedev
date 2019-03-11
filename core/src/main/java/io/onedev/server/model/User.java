@@ -28,7 +28,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.validation.annotation.UserName;

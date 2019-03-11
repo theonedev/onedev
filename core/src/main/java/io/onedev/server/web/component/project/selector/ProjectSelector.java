@@ -25,6 +25,8 @@ import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.commons.utils.matchscore.MatchScoreProvider;
+import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -33,8 +35,6 @@ import io.onedev.server.web.behavior.InputChangeBehavior;
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.utils.matchscore.MatchScoreProvider;
-import io.onedev.utils.matchscore.MatchScoreUtils;
 
 @SuppressWarnings("serial")
 public abstract class ProjectSelector extends Panel {

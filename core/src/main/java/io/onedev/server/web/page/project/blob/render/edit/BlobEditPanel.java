@@ -26,6 +26,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.Provider;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
@@ -35,7 +36,6 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.commitoption.CommitOptionPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.utils.Provider;
 
 @SuppressWarnings("serial")
 public abstract class BlobEditPanel extends Panel {

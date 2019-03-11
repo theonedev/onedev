@@ -11,8 +11,8 @@ import org.slf4j.LoggerFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.ObjectReference;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.ObjectReference;
 
 @Singleton
 public class DefaultUnitOfWork implements UnitOfWork {

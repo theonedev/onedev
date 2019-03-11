@@ -23,8 +23,10 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.launcher.loader.AppLoader;
-import io.onedev.launcher.loader.ImplementationRegistry;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.ImplementationRegistry;
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.editable.BeanContext;
@@ -35,7 +37,6 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.utils.ClassUtils;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializable>> {
@@ -52,7 +53,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		super(id, propertyDescriptor, model);
 		
 		implementations = new ArrayList<>();
-		baseClass = EditableUtils.getElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());
+		baseClass = ReflectionUtils.getCollectionElementType(propertyDescriptor.getPropertyGetter().getGenericReturnType());
 		Preconditions.checkNotNull(baseClass);
 		
 		ImplementationRegistry registry = AppLoader.getInstance(ImplementationRegistry.class);

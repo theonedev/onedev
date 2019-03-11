@@ -19,6 +19,7 @@ import org.apache.wicket.model.Model;
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Job;
 import io.onedev.server.migration.VersionedDocument;
@@ -27,7 +28,6 @@ import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class CISpecEditPanel extends FormComponentPanel<byte[]> {

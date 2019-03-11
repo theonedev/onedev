@@ -13,15 +13,15 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 
-import io.onedev.launcher.loader.ListenerRegistry;
-import io.onedev.launcher.loader.ManagedSerializedForm;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.UnitOfWork;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
-import io.onedev.utils.ClassUtils;
 
 @Singleton
 @SuppressWarnings("unchecked")

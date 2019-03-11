@@ -25,9 +25,9 @@ import org.apache.wicket.request.resource.JavaScriptResourceReference;
 import org.apache.wicket.request.resource.ResourceReference;
 import org.apache.wicket.resource.bundles.ConcatResourceBundleReference;
 
-import io.onedev.utils.ClassUtils;
-import io.onedev.utils.DependencyAware;
-import io.onedev.utils.DependencyUtils;
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.DependencyAware;
+import io.onedev.commons.utils.DependencyUtils;
 
 public class ResourceBundleReferences {
 

@@ -42,6 +42,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.Provider;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.Blob;
@@ -69,7 +70,6 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.ajaxlistener.TrackViewStateListener;
-import io.onedev.utils.Provider;
 
 @SuppressWarnings("serial")
 public class CommitOptionPanel extends Panel {

@@ -3,7 +3,7 @@ package io.onedev.server.util.diff;
 import java.io.Serializable;
 import java.util.List;
 
-import io.onedev.jsyntax.TextToken;
+import io.onedev.commons.jsyntax.TextToken;
 
 public class LineDiff implements Serializable {
 

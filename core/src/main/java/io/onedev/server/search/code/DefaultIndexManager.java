@@ -66,11 +66,15 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.jsymbol.Symbol;
-import io.onedev.jsymbol.SymbolExtractor;
-import io.onedev.jsymbol.SymbolExtractorRegistry;
-import io.onedev.launcher.loader.Listen;
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.jsymbol.SymbolExtractor;
+import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.concurrent.Prioritized;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.git.GitUtils;
@@ -83,10 +87,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.BatchWorker;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.IndexResult;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.FileUtils;
-import io.onedev.utils.StringUtils;
-import io.onedev.utils.concurrent.Prioritized;
 
 @Singleton
 public class DefaultIndexManager implements IndexManager {

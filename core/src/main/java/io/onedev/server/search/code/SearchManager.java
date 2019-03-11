@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import org.apache.lucene.search.IndexSearcher;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.jsymbol.Symbol;
+import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;

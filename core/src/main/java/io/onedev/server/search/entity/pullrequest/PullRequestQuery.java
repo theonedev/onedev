@@ -6,9 +6,10 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -53,7 +54,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 	
 	public static PullRequestQuery parse(Project project, @Nullable String queryString, boolean validate) {
 		if (queryString != null) {
-			ANTLRInputStream is = new ANTLRInputStream(queryString); 
+			CharStream is = CharStreams.fromString(queryString); 
 			PullRequestQueryLexer lexer = new PullRequestQueryLexer(is);
 			lexer.removeErrorListeners();
 			lexer.addErrorListener(new BaseErrorListener() {

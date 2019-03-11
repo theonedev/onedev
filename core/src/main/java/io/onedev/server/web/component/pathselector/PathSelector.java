@@ -28,11 +28,11 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.BlobIcon;
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public abstract class PathSelector extends Panel {

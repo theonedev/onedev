@@ -4,8 +4,8 @@
 	<artifactId>server-core</artifactId>
 	<parent>
 		<groupId>io.onedev</groupId>
-		<artifactId>server-parent</artifactId>
-		<version>2.0.6</version>
+		<artifactId>server</artifactId>
+		<version>2.1.2</version>
 	</parent>
 	<build>
 		<plugins>
@@ -22,15 +22,25 @@
 	<dependencies>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>launcher-loader</artifactId>
-			<version>${launcher.version}</version>
+			<artifactId>commons-launcher-loader</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>launcher-loader</artifactId>
-			<version>${launcher.version}</version>
+			<artifactId>commons-launcher-loader</artifactId>
 			<type>test-jar</type>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>commons-codeassist</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>commons-jsymbol</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>commons-jsyntax</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-codec</groupId>
@@ -229,11 +239,6 @@
 			<version>4.5.6</version>
 		</dependency>
 		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>codeassist</artifactId>
-			<version>1.0.2</version>
-		</dependency>
-		<dependency>
 			<groupId>org.glassfish.hk2</groupId>
 			<artifactId>guice-bridge</artifactId>
 			<version>2.4.0-b06</version>
@@ -363,16 +368,6 @@
 			<version>1.0.3</version>
 		</dependency>
 		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>jsymbol</artifactId>
-			<version>1.0.2</version>
-		</dependency>
-		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>jsyntax</artifactId>
-			<version>1.0.2</version>
-		</dependency>
-		<dependency>
 			<groupId>com.vladsch.flexmark</groupId>
 			<artifactId>flexmark</artifactId>
 			<version>${flexmark.version}</version>
@@ -428,11 +423,9 @@
 		<groovy.version>2.4.14</groovy.version>
 		<wicket.version>7.10.0</wicket.version>
 		<wicketbootstrap.version>0.10.17</wicketbootstrap.version>
-		<launcher.version>1.0.3</launcher.version>
 		<jersey.version>2.13</jersey.version>
 		<jetty.version>9.3.24.v20180605</jetty.version>
 		<jackson.version>2.9.8</jackson.version>
 		<servlet.version>3.1.0</servlet.version>
-		<antlr.version>4.5.1-1</antlr.version>
 	</properties>
 </project>

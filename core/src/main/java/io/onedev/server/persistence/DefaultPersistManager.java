@@ -47,6 +47,10 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import io.onedev.commons.utils.BeanUtils;
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.migration.DatabaseMigrator;
 import io.onedev.server.migration.MigrationHelper;
 import io.onedev.server.migration.VersionedDocument;
@@ -55,10 +59,6 @@ import io.onedev.server.model.ModelVersion;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
-import io.onedev.utils.BeanUtils;
-import io.onedev.utils.ClassUtils;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.FileUtils;
 
 @Singleton
 public class DefaultPersistManager implements PersistManager {

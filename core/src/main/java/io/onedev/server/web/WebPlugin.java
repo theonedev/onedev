@@ -2,7 +2,7 @@ package io.onedev.server.web;
 
 import javax.inject.Inject;
 
-import io.onedev.launcher.loader.AbstractPlugin;
+import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 public class WebPlugin extends AbstractPlugin {

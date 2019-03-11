@@ -13,7 +13,7 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.jsyntax.Tokenized;
+import io.onedev.commons.jsyntax.Tokenized;
 import io.onedev.server.util.diff.DiffBlock;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;

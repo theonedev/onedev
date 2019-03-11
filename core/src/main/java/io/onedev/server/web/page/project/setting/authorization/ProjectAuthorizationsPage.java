@@ -37,6 +37,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.commons.utils.WordUtils;
+import io.onedev.commons.utils.matchscore.MatchScoreProvider;
+import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.UserAuthorizationManager;
@@ -68,9 +71,6 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.util.userident.UserIdent;
-import io.onedev.utils.WordUtils;
-import io.onedev.utils.matchscore.MatchScoreProvider;
-import io.onedev.utils.matchscore.MatchScoreUtils;
 
 @SuppressWarnings("serial")
 public class ProjectAuthorizationsPage extends ProjectSettingPage {

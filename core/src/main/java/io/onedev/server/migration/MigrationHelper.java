@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.StringUtils;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.StringUtils;
 
 public class MigrationHelper {
 	

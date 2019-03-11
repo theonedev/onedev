@@ -10,8 +10,9 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.ReplicationMode;
 import org.hibernate.query.Query;
 
-import io.onedev.launcher.loader.Listen;
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.manager.CacheManager;
@@ -27,7 +28,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.utils.StringUtils;
 
 @Singleton
 public class DefaultUserManager extends AbstractEntityManager<User> implements UserManager {

@@ -5,7 +5,7 @@ import javax.ws.rs.ext.ContextResolver;
 
 import org.glassfish.jersey.server.validation.ValidationConfig;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
 
 public class ValidationConfigurationContextResolver implements ContextResolver<ValidationConfig> {
 

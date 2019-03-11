@@ -30,6 +30,7 @@ import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.Job;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
+import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanEditor;
@@ -139,7 +140,7 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 			@Override
 			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
 				if (StringUtils.isNotBlank(rowModel.getObject().getArtifacts()))
-					cellItem.add(new Label(componentId, rowModel.getObject().getArtifacts()));
+					cellItem.add(new MultilineLabel(componentId, rowModel.getObject().getArtifacts()));
 				else
 					cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
 			}

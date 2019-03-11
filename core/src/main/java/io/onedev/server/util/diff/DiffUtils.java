@@ -13,16 +13,16 @@ import javax.annotation.Nullable;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
-import io.onedev.jsyntax.TextToken;
-import io.onedev.jsyntax.TokenTypes;
-import io.onedev.jsyntax.TokenUtils;
-import io.onedev.jsyntax.Tokenized;
-import io.onedev.jsyntax.Tokenizer;
-import io.onedev.jsyntax.TokenizerRegistry;
+import io.onedev.commons.jsyntax.TextToken;
+import io.onedev.commons.jsyntax.TokenTypes;
+import io.onedev.commons.jsyntax.TokenUtils;
+import io.onedev.commons.jsyntax.Tokenized;
+import io.onedev.commons.jsyntax.Tokenizer;
+import io.onedev.commons.jsyntax.TokenizerRegistry;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.support.TextRange;
 import io.onedev.server.util.diff.DiffMatchPatch.Diff;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
-import io.onedev.utils.StringUtils;
 
 public class DiffUtils {
 

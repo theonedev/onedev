@@ -4,20 +4,18 @@ import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.List;
 
 import javax.annotation.Nullable;
 import javax.validation.Validator;
 
-import io.onedev.launcher.loader.AppLoader;
+import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.commons.utils.BeanUtils;
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.ReflectionUtils;
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.utils.BeanUtils;
-import io.onedev.utils.ClassUtils;
-import io.onedev.utils.ReflectionUtils;
-import io.onedev.utils.StringUtils;
-import io.onedev.utils.WordUtils;
 
 public class EditableUtils {
 	
@@ -120,23 +118,6 @@ public class EditableUtils {
 	 */
 	public static <T extends AnnotatedElement> void sortAnnotatedElements(List<T> annotatedElements) {
 		annotatedElements.sort((element1, element2) -> getOrder(element1) - getOrder(element2));
-	}
-	
-	public static Class<?> getElementClass(Type listType) {
-		if (listType instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType)listType;
-			Type rawType = parameterizedType.getRawType();
-			if (rawType instanceof Class<?>) {
-				Class<?> rawClazz = (Class<?>) rawType;
-				if (List.class.isAssignableFrom(rawClazz)) {
-					Type elementType = parameterizedType.getActualTypeArguments()[0];
-					if (elementType instanceof Class<?>) { 
-						return (Class<?>) elementType;
-					}
-				}
-			}
-		}
-		return null;
 	}
 	
 	public static boolean hasEditableProperties(Class<?> beanClass) {

@@ -6,15 +6,15 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.utils.ClassUtils;
 
 @SuppressWarnings("serial")
 public class PolymorphicListEditSupport implements EditSupport {
@@ -22,7 +22,7 @@ public class PolymorphicListEditSupport implements EditSupport {
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
-			final Class<?> elementClass = EditableUtils.getElementClass(descriptor.getPropertyGetter().getGenericReturnType());
+			final Class<?> elementClass = ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType());
 			if (elementClass != null && !ClassUtils.isConcrete(elementClass) 
 					&& elementClass.getAnnotation(Editable.class) != null) {
 				return new PropertyContext<List<Serializable>>(descriptor) {

@@ -24,9 +24,10 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
@@ -101,7 +102,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 
 	public static IssueQuery parse(@Nullable Project project, @Nullable String queryString, boolean validate) {
 		if (queryString != null) {
-			ANTLRInputStream is = new ANTLRInputStream(queryString); 
+			CharStream is = CharStreams.fromString(queryString); 
 			IssueQueryLexer lexer = new IssueQueryLexer(is);
 			lexer.removeErrorListeners();
 			lexer.addErrorListener(new BaseErrorListener() {

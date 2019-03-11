@@ -9,6 +9,9 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.matchscore.MatchScoreProvider;
+import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -21,9 +24,6 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.AtWhoReferenceSupport;
 import io.onedev.server.web.component.markdown.UserMentionSupport;
-import io.onedev.utils.StringUtils;
-import io.onedev.utils.matchscore.MatchScoreProvider;
-import io.onedev.utils.matchscore.MatchScoreUtils;
 
 @SuppressWarnings("serial")
 public abstract class CommentInput extends MarkdownEditor {

@@ -11,6 +11,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.CacheManager;
 import io.onedev.server.manager.UserManager;
@@ -24,7 +25,6 @@ import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.UserChoice;
-import io.onedev.utils.ReflectionUtils;
 
 @SuppressWarnings("serial")
 public class UserSingleChoiceEditor extends PropertyEditor<String> {

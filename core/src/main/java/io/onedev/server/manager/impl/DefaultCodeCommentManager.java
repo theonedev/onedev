@@ -36,8 +36,8 @@ import org.hibernate.query.Query;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import io.onedev.launcher.loader.Listen;
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
 import io.onedev.server.event.codecomment.CodeCommentDeleted;
 import io.onedev.server.event.codecomment.CodeCommentEvent;

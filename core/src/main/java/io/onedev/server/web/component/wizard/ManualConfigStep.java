@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 import org.apache.wicket.markup.html.form.FormComponent;
 
+import io.onedev.commons.utils.init.ManualConfig;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.utils.init.ManualConfig;
 
 @SuppressWarnings("serial")
 public class ManualConfigStep implements WizardStep {

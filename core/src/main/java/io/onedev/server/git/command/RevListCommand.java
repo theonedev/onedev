@@ -9,8 +9,8 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.utils.command.Commandline;
-import io.onedev.utils.command.LineConsumer;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.LineConsumer;
 
 public class RevListCommand extends GitCommand<List<String>> {
 

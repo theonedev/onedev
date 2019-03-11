@@ -1,4 +1,4 @@
-package io.onedev.server.entityquery.codecomment;
+package io.onedev.server.entityquery.issue;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,17 +6,17 @@ import java.util.List;
 
 import org.junit.Test;
 
-import io.onedev.codeassist.CodeAssist;
-import io.onedev.codeassist.FenceAware;
-import io.onedev.codeassist.InputStatus;
-import io.onedev.codeassist.InputSuggestion;
-import io.onedev.codeassist.grammar.LexerRuleRefElementSpec;
-import io.onedev.codeassist.parser.TerminalExpect;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
+import io.onedev.commons.codeassist.CodeAssist;
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.codeassist.InputStatus;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
+import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.server.search.entity.issue.IssueQueryLexer;
 
-public class TestCodeCommentQueryGrammar {
+public class IssueQueryGrammarTest {
 
-	private CodeAssist codeAssist = new CodeAssist(CodeCommentQueryLexer.class, false) {
+	private CodeAssist codeAssist = new CodeAssist(IssueQueryLexer.class, false) {
 
 		private static final long serialVersionUID = 1L;
 
@@ -48,11 +48,11 @@ public class TestCodeCommentQueryGrammar {
 		assertEquals(1, suggestions.size());
 		assertEquals("\"Date\" is before \"2018-09-01 2:30PM\":36", suggestions.get(0).toString());
 
-		suggestions = codeAssist.suggest(new InputStatus("created by me", 13), "query");
+		suggestions = codeAssist.suggest(new InputStatus("outstanding", 11), "query");
 		assertEquals(3, suggestions.size());
-		assertEquals("created by me:13", suggestions.get(0).toString());
-		assertEquals("\"created by me\" :16", suggestions.get(1).toString());
-		assertEquals("created by me :14", suggestions.get(2).toString());
+		assertEquals("outstanding:11", suggestions.get(0).toString());
+		assertEquals("\"outstanding\" :14", suggestions.get(1).toString());
+		assertEquals("outstanding :12", suggestions.get(2).toString());
 	}
 	
 }

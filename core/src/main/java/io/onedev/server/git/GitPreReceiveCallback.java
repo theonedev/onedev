@@ -21,6 +21,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
@@ -32,7 +33,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.PullRequestConstants;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 @Singleton

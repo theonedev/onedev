@@ -22,9 +22,9 @@ import org.apache.shiro.subject.Subject;
 import org.apache.shiro.web.filter.PathMatchingFilter;
 import org.apache.shiro.web.util.WebUtils;
 
-import io.onedev.launcher.loader.PluginManager;
-import io.onedev.utils.ExceptionUtils;
-import io.onedev.utils.StringUtils;
+import io.onedev.commons.launcher.loader.PluginManager;
+import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.StringUtils;
 
 @Singleton
 public class BasicAuthenticationFilter extends PathMatchingFilter {

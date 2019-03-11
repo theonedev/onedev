@@ -20,13 +20,13 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import io.onedev.jsymbol.TokenPosition;
+import io.onedev.commons.jsymbol.TokenPosition;
+import io.onedev.commons.utils.Range;
 import io.onedev.server.search.code.IndexConstants;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.TextHit;
 import io.onedev.server.search.code.query.regex.RegexLiterals;
 import io.onedev.server.util.ContentDetector;
-import io.onedev.utils.Range;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;

@@ -7,8 +7,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import io.onedev.utils.concurrent.PrioritizedCallable;
-import io.onedev.utils.concurrent.PrioritizedRunnable;
+import io.onedev.commons.utils.concurrent.PrioritizedCallable;
+import io.onedev.commons.utils.concurrent.PrioritizedRunnable;
 
 /**
  * This executor is intended to run resource intensive long running tasks

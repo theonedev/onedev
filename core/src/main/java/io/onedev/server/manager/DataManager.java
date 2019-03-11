@@ -4,8 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.commons.utils.init.ManualConfig;
 import io.onedev.server.model.support.setting.BackupSetting;
-import io.onedev.utils.init.ManualConfig;
 
 public interface DataManager {
 

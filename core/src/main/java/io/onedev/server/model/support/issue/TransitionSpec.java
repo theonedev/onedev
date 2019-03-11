@@ -13,6 +13,7 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.SettingManager;
 import io.onedev.server.model.Issue;
@@ -38,7 +39,6 @@ import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldRe
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution.FixType;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateResolution;
-import io.onedev.utils.StringUtils;
 
 @Editable
 public class TransitionSpec implements Serializable {

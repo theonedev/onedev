@@ -5,8 +5,8 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.image.Image;
 
-import io.onedev.jsymbol.Symbol;
-import io.onedev.utils.Range;
+import io.onedev.commons.jsymbol.Symbol;
+import io.onedev.commons.utils.Range;
 
 public class SymbolHit extends QueryHit {
 

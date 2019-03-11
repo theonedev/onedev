@@ -50,9 +50,9 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-import io.onedev.jsymbol.TokenPosition;
-import io.onedev.jsymbol.util.NoAntiCacheImage;
-import io.onedev.launcher.loader.ListenerRegistry;
+import io.onedev.commons.jsymbol.TokenPosition;
+import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobContent;

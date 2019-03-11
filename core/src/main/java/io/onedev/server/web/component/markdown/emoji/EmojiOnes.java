@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 
-import io.onedev.utils.ExceptionUtils;
+import io.onedev.commons.utils.ExceptionUtils;
 
 public class EmojiOnes {
 	

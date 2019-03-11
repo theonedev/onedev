@@ -40,6 +40,7 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
@@ -54,7 +55,6 @@ import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.utils.ExceptionUtils;
 
 @SuppressWarnings("serial")
 public abstract class RevisionSelector extends Panel {

@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.apache.wicket.model.IModel;
 
+import io.onedev.commons.utils.matchscore.MatchScoreProvider;
+import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.security.SecurityUtils;
@@ -15,8 +17,6 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
-import io.onedev.utils.matchscore.MatchScoreProvider;
-import io.onedev.utils.matchscore.MatchScoreUtils;
 
 public class ReviewerProvider extends AbstractUserChoiceProvider {
 

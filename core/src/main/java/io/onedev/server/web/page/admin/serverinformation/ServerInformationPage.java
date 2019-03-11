@@ -9,9 +9,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.progress.ProgressBar;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.progress.ProgressBar.Type;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.utils.FileUtils;
 
 @SuppressWarnings("serial")
 public class ServerInformationPage extends AdministrationPage {

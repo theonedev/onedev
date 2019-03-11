@@ -10,7 +10,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.jsymbol.TokenPosition;
+import io.onedev.commons.jsymbol.TokenPosition;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.CodeComment;

@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.manager.UserManager;
@@ -23,7 +24,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.permission.DefaultPrivilege;
 import io.onedev.server.security.permission.ProjectPrivilege;
-import io.onedev.utils.WordUtils;
 
 @SuppressWarnings("serial")
 public class PrivilegeSourcePanel extends Panel {

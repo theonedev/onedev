@@ -24,6 +24,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -35,7 +36,6 @@ import io.onedev.server.web.editable.PathSegment;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
-import io.onedev.utils.StringUtils;
 
 @SuppressWarnings("serial")
 public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {

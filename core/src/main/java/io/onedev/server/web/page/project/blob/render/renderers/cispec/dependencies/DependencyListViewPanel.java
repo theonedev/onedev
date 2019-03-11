@@ -25,6 +25,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.ci.Dependency;
+import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
 import jersey.repackaged.com.google.common.collect.Sets;
@@ -72,7 +73,7 @@ public class DependencyListViewPanel extends Panel {
 					protected Component newLabel(String componentId) {
 						String artifacts = rowModel.getObject().getArtifacts();
 						if (StringUtils.isNotBlank(artifacts))
-							return new Label(componentId, artifacts);
+							return new MultilineLabel(componentId, artifacts);
 						else
 							return new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false);
 					}

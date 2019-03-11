@@ -24,6 +24,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.editable.BeanDescriptor;
@@ -35,7 +37,6 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
-import io.onedev.utils.ClassUtils;
 
 @SuppressWarnings("serial")
 public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
@@ -51,7 +52,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	public BeanListPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
-		elementClass = EditableUtils.getElementClass(propertyDescriptor.getPropertyGetter().getGenericReturnType());
+		elementClass = ReflectionUtils.getCollectionElementType(propertyDescriptor.getPropertyGetter().getGenericReturnType());
 
 		propertyContexts = new ArrayList<>();
 		

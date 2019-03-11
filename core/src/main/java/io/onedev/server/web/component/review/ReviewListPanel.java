@@ -23,6 +23,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.manager.PullRequestManager;
@@ -38,7 +39,6 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.websocket.PageDataChanged;
-import io.onedev.utils.HtmlUtils;
 
 @SuppressWarnings("serial")
 public class ReviewListPanel extends GenericPanel<PullRequest> {
