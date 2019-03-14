@@ -50,7 +50,9 @@ public abstract class BlobEditPanel extends Panel {
 	
 	private AbstractDefaultAjaxBehavior recreateBehavior;
 	
-	private String tabSelectionInfo;
+	private String tabSelectionInfo;	
+	
+	private byte[] editingContent;
 		
 	public BlobEditPanel(String id, BlobRenderContext context) {
 		super(id);
@@ -125,21 +127,25 @@ public abstract class BlobEditPanel extends Panel {
 				String toTab = StringUtils.substringAfter(tabSelectionInfo, " ");
 				switch (toTab) {
 				case "edit":
-					if (fromTab.equals("edit-plain")) {
-						replace(editor = newEditor("editor", plainEditor.getModelObject().getBytes(Charsets.UTF_8)));
-						editor.setOutputMarkupId(true);
-						target.add(editor);
-					}
+					if (fromTab.equals("edit-plain")) 
+						editingContent = plainEditor.getModelObject().getBytes(Charsets.UTF_8);
+					replace(editor = newEditor("editor", editingContent));
+					editor.setOutputMarkupId(true);
+					target.add(editor);
 					break;
 				case "edit-plain":
-					if (fromTab.equals("edit")) {
-						replace(plainEditor = getPlainEditSupport().newEditor("plainEditor", 
-								new String(editor.getModelObject(), Charsets.UTF_8)));
-						plainEditor.setOutputMarkupId(true);
-						target.add(plainEditor);
-					}
+					if (fromTab.equals("edit")) 
+						editingContent = editor.getModelObject();
+					replace(plainEditor = getPlainEditSupport().newEditor("plainEditor", 
+							new String(editingContent, Charsets.UTF_8)));
+					plainEditor.setOutputMarkupId(true);
+					target.add(plainEditor);
 					break;
 				case "save":
+					if (fromTab.equals("edit"))
+						editingContent = editor.getModelObject();
+					else
+						editingContent = plainEditor.getModelObject().getBytes(Charsets.UTF_8);
 					commitOption.onContentChange(target);
 					break;
 				}
@@ -163,10 +169,7 @@ public abstract class BlobEditPanel extends Panel {
 
 			@Override
 			public byte[] get() {
-				if ("edit save".equals(tabSelectionInfo))
-					return editor.getModelObject();
-				else
-					return plainEditor.getModelObject().getBytes(Charsets.UTF_8);
+				return editingContent;
 			}
 			
 		}));

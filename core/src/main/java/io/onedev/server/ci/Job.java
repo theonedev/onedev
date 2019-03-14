@@ -28,7 +28,7 @@ public class Job implements Serializable {
 	
 	private List<JobTrigger> triggers = new ArrayList<>();
 	
-	private String artifacts;
+	private String publishArtifacts;
 	
 	private long timeout = 3600;
 	
@@ -71,8 +71,7 @@ public class Job implements Serializable {
 		this.dependencies = dependencies;
 	}
 
-	@Editable(order=500, description="Use triggers to run the job automatically under certain conditions. "
-			+ "The condition will be checked in order and the first matching trigger will take effect")
+	@Editable(order=500, description="Use triggers to run the job automatically under certain conditions")
 	public List<JobTrigger> getTriggers() {
 		return triggers;
 	}
@@ -81,15 +80,15 @@ public class Job implements Serializable {
 		this.triggers = triggers;
 	}
 
-	@Editable(order=600, description="Optionally specify space-separated artifact paths to publish. "
-			+ "Artifact path is relative to job workspace. Use * or ? for wildcard match")
+	@Editable(order=600, description="Optionally specify space-separated workspace files to publish as artifacts. "
+			+ "Use * or ? for wildcard match")
 	@PathPatterns
-	public String getArtifacts() {
-		return artifacts;
+	public String getPublishArtifacts() {
+		return publishArtifacts;
 	}
 
-	public void setArtifacts(String artifacts) {
-		this.artifacts = artifacts;
+	public void setPublishArtifacts(String publishArtifacts) {
+		this.publishArtifacts = publishArtifacts;
 	}
 
 	@Editable(order=600, description="Specify timeout in seconds")

@@ -71,7 +71,7 @@ public class DependencyListViewPanel extends Panel {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						String artifacts = rowModel.getObject().getArtifacts();
+						String artifacts = rowModel.getObject().getRetrieveArtifacts();
 						if (StringUtils.isNotBlank(artifacts))
 							return new MultilineLabel(componentId, artifacts);
 						else

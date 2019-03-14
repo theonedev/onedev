@@ -16,16 +16,17 @@ public class TagCreatedTrigger extends JobTrigger {
 
 	private static final long serialVersionUID = 1L;
 
-	private String tag;
+	private String tags;
 	
-	@Editable(order=100, description="Optionally specify tag to match. Wildcard character * and ? may be used")
+	@Editable(name="Created Tags", order=100, 
+			description="Optionally specify tags to check. Use * or ? for wildcard match")
 	@TagPatterns
-	public String getTag() {
-		return tag;
+	public String getTags() {
+		return tags;
 	}
 
-	public void setTag(String tag) {
-		this.tag = tag;
+	public void setTags(String tags) {
+		this.tags = tags;
 	}
 
 	@Override
@@ -34,7 +35,7 @@ public class TagCreatedTrigger extends JobTrigger {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String pushedTag = GitUtils.ref2tag(refUpdated.getRefName());
 			if (pushedTag != null && !refUpdated.getNewCommitId().equals(ObjectId.zeroId()) 
-					&& (getTag() == null || PathUtils.matchChildAware(getTag(), pushedTag))) {
+					&& (getTags() == null || PathUtils.matchChildAware(getTags(), pushedTag))) {
 				return true;
 			}
 		}
@@ -43,16 +44,10 @@ public class TagCreatedTrigger extends JobTrigger {
 
 	@Override
 	public String getDescription() {
-		String condition;
-		if (getTag() != null)
-			condition = String.format("when tag %s is created", getTag());
+		if (getTags() != null)
+			return String.format("When tags '%s' are created", getTags());
 		else
-			condition = "when tags are created";
-		
-		if (isIgnore())
-			return "Do not trigger " + condition;
-		else
-			return "Trigger " + condition;
+			return "When tags are created";
 	}
 
 }

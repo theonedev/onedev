@@ -139,8 +139,8 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
-				if (StringUtils.isNotBlank(rowModel.getObject().getArtifacts()))
-					cellItem.add(new MultilineLabel(componentId, rowModel.getObject().getArtifacts()));
+				if (StringUtils.isNotBlank(rowModel.getObject().getRetrieveArtifacts()))
+					cellItem.add(new MultilineLabel(componentId, rowModel.getObject().getRetrieveArtifacts()));
 				else
 					cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
 			}

@@ -14,32 +14,32 @@ public class PullRequestTrigger extends JobTrigger {
 
 	private static final long serialVersionUID = 1L;
 
-	private String targetBranch;
+	private String targetBranches;
 	
-	@Editable(order=100, description="Optionally specify target branch of the pull request to match. "
-			+ "Wildcard character * and ? may be used")
+	@Editable(order=100, description="Optionally specify target branches of the pull request to check. "
+			+ "Use * or ? for wildcard match")
 	@BranchPatterns
-	public String getTargetBranch() {
-		return targetBranch;
+	public String getTargetBranches() {
+		return targetBranches;
 	}
 
-	public void setTargetBranch(String targetBranch) {
-		this.targetBranch = targetBranch;
+	public void setTargetBranches(String targetBranches) {
+		this.targetBranches = targetBranches;
 	}
 	
 	@Override
 	protected boolean matches(ProjectEvent event, CISpec ciSpec, Job job) {
 		if (event instanceof PullRequestOpened) {
 			PullRequestOpened pullRequestOpened = (PullRequestOpened) event;
-			if (getTargetBranch() == null 
-					|| PathUtils.matchChildAware(getTargetBranch(), pullRequestOpened.getRequest().getTargetBranch())) { 
+			if (getTargetBranches() == null 
+					|| PathUtils.matchChildAware(getTargetBranches(), pullRequestOpened.getRequest().getTargetBranch())) { 
 				return true;
 			}
 		} 
 		if (event instanceof PullRequestUpdated) {
 			PullRequestUpdated pullRequestUpdated = (PullRequestUpdated) event;
-			if (getTargetBranch() == null 
-					|| PathUtils.matchChildAware(getTargetBranch(), pullRequestUpdated.getRequest().getTargetBranch())) {
+			if (getTargetBranches() == null 
+					|| PathUtils.matchChildAware(getTargetBranches(), pullRequestUpdated.getRequest().getTargetBranch())) {
 				return true;
 			}
 		}
@@ -48,15 +48,10 @@ public class PullRequestTrigger extends JobTrigger {
 
 	@Override
 	public String getDescription() {
-		String condition;
-		if (getTargetBranch() != null)
-			condition = String.format("when pull requests to branch %s are created/updated", getTargetBranch());
+		if (getTargetBranches() != null)
+			return String.format("When pull requests to branches '%s' are created/updated", getTargetBranches());
 		else
-			condition = "when pull requests are created/updated";
-		if (isIgnore())
-			return "Do not trigger " + condition;
-		else
-			return "Trigger " + condition;
+			return "When pull requests are created/updated";
 	}
 
 }

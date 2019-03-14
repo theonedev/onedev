@@ -23,30 +23,30 @@ public class BranchPushedTrigger extends JobTrigger {
 
 	private static final long serialVersionUID = 1L;
 
-	private String branch;
+	private String branches;
 	
-	private String path;
+	private String paths;
 	
-	@Editable(order=100, 
-			description="Optionally specify branch to match. Wildcard character * and ? may be used")
+	@Editable(name="Pushed Branches", order=100, 
+			description="Optionally specify space-separated branches to check. Use * or ? for wildcard match")
 	@BranchPatterns
-	public String getBranch() {
-		return branch;
+	public String getBranches() {
+		return branches;
 	}
 
-	public void setBranch(String branch) {
-		this.branch = branch;
+	public void setBranches(String branches) {
+		this.branches = branches;
 	}
 
-	@Editable(name="File", order=200, 
-			description="Optionally specify file to match. Wildcard character * and ? may be used")
+	@Editable(name="Touched Files", order=200, 
+			description="Optionally specify space-separated files to check. Use * or ? for wildcard match")
 	@PathPatterns("getPathSuggestions")
-	public String getPath() {
-		return path;
+	public String getPaths() {
+		return paths;
 	}
 
-	public void setPath(String path) {
-		this.path = path;
+	public void setPaths(String paths) {
+		this.paths = paths;
 	}
 	
 	@SuppressWarnings("unused")
@@ -55,7 +55,7 @@ public class BranchPushedTrigger extends JobTrigger {
 	}
 
 	private boolean touchedFile(RefUpdated refUpdated) {
-		if (getPath() != null) {
+		if (getPaths() != null) {
 			if (refUpdated.getOldCommitId().equals(ObjectId.zeroId())) {
 				return true;
 			} else if (refUpdated.getNewCommitId().equals(ObjectId.zeroId())) {
@@ -64,7 +64,7 @@ public class BranchPushedTrigger extends JobTrigger {
 				Collection<String> changedFiles = GitUtils.getChangedFiles(refUpdated.getProject().getRepository(), 
 						refUpdated.getOldCommitId(), refUpdated.getNewCommitId());
 				for (String changedFile: changedFiles) {
-					if (PathUtils.matchChildAware(getPath(), changedFile))
+					if (PathUtils.matchChildAware(getPaths(), changedFile))
 						return true;
 				}
 				return false;
@@ -80,7 +80,7 @@ public class BranchPushedTrigger extends JobTrigger {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String pushedBranch = GitUtils.ref2branch(refUpdated.getRefName());
 			if (pushedBranch != null) {
-				if ((getBranch() == null || PathUtils.matchChildAware(getBranch(), pushedBranch)) 
+				if ((getBranches() == null || PathUtils.matchChildAware(getBranches(), pushedBranch)) 
 						&& touchedFile(refUpdated)) {
 					return true;
 				}
@@ -91,19 +91,14 @@ public class BranchPushedTrigger extends JobTrigger {
 
 	@Override
 	public String getDescription() {
-		String condition;
-		if (getBranch() != null && getPath() != null)
-			condition = String.format("when push to branch %s and touch file %s", getBranch(), getPath());
-		else if (getBranch() != null)
-			condition = String.format("when push to branch %s", getBranch());
-		else if (getPath() != null)
-			condition = String.format("when push to branch %s", getBranch());
+		if (getBranches() != null && getPaths() != null)
+			return String.format("When push to branches '%s' and touch files '%s'", getBranches(), getPaths());
+		else if (getBranches() != null)
+			return String.format("When push to branches '%s'", getBranches());
+		else if (getPaths() != null)
+			return String.format("When touch files '%s'", getBranches());
 		else
-			condition = "when push to branches";
-		if (isIgnore())
-			return "Do not trigger " + condition;
-		else
-			return "Trigger " + condition;
+			return "When push to branches";
 	}
 
 }

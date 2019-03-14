@@ -10,7 +10,7 @@ import io.onedev.server.ci.jobparam.JobParam;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Multiline;
+import io.onedev.server.web.editable.annotation.PathPatterns;
 import io.onedev.server.web.page.project.blob.render.renderers.cispec.dependencies.DependencyEditPanel;
 
 @Editable
@@ -22,7 +22,7 @@ public class Dependency implements Serializable {
 	
 	private List<JobParam> params = new ArrayList<>();
 	
-	private String artifacts;
+	private String retrieveArtifacts;
 
 	@Editable(order=100)
 	@ChoiceProvider("getJobChoices")
@@ -45,15 +45,15 @@ public class Dependency implements Serializable {
 		this.params = params;
 	}
 
-	@Editable(order=300, description="Optionally specify space-separated artifact paths to retrieve. Path is relative to "
-			+ "build artifacts directory. Use * or ? for wildcard match")
-	@Multiline
-	public String getArtifacts() {
-		return artifacts;
+	@Editable(order=300, description="Optionally specify space-separated artifacts to retrieve into job workspace. "
+			+ "Use * or ? for wildcard match")
+	@PathPatterns
+	public String getRetrieveArtifacts() {
+		return retrieveArtifacts;
 	}
 
-	public void setArtifacts(String artifacts) {
-		this.artifacts = artifacts;
+	public void setRetrieveArtifacts(String retrieveArtifacts) {
+		this.retrieveArtifacts = retrieveArtifacts;
 	}
 	
 	@SuppressWarnings("unused")
