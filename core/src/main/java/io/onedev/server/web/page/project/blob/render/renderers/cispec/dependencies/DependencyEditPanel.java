@@ -131,7 +131,7 @@ public abstract class DependencyEditPanel extends Panel {
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 
-	public abstract CISpec getCISpec();
+	public abstract CISpec getEditingCISpec();
 	
 	public abstract Job getBelongingJob();
 	

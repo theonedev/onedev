@@ -112,7 +112,17 @@ public class WicketUtils {
 		if (lastVisible != null)
 			lastVisible.add(new LastVisibleAppender("class", "last-visible").setSeparator(" "));
 	}
-
+	
+	public static int getChildIndex(WebMarkupContainer parent, Component child) {
+		int index = 0;
+		for (Component each: parent) {
+			if (each == child)
+				return index;
+			index++;
+		}
+		return -1;
+	}
+	
 	public static class LastVisibleAppender extends AttributeAppender {
 
 		private static final long serialVersionUID = 1L;

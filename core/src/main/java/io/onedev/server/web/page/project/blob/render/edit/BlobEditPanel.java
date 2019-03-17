@@ -160,7 +160,7 @@ public abstract class BlobEditPanel extends Panel {
 			@Override
 			protected void onError() {
 				super.onError();
-				RequestCycle.get().find(AjaxRequestTarget.class).add(this);
+				BlobEditPanel.this.onFormError(RequestCycle.get().find(AjaxRequestTarget.class), this);
 			}
 
 		});
@@ -221,6 +221,10 @@ public abstract class BlobEditPanel extends Panel {
 
 	@Nullable
 	protected abstract PlainEditSupport getPlainEditSupport();
+	
+	protected void onFormError(AjaxRequestTarget target, Form<?> form) {
+		target.add(form);
+	}
 
 	@Override
 	public void renderHead(IHeaderResponse response) {

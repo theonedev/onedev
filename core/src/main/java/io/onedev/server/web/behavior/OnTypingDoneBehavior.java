@@ -13,7 +13,7 @@ import org.apache.wicket.markup.html.form.FormComponent;
 import io.onedev.server.web.asset.doneevents.DoneEventsResourceReference;
 
 @SuppressWarnings("serial")
-public abstract class OnTypingDoneBehavior extends AjaxFormComponentUpdatingBehavior{
+public abstract class OnTypingDoneBehavior extends AjaxFormComponentUpdatingBehavior {
 
 	private int timeout;
 	
@@ -36,7 +36,7 @@ public abstract class OnTypingDoneBehavior extends AjaxFormComponentUpdatingBeha
 		String script = String.format(""
 				+ "var $input = $('#%s');"
 				+ "$input.doneEvents('input', function() {"
-				+ "  $input.trigger('donetyping');"
+				+ "  $(this).trigger('donetyping');"
 				+ "}, %s);",
 				component.getMarkupId(true), timeout);
 		response.render(OnDomReadyHeaderItem.forScript(script));

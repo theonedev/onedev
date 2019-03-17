@@ -31,6 +31,10 @@ public class BeanContext implements Serializable {
 		this.descriptor = descriptor;
 	}
 	
+	public BeanDescriptor getDescriptor() {
+		return descriptor;
+	}
+	
 	public BeanViewer renderForView(String componentId, IModel<Serializable> model) {
 		checkBeanEditable();
 		return new BeanViewer(componentId, descriptor, model);

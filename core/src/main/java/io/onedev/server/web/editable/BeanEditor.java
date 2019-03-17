@@ -200,7 +200,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			@Override
 			public Object getInputValue(String name) {
 				/*
-				 * Field will be be display name of the property when the bean class being edited is 
+				 * Field will be display name of the property when the bean class being edited is 
 				 * generated via groovy script    
 				 */
 				String propertyName = beanDescriptor.getPropertyName(name);

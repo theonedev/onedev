@@ -69,6 +69,10 @@ public class Tabbable extends Panel {
 				Tab tab = item.getModelObject();
 				if (tab.isSelected())
 					item.add(AttributeModifier.append("class", "active"));
+				if (item.getIndex() == 0)
+					item.add(AttributeModifier.append("class", "first"));
+				if (item.getIndex() == tabs.size()-1)
+					item.add(AttributeModifier.append("class", "last"));
 
 				item.add(tab.render("tab"));
 			}

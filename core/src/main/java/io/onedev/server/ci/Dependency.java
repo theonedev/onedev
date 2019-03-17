@@ -61,7 +61,7 @@ public class Dependency implements Serializable {
 		DependencyEditPanel editor = OneContext.get().getComponent().findParent(DependencyEditPanel.class);
 		List<String> choices = new ArrayList<>();
 		Job belongingJob = editor.getBelongingJob();
-		for (Job job: editor.getCISpec().getJobs()) {
+		for (Job job: editor.getEditingCISpec().getJobs()) {
 			choices.add(job.getName());
 		}
 		choices.remove(belongingJob.getName());

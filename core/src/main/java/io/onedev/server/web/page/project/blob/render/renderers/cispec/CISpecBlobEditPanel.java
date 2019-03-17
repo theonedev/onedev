@@ -1,11 +1,13 @@
 package io.onedev.server.web.page.project.blob.render.renderers.cispec;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
-import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
+import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 
 import io.onedev.server.ci.CISpec;
@@ -17,6 +19,8 @@ import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport
 @SuppressWarnings("serial")
 public class CISpecBlobEditPanel extends BlobEditPanel {
 
+	private CISpecEditPanel editor;
+	
 	private PlainEditPanel plainEditor;
 	
 	public CISpecBlobEditPanel(String id, BlobRenderContext context) {
@@ -26,12 +30,12 @@ public class CISpecBlobEditPanel extends BlobEditPanel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new CISpecCssResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new CISpecResourceReference()));
 	}
 
 	@Override
 	protected FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
-		return new CISpecEditPanel(componentId, context, initialContent);
+		return editor = new CISpecEditPanel(componentId, context, initialContent);
 	}
 
 	@Override
@@ -104,6 +108,11 @@ public class CISpecBlobEditPanel extends BlobEditPanel {
 			}
 			
 		};
+	}
+
+	@Override
+	protected void onFormError(AjaxRequestTarget target, Form<?> form) {
+		editor.onFormError(target, form);
 	}
 
 }

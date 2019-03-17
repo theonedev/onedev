@@ -6,9 +6,7 @@
                 <div class="head">
                     Jobs
                 </div>
-                <div class="body">
-                    <div wicket:id="jobs" class="job"></div>
-                </div>
+                <div wicket:id="body" class="body"></div>
             </div>
         </div>
     </wicket:fragment>
@@ -18,7 +16,8 @@
             <div wicket:id="errorMessage" class="error-message"></div>
         </div>
     </wicket:fragment>
-    <wicket:fragment wicket:id="emptyFrag">
-        <div class="empty">Build spec not defined</div>
+    <wicket:fragment wicket:id="hasJobsFrag">
+        <ul wicket:id="navs" class="navs list-unstyled"></ul>
+        <div wicket:id="content" class="content"></div>
     </wicket:fragment>
 </wicket:extend>

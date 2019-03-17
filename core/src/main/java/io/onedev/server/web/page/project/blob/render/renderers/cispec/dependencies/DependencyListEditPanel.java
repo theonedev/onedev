@@ -76,8 +76,8 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 					}
 
 					@Override
-					public CISpec getCISpec() {
-						return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getCISpec();
+					public CISpec getEditingCISpec() {
+						return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getEditingCISpec();
 					}
 
 					@Override
@@ -115,8 +115,8 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 							}
 
 							@Override
-							public CISpec getCISpec() {
-								return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getCISpec();
+							public CISpec getEditingCISpec() {
+								return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getEditingCISpec();
 							}
 
 							@Override

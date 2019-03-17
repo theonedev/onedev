@@ -12,10 +12,6 @@
     font-size: 13px;
     font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
-.ci-spec>.empty {
-    font-size: 20px;
-}
-
 .ci-spec>.valid>div {
     border-radius: 4px;
 }
@@ -24,12 +20,84 @@
     font-size: 18px;
     margin-bottom: 20px;
 }
-.ci-spec>.valid>div>.body>div {
-    margin-bottom: 20px;
+.ci-spec>.valid>div>.body {
+    position: relative;
+}
+
+.ci-spec>.valid>div>.body>:first-child {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 220px;
+}
+.ci-spec>.valid>div>.body>:last-child {
+    margin-left: 240px;
+}
+
+.ci-spec-view>.valid>div>.body>.navs li, 
+.ci-spec-edit>.valid>div>.body>.side>.navs>.nav {
+    position: relative;
+    background: #444;
+}
+.ci-spec-view>.valid>div>.body>.navs li a,
+.ci-spec-edit>.valid>div>.body>.side>.navs>.nav a {
+    color: #BBB;
+}
+.ci-spec-edit>.valid>div>.body>.side>.navs>.nav .drag-indicator {
+    color: inherit;
+    margin-right: 4px;
+}
+.ci-spec-view>.valid>div>.body>.navs>li:hover a,
+.ci-spec-view>.valid>div>.body>.navs>li.active a,
+.ci-spec-edit>.valid>div>.body>.side>.navs>.nav:hover a,
+.ci-spec-edit>.valid>div>.body>.side>.navs>.nav.active a {
+    color: white;
+    font-weight: bold;
+}
+.ci-spec-view>.valid>div>.body>.navs>li.active,
+.ci-spec-edit>.valid>div>.body>.side>.navs>.nav.active {
+    background: #080808;
+}
+.ci-spec-view>.valid>div>.body>.navs>li.first,
+.ci-spec-edit>.valid>div>.body>.side>.navs>.nav:first-child {
+    border-radius: 4px 4px 0 0;
+}
+.ci-spec-view>.valid>div>.body>.navs>li.last,
+.ci-spec-edit>.valid>div>.body>.side>.navs>.nav:last-child {
+    border-radius: 0 0 4px 4px;
+}
+.ci-spec-view>.valid>div>.body>.navs>li.first.last,
+.ci-spec-edit>.valid>div>.body>.side>.navs>.nav:first-child:last-child {
     border-radius: 4px;
-    border: 2px solid #BBB;
+}
+
+.ci-spec-edit>.valid>div>.body>.side>.add {
+    margin-top: 20px;
+}
+.ci-spec-view>.valid>div>.body>.navs>li>a,
+.ci-spec-edit>.valid>div>.body>.side>.navs>.nav>.select {
+    padding: 8px 28px 8px 8px;
+    text-decoration: none;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ci-spec-edit>.valid>div>.body>.side>.navs>.nav>.delete {
+    right: 0;
+    top: 0;
+    position: absolute;
+    border-left: 1px solid #EEE;
+    padding: 8px 8px;
+    display: block;
+}
+.ci-spec-view>.valid>div>.body>.content,
+.ci-spec-edit>.valid>div>.body>.contents>.content {
+    border-radius: 4px;
+    border: 2px solid #333;
     padding: 20px;
 }
+
 .ci-spec>.valid .bean-properties>table>tbody>tr>td.name {
     width: 200px;
 }
