@@ -218,7 +218,6 @@ public abstract class BlobEditPanel extends Panel {
 		
 		setOutputMarkupId(true);
 	}
-	
 
 	@Override
 	public void onEvent(IEvent<?> event) {

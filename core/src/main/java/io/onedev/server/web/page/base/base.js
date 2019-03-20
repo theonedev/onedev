@@ -317,7 +317,7 @@ onedev.server = {
 								$this.focus();
 							}
 							return false;
-						}
+                        }
 					});
 				}
 			}, 0);
