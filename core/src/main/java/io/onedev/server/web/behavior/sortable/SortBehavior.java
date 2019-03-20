@@ -27,7 +27,7 @@ public abstract class SortBehavior extends AbstractPostAjaxBehavior {
 	
 	private String placeholder;
 	
-	private int distance = 1;
+	private int distance = 5;
 	
 	private String change;
 	

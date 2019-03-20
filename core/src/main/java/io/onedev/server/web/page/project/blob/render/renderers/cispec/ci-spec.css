@@ -34,6 +34,9 @@
     margin-left: 240px;
 }
 
+.ci-spec-edit>.valid>div>.body>.side>.navs:not(:empty) {
+    margin-bottom: 20px;
+}
 .ci-spec-view>.valid>div>.body>.navs li, 
 .ci-spec-edit>.valid>div>.body>.side>.navs>.nav {
     position: relative;
@@ -65,7 +68,6 @@
 .ci-spec-view>.valid>div>.body>.navs>li.last,
 .ci-spec-edit>.valid>div>.body>.side>.navs>.nav:last-child {
     border-radius: 0 0 4px 4px;
-    margin-bottom: 20px;
 }
 .ci-spec-view>.valid>div>.body>.navs>li.first.last,
 .ci-spec-edit>.valid>div>.body>.side>.navs>.nav:first-child:last-child {
