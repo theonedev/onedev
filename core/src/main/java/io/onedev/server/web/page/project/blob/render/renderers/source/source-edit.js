@@ -69,7 +69,13 @@ onedev.server.sourceEdit = {
 				cm.setSize($sourceEdit.width(), $sourceEdit.height()-$warning.outerHeight());
 			else
 				cm.setSize($sourceEdit.width(), $sourceEdit.height());
-		});
+        });
+        
+        $sourceEdit.on("beforeSubmit", function() {
+            var cm = onedev.server.sourceEdit.getCodeMirror(containerId);	
+            $sourceEdit.children("textarea").val(cm.getValue());
+        });
+
 		$warning.on("closed.bs.alert", function () {
 			$(window).resize();
 		})
@@ -167,10 +173,6 @@ onedev.server.sourceEdit = {
 	},
 	getCodeMirror: function(containerId) {
 		return $("#" + containerId + ">.source-edit>.code>.CodeMirror")[0].CodeMirror;		
-	},
-	onSubmit: function(containerId) {
-		var cm = onedev.server.sourceEdit.getCodeMirror(containerId);	
-		$("#" + containerId + ">.source-edit>textarea").val(cm.getValue());
 	},
 	onIndentTypeChange: function(containerId, indentType) {
 		var cm = onedev.server.sourceEdit.getCodeMirror(containerId);		

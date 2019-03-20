@@ -4,14 +4,14 @@ import java.io.Serializable;
 
 import com.google.common.base.Preconditions;
 
-public interface PathSegment extends Serializable {
+public interface PathElement extends Serializable {
 
 	@SuppressWarnings("serial")
-	public static class Property implements PathSegment {
+	public static class Named implements PathElement {
 
 		private final String name;
 		
-		public Property(String name) {
+		public Named(String name) {
 			this.name = Preconditions.checkNotNull(name);
 		}
 		
@@ -27,11 +27,11 @@ public interface PathSegment extends Serializable {
 	}
 	
 	@SuppressWarnings("serial")
-	public static class Element implements PathSegment {
+	public static class Indexed implements PathElement {
 
 		private final int index;
 		
-		public Element(int index) {
+		public Indexed(int index) {
 			this.index = index;
 		}
 		

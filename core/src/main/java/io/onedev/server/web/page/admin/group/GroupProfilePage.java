@@ -22,7 +22,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.util.ConfirmOnClick;
 
 @SuppressWarnings("serial")
@@ -81,7 +81,7 @@ public class GroupProfilePage extends GroupPage {
 					GroupManager groupManager = OneDev.getInstance(GroupManager.class);
 					Group groupWithSameName = groupManager.find(group.getName());
 					if (groupWithSameName != null && !groupWithSameName.equals(group)) {
-						editor.getErrorContext(new PathSegment.Property("name"))
+						editor.getErrorContext(new PathElement.Named("name"))
 								.addError("This name has already been used by another group.");
 					} 
 					if (!editor.hasErrors(true)) {

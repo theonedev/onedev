@@ -19,7 +19,7 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.web.component.select2.Select2MultiChoice;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
@@ -91,7 +91,7 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
     }
 
 	@Override
-	public ErrorContext getErrorContext(PathSegment pathSegment) {
+	public ErrorContext getErrorContext(PathElement element) {
 		return null;
 	}
 	

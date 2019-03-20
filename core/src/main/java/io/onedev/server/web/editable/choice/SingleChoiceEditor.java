@@ -17,7 +17,7 @@ import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
@@ -84,7 +84,7 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 	}
 
 	@Override
-	public ErrorContext getErrorContext(PathSegment pathSegment) {
+	public ErrorContext getErrorContext(PathElement element) {
 		return null;
 	}
 

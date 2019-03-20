@@ -14,7 +14,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.component.pullrequest.choice.PullRequestChoiceProvider;
 import io.onedev.server.web.component.pullrequest.choice.PullRequestSingleChoice;
 import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -78,7 +78,7 @@ public class PullRequestChoiceEditor extends PropertyEditor<Long> {
 	}
 
 	@Override
-	public ErrorContext getErrorContext(PathSegment pathSegment) {
+	public ErrorContext getErrorContext(PathElement element) {
 		return null;
 	}
 

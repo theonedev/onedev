@@ -22,9 +22,7 @@ public class CISpecRendererProvider implements BlobRendererContribution {
 	@Override
 	public PrioritizedComponentRenderer getRenderer(BlobRenderContext context) {
 		if (context.getMode() == Mode.ADD && isCISpec(context.getNewPath()) 
-				|| context.getMode() == Mode.EDIT 
-					&& isCISpec(context.getBlobIdent().path) 
-					&& context.getProject().getBlob(context.getBlobIdent()).getText() != null) {
+				|| context.getMode() == Mode.EDIT && isCISpec(context.getBlobIdent().path)) {
 			return new PrioritizedComponentRenderer() {
 				
 				private static final long serialVersionUID = 1L;
@@ -41,8 +39,7 @@ public class CISpecRendererProvider implements BlobRendererContribution {
 			};
 		} else if ((context.getMode() == Mode.VIEW || context.getMode() == Mode.VIEW_PLAIN || context.getMode() == Mode.BLAME) 
 				&& context.getBlobIdent().isFile() 
-				&& isCISpec(context.getBlobIdent().path) 
-				&& context.getProject().getBlob(context.getBlobIdent()).getText() != null) {
+				&& isCISpec(context.getBlobIdent().path)) {
 			return new PrioritizedComponentRenderer() {
 				
 				private static final long serialVersionUID = 1L;

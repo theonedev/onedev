@@ -15,7 +15,7 @@ import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.Job;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
@@ -78,11 +78,11 @@ public abstract class DependencyEditPanel extends Panel {
 				if (dependencyIndex != -1) { 
 					Dependency oldDependency = dependencies.get(dependencyIndex);
 					if (!dependency.getJob().equals(oldDependency.getJob()) && getDependency(dependency.getJob()) != null) {
-						editor.getErrorContext(new PathSegment.Property("job"))
+						editor.getErrorContext(new PathElement.Named("job"))
 								.addError("Dependency to this job is already defined");
 					}
 				} else if (getDependency(dependency.getJob()) != null) {
-					editor.getErrorContext(new PathSegment.Property("job"))
+					editor.getErrorContext(new PathElement.Named("job"))
 							.addError("Dependency to this job is already defined");
 				}
 

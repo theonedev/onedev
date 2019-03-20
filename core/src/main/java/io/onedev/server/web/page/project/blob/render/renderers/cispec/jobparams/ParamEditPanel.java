@@ -15,7 +15,7 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
@@ -77,13 +77,13 @@ abstract class ParamEditPanel extends Panel implements InputContext {
 				if (paramIndex != -1) { 
 					InputSpec oldParam = params.get(paramIndex);
 					if (!param.getName().equals(oldParam.getName()) && getInputSpec(param.getName()) != null) {
-						editor.getErrorContext(new PathSegment.Property("param"))
-								.getErrorContext(new PathSegment.Property("name"))
+						editor.getErrorContext(new PathElement.Named("param"))
+								.getErrorContext(new PathElement.Named("name"))
 								.addError("This name has already been used by another parameter");
 					}
 				} else if (getInputSpec(param.getName()) != null) {
-					editor.getErrorContext(new PathSegment.Property("param"))
-							.getErrorContext(new PathSegment.Property("name"))
+					editor.getErrorContext(new PathElement.Named("param"))
+							.getErrorContext(new PathElement.Named("name"))
 							.addError("This name has already been used by another parameter");
 				}
 

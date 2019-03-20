@@ -10,7 +10,7 @@ import io.onedev.server.model.Configuration;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 @SuppressWarnings("serial")
@@ -37,7 +37,7 @@ public class NewConfigurationPage extends ProjectSettingPage {
 				ConfigurationManager configurationManager = OneDev.getInstance(ConfigurationManager.class);
 				Configuration configurationWithSameName = configurationManager.find(getProject(), configuration.getName());
 				if (configurationWithSameName != null) {
-					editor.getErrorContext(new PathSegment.Property("name"))
+					editor.getErrorContext(new PathElement.Named("name"))
 							.addError("This name has already been used by another configuration in the project");
 				} 
 				if (!editor.hasErrors(true)) {

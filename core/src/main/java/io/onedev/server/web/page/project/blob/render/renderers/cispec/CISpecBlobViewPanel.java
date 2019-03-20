@@ -3,7 +3,6 @@ package io.onedev.server.web.page.project.blob.render.renderers.cispec;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -17,7 +16,6 @@ import com.google.common.base.Throwables;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Job;
 import io.onedev.server.git.Blob;
-import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -38,10 +36,9 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 		super.onInitialize();
 		
 		Blob blob = context.getProject().getBlob(context.getBlobIdent());
-		String ciSpecString = blob.getText().getContent();
-		if (StringUtils.isNotBlank(ciSpecString)) {
-			try {
-				CISpec ciSpec = (CISpec) VersionedDocument.fromXML(ciSpecString).toBean();
+		try {
+			CISpec ciSpec = CISpec.parse(blob.getBytes());
+			if (ciSpec != null) {
 				Fragment validFrag = new Fragment("content", "validFrag", this);			
 				if (!ciSpec.getJobs().isEmpty()) {
 					Fragment hasJobsFrag = new Fragment("body", "hasJobsFrag", this);
@@ -69,13 +66,13 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 					validFrag.add(new Label("body", "No jobs defined"));
 				}
 				add(validFrag);
-			} catch (Exception e) {
-				Fragment invalidFrag = new Fragment("content", "invalidFrag", this);
-				invalidFrag.add(new MultilineLabel("errorMessage", Throwables.getStackTraceAsString(e)));
-				add(invalidFrag);
+			} else {
+				add(new Label("content", "CI spec not defined"));
 			}
-		} else {
-			add(new Label("content", "Build spec not defined"));
+		} catch (Exception e) {
+			Fragment invalidFrag = new Fragment("content", "invalidFrag", this);
+			invalidFrag.add(new MultilineLabel("errorMessage", Throwables.getStackTraceAsString(e)));
+			add(invalidFrag);
 		}
 	}
 	

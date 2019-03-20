@@ -49,10 +49,67 @@ body {
 	border-color: #145562;
 }
 #session-feedback ul {
-	padding: 0; margin: 0;
+    padding: 0; 
+    margin: 0;
 }
 #session-feedback li {
-	list-style: none;
+    list-style: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: none;
+}
+
+ul.feedbackPanel {
+    margin: 0 0 20px 0;
+    padding: 0;
+    list-style: none;
+}
+ul.feedbackPanel>li {
+    margin: 0;
+    padding: 8px 0 8px 12px;
+    border-left: 6px solid;
+}
+li.feedbackPanelERROR, li.feedbackPanelFATAL {
+	color: #DD4B4B; 
+    background: #FEDADA;
+    border-left-color: #BF1111; 
+}
+li.feedbackPanelSUCCESS {
+	color: #399529; 
+    background: #E5FBE5;
+    border-left-color: #19A519; 
+}
+li.feedbackPanelINFO {
+	color: #31708f; 
+    background: #d9edf7;
+    border-left-color: #46A7D8; 
+}
+li.feedbackPanelWARNING {
+	background: #FDF3C9;
+	color: #836A05;
+	border-left-color: #AD8C07;
+}
+
+ul.feedbackPanel>li:first-child {
+    border-radius: 4px 4px 0 0;
+}
+ul.feedbackPanel>li:last-child {
+    border-radius: 0 0 4px 4px;
+}
+ul.feedbackPanel>li:first-child:last-child {
+    border-radius: 4px;
+}
+form .required {
+	font-size: 16px; 
+	color: #B94A48;
+}
+.bean-editor ul.feedbackPanel {
+    margin: 10px 0;
+}
+
+form>.test-feedback {
+	margin-top: 16px;
 }
 
 .noselect {
@@ -115,23 +172,6 @@ a.tree-junction {
 /* Tabs */
 .tabbable>.tab-content {
 	padding-top: 16px;
-}
-
-/* Forms */
-form .required {
-	font-size: 16px; 
-	color: #B94A48;
-}
-form .form-group ul.feedbackPanel, form td.value ul.feedbackPanel {
-	margin: 4px 0 0 -8px; 
-	padding-bottom: 0;
-}
-form li.feedbackPanelERROR {
-	color: #AA0000;
-	list-style: disc;
-}
-form>.test-feedback {
-	margin-top: 16px;
 }
 
 .help-block {
@@ -562,29 +602,30 @@ a.input-clear.input-group-clear {
 }
 
 .alert {
-	font-size: 16px;
+    font-size: 16px;
+    border: none;
+    border-left: 6px solid;
 }
 .alert a {
 	font-weight: bold;
 }
 .alert-info {
-	border: 1px solid #46A7D8;
-	font-size: 16px;
+	border-color: #46A7D8;
 }
 .alert-success {
-	border: 1px solid #19A519;
+	border-color: #19A519;
 	background: #E5FBE5;
 	color: #399529; 
 }
 .alert-danger {
 	color: #DD4B4B; 
 	background: #FEDADA;
-	border: 1px solid #BF1111;
+	border-color: #BF1111;
 }
 .alert-warning {
 	background: #FDF3C9;
 	color: #836A05;
-	border: 1px solid #AD8C07;
+	border-color: #AD8C07;
 }
 
 a.disabled, a[disabled="disabled"] {

@@ -1,33 +1,25 @@
 package io.onedev.server.web.page.project.blob.render.edit;
 
-import java.nio.charset.Charset;
-
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
-import org.apache.wicket.markup.html.form.HiddenField;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.PropertyModel;
-import org.apache.wicket.request.cycle.RequestCycle;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.Provider;
-import io.onedev.server.util.ContentDetector;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.page.project.blob.navigator.BlobNameChanging;
@@ -40,17 +32,17 @@ import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 @SuppressWarnings("serial")
 public abstract class BlobEditPanel extends Panel {
 
+	public static enum Tab {EDIT, EDIT_PLAIN, SAVE};
+	
 	protected final BlobRenderContext context;
 	
 	private FormComponentPanel<byte[]> editor;
-	
-	private FormComponentPanel<String> plainEditor;
 	
 	private CommitOptionPanel commitOption;
 	
 	private AbstractDefaultAjaxBehavior recreateBehavior;
 	
-	private String tabSelectionInfo;	
+	private Tab currentTab = Tab.EDIT;
 	
 	private byte[] editingContent;
 		
@@ -86,9 +78,104 @@ public abstract class BlobEditPanel extends Panel {
 		
 		add(new Form<Void>("content") {
 
+			private AjaxSubmitLink newSubmitLink(String componentId, Tab tab) {
+				return new AjaxSubmitLink(componentId) {
+
+					@Override
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						super.onSubmit(target, form);
+						if (currentTab == Tab.EDIT && tab == Tab.EDIT_PLAIN 
+								|| currentTab == Tab.EDIT_PLAIN && tab == Tab.EDIT
+								|| tab == Tab.SAVE) 
+							editingContent = editor.getModelObject();
+						if (tab != Tab.SAVE) {
+							if (tab == Tab.EDIT)
+								editor = newEditor("editor", editingContent);
+							else
+								editor = getPlainEditSupport().newEditor("editor", editingContent);
+							getParent().replace(editor);
+						} else {
+							commitOption.onContentChange(target);
+						}
+
+						String script = String.format(
+								"onedev.server.blobEdit.selectTab($('#%s>.blob-edit>.head>.%s'));", 
+								BlobEditPanel.this.getMarkupId(true), tab.name().toLowerCase().replace("_", "-"));
+						target.appendJavaScript(script);
+						
+						currentTab = tab;
+						
+						target.add(form);
+					}
+
+					@Override
+					protected void onError(AjaxRequestTarget target, Form<?> form) {
+						super.onError(target, form);
+						target.add(form);
+					}
+
+					@Override
+					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+						super.updateAjaxAttributes(attributes);
+						
+						attributes.getAjaxCallListeners().add(new IAjaxCallListener() {
+							
+							@Override
+							public CharSequence getSuccessHandler(Component component) {
+								return null;
+							}
+							
+							@Override
+							public CharSequence getPrecondition(Component component) {
+								return null;
+							}
+							
+							@Override
+							public CharSequence getInitHandler(Component component) {
+								return null;
+							}
+							
+							@Override
+							public CharSequence getFailureHandler(Component component) {
+								return null;
+							}
+							
+							@Override
+							public CharSequence getDoneHandler(Component component) {
+								return null;
+							}
+							
+							@Override
+							public CharSequence getCompleteHandler(Component component) {
+								return null;
+							}
+							
+							@Override
+							public CharSequence getBeforeSendHandler(Component component) {
+								return null;
+							}
+							
+							@Override
+							public CharSequence getBeforeHandler(Component component) {
+								return "$('.blob-submit-aware').trigger('beforeSubmit');";
+							}
+							
+							@Override
+							public CharSequence getAfterHandler(Component component) {
+								return null;
+							}
+							
+						});
+					}
+					
+				};
+			}
+			
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
+				
+				add(new FencedFeedbackPanel("feedback", this));
 				
 				byte[] content;
 				if (context.getMode() == Mode.EDIT)
@@ -98,69 +185,11 @@ public abstract class BlobEditPanel extends Panel {
 				add(editor = newEditor("editor", content));
 				editor.setOutputMarkupId(true);
 				
-				PlainEditSupport plainEditSupport = getPlainEditSupport();
-
-				if (plainEditSupport != null) {
-					Charset detectedCharset = ContentDetector.detectCharset(content);
-					Charset charset = detectedCharset!=null?detectedCharset:Charset.defaultCharset();
-					add(plainEditor = plainEditSupport.newEditor("plainEditor", new String(content, charset)));
-					plainEditor.setOutputMarkupId(true);
-				} else { 
-					add(new WebMarkupContainer("plainEditor").setVisible(false));
-				}
-				
-				add(new HiddenField<String>("tabSelectionInfo", new PropertyModel<String>(BlobEditPanel.this, "tabSelectionInfo")));
-				
-				add(newContentSubmitLink("submit"));
+				add(newSubmitLink("edit", Tab.EDIT));
+				add(newSubmitLink("editPlain", Tab.EDIT_PLAIN));
+				add(newSubmitLink("save", Tab.SAVE));
 				
 				setOutputMarkupId(true);
-			}
-
-			@Override
-			protected void onSubmit() {
-				super.onSubmit();
-
-				AjaxRequestTarget target = RequestCycle.get().find(AjaxRequestTarget.class);
-				Preconditions.checkNotNull(target);
-				
-				String fromTab = StringUtils.substringBefore(tabSelectionInfo, " ");
-				String toTab = StringUtils.substringAfter(tabSelectionInfo, " ");
-				switch (toTab) {
-				case "edit":
-					if (fromTab.equals("edit-plain")) 
-						editingContent = plainEditor.getModelObject().getBytes(Charsets.UTF_8);
-					replace(editor = newEditor("editor", editingContent));
-					editor.setOutputMarkupId(true);
-					target.add(editor);
-					break;
-				case "edit-plain":
-					if (fromTab.equals("edit")) 
-						editingContent = editor.getModelObject();
-					replace(plainEditor = getPlainEditSupport().newEditor("plainEditor", 
-							new String(editingContent, Charsets.UTF_8)));
-					plainEditor.setOutputMarkupId(true);
-					target.add(plainEditor);
-					break;
-				case "save":
-					if (fromTab.equals("edit"))
-						editingContent = editor.getModelObject();
-					else
-						editingContent = plainEditor.getModelObject().getBytes(Charsets.UTF_8);
-					commitOption.onContentChange(target);
-					break;
-				}
-				
-				String script = String.format(
-						"onedev.server.blobEdit.selectTab($('#%s>.blob-edit>.head>.%s'));", 
-						BlobEditPanel.this.getMarkupId(true), toTab);
-				
-				target.appendJavaScript(script);
-			}
-
-			@Override
-			protected void onError() {
-				super.onError();
-				BlobEditPanel.this.onFormError(RequestCycle.get().find(AjaxRequestTarget.class), this);
 			}
 
 		});
@@ -189,12 +218,8 @@ public abstract class BlobEditPanel extends Panel {
 		
 		setOutputMarkupId(true);
 	}
-
-	protected Component newContentSubmitLink(String componentId) {
-		return new AjaxSubmitLink(componentId) {
-		};
-	}
 	
+
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
@@ -222,10 +247,10 @@ public abstract class BlobEditPanel extends Panel {
 	@Nullable
 	protected abstract PlainEditSupport getPlainEditSupport();
 	
-	protected void onFormError(AjaxRequestTarget target, Form<?> form) {
-		target.add(form);
+	public FormComponentPanel<byte[]> getEditor() {
+		return editor;
 	}
-
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

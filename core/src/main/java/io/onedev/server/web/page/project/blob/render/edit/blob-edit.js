@@ -7,33 +7,16 @@ onedev.server.blobEdit = {
 		
 	    $head.find(".edit>a").click(function() {
             if (!$(this).parent().hasClass("active")) {
-        		var $content = $body.children(".content");
-                if ($head.find(".edit-plain").hasClass("active"))
-                    $content.children(".tab-selection-info").val("edit-plain edit");
-                else
-                    $content.children(".tab-selection-info").val("save edit");
-                $content.children(".submit").click();
+        		$body.find(">.content>.edit.submit").click();
             }
 	    });
 	    $head.find(".edit-plain>a").click(function() {
             if (!$(this).parent().hasClass("active")) {
-        		var $content = $body.children(".content");
-                if ($head.find(".edit").hasClass("active"))
-                    $content.children(".tab-selection-info").val("edit edit-plain");
-                else
-                    $content.children(".tab-selection-info").val("save edit-plain");
-                $content.children(".submit").click();
+        		$body.find(">.content>.edit-plain.submit").click();
             }
 	    });
 	    $head.find(".save>a").click(function() {
-            if (!$(this).parent().hasClass("active")) {
-        		var $content = $body.children(".content");
-                if ($head.find(".edit").hasClass("active"))
-                    $content.children(".tab-selection-info").val("edit save");
-                else
-                    $content.children(".tab-selection-info").val("edit-plain save");
-                $content.children(".submit").click();
-            }
+        		$body.find(">.content>.save.submit").click();
 	    });
 
 	    if ($body.find(".autofit:visible").length != 0)
@@ -81,14 +64,8 @@ onedev.server.blobEdit = {
 			$body.css("overflow", "auto");
         
         var $content = $body.children(".content");
-		if ($tab.hasClass("edit")) {
+		if ($tab.hasClass("edit") || $tab.hasClass("edit-plain")) {
 			$content.show();
-			$content.children(".editor").show();
-            $content.children(".plain-editor").hide();
-        } else if ($tab.hasClass("edit-plain")) {
-			$content.show();
-			$content.children(".editor").hide();
-            $content.children(".plain-editor").show();
 		} else {
 			$body.children(".commit-options").show();
         }

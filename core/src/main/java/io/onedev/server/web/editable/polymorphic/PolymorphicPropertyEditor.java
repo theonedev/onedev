@@ -26,7 +26,7 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -172,8 +172,8 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	}
 
 	@Override
-	public ErrorContext getErrorContext(PathSegment pathSegment) {
-		return ((ErrorContext) get(BEAN_EDITOR_ID)).getErrorContext(pathSegment);
+	public ErrorContext getErrorContext(PathElement element) {
+		return ((ErrorContext) get(BEAN_EDITOR_ID)).getErrorContext(element);
 	}
 
 	@Override

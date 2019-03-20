@@ -48,3 +48,7 @@
 .blob-edit>.body>.dirty-check {
 	display: none;
 }
+
+.blob-edit>.body>form>.feedback>ul {
+    margin: 20px 20px 0 20px;
+}

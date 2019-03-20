@@ -10,10 +10,14 @@ import javax.validation.Path;
 @SuppressWarnings("serial")
 public class ValuePath implements Serializable {
 
-	private List<PathSegment> elements = new ArrayList<>();
+	private List<PathElement> elements = new ArrayList<>();
 	
-	public ValuePath(PathSegment...elements) {
+	public ValuePath(PathElement...elements) {
 		this.elements = Arrays.asList(elements);
+	}
+	
+	public ValuePath(List<PathElement> elements) {
+		this.elements = elements;
 	}
 	
 	public ValuePath(ValuePath valuePath) {
@@ -23,13 +27,13 @@ public class ValuePath implements Serializable {
 	public ValuePath(Path validationPath) {
 		for (Path.Node node: validationPath) {
 			if (node.getIndex() != null) 
-				elements.add(new PathSegment.Element(node.getIndex()));
+				elements.add(new PathElement.Indexed(node.getIndex()));
 			if (node.getName() != null)
-				elements.add(new PathSegment.Property(node.getName()));
+				elements.add(new PathElement.Named(node.getName()));
 		}
 	}
 	
-	public List<PathSegment> getElements() {
+	public List<PathElement> getElements() {
 		return elements;
 	}
 

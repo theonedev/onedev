@@ -10,7 +10,7 @@ import io.onedev.server.manager.ConfigurationManager;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 
@@ -53,7 +53,7 @@ public class ConfigurationEditPage extends ProjectSettingPage {
 				
 				Configuration configurationWithSameName = getConfigurationManager().find(getProject(), configuration.getName());
 				if (configurationWithSameName != null && !configurationWithSameName.equals(configuration)) {
-					editor.getErrorContext(new PathSegment.Property("name"))
+					editor.getErrorContext(new PathElement.Named("name"))
 							.addError("This name has already been used by another configuration in the project");
 				} 
 				if (!editor.hasErrors(true)) {

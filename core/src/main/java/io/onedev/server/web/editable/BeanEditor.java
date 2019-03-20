@@ -34,7 +34,7 @@ import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.web.editable.PathSegment.Property;
+import io.onedev.server.web.editable.PathElement.Named;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Vertical;
@@ -273,25 +273,9 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				try {
 					Validator validator = AppLoader.getInstance(Validator.class);
 					for (ConstraintViolation<Serializable> violation: validator.validate(validatable.getValue())) {
-						ValuePath valuePath = new ValuePath(violation.getPropertyPath());
-						if (!valuePath.getElements().isEmpty()) {
-							PathSegment.Property property = (Property) valuePath.getElements().iterator().next();
-							boolean found = false;
-							for (Component item: propertiesView) {
-								int propertyIndex = (int) item.getDefaultModelObject();
-								PropertyContext<Serializable> propertyContext = propertyContexts.get(propertyIndex); 
-								if (propertyContext.getPropertyName().equals(property.getName()) 
-										&& propertyContext.getDescriptor().isPropertyVisible(new OneContext(item), beanDescriptor)
-										&& !propertyContext.getDescriptor().isPropertyExcluded()) {
-									found = true;
-									break;
-								}
-							}
-							if (!found)
-								continue;
-						}
-						ErrorContext errorContext = getErrorContext(valuePath);
-						errorContext.addError(violation.getMessage());
+						ErrorContext errorContext = getErrorContext(new ValuePath(violation.getPropertyPath()));
+						if (errorContext != null)
+							errorContext.addError(violation.getMessage());
 					}
 				} finally {
 					OneContext.pop();
@@ -314,13 +298,13 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	}
 	
 	@Override
-	public ErrorContext getErrorContext(PathSegment pathSegment) {
-		final PathSegment.Property property = (Property) pathSegment;
+	public ErrorContext getErrorContext(PathElement element) {
+		PathElement.Named namedElement = (Named) element;
 		return visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>() {
 
 			@Override
 			public void component(PropertyEditor<Serializable> object, IVisit<PropertyEditor<Serializable>> visit) {
-				if (object.getDescriptor().getPropertyName().equals(property.getName()))
+				if (object.getDescriptor().getPropertyName().equals(namedElement.getName()) && object.isVisibleInHierarchy())
 					visit.stop(object);
 				else
 					visit.dontGoDeeper();

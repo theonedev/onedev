@@ -1,10 +1,6 @@
 package io.onedev.server.web.page.project.blob.render.renderers.source;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.attributes.IAjaxCallListener;
-import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -29,8 +25,6 @@ import io.onedev.server.web.page.project.blob.render.view.Markable;
 @SuppressWarnings("serial")
 public class SourceEditPanel extends BlobEditPanel implements Markable {
 
-	private SourceFormComponent sourceFormComponent;
-	
 	private SourceFormatPanel sourceFormat;
 	
 	public SourceEditPanel(String id, BlobRenderContext context) {
@@ -39,8 +33,7 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 
 	@Override
 	protected FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
-		sourceFormComponent = new SourceFormComponent(componentId, initialContent);
-		return sourceFormComponent;
+		return new SourceFormComponent(componentId, initialContent);
 	}
 
 	@Override
@@ -50,7 +43,7 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 			@Override
 			public void onOptioneChange(AjaxRequestTarget target) {
 				String script = String.format("onedev.server.sourceEdit.onIndentTypeChange('%s', '%s');", 
-						sourceFormComponent.getMarkupId(), sourceFormat.getIndentType());
+						getEditor().getMarkupId(), sourceFormat.getIndentType());
 				target.appendJavaScript(script);
 			}
 			
@@ -59,7 +52,7 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 			@Override
 			public void onOptioneChange(AjaxRequestTarget target) {
 				String script = String.format("onedev.server.sourceEdit.onTabSizeChange('%s', %s);", 
-						sourceFormComponent.getMarkupId(), sourceFormat.getTabSize());
+						getEditor().getMarkupId(), sourceFormat.getTabSize());
 				target.appendJavaScript(script);
 			}
 			
@@ -68,72 +61,12 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 			@Override
 			public void onOptioneChange(AjaxRequestTarget target) {
 				String script = String.format("onedev.server.sourceEdit.onLineWrapModeChange('%s', '%s');", 
-						sourceFormComponent.getMarkupId(), sourceFormat.getLineWrapMode());
+						getEditor().getMarkupId(), sourceFormat.getLineWrapMode());
 				target.appendJavaScript(script);
 			}
 			
 		});	
 		return sourceFormat;
-	}
-
-	@Override
-	protected Component newContentSubmitLink(String componentId) {
-		return new AjaxSubmitLink(componentId) {
-
-			@Override
-			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new IAjaxCallListener() {
-					
-					@Override
-					public CharSequence getSuccessHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getPrecondition(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getInitHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getFailureHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getDoneHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getCompleteHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getBeforeSendHandler(Component component) {
-						return null;
-					}
-					
-					@Override
-					public CharSequence getBeforeHandler(Component component) {
-						return String.format("onedev.server.sourceEdit.onSubmit('%s');", 
-								sourceFormComponent.getMarkupId());
-					}
-					
-					@Override
-					public CharSequence getAfterHandler(Component component) {
-						return null;
-					}
-				});
-			}
-			
-		};
 	}
 
 	@Override
@@ -144,7 +77,7 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 		String autosaveKey = JavaScriptEscape.escapeJavaScript(context.getAutosaveKey());
 		String jsonOfMark = context.getMark()!=null?getJson(context.getMark()):"undefined"; 
 		String script = String.format("onedev.server.sourceEdit.onDomReady('%s', '%s', %s, '%s', %s, '%s', %b, '%s');", 
-				sourceFormComponent.getMarkupId(), 
+				getEditor().getMarkupId(), 
 				JavaScriptEscape.escapeJavaScript(context.getNewPath()), 
 				jsonOfMark,
 				sourceFormat.getIndentType(), 
@@ -155,7 +88,7 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		
 		script = String.format("onedev.server.sourceEdit.onWindowLoad('%s', %s, '%s');", 
-				sourceFormComponent.getMarkupId(), jsonOfMark, autosaveKey);
+				getEditor().getMarkupId(), jsonOfMark, autosaveKey);
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
@@ -172,10 +105,10 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 		String script;
 		if (mark != null) {
 			script = String.format("onedev.server.sourceEdit.mark('%s', %s);", 
-					sourceFormComponent.getMarkupId(), getJson(mark));
+					getEditor().getMarkupId(), getJson(mark));
 		} else {
 			script = String.format("onedev.server.sourceEdit.mark('%s', undefined);", 
-					sourceFormComponent.getMarkupId());
+					getEditor().getMarkupId());
 		}
 		target.appendJavaScript(script);
 	}

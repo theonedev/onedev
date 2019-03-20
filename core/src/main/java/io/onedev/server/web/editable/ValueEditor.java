@@ -17,14 +17,21 @@ public abstract class ValueEditor<T> extends FormComponentPanel<T> implements Er
 		setConvertedInput(model.getObject());
 	}
 
-	public @Nullable ErrorContext getErrorContext(ValuePath partPath) {
+	/**
+	 * Get error context of specified path
+	 * @param path
+	 * @return
+	 * 			error context of specified path, <tt>null</tt> if error on the path should be ignored (for instance 
+	 * 			when visibility of the property depends on another property, or is excluded etc.)
+	 */
+	public @Nullable ErrorContext getErrorContext(ValuePath path) {
 		ErrorContext context = this;
-		for (PathSegment segment: partPath.getElements()) {
-			ErrorContext segmentContext = context.getErrorContext(segment);
-			if (segmentContext != null)
-				context = segmentContext;
+		for (PathElement element: path.getElements()) {
+			ErrorContext elementContext = context.getErrorContext(element);
+			if (elementContext != null)
+				context = elementContext;
 			else 
-				break;
+				return null;
 		}
 		return context;
 	}
@@ -45,13 +52,13 @@ public abstract class ValueEditor<T> extends FormComponentPanel<T> implements Er
 	}
 
 	/**
-	 * Get error context for specified path segment. 
+	 * Get error context for specified path element. 
 	 * 
 	 * @return
-	 * 			error context of specified path segment, or <tt>null</tt> if error context 
+	 * 			error context of specified path element, or <tt>null</tt> if error context 
 	 * 			for specified path segment can not be found
 	 */
-	public abstract @Nullable ErrorContext getErrorContext(PathSegment pathSegment);
+	public abstract @Nullable ErrorContext getErrorContext(PathElement element);
 
 	protected abstract T convertInputToValue() throws ConversionException;
 	

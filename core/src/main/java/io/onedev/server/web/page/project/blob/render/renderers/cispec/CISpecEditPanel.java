@@ -1,9 +1,10 @@
 package io.onedev.server.web.page.project.blob.render.renderers.cispec;
 
 import java.io.Serializable;
-import java.nio.charset.Charset;
 
 import javax.annotation.Nullable;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -12,26 +13,30 @@ import org.apache.wicket.behavior.Behavior;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.validation.IValidatable;
+import org.apache.wicket.validation.IValidator;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 
-import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Job;
 import io.onedev.server.migration.VersionedDocument;
-import io.onedev.server.util.ContentDetector;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.ErrorContext;
+import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.PathElement.Indexed;
+import io.onedev.server.web.editable.PathElement.Named;
+import io.onedev.server.web.editable.ValuePath;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -46,38 +51,38 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 	
 	public CISpecEditPanel(String id, BlobRenderContext context, byte[] initialContent) {
 		super(id, Model.of(initialContent));
-		
-		Charset detectedCharset = ContentDetector.detectCharset(getModelObject());
-		Charset charset = detectedCharset!=null?detectedCharset:Charset.defaultCharset();
-		String ciSpecString = new String(getModelObject(), charset); 
-		if (StringUtils.isNotBlank(ciSpecString)) {
-			try {
-				parseResult = (Serializable) VersionedDocument.fromXML(ciSpecString).toBean();
-			} catch (Exception e) {
-				parseResult = e;
-			}
-		} else {
-			parseResult = new CISpec();
+		parseResult = parseCISpec(getModelObject());
+	}
+	
+	private Serializable parseCISpec(byte[] bytes) {
+		try {
+			CISpec ciSpec = CISpec.parse(bytes);
+			if (ciSpec == null)
+				ciSpec = new CISpec();
+			return ciSpec;
+		} catch (Exception e) {
+			return e;
 		}
 	}
 
 	private Component newJobNav(Job job) {
 		WebMarkupContainer nav = new WebMarkupContainer(jobNavs.newChildId());
 		
-		AjaxLink<Void> selectLink = new AjaxLink<Void>("select") {
+		nav.add(new AjaxLink<Void>("select") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				int index = WicketUtils.getChildIndex(jobNavs, nav);
-				target.appendJavaScript(String.format("onedev.ciSpec.edit.showJob(%d);", index));
+				String script = String.format("onedev.ciSpec.edit.showJob(%d);", 
+						WicketUtils.getChildIndex(jobNavs, nav));
+				target.appendJavaScript(script);
 			}
 
-		};
-		if (StringUtils.isNotBlank(job.getName()))
-			selectLink.add(new Label("label", job.getName()));
-		else
-			selectLink.add(new Label("label", "<i>Adding new</i>").setEscapeModelStrings(false));
-		nav.add(selectLink);
+			@Override
+			public void renderHead(IHeaderResponse response) {
+				super.renderHead(response);
+			}
+
+		});
 		
 		nav.add(new AjaxLink<Void>("delete") {
 
@@ -92,6 +97,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 			
 		});
 		jobNavs.add(nav.setOutputMarkupId(true));
+		
 		return nav;
 	}
 	
@@ -125,8 +131,17 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 				@Override
 				public void renderHead(IHeaderResponse response) {
 					super.renderHead(response);
-					if (!ciSpec.getJobs().isEmpty())
-						response.render(OnDomReadyHeaderItem.forScript("onedev.ciSpec.edit.showJob(0);"));
+
+					int index = 0;
+					for (Component child: jobContents) {
+						if (((BeanEditor) child).hasErrors(true)) {
+							index = WicketUtils.getChildIndex(jobContents, child);
+							break;
+						}
+					}
+					
+					String script = String.format("onedev.ciSpec.edit.showJob(%d);", index);
+					response.render(OnDomReadyHeaderItem.forScript(script));
 				}
 				
 			};
@@ -158,7 +173,8 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 					target.prependJavaScript(script);
 					target.add(content);
 					
-					target.appendJavaScript(String.format("onedev.ciSpec.edit.showJob(%d);", jobNavs.size()-1));
+					script = String.format("onedev.ciSpec.edit.showJob(%d);", jobNavs.size() - 1);
+					target.appendJavaScript(script);
 				}
 				
 			});
@@ -185,6 +201,49 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 				}
 				
 			}.sortable(".jobs>.body>.side>.navs"));
+			
+			add(new IValidator<byte[]>() {
+				
+				@Override
+				public void validate(IValidatable<byte[]> validatable) {
+					Serializable parseResult = parseCISpec(validatable.getValue());
+					if (parseResult instanceof CISpec) {
+						CISpec ciSpec = (CISpec) parseResult;
+						Validator validator = AppLoader.getInstance(Validator.class);
+						for (ConstraintViolation<CISpec> violation: validator.validate(ciSpec)) {
+							ValuePath path = new ValuePath(violation.getPropertyPath());
+							if (path.getElements().isEmpty()) {
+								error(violation.getMessage());
+							} else {
+								PathElement.Named named = (Named) path.getElements().iterator().next();
+								switch (named.getName()) {
+								case "jobs":
+									path = new ValuePath(path.getElements().subList(1, path.getElements().size()));
+									if (path.getElements().isEmpty()) {
+										error("Jobs: " + violation.getMessage());
+									} else {
+										PathElement.Indexed indexed = (Indexed) path.getElements().iterator().next();
+										path = new ValuePath(path.getElements().subList(1, path.getElements().size()));
+										if (path.getElements().isEmpty()) {
+											error("Job '" + ciSpec.getJobs().get(indexed.getIndex()).getName() + "': " + violation.getMessage());
+										} else {
+											@SuppressWarnings("deprecation")
+											BeanEditor editor = (BeanEditor) jobContents.get(indexed.getIndex());
+											ErrorContext errorContext = editor.getErrorContext(path);
+											if (errorContext != null)
+												errorContext.addError(violation.getMessage());
+										}
+									}
+									break;
+								default:
+									throw new RuntimeException("Unexpected element name: " + named.getName());
+								}
+							}
+						}					
+					}
+				}
+				
+			});
 		} else {
 			validFrag = new Fragment("content", "invalidFrag", this);
 			validFrag.add(new MultilineLabel("errorMessage", Throwables.getStackTraceAsString((Throwable) parseResult)));
@@ -213,18 +272,6 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 			return ciSpec;
 		} else {
 			return null;
-		}
-	}
-	
-	public void onFormError(AjaxRequestTarget target, Form<?> form) {
-		for (Component child: jobContents) {
-			BeanEditor editor = (BeanEditor) child;
-			if (editor.hasErrors(true)) {
-				target.add(editor);
-				target.appendJavaScript(String.format("onedev.ciSpec.edit.showJob(%d);", 
-						WicketUtils.getChildIndex(jobContents, child)));
-				break;
-			}
 		}
 	}
 	

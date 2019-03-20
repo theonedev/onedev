@@ -65,15 +65,13 @@
 .ci-spec-view>.valid>div>.body>.navs>li.last,
 .ci-spec-edit>.valid>div>.body>.side>.navs>.nav:last-child {
     border-radius: 0 0 4px 4px;
+    margin-bottom: 20px;
 }
 .ci-spec-view>.valid>div>.body>.navs>li.first.last,
 .ci-spec-edit>.valid>div>.body>.side>.navs>.nav:first-child:last-child {
     border-radius: 4px;
 }
 
-.ci-spec-edit>.valid>div>.body>.side>.add {
-    margin-top: 20px;
-}
 .ci-spec-view>.valid>div>.body>.navs>li>a,
 .ci-spec-edit>.valid>div>.body>.side>.navs>.nav>.select {
     padding: 8px 28px 8px 8px;
@@ -94,7 +92,7 @@
 .ci-spec-view>.valid>div>.body>.content,
 .ci-spec-edit>.valid>div>.body>.contents>.content {
     border-radius: 4px;
-    border: 2px solid #333;
+    border: 2px solid #666;
     padding: 20px;
 }
 

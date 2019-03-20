@@ -10,7 +10,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.web.component.configuration.ConfigurationMultiChoice;
 import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
@@ -42,7 +42,7 @@ public class ConfigurationMultiChoiceEditor extends PropertyEditor<List<String>>
 	}
 
 	@Override
-	public ErrorContext getErrorContext(PathSegment pathSegment) {
+	public ErrorContext getErrorContext(PathElement element) {
 		return null;
 	}
 

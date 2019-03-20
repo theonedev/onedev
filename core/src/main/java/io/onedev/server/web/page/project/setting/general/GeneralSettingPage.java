@@ -17,7 +17,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.component.project.ConfirmDeleteProjectModal;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
@@ -72,7 +72,7 @@ public class GeneralSettingPage extends ProjectSettingPage {
 				Project projectWithSameName = projectManager.find(project.getName());
 				if (projectWithSameName != null && !projectWithSameName.equals(project)) {
 					String errorMessage = "This name has already been used by another project"; 
-					editor.getErrorContext(new PathSegment.Property("name")).addError(errorMessage);
+					editor.getErrorContext(new PathElement.Named("name")).addError(errorMessage);
 				} else {
 					projectManager.save(project, oldName);
 					Session.get().success("General setting has been updated");

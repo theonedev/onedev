@@ -13,17 +13,13 @@ onedev.ciSpec = {
             var $body = $(".ci-spec-edit .jobs>.body");
             var $navs = $body.find(">.side>.navs");
             var $contents = $body.children(".contents");
+
             var $nav = $navs.children().eq(index);
             $nav.remove();
             $contents.children().eq(index).remove();
 
-            if ($nav.hasClass("active")) {
-                var $nextNav = $navs.children().eq(index);
-                if ($nextNav.hasClass("nav")) {
-                    $nextNav.addClass("active");
-                    $contents.children().eq(index).show();
-                }
-            } 
+            if ($nav.hasClass("active")) 
+                onedev.ciSpec.edit.showJob(0);
         }, 
         swapJobs: function(index1, index2) {
             var $contents = $(".ci-spec-edit .jobs>.body>.contents");
@@ -44,14 +40,19 @@ onedev.ciSpec = {
             var $content = $contents.children().eq(index);
             
             var $input = $content.find(">div>table>tbody>tr>td.property-name input");
-            $input.on("input", function() {
+
+            function syncName() {
                 var name = $input.val().trim();
                 var $name = $nav.find("a.select>.name");
                 if (name.length != 0) 
                     $name.text(name);
                 else
-                    $name.html("<i>Adding new</i>");
-            });
+                    $name.html("<i>Name not specified</i>");
+            }
+
+            $input.on("input", syncName);
+            
+            syncName();
         }
     }
 }

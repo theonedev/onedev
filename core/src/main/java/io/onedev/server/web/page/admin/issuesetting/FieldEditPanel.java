@@ -28,7 +28,7 @@ import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
@@ -90,13 +90,13 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 				if (fieldIndex != -1) { 
 					InputSpec oldField = getSetting().getFieldSpecs().get(fieldIndex);
 					if (!field.getName().equals(oldField.getName()) && getSetting().getFieldSpec(field.getName()) != null) {
-						editor.getErrorContext(new PathSegment.Property("field"))
-								.getErrorContext(new PathSegment.Property("name"))
+						editor.getErrorContext(new PathElement.Named("field"))
+								.getErrorContext(new PathElement.Named("name"))
 								.addError("This name has already been used by another field");
 					}
 				} else if (getSetting().getFieldSpec(field.getName()) != null) {
-					editor.getErrorContext(new PathSegment.Property("field"))
-							.getErrorContext(new PathSegment.Property("name"))
+					editor.getErrorContext(new PathElement.Named("field"))
+							.getErrorContext(new PathElement.Named("name"))
 							.addError("This name has already been used by another field");
 				}
 

@@ -31,8 +31,8 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathSegment;
-import io.onedev.server.web.editable.PathSegment.Property;
+import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.PathElement.Named;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -279,8 +279,8 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	}
 	
 	@Override
-	public ErrorContext getErrorContext(PathSegment pathSegment) {
-		final int index = ((PathSegment.Element) pathSegment).getIndex();
+	public ErrorContext getErrorContext(PathElement element) {
+		final int index = ((PathElement.Indexed) element).getIndex();
 		final String messagePrefix = "Item " + (index+1) + ": ";
 		
 		return new ErrorContext() {
@@ -308,11 +308,11 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 			}
 
 			@Override
-			public ErrorContext getErrorContext(PathSegment pathSegment) {
-				PathSegment.Property property = (Property) pathSegment;
+			public ErrorContext getErrorContext(PathElement element) {
+				PathElement.Named namedElement = (Named) element;
 
 				for (PropertyEditor<Serializable> propertyEditor: getPropertyEditorsAtRow(index)) {
-					if (propertyEditor.getDescriptor().getPropertyName().equals(property.getName()))
+					if (propertyEditor.getDescriptor().getPropertyName().equals(namedElement.getName()))
 						return propertyEditor;
 				}
 				return null;

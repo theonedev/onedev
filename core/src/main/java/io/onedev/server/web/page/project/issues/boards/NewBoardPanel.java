@@ -16,7 +16,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
@@ -45,7 +45,7 @@ abstract class NewBoardPanel extends Panel {
 				super.onSubmit(target, form);
 				int indexWithSameName = BoardSpec.getBoardIndex(boards, board.getName());
 				if (indexWithSameName != -1) {
-					editor.getErrorContext(new PathSegment.Property("name"))
+					editor.getErrorContext(new PathElement.Named("name"))
 							.addError("This name has already been used by another issue board in the project");
 				} 
 				if (!editor.hasErrors(true)){

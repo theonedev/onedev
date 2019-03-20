@@ -45,9 +45,9 @@ onedev.server.plainEdit = {
             cm.setSize($plainEdit.width(), $plainEdit.height());
             cm.refresh();
         });
-	},
-	onSubmit: function(containerId) {
-		var cm = $("#" + containerId + ">.plain-edit>.source>.CodeMirror")[0].CodeMirror;	
-		$("#" + containerId + ">.plain-edit>textarea").val(cm.getValue());
+
+        $plainEdit.on("beforeSubmit", function() {
+            $plainEdit.children("textarea").val($plainEdit.find(">.source>.CodeMirror")[0].CodeMirror.getValue());
+        });
 	}
 };

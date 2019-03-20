@@ -32,7 +32,7 @@ public class Job implements Serializable {
 	
 	private long timeout = 3600;
 	
-	@Editable(order=100)
+	@Editable(order=100, description="Specify name of the job")
 	@NotEmpty
 	public String getName() {
 		return name;

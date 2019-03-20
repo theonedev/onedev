@@ -16,7 +16,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.my.MyAvatarPage;
 import io.onedev.server.web.page.project.ProjectListPage;
@@ -49,12 +49,12 @@ public class RegisterPage extends BasePage {
 				UserManager userManager = OneDev.getInstance(UserManager.class);
 				User userWithSameName = userManager.findByName(user.getName());
 				if (userWithSameName != null) {
-					editor.getErrorContext(new PathSegment.Property("name"))
+					editor.getErrorContext(new PathElement.Named("name"))
 							.addError("This name has already been used by another user.");
 				} 
 				User userWithSameEmail = userManager.findByEmail(user.getEmail());
 				if (userWithSameEmail != null) {
-					editor.getErrorContext(new PathSegment.Property("email"))
+					editor.getErrorContext(new PathElement.Named("email"))
 							.addError("This email has already been used by another user.");
 				} 
 				if (!editor.hasErrors(true)) {

@@ -22,7 +22,7 @@ import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.web.component.groupchoice.GroupChoiceProvider;
 import io.onedev.server.web.component.groupchoice.GroupMultiChoice;
 import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.GroupChoice;
@@ -89,7 +89,7 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 	}
 
 	@Override
-	public ErrorContext getErrorContext(PathSegment pathSegment) {
+	public ErrorContext getErrorContext(PathElement element) {
 		return null;
 	}
 

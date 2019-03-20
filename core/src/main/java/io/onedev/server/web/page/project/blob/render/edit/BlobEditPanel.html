@@ -8,11 +8,12 @@
 			<div wicket:id="editOptions" class="options pull-right expanded"></div>
 		</div>
 		<div class="body">
-			<form wicket:id="content" class="content leave-confirm" onsubmit="return false;">
+            <form wicket:id="content" class="content leave-confirm" onsubmit="return false;">
+                <div wicket:id="feedback" class="feedback"></div>
 				<div wicket:id="editor" class="editor"></div>
-                <div wicket:id="plainEditor" class="plain-editor"></div>
-                <input wicket:id="tabSelectionInfo" type="hidden" class="tab-selection-info">
-                <a wicket:id="submit" class="submit">submit</a>
+                <a wicket:id="edit" class="edit submit">submit</a>
+                <a wicket:id="editPlain" class="edit-plain submit">submit</a>
+                <a wicket:id="save" class="save submit">submit</a>
 			</form>
 			<div wicket:id="commitOptions" class="commit-options"></div>
 		</div>

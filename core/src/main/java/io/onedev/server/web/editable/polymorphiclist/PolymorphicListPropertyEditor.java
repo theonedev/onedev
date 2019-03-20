@@ -34,7 +34,7 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
@@ -288,8 +288,8 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	}
 
 	@Override
-	public ErrorContext getErrorContext(PathSegment pathSegment) {
-		int index = ((PathSegment.Element) pathSegment).getIndex();
+	public ErrorContext getErrorContext(PathElement element) {
+		int index = ((PathElement.Indexed) element).getIndex();
 
 		int currentIndex = 0;
 		Iterator<Component> it = rows.iterator();

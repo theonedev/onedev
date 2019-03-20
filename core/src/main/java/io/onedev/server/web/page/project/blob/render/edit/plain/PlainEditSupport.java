@@ -6,6 +6,6 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 
 public interface PlainEditSupport extends Serializable {
 
-	FormComponentPanel<String> newEditor(String componentId, String initialContent);
+	FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent);
 	
 }

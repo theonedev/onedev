@@ -18,7 +18,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
 @SuppressWarnings("serial")
@@ -50,7 +50,7 @@ public class NewGroupPage extends AdministrationPage {
 				GroupManager groupManager = OneDev.getInstance(GroupManager.class);
 				Group groupWithSameName = groupManager.find(group.getName());
 				if (groupWithSameName != null) {
-					editor.getErrorContext(new PathSegment.Property("name"))
+					editor.getErrorContext(new PathElement.Named("name"))
 							.addError("This name has already been used by another group");
 				} 
 				if (!editor.hasErrors(true)) {

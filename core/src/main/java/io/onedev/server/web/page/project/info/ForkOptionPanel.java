@@ -16,7 +16,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 
 @SuppressWarnings("serial")
@@ -52,7 +52,7 @@ abstract class ForkOptionPanel extends Panel {
 				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 				Project projectWithSameName = projectManager.find(project.getName());
 				if (projectWithSameName != null) {
-					editor.getErrorContext(new PathSegment.Property("name"))
+					editor.getErrorContext(new PathElement.Named("name"))
 							.addError("This name has already been used by another project");
 					target.add(form);
 				} else {

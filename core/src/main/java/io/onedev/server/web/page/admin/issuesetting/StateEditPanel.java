@@ -15,7 +15,7 @@ import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathSegment;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
@@ -75,11 +75,11 @@ abstract class StateEditPanel extends Panel {
 				if (stateIndex != -1) { 
 					StateSpec oldState = getSetting().getStateSpecs().get(stateIndex);
 					if (!state.getName().equals(oldState.getName()) && getSetting().getStateSpec(state.getName()) != null) {
-						editor.getErrorContext(new PathSegment.Property("name"))
+						editor.getErrorContext(new PathElement.Named("name"))
 								.addError("This name has already been used by another state");
 					}
 				} else if (getSetting().getStateSpec(state.getName()) != null) {
-					editor.getErrorContext(new PathSegment.Property("name"))
+					editor.getErrorContext(new PathElement.Named("name"))
 							.addError("This name has already been used by another state");
 				}
 
