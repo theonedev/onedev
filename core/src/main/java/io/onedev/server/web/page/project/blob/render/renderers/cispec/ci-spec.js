@@ -7,7 +7,9 @@ onedev.ciSpec = {
             $navs.children().eq(index).addClass("active");
             var $contents = $body.children(".contents");
             $contents.children().hide();
-            $contents.children().eq(index).show();
+            var $content = $contents.children().eq(index);
+            $content.show();
+            onedev.server.focus.doFocus($content);
         },
         deleteJob: function(index) {
             var $body = $(".ci-spec-edit .jobs>.body");
