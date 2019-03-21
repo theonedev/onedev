@@ -890,6 +890,14 @@ public class DatabaseMigrator {
 					}
 				}
 				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Settings.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("LICENSE")) {
+						element.element("value").addAttribute("class", "io.onedev.commons.utils.license.LicenseDetail");
+					}
+				}
+				dom.writeToFile(file, false);
 			}
 		}
 	}
