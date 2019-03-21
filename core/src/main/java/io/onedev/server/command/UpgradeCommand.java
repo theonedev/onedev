@@ -137,7 +137,6 @@ public class UpgradeCommand extends DefaultPersistManager {
 				}
 			}
 		}
-		cleanAndCopy(new File(upgradeDir, "site/lib"), new File(Bootstrap.installDir, "site/lib"));
 		
 		AtomicReference<String> oldDataVersion = new AtomicReference<>(null);
 		int ret = buildCommandline(upgradeDir, "check_data_version").execute(new LineConsumer() {
@@ -434,14 +433,6 @@ public class UpgradeCommand extends DefaultPersistManager {
 						throw new RuntimeException(e);
 					}
 				}
-			}
-		}
-		for (File file: Bootstrap.getSiteLibDir().listFiles()) {
-			// end user may put some custom program files in site lib before upgrade, 
-			// to override site lib of old version
-			if (file.getName().endsWith(".jar") || file.getName().endsWith(".zip")) {
-				cleanAndCopy(Bootstrap.getSiteLibDir(), new File(upgradeDir, "site/lib"));
-				break;
 			}
 		}
 		try {
