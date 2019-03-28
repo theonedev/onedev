@@ -902,4 +902,22 @@ public class DatabaseMigrator {
 		}
 	}
 
+	private void migrate22(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("IssueFieldUnarys.xml")) {
+				File renamedFile = new File(dataDir, file.getName().replace("IssueFieldUnarys", "IssueFieldEntitys"));
+				try {
+					FileUtils.moveFile(file, renamedFile);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				VersionedDocument dom = VersionedDocument.fromFile(renamedFile);
+				for (Element element: dom.getRootElement().elements()) {
+					element.setName("io.onedev.server.model.IssueFieldEntity");
+				}
+				dom.writeToFile(renamedFile, false);
+			}
+		}
+	}
+	
 }

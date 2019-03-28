@@ -36,6 +36,7 @@ import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
+import org.eclipse.jgit.lib.ObjectId;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.hibernate.CallbackException;
@@ -80,9 +81,11 @@ import io.onedev.server.cache.DefaultCodeCommentRelationInfoManager;
 import io.onedev.server.cache.DefaultCommitInfoManager;
 import io.onedev.server.cache.DefaultUserInfoManager;
 import io.onedev.server.cache.UserInfoManager;
+import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.DefaultJobScheduler;
 import io.onedev.server.ci.JobScheduler;
 import io.onedev.server.ci.detect.CISpecDetector;
+import io.onedev.server.ci.jobexecutor.JobExecutor;
 import io.onedev.server.ci.jobexecutor.JobExecutorProvider;
 import io.onedev.server.command.ApplyDBConstraintsCommand;
 import io.onedev.server.command.BackupDBCommand;
@@ -171,6 +174,8 @@ import io.onedev.server.git.GitPreReceiveCallback;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.migration.JpaConverter;
 import io.onedev.server.migration.PersistentBagConverter;
+import io.onedev.server.model.Build2;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.authenticator.Authenticator;
 import io.onedev.server.notification.CommitNotificationManager;
 import io.onedev.server.notification.CodeCommentNotificationManager;
@@ -391,7 +396,34 @@ public class CoreModule extends AbstractPluginModule {
         contributeFromPackage(Authenticator.class, Authenticator.class);
         
         contributeFromPackage(CISpecDetector.class, CISpecDetector.class);
+        contribute(CISpecDetector.class, new CISpecDetector() {
+			
+			@Override
+			public int getPriority() {
+				return CISpecDetector.DEFAULT_PRIORITY;
+			}
+			
+			@Override
+			public CISpec detect(Project project, ObjectId commitId) {
+				return null;
+			}
+			
+		});
+        
         contributeFromPackage(JobExecutorProvider.class, JobExecutorProvider.class);
+        contribute(JobExecutorProvider.class, new JobExecutorProvider() {
+			
+			@Override
+			public int getPriority() {
+				return JobExecutorProvider.DEFAULT_PRIORITY;
+			}
+			
+			@Override
+			public JobExecutor getExecutor(Build2 build) {
+				return null;
+			}
+			
+		});
         
 		bind(IndexManager.class).to(DefaultIndexManager.class);
 		bind(SearchManager.class).to(DefaultSearchManager.class);

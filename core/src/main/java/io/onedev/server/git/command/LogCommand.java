@@ -155,7 +155,12 @@ public abstract class LogCommand extends GitCommand<Void> {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				if (line.contains("inexact rename detection was skipped") 
+						|| line.contains("you may want to set your diff.renameLimit variable")) {
+					logger.trace(line);
+				} else {
+					logger.error(line);
+				}
 			}
         	
         }).checkReturnCode();

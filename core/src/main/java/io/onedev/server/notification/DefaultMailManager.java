@@ -3,7 +3,6 @@ package io.onedev.server.notification;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
-import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,33 +26,18 @@ public class DefaultMailManager implements MailManager {
 	
 	private final SettingManager configManager;
 	
-	private final ExecutorService executorService;
-	
 	private final TransactionManager transactionManager;
 	
 	@Inject
-	public DefaultMailManager(TransactionManager transactionManager, SettingManager configManager, 
-			ExecutorService executorService) {
+	public DefaultMailManager(TransactionManager transactionManager, SettingManager configManager) {
 		this.transactionManager = transactionManager;
 		this.configManager = configManager;
-		this.executorService = executorService;
 	}
 
 	@Sessional
 	@Override
 	public void sendMailAsync(Collection<String> toList, String subject, String body) {
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				executorService.execute(newSendMailRunnable(toList, subject, body));
-			}
-			
-		});
-	}
-	
-	private Runnable newSendMailRunnable(Collection<String> toList, String subject, String body) {
-		return new Runnable() {
+		transactionManager.runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -64,7 +48,7 @@ public class DefaultMailManager implements MailManager {
 				}		
 			}
 			
-		};
+		});
 	}
 
 	@Override

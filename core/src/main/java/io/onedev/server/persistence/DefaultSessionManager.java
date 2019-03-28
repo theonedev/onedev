@@ -112,8 +112,6 @@ public class DefaultSessionManager implements SessionManager {
 					DefaultSessionManager.this.run(runnable);
 				} catch (Exception e) {
 					logger.error("Error running", e);
-				} finally {
-					closeSession();
 				}
 			}
 			
