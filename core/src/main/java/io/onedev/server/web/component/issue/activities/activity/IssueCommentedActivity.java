@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueCommentManager;
+import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.util.DeleteCallback;

@@ -14,7 +14,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.MilestoneManager;
+import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;

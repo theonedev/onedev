@@ -9,7 +9,7 @@ import org.json.JSONWriter;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CacheManager;
+import io.onedev.server.cache.CacheManager;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 

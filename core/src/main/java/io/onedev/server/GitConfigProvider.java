@@ -4,8 +4,8 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
 
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.config.GitConfig;
-import io.onedev.server.manager.SettingManager;
 
 @Singleton
 public class GitConfigProvider implements Provider<GitConfig> {

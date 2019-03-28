@@ -5,10 +5,10 @@ import javax.annotation.Nullable;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestReviewManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.manager.PullRequestManager;
-import io.onedev.server.manager.PullRequestReviewManager;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;

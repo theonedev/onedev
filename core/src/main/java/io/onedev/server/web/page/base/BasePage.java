@@ -42,7 +42,7 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;

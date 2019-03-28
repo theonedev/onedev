@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.GroupUsers;

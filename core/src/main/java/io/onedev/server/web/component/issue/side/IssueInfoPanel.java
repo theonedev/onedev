@@ -37,11 +37,11 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.PropertyModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
-import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.IssueVoteManager;
-import io.onedev.server.manager.IssueWatchManager;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.IssueVoteManager;
+import io.onedev.server.entitymanager.IssueWatchManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueVote;

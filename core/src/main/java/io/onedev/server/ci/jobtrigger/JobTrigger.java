@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Job;
 import io.onedev.server.ci.jobparam.JobParam;
 import io.onedev.server.event.ProjectEvent;
@@ -26,7 +25,7 @@ public abstract class JobTrigger implements Serializable {
 		this.params = params;
 	}
 	
-	protected abstract boolean matches(ProjectEvent event, CISpec ciSpec, Job job);
+	public abstract boolean matches(ProjectEvent event, Job job);
 	
 	public abstract String getDescription();
 	

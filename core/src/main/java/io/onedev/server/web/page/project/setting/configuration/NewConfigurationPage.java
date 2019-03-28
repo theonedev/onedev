@@ -5,7 +5,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ConfigurationManager;
+import io.onedev.server.entitymanager.ConfigurationManager;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;

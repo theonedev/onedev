@@ -8,7 +8,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 

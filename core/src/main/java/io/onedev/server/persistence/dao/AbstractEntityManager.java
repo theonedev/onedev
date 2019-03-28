@@ -112,7 +112,7 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 	}
 
 	protected Session getSession() {
-		return dao.getSession();
+		return dao.getSessionManager().getSession();
 	}
 
 }

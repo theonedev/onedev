@@ -15,8 +15,8 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CacheManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.cache.CacheManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.facade.UserFacade;

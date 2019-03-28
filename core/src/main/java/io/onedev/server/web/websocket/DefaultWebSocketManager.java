@@ -20,8 +20,8 @@ import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.web.page.base.BasePage;
 
 @Singleton
@@ -29,7 +29,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 
 	private final Application application;
 	
-	private final Dao dao;
+	private final TransactionManager transactionManager;
 	
 	private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
 	
@@ -40,9 +40,9 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	private final IWebSocketConnectionRegistry connectionRegistry = new SimpleWebSocketConnectionRegistry();
 
 	@Inject
-	public DefaultWebSocketManager(Application application, Dao dao, WebSocketPolicy webSocketPolicy) {
+	public DefaultWebSocketManager(Application application, TransactionManager transactionManager, WebSocketPolicy webSocketPolicy) {
 		this.application = application;
-		this.dao = dao;
+		this.transactionManager = transactionManager;
 		this.webSocketPolicy = webSocketPolicy;
 	}
 	
@@ -67,7 +67,7 @@ public class DefaultWebSocketManager implements WebSocketManager {
 	@Sessional
 	@Override
 	public void notifyObservableChange(String observable, @Nullable PageKey sourcePageKey) {
-		dao.doAfterCommit(new Runnable() {
+		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {

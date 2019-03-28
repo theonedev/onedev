@@ -128,7 +128,7 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 					}
 					
 				};
-				link.add(new Label("label", rowModel.getObject().getJob()));
+				link.add(new Label("label", rowModel.getObject().getJobName()));
 				fragment.add(link);
 				
 				cellItem.add(fragment);

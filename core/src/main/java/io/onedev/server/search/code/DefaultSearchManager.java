@@ -45,11 +45,11 @@ import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.manager.StorageManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
+import io.onedev.server.storage.StorageManager;
 import jersey.repackaged.com.google.common.base.Preconditions;
 
 @Singleton

@@ -3,8 +3,10 @@ package io.onedev.server.ci;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
@@ -27,6 +29,8 @@ public class CISpec implements Serializable, Validatable {
 	public static final String BLOB_PATH = "onedev-ci.xml";
 
 	private List<Job> jobs = new ArrayList<>();
+	
+	private transient Map<String, Job> jobMap;
 
 	@Editable
 	public List<Job> getJobs() {
@@ -36,28 +40,34 @@ public class CISpec implements Serializable, Validatable {
 	public void setJobs(List<Job> jobs) {
 		this.jobs = jobs;
 	}
+	
+	public Map<String, Job> getJobMap() {
+		if (jobMap == null) { 
+			jobMap = new HashMap<>();
+			for (Job job: jobs)
+				jobMap.put(job.getName(), job);
+		}
+		return jobMap;
+	}
 
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
-		Map<String, Job> jobMap = new HashMap<>();
-
 		boolean valid = true;
-		
+
+		Set<String> jobNames = new HashSet<>();
 		for (Job job: jobs) {
-			if (jobMap.containsKey(job.getName())) {
+			if (!jobNames.add(job.getName())) {
 				context.buildConstraintViolationWithTemplate("Duplicate names found: " + job.getName())
 						.addPropertyNode("jobs").addConstraintViolation();
 				valid = false;
-			} else {
-				jobMap.put(job.getName(), job);
 			}
 		}
 
 		for (int i=0; i<jobs.size(); i++) {
 			Job job = jobs.get(i);
 			for (Dependency dependency: job.getDependencies()) {
-				if (!jobMap.containsKey(dependency.getJob())) {
-					context.buildConstraintViolationWithTemplate("Dependency job not found: " + dependency.getJob())
+				if (!jobMap.containsKey(dependency.getJobName())) {
+					context.buildConstraintViolationWithTemplate("Dependency job not found: " + dependency.getJobName())
 							.addPropertyNode("jobs").addPropertyNode("dependencies")
 								.inIterable().atIndex(i)
 							.addConstraintViolation();
@@ -70,7 +80,7 @@ public class CISpec implements Serializable, Validatable {
 			Job job = jobs.get(i);
 			for (Dependency dependency: job.getDependencies()) {
 				List<String> dependencyChain = Lists.newArrayList(job.getName());
-				if (hasCircularDependencies(jobMap, dependencyChain, dependency.getJob())) {
+				if (hasCircularDependencies(jobMap, dependencyChain, dependency.getJobName())) {
 					context.buildConstraintViolationWithTemplate("Circular dependencies found: " + dependencyChain)
 							.addPropertyNode("jobs").addPropertyNode("dependencies")
 								.inIterable().atIndex(i)
@@ -97,7 +107,7 @@ public class CISpec implements Serializable, Validatable {
 			Job job = jobMap.get(jobName);
 			if (job != null) {
 				for (Dependency dependency: job.getDependencies()) {
-					if (hasCircularDependencies(jobMap, new ArrayList<>(dependencyChain), dependency.getJob()))
+					if (hasCircularDependencies(jobMap, new ArrayList<>(dependencyChain), dependency.getJobName()))
 						return true;
 				}
 			} 

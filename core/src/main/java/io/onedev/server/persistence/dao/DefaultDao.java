@@ -6,11 +6,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.transaction.Status;
-import javax.transaction.Synchronization;
 
 import org.hibernate.Criteria;
-import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 
 import io.onedev.commons.launcher.loader.ListenerRegistry;
@@ -19,7 +16,7 @@ import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.persistence.UnitOfWork;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 
@@ -27,52 +24,47 @@ import io.onedev.server.persistence.annotation.Transactional;
 @SuppressWarnings("unchecked")
 public class DefaultDao implements Dao, Serializable {
 
-	private final UnitOfWork unitOfWork;
+	private final SessionManager sessionManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
-	public DefaultDao(UnitOfWork unitOfWork, ListenerRegistry listenerRegistry) {
-		this.unitOfWork = unitOfWork;
+	public DefaultDao(SessionManager sessionManager, ListenerRegistry listenerRegistry) {
+		this.sessionManager = sessionManager;
 		this.listenerRegistry = listenerRegistry;
 	}
 	
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T get(Class<T> entityClass, Long entityId) {
-		return (T) getSession().get(ClassUtils.unproxy(entityClass), entityId);
+		return (T) sessionManager.getSession().get(ClassUtils.unproxy(entityClass), entityId);
 	}
 
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T load(Class<T> entityClass, Long entityId) {
-		return (T) getSession().load(ClassUtils.unproxy(entityClass), entityId);
+		return (T) sessionManager.getSession().load(ClassUtils.unproxy(entityClass), entityId);
 	}
 
 	@Transactional
 	@Override
 	public void persist(AbstractEntity entity) {
 		boolean isNew = entity.isNew();
-		getSession().saveOrUpdate(entity);
+		sessionManager.getSession().saveOrUpdate(entity);
 		listenerRegistry.post(new EntityPersisted(entity, isNew));
 	}
 
 	@Transactional
 	@Override
 	public void remove(AbstractEntity entity) {
-		getSession().delete(entity);
+		sessionManager.getSession().delete(entity);
 		listenerRegistry.post(new EntityRemoved(entity));
-	}
-
-	@Override
-	public Session getSession() {
-		return unitOfWork.getSession();
 	}
 
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> List<T> query(EntityCriteria<T> entityCriteria, int firstResult, int maxResults) {
-		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
+		Criteria criteria = entityCriteria.getExecutableCriteria(sessionManager.getSession());
 		criteria.setFirstResult(firstResult);
 		criteria.setMaxResults(maxResults);
 		return criteria.list();
@@ -87,7 +79,7 @@ public class DefaultDao implements Dao, Serializable {
 	@Transactional
 	@Override
 	public <T extends AbstractEntity> T find(EntityCriteria<T> entityCriteria) {
-		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
+		Criteria criteria = entityCriteria.getExecutableCriteria(sessionManager.getSession());
 		criteria.setFirstResult(0);
 		criteria.setMaxResults(1);
 		return (T) criteria.uniqueResult();
@@ -95,7 +87,7 @@ public class DefaultDao implements Dao, Serializable {
 
 	@Override
 	public <T extends AbstractEntity> int count(EntityCriteria<T> entityCriteria) {
-		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
+		Criteria criteria = entityCriteria.getExecutableCriteria(sessionManager.getSession());
 		criteria.setProjection(Projections.rowCount());
 		return ((Long) criteria.uniqueResult()).intValue();
 	}
@@ -111,36 +103,8 @@ public class DefaultDao implements Dao, Serializable {
 	}
 
 	@Override
-	public void doAfterCommit(Runnable runnable) {
-		if (getSession().getTransaction().isActive()) {
-			getSession().getTransaction().registerSynchronization(new Synchronization() {
-				
-				@Override
-				public void beforeCompletion() {
-				}
-				
-				@Override
-				public void afterCompletion(int status) {
-					if (status == Status.STATUS_COMMITTED)
-						runnable.run();
-				}
-				
-			});
-		} else {
-			runnable.run();
-		}
-	}	
-	
-	@Override
-	public void doUnitOfWorkAsyncAfterCommit(Runnable runnable) {
-		doAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				unitOfWork.doAsync(runnable);
-			}
-			
-		});
-	}	
+	public SessionManager getSessionManager() {
+		return sessionManager;
+	}
 
 }

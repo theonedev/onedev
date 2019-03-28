@@ -12,7 +12,7 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.userident.GitUserIdent;
 import io.onedev.server.util.userident.OrdinaryUserIdent;

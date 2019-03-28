@@ -7,9 +7,11 @@ import java.util.List;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.ci.jobtrigger.JobTrigger;
+import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
+import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.PathPatterns;
 
 @Editable
@@ -20,15 +22,19 @@ public class Job implements Serializable {
 
 	private String name;
 	
-	private List<Dependency> dependencies = new ArrayList<>();
+	private String image;
 	
-	private List<InputSpec> params = new ArrayList<>();
+	private String command;
 	
-	private List<Step> steps = new ArrayList<>();
-	
-	private List<JobTrigger> triggers = new ArrayList<>();
+	private boolean cloneSource = true;
 	
 	private String publishArtifacts;
+
+	private List<Dependency> dependencies = new ArrayList<>();
+	
+	private List<InputSpec> promptParams = new ArrayList<>();
+	
+	private List<JobTrigger> triggers = new ArrayList<>();
 	
 	private long timeout = 3600;
 	
@@ -42,25 +48,46 @@ public class Job implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200, name="Prompt Parameters", description="Specify parameters to prompt when the job "
-			+ "is triggered manually")
-	public List<InputSpec> getParams() {
-		return params;
+	@Editable(order=110, name="Docker Image", description="Specify the docker image to run the command")
+	@NotEmpty
+	public String getImage() {
+		return image;
 	}
 
-	public void setParams(List<InputSpec> params) {
-		this.params = params;
+	public void setImage(String image) {
+		this.image = image;
 	}
 
-	@Editable(order=300)
-	public List<Step> getSteps() {
-		return steps;
+	@Editable(order=120)
+	@Multiline
+	@NotEmpty
+	public String getCommand() {
+		return command;
 	}
 
-	public void setSteps(List<Step> steps) {
-		this.steps = steps;
+	public void setCommand(String command) {
+		this.command = command;
 	}
+
+	@Editable(order=130, description="Whether or not to clone the source code")
+	public boolean isCloneSource() {
+		return cloneSource;
+	}
+
+	public void setCloneSource(boolean cloneSource) {
+		this.cloneSource = cloneSource;
+	}	
 	
+	@Editable(order=300, description="Specify parameters to prompt when the job "
+			+ "is triggered manually")
+	public List<InputSpec> getPromptParams() {
+		return promptParams;
+	}
+
+	public void setPromptParams(List<InputSpec> promptParams) {
+		this.promptParams = promptParams;
+	}
+
 	@Editable(name="Dependency Jobs", order=400, description="Job dependencies determines the order and "
 			+ "concurrency when run different jobs")
 	public List<Dependency> getDependencies() {
@@ -91,7 +118,7 @@ public class Job implements Serializable {
 		this.publishArtifacts = publishArtifacts;
 	}
 
-	@Editable(order=600, description="Specify timeout in seconds")
+	@Editable(order=700, description="Specify timeout in seconds")
 	public long getTimeout() {
 		return timeout;
 	}
@@ -100,4 +127,12 @@ public class Job implements Serializable {
 		this.timeout = timeout;
 	}
 
+	public JobTrigger getMatchedTrigger(ProjectEvent event) {
+		for (JobTrigger trigger: getTriggers()) {
+			if (trigger.matches(event, this))
+				return trigger;
+		}
+		return null;
+	}
+	
 }

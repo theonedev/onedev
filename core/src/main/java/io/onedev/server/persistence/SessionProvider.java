@@ -9,16 +9,16 @@ import org.hibernate.Session;
 @Singleton
 public class SessionProvider implements Provider<Session> {
 
-	private final UnitOfWork unitOfWork;
+	private final SessionManager sessionManager;
 	
 	@Inject
-	public SessionProvider(UnitOfWork unitOfWork) {
-		this.unitOfWork = unitOfWork;
+	public SessionProvider(SessionManager sessionManager) {
+		this.sessionManager = sessionManager;
 	}
 	
 	@Override
 	public Session get() {
-		return unitOfWork.getSession();
+		return sessionManager.getSession();
 	}
 
 }

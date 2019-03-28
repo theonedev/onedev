@@ -6,6 +6,8 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -22,6 +24,14 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
+				new Thread(new Runnable() {
+
+					@Override
+					public void run() {
+						System.out.println(OneDev.getInstance(SessionManager.class).getSession());
+					}
+					
+				}).start();
 			}
 			
 		});

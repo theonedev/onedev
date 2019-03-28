@@ -11,7 +11,7 @@ import org.apache.wicket.model.IModel;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;

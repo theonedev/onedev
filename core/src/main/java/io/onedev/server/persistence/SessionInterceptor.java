@@ -1,29 +1,32 @@
 package io.onedev.server.persistence;
 
+import java.util.concurrent.Callable;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 
 import com.google.inject.Inject;
 
+import io.onedev.commons.utils.ExceptionUtils;
+
 public class SessionInterceptor implements MethodInterceptor {
 
 	@Inject
-	private PersistManager persistManager;
-	
-	@Inject
-	private UnitOfWork unitOfWork;
+	private SessionManager sessionManager;
 
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		if (persistManager.getSessionFactory() != null) {
-			unitOfWork.begin();
-			try {
-				return mi.proceed();
-			} finally {
-				unitOfWork.end();
+		return sessionManager.call(new Callable<Object>() {
+
+			@Override
+			public Object call() throws Exception {
+				try {
+					return mi.proceed();
+				} catch (Throwable e) {
+					throw ExceptionUtils.unchecked(e);
+				}
 			}
-		} else {
-			return mi.proceed();
-		}
+			
+		});
 	}
 	
 }

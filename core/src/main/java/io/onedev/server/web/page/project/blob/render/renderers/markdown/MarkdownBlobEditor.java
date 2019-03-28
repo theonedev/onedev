@@ -12,8 +12,8 @@ import com.google.common.base.Charsets;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.MarkdownManager;
 import io.onedev.server.util.ContentDetector;
+import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;

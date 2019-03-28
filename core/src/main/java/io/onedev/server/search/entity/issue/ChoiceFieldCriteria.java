@@ -11,9 +11,9 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueFieldUnary;
+import io.onedev.server.model.IssueFieldEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
@@ -46,14 +46,14 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
 		From<?, ?> join = context.getJoin(getFieldName());
 		if (allowMultiple) {
-			return context.getBuilder().equal(join.get(IssueFieldUnary.FIELD_ATTR_VALUE), value);
+			return context.getBuilder().equal(join.get(IssueFieldEntity.FIELD_ATTR_VALUE), value);
 		} else {
 			if (operator == IssueQueryLexer.Is)
-				return context.getBuilder().equal(join.get(IssueFieldUnary.FIELD_ATTR_VALUE), value);
+				return context.getBuilder().equal(join.get(IssueFieldEntity.FIELD_ATTR_VALUE), value);
 			else if (operator == IssueQueryLexer.IsGreaterThan)
-				return context.getBuilder().greaterThan(join.get(IssueFieldUnary.FIELD_ATTR_ORDINAL), ordinal);
+				return context.getBuilder().greaterThan(join.get(IssueFieldEntity.FIELD_ATTR_ORDINAL), ordinal);
 			else
-				return context.getBuilder().lessThan(join.get(IssueFieldUnary.FIELD_ATTR_ORDINAL), ordinal);
+				return context.getBuilder().lessThan(join.get(IssueFieldEntity.FIELD_ATTR_ORDINAL), ordinal);
 		}
 	}
 

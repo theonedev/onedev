@@ -19,7 +19,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.validator.constraints.Email;
 
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.jersey.ValidQueryParams;

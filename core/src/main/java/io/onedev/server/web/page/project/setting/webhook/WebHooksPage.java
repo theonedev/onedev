@@ -9,7 +9,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;

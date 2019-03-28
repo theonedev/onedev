@@ -77,11 +77,11 @@ public abstract class DependencyEditPanel extends Panel {
 
 				if (dependencyIndex != -1) { 
 					Dependency oldDependency = dependencies.get(dependencyIndex);
-					if (!dependency.getJob().equals(oldDependency.getJob()) && getDependency(dependency.getJob()) != null) {
+					if (!dependency.getJobName().equals(oldDependency.getJobName()) && getDependency(dependency.getJobName()) != null) {
 						editor.getErrorContext(new PathElement.Named("job"))
 								.addError("Dependency to this job is already defined");
 					}
-				} else if (getDependency(dependency.getJob()) != null) {
+				} else if (getDependency(dependency.getJobName()) != null) {
 					editor.getErrorContext(new PathElement.Named("job"))
 							.addError("Dependency to this job is already defined");
 				}
@@ -121,7 +121,7 @@ public abstract class DependencyEditPanel extends Panel {
 
 	private Dependency getDependency(String job) {
 		for (Dependency dependency: dependencies) {
-			if (job.equals(dependency.getJob()))
+			if (job.equals(dependency.getJobName()))
 				return dependency;
 		}
 		return null;

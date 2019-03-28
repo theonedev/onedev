@@ -8,7 +8,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Issue;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.IssueConstants;
-import io.onedev.server.model.IssueFieldUnary;
+import io.onedev.server.model.IssueFieldEntity;
 
 public class IssueQueryBuildContext extends QueryBuildContext<Issue> {
 	
@@ -25,7 +25,7 @@ public class IssueQueryBuildContext extends QueryBuildContext<Issue> {
 			return getRoot().join(IssueConstants.ATTR_MILESTONE, JoinType.LEFT);
 		default:
 			Join<Issue, ?> join = getRoot().join(IssueConstants.ATTR_FIELD_UNARIES, JoinType.LEFT);
-			join.on(getBuilder().equal(join.get(IssueFieldUnary.FIELD_ATTR_NAME), joinName));
+			join.on(getBuilder().equal(join.get(IssueFieldEntity.FIELD_ATTR_NAME), joinName));
 			return join;
 		}
 	}

@@ -15,8 +15,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Membership;

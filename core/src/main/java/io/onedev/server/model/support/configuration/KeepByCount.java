@@ -9,9 +9,9 @@ import org.hibernate.Session;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.BuildInfoManager;
-import io.onedev.server.manager.BuildManager;
-import io.onedev.server.manager.CacheManager;
+import io.onedev.server.cache.BuildInfoManager;
+import io.onedev.server.cache.CacheManager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.web.editable.annotation.Editable;

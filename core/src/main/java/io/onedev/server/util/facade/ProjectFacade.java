@@ -3,7 +3,7 @@ package io.onedev.server.util.facade;
 import java.util.Date;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.UserInfoManager;
+import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;

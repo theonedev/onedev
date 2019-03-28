@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.util.ConfirmOnClick;

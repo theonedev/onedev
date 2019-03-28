@@ -8,9 +8,9 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.Submodule;
-import io.onedev.server.manager.SettingManager;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 

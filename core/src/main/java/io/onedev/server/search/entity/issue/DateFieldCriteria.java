@@ -6,7 +6,7 @@ import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueFieldUnary;
+import io.onedev.server.model.IssueFieldEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.QueryBuildContext;
@@ -32,9 +32,9 @@ public class DateFieldCriteria extends FieldCriteria {
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
 		From<?, ?> join = context.getJoin(getFieldName());
 		if (operator == IssueQueryLexer.IsBefore)
-			return context.getBuilder().lessThan(join.get(IssueFieldUnary.FIELD_ATTR_ORDINAL), value.getTime());
+			return context.getBuilder().lessThan(join.get(IssueFieldEntity.FIELD_ATTR_ORDINAL), value.getTime());
 		else
-			return context.getBuilder().greaterThan(join.get(IssueFieldUnary.FIELD_ATTR_ORDINAL), value.getTime());
+			return context.getBuilder().greaterThan(join.get(IssueFieldEntity.FIELD_ATTR_ORDINAL), value.getTime());
 	}
 
 	@Override

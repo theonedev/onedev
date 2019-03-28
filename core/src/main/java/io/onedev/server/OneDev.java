@@ -23,15 +23,15 @@ import io.onedev.commons.launcher.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.init.InitStage;
 import io.onedev.commons.utils.init.ManualConfig;
 import io.onedev.commons.utils.schedule.TaskScheduler;
+import io.onedev.server.data.DataManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.manager.DataManager;
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.persistence.PersistManager;
-import io.onedev.server.persistence.UnitOfWork;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.jetty.JettyRunner;
 import io.onedev.server.util.serverconfig.ServerConfig;
@@ -47,7 +47,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	private final PersistManager persistManager;
 	
-	private final UnitOfWork unitOfWork;
+	private final SessionManager sessionManager;
 	
 	private final SettingManager configManager;
 	
@@ -67,12 +67,12 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	@Inject
 	public OneDev(JettyRunner jettyRunner, PersistManager persistManager, TaskScheduler taskScheduler,
-			UnitOfWork unitOfWork, ServerConfig serverConfig, DataManager dataManager, SettingManager configManager, 
+			SessionManager sessionManager, ServerConfig serverConfig, DataManager dataManager, SettingManager configManager, 
 			UserManager userManager, ListenerRegistry listenerRegistry, WebSocketManager webSocketManager) {
 		this.jettyRunner = jettyRunner;
 		this.persistManager = persistManager;
 		this.taskScheduler = taskScheduler;
-		this.unitOfWork = unitOfWork;
+		this.sessionManager = sessionManager;
 		this.configManager = configManager;
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
@@ -101,12 +101,12 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			initStage.waitForFinish();
 		}
 
-		unitOfWork.begin();
+		sessionManager.openSession();
 		try {
 			ThreadContext.bind(userManager.getRoot().asSubject());
 			listenerRegistry.post(new SystemStarting());
 		} finally {
-			unitOfWork.end();
+			sessionManager.closeSession();
 		}
 		
 		webSocketManager.start();
@@ -176,12 +176,12 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	public void stop() {
 		webSocketManager.stop();
 		
-		unitOfWork.begin();
+		sessionManager.openSession();
 		try {
 			listenerRegistry.post(new SystemStopped());
 			ThreadContext.unbindSubject();
 		} finally {
-			unitOfWork.end();
+			sessionManager.closeSession();
 		}
 		persistManager.stop();
 		

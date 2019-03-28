@@ -6,7 +6,7 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueManager;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.milestone.closelink.MilestoneCloseLinkCssResourceReference;

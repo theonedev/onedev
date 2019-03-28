@@ -6,8 +6,8 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.PullRequestReviewManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.PullRequestReviewManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;

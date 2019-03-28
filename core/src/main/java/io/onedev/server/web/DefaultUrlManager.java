@@ -11,8 +11,8 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Splitter;
 
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.UrlManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Issue;

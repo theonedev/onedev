@@ -28,9 +28,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.cache.UserInfoManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.exception.OneException;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.UserInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.floating.AlignPlacement;

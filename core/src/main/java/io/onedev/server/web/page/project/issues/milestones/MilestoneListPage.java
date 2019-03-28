@@ -28,7 +28,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.MilestoneManager;
+import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;

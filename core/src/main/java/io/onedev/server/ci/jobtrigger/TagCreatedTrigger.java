@@ -3,7 +3,6 @@ package io.onedev.server.ci.jobtrigger;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.PathUtils;
-import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Job;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
@@ -30,7 +29,7 @@ public class TagCreatedTrigger extends JobTrigger {
 	}
 
 	@Override
-	protected boolean matches(ProjectEvent event, CISpec ciSpec, Job job) {
+	public boolean matches(ProjectEvent event, Job job) {
 		if (event instanceof RefUpdated) {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String pushedTag = GitUtils.ref2tag(refUpdated.getRefName());

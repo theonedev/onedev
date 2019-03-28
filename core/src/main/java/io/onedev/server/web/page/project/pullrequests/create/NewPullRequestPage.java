@@ -38,9 +38,9 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.manager.CodeCommentManager;
-import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;

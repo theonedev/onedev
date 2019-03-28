@@ -18,15 +18,22 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.fasterxml.jackson.annotation.JsonView;
+import org.eclipse.jgit.lib.ObjectId;
 
+import com.fasterxml.jackson.annotation.JsonView;
+import com.google.common.base.Preconditions;
+
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.Job;
 import io.onedev.server.util.jackson.DefaultView;
 
 @Entity
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_user_id"), @Index(columnList="commitHash"), 
-				@Index(columnList="number"), @Index(columnList="job"), @Index(columnList="numberStr"), 
-				@Index(columnList="status"), @Index(columnList="beginDate"), @Index(columnList="duration")},
+				@Index(columnList="number"), @Index(columnList="jobName"), @Index(columnList="numberStr"), 
+				@Index(columnList="status"), @Index(columnList="submitDate"), @Index(columnList="pendingDate"),
+				@Index(columnList="runningDate"), @Index(columnList="finishDate"), 
+				@Index(columnList="runInstanceId")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})}
 )
 public class Build2 extends AbstractEntity {
@@ -36,7 +43,7 @@ public class Build2 extends AbstractEntity {
 	public static final String STATUS = "status";
 	
 	public enum Status {
-		RUNNING, SUCCESSFUL, FAILED, CANCELLED, TIMEDOUT;
+		WAITING, PENDING, RUNNING, SUCCESSFUL, FAILED
 	};
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -44,10 +51,10 @@ public class Build2 extends AbstractEntity {
 	private Project project; 
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
 	private User user;
 	
-	private String job;
+	@Column(nullable=false)
+	private String jobName;
 	
 	private long number;
 	
@@ -63,12 +70,28 @@ public class Build2 extends AbstractEntity {
 	private Status status; 
 	
 	@Column(nullable=false)
-	private Date beginDate;
+	private Date submitDate;
 	
-	private long duration;
+	private Date pendingDate;
+	
+	private Date runningDate;
+
+	private Date finishDate;
+	
+	private String runInstanceId;
+	
+	private String errorMessage;
+	
+	private transient Job job;
 
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	private Collection<BuildParam> params = new ArrayList<>();
+	
+	@OneToMany(mappedBy="dependent", cascade=CascadeType.REMOVE)
+	private Collection<BuildDependence> dependencies = new ArrayList<>();
+	
+	@OneToMany(mappedBy="dependency", cascade=CascadeType.REMOVE)
+	private Collection<BuildDependence> dependents= new ArrayList<>();
 	
 	private transient Map<String, String> paramMap;
 	
@@ -89,12 +112,12 @@ public class Build2 extends AbstractEntity {
 		this.user = user;
 	}
 
-	public String getJob() {
-		return job;
+	public String getJobName() {
+		return jobName;
 	}
 
-	public void setJob(String job) {
-		this.job = job;
+	public void setJobName(String jobName) {
+		this.jobName = jobName;
 	}
 
 	public long getNumber() {
@@ -103,6 +126,7 @@ public class Build2 extends AbstractEntity {
 
 	public void setNumber(long number) {
 		this.number = number;
+		numberStr = String.valueOf(number);
 	}
 
 	public String getNumberStr() {
@@ -128,21 +152,37 @@ public class Build2 extends AbstractEntity {
 	public void setStatus(Status status) {
 		this.status = status;
 	}
-
-	public Date getBeginDate() {
-		return beginDate;
+	
+	public Date getSubmitDate() {
+		return submitDate;
 	}
 
-	public void setBeginDate(Date beginDate) {
-		this.beginDate = beginDate;
+	public void setSubmitDate(Date submitDate) {
+		this.submitDate = submitDate;
 	}
 
-	public long getDuration() {
-		return duration;
+	public Date getPendingDate() {
+		return pendingDate;
 	}
 
-	public void setDuration(long duration) {
-		this.duration = duration;
+	public void setPendingDate(Date pendingDate) {
+		this.pendingDate = pendingDate;
+	}
+
+	public Date getRunningDate() {
+		return runningDate;
+	}
+
+	public void setRunningDate(Date runningDate) {
+		this.runningDate = runningDate;
+	}
+
+	public Date getFinishDate() {
+		return finishDate;
+	}
+
+	public void setFinishDate(Date finishDate) {
+		this.finishDate = finishDate;
 	}
 
 	public Collection<BuildParam> getParams() {
@@ -153,6 +193,38 @@ public class Build2 extends AbstractEntity {
 		this.params = params;
 	}
 	
+	public Collection<BuildDependence> getDependencies() {
+		return dependencies;
+	}
+
+	public void setDependencies(Collection<BuildDependence> dependencies) {
+		this.dependencies = dependencies;
+	}
+
+	public Collection<BuildDependence> getDependents() {
+		return dependents;
+	}
+
+	public void setDependents(Collection<BuildDependence> dependents) {
+		this.dependents = dependents;
+	}
+
+	public String getRunInstanceId() {
+		return runInstanceId;
+	}
+
+	public void setRunInstanceId(String runInstanceId) {
+		this.runInstanceId = runInstanceId;
+	}
+
+	public String getErrorMessage() {
+		return errorMessage;
+	}
+
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
+
 	public Map<String, String> getParamMap() {
 		if (paramMap == null) {
 			paramMap = new HashMap<>();
@@ -161,4 +233,13 @@ public class Build2 extends AbstractEntity {
 		}
 		return paramMap;
 	}
+
+	public Job getJob() {
+		if (job == null) { 
+			CISpec ciSpec = Preconditions.checkNotNull(getProject().getCISpec(ObjectId.fromString(getCommitHash())));
+			job = Preconditions.checkNotNull(ciSpec.getJobMap().get(jobName));
+		}
+		return job;
+	}
+	
 }

@@ -4,7 +4,7 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.page.base.BasePage;
 

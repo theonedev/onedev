@@ -65,11 +65,11 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.PullRequestChangeManager;
-import io.onedev.server.manager.PullRequestManager;
-import io.onedev.server.manager.PullRequestUpdateManager;
-import io.onedev.server.manager.PullRequestWatchManager;
-import io.onedev.server.manager.UserInfoManager;
+import io.onedev.server.cache.UserInfoManager;
+import io.onedev.server.entitymanager.PullRequestChangeManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestUpdateManager;
+import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;

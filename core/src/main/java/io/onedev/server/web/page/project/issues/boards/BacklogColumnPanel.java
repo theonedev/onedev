@@ -23,8 +23,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
-import io.onedev.server.manager.IssueManager;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueCriteria;

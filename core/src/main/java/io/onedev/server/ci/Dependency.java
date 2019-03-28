@@ -18,7 +18,7 @@ public class Dependency implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String job;
+	private String jobName;
 	
 	private List<JobParam> params = new ArrayList<>();
 	
@@ -27,12 +27,12 @@ public class Dependency implements Serializable {
 	@Editable(order=100)
 	@ChoiceProvider("getJobChoices")
 	@NotEmpty
-	public String getJob() {
-		return job;
+	public String getJobName() {
+		return jobName;
 	}
 
-	public void setJob(String job) {
-		this.job = job;
+	public void setJobName(String jobName) {
+		this.jobName = jobName;
 	}
 
 	@Editable(order=200, description="Specify parameters of the dependency job. Dependency is satisfied only when "

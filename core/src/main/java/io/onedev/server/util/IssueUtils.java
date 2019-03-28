@@ -19,8 +19,8 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;

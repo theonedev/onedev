@@ -5,7 +5,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;

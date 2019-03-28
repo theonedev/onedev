@@ -15,10 +15,10 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.MailManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
+import io.onedev.server.notification.MailManager;
 import io.onedev.server.web.behavior.testform.TestFormBehavior;
 import io.onedev.server.web.behavior.testform.TestResult;
 import io.onedev.server.web.editable.BeanUpdating;

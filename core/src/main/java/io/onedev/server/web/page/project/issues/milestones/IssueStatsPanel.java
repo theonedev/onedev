@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;

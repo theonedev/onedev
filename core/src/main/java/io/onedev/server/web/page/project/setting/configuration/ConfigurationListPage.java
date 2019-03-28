@@ -31,8 +31,8 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.BuildManager;
-import io.onedev.server.manager.ConfigurationManager;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.ConfigurationManager;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.configuration.DoNotCleanup;

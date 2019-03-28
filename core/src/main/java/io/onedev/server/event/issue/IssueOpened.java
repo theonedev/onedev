@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.MarkdownAware;
-import io.onedev.server.manager.GroupManager;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;

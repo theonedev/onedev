@@ -14,7 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.rest.RestConstants;
 import io.onedev.server.security.SecurityUtils;

@@ -28,7 +28,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.commons.utils.matchscore.MatchScoreProvider;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.InputChangeBehavior;

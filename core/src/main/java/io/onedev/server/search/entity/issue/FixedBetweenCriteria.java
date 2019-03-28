@@ -17,7 +17,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CacheManager;
+import io.onedev.server.cache.CacheManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;

@@ -32,10 +32,10 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CodeCommentManager;
-import io.onedev.server.manager.IssueCommentManager;
-import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.IssueCommentManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;

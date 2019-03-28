@@ -25,14 +25,14 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.MarkdownManager;
-import io.onedev.server.manager.PullRequestManager;
-import io.onedev.server.manager.PullRequestReviewManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;

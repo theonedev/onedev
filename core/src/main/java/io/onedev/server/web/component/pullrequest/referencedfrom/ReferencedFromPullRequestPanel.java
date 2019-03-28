@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.component.pullrequest.RequestStatusLabel;

@@ -9,9 +9,9 @@ import javax.annotation.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CacheManager;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.cache.CacheManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Issue;

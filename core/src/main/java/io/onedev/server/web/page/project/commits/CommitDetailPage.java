@@ -38,12 +38,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.cache.CommitInfoManager;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
-import io.onedev.server.manager.BuildManager;
-import io.onedev.server.manager.CodeCommentManager;
-import io.onedev.server.manager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;

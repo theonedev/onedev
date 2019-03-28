@@ -11,7 +11,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;

@@ -9,7 +9,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;

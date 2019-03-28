@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.MilestoneManager;
+import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 
 @SuppressWarnings("serial")

@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.BuildManager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;

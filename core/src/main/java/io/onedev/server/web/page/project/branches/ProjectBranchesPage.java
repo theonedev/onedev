@@ -54,11 +54,11 @@ import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
-import io.onedev.server.manager.BuildManager;
-import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;

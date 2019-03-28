@@ -21,7 +21,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.TextNodeVisitor;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Referenceable;

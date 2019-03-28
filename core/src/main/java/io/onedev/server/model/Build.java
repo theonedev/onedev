@@ -23,7 +23,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import com.google.common.base.Optional;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.BuildInfoManager;
+import io.onedev.server.cache.BuildInfoManager;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.facade.BuildFacade;
 

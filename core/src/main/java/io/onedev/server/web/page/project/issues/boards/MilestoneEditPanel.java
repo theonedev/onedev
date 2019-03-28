@@ -9,7 +9,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.MilestoneManager;
+import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;

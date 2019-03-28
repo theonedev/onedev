@@ -21,8 +21,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.hibernate.Hibernate;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
@@ -203,7 +203,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 				Issue issue = OneDev.getInstance(IssueManager.class).load(issueId);
 				Hibernate.initialize(issue.getProject());
 				Hibernate.initialize(issue.getMilestone());
-				Hibernate.initialize(issue.getFieldUnaries());
+				Hibernate.initialize(issue.getFieldEntities());
 				Hibernate.initialize(issue.getSubmitter());
 				send(getPage(), Broadcast.BREADTH, new IssueDragging(target, issue));
 			}

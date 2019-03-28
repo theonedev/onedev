@@ -3,10 +3,10 @@ package io.onedev.server.persistence.dao;
 import java.util.List;
 
 import org.hibernate.HibernateException;
-import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
 
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.persistence.SessionManager;
 
 public interface Dao {
 	
@@ -94,16 +94,6 @@ public interface Dao {
 	 */
 	<T extends AbstractEntity> int count(EntityCriteria<T> entityCriteria);
 
-	/**
-	 * Do some work after commit if there is an active transaction, or do the work immediately if there is no active 
-	 * transaction. Note that the work should not involve any other database operations in current thread 
-	 *  
-	 * @param runnable
-	 */
-	void doAfterCommit(Runnable runnable);
-	
-	void doUnitOfWorkAsyncAfterCommit(Runnable runnable);
-	
-	Session getSession();
-	
+	SessionManager getSessionManager();
+
 }

@@ -18,7 +18,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.server.manager.ConfigurationManager;
+import io.onedev.server.entitymanager.ConfigurationManager;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.jersey.ValidQueryParams;

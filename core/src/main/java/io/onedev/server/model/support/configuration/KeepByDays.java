@@ -10,8 +10,8 @@ import org.hibernate.query.Query;
 import org.joda.time.DateTime;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.BuildInfoManager;
-import io.onedev.server.manager.BuildManager;
+import io.onedev.server.cache.BuildInfoManager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.web.editable.annotation.Editable;

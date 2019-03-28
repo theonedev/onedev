@@ -18,8 +18,8 @@ import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.Constants;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CommitInfoManager;
-import io.onedev.server.manager.UrlManager;
+import io.onedev.server.cache.CommitInfoManager;
+import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;

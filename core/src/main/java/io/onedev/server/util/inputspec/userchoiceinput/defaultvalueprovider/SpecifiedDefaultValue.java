@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;

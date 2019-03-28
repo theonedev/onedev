@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CodeCommentManager;
+import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;

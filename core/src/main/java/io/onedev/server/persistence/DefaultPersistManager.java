@@ -437,7 +437,7 @@ public class DefaultPersistManager implements PersistManager {
 	@Sessional
 	@Override
 	public void importData(Metadata metadata, File dataDir) {
-		Session session = dao.getSession();
+		Session session = dao.getSessionManager().getSession();
 		List<Class<?>> entityTypes = getEntityTypes(sessionFactory);
 		Collections.reverse(entityTypes);
 		for (Class<?> entityType: entityTypes) {

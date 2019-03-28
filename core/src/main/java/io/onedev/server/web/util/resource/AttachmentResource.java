@@ -17,10 +17,10 @@ import org.apache.wicket.request.resource.AbstractResource;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.AttachmentManager;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.storage.AttachmentManager;
 import io.onedev.server.util.facade.ProjectFacade;
 
 public class AttachmentResource extends AbstractResource {

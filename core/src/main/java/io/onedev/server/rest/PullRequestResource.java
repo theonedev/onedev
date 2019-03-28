@@ -19,7 +19,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.persistence.dao.EntityCriteria;

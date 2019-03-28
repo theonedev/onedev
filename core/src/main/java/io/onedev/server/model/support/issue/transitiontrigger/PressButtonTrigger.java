@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.model.support.usermatcher.UserMatcher;
 import io.onedev.server.security.SecurityUtils;

@@ -29,10 +29,10 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 
+import io.onedev.server.entitymanager.impl.DefaultCodeCommentRelationManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.FileChange;
 import io.onedev.server.git.command.ListFileChangesCommand;
-import io.onedev.server.manager.impl.DefaultCodeCommentRelationManager;
 
 @Entity
 @Table(indexes={@Index(columnList="o_request_id"), @Index(columnList="date")})

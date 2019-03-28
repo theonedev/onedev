@@ -13,9 +13,9 @@ import org.apache.wicket.request.resource.AbstractResource;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.StorageManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.persistence.PersistManager;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 

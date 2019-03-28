@@ -30,7 +30,7 @@ import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.web.behavior.sortable.SortBehavior;

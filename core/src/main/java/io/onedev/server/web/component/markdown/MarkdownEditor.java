@@ -48,12 +48,12 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.MarkdownManager;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.markdown.emoji.EmojiOnes;
 import io.onedev.server.web.component.modal.ModalPanel;

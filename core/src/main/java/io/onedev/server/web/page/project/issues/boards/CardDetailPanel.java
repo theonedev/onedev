@@ -26,11 +26,11 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CodeCommentRelationInfoManager;
-import io.onedev.server.manager.CommitInfoManager;
-import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.UserInfoManager;
+import io.onedev.server.cache.CodeCommentRelationInfoManager;
+import io.onedev.server.cache.CommitInfoManager;
+import io.onedev.server.cache.UserInfoManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;

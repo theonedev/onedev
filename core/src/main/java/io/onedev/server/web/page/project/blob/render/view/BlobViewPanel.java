@@ -25,9 +25,9 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;

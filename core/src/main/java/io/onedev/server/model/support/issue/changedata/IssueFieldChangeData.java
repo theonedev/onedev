@@ -10,8 +10,8 @@ import org.apache.wicket.Component;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.GroupManager;
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;

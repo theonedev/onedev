@@ -12,8 +12,8 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 
 public class ProjectAndRevision implements Serializable {

@@ -27,9 +27,9 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.joda.time.DateTime;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.manager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Constants;

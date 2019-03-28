@@ -1,11 +1,9 @@
 package io.onedev.server.ci.jobtrigger;
 
 import io.onedev.commons.utils.PathUtils;
-import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Job;
 import io.onedev.server.event.ProjectEvent;
-import io.onedev.server.event.pullrequest.PullRequestOpened;
-import io.onedev.server.event.pullrequest.PullRequestUpdated;
+import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -28,21 +26,14 @@ public class PullRequestTrigger extends JobTrigger {
 	}
 	
 	@Override
-	protected boolean matches(ProjectEvent event, CISpec ciSpec, Job job) {
-		if (event instanceof PullRequestOpened) {
-			PullRequestOpened pullRequestOpened = (PullRequestOpened) event;
+	public boolean matches(ProjectEvent event, Job job) {
+		if (event instanceof PullRequestMergePreviewCalculated) {
+			PullRequestMergePreviewCalculated pullRequestMergePreviewCalculated = (PullRequestMergePreviewCalculated) event;
 			if (getTargetBranches() == null 
-					|| PathUtils.matchChildAware(getTargetBranches(), pullRequestOpened.getRequest().getTargetBranch())) { 
+					|| PathUtils.matchChildAware(getTargetBranches(), pullRequestMergePreviewCalculated.getRequest().getTargetBranch())) { 
 				return true;
 			}
 		} 
-		if (event instanceof PullRequestUpdated) {
-			PullRequestUpdated pullRequestUpdated = (PullRequestUpdated) event;
-			if (getTargetBranches() == null 
-					|| PathUtils.matchChildAware(getTargetBranches(), pullRequestUpdated.getRequest().getTargetBranch())) {
-				return true;
-			}
-		}
 		return false;
 	}
 

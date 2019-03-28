@@ -20,7 +20,7 @@ import javax.ws.rs.core.UriInfo;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import io.onedev.server.manager.UserManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.rest.RestConstants;
 import io.onedev.server.security.SecurityUtils;

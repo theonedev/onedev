@@ -19,9 +19,9 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.utils.Transformer;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.PullRequestManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;

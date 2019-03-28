@@ -27,7 +27,7 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.GroupManager;
+import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;

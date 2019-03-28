@@ -4,7 +4,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.Project;
 
-public class RefUpdated extends ProjectEvent {
+public class RefUpdated extends ProjectEvent implements CommitAware {
 	
 	private final String refName;
 	
@@ -28,6 +28,11 @@ public class RefUpdated extends ProjectEvent {
 	}
 
 	public ObjectId getNewCommitId() {
+		return newCommitId;
+	}
+
+	@Override
+	public ObjectId getCommitId() {
 		return newCommitId;
 	}
 	

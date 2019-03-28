@@ -30,11 +30,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.IssueChangeManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.exception.OneException;
-import io.onedev.server.manager.IssueChangeManager;
-import io.onedev.server.manager.IssueManager;
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;

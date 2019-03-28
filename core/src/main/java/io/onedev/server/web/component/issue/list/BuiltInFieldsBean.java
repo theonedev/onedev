@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;

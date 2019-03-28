@@ -27,20 +27,20 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.concurrent.PrioritizedRunnable;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.command.AdvertiseReceiveRefsCommand;
 import io.onedev.server.git.command.AdvertiseUploadRefsCommand;
 import io.onedev.server.git.command.ReceiveCommand;
 import io.onedev.server.git.command.UploadCommand;
 import io.onedev.server.git.exception.GitException;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.StorageManager;
-import io.onedev.server.manager.WorkExecutor;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.serverconfig.ServerConfig;
+import io.onedev.server.util.work.WorkExecutor;
 
 @Singleton
 public class GitFilter implements Filter {

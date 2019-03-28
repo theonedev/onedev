@@ -56,7 +56,7 @@ public class DependencyListViewPanel extends Panel {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getJob());
+						return new Label(componentId, rowModel.getObject().getJobName());
 					}
 					
 				});
@@ -146,7 +146,7 @@ public class DependencyListViewPanel extends Panel {
 
 						@Override
 						protected String getTitle() {
-							return dependencies.get(index).getJob();
+							return dependencies.get(index).getJobName();
 						}
 
 						@Override

@@ -6,7 +6,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueFieldUnary;
+import io.onedev.server.model.IssueFieldEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.QueryBuildContext;
@@ -24,7 +24,7 @@ public class ReferenceableFieldCriteria extends FieldCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		Path<Long> attribute = context.getJoin(getFieldName()).get(IssueFieldUnary.FIELD_ATTR_ORDINAL);
+		Path<Long> attribute = context.getJoin(getFieldName()).get(IssueFieldEntity.FIELD_ATTR_ORDINAL);
 		return context.getBuilder().equal(attribute, value);
 	}
 

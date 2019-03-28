@@ -71,6 +71,16 @@ import io.onedev.commons.utils.Range;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.detect.CISpecDetector;
+import io.onedev.server.entitymanager.BuildQuerySettingManager;
+import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
+import io.onedev.server.entitymanager.CommitQuerySettingManager;
+import io.onedev.server.entitymanager.IssueQuerySettingManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestQuerySettingManager;
+import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.Blob;
@@ -82,15 +92,6 @@ import io.onedev.server.git.Submodule;
 import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
-import io.onedev.server.manager.BuildQuerySettingManager;
-import io.onedev.server.manager.CodeCommentQuerySettingManager;
-import io.onedev.server.manager.CommitQuerySettingManager;
-import io.onedev.server.manager.IssueQuerySettingManager;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.PullRequestQuerySettingManager;
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.StorageManager;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransform;
 import io.onedev.server.model.support.NamedBuildQuery;
@@ -100,9 +101,10 @@ import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.issue.IssueSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
-import io.onedev.server.persistence.UnitOfWork;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.DefaultPrivilege;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.patternset.PatternSet;
@@ -244,6 +246,8 @@ public class Project extends AbstractEntity {
     private transient Map<BlobIdent, Blob> blobCache;
     
     private transient Map<String, Optional<ObjectId>> objectIdCache;
+    
+    private transient Map<ObjectId, Optional<CISpec>> ciSpecCache;
     
     private transient Map<ObjectId, Optional<RevCommit>> commitCache;
     
@@ -606,6 +610,31 @@ public class Project extends AbstractEntity {
 		
 		objectIdCache.put(revision, Optional.fromNullable(objectId));
 	}
+
+	@Nullable
+	public CISpec getCISpec(ObjectId commitId) {
+		if (ciSpecCache == null)
+			ciSpecCache = new HashMap<>();
+		Optional<CISpec> ciSpecOpt = ciSpecCache.get(commitId);
+		if (ciSpecOpt == null) {
+			try {
+				Blob blob = getBlob(new BlobIdent(commitId.name(), CISpec.BLOB_PATH, FileMode.TYPE_FILE));
+				ciSpecOpt = Optional.of(CISpec.parse(blob.getBytes()));
+			} catch (ObjectNotFoundException e) {
+				List<CISpecDetector> detectors = new ArrayList<>(OneDev.getExtensions(CISpecDetector.class));
+				detectors.sort(Comparator.comparing(CISpecDetector::getPriority));
+				CISpec ciSpec = null;
+				for (CISpecDetector detector: detectors) {
+					ciSpec = detector.detect(this, commitId);
+					if (ciSpec != null) 
+						break;
+				}
+				ciSpecOpt = Optional.fromNullable(ciSpec);
+			}
+			ciSpecCache.put(commitId, ciSpecOpt);
+		}
+		return ciSpecOpt.orNull();
+	}
 	
 	public LastCommitsOfChildren getLastCommitsOfChildren(String revision, @Nullable String path) {
 		if (path == null)
@@ -800,7 +829,7 @@ public class Project extends AbstractEntity {
 		}
     	
     	Subject subject = SecurityUtils.getSubject();
-    	OneDev.getInstance(UnitOfWork.class).doAsync(new Runnable() {
+    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
 
 			@Override
 			public void run() {
@@ -854,7 +883,7 @@ public class Project extends AbstractEntity {
 			throw new RuntimeException(e);
 		}
     	Subject subject = SecurityUtils.getSubject();
-    	OneDev.getInstance(UnitOfWork.class).doAsync(new Runnable() {
+    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
 
 			@Override
 			public void run() {

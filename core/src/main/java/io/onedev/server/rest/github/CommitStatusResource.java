@@ -25,9 +25,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.manager.BuildManager;
-import io.onedev.server.manager.ConfigurationManager;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.ConfigurationManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Project;

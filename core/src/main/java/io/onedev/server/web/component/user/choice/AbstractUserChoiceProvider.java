@@ -10,7 +10,7 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CacheManager;
+import io.onedev.server.cache.CacheManager;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.select2.ChoiceProvider;

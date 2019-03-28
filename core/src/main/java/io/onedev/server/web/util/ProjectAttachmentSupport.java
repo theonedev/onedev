@@ -16,11 +16,11 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.AttachmentManager;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.UnitOfWork;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.storage.AttachmentManager;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.util.resource.AttachmentResource;
@@ -76,12 +76,12 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 	}
 
 	private ProjectFacade getProject() {
-		UnitOfWork unitOfWork = OneDev.getInstance(UnitOfWork.class);
-		unitOfWork.begin();
+		SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
+		sessionManager.openSession();
 		try {
 			return OneDev.getInstance(ProjectManager.class).load(projectId).getFacade();
 		} finally {
-			unitOfWork.end();
+			sessionManager.closeSession();
 		}
 	}
 

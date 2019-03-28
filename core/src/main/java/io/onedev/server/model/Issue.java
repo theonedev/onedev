@@ -37,9 +37,9 @@ import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.CommitInfoManager;
-import io.onedev.server.manager.SettingManager;
-import io.onedev.server.manager.UserInfoManager;
+import io.onedev.server.cache.CommitInfoManager;
+import io.onedev.server.cache.UserInfoManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.security.SecurityUtils;
@@ -122,7 +122,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	private Date updateDate = new Date();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
-	private Collection<IssueFieldUnary> fieldUnaries = new ArrayList<>();
+	private Collection<IssueFieldEntity> fieldEntities = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueComment> comments = new ArrayList<>();
@@ -287,12 +287,12 @@ public class Issue extends AbstractEntity implements Referenceable {
 		this.commentCount = commentCount;
 	}
 
-	public Collection<IssueFieldUnary> getFieldUnaries() {
-		return fieldUnaries;
+	public Collection<IssueFieldEntity> getFieldEntities() {
+		return fieldEntities;
 	}
 
-	public void setFieldUnaries(Collection<IssueFieldUnary> fieldUnaries) {
-		this.fieldUnaries = fieldUnaries;
+	public void setFieldEntities(Collection<IssueFieldEntity> fieldEntities) {
+		this.fieldEntities = fieldEntities;
 	}
 	
 	public Date getUpdateDate() {
@@ -314,30 +314,30 @@ public class Issue extends AbstractEntity implements Referenceable {
 	}
 	
 	public Collection<String> getFieldNames() {
-		return getFieldUnaries().stream().map(it->it.getName()).collect(Collectors.toSet());
+		return getFieldEntities().stream().map(it->it.getName()).collect(Collectors.toSet());
 	}
 	
 	public Map<String, IssueField> getFields() {
 		Map<String, IssueField> fields = new LinkedHashMap<>();
 
-		Map<String, List<IssueFieldUnary>> unaryMap = new HashMap<>(); 
-		for (IssueFieldUnary unary: getFieldUnaries()) {
-			List<IssueFieldUnary> fieldsOfName = unaryMap.get(unary.getName());
+		Map<String, List<IssueFieldEntity>> entityMap = new HashMap<>(); 
+		for (IssueFieldEntity entity: getFieldEntities()) {
+			List<IssueFieldEntity> fieldsOfName = entityMap.get(entity.getName());
 			if (fieldsOfName == null) {
 				fieldsOfName = new ArrayList<>();
-				unaryMap.put(unary.getName(), fieldsOfName);
+				entityMap.put(entity.getName(), fieldsOfName);
 			}
-			fieldsOfName.add(unary);
+			fieldsOfName.add(entity);
 		}
 		for (InputSpec fieldSpec: getIssueSetting().getFieldSpecs()) {
 			String fieldName = fieldSpec.getName();
-			List<IssueFieldUnary> unaries = unaryMap.get(fieldName);
+			List<IssueFieldEntity> unaries = entityMap.get(fieldName);
 			if (unaries != null) {
 				String type = unaries.iterator().next().getType();
 				List<String> values = new ArrayList<>();
-				for (IssueFieldUnary unary: unaries) {
-					if (unary.getValue() != null)
-						values.add(unary.getValue());
+				for (IssueFieldEntity entity: unaries) {
+					if (entity.getValue() != null)
+						values.add(entity.getValue());
 				}
 				Collections.sort(values);
 				if (!fieldSpec.isAllowMultiple() && values.size() > 1) 
@@ -395,7 +395,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	}
 	
 	public void removeFields(Collection<String> fieldNames) {
-		for (Iterator<IssueFieldUnary> it = getFieldUnaries().iterator(); it.hasNext();) {
+		for (Iterator<IssueFieldEntity> it = getFieldEntities().iterator(); it.hasNext();) {
 			if (fieldNames.contains(it.next().getName()))
 				it.remove();
 		}
@@ -407,7 +407,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 	}
 	
 	public void setFieldValue(String fieldName, @Nullable Object fieldValue) {
-		for (Iterator<IssueFieldUnary> it = getFieldUnaries().iterator(); it.hasNext();) {
+		for (Iterator<IssueFieldEntity> it = getFieldEntities().iterator(); it.hasNext();) {
 			if (fieldName.equals(it.next().getName()))
 				it.remove();
 		}
@@ -416,7 +416,7 @@ public class Issue extends AbstractEntity implements Referenceable {
 		if (fieldSpec != null) {
 			long ordinal = getFieldOrdinal(fieldName, fieldValue);
 
-			IssueFieldUnary field = new IssueFieldUnary();
+			IssueFieldEntity field = new IssueFieldEntity();
 			field.setIssue(this);
 			field.setName(fieldName);
 			field.setOrdinal(ordinal);
@@ -426,16 +426,16 @@ public class Issue extends AbstractEntity implements Referenceable {
 				List<String> strings = fieldSpec.convertToStrings(fieldValue);
 				if (!strings.isEmpty()) {
 					for (String string: strings) {
-						IssueFieldUnary cloned = (IssueFieldUnary) SerializationUtils.clone(field);
+						IssueFieldEntity cloned = (IssueFieldEntity) SerializationUtils.clone(field);
 						cloned.setIssue(this);
 						cloned.setValue(string);
-						getFieldUnaries().add(cloned);
+						getFieldEntities().add(cloned);
 					}
 				} else {
-					getFieldUnaries().add(field);
+					getFieldEntities().add(field);
 				}
 			} else {
-				getFieldUnaries().add(field);
+				getFieldEntities().add(field);
 			}
 		}
 	}

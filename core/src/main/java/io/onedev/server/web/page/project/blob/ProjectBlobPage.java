@@ -54,6 +54,10 @@ import io.onedev.commons.jsymbol.TokenPosition;
 import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.CodeCommentManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
@@ -62,16 +66,12 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.exception.NotTreeException;
 import io.onedev.server.git.exception.ObjectAlreadyExistsException;
 import io.onedev.server.git.exception.ObsoleteCommitException;
-import io.onedev.server.manager.CodeCommentManager;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.PullRequestManager;
-import io.onedev.server.manager.UserManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TextRange;
-import io.onedev.server.persistence.UnitOfWork;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.code.IndexManager;
 import io.onedev.server.search.code.SearchManager;
@@ -1026,7 +1026,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		String refName = refUpdated.getRefName();
 		ObjectId oldCommitId = refUpdated.getOldCommitId();
 		ObjectId newCommitId = refUpdated.getNewCommitId();
-		OneDev.getInstance(UnitOfWork.class).doAsync(new Runnable() {
+		OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
 
 			@Override
 			public void run() {

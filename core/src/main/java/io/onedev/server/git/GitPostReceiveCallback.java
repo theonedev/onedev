@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.manager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.UnitOfWork;
+import io.onedev.server.persistence.SessionManager;
 
 import com.google.common.base.Preconditions;
 
@@ -40,12 +40,12 @@ public class GitPostReceiveCallback extends HttpServlet {
 
     private final ListenerRegistry listenerRegistry;
     
-    private final UnitOfWork unitOfWork;
+    private final SessionManager sessionManager;
     
     @Inject
-    public GitPostReceiveCallback(ProjectManager projectManager, UnitOfWork unitOfWork, ListenerRegistry listenerRegistry) {
+    public GitPostReceiveCallback(ProjectManager projectManager, SessionManager sessionManager, ListenerRegistry listenerRegistry) {
     	this.projectManager = projectManager;
-    	this.unitOfWork = unitOfWork;
+    	this.sessionManager = sessionManager;
         this.listenerRegistry = listenerRegistry;
     }
 
@@ -87,7 +87,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         fields.clear();
         fields.addAll(StringUtils.splitAndTrim(refUpdateInfo, " "));
         
-        unitOfWork.doAsync(new Runnable() {
+        sessionManager.runAsync(new Runnable() {
 
 			@Override
 			public void run() {

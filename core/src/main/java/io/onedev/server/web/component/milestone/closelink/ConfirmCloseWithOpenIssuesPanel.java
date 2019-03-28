@@ -11,7 +11,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.MilestoneManager;
+import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneCloseOption;

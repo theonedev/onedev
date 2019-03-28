@@ -28,7 +28,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.SettingManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.sortable.SortBehavior;

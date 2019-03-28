@@ -1,10 +1,9 @@
 package io.onedev.server.persistence;
 
+import java.util.concurrent.Callable;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.resource.transaction.spi.TransactionStatus;
 
 import com.google.inject.Inject;
 
@@ -13,36 +12,21 @@ import io.onedev.commons.utils.ExceptionUtils;
 public class TransactionInterceptor implements MethodInterceptor {
 
 	@Inject
-	private PersistManager persistManager;
-	
-	@Inject
-	private UnitOfWork unitOfWork;
+	private TransactionManager transactionManager;
 	
 	public Object invoke(MethodInvocation mi) throws Throwable {
-		if (persistManager.getSessionFactory() != null) {
-			unitOfWork.begin();
-			try {
-				Session session = unitOfWork.getSession();
-				if (session.getTransaction().getStatus() == TransactionStatus.ACTIVE) {
-					return mi.proceed();
-				} else {
-					Transaction tx = session.beginTransaction();
-					try {
-						Object result = mi.proceed();
-						session.flush();
-						tx.commit();
-						return result;
-					} catch (Throwable t) {
-						tx.rollback();
-						throw ExceptionUtils.unchecked(t);
-					}
-				}
-			} finally {
-				unitOfWork.end();
-			}
-		} else {
-			return mi.proceed();
-		}
-	}
+		return transactionManager.call(new Callable<Object>() {
 
+			@Override
+			public Object call() throws Exception {
+				try {
+					return mi.proceed();
+				} catch (Throwable e) {
+					throw ExceptionUtils.unchecked(e);
+				}
+			}
+			
+		});
+	}
+	
 }

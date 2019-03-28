@@ -6,7 +6,7 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.IssueCommentManager;
+import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;

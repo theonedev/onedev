@@ -13,8 +13,8 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.manager.BuildQuerySettingManager;
-import io.onedev.server.manager.ProjectManager;
+import io.onedev.server.entitymanager.BuildQuerySettingManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.BuildQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedBuildQuery;

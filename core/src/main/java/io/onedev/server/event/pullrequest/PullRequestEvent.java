@@ -2,11 +2,14 @@ package io.onedev.server.event.pullrequest;
 
 import java.util.Date;
 
+import org.eclipse.jgit.lib.ObjectId;
+
+import io.onedev.server.event.CommitAware;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 
-public abstract class PullRequestEvent extends ProjectEvent {
+public abstract class PullRequestEvent extends ProjectEvent implements CommitAware {
 
 	private final PullRequest request;
 	
@@ -17,6 +20,11 @@ public abstract class PullRequestEvent extends ProjectEvent {
 
 	public PullRequest getRequest() {
 		return request;
+	}
+
+	@Override
+	public ObjectId getCommitId() {
+		return request.getHeadCommit();
 	}
 	
 }

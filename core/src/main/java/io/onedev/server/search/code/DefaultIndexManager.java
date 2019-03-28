@@ -75,18 +75,18 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.concurrent.Prioritized;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.manager.BatchWorkManager;
-import io.onedev.server.manager.ProjectManager;
-import io.onedev.server.manager.StorageManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.persistence.UnitOfWork;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.BatchWorker;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.IndexResult;
+import io.onedev.server.util.work.BatchWorkManager;
+import io.onedev.server.util.work.BatchWorker;
 
 @Singleton
 public class DefaultIndexManager implements IndexManager {
@@ -103,7 +103,7 @@ public class DefaultIndexManager implements IndexManager {
 	
 	private final BatchWorkManager batchWorkManager;
 	
-	private final UnitOfWork unitOfWork;
+	private final SessionManager sessionManager;
 	
 	private final ProjectManager projectManager;
 	
@@ -111,11 +111,11 @@ public class DefaultIndexManager implements IndexManager {
 	
 	@Inject
 	public DefaultIndexManager(ListenerRegistry listenerRegistry, StorageManager storageManager, 
-			BatchWorkManager batchWorkManager, UnitOfWork unitOfWork, ProjectManager projectManager) {
+			BatchWorkManager batchWorkManager, SessionManager sessionManager, ProjectManager projectManager) {
 		this.listenerRegistry = listenerRegistry;
 		this.storageManager = storageManager;
 		this.batchWorkManager = batchWorkManager;
-		this.unitOfWork = unitOfWork;
+		this.sessionManager = sessionManager;
 		this.projectManager = projectManager;
 	}
 
@@ -302,7 +302,7 @@ public class DefaultIndexManager implements IndexManager {
 
 			@Override
 			public void doWorks(Collection<Prioritized> works) {
-				unitOfWork.run(new Runnable() {
+				sessionManager.run(new Runnable() {
 
 					@Override
 					public void run() {
