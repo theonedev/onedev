@@ -50,19 +50,19 @@ public class AuthenticatorPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		AuthenticatorHolder authenticatorHolder = new AuthenticatorHolder();
-		authenticatorHolder.setAuthenticator(OneDev.getInstance(SettingManager.class).getAuthenticator());
+		AuthenticatorBean bean = new AuthenticatorBean();
+		bean.setAuthenticator(OneDev.getInstance(SettingManager.class).getAuthenticator());
 		
-		PropertyEditor<Serializable> authenticatorEditor = 
-				PropertyContext.editBean("editor", authenticatorHolder, "authenticator");
-		authenticatorEditor.setOutputMarkupId(true);
+		PropertyEditor<Serializable> editor = 
+				PropertyContext.editBean("editor", bean, "authenticator");
+		editor.setOutputMarkupId(true);
 		Button saveButton = new Button("save") {
 
 			@Override
 			public void onSubmit() {
 				super.onSubmit();
 				
-				OneDev.getInstance(SettingManager.class).saveAuthenticator(authenticatorHolder.getAuthenticator());
+				OneDev.getInstance(SettingManager.class).saveAuthenticator(bean.getAuthenticator());
 				getSession().success("External authentication setting has been saved");
 			}
 			
@@ -80,7 +80,7 @@ public class AuthenticatorPage extends AdministrationPage {
 					@Override
 					protected TestResult test() {
 						try {
-							Authenticated authenticated = authenticatorHolder.getAuthenticator().authenticate(
+							Authenticated authenticated = bean.getAuthenticator().authenticate(
 									new UsernamePasswordToken(token.getUserName(), token.getPassword()));
 							StringBuilder retrievedInfoBuilder = new StringBuilder();
 							if (authenticated.getFullName() != null) {
@@ -125,7 +125,7 @@ public class AuthenticatorPage extends AdministrationPage {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				BeanEditor beanEditor = authenticatorEditor.visitChildren(BeanEditor.class, 
+				BeanEditor beanEditor = editor.visitChildren(BeanEditor.class, 
 						new IVisitor<BeanEditor, BeanEditor>() {
 
 					public void component(BeanEditor component, IVisit<BeanEditor> visit) {
@@ -193,7 +193,7 @@ public class AuthenticatorPage extends AdministrationPage {
 
 			@Override
 			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				target.add(authenticatorEditor);
+				target.add(editor);
 			}
 
 		};
@@ -213,7 +213,7 @@ public class AuthenticatorPage extends AdministrationPage {
 
 		};
 		
-		form.add(authenticatorEditor);
+		form.add(editor);
 		form.add(saveButton);
 		form.add(testButton);
 		

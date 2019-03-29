@@ -7,7 +7,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
-public class AuthenticatorHolder implements Serializable {
+public class AuthenticatorBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 

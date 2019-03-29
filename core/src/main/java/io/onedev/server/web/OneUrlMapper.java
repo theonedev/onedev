@@ -22,6 +22,7 @@ import io.onedev.server.web.page.admin.issuesetting.DefaultQueryListPage;
 import io.onedev.server.web.page.admin.issuesetting.DefaultStateTransitionsPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueStateListPage;
+import io.onedev.server.web.page.admin.jobexecutor.JobExecutorPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
@@ -150,6 +151,8 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/settings/security", SecuritySettingPage.class));
 		add(new OnePageMapper("administration/settings/authenticator", AuthenticatorPage.class));
 
+		add(new OnePageMapper("administration/settings/job-executor", JobExecutorPage.class));
+		
 		add(new OnePageMapper("administration/settings/issue-fields", IssueFieldListPage.class));
 		add(new OnePageMapper("administration/settings/issue-states", IssueStateListPage.class));
 		add(new OnePageMapper("administration/settings/state-transitions", DefaultStateTransitionsPage.class));

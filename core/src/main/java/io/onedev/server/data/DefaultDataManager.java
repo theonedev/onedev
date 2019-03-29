@@ -153,6 +153,10 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (setting == null) {
 			settingManager.saveAuthenticator(null);
 		}
+		setting = settingManager.getSetting(Key.JOB_EXECUTOR);
+		if (setting == null) {
+			settingManager.saveJobExecutor(null);
+		}
 		
 		setting = settingManager.getSetting(Key.MAIL);
 		if (setting == null) {

@@ -85,8 +85,6 @@ import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.DefaultJobScheduler;
 import io.onedev.server.ci.JobScheduler;
 import io.onedev.server.ci.detect.CISpecDetector;
-import io.onedev.server.ci.jobexecutor.JobExecutor;
-import io.onedev.server.ci.jobexecutor.JobExecutorProvider;
 import io.onedev.server.command.ApplyDBConstraintsCommand;
 import io.onedev.server.command.BackupDBCommand;
 import io.onedev.server.command.CheckDataVersionCommand;
@@ -174,16 +172,15 @@ import io.onedev.server.git.GitPreReceiveCallback;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.migration.JpaConverter;
 import io.onedev.server.migration.PersistentBagConverter;
-import io.onedev.server.model.Build2;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.authenticator.Authenticator;
-import io.onedev.server.notification.CommitNotificationManager;
 import io.onedev.server.notification.CodeCommentNotificationManager;
+import io.onedev.server.notification.CommitNotificationManager;
 import io.onedev.server.notification.DefaultMailManager;
-import io.onedev.server.notification.WebHookManager;
 import io.onedev.server.notification.IssueNotificationManager;
 import io.onedev.server.notification.MailManager;
 import io.onedev.server.notification.PullRequestNotificationManager;
+import io.onedev.server.notification.WebHookManager;
 import io.onedev.server.persistence.DefaultIdManager;
 import io.onedev.server.persistence.DefaultPersistManager;
 import io.onedev.server.persistence.DefaultSessionManager;
@@ -195,10 +192,10 @@ import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.PrefixedNamingStrategy;
 import io.onedev.server.persistence.SessionFactoryProvider;
 import io.onedev.server.persistence.SessionInterceptor;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.SessionProvider;
 import io.onedev.server.persistence.TransactionInterceptor;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
@@ -228,8 +225,8 @@ import io.onedev.server.util.jackson.git.GitObjectMapperConfigurator;
 import io.onedev.server.util.jackson.hibernate.HibernateObjectMapperConfigurator;
 import io.onedev.server.util.jetty.DefaultJettyRunner;
 import io.onedev.server.util.jetty.JettyRunner;
-import io.onedev.server.util.markdown.EntityReferenceManager;
 import io.onedev.server.util.markdown.DefaultMarkdownManager;
+import io.onedev.server.util.markdown.EntityReferenceManager;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.markdown.MarkdownProcessor;
 import io.onedev.server.util.validation.DefaultEntityValidator;
@@ -405,21 +402,6 @@ public class CoreModule extends AbstractPluginModule {
 			
 			@Override
 			public CISpec detect(Project project, ObjectId commitId) {
-				return null;
-			}
-			
-		});
-        
-        contributeFromPackage(JobExecutorProvider.class, JobExecutorProvider.class);
-        contribute(JobExecutorProvider.class, new JobExecutorProvider() {
-			
-			@Override
-			public int getPriority() {
-				return JobExecutorProvider.DEFAULT_PRIORITY;
-			}
-			
-			@Override
-			public JobExecutor getExecutor(Build2 build) {
 				return null;
 			}
 			

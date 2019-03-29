@@ -1,7 +1,6 @@
 package io.onedev.server.ci;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -18,12 +16,10 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.ci.jobexecutor.JobExecutor;
-import io.onedev.server.ci.jobexecutor.JobExecutorProvider;
 import io.onedev.server.ci.jobparam.JobParam;
 import io.onedev.server.ci.jobtrigger.JobTrigger;
 import io.onedev.server.entitymanager.Build2Manager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.CommitAware;
 import io.onedev.server.event.ProjectEvent;
@@ -35,10 +31,10 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.model.Build2;
-import io.onedev.server.model.Build2.Status;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -48,6 +44,8 @@ import io.onedev.server.util.MatrixRunner;
 public class DefaultJobScheduler implements JobScheduler, Runnable {
 
 	private static final int CHECK_INTERVAL = 10;
+	
+	private enum Status {RUNNING, STOPPING, STOPPED};
 	
 	private final Build2Manager buildManager;
 	
@@ -59,19 +57,20 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	
 	private final ExecutorService executorService;
 	
-	private volatile Thread thread;
+	private final SettingManager settingManager;
 	
-	private volatile boolean stopping;
+	private volatile Status status;
 	
 	@Inject
 	public DefaultJobScheduler(Build2Manager buildManager, UserManager userManager, 
 			ListenerRegistry listenerRegistry, TransactionManager transactionManager, 
-			ExecutorService executorService) {
+			ExecutorService executorService, SettingManager settingManager) {
 		this.buildManager = buildManager;
 		this.userManager = userManager;
 		this.listenerRegistry = listenerRegistry;
 		this.transactionManager = transactionManager;
 		this.executorService = executorService;
+		this.settingManager = settingManager;
 	}
 
 	@Sessional
@@ -119,7 +118,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 			build.setCommitHash(commitHash);
 			build.setJobName(jobName);
 			build.setSubmitDate(new Date());
-			build.setStatus(Status.WAITING);
+			build.setStatus(Build2.Status.WAITING);
 			build.setUser(userManager.getCurrent());
 			
 			for (Map.Entry<String, String> entry: paramMap.entrySet()) {
@@ -167,12 +166,12 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	}
 
 	private void run(Build2 build) {
-		JobExecutor jobExecutor = getJobExecutor(build);
+		JobExecutor jobExecutor = settingManager.getJobExecutor();
 		if (jobExecutor != null) {
 			String runInstanceId = jobExecutor.run(build);
 			if (runInstanceId != null) {
 				build.setRunInstanceId(runInstanceId);
-				build.setStatus(Status.RUNNING);
+				build.setStatus(Build2.Status.RUNNING);
 				build.setRunningDate(new Date());
 				buildManager.save(build);
 				listenerRegistry.post(new BuildRunning(build));
@@ -184,7 +183,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	
 	private void markBuildError(Build2 build, String errorMessage) {
 		build.setErrorMessage(errorMessage);
-		build.setStatus(Status.FAILED);
+		build.setStatus(Build2.Status.FAILED);
 		if (build.getPendingDate() == null)
 			build.setPendingDate(new Date());
 		if (build.getRunningDate() == null)
@@ -195,20 +194,6 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 		listenerRegistry.post(new BuildFinished(build));
 	}
 	
-	@Nullable
-	private JobExecutor getJobExecutor(Build2 build) {
-		List<JobExecutorProvider> providers = new ArrayList<>(OneDev.getExtensions(JobExecutorProvider.class));
-		providers.sort(Comparator.comparing(JobExecutorProvider::getPriority));
-		
-		for (JobExecutorProvider provider: providers) {
-			JobExecutor jobExecutor = provider.getExecutor(build);
-			if (jobExecutor != null)
-				return jobExecutor;
-		}
-
-		return null;
-	}
-
 	@Sessional
 	@Listen
 	public void on(ProjectEvent event) {
@@ -239,8 +224,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 		for (BuildDependence dependence: build.getDependents())
 			resubmit(dependence.getDependent());
 
-		if (build.getStatus() == Status.FAILED || build.getStatus() == Status.SUCCESSFUL) {
-			build.setStatus(Status.WAITING);
+		if (build.getStatus() == Build2.Status.FAILED || build.getStatus() == Build2.Status.SUCCESSFUL) {
+			build.setStatus(Build2.Status.WAITING);
 			build.setErrorMessage(null);
 			build.setFinishDate(null);
 			build.setPendingDate(null);
@@ -258,10 +243,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	@Transactional
 	@Override
 	public void cancel(Build2 build) {
-		if (build.getStatus() == Status.WAITING || build.getStatus() == Status.PENDING) {
+		if (build.getStatus() == Build2.Status.WAITING || build.getStatus() == Build2.Status.PENDING) {
 			markBuildError(build, "Build is cancelled");
-		} else if (build.getStatus() == Status.RUNNING) {
-			JobExecutor jobExecutor = getJobExecutor(build);
+		} else if (build.getStatus() == Build2.Status.RUNNING) {
+			JobExecutor jobExecutor = settingManager.getJobExecutor();
 			if (jobExecutor != null) {
 				if (jobExecutor.isRunning(build))
 					jobExecutor.stop(build);
@@ -275,17 +260,17 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	
 	@Listen
 	public void on(SystemStarted event) {
-		thread = new Thread(this);
-		thread.start();		
+		status = Status.RUNNING;
+		new Thread(this).start();		
 	}
 	
 	@Listen
 	public void on(SystemStopping event) {
-		stopping = true;
+		status = Status.STOPPING;
 		synchronized (this) {
 			notify();
 		}
-		while (thread != null ) {
+		while (status == Status.STOPPING) {
 			try {
 				Thread.sleep(100);
 			} catch (InterruptedException e) {
@@ -295,7 +280,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 
 	@Override
 	public synchronized void run() {
-		while (!stopping) {
+		while (status == Status.RUNNING) {
 			try {
 				wait(CHECK_INTERVAL * 1000L);
 			} catch (InterruptedException e) {
@@ -305,15 +290,15 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 				@Override
 				public void run() {
 					for (Build2 build: buildManager.queryUnfinished()) {
-						if (build.getStatus() == Status.PENDING) {
+						if (build.getStatus() == Build2.Status.PENDING) {
 							DefaultJobScheduler.this.run(build);									
-						} else if (build.getStatus() == Status.RUNNING) {
+						} else if (build.getStatus() == Build2.Status.RUNNING) {
 							CISpec ciSpec = build.getProject().getCISpec(ObjectId.fromString(build.getCommitHash()));
 							if (ciSpec != null) {
 								Job job = ciSpec.getJobMap().get(build.getJobName());
 								if (job != null) {
 									if (System.currentTimeMillis() - build.getRunningDate().getTime() > job.getTimeout() * 1000L) {
-										JobExecutor jobExecutor = getJobExecutor(build);
+										JobExecutor jobExecutor = settingManager.getJobExecutor();
 										if (jobExecutor != null) {
 											if (jobExecutor.isRunning(build))
 												jobExecutor.stop(build);
@@ -329,7 +314,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 							} else {
 								markBuildError(build, "No CI spec");
 							} 
-						} else if (build.getStatus() == Status.WAITING) {
+						} else if (build.getStatus() == Build2.Status.WAITING) {
 							boolean hasFailed = false;
 							boolean hasUnfinished = false;
 							
@@ -350,13 +335,13 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 							}
 							
 							if (hasFailed) {
-								build.setStatus(Status.FAILED);
+								build.setStatus(Build2.Status.FAILED);
 								build.setPendingDate(new Date());
 								build.setRunningDate(new Date());
 								build.setFinishDate(new Date());
 								listenerRegistry.post(new BuildFinished(build));
 							} else if (!hasUnfinished) {
-								build.setStatus(Status.PENDING);
+								build.setStatus(Build2.Status.PENDING);
 								build.setPendingDate(new Date());
 								listenerRegistry.post(new BuildPending(build));
 							}
@@ -366,7 +351,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 				
 			});
 		}	
-		thread = null;
+		status = Status.STOPPED;
 	}
 	
 }

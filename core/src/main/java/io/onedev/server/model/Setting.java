@@ -23,7 +23,7 @@ public class Setting extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum Key {SYSTEM, MAIL, BACKUP, SECURITY, AUTHENTICATOR, ISSUE};
+	public enum Key {SYSTEM, MAIL, BACKUP, SECURITY, AUTHENTICATOR, ISSUE, JOB_EXECUTOR};
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 

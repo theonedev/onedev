@@ -12,6 +12,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.authenticator.Authenticator;
+import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.setting.BackupSetting;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.model.support.setting.MailSetting;
@@ -39,6 +40,8 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	private volatile Long issueSettingId;
 	
 	private volatile Long authenticatorId;
+	
+	private volatile Long jobExecutorId;
 	
 	@Inject
 	public DefaultSettingManager(Dao dao, DataManager dataManager) {
@@ -210,6 +213,30 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 			setting.setKey(Key.AUTHENTICATOR);
 		}
 		setting.setValue(authenticator);
+		dao.persist(setting);
+	}
+
+	@Override
+	public JobExecutor getJobExecutor() {
+        Setting setting;
+        if (jobExecutorId == null) {
+    		setting = getSetting(Key.JOB_EXECUTOR);
+    		Preconditions.checkNotNull(setting);
+    		jobExecutorId = setting.getId();
+        } else {
+            setting = load(jobExecutorId);
+        }
+        return (JobExecutor) setting.getValue();
+	}
+
+	@Override
+	public void saveJobExecutor(JobExecutor jobExecutor) {
+		Setting setting = getSetting(Key.JOB_EXECUTOR);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(Key.JOB_EXECUTOR);
+		}
+		setting.setValue(jobExecutor);
 		dao.persist(setting);
 	}
 
