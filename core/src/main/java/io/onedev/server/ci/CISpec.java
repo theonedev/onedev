@@ -66,7 +66,7 @@ public class CISpec implements Serializable, Validatable {
 		for (int i=0; i<jobs.size(); i++) {
 			Job job = jobs.get(i);
 			for (Dependency dependency: job.getDependencies()) {
-				if (!jobMap.containsKey(dependency.getJobName())) {
+				if (!getJobMap().containsKey(dependency.getJobName())) {
 					context.buildConstraintViolationWithTemplate("Dependency job not found: " + dependency.getJobName())
 							.addPropertyNode("jobs").addPropertyNode("dependencies")
 								.inIterable().atIndex(i)
@@ -80,7 +80,7 @@ public class CISpec implements Serializable, Validatable {
 			Job job = jobs.get(i);
 			for (Dependency dependency: job.getDependencies()) {
 				List<String> dependencyChain = Lists.newArrayList(job.getName());
-				if (hasCircularDependencies(jobMap, dependencyChain, dependency.getJobName())) {
+				if (hasCircularDependencies(dependencyChain, dependency.getJobName())) {
 					context.buildConstraintViolationWithTemplate("Circular dependencies found: " + dependencyChain)
 							.addPropertyNode("jobs").addPropertyNode("dependencies")
 								.inIterable().atIndex(i)
@@ -95,7 +95,7 @@ public class CISpec implements Serializable, Validatable {
 		return valid;
 	}
 	
-	private boolean hasCircularDependencies(Map<String, Job> jobMap, List<String> dependencyChain, String jobName) {
+	private boolean hasCircularDependencies(List<String> dependencyChain, String jobName) {
 		if (dependencyChain.iterator().next().equals(jobName)) {
 			dependencyChain.add(jobName);
 			return true;
@@ -104,10 +104,10 @@ public class CISpec implements Serializable, Validatable {
 			return false;
 		} else {
 			dependencyChain.add(jobName);
-			Job job = jobMap.get(jobName);
+			Job job = getJobMap().get(jobName);
 			if (job != null) {
 				for (Dependency dependency: job.getDependencies()) {
-					if (hasCircularDependencies(jobMap, new ArrayList<>(dependencyChain), dependency.getJobName()))
+					if (hasCircularDependencies(new ArrayList<>(dependencyChain), dependency.getJobName()))
 						return true;
 				}
 			} 

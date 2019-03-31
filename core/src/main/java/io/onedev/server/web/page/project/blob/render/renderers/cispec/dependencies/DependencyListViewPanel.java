@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -25,7 +24,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.ci.Dependency;
-import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
 import jersey.repackaged.com.google.common.collect.Sets;
@@ -57,25 +55,6 @@ public class DependencyListViewPanel extends Panel {
 					@Override
 					protected Component newLabel(String componentId) {
 						return new Label(componentId, rowModel.getObject().getJobName());
-					}
-					
-				});
-			}
-		});		
-		
-		columns.add(new AbstractColumn<Dependency, Void>(Model.of("Artifacts")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						String artifacts = rowModel.getObject().getRetrieveArtifacts();
-						if (StringUtils.isNotBlank(artifacts))
-							return new MultilineLabel(componentId, artifacts);
-						else
-							return new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false);
 					}
 					
 				});

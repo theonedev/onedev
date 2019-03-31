@@ -20,9 +20,11 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Singleton;
+import javax.persistence.FlushModeType;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
+import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import com.google.inject.Inject;
@@ -52,15 +54,19 @@ public class DefaultTransactionManager implements TransactionManager {
 				if (getTransaction().isActive()) {
 					return callable.call();
 				} else {
-					Transaction tx = sessionManager.getSession().beginTransaction();
+					Session session = sessionManager.getSession();
+					FlushModeType prevFlushModeType = session.getFlushMode();
+					Transaction tx = session.beginTransaction();
 					try {
+						session.setFlushMode(FlushModeType.AUTO);
 						T result = callable.call();
-						sessionManager.getSession().flush();
 						tx.commit();
 						return result;
 					} catch (Throwable t) {
 						tx.rollback();
 						throw ExceptionUtils.unchecked(t);
+					} finally {
+						session.setFlushMode(prevFlushModeType);
 					}
 				}
 			}

@@ -37,7 +37,7 @@ public class DependencyBuiltTrigger extends JobTrigger {
 
 	@Override
 	public String getDescription() {
-		return "When dependency job finished running";
+		return "When dependency jobs finished successfully";
 	}
 
 }

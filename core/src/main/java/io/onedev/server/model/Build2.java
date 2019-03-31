@@ -43,7 +43,7 @@ public class Build2 extends AbstractEntity {
 	public static final String STATUS = "status";
 	
 	public enum Status {
-		WAITING, PENDING, RUNNING, SUCCESSFUL, FAILED
+		WAITING, PENDING, RUNNING, SUCCESSFUL, FAILED, IN_ERROR, CANCELLED
 	};
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -151,6 +151,11 @@ public class Build2 extends AbstractEntity {
 
 	public void setStatus(Status status) {
 		this.status = status;
+	}
+	
+	public boolean isFinished() {
+		return status == Status.IN_ERROR || status == Status.FAILED 
+				|| status == Status.CANCELLED || status == Status.SUCCESSFUL;
 	}
 	
 	public Date getSubmitDate() {

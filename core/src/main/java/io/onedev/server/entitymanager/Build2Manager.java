@@ -14,8 +14,7 @@ public interface Build2Manager extends EntityManager<Build2> {
     @Nullable
     Build2 find(Project project, long number);
     
-	@Nullable
-	Build2 find(Project project, String commitHash, String jobName, Map<String, String> params); 
+	List<Build2> query(Project project, String commitHash, String jobName, Map<String, String> params); 
 	
 	void create(Build2 build);
 	
@@ -23,5 +22,5 @@ public interface Build2Manager extends EntityManager<Build2> {
 	Build2 find(String runInstanceId);
 	
 	List<Build2> queryUnfinished();
-	
+
 }

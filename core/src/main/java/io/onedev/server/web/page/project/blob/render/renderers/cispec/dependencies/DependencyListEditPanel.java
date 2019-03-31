@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -30,7 +29,6 @@ import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.Job;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
-import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanEditor;
@@ -133,18 +131,6 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 				
 				cellItem.add(fragment);
 			}
-		});		
-		
-		columns.add(new AbstractColumn<Dependency, Void>(Model.of("Artifacts")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
-				if (StringUtils.isNotBlank(rowModel.getObject().getRetrieveArtifacts()))
-					cellItem.add(new MultilineLabel(componentId, rowModel.getObject().getRetrieveArtifacts()));
-				else
-					cellItem.add(new Label(componentId, "<i>Not specified</i>").setEscapeModelStrings(false));
-			}
-			
 		});		
 		
 		columns.add(new AbstractColumn<Dependency, Void>(Model.of("")) {

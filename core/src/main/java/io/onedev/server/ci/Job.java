@@ -28,6 +28,8 @@ public class Job implements Serializable {
 	
 	private boolean cloneSource = true;
 	
+	private boolean retrieveDependencyArtifacts = true;
+	
 	private String publishArtifacts;
 
 	private List<Dependency> dependencies = new ArrayList<>();
@@ -78,6 +80,15 @@ public class Job implements Serializable {
 		this.cloneSource = cloneSource;
 	}	
 	
+	@Editable(order=140, description="Whether or not to retrieve artifacts of dependency jobs")
+	public boolean isRetrieveDependencyArtifacts() {
+		return retrieveDependencyArtifacts;
+	}
+
+	public void setRetrieveDependencyArtifacts(boolean retrieveDependencyArtifacts) {
+		this.retrieveDependencyArtifacts = retrieveDependencyArtifacts;
+	}
+
 	@Editable(order=300, description="Specify parameters to prompt when the job "
 			+ "is triggered manually")
 	public List<InputSpec> getPromptParams() {

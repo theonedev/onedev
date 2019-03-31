@@ -57,7 +57,7 @@ public class DefaultBuild2Manager extends AbstractEntityManager<Build2> implemen
 
 	@Sessional
 	@Override
-	public Build2 find(Project project, String commitHash, String jobName, Map<String, String> params) {
+	public List<Build2> query(Project project, String commitHash, String jobName, Map<String, String> params) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build2> query = builder.createQuery(Build2.class);
 		Root<Build2> root = query.from(Build2.class);
@@ -72,7 +72,7 @@ public class DefaultBuild2Manager extends AbstractEntityManager<Build2> implemen
 			restrictions.add(builder.equal(join.get("name"), entry.getKey()));
 			restrictions.add(builder.equal(join.get("value"), entry.getValue()));
 		}
-		return getSession().createQuery(query.distinct(true).where(restrictions.toArray(new Predicate[0]))).uniqueResult();
+		return getSession().createQuery(query.where(restrictions.toArray(new Predicate[0]))).list();
 	}
 
 	@Sessional
