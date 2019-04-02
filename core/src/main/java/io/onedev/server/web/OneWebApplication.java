@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -61,6 +63,13 @@ import io.onedev.server.web.websocket.WebSocketManager;
 
 @Singleton
 public class OneWebApplication extends WebApplication {
+	
+	private final Set<WebApplicationConfigurator> applicationConfigurators;
+	
+	@Inject
+	public OneWebApplication(Set<WebApplicationConfigurator> applicationConfigurators) {
+		this.applicationConfigurators = applicationConfigurators;
+	}
 	
 	@Override
 	public RuntimeConfigurationType getConfigurationType() {
@@ -186,6 +195,9 @@ public class OneWebApplication extends WebApplication {
 		});
 		
 		mount(new OneUrlMapper(this));
+		
+		for (WebApplicationConfigurator configurator: applicationConfigurators)
+			configurator.configure(this);
 	}
 
 	@Override

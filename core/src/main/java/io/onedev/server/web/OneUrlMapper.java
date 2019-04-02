@@ -84,7 +84,6 @@ import io.onedev.server.web.page.security.ForgetPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
 import io.onedev.server.web.page.security.RegisterPage;
-import io.onedev.server.web.page.test.TestPage;
 import io.onedev.server.web.util.mapper.OnePageMapper;
 import io.onedev.server.web.util.mapper.OneResourceMapper;
 import io.onedev.server.web.util.resource.ArchiveResourceReference;
@@ -101,8 +100,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		addMyPages();
 		addAdministrationPages();
 		addSecurityPages();
-		
-		add(new OnePageMapper("test", TestPage.class));
 		
 		addResources();
 	}

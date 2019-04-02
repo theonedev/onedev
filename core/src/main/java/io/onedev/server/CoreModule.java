@@ -242,6 +242,7 @@ import io.onedev.server.web.DefaultWicketServlet;
 import io.onedev.server.web.ExpectedExceptionContribution;
 import io.onedev.server.web.OneWebApplication;
 import io.onedev.server.web.ResourcePackScopeContribution;
+import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.component.diff.DiffRenderer;
 import io.onedev.server.web.component.markdown.SourcePositionTrackExtension;
 import io.onedev.server.web.component.markdown.emoji.EmojiExtension;
@@ -253,8 +254,10 @@ import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.layout.MainNavContribution;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecRendererProvider;
+import io.onedev.server.web.page.test.TestPage;
 import io.onedev.server.web.util.avatar.AvatarManager;
 import io.onedev.server.web.util.avatar.DefaultAvatarManager;
+import io.onedev.server.web.util.mapper.OnePageMapper;
 import io.onedev.server.web.util.markdown.CommitProcessor;
 import io.onedev.server.web.util.markdown.IssueProcessor;
 import io.onedev.server.web.util.markdown.MentionProcessor;
@@ -456,6 +459,15 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
 		
 		contributeFromPackage(EditSupport.class, EditSupportLocator.class);
+		
+		contribute(WebApplicationConfigurator.class, new WebApplicationConfigurator() {
+			
+			@Override
+			public void configure(WebApplication application) {
+				application.mount(new OnePageMapper("/test", TestPage.class));
+			}
+			
+		});
 		
 		bind(CommitIndexedBroadcaster.class);
 		
