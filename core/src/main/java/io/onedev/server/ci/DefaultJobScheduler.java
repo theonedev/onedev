@@ -200,13 +200,22 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	private void run(Build2 build) {
 		JobExecutor jobExecutor = settingManager.getJobExecutor();
 		if (jobExecutor != null) {
-			String runInstanceId = jobExecutor.run(build);
-			if (runInstanceId != null) {
-				build.setRunInstanceId(runInstanceId);
-				build.setStatus(Build2.Status.RUNNING);
-				build.setRunningDate(new Date());
-				buildManager.save(build);
-				listenerRegistry.post(new BuildRunning(build));
+			CISpec ciSpec = build.getProject().getCISpec(ObjectId.fromString(build.getCommitHash()));
+			if (ciSpec != null) {
+				Job job = ciSpec.getJobMap().get(build.getJobName());
+				if (job != null) {
+					String runningInstance = jobExecutor.run(job.getImage(), job.getCommands());
+					if (runningInstance != null) {
+						build.setStatus(Build2.Status.RUNNING);
+						build.setRunningDate(new Date());
+						buildManager.save(build);
+						listenerRegistry.post(new BuildRunning(build));
+					}
+				} else {
+					markBuildError(build, "Job not found");
+				}
+			} else {
+				markBuildError(build, "No CI spec");
 			}
 		} else {
 			markBuildError(build, "No applicable job executor");
@@ -248,7 +257,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 			build.setErrorMessage(null);
 			build.setFinishDate(null);
 			build.setPendingDate(null);
-			build.setRunInstanceId(null);
+			build.setRunningInstance(null);
 			build.setRunningDate(null);
 			build.setSubmitDate(new Date());
 			build.setUser(userManager.getCurrent());
@@ -265,8 +274,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 		if (build.getStatus() == Build2.Status.RUNNING) {
 			JobExecutor jobExecutor = settingManager.getJobExecutor();
 			if (jobExecutor != null) {
-				if (jobExecutor.isRunning(build))
-					jobExecutor.stop(build);
+				if (jobExecutor.isRunning(build.getRunningInstance()))
+					jobExecutor.stop(build.getRunningInstance());
 				else
 					markBuildError(build, "Aborted for unknown reason");
 			} else { 
@@ -326,8 +335,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 										if (System.currentTimeMillis() - build.getRunningDate().getTime() > job.getTimeout() * 1000L) {
 											JobExecutor jobExecutor = settingManager.getJobExecutor();
 											if (jobExecutor != null) {
-												if (jobExecutor.isRunning(build))
-													jobExecutor.stop(build);
+												if (jobExecutor.isRunning(build.getRunningInstance()))
+													jobExecutor.stop(build.getRunningInstance());
 												else
 													markBuildError(build, "Aborted for unknown reason");
 											} else {

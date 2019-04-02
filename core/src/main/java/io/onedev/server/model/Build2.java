@@ -18,13 +18,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.eclipse.jgit.lib.ObjectId;
-
 import com.fasterxml.jackson.annotation.JsonView;
-import com.google.common.base.Preconditions;
 
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.Job;
 import io.onedev.server.util.jackson.DefaultView;
 
 @Entity
@@ -33,7 +28,7 @@ import io.onedev.server.util.jackson.DefaultView;
 				@Index(columnList="number"), @Index(columnList="jobName"), @Index(columnList="numberStr"), 
 				@Index(columnList="status"), @Index(columnList="submitDate"), @Index(columnList="pendingDate"),
 				@Index(columnList="runningDate"), @Index(columnList="finishDate"), 
-				@Index(columnList="runInstanceId")},
+				@Index(columnList="runningInstance")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})}
 )
 public class Build2 extends AbstractEntity {
@@ -78,11 +73,9 @@ public class Build2 extends AbstractEntity {
 
 	private Date finishDate;
 	
-	private String runInstanceId;
+	private String runningInstance;
 	
 	private String errorMessage;
-	
-	private transient Job job;
 
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	private Collection<BuildParam> params = new ArrayList<>();
@@ -214,12 +207,12 @@ public class Build2 extends AbstractEntity {
 		this.dependents = dependents;
 	}
 
-	public String getRunInstanceId() {
-		return runInstanceId;
+	public String getRunningInstance() {
+		return runningInstance;
 	}
 
-	public void setRunInstanceId(String runInstanceId) {
-		this.runInstanceId = runInstanceId;
+	public void setRunningInstance(String runningInstance) {
+		this.runningInstance = runningInstance;
 	}
 
 	public String getErrorMessage() {
@@ -239,12 +232,4 @@ public class Build2 extends AbstractEntity {
 		return paramMap;
 	}
 
-	public Job getJob() {
-		if (job == null) { 
-			CISpec ciSpec = Preconditions.checkNotNull(getProject().getCISpec(ObjectId.fromString(getCommitHash())));
-			job = Preconditions.checkNotNull(ciSpec.getJobMap().get(jobName));
-		}
-		return job;
-	}
-	
 }

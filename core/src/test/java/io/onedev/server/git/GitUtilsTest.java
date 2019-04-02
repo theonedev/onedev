@@ -119,7 +119,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		addFileAndCommit("master2", "", "master2");
 		ObjectId masterId = git.getRepository().resolve("master");
 		ObjectId devId = git.getRepository().resolve("dev");
-		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), devId, masterId, false, user, "merge commit");
+		ObjectId mergeCommitId = GitUtils.merge(git.getRepository(), devId, masterId, false, user, user, "merge commit");
 		try (	RevWalk revWalk = new RevWalk(git.getRepository());
 				TreeWalk treeWalk = new TreeWalk(git.getRepository())) {
 			RevCommit mergeCommit = revWalk.parseCommit(mergeCommitId);
@@ -145,7 +145,7 @@ public class GitUtilsTest extends AbstractGitTest {
 		addFileAndCommit("master1", "", "master1");
 		addFileAndCommit("conflict", "2", "master2");
 		assertNull(GitUtils.merge(git.getRepository(), git.getRepository().resolve("dev"), 
-				git.getRepository().resolve("master"), false, user, "merge commit"));
+				git.getRepository().resolve("master"), false, user, user, "merge commit"));
 	}
 	
 }

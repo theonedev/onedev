@@ -20,7 +20,7 @@ public enum MergeStrategy {
 			Repository repository = request.getTargetProject().getRepository();
 			ObjectId requestHead = request.getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
-			return GitUtils.merge(repository, requestHead, targetHead, false, user, 
+			return GitUtils.merge(repository, requestHead, targetHead, false, user, user,
 						request.getCommitMessage());
 		}
 		
@@ -36,7 +36,7 @@ public enum MergeStrategy {
 				return requestHead;
 			} else {
 				PersonIdent user = new PersonIdent(OneDev.NAME, "");
-				return GitUtils.merge(repository, requestHead, targetHead, false, user, 
+				return GitUtils.merge(repository, requestHead, targetHead, false, user, user,
 							request.getCommitMessage());
 			}
 		}
@@ -50,7 +50,7 @@ public enum MergeStrategy {
 			ObjectId requestHead = request.getHeadCommit();
 			ObjectId targetHead = request.getTarget().getObjectId();
 			PersonIdent user = new PersonIdent(OneDev.NAME, "");
-			return GitUtils.merge(repository, requestHead, targetHead, true, user, 
+			return GitUtils.merge(repository, requestHead, targetHead, true, user, user,
 						request.getCommitMessage());
 		}
 		

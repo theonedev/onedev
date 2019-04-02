@@ -451,7 +451,7 @@ public class GitUtils {
     
     @Nullable
     public static ObjectId merge(Repository repository, ObjectId source, ObjectId target, 
-    		boolean squash, PersonIdent committer, String commitMessage) {
+    		boolean squash, PersonIdent committer, PersonIdent author, String commitMessage) {
     	try (	RevWalk revWalk = new RevWalk(repository);
     			ObjectInserter inserter = repository.newObjectInserter();) {
     		RevCommit sourceCommit = revWalk.parseCommit(source);
@@ -459,7 +459,7 @@ public class GitUtils {
     		Merger merger = MergeStrategy.RECURSIVE.newMerger(repository, true);
     		if (merger.merge(targetCommit, sourceCommit)) {
 		        CommitBuilder mergedCommit = new CommitBuilder();
-		        mergedCommit.setAuthor(sourceCommit.getAuthorIdent());
+		        mergedCommit.setAuthor(author);
 		        mergedCommit.setCommitter(committer);
 		        if (squash)
 		        	mergedCommit.setParentId(targetCommit);

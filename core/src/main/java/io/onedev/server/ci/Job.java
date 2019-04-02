@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.constraints.Size;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.ci.jobtrigger.JobTrigger;
@@ -11,7 +13,6 @@ import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.PathPatterns;
 
 @Editable
@@ -24,7 +25,7 @@ public class Job implements Serializable {
 	
 	private String image;
 	
-	private String command;
+	private List<String> commands;
 	
 	private boolean cloneSource = true;
 	
@@ -60,17 +61,16 @@ public class Job implements Serializable {
 		this.image = image;
 	}
 
-	@Editable(order=120)
-	@Multiline
-	@NotEmpty
-	public String getCommand() {
-		return command;
+	@Editable(order=120, description="Specify commands to execute, with one command per line")
+	@Size(min=1, message="At least one command needs to be specified")
+	public List<String> getCommands() {
+		return commands;
 	}
 
-	public void setCommand(String command) {
-		this.command = command;
+	public void setCommands(List<String> commands) {
+		this.commands = commands;
 	}
-
+	
 	@Editable(order=130, description="Whether or not to clone the source code")
 	public boolean isCloneSource() {
 		return cloneSource;

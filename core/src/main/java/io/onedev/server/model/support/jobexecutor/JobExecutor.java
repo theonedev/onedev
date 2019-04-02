@@ -1,20 +1,20 @@
 package io.onedev.server.model.support.jobexecutor;
 
 import java.io.Serializable;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.model.Build2;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
 public interface JobExecutor extends Serializable {
 
 	@Nullable
-	String run(Build2 build);
+	String run(String image, List<String> commands);
 
-	boolean isRunning(Build2 build);
+	boolean isRunning(String runningInstance);
 	
-	void stop(Build2 build);
+	void stop(String runningInstance);
 	
 }
