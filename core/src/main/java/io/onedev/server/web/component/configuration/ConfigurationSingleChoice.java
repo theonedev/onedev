@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.web.component.select2.Select2Choice;
 import io.onedev.server.web.component.stringchoice.StringChoiceProvider;
@@ -18,22 +19,27 @@ public class ConfigurationSingleChoice extends Select2Choice<String> {
 	private static final long serialVersionUID = 1L;
 
 	public ConfigurationSingleChoice(String id, IModel<String> model) {
-		super(id, model, new StringChoiceProvider(getChoices()));
+		super(id, model, new StringChoiceProvider(new LoadableDetachableModel<Map<String, String>>() {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			protected Map<String, String> load() {
+				Map<String, String> choices = new LinkedHashMap<>();
+				if (WicketUtils.getPage() instanceof ProjectPage) {
+					ProjectPage projectPage = (ProjectPage) WicketUtils.getPage();
+					List<String> configurations = projectPage.getProject().getConfigurations()
+							.stream().map(it->it.getName()).collect(Collectors.toList());
+					Collections.sort(configurations);
+					for (String configuration: configurations)
+						choices.put(configuration, configuration);
+				} 
+				return choices;
+			}
+			
+		}));
 	}
 
-	private static Map<String, String> getChoices() {
-		Map<String, String> choices = new LinkedHashMap<>();
-		if (WicketUtils.getPage() instanceof ProjectPage) {
-			ProjectPage projectPage = (ProjectPage) WicketUtils.getPage();
-			List<String> configurations = projectPage.getProject().getConfigurations()
-					.stream().map(it->it.getName()).collect(Collectors.toList());
-			Collections.sort(configurations);
-			for (String configuration: configurations)
-				choices.put(configuration, configuration);
-		} 
-		return choices;
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

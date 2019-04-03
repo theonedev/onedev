@@ -8,16 +8,14 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import io.onedev.server.util.validation.BranchPatternsValidator;
+import io.onedev.server.util.validation.ProjectPatternsValidator;
 
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=BranchPatternsValidator.class) 
-public @interface BranchPatterns {
+@Constraint(validatedBy=ProjectPatternsValidator.class) 
+public @interface ProjectPatterns {
 
-	String value() default "";
-	
-	String message() default "Malformed branch patterns"; 
+	String message() default "Malformed project patterns"; 
 	
 	Class<?>[] groups() default {};
 

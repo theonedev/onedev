@@ -10,6 +10,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxChannel;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -27,6 +28,7 @@ import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.Range;
 import io.onedev.commons.utils.RangeUtils;
+import io.onedev.server.util.OneContext;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.AlignTarget;
@@ -45,8 +47,9 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 	protected void onBind() {
 		super.onBind();
 		
-		Component inputField = getComponent();
-		inputField.setOutputMarkupId(true);
+		Component input = getComponent();
+		input.add(AttributeAppender.append("class", "input-assist"));
+		input.setOutputMarkupId(true);
 	}
 
 	private int getLine(String content, int charIndex) {
@@ -132,7 +135,13 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 			
 			if (inputCaret != null) {
 				InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
-				List<InputCompletion> suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
+				List<InputCompletion> suggestions;				
+				OneContext.push(new OneContext(getComponent()));
+				try {
+					suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
+				} finally {
+					OneContext.pop();
+				}
 				int count = 0;
 				for (Iterator<InputCompletion> it = suggestions.iterator(); it.hasNext();) {
 					it.next();

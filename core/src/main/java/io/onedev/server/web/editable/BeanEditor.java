@@ -100,9 +100,9 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				Set<String> checkedPropertyNames = new HashSet<>();
 				if (hasTransitiveDependency(propertyContext.getPropertyName(), 
 						propertyUpdating.getPropertyName(), checkedPropertyNames)) {
-					Component newPropertyContainer = newItem(propertyContainer.getId(), propertyIndex);
-					propertyContainer.replaceWith(newPropertyContainer);
-					propertyUpdating.getHandler().add(newPropertyContainer);
+					propertyUpdating.getHandler().add(propertyContainer);
+					String script = String.format("$('#%s').addClass('no-autofocus');", propertyContainer.getMarkupId());
+					propertyUpdating.getHandler().appendJavaScript(script);
 				}
 			}
 			validate();

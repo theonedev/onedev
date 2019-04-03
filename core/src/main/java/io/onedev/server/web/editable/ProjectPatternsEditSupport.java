@@ -9,22 +9,20 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.ReflectionUtils;
-import io.onedev.server.util.OneContext;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
-import io.onedev.server.web.editable.annotation.PathPatterns;
+import io.onedev.server.web.editable.annotation.ProjectPatterns;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
+import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class PathPatternsEditSupport implements EditSupport {
+public class ProjectPatternsEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Method propertyGetter = descriptor.getPropertyGetter();
-		PathPatterns pathPatterns = propertyGetter.getAnnotation(PathPatterns.class);
-        if (pathPatterns != null) {
+        if (propertyGetter.getAnnotation(ProjectPatterns.class) != null) {
         	if (propertyGetter.getReturnType() == String.class) {
         		return new PropertyContext<String>(descriptor) {
 
@@ -41,31 +39,16 @@ public class PathPatternsEditSupport implements EditSupport {
     						protected InputAssistBehavior getInputAssistBehavior() {
     							return new PatternSetAssistBehavior() {
 
-									@SuppressWarnings("unchecked")
 									@Override
 									protected List<InputSuggestion> suggest(String matchWith) {
-										String suggestionMethod = pathPatterns.value();
-										if (suggestionMethod.length() != 0) {
-											OneContext.push(new OneContext(getComponent()));
-											try {
-												return (List<InputSuggestion>) ReflectionUtils.invokeStaticMethod(
-														descriptor.getBeanClass(), suggestionMethod, new Object[] {matchWith});
-											} finally {
-												OneContext.pop();
-											}
-										} else {
-											return Lists.newArrayList();
-										}
+										return SuggestionUtils.suggestProjects(matchWith);
 									}
-    								
+
 									@Override
 									protected List<String> getHints(TerminalExpect terminalExpect) {
-										return Lists.newArrayList(
-												"Path containing spaces or starting with dash needs to be quoted",
-												"Use * or ? for wildcard match"
-												);
+										return Lists.newArrayList("Use * or ? for wildcard match");
 									}
-									
+    								
     							};
     						}
     		        		
@@ -74,7 +57,7 @@ public class PathPatternsEditSupport implements EditSupport {
         			
         		};
         	} else {
-	    		throw new RuntimeException("Annotation 'PathPatterns' should be applied to property "
+	    		throw new RuntimeException("Annotation 'ProjectPatterns' should be applied to property "
 	    				+ "of type 'String'");
         	}
         } else {

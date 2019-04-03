@@ -297,13 +297,20 @@ public abstract class IssueInfoPanel extends Panel {
 				Fragment fragment =  new Fragment("milestone", "milestoneEditFrag", IssueInfoPanel.this);
 				Form<?> form = new Form<Void>("form");
 				
-				List<Milestone> milestones = getProject().getSortedMilestones();
+				IModel<Map<String, String>> choicesModel = new LoadableDetachableModel<Map<String, String>>() {
+
+					@Override
+					protected Map<String, String> load() {
+						List<Milestone> milestones = getProject().getSortedMilestones();
+						Map<String, String> choices = new LinkedHashMap<>();
+						for (Milestone milestone: milestones)
+							choices.put(milestone.getName(), milestone.getName());
+						return choices;
+					}
+					
+				};
 				
-				Map<String, String> choices = new LinkedHashMap<>();
-				for (Milestone milestone: milestones)
-					choices.put(milestone.getName(), milestone.getName());
-				
-				StringSingleChoice choice = new StringSingleChoice("milestone", new PropertyModel<String>(this, "milestoneName"), choices) {
+				StringSingleChoice choice = new StringSingleChoice("milestone", new PropertyModel<String>(this, "milestoneName"), choicesModel) {
 
 					@Override
 					protected void onInitialize() {

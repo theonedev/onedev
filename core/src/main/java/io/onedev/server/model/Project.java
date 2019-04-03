@@ -611,6 +611,16 @@ public class Project extends AbstractEntity {
 		objectIdCache.put(revision, Optional.fromNullable(objectId));
 	}
 
+	/**
+	 * Get CI spec of specified commit
+	 * @param commitId
+	 * 			commit id to get CI spec for 
+	 * @return
+	 * 			CI spec of specified commit, or <tt>null</tt> if no CI spec is defined and 
+	 * 			auto-detection also can not provide an appropriate CI spec  
+	 * @throws
+	 * 			Exception when CI spec is defined but not valid
+	 */
 	@Nullable
 	public CISpec getCISpec(ObjectId commitId) {
 		if (ciSpecCache == null)

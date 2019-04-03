@@ -20,7 +20,7 @@ public class PageTabLink extends Panel {
 	}
 
 	protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-		return new ViewStateAwarePageLink<Void>("link", pageClass);
+		return new ViewStateAwarePageLink<Void>(linkId, pageClass);
 	}
 
 }

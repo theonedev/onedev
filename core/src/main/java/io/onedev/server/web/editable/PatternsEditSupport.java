@@ -9,23 +9,21 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.model.Project;
+import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.web.behavior.PatternSetAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
-import io.onedev.server.web.editable.annotation.BranchPatterns;
+import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.string.StringPropertyEditor;
 import io.onedev.server.web.editable.string.StringPropertyViewer;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
-public class BranchPatternsEditSupport implements EditSupport {
+public class PatternsEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Method propertyGetter = descriptor.getPropertyGetter();
-		BranchPatterns branchPatterns = propertyGetter.getAnnotation(BranchPatterns.class);
-        if (branchPatterns != null) {
+		Patterns pathPatterns = propertyGetter.getAnnotation(Patterns.class);
+        if (pathPatterns != null) {
         	if (propertyGetter.getReturnType() == String.class) {
         		return new PropertyContext<String>(descriptor) {
 
@@ -42,17 +40,26 @@ public class BranchPatternsEditSupport implements EditSupport {
     						protected InputAssistBehavior getInputAssistBehavior() {
     							return new PatternSetAssistBehavior() {
 
+									@SuppressWarnings("unchecked")
 									@Override
 									protected List<InputSuggestion> suggest(String matchWith) {
-										Project project = ((ProjectPage)getPage()).getProject();
-										return SuggestionUtils.suggestBranches(project, matchWith);
-									}
-
-									@Override
-									protected List<String> getHints(TerminalExpect terminalExpect) {
-										return Lists.newArrayList("Use * or ? for wildcard match");
+										String suggestionMethod = pathPatterns.value();
+										if (suggestionMethod.length() != 0) {
+											return (List<InputSuggestion>) ReflectionUtils.invokeStaticMethod(
+													descriptor.getBeanClass(), suggestionMethod, new Object[] {matchWith});
+										} else {
+											return Lists.newArrayList();
+										}
 									}
     								
+									@Override
+									protected List<String> getHints(TerminalExpect terminalExpect) {
+										return Lists.newArrayList(
+												"Pattern containing spaces or starting with dash needs to be quoted",
+												"Use * or ? for wildcard match"
+												);
+									}
+									
     							};
     						}
     		        		
@@ -61,7 +68,7 @@ public class BranchPatternsEditSupport implements EditSupport {
         			
         		};
         	} else {
-	    		throw new RuntimeException("Annotation 'BranchPatterns' should be applied to property "
+	    		throw new RuntimeException("Annotation 'Patterns' should be applied to property "
 	    				+ "of type 'String'");
         	}
         } else {

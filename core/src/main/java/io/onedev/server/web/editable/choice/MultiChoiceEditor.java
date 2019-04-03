@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -37,36 +38,43 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Map<String, String> choices;
-		
-		OneContext oneContext = new OneContext(this);
-		
-		OneContext.push(oneContext);
-		try {
-			getDescriptor().getDependencyPropertyNames().clear();
-			io.onedev.server.web.editable.annotation.ChoiceProvider choiceProvider = 
-					descriptor.getPropertyGetter().getAnnotation(
-							io.onedev.server.web.editable.annotation.ChoiceProvider.class);
-			Preconditions.checkNotNull(choiceProvider);
-			Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value());
-			if (result instanceof List) {
-				choices = new LinkedHashMap<>();
-				for (String each: (List<String>)result) 
-					choices.put(each, each);
-			} else {
-				choices = (Map<String, String>)result;
-			}
-		} finally {
-			OneContext.pop();
-		}
-		
 		List<String> selections;
 		if (getModelObject() != null)
 			selections = getModelObject();
 		else
 			selections = new ArrayList<>();
 		
-		input = new StringMultiChoice("input", Model.of(selections), choices) {
+		input = new StringMultiChoice("input", Model.of(selections), new LoadableDetachableModel<Map<String, String>>() {
+
+			@Override
+			protected Map<String, String> load() {
+				Map<String, String> choices;
+				
+				OneContext oneContext = new OneContext(MultiChoiceEditor.this);
+				
+				OneContext.push(oneContext);
+				try {
+					getDescriptor().getDependencyPropertyNames().clear();
+					io.onedev.server.web.editable.annotation.ChoiceProvider choiceProvider = 
+							descriptor.getPropertyGetter().getAnnotation(
+									io.onedev.server.web.editable.annotation.ChoiceProvider.class);
+					Preconditions.checkNotNull(choiceProvider);
+					Object result = ReflectionUtils.invokeStaticMethod(descriptor.getBeanClass(), choiceProvider.value());
+					if (result instanceof List) {
+						choices = new LinkedHashMap<>();
+						for (String each: (List<String>)result) 
+							choices.put(each, each);
+					} else {
+						choices = (Map<String, String>)result;
+					}
+				} finally {
+					OneContext.pop();
+				}
+				
+				return choices;
+			}
+			
+		}) {
 
 			@Override
 			protected void onInitialize() {

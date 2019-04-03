@@ -705,3 +705,36 @@ td.no-elements {
 td.ellipsis {
     font-size: 16px;
 }
+
+.panel-list .drag-indicator {
+	margin-right: 8px;
+}
+.panel-list .panel-heading a {
+	color: #444; 
+	margin-right: 8px;
+}
+.panel-list .panel-heading input {
+	vertical-align: text-top;
+}
+.panel-list input[type="checkbox"]+label {
+	font-weight: normal;
+}
+.panel-list .add-new {
+	display: block; 
+	padding: 16px; 
+	background: #F2F2F2; 
+	border: 1px solid #DDD; 
+	border-radius: 4px; 
+	font-size: 16px; 
+	color: #444; 
+	margin-bottom: 16px;
+}
+.panel-list a.add-new:hover {
+	text-decoration: none; 
+	background-color: #EBEBEB; 
+	border-color: #ADADAD;
+}
+
+.panel-list .disabled .panel {
+	color: #999;
+}

@@ -10,6 +10,7 @@ import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -43,10 +44,6 @@ public class PromptFieldsUponIssueOpenSettingPage extends IssueSettingPage {
 			
 		};
 		
-		Map<String, String> choices = new LinkedHashMap<>();
-		for (String fieldName: getGlobalSetting().getFieldNames())
-			choices.put(fieldName, fieldName);
-		
 		form.add(new StringMultiChoice("fields", new IModel<Collection<String>>() {
 
 			@Override
@@ -63,7 +60,17 @@ public class PromptFieldsUponIssueOpenSettingPage extends IssueSettingPage {
 				fieldSet = new HashSet<>(object);
 			}
 			
-		}, choices));
+		}, new LoadableDetachableModel<Map<String, String>>() {
+
+			@Override
+			protected Map<String, String> load() {
+				Map<String, String> choices = new LinkedHashMap<>();
+				for (String fieldName: getGlobalSetting().getFieldNames())
+					choices.put(fieldName, fieldName);
+				return choices;
+			}
+			
+		}));
 		
 		form.add(new Link<Void>("useDefault") {
 

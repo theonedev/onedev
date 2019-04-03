@@ -13,7 +13,7 @@ import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.PathPatterns;
+import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable
 @Horizontal
@@ -23,7 +23,7 @@ public class Job implements Serializable {
 
 	private String name;
 	
-	private String image;
+	private String environment;
 	
 	private List<String> commands;
 	
@@ -51,14 +51,16 @@ public class Job implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=110, name="Docker Image", description="Specify the docker image to run the command")
+	@Editable(order=110, description="Specify the environment to run the command. Environment will be interpretated "
+			+ "by underlying job executor. For instance, a docker executor will treat it as a docker image, and an "
+			+ "agent executor will treat it as labels to match agents")
 	@NotEmpty
-	public String getImage() {
-		return image;
+	public String getEnvironment() {
+		return environment;
 	}
 
-	public void setImage(String image) {
-		this.image = image;
+	public void setEnvironment(String environment) {
+		this.environment = environment;
 	}
 
 	@Editable(order=120, description="Specify commands to execute, with one command per line")
@@ -120,7 +122,7 @@ public class Job implements Serializable {
 
 	@Editable(order=600, description="Optionally specify space-separated workspace files to publish as artifacts. "
 			+ "Use * or ? for wildcard match")
-	@PathPatterns
+	@Patterns
 	public String getPublishArtifacts() {
 		return publishArtifacts;
 	}

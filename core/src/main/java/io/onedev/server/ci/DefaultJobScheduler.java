@@ -72,16 +72,15 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	
 	@Inject
 	public DefaultJobScheduler(ProjectManager projectManager, Build2Manager buildManager, 
-			UserManager userManager, ListenerRegistry listenerRegistry, 
-			TransactionManager transactionManager, ExecutorService executorService, 
-			SettingManager settingManager) {
+			UserManager userManager, ListenerRegistry listenerRegistry, SettingManager settingManager,
+			TransactionManager transactionManager, ExecutorService executorService) {
 		this.projectManager = projectManager;
+		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
 		this.listenerRegistry = listenerRegistry;
 		this.transactionManager = transactionManager;
 		this.executorService = executorService;
-		this.settingManager = settingManager;
 	}
 
 	@Sessional
@@ -161,9 +160,15 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 			
 			dependencyChain.add(jobName);
 			
-			CISpec ciSpec = project.getCISpec(ObjectId.fromString(commitHash));
-			if (ciSpec == null) {
-				markBuildError(build, "No CI spec");
+			CISpec ciSpec;
+			try {
+				ciSpec = project.getCISpec(ObjectId.fromString(commitHash));
+				if (ciSpec == null) {
+					markBuildError(build, "No CI spec");
+					return builds;
+				}
+			} catch (Exception e) {
+				markBuildError(build, "Invalid CI spec");
 				return builds;
 			}
 			
@@ -198,18 +203,23 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	}
 
 	private void run(Build2 build) {
-		JobExecutor jobExecutor = settingManager.getJobExecutor();
-		if (jobExecutor != null) {
-			CISpec ciSpec = build.getProject().getCISpec(ObjectId.fromString(build.getCommitHash()));
+		ObjectId commitId = ObjectId.fromString(build.getCommitHash());
+		try {
+			CISpec ciSpec = build.getProject().getCISpec(commitId);
 			if (ciSpec != null) {
 				Job job = ciSpec.getJobMap().get(build.getJobName());
 				if (job != null) {
-					String runningInstance = jobExecutor.run(job.getImage(), job.getCommands());
-					if (runningInstance != null) {
-						build.setStatus(Build2.Status.RUNNING);
-						build.setRunningDate(new Date());
-						buildManager.save(build);
-						listenerRegistry.post(new BuildRunning(build));
+					JobExecutor executor = settingManager.getJobExecutor(build.getProject(), commitId, job.getName(), job.getEnvironment());
+					if (executor != null) {
+						String runningInstance = executor.run(job.getEnvironment(), job.getCommands());
+						if (runningInstance != null) {
+							build.setStatus(Build2.Status.RUNNING);
+							build.setRunningDate(new Date());
+							buildManager.save(build);
+							listenerRegistry.post(new BuildRunning(build));
+						}
+					} else {
+						markBuildError(build, "No applicable job executor");
 					}
 				} else {
 					markBuildError(build, "Job not found");
@@ -217,8 +227,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 			} else {
 				markBuildError(build, "No CI spec");
 			}
-		} else {
-			markBuildError(build, "No applicable job executor");
+		} catch (Exception e) {
+			markBuildError(build, "Invalid CI spec");
 		}
 	}
 	
@@ -235,13 +245,19 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	public void on(ProjectEvent event) {
 		if (event instanceof CommitAware) {
 			ObjectId commitId = ((CommitAware) event).getCommitId();
-			CISpec ciSpec = event.getProject().getCISpec(commitId);
-			if (ciSpec != null) {
-				for (Job job: ciSpec.getJobs()) {
-					JobTrigger trigger = job.getMatchedTrigger(event);
-					if (trigger != null)
-						submit(event.getProject(), commitId.name(), job.getName(), getParamMatrix(trigger.getParams()));
+			try {
+				CISpec ciSpec = event.getProject().getCISpec(commitId);
+				if (ciSpec != null) {
+					for (Job job: ciSpec.getJobs()) {
+						JobTrigger trigger = job.getMatchedTrigger(event);
+						if (trigger != null)
+							submit(event.getProject(), commitId.name(), job.getName(), getParamMatrix(trigger.getParams()));
+					}
 				}
+			} catch (Exception e) {
+				String message = String.format("Error parsing CI spec (project: %s, commit: %s)", 
+						event.getProject().getName(), commitId.name());
+				logger.error(message, e);
 			}
 		}
 	}
@@ -272,15 +288,11 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	@Override
 	public void cancel(Build2 build) {
 		if (build.getStatus() == Build2.Status.RUNNING) {
-			JobExecutor jobExecutor = settingManager.getJobExecutor();
-			if (jobExecutor != null) {
-				if (jobExecutor.isRunning(build.getRunningInstance()))
-					jobExecutor.stop(build.getRunningInstance());
-				else
-					markBuildError(build, "Aborted for unknown reason");
-			} else { 
-				markBuildError(build, "No applicable job executor");
-			}
+			JobExecutor executor = settingManager.getJobExecutor(build.getRunningInstance());
+			if (executor != null)
+				executor.stop(build.getRunningInstance());
+			else 
+				markBuildError(build, "Aborted for unknown reason");
 		} else if (!build.isFinished()) {
 			build.setStatus(Build2.Status.CANCELLED);
 			build.setErrorMessage(null);
@@ -328,27 +340,28 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 							if (build.getStatus() == Build2.Status.PENDING) {
 								DefaultJobScheduler.this.run(build);									
 							} else if (build.getStatus() == Build2.Status.RUNNING) {
-								CISpec ciSpec = build.getProject().getCISpec(ObjectId.fromString(build.getCommitHash()));
-								if (ciSpec != null) {
-									Job job = ciSpec.getJobMap().get(build.getJobName());
-									if (job != null) {
-										if (System.currentTimeMillis() - build.getRunningDate().getTime() > job.getTimeout() * 1000L) {
-											JobExecutor jobExecutor = settingManager.getJobExecutor();
-											if (jobExecutor != null) {
-												if (jobExecutor.isRunning(build.getRunningInstance()))
-													jobExecutor.stop(build.getRunningInstance());
+								ObjectId commitId = ObjectId.fromString(build.getCommitHash());
+								try {
+									CISpec ciSpec = build.getProject().getCISpec(commitId);
+									if (ciSpec != null) {
+										Job job = ciSpec.getJobMap().get(build.getJobName());
+										if (job != null) {
+											if (System.currentTimeMillis() - build.getRunningDate().getTime() > job.getTimeout() * 1000L) {
+												JobExecutor executor = settingManager.getJobExecutor(build.getRunningInstance());
+												if (executor != null)
+													executor.stop(build.getRunningInstance());
 												else
-													markBuildError(build, "Aborted for unknown reason");
-											} else {
-												markBuildError(build, "No applicable job executor");
+													markBuildError(build, "Stopped for unknown reason");
 											}
+										} else {
+											markBuildError(build, "Job not found");
 										}
 									} else {
-										markBuildError(build, "Job not found");
-									}
-								} else {
-									markBuildError(build, "No CI spec");
-								} 
+										markBuildError(build, "No CI spec");
+									} 
+								} catch (Exception e) {
+									markBuildError(build, "Invalid CI spec");
+								}
 							} else if (build.getStatus() == Build2.Status.WAITING) {
 								boolean hasUnsuccessful = false;
 								boolean hasUnfinished = false;

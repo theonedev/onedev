@@ -1,7 +1,12 @@
 package io.onedev.server.entitymanager;
 
+import java.util.List;
+
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.ObjectId;
+
+import io.onedev.server.model.Project;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.support.authenticator.Authenticator;
 import io.onedev.server.model.support.jobexecutor.JobExecutor;
@@ -99,9 +104,13 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveAuthenticator(@Nullable Authenticator authenticator);
 
+	List<JobExecutor> getJobExecutors();
+	
+	void saveJobExecutors(List<JobExecutor> jobExecutors);
+
 	@Nullable
-	JobExecutor getJobExecutor();
+	JobExecutor getJobExecutor(Project project, ObjectId commitId, String jobName, String image);
 	
-	void saveJobExecutor(JobExecutor jobExecutor);
-	
+	@Nullable
+	JobExecutor getJobExecutor(String runningInstance);
 }

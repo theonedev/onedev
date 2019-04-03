@@ -319,6 +319,7 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 				}
 				
 			};
+			link.add(newLabel("label"));
 			add(link);
 		}
 		

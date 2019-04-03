@@ -16,6 +16,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -88,13 +89,18 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			
 		});
 
-		List<Milestone> milestones = getProject().getSortedMilestones();
-		
-		Map<String, String> choices = new LinkedHashMap<>();
-		for (Milestone milestone: milestones)
-			choices.put(milestone.getName(), milestone.getName());
-		
-		milestoneChoice = new StringSingleChoice("milestone", Model.of(issue.getMilestoneName()), choices) {
+		milestoneChoice = new StringSingleChoice("milestone", Model.of(issue.getMilestoneName()), new LoadableDetachableModel<Map<String, String>>() {
+
+			@Override
+			protected Map<String, String> load() {
+				Map<String, String> choices = new LinkedHashMap<>();
+				List<Milestone> milestones = getProject().getSortedMilestones();
+				for (Milestone milestone: milestones)
+					choices.put(milestone.getName(), milestone.getName());
+				return choices;
+			}
+			
+		}) {
 
 			@Override
 			protected void onInitialize() {

@@ -18,7 +18,8 @@ public class TagCreatedTrigger extends JobTrigger {
 	private String tags;
 	
 	@Editable(name="Created Tags", order=100, 
-			description="Optionally specify tags to check. Use * or ? for wildcard match")
+			description="Optionally specify space-separated tags to check. Use * or ? for wildcard match. "
+					+ "Leave empty to match all tags")
 	@TagPatterns
 	public String getTags() {
 		return tags;

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.wicket.model.IModel;
 import org.json.JSONException;
 import org.json.JSONWriter;
 
@@ -20,15 +21,21 @@ public class StringChoiceProvider extends ChoiceProvider<String> {
 
 	public static final String SPECIAL_CHOICE_PREFIX = "<$OneDevSpecialChoice$>";
 	
-	private final Map<String, String> choices;
+	private final IModel<Map<String, String>> choicesModel;
 	
-	public StringChoiceProvider(Map<String, String> choices) {
-		this.choices = choices;
+	public StringChoiceProvider(IModel<Map<String, String>> choicesModel) {
+		this.choicesModel = choicesModel;
 	}
 	
 	@Override
+	public void detach() {
+		choicesModel.detach();
+		super.detach();
+	}
+
+	@Override
 	public void toJson(String choice, JSONWriter writer) throws JSONException {
-		String name = choices.get(choice);
+		String name = choicesModel.getObject().get(choice);
 		if (name == null)
 			name = choice;
 		writer.key("id").value(choice).key("name").value(name);
@@ -44,12 +51,12 @@ public class StringChoiceProvider extends ChoiceProvider<String> {
 		List<String> matched;
 		if (StringUtils.isNotBlank(term)) {
 			matched = new ArrayList<>();
-			for (Map.Entry<String, String> entry: choices.entrySet()) {
+			for (Map.Entry<String, String> entry: choicesModel.getObject().entrySet()) {
 				if (entry.getValue().toLowerCase().startsWith(term)) 
 					matched.add(entry.getKey());
 			}
 		} else {
-			matched = new ArrayList<>(choices.keySet());
+			matched = new ArrayList<>(choicesModel.getObject().keySet());
 		}
 		new ResponseFiller<String>(response).fill(matched, page, WebConstants.PAGE_SIZE);
 	}

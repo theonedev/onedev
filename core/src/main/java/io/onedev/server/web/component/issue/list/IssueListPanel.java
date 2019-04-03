@@ -260,9 +260,6 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 				Fragment fragment = new Fragment(id, "listFieldsFrag", IssueListPanel.this);
 				Form<?> form = new Form<Void>("form");
 				fieldSet = getProject().getIssueSetting().getListFields(true);
-				Map<String, String> choices = new LinkedHashMap<>();
-				for (String fieldName: getGlobalIssueSetting().getFieldNames())
-					choices.put(fieldName, fieldName);
 				form.add(new StringMultiChoice("fields", new IModel<Collection<String>>() {
 
 					@Override
@@ -279,7 +276,17 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						fieldSet = new HashSet<>(object);
 					}
 					
-				}, choices));
+				}, new LoadableDetachableModel<Map<String, String>>() {
+
+					@Override
+					protected Map<String, String> load() {
+						Map<String, String> choices = new LinkedHashMap<>();
+						for (String fieldName: getGlobalIssueSetting().getFieldNames())
+							choices.put(fieldName, fieldName);
+						return choices;
+					}
+					
+				}));
 				
 				form.add(new AjaxLink<Void>("close") {
 

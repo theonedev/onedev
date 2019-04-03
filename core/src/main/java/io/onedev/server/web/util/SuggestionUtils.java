@@ -24,15 +24,18 @@ import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.facade.ConfigurationFacade;
+import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 
@@ -58,6 +61,19 @@ public class SuggestionUtils {
 			int index = branch.toLowerCase().indexOf(matchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
 				suggestions.add(new InputSuggestion(branch, new Range(index, index+matchWith.length())));
+		}
+		return suggestions;
+	}
+	
+	public static List<InputSuggestion> suggestProjects(String matchWith) {
+		matchWith = matchWith.toLowerCase();
+		int numSuggestions = 0;
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		User user = SecurityUtils.getUser();
+		for (ProjectFacade project: OneDev.getInstance(ProjectManager.class).getAccessibleProjects(user)) {
+			int index = project.getName().toLowerCase().indexOf(matchWith);
+			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
+				suggestions.add(new InputSuggestion(project.getName(), new Range(index, index+matchWith.length())));
 		}
 		return suggestions;
 	}

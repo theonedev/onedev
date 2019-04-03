@@ -6,12 +6,12 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.StringUtils;
 
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.editable.annotation.PathPatterns;
+import io.onedev.server.web.editable.annotation.ProjectPatterns;
 
-public class PathPatternsValidator implements ConstraintValidator<PathPatterns, String> {
+public class ProjectPatternsValidator implements ConstraintValidator<ProjectPatterns, String> {
 	
 	@Override
-	public void initialize(PathPatterns constaintAnnotation) {
+	public void initialize(ProjectPatterns constaintAnnotation) {
 	}
 
 	@Override
@@ -27,7 +27,7 @@ public class PathPatternsValidator implements ConstraintValidator<PathPatterns, 
 				if (StringUtils.isNotBlank(e.getMessage()))
 					constraintContext.buildConstraintViolationWithTemplate(e.getMessage()).addConstraintViolation();
 				else
-					constraintContext.buildConstraintViolationWithTemplate("Malformed path patterns").addConstraintViolation();
+					constraintContext.buildConstraintViolationWithTemplate("Malformed project patterns").addConstraintViolation();
 				return false;
 			}
 		}

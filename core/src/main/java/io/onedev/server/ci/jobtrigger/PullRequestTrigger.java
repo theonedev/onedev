@@ -15,7 +15,7 @@ public class PullRequestTrigger extends JobTrigger {
 	private String targetBranches;
 	
 	@Editable(order=100, description="Optionally specify target branches of the pull request to check. "
-			+ "Use * or ? for wildcard match")
+			+ "Use * or ? for wildcard match. Leave empty to match all pull requests")
 	@BranchPatterns
 	public String getTargetBranches() {
 		return targetBranches;

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -39,19 +40,25 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Map<String, String> choices = new LinkedHashMap<>();
-        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
-            Enum<?> value = (Enum<?>) it.next();
-            choices.put(value.name(), getDisplayValue(value.toString()));
-        }
-
         String selection;
         if (getModelObject() != null)
         	selection = getModelObject().name();
         else
         	selection = null;
         
-		input = new StringSingleChoice("input", Model.of(selection), choices) {
+		input = new StringSingleChoice("input", Model.of(selection), new LoadableDetachableModel<Map<String, String>>() {
+
+			@Override
+			protected Map<String, String> load() {
+				Map<String, String> choices = new LinkedHashMap<>();
+		        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
+		            Enum<?> value = (Enum<?>) it.next();
+		            choices.put(value.name(), getDisplayValue(value.toString()));
+		        }
+		        return choices;
+			}
+			
+		}) {
 
 			@Override
 			protected void onInitialize() {

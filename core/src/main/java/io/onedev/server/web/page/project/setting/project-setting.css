@@ -42,38 +42,6 @@ body.BranchProtectionPage, body.WebHooksPage {
 #project-setting .general-setting form .delete {
 	margin-right: 0;
 }
-#project-setting .panel-list .drag-indicator {
-	margin-right: 8px;
-}
-#project-setting .panel-list .panel-heading a {
-	color: #444; 
-	margin-right: 8px;
-}
-#project-setting .panel-list .panel-heading input {
-	vertical-align: text-top;
-}
-#project-setting .panel-list input[type="checkbox"]+label {
-	font-weight: normal;
-}
-#project-setting .panel-list .add-new {
-	display: block; 
-	padding: 16px; 
-	background: #F2F2F2; 
-	border: 1px solid #DDD; 
-	border-radius: 4px; 
-	font-size: 16px; 
-	color: #444; 
-	margin-bottom: 16px;
-}
-#project-setting .panel-list a.add-new:hover {
-	text-decoration: none; 
-	background-color: #EBEBEB; 
-	border-color: #ADADAD;
-}
-
-#project-setting .disabled .panel {
-	color: #999;
-}
 
 #project-setting .commit-message-transform>label {
 	float: left;

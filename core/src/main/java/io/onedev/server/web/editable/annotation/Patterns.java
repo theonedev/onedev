@@ -8,14 +8,14 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import io.onedev.server.util.validation.PathPatternsValidator;
+import io.onedev.server.util.validation.PatternsValidator;
 
 @Target({ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy=PathPatternsValidator.class) 
-public @interface PathPatterns {
+@Constraint(validatedBy=PatternsValidator.class) 
+public @interface Patterns {
 
-	String message() default "Malformed path patterns";
+	String message() default "Malformed patterns";
 	
 	String value() default "";
 	

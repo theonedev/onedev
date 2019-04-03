@@ -1,10 +1,11 @@
-package io.onedev.server.web.page.admin.jobexecutor;
+package io.onedev.server.web.page.admin.jobexecutors;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.NotNull;
+
 import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class JobExecutorBean implements Serializable {
@@ -14,7 +15,7 @@ public class JobExecutorBean implements Serializable {
 	private JobExecutor jobExecutor;
 
 	@Editable
-	@NameOfEmptyValue("No job executor")
+	@NotNull
 	public JobExecutor getJobExecutor() {
 		return jobExecutor;
 	}
@@ -22,5 +23,5 @@ public class JobExecutorBean implements Serializable {
 	public void setJobExecutor(JobExecutor jobExecutor) {
 		this.jobExecutor = jobExecutor;
 	}
-
+	
 }

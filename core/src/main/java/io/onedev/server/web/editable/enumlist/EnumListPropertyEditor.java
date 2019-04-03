@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
@@ -42,19 +43,25 @@ public class EnumListPropertyEditor extends PropertyEditor<List<Enum<?>>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Map<String, String> choices = new LinkedHashMap<>();
-        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
-            Enum<?> value = (Enum<?>) it.next();
-            choices.put(value.name(), getDisplayValue(value.toString()));
-        }
-
         List<String> selections = new ArrayList<>();
         if (getModelObject() != null) {
         	for (Enum<?> each: getModelObject()) 
         		selections.add(each.name());
         }
         
-        input = new StringMultiChoice("input", Model.of(selections), choices) {
+        input = new StringMultiChoice("input", Model.of(selections), new LoadableDetachableModel<Map<String, String>>() {
+
+			@Override
+			protected Map<String, String> load() {
+				Map<String, String> choices = new LinkedHashMap<>();
+		        for (Iterator<?> it = EnumSet.allOf(enumClass).iterator(); it.hasNext();) {
+		            Enum<?> value = (Enum<?>) it.next();
+		            choices.put(value.name(), getDisplayValue(value.toString()));
+		        }
+		        return choices;
+			}
+        	
+        }) {
 
         	@Override
         	protected void onInitialize() {

@@ -37,7 +37,7 @@ import io.onedev.server.web.page.admin.group.GroupPage;
 import io.onedev.server.web.page.admin.group.NewGroupPage;
 import io.onedev.server.web.page.admin.issuesetting.GlobalIssueSettingPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
-import io.onedev.server.web.page.admin.jobexecutor.JobExecutorPage;
+import io.onedev.server.web.page.admin.jobexecutors.JobExecutorPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
@@ -131,7 +131,7 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof AuthenticatorPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
-		administrationContainer.add(item = new WebMarkupContainer("jobExecutor"));
+		administrationContainer.add(item = new WebMarkupContainer("jobExecutors"));
 		item.add(new ViewStateAwarePageLink<Void>("link", JobExecutorPage.class));
 		if (getPage() instanceof JobExecutorPage)
 			item.add(AttributeAppender.append("class", "active"));

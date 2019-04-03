@@ -40,9 +40,14 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 				else if (token.getType() == PatternSetLexer.NQuoted)
 					matches.add(token.getText());
 			}
-			
+
+			String unmatched = terminalExpect.getUnmatchedText();
 			if (spec.getRuleName().equals("NQuoted")) {
-				return suggest(terminalExpect.getUnmatchedText())
+				List<InputSuggestion> suggestions = suggest(unmatched);
+				int index = "*".indexOf(unmatched);
+				if (index != -1)
+					suggestions.add(new InputSuggestion("*", "all", new Range(index, unmatched.length())));
+				return suggestions
 						.stream()
 						.filter(it->!matches.contains(it.getContent()))
 						.map(it->{
@@ -58,7 +63,7 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 							}
 						})
 						.collect(Collectors.toList());
-			} else if (spec.getRuleName().equals("Quoted") && terminalExpect.getUnmatchedText().startsWith("\"")) {
+			} else if (spec.getRuleName().equals("Quoted") && unmatched.startsWith("\"")) {
 				return new FenceAware(codeAssist.getGrammar(), "\"", "\"") {
 
 					@Override
