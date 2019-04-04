@@ -22,7 +22,7 @@ import org.hibernate.criterion.Restrictions;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.JobScheduler;
+import io.onedev.server.ci.job.JobScheduler;
 import io.onedev.server.entitymanager.Build2Manager;
 import io.onedev.server.model.Build2;
 import io.onedev.server.model.BuildDependence;
@@ -70,7 +70,7 @@ public class BuildListPage2 extends ProjectPage {
 			public void populateItem(Item<ICellPopulator<Build2>> cellItem, String componentId,
 					IModel<Build2> rowModel) {
 				Build2 build = rowModel.getObject();
-				cellItem.add(new Label(componentId, build.getErrorMessage()));
+				cellItem.add(new Label(componentId, build.getStatusMessage()));
 			}
 		});
 		

@@ -26,7 +26,7 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Dependency;
-import io.onedev.server.ci.Job;
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;

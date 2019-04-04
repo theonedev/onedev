@@ -1,18 +1,11 @@
 package io.onedev.server.web.page.test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.git.RefInfo;
-import io.onedev.server.model.Project;
 import io.onedev.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -29,12 +22,6 @@ public class TestPage extends BasePage {
 
 			@Override
 			public void onClick() {
-				ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-				List<RefInfo> refInfos = new ArrayList<>();
-				for (Project project: projectManager.query()) {
-					refInfos.addAll(project.getBranches());
-				}
-				System.out.println(refInfos.size());
 			}
 			
 		});

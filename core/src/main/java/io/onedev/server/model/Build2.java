@@ -28,7 +28,7 @@ import io.onedev.server.util.jackson.DefaultView;
 				@Index(columnList="number"), @Index(columnList="jobName"), @Index(columnList="numberStr"), 
 				@Index(columnList="status"), @Index(columnList="submitDate"), @Index(columnList="pendingDate"),
 				@Index(columnList="runningDate"), @Index(columnList="finishDate"), 
-				@Index(columnList="runningInstance")},
+				@Index(columnList="jobInstance")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})}
 )
 public class Build2 extends AbstractEntity {
@@ -73,9 +73,9 @@ public class Build2 extends AbstractEntity {
 
 	private Date finishDate;
 	
-	private String runningInstance;
+	private String jobInstance;
 	
-	private String errorMessage;
+	private String statusMessage;
 
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	private Collection<BuildParam> params = new ArrayList<>();
@@ -143,7 +143,12 @@ public class Build2 extends AbstractEntity {
 	}
 
 	public void setStatus(Status status) {
+		setStatus(status, null);
+	}
+	
+	public void setStatus(Status status, @Nullable String statusMessage) {
 		this.status = status;
+		this.statusMessage = statusMessage;
 	}
 	
 	public boolean isFinished() {
@@ -207,20 +212,20 @@ public class Build2 extends AbstractEntity {
 		this.dependents = dependents;
 	}
 
-	public String getRunningInstance() {
-		return runningInstance;
+	public String getJobInstance() {
+		return jobInstance;
 	}
 
-	public void setRunningInstance(String runningInstance) {
-		this.runningInstance = runningInstance;
+	public void setJobInstance(String jobInstance) {
+		this.jobInstance = jobInstance;
 	}
 
-	public String getErrorMessage() {
-		return errorMessage;
+	public String getStatusMessage() {
+		return statusMessage;
 	}
 
-	public void setErrorMessage(String errorMessage) {
-		this.errorMessage = errorMessage;
+	public void setStatusMessage(String statusMessage) {
+		this.statusMessage = statusMessage;
 	}
 
 	public Map<String, String> getParamMap() {

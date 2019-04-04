@@ -1,11 +1,11 @@
-package io.onedev.server.ci.jobtrigger;
+package io.onedev.server.ci.job.trigger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.onedev.server.ci.Job;
-import io.onedev.server.ci.jobparam.JobParam;
+import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.web.editable.annotation.Editable;
 

@@ -1,4 +1,4 @@
-package io.onedev.server.ci.jobparam;
+package io.onedev.server.ci.job.param;
 
 import java.util.List;
 

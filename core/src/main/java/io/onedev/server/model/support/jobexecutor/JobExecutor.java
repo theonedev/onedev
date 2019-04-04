@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.ci.job.JobCallback;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.annotation.ProjectPatterns;
@@ -82,7 +83,7 @@ public abstract class JobExecutor implements Serializable {
 	}
 	
 	@Nullable
-	public abstract String run(String environment, List<String> commands);
+	public abstract String run(String environment, List<String> commands, JobCallback callback);
 
 	public abstract boolean isRunning(String runningInstance);
 	

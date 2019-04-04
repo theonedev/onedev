@@ -15,6 +15,8 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.ci.job.Job;
+import io.onedev.server.exception.OneException;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -119,7 +121,11 @@ public class CISpec implements Serializable, Validatable {
 	public static CISpec parse(byte[] bytes) {
 		String ciSpecString = new String(bytes, Charsets.UTF_8); 
 		if (StringUtils.isNotBlank(ciSpecString)) {
-			return (CISpec) VersionedDocument.fromXML(ciSpecString).toBean();
+			try {
+				return (CISpec) VersionedDocument.fromXML(ciSpecString).toBean();
+			} catch (Exception e) {
+				throw new OneException("Invalid CI spec", e);
+			}
 		} else {
 			return null;
 		}

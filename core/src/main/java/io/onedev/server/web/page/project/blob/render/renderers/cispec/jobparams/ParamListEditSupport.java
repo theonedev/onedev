@@ -7,7 +7,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.utils.ReflectionUtils;
-import io.onedev.server.ci.Job;
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;

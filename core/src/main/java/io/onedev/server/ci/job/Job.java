@@ -1,4 +1,4 @@
-package io.onedev.server.ci;
+package io.onedev.server.ci.job;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -8,7 +8,9 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.ci.jobtrigger.JobTrigger;
+import io.onedev.server.ci.Dependency;
+import io.onedev.server.ci.job.log.LogLevel;
+import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -40,6 +42,8 @@ public class Job implements Serializable {
 	private List<JobTrigger> triggers = new ArrayList<>();
 	
 	private long timeout = 3600;
+	
+	private LogLevel logLevel = LogLevel.INFO;
 	
 	@Editable(order=100, description="Specify name of the job")
 	@NotEmpty
@@ -138,6 +142,15 @@ public class Job implements Serializable {
 
 	public void setTimeout(long timeout) {
 		this.timeout = timeout;
+	}
+
+	@Editable(order=800)
+	public LogLevel getLogLevel() {
+		return logLevel;
+	}
+
+	public void setLogLevel(LogLevel logLevel) {
+		this.logLevel = logLevel;
 	}
 
 	public JobTrigger getMatchedTrigger(ProjectEvent event) {

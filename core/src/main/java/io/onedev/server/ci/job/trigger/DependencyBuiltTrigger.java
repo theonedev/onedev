@@ -1,8 +1,8 @@
-package io.onedev.server.ci.jobtrigger;
+package io.onedev.server.ci.job.trigger;
 
 import io.onedev.server.ci.Dependency;
-import io.onedev.server.ci.Job;
-import io.onedev.server.ci.jobparam.JobParam;
+import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.build2.BuildFinished;
 import io.onedev.server.model.Build2;

@@ -153,5 +153,18 @@ public class DefaultStorageManager implements StorageManager {
         FileUtils.createDir(userDir);
         return userDir;
     }
+
+	private File getBuildsDir(Long projectId) {
+        File buildsDir = new File(getProjectDir(projectId), "builds");
+        FileUtils.createDir(buildsDir);
+        return buildsDir;
+	}
+	
+	@Override
+	public File getBuildDir(Long projectId, Long buildId) {
+		File buildDir = new File(getBuildsDir(projectId), String.valueOf(buildId));
+		FileUtils.createDir(buildDir);
+		return buildDir;
+	}
     
 }

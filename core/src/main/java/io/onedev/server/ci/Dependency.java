@@ -6,7 +6,8 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.ci.jobparam.JobParam;
+import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;

@@ -14,7 +14,7 @@ import org.apache.wicket.model.Model;
 import com.google.common.base.Throwables;
 
 import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.Job;
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.git.Blob;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;

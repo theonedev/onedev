@@ -1,4 +1,4 @@
-package io.onedev.server.ci;
+package io.onedev.server.ci.job;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,8 +19,13 @@ import org.slf4j.LoggerFactory;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.ci.jobparam.JobParam;
-import io.onedev.server.ci.jobtrigger.JobTrigger;
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.Dependency;
+import io.onedev.server.ci.job.log.JobLogger;
+import io.onedev.server.ci.job.log.LogLevel;
+import io.onedev.server.ci.job.log.LogManager;
+import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.Build2Manager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -64,6 +69,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	
 	private final TransactionManager transactionManager;
 	
+	private final LogManager logManager;
+	
 	private final ExecutorService executorService;
 	
 	private final SettingManager settingManager;
@@ -73,7 +80,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	@Inject
 	public DefaultJobScheduler(ProjectManager projectManager, Build2Manager buildManager, 
 			UserManager userManager, ListenerRegistry listenerRegistry, SettingManager settingManager,
-			TransactionManager transactionManager, ExecutorService executorService) {
+			TransactionManager transactionManager, ExecutorService executorService, 
+			LogManager logManager) {
 		this.projectManager = projectManager;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
@@ -81,19 +89,20 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 		this.listenerRegistry = listenerRegistry;
 		this.transactionManager = transactionManager;
 		this.executorService = executorService;
+		this.logManager = logManager;
 	}
 
 	@Sessional
 	@Override
 	public void submit(Project project, String commitHash, String jobName, Map<String, List<String>> paramMatrix) {
-		String commitLock = "job-schedule: " + project.getId() + "-" + commitHash;
+		String lockKey = "job-schedule: " + project.getId() + "-" + commitHash;
 		Long projectId = project.getId();
 		Long userId = User.idOf(userManager.getCurrent());
 		executorService.execute(new Runnable() {
 
 			@Override
 			public void run() {
-				LockUtils.call(commitLock, new Callable<Void>() {
+				LockUtils.call(lockKey, new Callable<Void>() {
 
 					@Override
 					public Void call() {
@@ -211,9 +220,52 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 				if (job != null) {
 					JobExecutor executor = settingManager.getJobExecutor(build.getProject(), commitId, job.getName(), job.getEnvironment());
 					if (executor != null) {
-						String runningInstance = executor.run(job.getEnvironment(), job.getCommands());
-						if (runningInstance != null) {
+						Long projectId = build.getProject().getId();
+						Long buildId = build.getId();
+						LogLevel loggerLevel = job.getLogLevel();
+						
+						String jobInstance = executor.run(job.getEnvironment(), job.getCommands(), new JobCallback() {
+
+							@Override
+							public void jobFinished(JobResult result, String resultMessage) {
+								transactionManager.call(new Callable<Void>() {
+
+									@Override
+									public Void call() throws Exception {
+										Build2 build = buildManager.load(buildId); 
+										switch (result) {
+										case SUCCESSFUL:
+											build.setStatus(Build2.Status.SUCCESSFUL, resultMessage);
+											break;
+										case FAILED:
+											build.setStatus(Build2.Status.FAILED, resultMessage);
+											break;
+										case CANCELLED:
+											build.setStatus(Build2.Status.CANCELLED, resultMessage);
+											break;
+										case IN_ERROR:
+											build.setStatus(Build2.Status.IN_ERROR, resultMessage);
+											break;
+										default:
+											throw new OneException("Unexpected job result: " + result);
+										}
+										buildManager.save(build);
+										listenerRegistry.post(new BuildFinished(build));
+										return null;
+									}
+									
+								});
+							}
+
+							@Override
+							public JobLogger getJobLogger() {
+								return logManager.getLogger(projectId, buildId, loggerLevel);
+							}
+							
+						});
+						if (jobInstance != null) {
 							build.setStatus(Build2.Status.RUNNING);
+							build.setJobInstance(jobInstance);
 							build.setRunningDate(new Date());
 							buildManager.save(build);
 							listenerRegistry.post(new BuildRunning(build));
@@ -233,8 +285,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	}
 	
 	private void markBuildError(Build2 build, String errorMessage) {
-		build.setErrorMessage(errorMessage);
-		build.setStatus(Build2.Status.IN_ERROR);
+		build.setStatus(Build2.Status.IN_ERROR, errorMessage);
 		build.setFinishDate(new Date());
 		buildManager.save(build);
 		listenerRegistry.post(new BuildFinished(build));
@@ -270,10 +321,9 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 
 		if (build.isFinished()) {
 			build.setStatus(Build2.Status.WAITING);
-			build.setErrorMessage(null);
 			build.setFinishDate(null);
 			build.setPendingDate(null);
-			build.setRunningInstance(null);
+			build.setJobInstance(null);
 			build.setRunningDate(null);
 			build.setSubmitDate(new Date());
 			build.setUser(userManager.getCurrent());
@@ -288,14 +338,13 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	@Override
 	public void cancel(Build2 build) {
 		if (build.getStatus() == Build2.Status.RUNNING) {
-			JobExecutor executor = settingManager.getJobExecutor(build.getRunningInstance());
+			JobExecutor executor = settingManager.getJobExecutor(build.getJobInstance());
 			if (executor != null)
-				executor.stop(build.getRunningInstance());
+				executor.stop(build.getJobInstance());
 			else 
 				markBuildError(build, "Aborted for unknown reason");
 		} else if (!build.isFinished()) {
 			build.setStatus(Build2.Status.CANCELLED);
-			build.setErrorMessage(null);
 			build.setFinishDate(new Date());
 			buildManager.save(build);
 			listenerRegistry.post(new BuildFinished(build));
@@ -312,12 +361,12 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	public void on(SystemStopping event) {
 		if (status == Status.RUNNING) {
 			status = Status.STOPPING;
-			synchronized (this) {
-				notify();
-			}
 			while (status == Status.STOPPING) {
+				synchronized (this) {
+					notify();
+				}
 				try {
-					Thread.sleep(100);
+					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 				}
 			}
@@ -326,20 +375,23 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 
 	@Override
 	public synchronized void run() {
-		while (status == Status.RUNNING) {
+		while (true) {
 			try {
 				wait(CHECK_INTERVAL * 1000L);
 			} catch (InterruptedException e) {
 			}
 			try {
-				transactionManager.run(new Runnable() {
+				boolean hasRunnings = transactionManager.call(new Callable<Boolean>() {
 	
 					@Override
-					public void run() {
+					public Boolean call() {
+						boolean hasRunnings = false;
 						for (Build2 build: buildManager.queryUnfinished()) {
 							if (build.getStatus() == Build2.Status.PENDING) {
-								DefaultJobScheduler.this.run(build);									
+								if (status == Status.RUNNING)
+									DefaultJobScheduler.this.run(build);									
 							} else if (build.getStatus() == Build2.Status.RUNNING) {
+								hasRunnings = true;
 								ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 								try {
 									CISpec ciSpec = build.getProject().getCISpec(commitId);
@@ -347,9 +399,9 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 										Job job = ciSpec.getJobMap().get(build.getJobName());
 										if (job != null) {
 											if (System.currentTimeMillis() - build.getRunningDate().getTime() > job.getTimeout() * 1000L) {
-												JobExecutor executor = settingManager.getJobExecutor(build.getRunningInstance());
+												JobExecutor executor = settingManager.getJobExecutor(build.getJobInstance());
 												if (executor != null)
-													executor.stop(build.getRunningInstance());
+													executor.stop(build.getJobInstance());
 												else
 													markBuildError(build, "Stopped for unknown reason");
 											}
@@ -386,9 +438,12 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 								}
 							}
 						}
+						return hasRunnings;
 					}
 					
 				});
+				if (!hasRunnings && status == Status.STOPPING)
+					break;
 			} catch (Exception e) {
 				logger.error("Error checking unfinished builds", e);
 			}

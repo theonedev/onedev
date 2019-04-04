@@ -1,9 +1,9 @@
-package io.onedev.server.ci.jobtrigger;
+package io.onedev.server.ci.job.trigger;
 
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.PathUtils;
-import io.onedev.server.ci.Job;
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;

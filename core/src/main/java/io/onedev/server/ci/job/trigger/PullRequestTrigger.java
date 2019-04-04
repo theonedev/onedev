@@ -1,7 +1,7 @@
-package io.onedev.server.ci.jobtrigger;
+package io.onedev.server.ci.job.trigger;
 
 import io.onedev.commons.utils.PathUtils;
-import io.onedev.server.ci.Job;
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.web.editable.annotation.BranchPatterns;

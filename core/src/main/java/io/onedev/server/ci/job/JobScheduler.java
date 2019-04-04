@@ -1,4 +1,4 @@
-package io.onedev.server.ci;
+package io.onedev.server.ci.job;
 
 import java.util.List;
 import java.util.Map;
