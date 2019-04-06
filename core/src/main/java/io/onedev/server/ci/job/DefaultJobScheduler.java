@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -21,6 +20,7 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Dependency;
+import io.onedev.server.ci.InvalidCISpecException;
 import io.onedev.server.ci.job.log.JobLogger;
 import io.onedev.server.ci.job.log.LogLevel;
 import io.onedev.server.ci.job.log.LogManager;
@@ -71,8 +71,6 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	
 	private final LogManager logManager;
 	
-	private final ExecutorService executorService;
-	
 	private final SettingManager settingManager;
 	
 	private volatile Status status;
@@ -80,15 +78,13 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	@Inject
 	public DefaultJobScheduler(ProjectManager projectManager, Build2Manager buildManager, 
 			UserManager userManager, ListenerRegistry listenerRegistry, SettingManager settingManager,
-			TransactionManager transactionManager, ExecutorService executorService, 
-			LogManager logManager) {
+			TransactionManager transactionManager, LogManager logManager) {
 		this.projectManager = projectManager;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
 		this.listenerRegistry = listenerRegistry;
 		this.transactionManager = transactionManager;
-		this.executorService = executorService;
 		this.logManager = logManager;
 	}
 
@@ -98,7 +94,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 		String lockKey = "job-schedule: " + project.getId() + "-" + commitHash;
 		Long projectId = project.getId();
 		Long userId = User.idOf(userManager.getCurrent());
-		executorService.execute(new Runnable() {
+		transactionManager.runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
@@ -176,8 +172,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 					markBuildError(build, "No CI spec");
 					return builds;
 				}
-			} catch (Exception e) {
-				markBuildError(build, "Invalid CI spec");
+			} catch (InvalidCISpecException e) {
+				markBuildError(build, e.getMessage());
 				return builds;
 			}
 			
@@ -279,8 +275,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 			} else {
 				markBuildError(build, "No CI spec");
 			}
-		} catch (Exception e) {
-			markBuildError(build, "Invalid CI spec");
+		} catch (InvalidCISpecException e) {
+			markBuildError(build, e.getMessage());
 		}
 	}
 	
@@ -306,7 +302,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 					}
 				}
 			} catch (Exception e) {
-				String message = String.format("Error parsing CI spec (project: %s, commit: %s)", 
+				String message = String.format("Error checking job triggers (project: %s, commit: %s)", 
 						event.getProject().getName(), commitId.name());
 				logger.error(message, e);
 			}
@@ -392,27 +388,27 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 									DefaultJobScheduler.this.run(build);									
 							} else if (build.getStatus() == Build2.Status.RUNNING) {
 								hasRunnings = true;
-								ObjectId commitId = ObjectId.fromString(build.getCommitHash());
-								try {
-									CISpec ciSpec = build.getProject().getCISpec(commitId);
-									if (ciSpec != null) {
-										Job job = ciSpec.getJobMap().get(build.getJobName());
-										if (job != null) {
-											if (System.currentTimeMillis() - build.getRunningDate().getTime() > job.getTimeout() * 1000L) {
-												JobExecutor executor = settingManager.getJobExecutor(build.getJobInstance());
-												if (executor != null)
+								JobExecutor executor = settingManager.getJobExecutor(build.getJobInstance());
+								if (executor != null) {
+									ObjectId commitId = ObjectId.fromString(build.getCommitHash());
+									try {
+										CISpec ciSpec = build.getProject().getCISpec(commitId);
+										if (ciSpec != null) {
+											Job job = ciSpec.getJobMap().get(build.getJobName());
+											if (job != null) {
+												if (System.currentTimeMillis() - build.getRunningDate().getTime() > job.getTimeout() * 1000L)
 													executor.stop(build.getJobInstance());
-												else
-													markBuildError(build, "Stopped for unknown reason");
+											} else {
+												markBuildError(build, "Job not found");
 											}
 										} else {
-											markBuildError(build, "Job not found");
-										}
-									} else {
-										markBuildError(build, "No CI spec");
-									} 
-								} catch (Exception e) {
-									markBuildError(build, "Invalid CI spec");
+											markBuildError(build, "No CI spec");
+										} 
+									} catch (InvalidCISpecException e) {
+										markBuildError(build, e.getMessage());
+									}
+								} else {
+									markBuildError(build, "Stopped for unknown reason");
 								}
 							} else if (build.getStatus() == Build2.Status.WAITING) {
 								boolean hasUnsuccessful = false;

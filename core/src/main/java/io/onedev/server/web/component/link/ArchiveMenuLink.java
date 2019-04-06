@@ -11,8 +11,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
-import io.onedev.server.web.util.resource.ArchiveResource;
-import io.onedev.server.web.util.resource.ArchiveResourceReference;
+import io.onedev.server.web.stream.ArchiveStreamResource;
+import io.onedev.server.web.stream.ArchiveStreamResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class ArchiveMenuLink extends MenuLink {
@@ -36,8 +36,8 @@ public abstract class ArchiveMenuLink extends MenuLink {
 
 			@Override
 			public AbstractLink newLink(String id) {
-				return new ResourceLink<Void>(id, new ArchiveResourceReference(), 
-						ArchiveResource.paramsOf(projectModel.getObject(), getRevision(), ArchiveResource.FORMAT_ZIP)) {
+				return new ResourceLink<Void>(id, new ArchiveStreamResourceReference(), 
+						ArchiveStreamResource.paramsOf(projectModel.getObject(), getRevision(), ArchiveStreamResource.FORMAT_ZIP)) {
 
 					@Override
 					protected CharSequence getOnClickScript(CharSequence url) {
@@ -57,8 +57,8 @@ public abstract class ArchiveMenuLink extends MenuLink {
 
 			@Override
 			public AbstractLink newLink(String id) {
-				return new ResourceLink<Void>(id, new ArchiveResourceReference(), 
-						ArchiveResource.paramsOf(projectModel.getObject(), getRevision(), ArchiveResource.FORMAT_TGZ)) {
+				return new ResourceLink<Void>(id, new ArchiveStreamResourceReference(), 
+						ArchiveStreamResource.paramsOf(projectModel.getObject(), getRevision(), ArchiveStreamResource.FORMAT_TGZ)) {
 
 					@Override
 					protected CharSequence getOnClickScript(CharSequence url) {

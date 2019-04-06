@@ -23,8 +23,8 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentManager;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
-import io.onedev.server.web.util.resource.AttachmentResource;
-import io.onedev.server.web.util.resource.AttachmentResourceReference;
+import io.onedev.server.web.stream.AttachmentStreamResource;
+import io.onedev.server.web.stream.AttachmentStreamResourceReference;
 
 public class ProjectAttachmentSupport implements AttachmentSupport {
 
@@ -45,8 +45,8 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 	
 	@Override
 	public String getAttachmentUrl(String attachment) {
-		PageParameters params = AttachmentResource.paramsOf(getProject(), attachmentDirUUID, attachment);
-		return RequestCycle.get().urlFor(new AttachmentResourceReference(), params).toString();
+		PageParameters params = AttachmentStreamResource.paramsOf(getProject(), attachmentDirUUID, attachment);
+		return RequestCycle.get().urlFor(new AttachmentStreamResourceReference(), params).toString();
 	}
 	
 	@Override

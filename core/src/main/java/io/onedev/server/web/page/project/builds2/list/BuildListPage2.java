@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.builds2;
+package io.onedev.server.web.page.project.builds2.list;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,6 +10,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DefaultDataT
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -30,6 +31,7 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.builds2.detail.BuildDetailPage;
 
 @SuppressWarnings("serial")
 public class BuildListPage2 extends ProjectPage {
@@ -50,7 +52,12 @@ public class BuildListPage2 extends ProjectPage {
 			public void populateItem(Item<ICellPopulator<Build2>> cellItem, String componentId,
 					IModel<Build2> rowModel) {
 				Build2 build = rowModel.getObject();
-				cellItem.add(new Label(componentId, build.getNumber()));
+				Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPage2.this);
+				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDetailPage.class, 
+						BuildDetailPage.paramsOf(build));
+				link.add(new Label("label", build.getNumber()));
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
 		});
 		

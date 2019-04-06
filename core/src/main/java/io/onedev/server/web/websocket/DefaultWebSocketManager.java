@@ -1,12 +1,9 @@
 package io.onedev.server.web.websocket;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -19,31 +16,49 @@ import org.apache.wicket.protocol.ws.api.registry.IWebSocketConnectionRegistry;
 import org.apache.wicket.protocol.ws.api.registry.PageIdKey;
 import org.apache.wicket.protocol.ws.api.registry.SimpleWebSocketConnectionRegistry;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
+import org.quartz.ScheduleBuilder;
+import org.quartz.SimpleScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.utils.schedule.SchedulableTask;
+import io.onedev.commons.utils.schedule.TaskScheduler;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.web.page.base.BasePage;
 
 @Singleton
-public class DefaultWebSocketManager implements WebSocketManager {
+public class DefaultWebSocketManager implements WebSocketManager, SchedulableTask {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultWebSocketManager.class);
+	
 	private final Application application;
 	
 	private final TransactionManager transactionManager;
 	
-	private final ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
-	
 	private final WebSocketPolicy webSocketPolicy;
+	
+	private final TaskScheduler taskScheduler;
+	
+	private final ExecutorService executorService;
 	
 	private final Map<String, Map<IKey, Collection<String>>> observables = new ConcurrentHashMap<>();
 	
 	private final IWebSocketConnectionRegistry connectionRegistry = new SimpleWebSocketConnectionRegistry();
+	
+	private String taskId;
 
 	@Inject
-	public DefaultWebSocketManager(Application application, TransactionManager transactionManager, WebSocketPolicy webSocketPolicy) {
+	public DefaultWebSocketManager(Application application, TransactionManager transactionManager, 
+			WebSocketPolicy webSocketPolicy, TaskScheduler taskScheduler, ExecutorService executorService) {
 		this.application = application;
 		this.transactionManager = transactionManager;
 		this.webSocketPolicy = webSocketPolicy;
+		this.taskScheduler = taskScheduler;
+		this.executorService = executorService;
 	}
 	
 	@Override
@@ -71,50 +86,61 @@ public class DefaultWebSocketManager implements WebSocketManager {
 
 			@Override
 			public void run() {
-				for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
-					PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
-					if (connection.isOpen() && (sourcePageKey == null || !sourcePageKey.equals(pageKey))) {
-						Map<IKey, Collection<String>> sessionPages = observables.get(pageKey.getSessionId());
-						if (sessionPages != null) {
-							Collection<String> pageObservables = sessionPages.get(pageKey.getPageId());
-							if (pageObservables != null && pageObservables.contains(observable)) {
-								try {
-									connection.sendMessage(OBSERVABLE_CHANGED + ":" + observable);
-								} catch (IOException e) {
-									throw new RuntimeException(e);
+				executorService.execute(new Runnable() {
+
+					@Override
+					public void run() {
+						for (IWebSocketConnection connection: connectionRegistry.getConnections(application)) {
+							PageKey pageKey = ((WebSocketConnection) connection).getPageKey();
+							if (connection.isOpen() && (sourcePageKey == null || !sourcePageKey.equals(pageKey))) {
+								Map<IKey, Collection<String>> sessionPages = observables.get(pageKey.getSessionId());
+								if (sessionPages != null) {
+									Collection<String> pageObservables = sessionPages.get(pageKey.getPageId());
+									if (pageObservables != null && pageObservables.contains(observable)) {
+										String message = OBSERVABLE_CHANGED + ":" + observable; 
+										try {
+											connection.sendMessage(message);
+										} catch (Exception e) {
+											logger.error("Error sending websocket message: " + message, e);
+										}
+									}
 								}
 							}
 						}
 					}
-				}
+					
+				});
 			}
 			
 		});
 	}
 	
 	@Override
-	public void start() {
-		scheduledExecutorService.scheduleWithFixedDelay(new Runnable() {
-
-			@Override
-			public void run() {
-				for (IWebSocketConnection connection: new SimpleWebSocketConnectionRegistry().getConnections(application)) {
-					if (connection.isOpen()) {
-						try {
-							connection.sendMessage(WebSocketManager.KEEP_ALIVE);
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}
+	public void execute() {
+		for (IWebSocketConnection connection: new SimpleWebSocketConnectionRegistry().getConnections(application)) {
+			if (connection.isOpen()) {
+				try {
+					connection.sendMessage(WebSocketManager.KEEP_ALIVE);
+				} catch (Exception e) {
+					logger.error("Error sending websocket keep alive message", e);
 				}
 			}
-			
-		}, 0, webSocketPolicy.getIdleTimeout()/2, TimeUnit.MILLISECONDS);
+		}
+	}
+	
+	@Listen
+	public void on(SystemStarted event) {
+		taskId = taskScheduler.schedule(this);
 	}
 
+	@Listen
+	public void on(SystemStopping event) {
+		taskScheduler.unschedule(taskId);
+	}
+	
 	@Override
-	public void stop() {
-		scheduledExecutorService.shutdown();
+	public ScheduleBuilder<?> getScheduleBuilder() {
+		return SimpleScheduleBuilder.repeatSecondlyForever((int)webSocketPolicy.getIdleTimeout()/2000);
 	}
 
 }

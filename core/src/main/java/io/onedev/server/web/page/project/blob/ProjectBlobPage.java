@@ -101,7 +101,7 @@ import io.onedev.server.web.page.project.blob.search.advanced.AdvancedSearchPane
 import io.onedev.server.web.page.project.blob.search.quick.QuickSearchPanel;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
-import io.onedev.server.web.util.resource.RawBlobResourceReference;
+import io.onedev.server.web.stream.RawBlobStreamResourceReference;
 import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
@@ -191,7 +191,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		
 		if (params.get(PARAM_RAW).toBoolean(false)) {
 			RequestCycle.get().scheduleRequestHandlerAfterCurrent(
-					new ResourceReferenceRequestHandler(new RawBlobResourceReference(), getPageParameters()));
+					new ResourceReferenceRequestHandler(new RawBlobStreamResourceReference(), getPageParameters()));
 		}
 	}
 	

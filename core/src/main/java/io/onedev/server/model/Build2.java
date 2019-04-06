@@ -237,4 +237,8 @@ public class Build2 extends AbstractEntity {
 		return paramMap;
 	}
 
+	public static String getLogWebSocketObservable(Long buildId) {
+		return "build-log:" + buildId;
+	}
+	
 }

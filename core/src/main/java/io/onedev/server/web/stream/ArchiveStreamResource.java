@@ -1,4 +1,4 @@
-package io.onedev.server.web.util.resource;
+package io.onedev.server.web.stream;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -18,18 +18,17 @@ import org.eclipse.jgit.archive.TgzFormat;
 import org.eclipse.jgit.archive.ZipFormat;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 
-public class ArchiveResource extends AbstractResource {
+public class ArchiveStreamResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String PARAM_DEPOT = "project";
+	private static final String PARAM_PROJECT = "project";
 	
 	private static final String PARAM_REVISION = "revision";
 	
@@ -43,14 +42,14 @@ public class ArchiveResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		String projectName = Preconditions.checkNotNull(params.get(PARAM_DEPOT).toString());
+		String projectName = params.get(PARAM_PROJECT).toString();
 		if (StringUtils.isBlank(projectName))
 			throw new IllegalArgumentException("project name has to be specified");
 		
 		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
 		
 		if (project == null) 
-			throw new EntityNotFoundException("Unable to find project " + projectName);
+			throw new EntityNotFoundException("Unable to find project: " + projectName);
 		
 		String revision = params.get(PARAM_REVISION).toString();
 		if (StringUtils.isBlank(revision))
@@ -106,7 +105,7 @@ public class ArchiveResource extends AbstractResource {
 
 	public static PageParameters paramsOf(Project project, String revision, String format) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_DEPOT, project.getName());
+		params.set(PARAM_PROJECT, project.getName());
 		params.set(PARAM_REVISION, revision);
 		params.set(PARAM_FORMAT, format);
 		

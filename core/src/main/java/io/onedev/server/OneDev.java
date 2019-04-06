@@ -35,7 +35,6 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.jetty.JettyRunner;
 import io.onedev.server.util.serverconfig.ServerConfig;
-import io.onedev.server.web.websocket.WebSocketManager;
 
 public class OneDev extends AbstractPlugin implements Serializable {
 
@@ -63,12 +62,10 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	private volatile InitStage initStage;
 	
-	private final WebSocketManager webSocketManager;
-	
 	@Inject
 	public OneDev(JettyRunner jettyRunner, PersistManager persistManager, TaskScheduler taskScheduler,
-			SessionManager sessionManager, ServerConfig serverConfig, DataManager dataManager, SettingManager configManager, 
-			UserManager userManager, ListenerRegistry listenerRegistry, WebSocketManager webSocketManager) {
+			SessionManager sessionManager, ServerConfig serverConfig, DataManager dataManager, 
+			SettingManager configManager, UserManager userManager, ListenerRegistry listenerRegistry) {
 		this.jettyRunner = jettyRunner;
 		this.persistManager = persistManager;
 		this.taskScheduler = taskScheduler;
@@ -78,7 +75,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		this.serverConfig = serverConfig;
 		this.userManager = userManager;
 		this.listenerRegistry = listenerRegistry;
-		this.webSocketManager = webSocketManager;
 		
 		initStage = new InitStage("Server is Starting...");
 	}
@@ -108,8 +104,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		} finally {
 			sessionManager.closeSession();
 		}
-		
-		webSocketManager.start();
 	}
 	
 	@Sessional
@@ -174,8 +168,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 
 	@Override
 	public void stop() {
-		webSocketManager.stop();
-		
 		sessionManager.openSession();
 		try {
 			listenerRegistry.post(new SystemStopped());

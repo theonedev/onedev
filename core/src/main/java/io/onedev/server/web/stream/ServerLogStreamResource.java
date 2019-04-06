@@ -1,4 +1,4 @@
-package io.onedev.server.web.util.resource;
+package io.onedev.server.web.stream;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import io.onedev.server.security.SecurityUtils;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 
-public class ServerLogResource extends AbstractResource {
+public class ServerLogStreamResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 
@@ -33,7 +33,7 @@ public class ServerLogResource extends AbstractResource {
 		response.disableCaching();
 		
 		try {
-			response.setFileName(URLEncoder.encode("server.log", Charsets.UTF_8.name()));
+			response.setFileName(URLEncoder.encode("server-log.txt", Charsets.UTF_8.name()));
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}

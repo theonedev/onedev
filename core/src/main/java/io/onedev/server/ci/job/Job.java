@@ -67,7 +67,9 @@ public class Job implements Serializable {
 		this.environment = environment;
 	}
 
-	@Editable(order=120, description="Specify commands to execute, with one command per line")
+	@Editable(order=120, description="Specify commands to execute in above environment, with one command per line. "
+			+ "For Windows based environments, commands will be interpretated by PowerShell, and for Unix/Linux "
+			+ "based environments, commands will be interpretated by shell")
 	@Size(min=1, message="At least one command needs to be specified")
 	public List<String> getCommands() {
 		return commands;

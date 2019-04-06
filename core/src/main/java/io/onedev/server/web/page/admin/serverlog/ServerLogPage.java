@@ -10,8 +10,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import com.google.common.base.Joiner;
 
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.resource.ServerLogResource;
-import io.onedev.server.web.util.resource.ServerLogResourceReference;
+import io.onedev.server.web.stream.ServerLogStreamResource;
+import io.onedev.server.web.stream.ServerLogStreamResourceReference;
 
 @SuppressWarnings("serial")
 public class ServerLogPage extends AdministrationPage {
@@ -26,9 +26,9 @@ public class ServerLogPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new ResourceLink<Void>("download", new ServerLogResourceReference()));
+		add(new ResourceLink<Void>("download", new ServerLogStreamResourceReference()));
 		
-		List<String> lines = ServerLogResource.readServerLog();		
+		List<String> lines = ServerLogStreamResource.readServerLog();		
 		String content;
 		if (lines.size() > MAX_DISPLAY_LINES) {
 			add(new Label("warning", "Too many log entries, displaying recent " + MAX_DISPLAY_LINES));

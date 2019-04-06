@@ -1,4 +1,4 @@
-package io.onedev.server.web.util.resource;
+package io.onedev.server.web.stream;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -19,7 +19,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -29,7 +28,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 
-public class RawBlobResource extends AbstractResource {
+public class RawBlobStreamResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 
@@ -45,14 +44,14 @@ public class RawBlobResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		String projectName = Preconditions.checkNotNull(params.get(PARAM_DEPOT).toString());
+		String projectName = params.get(PARAM_DEPOT).toString();
 		if (StringUtils.isBlank(projectName))
 			throw new IllegalArgumentException("project name has to be specified");
 
 		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
 
 		if (project == null)
-			throw new EntityNotFoundException("Unable to find project " + projectName);
+			throw new EntityNotFoundException("Unable to find project: " + projectName);
 
 		List<String> revisionAndPathSegments = new ArrayList<>();
 		String segment = params.get(PARAM_REVISION).toString();

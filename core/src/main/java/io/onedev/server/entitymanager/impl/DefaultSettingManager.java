@@ -16,7 +16,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.commons.utils.stringmatch.Matcher;
-import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.data.DataManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -263,11 +262,14 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	public JobExecutor getJobExecutor(Project project, ObjectId commitId, String jobName, String image) {
 		Matcher matcher = new ChildAwareMatcher();
 
-		for (JobExecutor executor: OneDev.getInstance(SettingManager.class).getJobExecutors()) {
+		for (JobExecutor executor: getJobExecutors()) {
 			if (executor.isEnabled() 
-					&& PatternSet.fromString(executor.getProjects()).matches(matcher, project.getName())
-					&& PatternSet.fromString(executor.getJobs()).matches(matcher, jobName)
-					&& PatternSet.fromString(executor.getEnvironments()).matches(matcher, image)) {
+					&& (executor.getProjects() == null || PatternSet.fromString(executor.getProjects()).matches(matcher, project.getName()))
+					&& (executor.getJobs() == null || PatternSet.fromString(executor.getJobs()).matches(matcher, jobName))
+					&& (executor.getEnvironments() == null || PatternSet.fromString(executor.getEnvironments()).matches(matcher, image))) {
+				if (executor.getBranches() == null)
+					return executor;
+				
 				Collection<ObjectId> descendants = commitInfoManager.getDescendants(project, Sets.newHashSet(commitId));
 				descendants.add(commitId);
 			

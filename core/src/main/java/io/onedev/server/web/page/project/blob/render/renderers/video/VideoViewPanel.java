@@ -8,8 +8,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
-import io.onedev.server.web.util.resource.RawBlobResource;
-import io.onedev.server.web.util.resource.RawBlobResourceReference;
+import io.onedev.server.web.stream.RawBlobStreamResource;
+import io.onedev.server.web.stream.RawBlobStreamResourceReference;
 
 @SuppressWarnings("serial")
 public class VideoViewPanel extends BlobViewPanel {
@@ -22,8 +22,8 @@ public class VideoViewPanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String url = RequestCycle.get().urlFor(new RawBlobResourceReference(), 
-				RawBlobResource.paramsOf(context.getProject(), context.getBlobIdent())).toString();
+		String url = RequestCycle.get().urlFor(new RawBlobStreamResourceReference(), 
+				RawBlobStreamResource.paramsOf(context.getProject(), context.getBlobIdent())).toString();
 
 		add(new WebMarkupContainer("video").add(AttributeAppender.append("src", url)));
 	}

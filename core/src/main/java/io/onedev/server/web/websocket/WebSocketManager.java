@@ -20,8 +20,4 @@ public interface WebSocketManager {
 	
 	void notifyObservableChange(String observable, @Nullable PageKey sourcePageKey);
 	
-	void start();
-	
-	void stop();
-	
 }

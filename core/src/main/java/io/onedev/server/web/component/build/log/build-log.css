@@ -1,0 +1,34 @@
+.build-log {
+    overflow: auto;
+    height: 600px;
+    background: black;
+    color: white;
+    border-radius: 4px;
+}
+.build-log>.log-entry {
+    display: table-row;
+}
+.build-log>.log-entry.ERROR {
+    color: red;
+}
+.build-log>.log-entry.WARN {
+    color: yellow;
+}
+.build-log>.log-entry.DEBUG {
+    color: lightgray;
+}
+.build-log>.log-entry.TRACE {
+    color: darkgray;
+}
+.build-log>.log-entry>* {
+    display: table-cell;
+    padding-right: 8px;
+}
+.build-log>.log-entry>.message {
+    padding-right: 0;
+}
+.build-log>.too-many-entries {
+    color: red;
+    font-size: 16px;
+    font-weight: bold;
+}
