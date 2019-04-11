@@ -90,7 +90,7 @@ public class BranchProtectionPage extends ProjectSettingPage {
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment("newProtection", "editNewFrag", getPage());
 				fragment.setOutputMarkupId(true);
-				fragment.add(new BranchProtectionEditor("editor", new BranchProtection()) {
+				fragment.add(new BranchProtectionEditPanel("editor", new BranchProtection()) {
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, BranchProtection protection) {

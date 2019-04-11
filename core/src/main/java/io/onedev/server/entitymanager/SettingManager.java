@@ -4,9 +4,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.eclipse.jgit.lib.ObjectId;
-
-import io.onedev.server.model.Project;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.support.authenticator.Authenticator;
 import io.onedev.server.model.support.jobexecutor.JobExecutor;
@@ -108,9 +105,4 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveJobExecutors(List<JobExecutor> jobExecutors);
 
-	@Nullable
-	JobExecutor getJobExecutor(Project project, ObjectId commitId, String jobName, String image);
-	
-	@Nullable
-	JobExecutor getJobExecutor(String runningInstance);
 }

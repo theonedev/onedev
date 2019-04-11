@@ -26,12 +26,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
+import com.google.common.base.Throwables;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.event.build2.BuildFinished;
 import io.onedev.server.model.Build2;
@@ -42,6 +46,8 @@ import io.onedev.server.web.websocket.WebSocketManager;
 @Singleton
 public class DefaultLogManager implements LogManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultLogManager.class);
+	
 	private static final int MIN_CACHE_ENTRIES = 5000;
 
 	private static final int MAX_CACHE_ENTRIES = 10000;
@@ -69,57 +75,74 @@ public class DefaultLogManager implements LogManager {
 		return new File(buildDir, LOG_FILE);
 	}
 	
-	@Sessional
 	@Override
-	public JobLogger getLogger(Long projectId, Long buildId, LogLevel loggerLevel) {
-		return new JobLogger() {
+	public void clearLogger(Long projectId, Long buildId) {
+		Lock lock = LockUtils.getReadWriteLock(getLockKey(buildId)).writeLock();
+		lock.lock();
+		try {
+			FileUtils.deleteFile(getLogFile(projectId, buildId));
+			recentSnippets.remove(buildId);
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public Logger getLogger(Long projectId, Long buildId, LogLevel loggerLevel) {
+		return new JobLogger(loggerLevel) {
 			
-			@Override
-			public void log(LogLevel logLevel, String message) {
-				if (logLevel.ordinal() <= loggerLevel.ordinal()) {
-					Lock lock = LockUtils.getReadWriteLock(getLockKey(buildId)).writeLock();
-					lock.lock();
-					try {
-						LogSnippet snippet = recentSnippets.get(buildId);
-						File logFile = getLogFile(projectId, buildId);
-						if (snippet == null) {
-							snippet = new LogSnippet();
-							if (logFile.exists()) {
-								try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)))) {
-									while (true) {
-										ois.readObject();
-										snippet.offset++;
-									}
-								} catch (EOFException e) {
-								} catch (IOException | ClassNotFoundException e) {
-									throw new RuntimeException(e);
-								} 
-							}
-							recentSnippets.put(buildId, snippet);
-						}
-						snippet.entries.add(new LogEntry(new Date(), logLevel, message));
-						if (snippet.entries.size() > MAX_CACHE_ENTRIES) {
-							try (ObjectOutputStream oos = newOutputStream(logFile)) {
-								while (snippet.entries.size() > MIN_CACHE_ENTRIES) {
-									LogEntry entry = snippet.entries.remove(0);
-									oos.writeObject(entry);
-									snippet.offset++;
-								}
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-						}
-						
-						webSocketManager.notifyObservableChange(Build2.getLogWebSocketObservable(buildId), null);
-					} finally {
-						lock.unlock();
-					}
-				}
-			}
+			private static final long serialVersionUID = 1L;
 
 			@Override
-			public LogLevel getLogLevel() {
-				return loggerLevel;
+			public void log(LogLevel logLevel, String message, Throwable throwable) {
+				try {
+					if (throwable != null) {
+						for (String line: Splitter.on(EOL_PATTERN).split(Throwables.getStackTraceAsString(throwable)))
+							message += "\n    " + line;
+					}
+							
+					if (logLevel.ordinal() <= loggerLevel.ordinal()) {
+						Lock lock = LockUtils.getReadWriteLock(getLockKey(buildId)).writeLock();
+						lock.lock();
+						try {
+							LogSnippet snippet = recentSnippets.get(buildId);
+							File logFile = getLogFile(projectId, buildId);
+							if (snippet == null) {
+								snippet = new LogSnippet();
+								if (logFile.exists()) {
+									try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)))) {
+										while (true) {
+											ois.readObject();
+											snippet.offset++;
+										}
+									} catch (EOFException e) {
+									} catch (IOException | ClassNotFoundException e) {
+										throw new RuntimeException(e);
+									} 
+								}
+								recentSnippets.put(buildId, snippet);
+							}
+							snippet.entries.add(new LogEntry(new Date(), logLevel, message));
+							if (snippet.entries.size() > MAX_CACHE_ENTRIES) {
+								try (ObjectOutputStream oos = newOutputStream(logFile)) {
+									while (snippet.entries.size() > MIN_CACHE_ENTRIES) {
+										LogEntry entry = snippet.entries.remove(0);
+										oos.writeObject(entry);
+										snippet.offset++;
+									}
+								} catch (IOException e) {
+									throw new RuntimeException(e);
+								}
+							}
+							
+							webSocketManager.notifyObservableChange(Build2.getLogWebSocketObservable(buildId), null);
+						} finally {
+							lock.unlock();
+						}
+					}
+				} catch (Exception e) {
+					logger.error("Error logging", e);
+				}
 			}
 			
 		};

@@ -10,6 +10,7 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -21,14 +22,18 @@ public abstract class ModalPanel extends Panel {
 	private static final String CONTENT_ID = "content";
 	
 	public ModalPanel(AjaxRequestTarget target) {
-		super(((BasePage)target.getPage()).getRootComponents().newChildId());
+		this(target, null);
+	}
+	
+	public ModalPanel(AjaxRequestTarget target, IModel<?> model) {
+		super(((BasePage)target.getPage()).getRootComponents().newChildId(), model);
 		
 		BasePage page = (BasePage) target.getPage(); 
 		page.getRootComponents().add(this);
 		target.prependJavaScript(String.format("$('body').append(\"<div id='%s'></div>\");", getMarkupId()));
 		target.add(this);
 	}
-
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();

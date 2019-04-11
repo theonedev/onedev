@@ -1,7 +1,5 @@
 package io.onedev.server.web.page.project.blob.render.edit;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -55,7 +53,7 @@ public abstract class BlobEditPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new WebMarkupContainer("editPlainTab").setVisible(getPlainEditSupport() != null));
+		add(new WebMarkupContainer("editPlainTab").setVisible(this instanceof PlainEditSupport));
 		add(new WebMarkupContainer("saveTab")
 				.setVisible(context.getMode() != Mode.ADD || context.getNewPath() != null));
 		
@@ -92,7 +90,7 @@ public abstract class BlobEditPanel extends Panel {
 							if (tab == Tab.EDIT)
 								editor = newEditor("editor", editingContent);
 							else
-								editor = getPlainEditSupport().newEditor("editor", editingContent);
+								editor = ((PlainEditSupport)BlobEditPanel.this).newPlainEditor("editor", editingContent);
 							getParent().replace(editor);
 						} else {
 							commitOption.onContentChange(target);
@@ -243,9 +241,6 @@ public abstract class BlobEditPanel extends Panel {
 	
 	protected abstract FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent);
 
-	@Nullable
-	protected abstract PlainEditSupport getPlainEditSupport();
-	
 	public FormComponentPanel<byte[]> getEditor() {
 		return editor;
 	}

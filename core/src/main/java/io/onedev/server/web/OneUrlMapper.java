@@ -152,7 +152,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/settings/security", SecuritySettingPage.class));
 		add(new OnePageMapper("administration/settings/authenticator", AuthenticatorPage.class));
 
-		add(new OnePageMapper("administration/settings/job-executor", JobExecutorPage.class));
+		add(new OnePageMapper("administration/settings/job-executors", JobExecutorPage.class));
 		
 		add(new OnePageMapper("administration/settings/issue-fields", IssueFieldListPage.class));
 		add(new OnePageMapper("administration/settings/issue-states", IssueStateListPage.class));

@@ -210,7 +210,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>1.0.9</commons.version>
+		<commons.version>1.0.10</commons.version>
 		<antlr.version>4.7.2</antlr.version>
 	</properties>
 </project>

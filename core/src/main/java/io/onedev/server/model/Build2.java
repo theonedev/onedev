@@ -18,6 +18,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonView;
 
 import io.onedev.server.util.jackson.DefaultView;
@@ -27,8 +29,7 @@ import io.onedev.server.util.jackson.DefaultView;
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_user_id"), @Index(columnList="commitHash"), 
 				@Index(columnList="number"), @Index(columnList="jobName"), @Index(columnList="numberStr"), 
 				@Index(columnList="status"), @Index(columnList="submitDate"), @Index(columnList="pendingDate"),
-				@Index(columnList="runningDate"), @Index(columnList="finishDate"), 
-				@Index(columnList="jobInstance")},
+				@Index(columnList="runningDate"), @Index(columnList="finishDate")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})}
 )
 public class Build2 extends AbstractEntity {
@@ -36,6 +37,8 @@ public class Build2 extends AbstractEntity {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String STATUS = "status";
+	
+	private static final int MAX_STATUS_MESSAGE = 1024;
 	
 	public enum Status {
 		WAITING, PENDING, RUNNING, SUCCESSFUL, FAILED, IN_ERROR, CANCELLED
@@ -73,8 +76,7 @@ public class Build2 extends AbstractEntity {
 
 	private Date finishDate;
 	
-	private String jobInstance;
-	
+	@Column(length=MAX_STATUS_MESSAGE)
 	private String statusMessage;
 
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
@@ -148,7 +150,7 @@ public class Build2 extends AbstractEntity {
 	
 	public void setStatus(Status status, @Nullable String statusMessage) {
 		this.status = status;
-		this.statusMessage = statusMessage;
+		setStatusMessage(statusMessage);
 	}
 	
 	public boolean isFinished() {
@@ -212,19 +214,13 @@ public class Build2 extends AbstractEntity {
 		this.dependents = dependents;
 	}
 
-	public String getJobInstance() {
-		return jobInstance;
-	}
-
-	public void setJobInstance(String jobInstance) {
-		this.jobInstance = jobInstance;
-	}
-
 	public String getStatusMessage() {
 		return statusMessage;
 	}
 
 	public void setStatusMessage(String statusMessage) {
+		if (statusMessage != null)
+			statusMessage = StringUtils.abbreviate(statusMessage, MAX_STATUS_MESSAGE);
 		this.statusMessage = statusMessage;
 	}
 

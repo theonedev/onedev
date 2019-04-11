@@ -97,7 +97,7 @@ public class JobExecutorPage extends AdministrationPage {
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment("newExecutor", "editNewFrag", getPage());
 				fragment.setOutputMarkupId(true);
-				fragment.add(new JobExecutorEditor("editor", null) {
+				fragment.add(new JobExecutorEditPanel("editor", null) {
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, JobExecutor executor) {

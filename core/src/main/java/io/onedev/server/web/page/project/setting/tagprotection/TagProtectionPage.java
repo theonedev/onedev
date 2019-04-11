@@ -90,7 +90,7 @@ public class TagProtectionPage extends ProjectSettingPage {
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment("newProtection", "editNewFrag", getPage());
 				fragment.setOutputMarkupId(true);
-				fragment.add(new TagProtectionEditor("editor", new TagProtection()) {
+				fragment.add(new TagProtectionEditPanel("editor", new TagProtection()) {
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, TagProtection protection) {

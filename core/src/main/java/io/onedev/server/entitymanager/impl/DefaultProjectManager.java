@@ -23,6 +23,7 @@ import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.lib.StoredConfig;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +52,6 @@ import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -79,8 +79,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     
     private final AvatarManager avatarManager;
     
-    private final TransactionManager transactionManager;
-    
     private final String gitReceiveHook;
     
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
@@ -88,8 +86,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     @Inject
     public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager,  
     		UserAuthorizationManager userAuthorizationManager, BuildManager buildManager, 
-    		CacheManager cacheManager, AvatarManager avatarManager, 
-    		TransactionManager transactionManager) {
+    		CacheManager cacheManager, AvatarManager avatarManager) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -97,7 +94,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
         this.buildManager = buildManager;
         this.cacheManager = cacheManager;
         this.avatarManager = avatarManager;
-        this.transactionManager = transactionManager;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
@@ -117,8 +113,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     			if (repository == null) {
     				try {
 						repository = new FileRepository(project.getGitDir());
-						repository.getConfig().setEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, 
-								ConfigConstants.CONFIG_KEY_ALGORITHM, SupportedAlgorithm.HISTOGRAM);
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -147,18 +141,8 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     		authorization.setProject(project);
     		authorization.setUser(SecurityUtils.getUser());
     		userAuthorizationManager.save(authorization);
+           	checkSanity(project);
     	}
-       	
-    	File gitDir = project.getGitDir();
-    	
-    	transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				checkGit(gitDir);
-			}
-    		
-    	});
     }
     
     @Transactional
@@ -215,19 +199,18 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
         return true;
 	}
 	
-	private void checkGit(File gitDir) {
+	private void checkSanity(Project project) {
+		File gitDir = project.getGitDir();
 		if (gitDir.listFiles().length == 0) {
         	logger.info("Initializing git repository in '" + gitDir + "'...");
-            try {
-				Git.init().setDirectory(gitDir).setBare(true).call();
+            try (Git git = Git.init().setDirectory(gitDir).setBare(true).call()) {
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
 		} else if (!GitUtils.isValid(gitDir)) {
         	logger.warn("Directory '" + gitDir + "' is not a valid git repository, reinitializing...");
         	FileUtils.cleanDir(gitDir);
-            try {
-				Git.init().setDirectory(gitDir).setBare(true).call();
+            try (Git git = Git.init().setDirectory(gitDir).setBare(true).call()) {
 			} catch (Exception e) {
 				throw ExceptionUtils.unchecked(e);
 			}
@@ -244,6 +227,25 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
             FileUtils.writeFile(gitPostReceiveHookFile, String.format(gitReceiveHook, "git-postreceive-callback"));
             gitPostReceiveHookFile.setExecutable(true);
         }
+
+		try {
+			StoredConfig config = project.getRepository().getConfig();
+			boolean changed = false;
+			if (config.getEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, ConfigConstants.CONFIG_KEY_ALGORITHM, 
+					SupportedAlgorithm.MYERS) != SupportedAlgorithm.HISTOGRAM) {
+				config.setEnum(ConfigConstants.CONFIG_DIFF_SECTION, null, ConfigConstants.CONFIG_KEY_ALGORITHM, 
+						SupportedAlgorithm.HISTOGRAM);
+				changed = true;
+			}
+			if (!config.getBoolean("uploadpack", "allowAnySHA1InWant", false)) {
+				config.setBoolean("uploadpack", null, "allowAnySHA1InWant", true);
+				changed = true;
+			}
+			if (changed)
+				config.save();				
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	
 	@Listen
@@ -257,8 +259,9 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 
 	@Listen
 	public void on(SystemStarted event) {
+		logger.info("Checking projects...");
 		for (Project project: query())
-			checkGit(project.getGitDir());
+			checkSanity(project);
 	}
 
 	@Transactional

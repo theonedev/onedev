@@ -6,7 +6,6 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
-import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport;
 
 @SuppressWarnings("serial")
 public class NoNameEditPanel extends BlobEditPanel {
@@ -24,11 +23,6 @@ public class NoNameEditPanel extends BlobEditPanel {
 	@Override
 	protected FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
 		return new NoNameFormComponent(componentId);
-	}
-
-	@Override
-	protected PlainEditSupport getPlainEditSupport() {
-		return null;
 	}
 
 }

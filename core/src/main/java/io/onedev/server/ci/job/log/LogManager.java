@@ -3,11 +3,15 @@ package io.onedev.server.ci.job.log;
 import java.io.InputStream;
 import java.util.List;
 
+import org.slf4j.Logger;
+
 import io.onedev.server.model.Build2;
 
 public interface LogManager {
 	
-	JobLogger getLogger(Long projectId, Long buildId, LogLevel logLevel);
+	void clearLogger(Long projectId, Long buildId);
+	
+	Logger getLogger(Long projectId, Long buildId, LogLevel logLevel);
 	
 	/**
 	 * Read specified number of log entries from specified build, starting from specified index 

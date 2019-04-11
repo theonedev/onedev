@@ -10,32 +10,25 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 
-public class FetchCommand extends GitCommand<Void> {
+public class InitCommand extends GitCommand<Void> {
 
-	private static final Logger logger = LoggerFactory.getLogger(FetchCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(InitCommand.class);
 	
     private String from;
     
-    private int depth;
-    
     private String[] refspec = new String[0];
     
-	public FetchCommand(final File gitDir) {
+	public InitCommand(final File gitDir) {
 		super(gitDir);
 	}
 
-	public FetchCommand from(String from) {
+	public InitCommand from(String from) {
 	    this.from = from;
 	    return this;
 	}
 	
-	public FetchCommand refspec(String... refspec) {
+	public InitCommand refspec(String... refspec) {
 		this.refspec = refspec;
-		return this;
-	}
-
-	public FetchCommand depth(int depth) {
-		this.depth = depth;
 		return this;
 	}
 	
@@ -45,9 +38,7 @@ public class FetchCommand extends GitCommand<Void> {
 	    
 		Commandline cmd = cmd().addArgs("fetch");
 		cmd.addArgs(from);
-		cmd.addArgs("--force", "--quiet");
-		if (depth != 0)
-			cmd.addArgs("--depth", String.valueOf(depth));
+		cmd.addArgs("--force");
 		
 		for (String each: refspec)
 			cmd.addArgs(each);
@@ -63,7 +54,14 @@ public class FetchCommand extends GitCommand<Void> {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				if (line.startsWith("From ") 
+						|| line.startsWith(" * branch") 
+						|| line.startsWith(" * [new ref]") 
+						|| line.contains("..") && line.contains("->")) {
+					logger.info(line);
+				} else {
+					logger.error(line);
+				}
 			}
 			
 		}).checkReturnCode();

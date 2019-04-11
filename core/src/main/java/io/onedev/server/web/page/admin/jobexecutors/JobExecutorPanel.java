@@ -35,7 +35,7 @@ abstract class JobExecutorPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				JobExecutorEditor editor = new JobExecutorEditor("executor", executor) {
+				JobExecutorEditPanel editor = new JobExecutorEditPanel("executor", executor) {
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, JobExecutor executor) {

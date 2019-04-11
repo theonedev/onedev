@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.renderers.gitlink;
 
 import org.apache.wicket.AttributeModifier;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -34,6 +35,12 @@ public class GitLinkPanel extends BlobViewPanel {
 			link.add(AttributeModifier.replace("href", submodule.getUrl() + "/blob/" + submodule.getCommitId()));
 		} else {
 			link = new Link<Void>("link") {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.setName("span");
+				}
 
 				@Override
 				public void onClick() {

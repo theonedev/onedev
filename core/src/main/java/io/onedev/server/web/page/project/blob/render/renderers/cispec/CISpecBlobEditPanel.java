@@ -11,7 +11,7 @@ import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditPanel;
 import io.onedev.server.web.page.project.blob.render.edit.plain.PlainEditSupport;
 
 @SuppressWarnings("serial")
-public class CISpecBlobEditPanel extends BlobEditPanel {
+public class CISpecBlobEditPanel extends BlobEditPanel implements PlainEditSupport {
 
 	public CISpecBlobEditPanel(String id, BlobRenderContext context) {
 		super(id, context);
@@ -29,15 +29,8 @@ public class CISpecBlobEditPanel extends BlobEditPanel {
 	}
 
 	@Override
-	protected PlainEditSupport getPlainEditSupport() {
-		return new PlainEditSupport() {
-
-			@Override
-			public FormComponentPanel<byte[]> newEditor(String componentId, byte[] initialContent) {
-				return new PlainEditPanel(componentId, CISpec.BLOB_PATH, initialContent);
-			}
-			
-		};
+	public FormComponentPanel<byte[]> newPlainEditor(String componentId, byte[] initialContent) {
+		return new PlainEditPanel(componentId, CISpec.BLOB_PATH, initialContent);
 	}
-
+			
 }

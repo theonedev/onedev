@@ -35,7 +35,7 @@ abstract class TagProtectionPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				TagProtectionEditor editor = new TagProtectionEditor("protection", protection) {
+				TagProtectionEditPanel editor = new TagProtectionEditPanel("protection", protection) {
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, TagProtection protection) {

@@ -35,7 +35,7 @@ abstract class BranchProtectionPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				BranchProtectionEditor editor = new BranchProtectionEditor("protection", protection) {
+				BranchProtectionEditPanel editor = new BranchProtectionEditPanel("protection", protection) {
 
 					@Override
 					protected void onSave(AjaxRequestTarget target, BranchProtection protection) {
