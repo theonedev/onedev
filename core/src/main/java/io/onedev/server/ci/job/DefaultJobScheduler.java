@@ -146,10 +146,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	
 	private List<Build2> submit(Project project, @Nullable User user, String commitHash, String jobName, 
 			Map<String, String> paramMap, List<String> dependencyChain) {
-		System.out.println("1");
 		List<Build2> builds = buildManager.query(project, commitHash, jobName, paramMap);
 		if (builds.isEmpty()) {
-			System.out.println("2");
 			Build2 build = new Build2();
 			build.setProject(project);
 			build.setCommitHash(commitHash);
@@ -214,7 +212,6 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 
 			buildManager.create(build);
 			listenerRegistry.post(new BuildSubmitted(build));
-			System.out.println("3");
 		}
 		return builds;
 	}
