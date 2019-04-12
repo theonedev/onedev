@@ -99,6 +99,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		EntityCriteria<Issue> criteria = newCriteria();
 		criteria.add(Restrictions.eq("project", project));
 		criteria.add(Restrictions.eq("number", number));
+		criteria.setCacheable(true);
 		return find(criteria);
 	}
 	

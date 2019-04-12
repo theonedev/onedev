@@ -26,6 +26,8 @@ import javax.transaction.Synchronization;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.inject.Inject;
 
@@ -35,10 +37,12 @@ import io.onedev.server.persistence.annotation.Transactional;
 @Singleton
 public class DefaultTransactionManager implements TransactionManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultTransactionManager.class);
+	
 	private final SessionManager sessionManager;
 	
 	private final ExecutorService executorService;
-
+	
 	@Inject
 	public DefaultTransactionManager(SessionManager sessionManager, ExecutorService executorService) {
 		this.sessionManager = sessionManager;
@@ -93,7 +97,11 @@ public class DefaultTransactionManager implements TransactionManager {
 
 			@Override
 			public void run() {
-				DefaultTransactionManager.this.run(runnable);
+				try {
+					DefaultTransactionManager.this.run(runnable);
+				} catch (Exception e) {
+					logger.error("Error running", e);
+				}
 			}
 			
 		});
@@ -110,8 +118,13 @@ public class DefaultTransactionManager implements TransactionManager {
 				
 				@Override
 				public void afterCompletion(int status) {
-					if (status == Status.STATUS_COMMITTED)
-						runnable.run();
+					if (status == Status.STATUS_COMMITTED) {
+						try {
+							runnable.run();
+						} catch (Exception e) {
+							logger.error("Error running", e);
+						}
+					}
 				}
 				
 			});
@@ -126,7 +139,18 @@ public class DefaultTransactionManager implements TransactionManager {
 
 			@Override
 			public void run() {
-				executorService.execute(runnable);
+				executorService.execute(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							runnable.run();
+						} catch (Exception e) {
+							logger.error("Error running", e);
+						}
+					}
+					
+				});
 			}
 			
 		});

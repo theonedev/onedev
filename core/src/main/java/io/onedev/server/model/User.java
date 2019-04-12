@@ -2,7 +2,6 @@ package io.onedev.server.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.UUID;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -56,9 +55,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Column(unique=true, nullable=false)
 	private String email;
-	
-	@Column(nullable=false)
-	private String uuid = UUID.randomUUID().toString();
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
@@ -202,14 +198,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setIssueQuerySettings(Collection<IssueQuerySetting> issueQuerySettings) {
 		this.issueQuerySettings = issueQuerySettings;
-	}
-
-	public String getUUID() {
-		return uuid;
-	}
-
-	public void setUUID(String uuid) {
-		this.uuid = uuid;
 	}
 
 	@Override

@@ -920,4 +920,45 @@ public class DatabaseMigrator {
 		}
 	}
 	
+	private void migrate23(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Build2s.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element runInstanceIdElement = element.element("runInstanceId");
+					if (runInstanceIdElement != null)
+						runInstanceIdElement.detach();
+					Element errorMessageElement = element.element("errorMessage");
+					if (errorMessageElement != null)
+						errorMessageElement.setName("statusMessage");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("uuid").detach();
+					if (element.element("issueSetting") == null)
+						element.addElement("issueSetting");
+					if (element.element("savedCommitQueries") == null) 
+						element.addElement("savedCommitQueries");
+					if (element.element("savedPullRequestQueries") == null) 
+						element.addElement("savedPullRequestQueries");
+					if (element.element("savedCodeCommentQueries") == null) 
+						element.addElement("savedCodeCommentQueries");
+					if (element.element("savedBuildQueries") == null) 
+						element.addElement("savedBuildQueries");
+					if (element.element("webHooks") == null) 
+						element.addElement("webHooks");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("uuid").detach();
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

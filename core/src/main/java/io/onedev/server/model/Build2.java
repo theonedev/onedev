@@ -19,6 +19,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
@@ -32,6 +34,7 @@ import io.onedev.server.util.jackson.DefaultView;
 				@Index(columnList="runningDate"), @Index(columnList="finishDate")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})}
 )
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class Build2 extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

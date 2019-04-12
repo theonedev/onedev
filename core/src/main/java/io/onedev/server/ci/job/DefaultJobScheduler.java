@@ -57,7 +57,7 @@ import io.onedev.server.util.MatrixRunner;
 @Singleton
 public class DefaultJobScheduler implements JobScheduler, Runnable {
 
-	private static final int CHECK_INTERVAL = 5;
+	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultJobScheduler.class);
 	
@@ -146,8 +146,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	
 	private List<Build2> submit(Project project, @Nullable User user, String commitHash, String jobName, 
 			Map<String, String> paramMap, List<String> dependencyChain) {
+		System.out.println("1");
 		List<Build2> builds = buildManager.query(project, commitHash, jobName, paramMap);
 		if (builds.isEmpty()) {
+			System.out.println("2");
 			Build2 build = new Build2();
 			build.setProject(project);
 			build.setCommitHash(commitHash);
@@ -212,6 +214,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 
 			buildManager.create(build);
 			listenerRegistry.post(new BuildSubmitted(build));
+			System.out.println("3");
 		}
 		return builds;
 	}
@@ -361,7 +364,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	public synchronized void run() {
 		while (true) {
 			try {
-				wait(CHECK_INTERVAL * 1000L);
+				wait(CHECK_INTERVAL);
 			} catch (InterruptedException e) {
 			}
 			try {

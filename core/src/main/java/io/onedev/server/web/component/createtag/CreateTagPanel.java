@@ -119,7 +119,7 @@ public abstract class CreateTagPanel extends Panel {
 						target.focusComponent(nameInput);
 						target.add(form);
 					} else {
-						project.tag(tagName, revision, user.asPerson(), tagMessage);
+						project.createTag(tagName, revision, user.asPerson(), tagMessage);
 						onCreate(target, tagName);
 					}
 				}

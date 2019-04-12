@@ -17,13 +17,10 @@ public class ProjectFacade extends EntityFacade {
 	
 	private final DefaultPrivilege defaultPrivilege;
 	
-	private final String uuid;
-	
 	public ProjectFacade(Project project) {
 		super(project.getId());
 		name = project.getName();
 		defaultPrivilege = project.getDefaultPrivilege();
-		uuid = project.getUUID();
 	}
 	
 	public String getName() {
@@ -32,10 +29,6 @@ public class ProjectFacade extends EntityFacade {
 
 	public DefaultPrivilege getDefaultPrivilege() {
 		return defaultPrivilege;
-	}
-
-	public String getUUID() {
-		return uuid;
 	}
 
 	public static int compareLastVisit(ProjectFacade project1, ProjectFacade project2) {

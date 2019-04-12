@@ -544,7 +544,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Listen
 	public void on(RefUpdated event) {
 		String branch = GitUtils.ref2branch(event.getRefName());
-		if (branch != null) {
+		if (branch != null && !event.getOldCommitId().equals(ObjectId.zeroId())) {
 			ProjectAndBranch projectAndBranch = new ProjectAndBranch(event.getProject(), branch);
 			Criterion criterion = Restrictions.and(
 					ofOpen(), 

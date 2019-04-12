@@ -52,6 +52,7 @@ public class DefaultBuild2Manager extends AbstractEntityManager<Build2> implemen
 		EntityCriteria<Build2> criteria = newCriteria();
 		criteria.add(Restrictions.eq("project", project));
 		criteria.add(Restrictions.eq("number", number));
+		criteria.setCacheable(true);
 		return find(criteria);
 	}
 
@@ -91,6 +92,7 @@ public class DefaultBuild2Manager extends AbstractEntityManager<Build2> implemen
 				Restrictions.eq("status", Status.PENDING), 
 				Restrictions.eq("status", Status.RUNNING), 
 				Restrictions.eq("status", Status.WAITING)));
+		criteria.setCacheable(true);
 		return query(criteria);
 	}
 

@@ -3,6 +3,7 @@ package io.onedev.server.persistence.dao;
 import java.io.Serializable;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.hibernate.CacheMode;
 import org.hibernate.Criteria;
 import org.hibernate.FetchMode;
 import org.hibernate.HibernateException;
@@ -67,6 +68,18 @@ public class EntityCriteria<T extends AbstractEntity> implements CriteriaSpecifi
 	public EntityCriteria<T> addOrder(Order order) {
 		criteria.addOrder(order);
 		return this;
+	}
+	
+	public void setCacheable(boolean cacheable) {
+		criteria.setCacheable(cacheable);
+	}
+	
+	public void setCacheMode(CacheMode cacheMode) {
+		criteria.setCacheMode(cacheMode);
+	}
+	
+	public void setCacheRegion(String cacheRegion) {
+		criteria.setCacheRegion(cacheRegion);
 	}
 
 	public EntityCriteria<T> createAlias(String associationPath, String alias)

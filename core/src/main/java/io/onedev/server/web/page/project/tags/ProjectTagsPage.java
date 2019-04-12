@@ -239,7 +239,7 @@ public class ProjectTagsPage extends ProjectPage {
 								target.focusComponent(nameInput);
 								target.add(form);
 							} else {
-								getProject().tag(tagName, tagRevision, getLoginUser().asPerson(), tagMessage);
+								getProject().createTag(tagName, tagRevision, getLoginUser().asPerson(), tagMessage);
 								modal.close();
 								target.add(tagsContainer);
 								newPagingNavigation(target);

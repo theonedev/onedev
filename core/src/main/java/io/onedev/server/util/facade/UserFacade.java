@@ -15,15 +15,12 @@ public class UserFacade extends EntityFacade {
 	
 	private final String email;
 	
-	private final String uuid;
-	
 	public UserFacade(User user) {
 		super(user.getId());
 
 		name = user.getName();
 		fullName = user.getFullName();
 		email = user.getEmail();
-		uuid = user.getUUID();
 	}
 
 	public String getName() {
@@ -36,10 +33,6 @@ public class UserFacade extends EntityFacade {
 
 	public String getEmail() {
 		return email;
-	}
-	
-	public String getUUID() {
-		return uuid;
 	}
 
 	public boolean isRoot() {

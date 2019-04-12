@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.stream.Collectors;
@@ -102,6 +101,7 @@ import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.issue.IssueSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.DefaultPrivilege;
 import io.onedev.server.storage.StorageManager;
@@ -114,7 +114,7 @@ import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Entity
-@Table(indexes={@Index(columnList="o_forkedFrom_id")})
+@Table(indexes={@Index(columnList="o_forkedFrom_id"), @Index(columnList="name")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @DynamicUpdate
 @Editable
@@ -143,9 +143,6 @@ public class Project extends AbstractEntity {
 	@Column(length=65535, name="COMMIT_MSG_TRANSFORM")
 	@JsonView(DefaultView.class)
 	private ArrayList<CommitMessageTransform> commitMessageTransforms = new ArrayList<>();
-	
-	@Column(nullable=false)
-	private String uuid = UUID.randomUUID().toString();
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
@@ -209,37 +206,68 @@ public class Project extends AbstractEntity {
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
-	private transient List<Milestone> sortedMilestones;
+	@Lob
+	@Column(length=65535)
+	@JsonView(DefaultView.class)
+	private IssueSetting issueSetting = new IssueSetting();
 	
 	@Lob
 	@Column(length=65535)
 	@JsonView(DefaultView.class)
-	private IssueSetting issueSetting;
+	private ArrayList<NamedCommitQuery> savedCommitQueries = new ArrayList<>();
+	{
+		savedCommitQueries.add(new NamedCommitQuery("All", "all"));
+		savedCommitQueries.add(new NamedCommitQuery("Default branch", "default-branch"));
+		savedCommitQueries.add(new NamedCommitQuery("Authored by me", "authored-by-me"));
+		savedCommitQueries.add(new NamedCommitQuery("Committed by me", "committed-by-me"));
+		savedCommitQueries.add(new NamedCommitQuery("Committed recently", "after(last week)"));
+	}
 	
 	@Lob
 	@Column(length=65535)
 	@JsonView(DefaultView.class)
-	private ArrayList<NamedCommitQuery> savedCommitQueries;
+	private ArrayList<NamedPullRequestQuery> savedPullRequestQueries = new ArrayList<>();
+	{
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Open", "open"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("To be reviewed by me", "to be reviewed by me"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("To be changed by me", "submitted by me and someone requested for changes"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Request for changes by me", "requested for changes by me"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Approved by me", "approved by me"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted by me", "submitted by me"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("Closed", "merged or discarded"));
+		savedPullRequestQueries.add(new NamedPullRequestQuery("All", "all"));
+	}
 	
 	@Lob
 	@Column(length=65535)
 	@JsonView(DefaultView.class)
-	private ArrayList<NamedPullRequestQuery> savedPullRequestQueries;
+	private ArrayList<NamedCodeCommentQuery> savedCodeCommentQueries = new ArrayList<>(); 
+	{
+		savedCodeCommentQueries.add(new NamedCodeCommentQuery("All", "all"));
+		savedCodeCommentQueries.add(new NamedCodeCommentQuery("Created by me", "created by me"));
+		savedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is after \"last week\""));
+		savedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+	}
 	
 	@Lob
 	@Column(length=65535)
 	@JsonView(DefaultView.class)
-	private ArrayList<NamedCodeCommentQuery> savedCodeCommentQueries;
+	private ArrayList<NamedBuildQuery> savedBuildQueries = new ArrayList<>();
+	{
+		savedBuildQueries.add(new NamedBuildQuery("All", "all"));
+		savedBuildQueries.add(new NamedBuildQuery("Successful", "successful"));
+		savedBuildQueries.add(new NamedBuildQuery("Failed", "failed"));
+		savedBuildQueries.add(new NamedBuildQuery("In error", "in error"));
+		savedBuildQueries.add(new NamedBuildQuery("Running", "running"));
+		savedBuildQueries.add(new NamedBuildQuery("Build recently", "\"Build Date\" is after \"last week\""));
+	}
 	
 	@Lob
 	@Column(length=65535)
 	@JsonView(DefaultView.class)
-	private ArrayList<NamedBuildQuery> savedBuildQueries;
-	
-	@Lob
-	@Column(length=65535)
-	@JsonView(DefaultView.class)
-	private ArrayList<WebHook> webHooks;
+	private ArrayList<WebHook> webHooks = new ArrayList<>();
 	
 	private transient Repository repository;
 	
@@ -267,6 +295,8 @@ public class Project extends AbstractEntity {
     
     private transient Optional<CommitQuerySetting> commitQuerySettingOfCurrentUserHolder;
     
+	private transient List<Milestone> sortedMilestones;
+	
 	@Editable(order=100)
 	@ProjectName
 	@NotEmpty
@@ -309,14 +339,6 @@ public class Project extends AbstractEntity {
 
 	public void setCommitMessageTransforms(ArrayList<CommitMessageTransform> commitMessageTransforms) {
 		this.commitMessageTransforms = commitMessageTransforms;
-	}
-
-	public String getUUID() {
-		return uuid;
-	}
-
-	public void setUUID(String uuid) {
-		this.uuid = uuid;
 	}
 
 	public ArrayList<BranchProtection> getBranchProtections() {
@@ -839,18 +861,25 @@ public class Project extends AbstractEntity {
 		}
     	
     	Subject subject = SecurityUtils.getSubject();
-    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
+    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				ThreadContext.bind(subject);
-				try {
-					Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-					OneDev.getInstance(ListenerRegistry.class).post(
-							new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
-				} finally {
-					ThreadContext.unbindSubject();
-				}
+		    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						ThreadContext.bind(subject);
+						try {
+							Project project = OneDev.getInstance(ProjectManager.class).load(getId());
+							OneDev.getInstance(ListenerRegistry.class).post(
+									new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
+						} finally {
+							ThreadContext.unbindSubject();
+						}
+					}
+		    		
+		    	});
 			}
     		
     	});
@@ -863,13 +892,39 @@ public class Project extends AbstractEntity {
 			RevCommit commit = getRevCommit(branchRevision);
 			command.setStartPoint(getRevCommit(branchRevision));
 			command.call();
-			cacheObjectId(GitUtils.branch2ref(branchName), commit);
+			String refName = GitUtils.branch2ref(branchName); 
+			cacheObjectId(refName, commit);
+			
+	    	Subject subject = SecurityUtils.getSubject();
+	    	ObjectId commitId = commit.copy();
+	    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+			    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
+
+						@Override
+						public void run() {
+							ThreadContext.bind(subject);
+							try {
+								Project project = OneDev.getInstance(ProjectManager.class).load(getId());
+								OneDev.getInstance(ListenerRegistry.class).post(
+										new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
+							} finally {
+								ThreadContext.unbindSubject();
+							}
+						}
+			    		
+			    	});
+				}
+	    		
+	    	});			
 		} catch (GitAPIException e) {
 			throw new RuntimeException(e);
 		}
     }
     
-    public void tag(String tagName, String tagRevision, PersonIdent taggerIdent, @Nullable String tagMessage) {
+    public void createTag(String tagName, String tagRevision, PersonIdent taggerIdent, @Nullable String tagMessage) {
 		try {
 			TagCommand tag = git().tag();
 			tag.setName(tagName);
@@ -878,7 +933,34 @@ public class Project extends AbstractEntity {
 			tag.setTagger(taggerIdent);
 			tag.setObjectId(getRevCommit(tagRevision));
 			tag.call();
-			cacheObjectId(GitUtils.tag2ref(tagName), tag.getObjectId());
+			
+			String refName = GitUtils.tag2ref(tagName);
+			cacheObjectId(refName, tag.getObjectId());
+			
+	    	Subject subject = SecurityUtils.getSubject();
+	    	ObjectId commitId = tag.getObjectId().copy();
+	    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+			    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
+
+						@Override
+						public void run() {
+							ThreadContext.bind(subject);
+							try {
+								Project project = OneDev.getInstance(ProjectManager.class).load(getId());
+								OneDev.getInstance(ListenerRegistry.class).post(
+										new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
+							} finally {
+								ThreadContext.unbindSubject();
+							}
+						}
+			    		
+			    	});
+				}
+	    		
+	    	});			
 		} catch (GitAPIException e) {
 			throw new RuntimeException(e);
 		}
@@ -892,19 +974,27 @@ public class Project extends AbstractEntity {
 		} catch (GitAPIException e) {
 			throw new RuntimeException(e);
 		}
+
     	Subject subject = SecurityUtils.getSubject();
-    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
+    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				ThreadContext.bind(subject);
-				try {
-					Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-					OneDev.getInstance(ListenerRegistry.class).post(
-							new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
-				} finally {
-					ThreadContext.unbindSubject();
-				}
+		    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						ThreadContext.bind(subject);
+						try {
+							Project project = OneDev.getInstance(ProjectManager.class).load(getId());
+							OneDev.getInstance(ListenerRegistry.class).post(
+									new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
+						} finally {
+							ThreadContext.unbindSubject();
+						}
+					}
+		    		
+		    	});
 			}
     		
     	});
@@ -919,8 +1009,6 @@ public class Project extends AbstractEntity {
 	}
 
 	public IssueSetting getIssueSetting() {
-		if (issueSetting == null) 
-			issueSetting = new IssueSetting();
 		return issueSetting;
 	}
 
@@ -929,14 +1017,6 @@ public class Project extends AbstractEntity {
 	}
 
 	public ArrayList<NamedCommitQuery> getSavedCommitQueries() {
-		if (savedCommitQueries == null) {
-			savedCommitQueries = new ArrayList<>();
-			savedCommitQueries.add(new NamedCommitQuery("All", "all"));
-			savedCommitQueries.add(new NamedCommitQuery("Default branch", "default-branch"));
-			savedCommitQueries.add(new NamedCommitQuery("Authored by me", "authored-by-me"));
-			savedCommitQueries.add(new NamedCommitQuery("Committed by me", "committed-by-me"));
-			savedCommitQueries.add(new NamedCommitQuery("Committed recently", "after(last week)"));
-		}
 		return savedCommitQueries;
 	}
 
@@ -945,19 +1025,6 @@ public class Project extends AbstractEntity {
 	}
 	
 	public ArrayList<NamedPullRequestQuery> getSavedPullRequestQueries() {
-		if (savedPullRequestQueries == null) {
-			savedPullRequestQueries = new ArrayList<>();
-			savedPullRequestQueries.add(new NamedPullRequestQuery("Open", "open"));
-			savedPullRequestQueries.add(new NamedPullRequestQuery("To be reviewed by me", "to be reviewed by me"));
-			savedPullRequestQueries.add(new NamedPullRequestQuery("To be changed by me", "submitted by me and someone requested for changes"));
-			savedPullRequestQueries.add(new NamedPullRequestQuery("Request for changes by me", "requested for changes by me"));
-			savedPullRequestQueries.add(new NamedPullRequestQuery("Approved by me", "approved by me"));
-			savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted by me", "submitted by me"));
-			savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
-			savedPullRequestQueries.add(new NamedPullRequestQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-			savedPullRequestQueries.add(new NamedPullRequestQuery("Closed", "merged or discarded"));
-			savedPullRequestQueries.add(new NamedPullRequestQuery("All", "all"));
-		}
 		return savedPullRequestQueries;
 	}
 
@@ -1002,13 +1069,6 @@ public class Project extends AbstractEntity {
 	}
 	
 	public ArrayList<NamedCodeCommentQuery> getSavedCodeCommentQueries() {
-		if (savedCodeCommentQueries == null) {
-			savedCodeCommentQueries = new ArrayList<>();
-			savedCodeCommentQueries.add(new NamedCodeCommentQuery("All", "all"));
-			savedCodeCommentQueries.add(new NamedCodeCommentQuery("Created by me", "created by me"));
-			savedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is after \"last week\""));
-			savedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-		}
 		return savedCodeCommentQueries;
 	}
 
@@ -1017,15 +1077,6 @@ public class Project extends AbstractEntity {
 	}
 	
 	public ArrayList<NamedBuildQuery> getSavedBuildQueries() {
-		if (savedBuildQueries == null) {
-			savedBuildQueries = new ArrayList<>();
-			savedBuildQueries.add(new NamedBuildQuery("All", "all"));
-			savedBuildQueries.add(new NamedBuildQuery("Successful", "successful"));
-			savedBuildQueries.add(new NamedBuildQuery("Failed", "failed"));
-			savedBuildQueries.add(new NamedBuildQuery("In error", "in error"));
-			savedBuildQueries.add(new NamedBuildQuery("Running", "running"));
-			savedBuildQueries.add(new NamedBuildQuery("Build recently", "\"Build Date\" is after \"last week\""));
-		}
 		return savedBuildQueries;
 	}
 
@@ -1151,8 +1202,6 @@ public class Project extends AbstractEntity {
 	}
 	
 	public ArrayList<WebHook> getWebHooks() {
-		if (webHooks == null)
-			webHooks = new ArrayList<>();
 		return webHooks;
 	}
 
