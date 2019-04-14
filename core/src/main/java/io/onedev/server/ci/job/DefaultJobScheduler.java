@@ -269,6 +269,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 
 								@Override
 								public void run() {
+									logger.info("Creating workspace...");
 									File workspace = FileUtils.createTempDir("workspace");
 									try {
 										Map<String, String> envVars = new HashMap<>();
@@ -317,6 +318,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 									} finally {
 										logger.info("Deleting workspace...");
 										FileUtils.deleteDir(workspace);
+										logger.info("Workspace deleted");
 									}
 								}
 								
