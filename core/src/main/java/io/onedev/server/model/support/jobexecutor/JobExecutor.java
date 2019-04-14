@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -13,7 +14,6 @@ import org.slf4j.Logger;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.commons.utils.stringmatch.Matcher;
 import io.onedev.server.OneDev;
@@ -105,12 +105,9 @@ public abstract class JobExecutor implements Serializable {
 		this.environments = environments;
 	}
 	
-	public File createWorkspace() {
-		return Bootstrap.createTempDir("workspace");
-	}
-	
-	public abstract void execute(String environment, List<String> commands, 
-			@Nullable SourceSnapshot snapshot, Logger logger);
+	public abstract void execute(String environment, File workspace, Map<String, String> envVars, 
+			List<String> commands, @Nullable SourceSnapshot snapshot, PatternSet collectFiles, 
+			Logger logger);
 
 	public final boolean isApplicable(Project project, ObjectId commitId, String jobName, String image) {
 		Matcher matcher = new ChildAwareMatcher();

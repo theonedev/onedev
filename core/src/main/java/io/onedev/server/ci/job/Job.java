@@ -10,12 +10,12 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.job.log.LogLevel;
+import io.onedev.server.ci.job.outcome.JobOutcome;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable
 @Horizontal
@@ -31,10 +31,8 @@ public class Job implements Serializable {
 	
 	private boolean cloneSource = true;
 	
-	private boolean retrieveDependencyArtifacts = true;
+	private List<JobOutcome> outcomes = new ArrayList<>();
 	
-	private String publishArtifacts;
-
 	private List<Dependency> dependencies = new ArrayList<>();
 	
 	private List<InputSpec> promptParams = new ArrayList<>();
@@ -88,13 +86,13 @@ public class Job implements Serializable {
 		this.cloneSource = cloneSource;
 	}	
 	
-	@Editable(order=140, description="Whether or not to retrieve artifacts of dependency jobs")
-	public boolean isRetrieveDependencyArtifacts() {
-		return retrieveDependencyArtifacts;
+	@Editable(order=200, description="Specify job outcomes")
+	public List<JobOutcome> getOutcomes() {
+		return outcomes;
 	}
 
-	public void setRetrieveDependencyArtifacts(boolean retrieveDependencyArtifacts) {
-		this.retrieveDependencyArtifacts = retrieveDependencyArtifacts;
+	public void setOutcomes(List<JobOutcome> outcomes) {
+		this.outcomes = outcomes;
 	}
 
 	@Editable(order=300, description="Specify parameters to prompt when the job "
@@ -124,17 +122,6 @@ public class Job implements Serializable {
 
 	public void setTriggers(List<JobTrigger> triggers) {
 		this.triggers = triggers;
-	}
-
-	@Editable(order=600, description="Optionally specify space-separated workspace files to publish as artifacts. "
-			+ "Use * or ? for wildcard match")
-	@Patterns
-	public String getPublishArtifacts() {
-		return publishArtifacts;
-	}
-
-	public void setPublishArtifacts(String publishArtifacts) {
-		this.publishArtifacts = publishArtifacts;
 	}
 
 	@Editable(order=700, description="Specify timeout in seconds")

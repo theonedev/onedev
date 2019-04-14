@@ -1,11 +1,15 @@
 package io.onedev.server.ci.job;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,11 +26,14 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.InvalidCISpecException;
 import io.onedev.server.ci.job.log.LogManager;
+import io.onedev.server.ci.job.outcome.DependencyPopulator;
+import io.onedev.server.ci.job.outcome.JobOutcome;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.Build2Manager;
@@ -49,10 +56,12 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.jobexecutor.SourceSnapshot;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.MatrixRunner;
+import io.onedev.server.util.patternset.PatternSet;
 
 @Singleton
 public class DefaultJobScheduler implements JobScheduler, Runnable {
@@ -75,18 +84,23 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	
 	private final TransactionManager transactionManager;
 	
+	private final SessionManager sessionManager;
+	
 	private final LogManager logManager;
 	
 	private final SettingManager settingManager;
 	
 	private final ExecutorService executorService;
 	
+	private final Set<DependencyPopulator> dependencyPopulators;
+	
 	private volatile Status status;
 	
 	@Inject
 	public DefaultJobScheduler(ProjectManager projectManager, Build2Manager buildManager, 
 			UserManager userManager, ListenerRegistry listenerRegistry, SettingManager settingManager,
-			TransactionManager transactionManager, LogManager logManager, ExecutorService executorService) {
+			TransactionManager transactionManager, LogManager logManager, ExecutorService executorService,
+			SessionManager sessionManager, Set<DependencyPopulator> dependencyPopulators) {
 		this.projectManager = projectManager;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
@@ -95,6 +109,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 		this.transactionManager = transactionManager;
 		this.logManager = logManager;
 		this.executorService = executorService;
+		this.dependencyPopulators = dependencyPopulators;
+		this.sessionManager = sessionManager;
 	}
 
 	@Sessional
@@ -247,12 +263,61 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 								snapshot = null;
 							
 							Logger logger = logManager.getLogger(build.getProject().getId(), build.getId(), job.getLogLevel()); 
-						
+
+							Long buildId = build.getId();
 							JobExecution execution = new JobExecution(executorService.submit(new Runnable() {
 
 								@Override
 								public void run() {
-									executor.execute(job.getEnvironment(), job.getCommands(), snapshot, logger);
+									File workspace = FileUtils.createTempDir("workspace");
+									try {
+										Map<String, String> envVars = new HashMap<>();
+										Set<String> includeFiles = new HashSet<>();
+										Set<String> excludeFiles = new HashSet<>();
+										
+										sessionManager.run(new Runnable() {
+
+											@Override
+											public void run() {
+												Build2 build = buildManager.load(buildId);
+												logger.info("Populating dependencies...");
+												for (BuildDependence dependence: build.getDependencies()) {
+													for (DependencyPopulator populator: dependencyPopulators)
+														populator.populate(dependence.getDependency(), workspace);
+												}
+												envVars.put("ONEDEV_PROJECT", build.getProject().getName());
+												envVars.put("ONEDEV_COMMIT", commitId.name());
+												envVars.put("ONEDEV_JOB", job.getName());
+												for (BuildParam param: build.getParams()) 
+													envVars.put("ONEDEV_PARAM_" + param.getName(), param.getValue());
+												
+												for (JobOutcome outcome: job.getOutcomes()) {
+													PatternSet patternSet = PatternSet.fromString(outcome.getFilePatterns());
+													includeFiles.addAll(patternSet.getIncludes());
+													excludeFiles.addAll(patternSet.getExcludes());
+												}
+											}
+											
+										});
+
+										executor.execute(job.getEnvironment(), workspace, envVars, job.getCommands(), 
+												snapshot, new PatternSet(includeFiles, excludeFiles), logger);
+										
+										sessionManager.run(new Runnable() {
+
+											@Override
+											public void run() {
+												logger.info("Collecting job outcomes...");
+												Build2 build = buildManager.load(buildId);
+												for (JobOutcome outcome: job.getOutcomes())
+													outcome.process(build, workspace);
+											}
+											
+										});
+									} finally {
+										logger.info("Deleting workspace...");
+										FileUtils.deleteDir(workspace);
+									}
 								}
 								
 							}), job.getTimeout() * 1000L);

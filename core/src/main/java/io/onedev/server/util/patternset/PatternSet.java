@@ -1,6 +1,9 @@
 package io.onedev.server.util.patternset;
 
+import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,10 +14,12 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.unbescape.java.JavaEscape;
 
 import io.onedev.commons.utils.stringmatch.Matcher;
+import io.onedev.commons.utils.stringmatch.WildcardPathMatcher;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.util.patternset.PatternSetParser.PatternContext;
 import io.onedev.server.util.patternset.PatternSetParser.PatternsContext;
@@ -52,6 +57,19 @@ public class PatternSet implements Serializable {
 				return true;
 		}
 		return false;
+	}
+	
+	public Collection<File> listFiles(File dir) {
+		Collection<File> files = new ArrayList<>();
+		WildcardPathMatcher matcher = new WildcardPathMatcher();
+		int baseLen = dir.getAbsolutePath().length() + 1;
+		for (File file: FileUtils.listFiles(dir, null, true)) {
+			String relative = file.getAbsolutePath().substring(baseLen);
+			relative = relative.replace('\\', '/');
+			if (matches(matcher, relative))
+				files.add(file);
+		}
+		return files;
 	}
 	
 	public static PatternSet fromString(String patternSetString) {

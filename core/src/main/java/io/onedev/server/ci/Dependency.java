@@ -11,7 +11,7 @@ import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.page.project.blob.render.renderers.cispec.dependencies.DependencyEditPanel;
+import io.onedev.server.web.page.project.blob.render.renderers.cispec.dependency.DependencyEditPanel;
 
 @Editable
 public class Dependency implements Serializable {

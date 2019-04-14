@@ -11,7 +11,9 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
+import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -135,11 +137,42 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				onPropertyUpdating(target);
+				target.add(typeSelectorContainer.get("typeDescription"));
 				target.add(get(BEAN_EDITOR_ID));
 			}
 			
 		});
 		typeSelectorContainer.add(typeSelector);
+		
+		typeSelectorContainer.add(new Label("typeDescription", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				Component beanEditor = PolymorphicPropertyEditor.this.get(BEAN_EDITOR_ID);				
+				if (beanEditor instanceof BeanEditor) {
+					Class<?> beanClass = ((BeanEditor) beanEditor).getBeanDescriptor().getBeanClass(); 
+					return EditableUtils.getDescription(beanClass);
+				} else {
+					return null;
+				}
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+
+				Component beanEditor = PolymorphicPropertyEditor.this.get(BEAN_EDITOR_ID);				
+				if (beanEditor instanceof BeanEditor) {
+					Class<?> beanClass = ((BeanEditor) beanEditor).getBeanDescriptor().getBeanClass(); 
+					setVisible(EditableUtils.getDescription(beanClass) != null);
+				} else {
+					setVisible(false);
+				}
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
 		
 		add(newBeanEditor(getModelObject()));
 	}

@@ -87,6 +87,7 @@ import io.onedev.server.ci.job.DefaultJobScheduler;
 import io.onedev.server.ci.job.JobScheduler;
 import io.onedev.server.ci.job.log.DefaultLogManager;
 import io.onedev.server.ci.job.log.LogManager;
+import io.onedev.server.ci.job.outcome.DependencyPopulator;
 import io.onedev.server.command.ApplyDBConstraintsCommand;
 import io.onedev.server.command.BackupDBCommand;
 import io.onedev.server.command.CheckDataVersionCommand;
@@ -375,6 +376,7 @@ public class CoreModule extends AbstractPluginModule {
 
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
+	    contributeFromPackage(DependencyPopulator.class, DependencyPopulator.class);
 	    
 	    contribute(PersistListener.class, PullRequestNotificationManager.class);
 	    
