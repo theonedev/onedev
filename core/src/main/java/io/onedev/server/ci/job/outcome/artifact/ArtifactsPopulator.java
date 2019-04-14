@@ -1,19 +1,22 @@
-package io.onedev.server.ci.job.outcome;
+package io.onedev.server.ci.job.outcome.artifact;
 
 import java.io.File;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
 
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.ci.job.outcome.DependencyPopulator;
+import io.onedev.server.ci.job.outcome.JobOutcome;
 import io.onedev.server.model.Build2;
 
 public class ArtifactsPopulator implements DependencyPopulator {
 
 	@Override
-	public void populate(Build2 dependency, File workspace) {
-		File outcomeDir = JobOutcome.getOutcomeDir(dependency, JobArtifacts.NAME);
-		LockUtils.read(JobOutcome.getLockKey(dependency, JobArtifacts.NAME), new Callable<Void>() {
+	public void populate(Build2 dependency, File workspace, Logger logger) {
+		File outcomeDir = JobOutcome.getOutcomeDir(dependency, JobArtifacts.DIR);
+		LockUtils.read(JobOutcome.getLockKey(dependency, JobArtifacts.DIR), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {

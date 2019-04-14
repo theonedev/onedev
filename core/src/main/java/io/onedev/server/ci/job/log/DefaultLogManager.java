@@ -35,7 +35,6 @@ import com.google.common.base.Throwables;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.event.build2.BuildFinished;
 import io.onedev.server.model.Build2;
@@ -73,18 +72,6 @@ public class DefaultLogManager implements LogManager {
 	private File getLogFile(Long projectId, Long buildId) {
 		File buildDir = storageManager.getBuildDir(projectId, buildId);
 		return new File(buildDir, LOG_FILE);
-	}
-	
-	@Override
-	public void clearLogger(Long projectId, Long buildId) {
-		Lock lock = LockUtils.getReadWriteLock(getLockKey(buildId)).writeLock();
-		lock.lock();
-		try {
-			FileUtils.deleteFile(getLogFile(projectId, buildId));
-			recentSnippets.remove(buildId);
-		} finally {
-			lock.unlock();
-		}
 	}
 	
 	@Override

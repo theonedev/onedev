@@ -9,8 +9,6 @@ import io.onedev.server.model.Build2;
 
 public interface LogManager {
 	
-	void clearLogger(Long projectId, Long buildId);
-	
 	Logger getLogger(Long projectId, Long buildId, LogLevel logLevel);
 	
 	/**

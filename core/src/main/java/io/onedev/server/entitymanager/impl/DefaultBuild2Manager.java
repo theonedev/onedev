@@ -18,6 +18,7 @@ import org.hibernate.query.Query;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.entitymanager.Build2Manager;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -31,6 +32,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.storage.StorageManager;
 
 @Singleton
 public class DefaultBuild2Manager extends AbstractEntityManager<Build2> implements Build2Manager {
@@ -39,11 +41,15 @@ public class DefaultBuild2Manager extends AbstractEntityManager<Build2> implemen
 	
 	private final BuildDependenceManager buildDependenceManager;
 	
+	private final StorageManager storageManager;
+	
 	@Inject
-	public DefaultBuild2Manager(Dao dao, BuildParamManager buildParamManager, BuildDependenceManager buildDependenceManager) {
+	public DefaultBuild2Manager(Dao dao, BuildParamManager buildParamManager, 
+			BuildDependenceManager buildDependenceManager, StorageManager storageManager) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
+		this.storageManager = storageManager;
 	}
 
 	@Sessional
@@ -109,6 +115,8 @@ public class DefaultBuild2Manager extends AbstractEntityManager<Build2> implemen
 			buildParamManager.save(param);
 		for (BuildDependence dependence: build.getDependencies())
 			buildDependenceManager.save(dependence);
+		
+		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getId()));
 	}
 
 }

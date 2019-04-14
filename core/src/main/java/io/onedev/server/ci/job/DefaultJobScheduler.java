@@ -283,7 +283,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 												logger.info("Populating dependencies...");
 												for (BuildDependence dependence: build.getDependencies()) {
 													for (DependencyPopulator populator: dependencyPopulators)
-														populator.populate(dependence.getDependency(), workspace);
+														populator.populate(dependence.getDependency(), workspace, logger);
 												}
 												envVars.put("ONEDEV_PROJECT", build.getProject().getName());
 												envVars.put("ONEDEV_COMMIT", commitId.name());
@@ -310,7 +310,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 												logger.info("Collecting job outcomes...");
 												Build2 build = buildManager.load(buildId);
 												for (JobOutcome outcome: job.getOutcomes())
-													outcome.process(build, workspace);
+													outcome.process(build, workspace, logger);
 											}
 											
 										});
@@ -378,7 +378,6 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 			resubmit(dependence.getDependent());
 
 		if (build.isFinished()) {
-			logManager.clearLogger(build.getProject().getId(), build.getId());
 			build.setStatus(Build2.Status.WAITING);
 			build.setFinishDate(null);
 			build.setPendingDate(null);

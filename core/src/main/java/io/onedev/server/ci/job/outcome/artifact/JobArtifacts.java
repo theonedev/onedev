@@ -1,11 +1,14 @@
-package io.onedev.server.ci.job.outcome;
+package io.onedev.server.ci.job.outcome.artifact;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
+import org.slf4j.Logger;
+
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.ci.job.outcome.JobOutcome;
 import io.onedev.server.model.Build2;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -14,14 +17,14 @@ public class JobArtifacts extends JobOutcome {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String NAME = "artifacts";
+	public static final String DIR = "artifacts";
 	
 	@Override
-	public void process(Build2 build, File workspace) {
-		File outcomeDir = getOutcomeDir(build, NAME);
+	public void process(Build2 build, File workspace, Logger logger) {
+		File outcomeDir = getOutcomeDir(build, DIR);
 		FileUtils.createDir(outcomeDir);
 
-		LockUtils.write(getLockKey(build, NAME), new Callable<Void>() {
+		LockUtils.write(getLockKey(build, DIR), new Callable<Void>() {
 
 			@Override
 			public Void call() throws Exception {
