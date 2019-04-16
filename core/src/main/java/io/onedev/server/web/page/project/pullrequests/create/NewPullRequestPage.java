@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -37,10 +38,12 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
+import io.onedev.commons.utils.Pair;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -110,6 +113,21 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		return params;
 	}
 
+	private String suggestSourceBranch() {
+		User user = getLoginUser();
+		List<Pair<String, Integer>> branchUpdates = new ArrayList<>(); 
+		for (RefInfo refInfo: getProject().getBranches()) {
+			RevCommit commit = (RevCommit) refInfo.getPeeledObj();
+			if (commit.getAuthorIdent().getEmailAddress().equals(user.getEmail()))
+				branchUpdates.add(new Pair<>(GitUtils.ref2branch(refInfo.getRef().getName()), commit.getCommitTime()));
+		}
+		branchUpdates.sort(Comparator.comparing(Pair::getSecond));
+		if (!branchUpdates.isEmpty())
+			return branchUpdates.get(branchUpdates.size()-1).getFirst();
+		else
+			return getProject().getDefaultBranch();
+	}
+	
 	public NewPullRequestPage(PageParameters params) {
 		super(params);
 		
@@ -120,17 +138,23 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		PullRequest prevRequest = null;
 		String targetParam = params.get("target").toString();
 		String sourceParam = params.get("source").toString();
+		String suggestedSourceBranch = null;
 		if (targetParam != null) {
 			target = new ProjectAndBranch(targetParam);
 		} else {
 			prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(getProject(), getLoginUser());
 			if (prevRequest != null && prevRequest.getTarget().getObjectId(false) != null) {
 				target = prevRequest.getTarget();
-			} else if (getProject().getForkedFrom() != null) {
-				target = new ProjectAndBranch(getProject().getForkedFrom(), 
-						getProject().getForkedFrom().getDefaultBranch());
 			} else {
-				target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
+				suggestedSourceBranch = suggestSourceBranch();
+				if (!suggestedSourceBranch.equals(getProject().getDefaultBranch())) {
+					target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
+				} else if (getProject().getForkedFrom() != null) {
+					target = new ProjectAndBranch(getProject().getForkedFrom(), 
+							getProject().getForkedFrom().getDefaultBranch());
+				} else {
+					target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
+				}
 			}
 		}
 		
@@ -139,13 +163,12 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		} else {
 			if (prevRequest == null)
 				prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(getProject(), getLoginUser());
-			if (prevRequest != null && prevRequest.getSource().getObjectId(false) != null) {
+			if (prevRequest != null && prevRequest.getSource().getObjectId(false) != null) 
 				source = prevRequest.getSource();
-			} else if (getProject().getForkedFrom() != null) {
+			else if (suggestedSourceBranch != null) 
+				source = new ProjectAndBranch(getProject(), suggestedSourceBranch);
+			else
 				source = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
-			} else {
-				source = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
-			}
 		}
 
 		AtomicReference<PullRequest> pullRequestRef = new AtomicReference<>(null);
