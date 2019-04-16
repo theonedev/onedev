@@ -154,6 +154,9 @@ public class Project extends AbstractEntity {
     @OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
     private Collection<Configuration> configurations = new ArrayList<>();
     
+    @OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+    private Collection<Build2> build2s = new ArrayList<>();
+    
 	@Lob
 	@Column(nullable=false, length=65535)
 	@JsonView(DefaultView.class)

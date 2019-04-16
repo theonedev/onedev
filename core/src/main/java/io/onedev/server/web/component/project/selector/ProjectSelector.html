@@ -2,13 +2,13 @@
 	<div class="project-selector">
 		<wicket:enclosure child="search">
 		<div class="search">
-			<input wicket:id="search" class="form-control" placeholder="Search projects..."></input>
+			<input wicket:id="search" class="form-control" placeholder="Search projects...">
 		</div>
 		</wicket:enclosure>
 		<ul wicket:id="projects" class="list-unstyled projects autosize">
 			<li wicket:id="projects" class="project selectable">
 				<a wicket:id="link">
-					<i class="fa fa-ext fa-repo"></i> <span wicket:id="name"></span>
+					<img wicket:id="avatar"> <span wicket:id="name"></span>
 				</a>
 			</li>
 		</ul>

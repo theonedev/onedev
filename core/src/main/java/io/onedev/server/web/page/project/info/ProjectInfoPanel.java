@@ -51,8 +51,18 @@ public abstract class ProjectInfoPanel extends Panel {
 		
 		if (getProject().getForkedFrom() != null) {
 			Link<Void> link = new ViewStateAwarePageLink<Void>("forkedFromLink", 
-					ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject().getForkedFrom()));
+					ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject().getForkedFrom())) {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					if (!isEnabled())
+						tag.setName("span");
+				}
+				
+			};
 			link.add(new Label("name", getProject().getForkedFrom().getName()));
+			link.setEnabled(SecurityUtils.canReadCode(getProject().getForkedFrom().getFacade()));
 			add(link);
 		} else {
 			WebMarkupContainer link = new WebMarkupContainer("forkedFromLink");

@@ -64,10 +64,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private long version;
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<Membership> memberships = new ArrayList<>();
+	private Collection<UserAuthorization> authorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<UserAuthorization> authorizations = new ArrayList<>();
+	private Collection<Membership> memberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestReview> reviews = new ArrayList<>();
@@ -81,6 +81,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
     
+	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	private Collection<Build2> build2s = new ArrayList<>();
+	
     @Override
     public PrincipalCollection getPrincipals() {
         return new SimplePrincipalCollection(getId(), "");

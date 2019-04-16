@@ -135,43 +135,33 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		if (currentUser == null)
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 
-		PullRequest prevRequest = null;
 		String targetParam = params.get("target").toString();
 		String sourceParam = params.get("source").toString();
 		String suggestedSourceBranch = null;
 		if (targetParam != null) {
 			target = new ProjectAndBranch(targetParam);
 		} else {
-			prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(getProject(), getLoginUser());
-			if (prevRequest != null && prevRequest.getTarget().getObjectId(false) != null) {
-				target = prevRequest.getTarget();
+			suggestedSourceBranch = suggestSourceBranch();
+			if (!suggestedSourceBranch.equals(getProject().getDefaultBranch())) {
+				target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
+ 			} else if (getProject().getForkedFrom() != null && SecurityUtils.canReadCode(getProject().getForkedFrom().getFacade())) {
+				target = new ProjectAndBranch(getProject().getForkedFrom(), 
+						getProject().getForkedFrom().getDefaultBranch());
 			} else {
-				suggestedSourceBranch = suggestSourceBranch();
-				if (!suggestedSourceBranch.equals(getProject().getDefaultBranch())) {
-					target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
-				} else if (getProject().getForkedFrom() != null) {
-					target = new ProjectAndBranch(getProject().getForkedFrom(), 
-							getProject().getForkedFrom().getDefaultBranch());
-				} else {
-					target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
-				}
+				target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
 			}
 		}
 		
 		if (sourceParam != null) {
 			source = new ProjectAndBranch(sourceParam);
 		} else {
-			if (prevRequest == null)
-				prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(getProject(), getLoginUser());
-			if (prevRequest != null && prevRequest.getSource().getObjectId(false) != null) 
-				source = prevRequest.getSource();
-			else if (suggestedSourceBranch != null) 
-				source = new ProjectAndBranch(getProject(), suggestedSourceBranch);
-			else
-				source = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
+			if (suggestedSourceBranch == null) 
+				suggestedSourceBranch = suggestSourceBranch();
+			source = new ProjectAndBranch(getProject(), suggestedSourceBranch);
 		}
 
 		AtomicReference<PullRequest> pullRequestRef = new AtomicReference<>(null);
+		PullRequest prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(getProject(), getLoginUser());
 		if (prevRequest != null && source.equals(prevRequest.getSource()) && target.equals(prevRequest.getTarget()) && prevRequest.isOpen())
 			pullRequestRef.set(prevRequest);
 		else
