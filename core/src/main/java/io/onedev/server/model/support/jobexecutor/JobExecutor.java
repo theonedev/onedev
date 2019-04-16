@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 
 import com.google.common.base.Preconditions;
@@ -18,10 +19,12 @@ import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.commons.utils.stringmatch.Matcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
+import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.validation.annotation.ExecutorName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
@@ -32,9 +35,11 @@ public abstract class JobExecutor implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String ENVIRONMENT_WORKSPACE = "onedev-workspace";
+	public static final String WORKSPACE = "onedev-workspace";
 	
 	private boolean enabled = true;
+	
+	private String name;
 	
 	private String projects;
 	
@@ -44,6 +49,8 @@ public abstract class JobExecutor implements Serializable {
 	
 	private String environments;
 
+	private int cacheTTL = 7;
+	
 	public boolean isEnabled() {
 		return enabled;
 	}
@@ -52,6 +59,17 @@ public abstract class JobExecutor implements Serializable {
 		this.enabled = enabled;
 	}
 	
+	@Editable(order=50, description="Specify a name to identify the executor")
+	@ExecutorName
+	@NotEmpty
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	@Editable(order=100, name="Applicable Projects", 
 			description="Optionally specify space-separated projects applicable for this executor. Use * or ? for wildcard match. "
 					+ "Leave empty to match all projects")
@@ -105,9 +123,21 @@ public abstract class JobExecutor implements Serializable {
 		this.environments = environments;
 	}
 	
+	@Editable(order=10000, description="Specify job cache TTL (time to live) by days. OneDev may create "
+			+ "multiple job caches even for same cache key to avoid cache conflicts when running jobs "
+			+ "concurrently. This setting tells OneDev to remove caches inactive for specified "
+			+ "time period to save disk space")
+	public int getCacheTTL() {
+		return cacheTTL;
+	}
+
+	public void setCacheTTL(int cacheTTL) {
+		this.cacheTTL = cacheTTL;
+	}
+
 	public abstract void execute(String environment, File workspace, Map<String, String> envVars, 
-			List<String> commands, @Nullable SourceSnapshot snapshot, PatternSet collectFiles, 
-			Logger logger);
+			List<String> commands, @Nullable SourceSnapshot snapshot, Collection<JobCache> caches, 
+			PatternSet collectFiles, Logger logger);
 
 	public final boolean isApplicable(Project project, ObjectId commitId, String jobName, String image) {
 		Matcher matcher = new ChildAwareMatcher();
@@ -136,5 +166,7 @@ public abstract class JobExecutor implements Serializable {
 	public boolean hasCapacity() {
 		return true;
 	}
+	
+	public abstract void checkCaches();
 	
 }

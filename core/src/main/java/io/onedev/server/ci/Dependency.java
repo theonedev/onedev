@@ -2,19 +2,26 @@ package io.onedev.server.ci;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import javax.validation.ConstraintValidatorContext;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.page.project.blob.render.renderers.cispec.dependency.DependencyEditPanel;
 
 @Editable
-public class Dependency implements Serializable {
+@ClassValidating
+public class Dependency implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -53,6 +60,25 @@ public class Dependency implements Serializable {
 		}
 		choices.remove(belongingJob.getName());
 		return choices;
+	}
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		Set<String> paramNames = new HashSet<>();
+		boolean isValid = true;
+		for (JobParam param: params) {
+			if (paramNames.contains(param.getName())) {
+				isValid = false;
+				context.buildConstraintViolationWithTemplate("Duplicate param: " + param.getName())
+						.addPropertyNode("params").addConstraintViolation();
+			} else {
+				paramNames.add(param.getName());
+			}
+		}
+		
+		if (!isValid)
+			context.disableDefaultConstraintViolation();
+		return isValid;
 	}
 	
 }

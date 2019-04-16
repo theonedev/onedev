@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.admin.jobexecutors;
+package io.onedev.server.web.page.admin.jobexecutor;
 
 import java.util.List;
 
@@ -22,10 +22,13 @@ import io.onedev.server.web.page.admin.AdministrationPage;
 @SuppressWarnings("serial")
 public class JobExecutorPage extends AdministrationPage {
 
+	private List<JobExecutor> executors;
+	
 	private WebMarkupContainer container;
 	
 	public JobExecutorPage(PageParameters params) {
 		super(params);
+		executors = getSettingManager().getJobExecutors();
 	}
 
 	private SettingManager getSettingManager() {
@@ -50,20 +53,17 @@ public class JobExecutorPage extends AdministrationPage {
 
 			@Override
 			protected void populateItem(ListItem<JobExecutor> item) {
-				item.add(new JobExecutorPanel("executor", item.getModelObject()) {
+				item.add(new JobExecutorPanel("executor", executors, item.getIndex()) {
 
 					@Override
 					protected void onDelete(AjaxRequestTarget target) {
-						List<JobExecutor> executors = getSettingManager().getJobExecutors();
 						executors.remove(item.getIndex());
 						getSettingManager().saveJobExecutors(executors);
 						target.add(container);
 					}
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, JobExecutor executor) {
-						List<JobExecutor> executors = getSettingManager().getJobExecutors();
-						executors.set(item.getIndex(), executor);
+					protected void onSave(AjaxRequestTarget target) {
 						getSettingManager().saveJobExecutors(executors);
 					}
 					
@@ -97,12 +97,10 @@ public class JobExecutorPage extends AdministrationPage {
 			public void onClick(AjaxRequestTarget target) {
 				Fragment fragment = new Fragment("newExecutor", "editNewFrag", getPage());
 				fragment.setOutputMarkupId(true);
-				fragment.add(new JobExecutorEditPanel("editor", null) {
+				fragment.add(new JobExecutorEditPanel("editor", executors, -1) {
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, JobExecutor executor) {
-						List<JobExecutor> executors = getSettingManager().getJobExecutors();
-						executors.add(executor);
+					protected void onSave(AjaxRequestTarget target) {
 						getSettingManager().saveJobExecutors(executors);
 						container.replace(newAddNewFrag());
 						target.add(container);

@@ -1,4 +1,6 @@
-package io.onedev.server.web.page.admin.jobexecutors;
+package io.onedev.server.web.page.admin.jobexecutor;
+
+import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -19,12 +21,15 @@ import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 @SuppressWarnings("serial")
 abstract class JobExecutorPanel extends Panel {
 
-	private final JobExecutor executor;
+	private final List<JobExecutor> executors;
 	
-	public JobExecutorPanel(String id, JobExecutor executor) {
+	private final int executorIndex;
+	
+	public JobExecutorPanel(String id, List<JobExecutor> executors, int executorIndex) {
 		super(id);
 		
-		this.executor = executor;
+		this.executors = executors;
+		this.executorIndex = executorIndex;
 	}
 
 	@Override
@@ -35,21 +40,21 @@ abstract class JobExecutorPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				JobExecutorEditPanel editor = new JobExecutorEditPanel("executor", executor) {
+				JobExecutorEditPanel editor = new JobExecutorEditPanel("executor", executors, executorIndex) {
 
 					@Override
-					protected void onSave(AjaxRequestTarget target, JobExecutor executor) {
-						JobExecutorPanel.this.onSave(target, executor);
-						Component executorViewer = BeanContext.viewBean("executor", executor).setOutputMarkupId(true);
-						JobExecutorPanel.this.replace(executorViewer);
-						target.add(executorViewer);
+					protected void onSave(AjaxRequestTarget target) {
+						JobExecutorPanel.this.onSave(target);
+						Component viewer = BeanContext.viewBean("executor", getExecutor()).setOutputMarkupId(true);
+						JobExecutorPanel.this.replace(viewer);
+						target.add(viewer);
 					}
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
-						Component executorViewer = BeanContext.viewBean("executor", executor).setOutputMarkupId(true);
-						JobExecutorPanel.this.replace(executorViewer);
-						target.add(executorViewer);
+						Component viewer = BeanContext.viewBean("executor", getExecutor()).setOutputMarkupId(true);
+						JobExecutorPanel.this.replace(viewer);
+						target.add(viewer);
 					}
 					
 				};
@@ -75,12 +80,12 @@ abstract class JobExecutorPanel extends Panel {
 		});
 		
 		AjaxCheckBox enableCheck;
-		add(enableCheck = new AjaxCheckBox("enable", Model.of(executor.isEnabled())) {
+		add(enableCheck = new AjaxCheckBox("enable", Model.of(getExecutor().isEnabled())) {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				executor.setEnabled(!executor.isEnabled());
-				onSave(target, executor);
+				getExecutor().setEnabled(!getExecutor().isEnabled());
+				onSave(target);
 				target.add(JobExecutorPanel.this);
 			}
 			
@@ -95,13 +100,13 @@ abstract class JobExecutorPanel extends Panel {
 			
 		});
 		
-		add(BeanContext.viewBean("executor", executor).setOutputMarkupId(true));
+		add(BeanContext.viewBean("executor", getExecutor()).setOutputMarkupId(true));
 		
 		add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
 			@Override
 			protected String load() {
-				return !executor.isEnabled()? "disabled": "";
+				return !getExecutor().isEnabled()? "disabled": "";
 			}
 			
 		}));
@@ -109,8 +114,12 @@ abstract class JobExecutorPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
+	private JobExecutor getExecutor() {
+		return executors.get(executorIndex);
+	}
+	
 	protected abstract void onDelete(AjaxRequestTarget target);
 
-	protected abstract void onSave(AjaxRequestTarget target, JobExecutor executor);
+	protected abstract void onSave(AjaxRequestTarget target);
 	
 }

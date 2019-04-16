@@ -93,36 +93,30 @@ public class DefaultLogManager implements LogManager {
 						lock.lock();
 						try {
 							LogSnippet snippet = recentSnippets.get(buildId);
-							File logFile = getLogFile(projectId, buildId);
 							if (snippet == null) {
-								snippet = new LogSnippet();
-								if (logFile.exists()) {
-									try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)))) {
-										while (true) {
-											ois.readObject();
+								File logFile = getLogFile(projectId, buildId);
+								if (!logFile.exists())	{
+									snippet = new LogSnippet();
+									recentSnippets.put(buildId, snippet);
+								}
+							}
+							if (snippet != null) {
+								snippet.entries.add(new LogEntry(new Date(), logLevel, message));
+								if (snippet.entries.size() > MAX_CACHE_ENTRIES) {
+									File logFile = getLogFile(projectId, buildId);
+									try (ObjectOutputStream oos = newOutputStream(logFile)) {
+										while (snippet.entries.size() > MIN_CACHE_ENTRIES) {
+											LogEntry entry = snippet.entries.remove(0);
+											oos.writeObject(entry);
 											snippet.offset++;
 										}
-									} catch (EOFException e) {
-									} catch (IOException | ClassNotFoundException e) {
+									} catch (IOException e) {
 										throw new RuntimeException(e);
-									} 
-								}
-								recentSnippets.put(buildId, snippet);
-							}
-							snippet.entries.add(new LogEntry(new Date(), logLevel, message));
-							if (snippet.entries.size() > MAX_CACHE_ENTRIES) {
-								try (ObjectOutputStream oos = newOutputStream(logFile)) {
-									while (snippet.entries.size() > MIN_CACHE_ENTRIES) {
-										LogEntry entry = snippet.entries.remove(0);
-										oos.writeObject(entry);
-										snippet.offset++;
 									}
-								} catch (IOException e) {
-									throw new RuntimeException(e);
 								}
+								
+								webSocketManager.notifyObservableChange(Build2.getLogWebSocketObservable(buildId), null);
 							}
-							
-							webSocketManager.notifyObservableChange(Build2.getLogWebSocketObservable(buildId), null);
 						} finally {
 							lock.unlock();
 						}
@@ -232,8 +226,8 @@ public class DefaultLogManager implements LogManager {
 					snippet.entries.addAll(recentSnippet.entries.subList(
 							recentSnippet.entries.size()-count, recentSnippet.entries.size()));
 				} else {
-					snippet.entries.addAll(recentSnippet.entries);
 					snippet.entries.addAll(readLogSnippetReversely(logFile, count - recentSnippet.entries.size()).entries);
+					snippet.entries.addAll(recentSnippet.entries);
 				}
 				snippet.offset = recentSnippet.entries.size() + recentSnippet.offset - snippet.entries.size();
 				return snippet;
@@ -279,7 +273,7 @@ public class DefaultLogManager implements LogManager {
 						oos.writeObject(entry);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
-				}
+				} 
 			}
 		} finally {
 			lock.unlock();

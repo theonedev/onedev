@@ -266,7 +266,7 @@ public class DefaultIndexManager implements IndexManager {
 					List<Symbol> symbols = null;
 					try {
 						symbols = extractor.extract(blobName, StringUtils.removeBOM(content));
-					} catch (Throwable e) {
+					} catch (Exception e) {
 						logger.trace("Can not extract symbols from blob (hash:" + blobId.name() + ", path:" + blobPath + ")", e);
 					}
 					if (symbols != null) {

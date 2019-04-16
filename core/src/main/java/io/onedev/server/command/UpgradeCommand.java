@@ -1,6 +1,7 @@
 package io.onedev.server.command;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -201,12 +202,19 @@ public class UpgradeCommand extends DefaultPersistManager {
 		FileUtils.createDir(upgradeBackup);
 		File dbBackup = null;
 		
-		FileUtils.cleanDir(new File(upgradeDir, "temp"));
-		
 		if (usingEmbeddedDB.get()) {
 			logger.info("Backing up old installation directory as {}...", upgradeBackup.getAbsolutePath());
 			try {
-				FileUtils.copyDirectory(upgradeDir, upgradeBackup);
+				int baseLen = upgradeDir.getAbsolutePath().length() + 1;
+				FileUtils.copyDirectory(upgradeDir, upgradeBackup, new FileFilter() {
+
+					@Override
+					public boolean accept(File pathname) {
+						String relative = pathname.getAbsolutePath().substring(baseLen);
+						return !relative.equals("temp") && !relative.equals("cache");
+					}
+					
+				});
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}

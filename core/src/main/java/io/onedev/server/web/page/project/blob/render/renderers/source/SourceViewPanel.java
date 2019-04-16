@@ -170,7 +170,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 			} else {
 				try {
 					symbols.addAll(extractor.extract(null, StringUtils.removeBOM(blob.getText().getContent())));
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					logger.trace("Can not extract symbols from blob: " + context.getBlobIdent(), e);
 				}
 			}

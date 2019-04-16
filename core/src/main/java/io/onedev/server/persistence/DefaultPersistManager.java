@@ -269,7 +269,7 @@ public class DefaultPersistManager implements PersistManager {
 					return dataVersion;
 				}
 			}
-		} catch (Throwable e) {
+		} catch (Exception e) {
 			if (e.getMessage() != null && e.getMessage().contains("ORA-00942")) 
 				return null;
 			else
@@ -463,7 +463,7 @@ public class DefaultPersistManager implements PersistManager {
 					session.flush();
 					session.clear();
 					transaction.commit();
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					transaction.rollback();
 					throw ExceptionUtils.unchecked(e);
 				}
@@ -493,7 +493,7 @@ public class DefaultPersistManager implements PersistManager {
 						AbstractEntity entity = (AbstractEntity) new VersionedDocument(DocumentHelper.createDocument(element)).toBean();
 						validator.validate(entity);
 					}
-				} catch (Throwable e) {
+				} catch (Exception e) {
 					throw ExceptionUtils.unchecked(e);
 				}
 			}

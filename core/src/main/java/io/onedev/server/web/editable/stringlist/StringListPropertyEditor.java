@@ -73,10 +73,10 @@ public class StringListPropertyEditor extends PropertyEditor<List<String>> {
 
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
+		List<String> value = new ArrayList<>();
 		if (input.getConvertedInput() != null)
-			return Splitter.on("\n").trimResults().omitEmptyStrings().splitToList(input.getConvertedInput());
-		else
-			return new ArrayList<>();
+			value.addAll(Splitter.on("\n").trimResults().omitEmptyStrings().splitToList(input.getConvertedInput()));
+		return value;
 	}
 
 	@Nullable

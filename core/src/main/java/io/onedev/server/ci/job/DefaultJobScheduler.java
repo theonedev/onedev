@@ -21,13 +21,18 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.schedule.SchedulableTask;
+import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.InvalidCISpecException;
@@ -46,6 +51,7 @@ import io.onedev.server.event.build2.BuildFinished;
 import io.onedev.server.event.build2.BuildPending;
 import io.onedev.server.event.build2.BuildRunning;
 import io.onedev.server.event.build2.BuildSubmitted;
+import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.OneException;
@@ -53,6 +59,8 @@ import io.onedev.server.model.Build2;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.Setting;
+import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.jobexecutor.SourceSnapshot;
@@ -64,13 +72,13 @@ import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.patternset.PatternSet;
 
 @Singleton
-public class DefaultJobScheduler implements JobScheduler, Runnable {
+public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableTask {
 
 	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultJobScheduler.class);
 	
-	private enum Status {RUNNING, STOPPING, STOPPED};
+	private enum Status {STARTED, STOPPING, STOPPED};
 	
 	private final Map<Long, JobExecution> jobExecutions = new ConcurrentHashMap<>();
 	
@@ -94,13 +102,20 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	
 	private final Set<DependencyPopulator> dependencyPopulators;
 	
+	private final TaskScheduler taskScheduler;
+	
+	private volatile List<JobExecutor> jobExecutors;
+	
+	private String taskId;
+	
 	private volatile Status status;
 	
 	@Inject
 	public DefaultJobScheduler(ProjectManager projectManager, Build2Manager buildManager, 
 			UserManager userManager, ListenerRegistry listenerRegistry, SettingManager settingManager,
 			TransactionManager transactionManager, LogManager logManager, ExecutorService executorService,
-			SessionManager sessionManager, Set<DependencyPopulator> dependencyPopulators) {
+			SessionManager sessionManager, Set<DependencyPopulator> dependencyPopulators, 
+			TaskScheduler taskScheduler) {
 		this.projectManager = projectManager;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
@@ -111,6 +126,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 		this.executorService = executorService;
 		this.dependencyPopulators = dependencyPopulators;
 		this.sessionManager = sessionManager;
+		this.taskScheduler = taskScheduler;
 	}
 
 	@Sessional
@@ -234,7 +250,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 	
 	@Nullable
 	private JobExecutor getJobExecutor(Project project, ObjectId commitId, String jobName, String image) {
-		for (JobExecutor executor: settingManager.getJobExecutors()) {
+		for (JobExecutor executor: jobExecutors) {
 			if (executor.isApplicable(project, commitId, jobName, image))
 				return executor;
 		}
@@ -263,7 +279,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 								snapshot = null;
 							
 							Logger logger = logManager.getLogger(build.getProject().getId(), build.getId(), job.getLogLevel()); 
-
+							
 							Long buildId = build.getId();
 							JobExecution execution = new JobExecution(executorService.submit(new Runnable() {
 
@@ -301,8 +317,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 											
 										});
 
-										executor.execute(job.getEnvironment(), workspace, envVars, job.getCommands(), 
-												snapshot, new PatternSet(includeFiles, excludeFiles), logger);
+										logger.info("Executing job with executor '" + executor.getName() + "'...");
+										
+										executor.execute(job.getEnvironment(), workspace, envVars, job.getCommands(), snapshot, 
+												job.getCaches(), new PatternSet(includeFiles, excludeFiles), logger);
 										
 										sessionManager.run(new Runnable() {
 
@@ -315,6 +333,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 											}
 											
 										});
+									} catch (Exception e) {
+										if (ExceptionUtils.find(e, InterruptedException.class) == null)
+											logger.error("Error running build", e);
+										throw e;
 									} finally {
 										logger.info("Deleting workspace...");
 										FileUtils.deleteDir(workspace);
@@ -401,15 +423,28 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 			execution.getFuture().cancel(true);
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Listen
+	public void on(EntityPersisted event) {
+		if (event.getEntity() instanceof Setting) {
+			Setting setting = (Setting) event.getEntity();
+			if (setting.getKey() == Key.JOB_EXECUTORS)
+				jobExecutors = (List<JobExecutor>) setting.getValue();
+		}
+	}
+	
 	@Listen
 	public void on(SystemStarted event) {
-		status = Status.RUNNING;
+		status = Status.STARTED;
+		jobExecutors = settingManager.getJobExecutors();
 		new Thread(this).start();		
+		taskId = taskScheduler.schedule(this);
 	}
 	
 	@Listen
 	public void on(SystemStopping event) {
-		if (status == Status.RUNNING) {
+		taskScheduler.unschedule(taskId);
+		if (status == Status.STARTED) {
 			status = Status.STOPPING;
 			while (status == Status.STOPPING) {
 				synchronized (this) {
@@ -437,7 +472,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 					public Boolean call() {
 						for (Build2 build: buildManager.queryUnfinished()) {
 							if (build.getStatus() == Build2.Status.PENDING) {
-								if (status == Status.RUNNING) 
+								if (status == Status.STARTED) 
 									run(build);									
 							} else if (build.getStatus() == Build2.Status.RUNNING) {
 								JobExecution execution = jobExecutions.get(build.getId());
@@ -506,6 +541,17 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 		status = Status.STOPPED;
 	}
 	
+	@Override
+	public void execute() {
+		for (JobExecutor executor: jobExecutors)
+			executor.checkCaches();
+	}
+
+	@Override
+	public ScheduleBuilder<?> getScheduleBuilder() {
+		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
+	}
+	
 	private static class JobExecution {
 		
 		private final Future<?> future;
@@ -526,4 +572,5 @@ public class DefaultJobScheduler implements JobScheduler, Runnable {
 		}
 		
 	}
+
 }

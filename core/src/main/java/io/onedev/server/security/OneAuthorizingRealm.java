@@ -163,7 +163,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
         		Authenticated authenticated;
         		try {
         			authenticated = authenticator.authenticate((UsernamePasswordToken) token);
-        		} catch (Throwable e) {
+        		} catch (Exception e) {
         			if (e instanceof AuthenticationException) {
         				logger.debug("Authentication not passed", e);
             			throw ExceptionUtils.unchecked(e);

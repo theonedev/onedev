@@ -44,10 +44,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	
 	private volatile Long authenticatorId;
 	
-	/*
-	 * Cache job executors as it may contain internal state
-	 */
-	private List<JobExecutor> jobExecutors;
+	private volatile Long jobExecutorsId;
 	
 	@Inject
 	public DefaultSettingManager(Dao dao, DataManager dataManager) {
@@ -225,18 +222,21 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	@Sessional
 	@SuppressWarnings("unchecked")
 	@Override
-	public synchronized List<JobExecutor> getJobExecutors() {
-		if (jobExecutors == null) {
-	        Setting setting = Preconditions.checkNotNull(getSetting(Key.JOB_EXECUTORS));
-	        jobExecutors = (List<JobExecutor>) setting.getValue();
-		}
-		return jobExecutors;
+	public List<JobExecutor> getJobExecutors() {
+        Setting setting;
+        if (jobExecutorsId == null) {
+    		setting = getSetting(Key.JOB_EXECUTORS);
+    		Preconditions.checkNotNull(setting);
+    		jobExecutorsId = setting.getId();
+        } else {
+            setting = load(jobExecutorsId);
+        }
+        return (List<JobExecutor>) setting.getValue();
 	}
 
 	@Transactional
 	@Override
-	public synchronized void saveJobExecutors(List<JobExecutor> jobExecutors) {
-		this.jobExecutors = jobExecutors;
+	public void saveJobExecutors(List<JobExecutor> jobExecutors) {
 		Setting setting = getSetting(Key.JOB_EXECUTORS);
 		if (setting == null) {
 			setting = new Setting();

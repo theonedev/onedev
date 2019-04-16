@@ -37,6 +37,7 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Preconditions;
 
 import io.onedev.commons.jsyntax.TextToken;
 import io.onedev.commons.jsyntax.TokenUtils;
@@ -61,9 +62,9 @@ import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.diff.DiffBlock;
+import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.LineDiff;
-import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.blamemessage.BlameMessageBehavior;
@@ -80,8 +81,6 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergePreviewPage;
-
-import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
 public class TextDiffPanel extends Panel implements SourceAware {

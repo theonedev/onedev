@@ -2,24 +2,31 @@ package io.onedev.server.ci.job;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.ci.Dependency;
+import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.ci.job.log.LogLevel;
 import io.onedev.server.ci.job.outcome.JobOutcome;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 
 @Editable
 @Horizontal
-public class Job implements Serializable {
+@ClassValidating
+public class Job implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -32,6 +39,8 @@ public class Job implements Serializable {
 	private boolean cloneSource = true;
 	
 	private List<JobOutcome> outcomes = new ArrayList<>();
+
+	private List<JobCache> caches = new ArrayList<>();
 	
 	private List<Dependency> dependencies = new ArrayList<>();
 	
@@ -86,6 +95,18 @@ public class Job implements Serializable {
 		this.cloneSource = cloneSource;
 	}	
 	
+	@Editable(order=150, description="Cache specific paths to speed up job execution. For instance for node.js "
+			+ "projects, you may cache the <tt>node_modules</tt> folder to avoid downloading node modules for "
+			+ "subsequent job executions. Note that cache is considered as a best-effort approach and your "
+			+ "build script should always consider that cache might not be available")
+	public List<JobCache> getCaches() {
+		return caches;
+	}
+
+	public void setCaches(List<JobCache> caches) {
+		this.caches = caches;
+	}
+
 	@Editable(order=200, description="Specify job outcomes")
 	public List<JobOutcome> getOutcomes() {
 		return outcomes;
@@ -148,6 +169,57 @@ public class Job implements Serializable {
 				return trigger;
 		}
 		return null;
+	}
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		Set<String> keys = new HashSet<>();
+		Set<String> paths = new HashSet<>();
+		
+		boolean isValid = true;
+		for (JobCache cache: caches) {
+			if (keys.contains(cache.getKey())) {
+				isValid = false;
+				context.buildConstraintViolationWithTemplate("Duplicate key: " + cache.getKey())
+						.addPropertyNode("caches").addConstraintViolation();
+			} else {
+				keys.add(cache.getKey());
+			}
+			if (paths.contains(cache.getPath())) {
+				isValid = false;
+				context.buildConstraintViolationWithTemplate("Duplicate path: " + cache.getPath())
+						.addPropertyNode("caches").addConstraintViolation();
+			} else {
+				paths.add(cache.getPath());
+			}
+		}
+
+		Set<String> dependencyJobs = new HashSet<>();
+		for (Dependency dependency: dependencies) {
+			if (dependencyJobs.contains(dependency.getJobName())) {
+				isValid = false;
+				context.buildConstraintViolationWithTemplate("Duplicate dependency: " + dependency.getJobName())
+						.addPropertyNode("dependencies").addConstraintViolation();
+			} else {
+				dependencyJobs.add(dependency.getJobName());
+			}
+		}
+		
+		Set<String> promptParamNames = new HashSet<>();
+		for (InputSpec promptParam: promptParams) {
+			if (promptParamNames.contains(promptParam.getName())) {
+				isValid = false;
+				context.buildConstraintViolationWithTemplate("Duplicate prompt param: " + promptParam.getName())
+						.addPropertyNode("promptParams").addConstraintViolation();
+			} else {
+				promptParamNames.add(promptParam.getName());
+			}
+		}
+		
+		if (!isValid)
+			context.disableDefaultConstraintViolation();
+		
+		return isValid;
 	}
 	
 }

@@ -244,7 +244,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 	}
 	
 	@Sessional
-	protected void notifyBackupError(Exception e) {
+	protected void notifyBackupError(Throwable e) {
 		User root = userManager.getRoot();
 		String url = settingManager.getSystemSetting().getServerUrl();
 		String body = String.format(""

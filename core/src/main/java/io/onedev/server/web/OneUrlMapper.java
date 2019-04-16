@@ -22,7 +22,7 @@ import io.onedev.server.web.page.admin.issuesetting.DefaultQueryListPage;
 import io.onedev.server.web.page.admin.issuesetting.DefaultStateTransitionsPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueStateListPage;
-import io.onedev.server.web.page.admin.jobexecutors.JobExecutorPage;
+import io.onedev.server.web.page.admin.jobexecutor.JobExecutorPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;

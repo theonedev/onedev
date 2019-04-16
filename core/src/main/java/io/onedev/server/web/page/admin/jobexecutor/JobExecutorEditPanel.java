@@ -1,8 +1,11 @@
-package io.onedev.server.web.page.admin.jobexecutors;
+package io.onedev.server.web.page.admin.jobexecutor;
 
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -21,9 +24,9 @@ import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.web.behavior.testform.TestFormBehavior;
 import io.onedev.server.web.behavior.testform.TestResult;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyUpdating;
 import io.onedev.server.web.util.Testable;
 
@@ -32,12 +35,30 @@ abstract class JobExecutorEditPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(JobExecutorEditPanel.class);
 	
-	private final JobExecutor executor;
+	private final List<JobExecutor> executors;
 	
-	public JobExecutorEditPanel(String id, JobExecutor executor) {
+	private final int executorIndex;
+	
+	public JobExecutorEditPanel(String id, List<JobExecutor> executors, int executorIndex) {
 		super(id);
 		
-		this.executor = executor;
+		this.executors = executors;
+		this.executorIndex = executorIndex;
+	}
+	
+	private void checkNameDuplication(BeanEditor editor, JobExecutor executor) {
+		if (executorIndex != -1) { 
+			JobExecutor oldExecutor = executors.get(executorIndex);
+			if (!executor.getName().equals(oldExecutor.getName()) && getExecutor(executor.getName()) != null) {
+				editor.getErrorContext(new PathElement.Named("executor"))
+						.getErrorContext(new PathElement.Named("name"))
+						.addError("This name has already been used by another job executor");
+			}
+		} else if (getExecutor(executor.getName()) != null) {
+			editor.getErrorContext(new PathElement.Named("executor"))
+					.getErrorContext(new PathElement.Named("name"))
+					.addError("This name has already been used by another job executor");
+		}
 	}
 
 	@Override
@@ -45,9 +66,10 @@ abstract class JobExecutorEditPanel extends Panel {
 		super.onInitialize();
 		
 		JobExecutorBean bean = new JobExecutorBean();
-		bean.setJobExecutor(executor);
+		if (executorIndex != -1)
+			bean.setExecutor(executors.get(executorIndex));
 
-		PropertyEditor<Serializable> editor = PropertyContext.editBean("editor", bean, "jobExecutor");
+		BeanEditor editor = BeanContext.editBean("editor", bean);
 		editor.setOutputMarkupId(true);
 		
 		AjaxButton saveButton = new AjaxButton("save") {
@@ -55,7 +77,20 @@ abstract class JobExecutorEditPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				onSave(target, bean.getJobExecutor());
+				
+				JobExecutor executor = bean.getExecutor();
+				checkNameDuplication(editor, executor);
+
+				if (!editor.hasErrors(true)) {
+					if (executorIndex != -1) {
+						executors.set(executorIndex, executor);
+					} else {
+						executors.add(executor);
+					}
+					onSave(target);
+				} else {
+					target.add(form);
+				}
 			}
 
 			@Override
@@ -90,7 +125,7 @@ abstract class JobExecutorEditPanel extends Panel {
 					@Override
 					protected TestResult test() {
 						try {
-							((Testable)bean.getJobExecutor()).test(testData);
+							((Testable)bean.getExecutor()).test(testData);
 							return new TestResult.Successful("Job executor tested successfully");
 						} catch (Exception e) {
 							logger.error("Error testing job executor", e);
@@ -149,21 +184,26 @@ abstract class JobExecutorEditPanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				if (testData != null) {
-					new BeanEditModalPanel(target, testData) {
+				checkNameDuplication(editor, bean.getExecutor());
+				if (!editor.hasErrors(true)) {
+					if (testData != null) {
+						new BeanEditModalPanel(target, testData) {
 
-						@Override
-						protected void onSave(AjaxRequestTarget target, Serializable bean) {
-							target.add(editor);
-							target.focusComponent(null);
-							testBehavior.requestTest(target);
-						}
-						
-					};
+							@Override
+							protected void onSave(AjaxRequestTarget target, Serializable bean) {
+								target.add(editor);
+								target.focusComponent(null);
+								testBehavior.requestTest(target);
+							}
+							
+						};
+					} else {
+						target.add(editor);
+						target.focusComponent(null);
+						testBehavior.requestTest(target);
+					}
 				} else {
-					target.add(editor);
-					target.focusComponent(null);
-					testBehavior.requestTest(target);
+					target.add(form);
 				}
 			}
 
@@ -200,7 +240,16 @@ abstract class JobExecutorEditPanel extends Panel {
 		setOutputMarkupId(true);
 	}
 	
-	protected abstract void onSave(AjaxRequestTarget target, JobExecutor executor);
+	@Nullable
+	private JobExecutor getExecutor(String executorName) {
+		for (JobExecutor executor: executors) {
+			if (executorName.equals(executor.getName()))
+				return executor;
+		}
+		return null;
+	}
+	
+	protected abstract void onSave(AjaxRequestTarget target);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 }

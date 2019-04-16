@@ -18,10 +18,12 @@ import org.hibernate.query.Query;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.entitymanager.Build2Manager;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.event.build2.BuildSubmitted;
 import io.onedev.server.model.Build2;
 import io.onedev.server.model.Build2.Status;
 import io.onedev.server.model.BuildDependence;
@@ -45,7 +47,8 @@ public class DefaultBuild2Manager extends AbstractEntityManager<Build2> implemen
 	
 	@Inject
 	public DefaultBuild2Manager(Dao dao, BuildParamManager buildParamManager, 
-			BuildDependenceManager buildDependenceManager, StorageManager storageManager) {
+			BuildDependenceManager buildDependenceManager, 
+			StorageManager storageManager) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
@@ -115,8 +118,11 @@ public class DefaultBuild2Manager extends AbstractEntityManager<Build2> implemen
 			buildParamManager.save(param);
 		for (BuildDependence dependence: build.getDependencies())
 			buildDependenceManager.save(dependence);
-		
-		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getId()));
 	}
 
+	@Listen
+	public void on(BuildSubmitted event) {
+		Build2 build = event.getBuild();
+		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getId()));
+	}
 }
