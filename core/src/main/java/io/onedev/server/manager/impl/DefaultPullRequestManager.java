@@ -684,15 +684,15 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					}
 				}
 			}
-			
-			ProjectFacade project = request.getTargetProject().getFacade();
-			Permission writeCode = new ProjectPermission(project, ProjectPrivilege.CODE_WRITE); 
-			if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(writeCode)) {
-				Collection<User> writers = new ArrayList<>();
-				for (UserFacade facade: SecurityUtils.getAuthorizedUsers(project, ProjectPrivilege.CODE_WRITE)) 
-					writers.add(userManager.load(facade.getId()));
-				checkReviews(writers, 1, request.getLatestUpdate());
-			}
+		}
+		
+		ProjectFacade project = request.getTargetProject().getFacade();
+		Permission writeCode = new ProjectPermission(project, ProjectPrivilege.CODE_WRITE); 
+		if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(writeCode)) {
+			Collection<User> writers = new ArrayList<>();
+			for (UserFacade facade: SecurityUtils.getAuthorizedUsers(project, ProjectPrivilege.CODE_WRITE)) 
+				writers.add(userManager.load(facade.getId()));
+			checkReviews(writers, 1, request.getLatestUpdate());
 		}
 	}
 

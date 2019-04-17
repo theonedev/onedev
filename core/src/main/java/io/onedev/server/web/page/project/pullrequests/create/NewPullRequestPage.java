@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -39,6 +40,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.RefInfo;
 import io.onedev.server.manager.CodeCommentManager;
 import io.onedev.server.manager.PullRequestManager;
 import io.onedev.server.model.CodeComment;
@@ -77,6 +79,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequ
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.ajaxlistener.DisableGlobalLoadingIndicatorListener;
+import io.onedev.utils.Pair;
 
 @SuppressWarnings("serial")
 public class NewPullRequestPage extends ProjectPage implements CommentSupport {
@@ -110,6 +113,21 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		return params;
 	}
 
+	private String suggestSourceBranch() {
+		User user = getLoginUser();
+		List<Pair<String, Integer>> branchUpdates = new ArrayList<>(); 
+		for (RefInfo refInfo: getProject().getBranches()) {
+			RevCommit commit = (RevCommit) refInfo.getPeeledObj();
+			if (commit.getAuthorIdent().getEmailAddress().equals(user.getEmail()))
+				branchUpdates.add(new Pair<>(GitUtils.ref2branch(refInfo.getRef().getName()), commit.getCommitTime()));
+		}
+		branchUpdates.sort(Comparator.comparing(Pair::getSecond));
+		if (!branchUpdates.isEmpty())
+			return branchUpdates.get(branchUpdates.size()-1).getFirst();
+		else
+			return getProject().getDefaultBranch();
+	}
+	
 	public NewPullRequestPage(PageParameters params) {
 		super(params);
 		
@@ -117,16 +135,16 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		if (currentUser == null)
 			throw new RestartResponseAtInterceptPageException(LoginPage.class);
 
-		PullRequest prevRequest = null;
 		String targetParam = params.get("target").toString();
 		String sourceParam = params.get("source").toString();
+		String suggestedSourceBranch = null;
 		if (targetParam != null) {
 			target = new ProjectAndBranch(targetParam);
 		} else {
-			prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(getProject(), getLoginUser());
-			if (prevRequest != null && prevRequest.getTarget().getObjectId(false) != null) {
-				target = prevRequest.getTarget();
-			} else if (getProject().getForkedFrom() != null) {
+			suggestedSourceBranch = suggestSourceBranch();
+			if (!suggestedSourceBranch.equals(getProject().getDefaultBranch())) {
+				target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
+ 			} else if (getProject().getForkedFrom() != null && SecurityUtils.canReadCode(getProject().getForkedFrom().getFacade())) {
 				target = new ProjectAndBranch(getProject().getForkedFrom(), 
 						getProject().getForkedFrom().getDefaultBranch());
 			} else {
@@ -137,18 +155,13 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		if (sourceParam != null) {
 			source = new ProjectAndBranch(sourceParam);
 		} else {
-			if (prevRequest == null)
-				prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(getProject(), getLoginUser());
-			if (prevRequest != null && prevRequest.getSource().getObjectId(false) != null) {
-				source = prevRequest.getSource();
-			} else if (getProject().getForkedFrom() != null) {
-				source = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
-			} else {
-				source = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
-			}
+			if (suggestedSourceBranch == null) 
+				suggestedSourceBranch = suggestSourceBranch();
+			source = new ProjectAndBranch(getProject(), suggestedSourceBranch);
 		}
 
 		AtomicReference<PullRequest> pullRequestRef = new AtomicReference<>(null);
+		PullRequest prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(getProject(), getLoginUser());
 		if (prevRequest != null && source.equals(prevRequest.getSource()) && target.equals(prevRequest.getTarget()) && prevRequest.isOpen())
 			pullRequestRef.set(prevRequest);
 		else
