@@ -132,7 +132,10 @@ public class UpgradeCommand extends DefaultPersistManager {
 					|| file.getName().contains("ojdbc") || file.getName().contains("postgresql") 
 					|| file.getName().contains("sqljdbc")) {
 				try {
-					FileUtils.moveFileToDirectory(file, new File(upgradeDir, "site/lib"), true);
+					File destDir = new File(upgradeDir, "site/lib");
+					FileUtils.createDir(destDir);
+					FileUtils.copyFileToDirectory(file, destDir);
+					FileUtils.deleteFile(file);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
