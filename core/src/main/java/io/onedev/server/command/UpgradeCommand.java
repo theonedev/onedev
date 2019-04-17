@@ -239,7 +239,16 @@ public class UpgradeCommand extends DefaultPersistManager {
 			
 			logger.info("Backing up old installation directory as {}...", upgradeBackup.getAbsolutePath());
 			try {
-				FileUtils.copyDirectory(upgradeDir, upgradeBackup);
+				int baseLen = upgradeDir.getAbsolutePath().length() + 1;
+				FileUtils.copyDirectory(upgradeDir, upgradeBackup, new FileFilter() {
+
+					@Override
+					public boolean accept(File pathname) {
+						String relative = pathname.getAbsolutePath().substring(baseLen);
+						return !relative.equals("temp") && !relative.equals("cache");
+					}
+					
+				});
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
