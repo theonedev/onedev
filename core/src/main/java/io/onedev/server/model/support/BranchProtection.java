@@ -14,12 +14,10 @@ import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.usermatcher.Anyone;
-import io.onedev.server.model.support.usermatcher.SpecifiedGroup;
-import io.onedev.server.model.support.usermatcher.SpecifiedUser;
-import io.onedev.server.model.support.usermatcher.UserMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import io.onedev.server.util.usermatcher.Anyone;
+import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.ConfigurationChoice;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -34,7 +32,7 @@ public class BranchProtection implements Serializable {
 	
 	private String branches;
 	
-	private UserMatcher submitter = new Anyone();
+	private String submitter = new Anyone().toString();
 	
 	private boolean noForcedPush = true;
 	
@@ -71,12 +69,13 @@ public class BranchProtection implements Serializable {
 
 	@Editable(order=150, name="If Submitted By", description="This protection rule will apply "
 			+ "only if the change is submitted by specified users here")
-	@NotNull(message="may not be empty")
-	public UserMatcher getSubmitter() {
+	@io.onedev.server.web.editable.annotation.UserMatcher
+	@NotEmpty(message="may not be empty")
+	public String getSubmitter() {
 		return submitter;
 	}
 
-	public void setSubmitter(UserMatcher submitter) {
+	public void setSubmitter(String submitter) {
 		this.submitter = submitter;
 	}
 
@@ -161,11 +160,7 @@ public class BranchProtection implements Serializable {
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
-		if (getSubmitter() instanceof SpecifiedGroup) {
-			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
-			if (specifiedGroup.getGroupName().equals(oldName))
-				specifiedGroup.setGroupName(newName);
-		}
+		submitter = UserMatcher.onRenameGroup(submitter, oldName, newName);
 		
 		ReviewRequirement reviewRequirement = ReviewRequirement.fromString(this.reviewRequirement);
 		for (Group group: reviewRequirement.getGroups().keySet()) {
@@ -185,11 +180,7 @@ public class BranchProtection implements Serializable {
 	}
 	
 	public boolean onDeleteGroup(String groupName) {
-		if (getSubmitter() instanceof SpecifiedGroup) {
-			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
-			if (specifiedGroup.getGroupName().equals(groupName))
-				return true;
-		}
+		submitter = UserMatcher.onDeleteGroup(submitter, groupName);
 		
 		for (Group group: ReviewRequirement.fromString(reviewRequirement).getGroups().keySet()) {
 			if (group.getName().equals(groupName))
@@ -220,11 +211,7 @@ public class BranchProtection implements Serializable {
 	}
 	
 	public void onRenameUser(Project project, String oldName, String newName) {
-		if (getSubmitter() instanceof SpecifiedUser) {
-			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
-			if (specifiedUser.getUserName().equals(oldName))
-				specifiedUser.setUserName(newName);
-		}
+		submitter = UserMatcher.onRenameUser(submitter, oldName, newName);
 		
 		ReviewRequirement reviewRequirement = ReviewRequirement.fromString(this.reviewRequirement);
 		for (User user: reviewRequirement.getUsers()) {
@@ -244,11 +231,7 @@ public class BranchProtection implements Serializable {
 	}
 	
 	public boolean onDeleteUser(Project project, String userName) {
-		if (getSubmitter() instanceof SpecifiedUser) {
-			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
-			if (specifiedUser.getUserName().equals(userName))
-				return true;
-		}
+		submitter = UserMatcher.onDeleteUser(submitter, userName);
 		
 		for (User user: ReviewRequirement.fromString(reviewRequirement).getUsers()) {
 			if (user.getName().equals(userName))

@@ -2,15 +2,11 @@ package io.onedev.server.model.support;
 
 import java.io.Serializable;
 
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.model.support.usermatcher.Anyone;
-import io.onedev.server.model.support.usermatcher.SpecifiedGroup;
-import io.onedev.server.model.support.usermatcher.SpecifiedUser;
-import io.onedev.server.model.support.usermatcher.UserMatcher;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.usermatcher.Anyone;
+import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.TagPatterns;
 
@@ -23,7 +19,7 @@ public class TagProtection implements Serializable {
 	
 	private String tags;
 	
-	private UserMatcher submitter = new Anyone();
+	private String submitter = new Anyone().toString();
 	
 	private boolean noUpdate = true;
 	
@@ -52,12 +48,13 @@ public class TagProtection implements Serializable {
 
 	@Editable(order=150, name="If Performed By", description="This protection rule will apply "
 			+ "only if the action is performed by specified users here")
-	@NotNull(message="may not be empty")
-	public UserMatcher getSubmitter() {
+	@io.onedev.server.web.editable.annotation.UserMatcher
+	@NotEmpty(message="may not be empty")
+	public String getSubmitter() {
 		return submitter;
 	}
 
-	public void setSubmitter(UserMatcher submitter) {
+	public void setSubmitter(String submitter) {
 		this.submitter = submitter;
 	}
 
@@ -89,36 +86,20 @@ public class TagProtection implements Serializable {
 	}
 
 	public void onRenameGroup(String oldName, String newName) {
-		if (getSubmitter() instanceof SpecifiedGroup) {
-			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
-			if (specifiedGroup.getGroupName().equals(oldName))
-				specifiedGroup.setGroupName(newName);
-		}
+		submitter = UserMatcher.onRenameGroup(submitter, oldName, newName);
 	}
 	
 	public boolean onDeleteGroup(String groupName) {
-		if (getSubmitter() instanceof SpecifiedGroup) {
-			SpecifiedGroup specifiedGroup = (SpecifiedGroup) getSubmitter();
-			if (specifiedGroup.getGroupName().equals(groupName))
-				return true;
-		}
+		submitter = UserMatcher.onDeleteGroup(submitter, groupName);
 		return false;
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		if (getSubmitter() instanceof SpecifiedUser) {
-			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
-			if (specifiedUser.getUserName().equals(oldName))
-				specifiedUser.setUserName(newName);
-		}
+		submitter = UserMatcher.onRenameUser(submitter, oldName, newName);
 	}
 	
 	public boolean onDeleteUser(String userName) {
-		if (getSubmitter() instanceof SpecifiedUser) {
-			SpecifiedUser specifiedUser = (SpecifiedUser) getSubmitter();
-			if (specifiedUser.getUserName().equals(userName))
-				return true;
-		}
+		submitter = UserMatcher.onDeleteUser(submitter, userName);
 		return false;
 	}
 

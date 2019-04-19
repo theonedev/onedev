@@ -108,6 +108,7 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
@@ -210,12 +211,12 @@ public class Project extends AbstractEntity {
 	private Collection<Milestone> milestones = new ArrayList<>();
 	
 	@Lob
-	@Column(length=65535)
+	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
 	private IssueSetting issueSetting = new IssueSetting();
 	
 	@Lob
-	@Column(length=65535)
+	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
 	private ArrayList<NamedCommitQuery> savedCommitQueries = new ArrayList<>();
 	{
@@ -227,7 +228,7 @@ public class Project extends AbstractEntity {
 	}
 	
 	@Lob
-	@Column(length=65535)
+	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
 	private ArrayList<NamedPullRequestQuery> savedPullRequestQueries = new ArrayList<>();
 	{
@@ -244,7 +245,7 @@ public class Project extends AbstractEntity {
 	}
 	
 	@Lob
-	@Column(length=65535)
+	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
 	private ArrayList<NamedCodeCommentQuery> savedCodeCommentQueries = new ArrayList<>(); 
 	{
@@ -255,7 +256,7 @@ public class Project extends AbstractEntity {
 	}
 	
 	@Lob
-	@Column(length=65535)
+	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
 	private ArrayList<NamedBuildQuery> savedBuildQueries = new ArrayList<>();
 	{
@@ -268,7 +269,7 @@ public class Project extends AbstractEntity {
 	}
 	
 	@Lob
-	@Column(length=65535)
+	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
 	private ArrayList<WebHook> webHooks = new ArrayList<>();
 	
@@ -1216,7 +1217,7 @@ public class Project extends AbstractEntity {
 	public TagProtection getTagProtection(String tagName, User user) {
 		for (TagProtection protection: tagProtections) {
 			if (protection.isEnabled() 
-					&& protection.getSubmitter().matches(this, user)
+					&& UserMatcher.fromString(protection.getSubmitter()).matches(this, user)
 					&& PatternSet.fromString(protection.getTags()).matches(new ChildAwareMatcher(), tagName)) {
 				return protection;
 			}
@@ -1228,7 +1229,7 @@ public class Project extends AbstractEntity {
 	public BranchProtection getBranchProtection(String branchName, @Nullable User user) {
 		for (BranchProtection protection: branchProtections) {
 			if (protection.isEnabled() 
-					&& protection.getSubmitter().matches(this, user) 
+					&& UserMatcher.fromString(protection.getSubmitter()).matches(this, user) 
 					&& PatternSet.fromString(protection.getBranches()).matches(new ChildAwareMatcher(), branchName)) {
 				return protection;
 			}

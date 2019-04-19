@@ -62,6 +62,7 @@ import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -166,7 +167,8 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 									}
 								} else if (SecurityUtils.canWriteCode(issue.getProject().getFacade())) {
 									InputSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
-									if (fieldSpec != null && fieldSpec.getCanBeChangedBy().matches(getProject(), SecurityUtils.getUser())) {
+									UserMatcher userMatcher = UserMatcher.fromString(fieldSpec.getCanBeChangedBy());
+									if (fieldSpec != null && userMatcher.matches(getProject(), SecurityUtils.getUser())) {
 										issue = SerializationUtils.clone(issue);
 										issue.setFieldValue(identifyField, getColumn());
 									}
@@ -359,7 +361,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					PressButtonTrigger trigger = (PressButtonTrigger) transitionRef.get().getTrigger();
 					for (String promptField: trigger.getPromptFields()) {
 						InputSpec fieldSpec = getIssueSetting().getFieldSpec(promptField);
-						if (fieldSpec != null && fieldSpec.getCanBeChangedBy().matches(getProject(), SecurityUtils.getUser())) {
+						if (fieldSpec != null && UserMatcher.fromString(fieldSpec.getCanBeChangedBy()).matches(getProject(), SecurityUtils.getUser())) {
 							hasPromptFields = true;
 							break;
 						}
@@ -410,7 +412,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					if (fieldSpec == null)
 						throw new OneException("Undefined custom field: " + fieldName);
 					
-					if (!fieldSpec.getCanBeChangedBy().matches(getProject(), SecurityUtils.getUser()))
+					if (!UserMatcher.fromString(fieldSpec.getCanBeChangedBy()).matches(getProject(), SecurityUtils.getUser()))
 						throw new UnauthorizedException("Permission denied");
 					
 					Map<String, Object> fieldValues = new HashMap<>();

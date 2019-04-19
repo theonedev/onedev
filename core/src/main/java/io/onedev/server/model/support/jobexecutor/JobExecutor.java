@@ -139,13 +139,13 @@ public abstract class JobExecutor implements Serializable {
 			List<String> commands, @Nullable SourceSnapshot snapshot, Collection<JobCache> caches, 
 			PatternSet collectFiles, Logger logger);
 
-	public final boolean isApplicable(Project project, ObjectId commitId, String jobName, String image) {
+	public final boolean isApplicable(Project project, ObjectId commitId, String jobName, String environment) {
 		Matcher matcher = new ChildAwareMatcher();
 
 		if (isEnabled() 
 				&& (getProjects() == null || PatternSet.fromString(getProjects()).matches(matcher, project.getName()))
 				&& (getJobs() == null || PatternSet.fromString(getJobs()).matches(matcher, jobName))
-				&& (getEnvironments() == null || PatternSet.fromString(getEnvironments()).matches(matcher, image))) {
+				&& (getEnvironments() == null || PatternSet.fromString(getEnvironments()).matches(matcher, environment))) {
 			if (getBranches() == null)
 				return true;
 			

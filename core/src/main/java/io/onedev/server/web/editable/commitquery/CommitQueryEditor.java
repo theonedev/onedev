@@ -8,13 +8,13 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.model.Project;
+import io.onedev.server.web.behavior.CommitQueryBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.commits.CommitQueryBehavior;
 
 @SuppressWarnings("serial")
 public class CommitQueryEditor extends PropertyEditor<String> {

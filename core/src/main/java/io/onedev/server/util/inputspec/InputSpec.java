@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang.SerializationUtils;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -16,19 +15,19 @@ import org.unbescape.java.JavaEscape;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.model.support.usermatcher.Anyone;
-import io.onedev.server.model.support.usermatcher.UserMatcher;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.inputspec.showcondition.ValueIsNotAnyOf;
 import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
+import io.onedev.server.util.usermatcher.Anyone;
 import io.onedev.server.util.validation.annotation.InputName;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.UserMatcher;
 
 @Editable
 public abstract class InputSpec implements Serializable {
@@ -73,7 +72,7 @@ public abstract class InputSpec implements Serializable {
 	
 	private ShowCondition showCondition;
 	
-	private UserMatcher canBeChangedBy = new Anyone();
+	private String canBeChangedBy = new Anyone().toString();
 	
 	@Editable(order=10)
 	@InputName
@@ -137,12 +136,13 @@ public abstract class InputSpec implements Serializable {
 	}
 	
 	@Editable(order=65, description="resource.input.canBeChangedBy")
-	@NotNull
-	public UserMatcher getCanBeChangedBy() {
+	@UserMatcher
+	@NotEmpty
+	public String getCanBeChangedBy() {
 		return canBeChangedBy;
 	}
 
-	public void setCanBeChangedBy(UserMatcher canBeChangedBy) {
+	public void setCanBeChangedBy(String canBeChangedBy) {
 		this.canBeChangedBy = canBeChangedBy;
 	}
 

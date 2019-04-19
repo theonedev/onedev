@@ -67,6 +67,7 @@ import io.onedev.server.search.commit.CommitQueryUtils;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Constants;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.web.behavior.CommitQueryBehavior;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.status.BuildsStatusPanel;
 import io.onedev.server.web.component.commit.graph.CommitGraphResourceReference;

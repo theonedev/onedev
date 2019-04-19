@@ -4,16 +4,15 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.model.support.usermatcher.UserMatcher;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -27,7 +26,7 @@ public class PressButtonTrigger implements TransitionTrigger {
 
 	private String buttonLabel;
 
-	private UserMatcher authorized;
+	private String authorized;
 	
 	private List<String> promptFields = new ArrayList<>();
 	
@@ -42,12 +41,13 @@ public class PressButtonTrigger implements TransitionTrigger {
 	}
 
 	@Editable(order=200, name="Authorization")
-	@NotNull(message="may not be empty")
-	public UserMatcher getAuthorized() {
+	@io.onedev.server.web.editable.annotation.UserMatcher
+	@NotEmpty(message="may not be empty")
+	public String getAuthorized() {
 		return authorized;
 	}
 	
-	public void setAuthorized(UserMatcher authorized) {
+	public void setAuthorized(String authorized) {
 		this.authorized = authorized;
 	}
 
@@ -87,7 +87,8 @@ public class PressButtonTrigger implements TransitionTrigger {
 	
 	public boolean isAuthorized() {
 		ProjectPage page = (ProjectPage) WicketUtils.getPage();
-		return SecurityUtils.getUser() != null && getAuthorized().matches(page.getProject(), SecurityUtils.getUser());		
+		User user = SecurityUtils.getUser();
+		return user != null && UserMatcher.fromString(getAuthorized()).matches(page.getProject(), user);		
 	}
 	
 }

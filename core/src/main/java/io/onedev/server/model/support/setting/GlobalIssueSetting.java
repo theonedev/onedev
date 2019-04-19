@@ -22,7 +22,6 @@ import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
-import io.onedev.server.model.support.usermatcher.CodeWriters;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.OrCriteria;
@@ -38,6 +37,7 @@ import io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider.Specifie
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
+import io.onedev.server.util.usermatcher.CodeWriters;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -129,7 +129,7 @@ public class GlobalIssueSetting implements Serializable {
 
 		UserChoiceInput assignee = new UserChoiceInput();
 		assignee.setChoiceProvider(new io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.CodeWriters());
-		assignee.setCanBeChangedBy(new CodeWriters());
+		assignee.setCanBeChangedBy(new CodeWriters().toString());
 		assignee.setAllowEmpty(true);
 		assignee.setNameOfEmptyValue("Not assigned");
 		assignee.setName("Assignee");
@@ -194,7 +194,7 @@ public class GlobalIssueSetting implements Serializable {
 		transition.setToState("Closed");
 		PressButtonTrigger pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Close");
-		pressButton.setAuthorized(new CodeWriters());
+		pressButton.setAuthorized(new CodeWriters().toString());
 		pressButton.setPromptFields(Lists.newArrayList("Resolution", "Duplicate With"));
 		transition.setTrigger(pressButton);
 		
@@ -206,7 +206,7 @@ public class GlobalIssueSetting implements Serializable {
 		pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Reopen");
 		transition.setRemoveFields(Lists.newArrayList("Resolution", "Duplicate With"));
-		pressButton.setAuthorized(new CodeWriters());
+		pressButton.setAuthorized(new CodeWriters().toString());
 		transition.setTrigger(pressButton);
 		
 		defaultTransitionSpecs.add(transition);

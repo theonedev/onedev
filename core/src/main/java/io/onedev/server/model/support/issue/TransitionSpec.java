@@ -25,12 +25,11 @@ import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTri
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.TransitionTrigger;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.model.support.usermatcher.SpecifiedGroup;
-import io.onedev.server.model.support.usermatcher.SpecifiedUser;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
@@ -134,11 +133,7 @@ public class TransitionSpec implements Serializable {
 		TransitionTrigger trigger = getTrigger();
 		if (trigger instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			if (pressButton.getAuthorized() instanceof SpecifiedUser) {
-				SpecifiedUser specifiedUser = (SpecifiedUser) pressButton.getAuthorized();
-				if (specifiedUser.getUserName().equals(oldName))
-					specifiedUser.setUserName(newName);
-			}
+			pressButton.setAuthorized(UserMatcher.onRenameUser(pressButton.getAuthorized(), oldName, newName));
 		}
 	}
 	
@@ -146,11 +141,7 @@ public class TransitionSpec implements Serializable {
 		TransitionTrigger trigger = getTrigger();
 		if (trigger instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			if (pressButton.getAuthorized() instanceof SpecifiedUser) {
-				SpecifiedUser specifiedUser = (SpecifiedUser) pressButton.getAuthorized();
-				if (specifiedUser.getUserName().equals(userName))
-					return true;
-			}
+			pressButton.setAuthorized(UserMatcher.onDeleteUser(pressButton.getAuthorized(), userName));
 		}
 		return false;
 	}
@@ -178,11 +169,7 @@ public class TransitionSpec implements Serializable {
 		TransitionTrigger trigger = getTrigger();
 		if (trigger instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			if (pressButton.getAuthorized() instanceof SpecifiedGroup) {
-				SpecifiedGroup specifiedGroup = (SpecifiedGroup) pressButton.getAuthorized();
-				if (specifiedGroup.getGroupName().equals(oldName))
-					specifiedGroup.setGroupName(newName);
-			}
+			pressButton.setAuthorized(UserMatcher.onRenameGroup(pressButton.getAuthorized(), oldName, newName));
 		}
 	}
 	
@@ -190,11 +177,7 @@ public class TransitionSpec implements Serializable {
 		TransitionTrigger trigger = getTrigger();
 		if (trigger instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			if (pressButton.getAuthorized() instanceof SpecifiedGroup) {
-				SpecifiedGroup specifiedGroup = (SpecifiedGroup) pressButton.getAuthorized();
-				if (specifiedGroup.getGroupName().equals(groupName))
-					return true;
-			}
+			pressButton.setAuthorized(UserMatcher.onDeleteGroup(pressButton.getAuthorized(), groupName));
 		}
 		return false;
 	}

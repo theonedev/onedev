@@ -56,7 +56,7 @@ public class PatternSet implements Serializable {
 			if (matcher.matches(include, value))
 				return true;
 		}
-		return false;
+		return true;
 	}
 	
 	public Collection<File> listFiles(File dir) {

@@ -961,4 +961,78 @@ public class DatabaseMigrator {
 		}
 	}
 	
+	private String escapeValue24(String value) {
+		StringBuilder builder = new StringBuilder();
+		for (int i=0; i<value.length(); i++) {
+			char ch = value.charAt(i);
+			if ("\\()".indexOf(ch) != -1)
+				builder.append("\\");
+			builder.append(ch);
+		}
+		return builder.toString();
+	}
+	
+	private void migrateUserMatcher24(Element userMatcherElement) {
+		String userMatcher;
+		String userMatcherClass = userMatcherElement.attributeValue("class");
+		if (userMatcherClass.contains("Anyone")) {
+			userMatcher = "anyone";
+		} else if (userMatcherClass.contains("CodeWriters")) {
+			userMatcher = "code writers";
+		} else if (userMatcherClass.contains("CodeReaders")) {
+			userMatcher = "code readers";
+		} else if (userMatcherClass.contains("IssueReaders")) {
+			userMatcher = "issue readers";
+		} else if (userMatcherClass.contains("ProjectAdministrators")) {
+			userMatcher = "project administrators";
+		} else if (userMatcherClass.contains("SpecifiedUser")) {
+			userMatcher = "user(" + escapeValue24(userMatcherElement.elementText("userName").trim()) + ")";
+		} else {
+			userMatcher = "group(" + escapeValue24(userMatcherElement.elementText("groupName").trim()) + ")";
+		}
+		userMatcherElement.clearContent();
+		userMatcherElement.remove(userMatcherElement.attribute("class"));
+		userMatcherElement.setText(userMatcher);
+	}
+	
+	private void migrateTransitionSpecsElement24(Element transitionSpecsElement) {
+		for (Element transitionElement: transitionSpecsElement.elements()) {
+			Element triggerElement = transitionElement.element("trigger");
+			if (triggerElement.attributeValue("class").contains("PressButtonTrigger"))
+				migrateUserMatcher24(triggerElement.element("authorized"));
+		}
+	}
+	
+	private void migrate24(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					if (element.elementTextTrim("key").equals("ISSUE")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							migrateTransitionSpecsElement24(valueElement.element("defaultTransitionSpecs"));
+							for (Element fieldElement: valueElement.element("fieldSpecs").elements())
+								migrateUserMatcher24(fieldElement.element("canBeChangedBy"));
+						}
+					}
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element issueSettingElement = element.element("issueSetting");
+					Element transitionsElement = issueSettingElement.element("transitionSpecs");
+					if (transitionsElement != null) 
+						migrateTransitionSpecsElement24(transitionsElement);
+					for (Element branchProtectionElement: element.element("branchProtections").elements())
+						migrateUserMatcher24(branchProtectionElement.element("submitter"));
+					for (Element tagProtectionElement: element.element("tagProtections").elements())
+						migrateUserMatcher24(tagProtectionElement.element("submitter"));
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

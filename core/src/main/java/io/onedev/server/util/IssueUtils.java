@@ -26,6 +26,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 
@@ -58,15 +59,14 @@ public class IssueUtils {
 		}
 	}
 	
-	public static Collection<String> getPropertyNames(Project project, Class<?> fieldBeanClass, 
-			Collection<String> fieldNames) {
+	public static Collection<String> getPropertyNames(Project project, Class<?> fieldBeanClass, Collection<String> fieldNames) {
 		Collection<String> propertyNames = new HashSet<>();
 		SettingManager settingManager = OneDev.getInstance(SettingManager.class); 
 		User user = SecurityUtils.getUser();
 		for (PropertyDescriptor property: new BeanDescriptor(fieldBeanClass).getPropertyDescriptors()) {
 			if (fieldNames.contains(property.getDisplayName())) {
 				InputSpec field = settingManager.getIssueSetting().getFieldSpec(property.getDisplayName());
-				if (field != null && field.getCanBeChangedBy().matches(project, user))
+				if (field != null && UserMatcher.fromString(field.getCanBeChangedBy()).matches(project, user))
 					propertyNames.add(property.getPropertyName());
 			}
 		}

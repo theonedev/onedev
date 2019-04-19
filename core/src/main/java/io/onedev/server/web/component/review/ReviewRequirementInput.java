@@ -20,7 +20,7 @@ public class ReviewRequirementInput extends TextField<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ReviewRequirementAssistBehavior(projectModel));
+		add(new ReviewRequirementBehavior(projectModel));
 	}
 
 	@Override
