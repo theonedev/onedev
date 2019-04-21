@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -37,8 +38,10 @@ public class IssueUtils {
 	private static final String BEAN_PREFIX = "IssueFieldBean";
 	
 	public static void clearFields(Serializable fieldBean) {
-		for (PropertyDescriptor property: new BeanDescriptor(fieldBean.getClass()).getPropertyDescriptors())
-			property.setPropertyValue(fieldBean, null);
+		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(fieldBean.getClass()).getPropertyDescriptors().values()) {
+			for (PropertyDescriptor property: groupProperties) 
+				property.setPropertyValue(fieldBean, null);
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -63,11 +66,13 @@ public class IssueUtils {
 		Collection<String> propertyNames = new HashSet<>();
 		SettingManager settingManager = OneDev.getInstance(SettingManager.class); 
 		User user = SecurityUtils.getUser();
-		for (PropertyDescriptor property: new BeanDescriptor(fieldBeanClass).getPropertyDescriptors()) {
-			if (fieldNames.contains(property.getDisplayName())) {
-				InputSpec field = settingManager.getIssueSetting().getFieldSpec(property.getDisplayName());
-				if (field != null && UserMatcher.fromString(field.getCanBeChangedBy()).matches(project, user))
-					propertyNames.add(property.getPropertyName());
+		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(fieldBeanClass).getPropertyDescriptors().values()) {
+			for (PropertyDescriptor property: groupProperties) {
+				if (fieldNames.contains(property.getDisplayName())) {
+					InputSpec field = settingManager.getIssueSetting().getFieldSpec(property.getDisplayName());
+					if (field != null && UserMatcher.fromString(field.getCanBeChangedBy()).matches(project, user))
+						propertyNames.add(property.getPropertyName());
+				}
 			}
 		}
 		return propertyNames;
@@ -78,9 +83,11 @@ public class IssueUtils {
 		try {
 			Map<String, Object> fieldValues = new HashMap<>();
 			BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
-			for (PropertyDescriptor propertyDescriptor: beanDescriptor.getPropertyDescriptors()) {
-				if (fieldNames.contains(propertyDescriptor.getDisplayName()))
-					fieldValues.put(propertyDescriptor.getDisplayName(), propertyDescriptor.getPropertyValue(fieldBean));
+			for (List<PropertyDescriptor> groupProperties: beanDescriptor.getPropertyDescriptors().values()) {
+				for (PropertyDescriptor property: groupProperties) {
+					if (fieldNames.contains(property.getDisplayName()))
+						fieldValues.put(property.getDisplayName(), property.getPropertyValue(fieldBean));
+				}
 			}
 			
 			return fieldValues;

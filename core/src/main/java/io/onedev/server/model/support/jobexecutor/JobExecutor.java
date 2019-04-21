@@ -70,7 +70,7 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=100, name="Applicable Projects", 
+	@Editable(order=10000, name="Applicable Projects", group="Job Match Settings",
 			description="Optionally specify space-separated projects applicable for this executor. Use * or ? for wildcard match. "
 					+ "Leave empty to match all projects")
 	@ProjectPatterns
@@ -83,7 +83,7 @@ public abstract class JobExecutor implements Serializable {
 		this.projects = projects;
 	}
 
-	@Editable(order=200, name="Applicable Branches", 
+	@Editable(order=10100, name="Applicable Branches", group="Job Match Settings",
 			description="Optionally specify space-separated branches applicable for this executor. When run a job "
 					+ "against a particular commit, all branches able to reaching the commit will be checked. "
 					+ "Use * or ? for wildcard match. Leave empty to match all branches.")
@@ -97,7 +97,7 @@ public abstract class JobExecutor implements Serializable {
 		this.branches = branches;
 	}
 
-	@Editable(order=300, name="Applicable Jobs", 
+	@Editable(order=10200, name="Applicable Jobs", group="Job Match Settings",
 			description="Optionally specify space-separated jobs applicable for this executor. Use * or ? for wildcard match. "
 					+ "Leave empty to match all jobs")
 	@Patterns
@@ -110,7 +110,7 @@ public abstract class JobExecutor implements Serializable {
 		this.jobs = jobs;
 	}
 
-	@Editable(order=400, name="Applicable Environments", 
+	@Editable(order=10300, name="Applicable Environments", group="Job Match Settings",
 			description="Optionally specify space-separated environments applicable for this executor. Use * or ? for wildcard match. "
 					+ "Leave empty to match all images")
 	@Patterns
@@ -123,7 +123,7 @@ public abstract class JobExecutor implements Serializable {
 		this.environments = environments;
 	}
 	
-	@Editable(order=10000, description="Specify job cache TTL (time to live) by days. OneDev may create "
+	@Editable(order=50000, group="More Settings", description="Specify job cache TTL (time to live) by days. OneDev may create "
 			+ "multiple job caches even for same cache key to avoid cache conflicts when running jobs "
 			+ "concurrently. This setting tells OneDev to remove caches inactive for specified "
 			+ "time period to save disk space")

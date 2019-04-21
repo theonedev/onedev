@@ -56,8 +56,9 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
 		propertyContexts = new ArrayList<>();
 		
-		for (PropertyDescriptor each: new BeanDescriptor(elementClass).getPropertyDescriptors()) {
-			propertyContexts.add(PropertyContext.of(each));
+		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(elementClass).getPropertyDescriptors().values()) {
+			for (PropertyDescriptor property: groupProperties)
+				propertyContexts.add(PropertyContext.of(property));
 		}
 
 	}

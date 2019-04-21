@@ -29,8 +29,9 @@ public class BeanListPropertyViewer extends Panel {
 		super(id);
 		
 		elementPropertyContexts = new ArrayList<>();
-		for (PropertyDescriptor propertyDescriptor: new BeanDescriptor(elementClass).getPropertyDescriptors()) {
-			elementPropertyContexts.add(PropertyContext.of(propertyDescriptor));
+		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(elementClass).getPropertyDescriptors().values()) {
+			for (PropertyDescriptor property: groupProperties)
+				elementPropertyContexts.add(PropertyContext.of(property));
 		}
 		
 		this.elements = elements;

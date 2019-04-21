@@ -2,6 +2,8 @@ package io.onedev.server.web.editable;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
@@ -34,6 +36,12 @@ public abstract class ValueEditor<T> extends FormComponentPanel<T> implements Er
 				return null;
 		}
 		return context;
+	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(JavaScriptHeaderItem.forReference(new EditableResourceReference()));
 	}
 	
 	public void clearErrors(boolean recursive) {

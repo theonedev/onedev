@@ -120,7 +120,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.password = password;
 	}
 	
-	@Editable(order=1400, description="Optionally specify options to run container. For instance, you may use <tt>-m 2g</tt> "
+	@Editable(order=20000, group="More Settings", description="Optionally specify options to run container. For instance, you may use <tt>-m 2g</tt> "
 			+ "to limit memory of created container to be 2 giga bytes")
 	public String getRunOptions() {
 		return runOptions;
@@ -134,7 +134,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		return (boolean) OneContext.get().getEditContext().getInputValue("authenticateToRegistry");
 	}
 
-	@Editable(order=1400, description="Specify max number of concurrent jobs being executed. Each job execution "
+	@Editable(order=21000, group="More Settings", description="Specify max number of concurrent jobs being executed. Each job execution "
 			+ "will launch a separate docker container. Defaults to number of processors in the system")
 	public int getCapacity() {
 		return capacity;

@@ -55,8 +55,8 @@ public class EditableUtils {
 	 */
 	public static @Nullable String getCategory(AnnotatedElement element) {
 		Editable editable = element.getAnnotation(Editable.class);
-		if (editable != null && editable.category().trim().length() != 0)
-			return editable.category();
+		if (editable != null && editable.group().trim().length() != 0)
+			return editable.group();
 		else
 			return null;
 	}

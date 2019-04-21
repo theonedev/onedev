@@ -1,21 +1,26 @@
 <wicket:panel>
-	<div wicket:id="content" class="bean-properties"></div>
+    <div wicket:id="groups" class="group bean-properties">
+        <a wicket:id="toggle" class="toggle"><span wicket:id="groupName"></span></a>
+        <wicket:container wicket:id="content"></wicket:container>
+    </div>
 	
-	<wicket:fragment wicket:id="verticalFrag">
-		<div wicket:id="properties" class="form-group">
-			<wicket:enclosure child="name">
-			<label class="name control-label">
-				<span wicket:id="name"></span>
-				<span wicket:id="required" class="required"></span>
-			</label>
-			</wicket:enclosure>
-			<div wicket:id="value" class="value"></div>
-			<div wicket:id="feedback"></div>
-			<div wicket:id="description" class="help-block"></div>
-		</div>
+	<wicket:fragment wicket:id="verticalPropertiesFrag">
+        <div>
+			<div wicket:id="properties" class="form-group">
+				<wicket:enclosure child="name">
+				<label class="name control-label">
+					<span wicket:id="name"></span>
+					<span wicket:id="required" class="required"></span>
+				</label>
+				</wicket:enclosure>
+				<div wicket:id="value" class="value"></div>
+				<div wicket:id="feedback"></div>
+				<div wicket:id="description" class="help-block"></div>
+			</div>
+        </div>
 	</wicket:fragment>
 
-	<wicket:fragment wicket:id="horizontalFrag">
+	<wicket:fragment wicket:id="horizontalPropertiesFrag">
 		<table>
 			<tr wicket:id="properties">
 				<td wicket:id="name" class="name control-label">

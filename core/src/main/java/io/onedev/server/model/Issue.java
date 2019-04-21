@@ -384,12 +384,14 @@ public class Issue extends AbstractEntity implements Referenceable {
 		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBeanClass);
 		Serializable fieldBean = (Serializable) beanDescriptor.newBeanInstance();
 
-		for (PropertyDescriptor property: beanDescriptor.getPropertyDescriptors()) {
-			IssueField field = getFields().get(property.getDisplayName());
-			if (field != null)
-				property.setPropertyValue(fieldBean, field.getValue(getProject()));
-			else if (!withDefaultValue)
-				property.setPropertyValue(fieldBean, null);
+		for (List<PropertyDescriptor> groupProperties: beanDescriptor.getPropertyDescriptors().values()) {
+			for (PropertyDescriptor property: groupProperties) {
+				IssueField field = getFields().get(property.getDisplayName());
+				if (field != null)
+					property.setPropertyValue(fieldBean, field.getValue(getProject()));
+				else if (!withDefaultValue)
+					property.setPropertyValue(fieldBean, null);
+			}
 		}
 		return fieldBean;
 	}

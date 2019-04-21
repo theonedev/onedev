@@ -76,10 +76,14 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				for (PropertyDescriptor propertyDescriptor: builtInFieldsEditor.getBeanDescriptor().getPropertyDescriptors()) 
-					propertyDescriptor.setPropertyExcluded(!selectedFields.contains(propertyDescriptor.getDisplayName()));
-				for (PropertyDescriptor propertyDescriptor: customFieldsEditor.getBeanDescriptor().getPropertyDescriptors()) 
-					propertyDescriptor.setPropertyExcluded(!selectedFields.contains(propertyDescriptor.getDisplayName()));
+				for (List<PropertyDescriptor> values: builtInFieldsEditor.getBeanDescriptor().getPropertyDescriptors().values()) {
+					for (PropertyDescriptor value: values) 
+						value.setPropertyExcluded(!selectedFields.contains(value.getDisplayName()));
+				}
+				for (List<PropertyDescriptor> values: customFieldsEditor.getBeanDescriptor().getPropertyDescriptors().values()) { 
+					for (PropertyDescriptor value: values)
+						value.setPropertyExcluded(!selectedFields.contains(value.getDisplayName()));
+				}
 				target.add(form);
 			}
 			
@@ -201,9 +205,11 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		form.add(builtInFieldsEditor);
 
 		excludedProperties = new HashSet<>();
-		for (PropertyDescriptor property: new BeanDescriptor(customFieldsBean.getClass()).getPropertyDescriptors()) {
-			if (!selectedFields.contains(property.getDisplayName()))
-				excludedProperties.add(property.getPropertyName());
+		for (List<PropertyDescriptor> values: new BeanDescriptor(customFieldsBean.getClass()).getPropertyDescriptors().values()) {
+			for (PropertyDescriptor value: values) {
+				if (!selectedFields.contains(value.getDisplayName()))
+					excludedProperties.add(value.getPropertyName());
+			}
 		}
 		
 		customFieldsEditor = BeanContext.editBean("customFieldsEditor", customFieldsBean, excludedProperties, true); 
