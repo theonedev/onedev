@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -83,7 +85,7 @@ public class UserMatcher implements Serializable {
 		}
 	}
 	
-	public static UserMatcher fromString(String userMatcherString) {
+	public static UserMatcher fromString(@Nullable String userMatcherString) {
 		List<UserMatcherCriteria> criterias = new ArrayList<>();
 		List<UserMatcherCriteria> exceptCriterias = new ArrayList<>();
 		
@@ -163,83 +165,73 @@ public class UserMatcher implements Serializable {
 			return new Anyone().toString();
 	}
 
+	private static void onRenameGroup(List<UserMatcherCriteria> criterias, String oldName, String newName) {
+		for (UserMatcherCriteria criteria: criterias) {
+			if (criteria instanceof SpecifiedGroup) {  
+				SpecifiedGroup specifiedGroup = (SpecifiedGroup) criteria;
+				if (specifiedGroup.getGroupName().equals(oldName))
+					specifiedGroup.setGroupName(newName);
+			}
+		}
+	}
+	
 	public static String onRenameGroup(String userMatcherString, String oldName, String newName) {
-		UserMatcher userMatcher = UserMatcher.fromString(userMatcherString);
-		for (UserMatcherCriteria criteria: userMatcher.getCriterias()) {
-			if (criteria instanceof SpecifiedGroup) {  
-				SpecifiedGroup specifiedGroup = (SpecifiedGroup) criteria;
-				if (specifiedGroup.getGroupName().equals(oldName))
-					specifiedGroup.setGroupName(newName);
-			}
-		}
-		for (UserMatcherCriteria criteria: userMatcher.getExceptCriterias()) {
-			if (criteria instanceof SpecifiedGroup) {  
-				SpecifiedGroup specifiedGroup = (SpecifiedGroup) criteria;
-				if (specifiedGroup.getGroupName().equals(oldName))
-					specifiedGroup.setGroupName(newName);
-			}
-		}
+		UserMatcher userMatcher = fromString(userMatcherString);
+		onRenameGroup(userMatcher.getCriterias(), oldName, newName);
+		onRenameGroup(userMatcher.getExceptCriterias(), oldName, newName);
 		return userMatcher.toString();
+	}
+
+	private static void onDeleteGroup(List<UserMatcherCriteria> criterias, String groupName) {
+		for (Iterator<UserMatcherCriteria> it = criterias.iterator(); it.hasNext();) {
+			UserMatcherCriteria criteria = it.next();
+			if (criteria instanceof SpecifiedGroup) {  
+				SpecifiedGroup specifiedGroup = (SpecifiedGroup) criteria;
+				if (specifiedGroup.getGroupName().equals(groupName))
+					it.remove();
+			}
+		}
 	}
 	
 	public static String onDeleteGroup(String userMatcherString, String groupName) {
-		UserMatcher userMatcher = UserMatcher.fromString(userMatcherString);
-		for (Iterator<UserMatcherCriteria> it = userMatcher.getCriterias().iterator(); it.hasNext();) {
-			UserMatcherCriteria criteria = it.next();
-			if (criteria instanceof SpecifiedGroup) {  
-				SpecifiedGroup specifiedGroup = (SpecifiedGroup) criteria;
-				if (specifiedGroup.getGroupName().equals(groupName))
-					it.remove();
-			}
-		}
-		for (Iterator<UserMatcherCriteria> it = userMatcher.getExceptCriterias().iterator(); it.hasNext();) {
-			UserMatcherCriteria criteria = it.next();
-			if (criteria instanceof SpecifiedGroup) {  
-				SpecifiedGroup specifiedGroup = (SpecifiedGroup) criteria;
-				if (specifiedGroup.getGroupName().equals(groupName))
-					it.remove();
-			}
-		}
+		UserMatcher userMatcher = fromString(userMatcherString);
+		onDeleteGroup(userMatcher.getCriterias(), groupName);
+		onDeleteGroup(userMatcher.getExceptCriterias(), groupName);
 		return userMatcher.toString();
+	}
+
+	private static void onRenameUser(List<UserMatcherCriteria> criterias, String oldName, String newName) {
+		for (UserMatcherCriteria criteria: criterias) {
+			if (criteria instanceof SpecifiedUser) {  
+				SpecifiedUser specifiedUser = (SpecifiedUser) criteria;
+				if (specifiedUser.getUserName().equals(oldName))
+					specifiedUser.setUserName(newName);
+			}
+		}
 	}
 	
 	public static String onRenameUser(String userMatcherString, String oldName, String newName) {
-		UserMatcher userMatcher = UserMatcher.fromString(userMatcherString);
-		for (UserMatcherCriteria criteria: userMatcher.getCriterias()) {
-			if (criteria instanceof SpecifiedUser) {  
-				SpecifiedUser specifiedUser = (SpecifiedUser) criteria;
-				if (specifiedUser.getUserName().equals(oldName))
-					specifiedUser.setUserName(newName);
-			}
-		}
-		for (UserMatcherCriteria criteria: userMatcher.getExceptCriterias()) {
-			if (criteria instanceof SpecifiedUser) {  
-				SpecifiedUser specifiedUser = (SpecifiedUser) criteria;
-				if (specifiedUser.getUserName().equals(oldName))
-					specifiedUser.setUserName(newName);
-			}
-		}
+		UserMatcher userMatcher = fromString(userMatcherString);
+		onRenameUser(userMatcher.getCriterias(), oldName, newName);
+		onRenameUser(userMatcher.getExceptCriterias(), oldName, newName);
 		return userMatcher.toString();
+	}
+
+	private static void onDeleteUser(List<UserMatcherCriteria> criterias, String userName) {
+		for (Iterator<UserMatcherCriteria> it = criterias.iterator(); it.hasNext();) {
+			UserMatcherCriteria criteria = it.next();
+			if (criteria instanceof SpecifiedUser) {  
+				SpecifiedUser specifiedUser = (SpecifiedUser) criteria;
+				if (specifiedUser.getUserName().equals(userName))
+					it.remove();
+			}
+		}
 	}
 	
 	public static String onDeleteUser(String userMatcherString, String userName) {
-		UserMatcher userMatcher = UserMatcher.fromString(userMatcherString);
-		for (Iterator<UserMatcherCriteria> it = userMatcher.getCriterias().iterator(); it.hasNext();) {
-			UserMatcherCriteria criteria = it.next();
-			if (criteria instanceof SpecifiedUser) {  
-				SpecifiedUser specifiedUser = (SpecifiedUser) criteria;
-				if (specifiedUser.getUserName().equals(userName))
-					it.remove();
-			}
-		}
-		for (Iterator<UserMatcherCriteria> it = userMatcher.getExceptCriterias().iterator(); it.hasNext();) {
-			UserMatcherCriteria criteria = it.next();
-			if (criteria instanceof SpecifiedUser) {  
-				SpecifiedUser specifiedUser = (SpecifiedUser) criteria;
-				if (specifiedUser.getUserName().equals(userName))
-					it.remove();
-			}
-		}
+		UserMatcher userMatcher = fromString(userMatcherString);
+		onDeleteUser(userMatcher.getCriterias(), userName);
+		onDeleteUser(userMatcher.getExceptCriterias(), userName);
 		return userMatcher.toString();
 	}
 	

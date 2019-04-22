@@ -11,9 +11,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
-import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usermatcher.Anyone;
@@ -161,40 +159,25 @@ public class BranchProtection implements Serializable {
 	
 	public void onRenameGroup(String oldName, String newName) {
 		submitter = UserMatcher.onRenameGroup(submitter, oldName, newName);
-		
-		ReviewRequirement reviewRequirement = ReviewRequirement.fromString(this.reviewRequirement);
-		for (Group group: reviewRequirement.getGroups().keySet()) {
-			if (group.getName().equals(oldName))
-				group.setName(newName);
-		}
-		setReviewRequirement(reviewRequirement.toString());
+		reviewRequirement = ReviewRequirement.onRenameGroup(reviewRequirement, oldName, newName);
 		
 		for (FileProtection fileProtection: getFileProtections()) {
-			reviewRequirement = ReviewRequirement.fromString(fileProtection.getReviewRequirement()); 
-			for (Group group: reviewRequirement.getGroups().keySet()) {
-				if (group.getName().equals(oldName))
-					group.setName(newName);
-			}
-			fileProtection.setReviewRequirement(reviewRequirement.toString());
+			fileProtection.setReviewRequirement(ReviewRequirement.onRenameGroup(
+					fileProtection.getReviewRequirement(), oldName, newName));
 		}
 	}
 	
 	public boolean onDeleteGroup(String groupName) {
 		submitter = UserMatcher.onDeleteGroup(submitter, groupName);
-		
-		for (Group group: ReviewRequirement.fromString(reviewRequirement).getGroups().keySet()) {
-			if (group.getName().equals(groupName))
-				return true;
-		}
-		
+		reviewRequirement = ReviewRequirement.onDeleteGroup(reviewRequirement, groupName);
+
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection protection = it.next();
-			for (Group group: ReviewRequirement.fromString(protection.getReviewRequirement()).getGroups().keySet()) {
-				if (group.getName().equals(groupName)) {
-					it.remove();
-					break;
-				}
-			}
+			String reviewRequirement = ReviewRequirement.onDeleteGroup(protection.getReviewRequirement(), groupName);
+			if (reviewRequirement != null)
+				protection.setReviewRequirement(reviewRequirement);
+			else
+				it.remove();
 		}
 		
 		return false;
@@ -212,40 +195,25 @@ public class BranchProtection implements Serializable {
 	
 	public void onRenameUser(Project project, String oldName, String newName) {
 		submitter = UserMatcher.onRenameUser(submitter, oldName, newName);
-		
-		ReviewRequirement reviewRequirement = ReviewRequirement.fromString(this.reviewRequirement);
-		for (User user: reviewRequirement.getUsers()) {
-			if (user.getName().equals(oldName))
-				user.setName(newName);
-		}
-		setReviewRequirement(reviewRequirement.toString());
+		reviewRequirement = ReviewRequirement.onRenameUser(reviewRequirement, oldName, newName);
 		
 		for (FileProtection fileProtection: getFileProtections()) {
-			reviewRequirement = ReviewRequirement.fromString(fileProtection.getReviewRequirement());
-			for (User user: reviewRequirement.getUsers()) {
-				if (user.getName().equals(oldName))
-					user.setName(newName);
-			}
-			fileProtection.setReviewRequirement(reviewRequirement.toString());
+			fileProtection.setReviewRequirement(ReviewRequirement.onRenameUser(
+					fileProtection.getReviewRequirement(), oldName, newName));
 		}	
 	}
 	
 	public boolean onDeleteUser(Project project, String userName) {
 		submitter = UserMatcher.onDeleteUser(submitter, userName);
-		
-		for (User user: ReviewRequirement.fromString(reviewRequirement).getUsers()) {
-			if (user.getName().equals(userName))
-				return true;
-		}
-		
+		reviewRequirement = ReviewRequirement.onDeleteUser(reviewRequirement, userName);
+
 		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
 			FileProtection protection = it.next();
-			for (User user: ReviewRequirement.fromString(protection.getReviewRequirement()).getUsers()) {
-				if (user.getName().equals(userName)) {
-					it.remove();
-					break;
-				}
-			}
+			String reviewRequirement = ReviewRequirement.onDeleteUser(protection.getReviewRequirement(), userName);
+			if (reviewRequirement != null)
+				protection.setReviewRequirement(reviewRequirement);
+			else
+				it.remove();
 		}
 		return false;
 	}

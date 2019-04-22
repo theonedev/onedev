@@ -1,6 +1,7 @@
 package io.onedev.server.util.reviewrequirement;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class ReviewRequirement {
 		this.groups = groups;
 	}
 	
-	public static ReviewRequirement fromString(String requirementString) {
+	public static ReviewRequirement fromString(@Nullable String requirementString) {
 		List<User> users = new ArrayList<>();
 		Map<Group, Integer> groups = new LinkedHashMap<>();
 		
@@ -132,6 +133,44 @@ public class ReviewRequirement {
 				return false;
 		}
 		return true;
+	}
+	
+	@Nullable
+	public static String onRenameGroup(String reviewRequirementString, String oldName, String newName) {
+		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
+		for (Group group: reviewRequirement.getGroups().keySet()) {
+			if (group.getName().equals(oldName))
+				group.setName(newName);
+		}
+		return reviewRequirement.toString();
+	}
+
+	@Nullable
+	public static String onDeleteGroup(String reviewRequirementString, String groupName) {
+		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
+		for (Iterator<Map.Entry<Group, Integer>> it = reviewRequirement.getGroups().entrySet().iterator(); it.hasNext();) {
+			if (it.next().getKey().getName().equals(groupName))
+				it.remove();
+		}
+		return reviewRequirement.toString();
+	}
+	
+	public static String onRenameUser(String reviewRequirementString, String oldName, String newName) {
+		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
+		for (User user: reviewRequirement.getUsers()) {
+			if (user.getName().equals(oldName))
+				user.setName(newName);
+		}
+		return reviewRequirement.toString();
+	}
+	
+	public static String onDeleteUser(String reviewRequirementString, String userName) {
+		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
+		for (Iterator<User> it = reviewRequirement.getUsers().iterator(); it.hasNext();) {
+			if (it.next().getName().equals(userName))
+				it.remove();
+		}
+		return reviewRequirement.toString();
 	}
 	
 	@Nullable

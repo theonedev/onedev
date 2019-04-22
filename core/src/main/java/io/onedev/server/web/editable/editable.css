@@ -18,7 +18,7 @@
 }
 .editable>.group>a:AFTER {
 	font-family: "FontAwesome";    
-	margin-left: 12px;
+    margin-left: 12px; 
 }
 .editable>.group>a:AFTER {
     content: "\f103";
