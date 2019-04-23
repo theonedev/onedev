@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -10,8 +11,8 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_request_id"), @Index(columnList="o_job_name")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_job_name", "o_request_id"})}
+		indexes={@Index(columnList="o_request_id"), @Index(columnList="jobName")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"jobName", "o_request_id"})}
 )
 public class PullRequestBuild extends AbstractEntity {
 
@@ -19,8 +20,7 @@ public class PullRequestBuild extends AbstractEntity {
 	
 	public static final String ATTR_BUILD = "build";
 	
-	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=false)
+	@Column(nullable=false)
 	private String jobName;
 	
 	@ManyToOne(fetch=FetchType.LAZY)

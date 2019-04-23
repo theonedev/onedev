@@ -261,19 +261,17 @@ public class Build extends AbstractEntity {
 			Collection<ObjectId> prevCommits = OneDev.getInstance(BuildInfoManager.class).getPrevCommits(project, getId());
 			if (prevCommits != null) {
 				fixedIssueNumbers = Optional.of(new HashSet<>());
-				if (!prevCommits.isEmpty()) {
-					Repository repository = project.getRepository();
-					try (RevWalk revWalk = new RevWalk(repository)) {
-						revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommitHash())));
-						for (ObjectId prevCommit: prevCommits)
-							revWalk.markUninteresting(revWalk.parseCommit(prevCommit));
+				Repository repository = project.getRepository();
+				try (RevWalk revWalk = new RevWalk(repository)) {
+					revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommitHash())));
+					for (ObjectId prevCommit: prevCommits)
+						revWalk.markUninteresting(revWalk.parseCommit(prevCommit));
 
-						RevCommit commit;
-						while ((commit = revWalk.next()) != null) 
-							fixedIssueNumbers.get().addAll(IssueUtils.parseFixedIssues(project, commit.getFullMessage()));
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
+					RevCommit commit;
+					while ((commit = revWalk.next()) != null) 
+						fixedIssueNumbers.get().addAll(IssueUtils.parseFixedIssues(project, commit.getFullMessage()));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
 			} else {
 				fixedIssueNumbers = Optional.absent();

@@ -99,24 +99,36 @@ public class IssueUtils {
 	public static Collection<Long> parseFixedIssues(Project project, String commitMessage) {
 		Collection<Long> issueNumbers = new HashSet<>();
 
-		/*
-		 * Transform commit message with defined transformers first in order not to process issue keys pointing 
-		 * to external issue trackers
-		 */
-		commitMessage = CommitMessageTransformer.transform(commitMessage, project.getCommitMessageTransforms());
+		// Skip unmatched commit message quickly 
+		boolean found = false;
+		String lowerCaseCommitMessage = commitMessage.toLowerCase();
+		for (String word: FIX_ISSUE_WORDS) {
+			if (lowerCaseCommitMessage.indexOf(word) != -1) {
+				found = true;
+				break;
+			}
+		}
 		
-		// Only process top level text node to skip transformed links above
-		Element body = Jsoup.parseBodyFragment(commitMessage).body();
-		for (int i=0; i<body.childNodeSize(); i++) {
-			Node node = body.childNode(i);
-			if (node instanceof TextNode) {
-				TextNode textNode = (TextNode) body.childNode(i);
-				StringTokenizer tokenizer = new StringTokenizer(textNode.getWholeText());
-				while (tokenizer.hasMoreTokens()) {
-					String token = tokenizer.nextToken();
-					if (FIX_ISSUE_WORDS.contains(token.toLowerCase())) {
-						while (FIX_ISSUE_WORDS.contains(parseIssueNumbers(tokenizer, issueNumbers)))
-							parseIssueNumbers(tokenizer, issueNumbers);
+		if (found) {
+			/*
+			 * Transform commit message with defined transformers first in order not to process issue keys pointing 
+			 * to external issue trackers
+			 */
+			commitMessage = CommitMessageTransformer.transform(commitMessage, project.getCommitMessageTransforms());
+			
+			// Only process top level text node to skip transformed links above
+			Element body = Jsoup.parseBodyFragment(commitMessage).body();
+			for (int i=0; i<body.childNodeSize(); i++) {
+				Node node = body.childNode(i);
+				if (node instanceof TextNode) {
+					TextNode textNode = (TextNode) body.childNode(i);
+					StringTokenizer tokenizer = new StringTokenizer(textNode.getWholeText());
+					while (tokenizer.hasMoreTokens()) {
+						String token = tokenizer.nextToken();
+						if (FIX_ISSUE_WORDS.contains(token.toLowerCase())) {
+							while (FIX_ISSUE_WORDS.contains(parseIssueNumbers(tokenizer, issueNumbers)))
+								parseIssueNumbers(tokenizer, issueNumbers);
+						}
 					}
 				}
 			}
