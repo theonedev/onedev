@@ -24,7 +24,6 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Issue;
@@ -37,7 +36,6 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.facade.BuildFacade;
-import io.onedev.server.util.facade.ConfigurationFacade;
 import io.onedev.server.util.facade.EntityFacade;
 import io.onedev.server.util.facade.GroupAuthorizationFacade;
 import io.onedev.server.util.facade.GroupFacade;
@@ -80,10 +78,6 @@ public class DefaultCacheManager implements CacheManager {
 	
 	private final ReadWriteLock membershipsLock = new ReentrantReadWriteLock();
 
-	private final Map<Long, ConfigurationFacade> configurations = new HashMap<>();
-	
-	private final ReadWriteLock configurationsLock = new ReentrantReadWriteLock();
-	
 	private final Map<Long, BuildFacade> builds= new HashMap<>();
 	
 	private final ReadWriteLock buildsLock = new ReentrantReadWriteLock();
@@ -129,10 +123,7 @@ public class DefaultCacheManager implements CacheManager {
 		for (Membership membership: dao.query(Membership.class))
 			memberships.put(membership.getId(), membership.getFacade());
 		
-		for (Configuration configuration: dao.query(Configuration.class))
-			configurations.put(configuration.getId(), configuration.getFacade());
-		
-		Query<?> query = dao.getSessionManager().getSession().createQuery("select id, configuration.id, commitHash from Build");
+		Query<?> query = dao.getSessionManager().getSession().createQuery("select id, project.id, commitHash from Build");
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			Long buildId = (Long) fields[0];
 			builds.put(buildId, new BuildFacade(buildId, (Long)fields[1], (String)fields[2]));
@@ -167,8 +158,6 @@ public class DefaultCacheManager implements CacheManager {
 			facade = ((Build)event.getEntity()).getFacade();
 		} else if (event.getEntity() instanceof Issue) {
 			facade = ((Issue)event.getEntity()).getFacade();
-		} else if (event.getEntity() instanceof Configuration) {
-			facade = ((Configuration)event.getEntity()).getFacade();
 		} else if (event.getEntity() instanceof UserAuthorization) {
 			facade = ((UserAuthorization) event.getEntity()).getFacade();
 		} else if (event.getEntity() instanceof GroupAuthorization) {
@@ -209,14 +198,6 @@ public class DefaultCacheManager implements CacheManager {
 						groupIdsByName.inverse().put(group.getId(), group.getName());
 					} finally {
 						groupsLock.writeLock().unlock();
-					}
-				} else if (facade instanceof ConfigurationFacade) {
-					ConfigurationFacade configuration = (ConfigurationFacade) facade;
-					configurationsLock.writeLock().lock();
-					try {
-						configurations.put(configuration.getId(), configuration);
-					} finally {
-						configurationsLock.writeLock().unlock();
 					}
 				} else if (facade instanceof IssueFacade) {
 					IssueFacade issue = (IssueFacade) facade;
@@ -301,26 +282,6 @@ public class DefaultCacheManager implements CacheManager {
 					} finally {
 						groupAuthorizationsLock.writeLock().unlock();
 					}
-					configurationsLock.writeLock().lock();
-					try {
-						for (Iterator<Map.Entry<Long, ConfigurationFacade>> it = configurations.entrySet().iterator(); it.hasNext();) {
-							ConfigurationFacade configuration = it.next().getValue();
-							if (configuration.getProjectId().equals(id)) {
-								it.remove();
-								buildsLock.writeLock().lock();
-								try {
-									for (Iterator<Map.Entry<Long, BuildFacade>> it2 = builds.entrySet().iterator(); it2.hasNext();) {
-										if (it2.next().getValue().getConfigurationId().equals(configuration.getId()))
-											it2.remove();
-									}
-								} finally {
-									buildsLock.writeLock().unlock();
-								}
-							}
-						}
-					} finally {
-						configurationsLock.writeLock().unlock();
-					}
 					issuesLock.writeLock().lock();
 					try {
 						for (Iterator<Map.Entry<Long, IssueFacade>> it = issues.entrySet().iterator(); it.hasNext();) {
@@ -383,22 +344,6 @@ public class DefaultCacheManager implements CacheManager {
 						}
 					} finally {
 						membershipsLock.writeLock().unlock();
-					}
-				} else if (Configuration.class.isAssignableFrom(clazz)) {
-					configurationsLock.writeLock().lock();
-					try {
-						configurations.remove(id);
-					} finally {
-						configurationsLock.writeLock().unlock();
-					}
-					buildsLock.writeLock().lock();
-					try {
-						for (Iterator<Map.Entry<Long, BuildFacade>> it = builds.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getValue().getConfigurationId().equals(id))
-								it.remove();
-						}
-					} finally {
-						buildsLock.writeLock().unlock();
 					}
 				} else if (Build.class.isAssignableFrom(clazz)) {
 					buildsLock.writeLock().lock();
@@ -587,63 +532,32 @@ public class DefaultCacheManager implements CacheManager {
 	@Override
 	public Collection<Long> getBuildIdsByProject(Long projectId) {
 		buildsLock.readLock().lock();
-		configurationsLock.readLock().lock();
 		try {
 			Collection<Long> buildIds = new HashSet<>();
 			for (BuildFacade build: builds.values()) {
-				ConfigurationFacade configuration = configurations.get(build.getConfigurationId());
-				if (configuration != null && configuration.getProjectId().equals(projectId))
+				if (build.getProjectId().equals(projectId))
 					buildIds.add(build.getId());
 			}
 			return buildIds;
 		} finally {
-			configurationsLock.readLock().unlock();
 			buildsLock.readLock().unlock();
 		}
 	}
 
 	@Override
-	public Collection<Long> getBuildIdsByConfiguration(Long configurationId) {
-		buildsLock.readLock().lock();
-		try {
-			Collection<Long> buildIds = new HashSet<>();
-			for (BuildFacade build: builds.values()) {
-				if (build.getConfigurationId().equals(configurationId))
-					buildIds.add(build.getId());
-			}
-			return buildIds;
-		} finally {
-			buildsLock.readLock().unlock();
-		}
-	}
-	
-	@Override
 	public Collection<Long> filterBuildIds(Long projectId, Collection<String> commitHashes) {
 		buildsLock.readLock().lock();
-		configurationsLock.readLock().lock();
 		try {
 			Collection<Long> buildIds = new HashSet<>();
 			for (BuildFacade build: builds.values()) {
-				ConfigurationFacade configuration = configurations.get(build.getConfigurationId());
-				if (configuration != null && configuration.getProjectId().equals(projectId) 
+				if (build.getProjectId().equals(projectId) 
 						&& commitHashes.contains(build.getCommitHash())) {
 					buildIds.add(build.getId());
 				}
 			}
 			return buildIds;
 		} finally {
-			configurationsLock.readLock().unlock();
 			buildsLock.readLock().unlock();
-		}
-	}
-
-	@Override
-	public Map<Long, ConfigurationFacade> getConfigurations() {
-		configurationsLock.readLock().lock();
-		try {
-			return new HashMap<>(configurations);
-		} finally {
-			configurationsLock.readLock().unlock();
 		}
 	}
 
@@ -667,24 +581,4 @@ public class DefaultCacheManager implements CacheManager {
 		}
 	}
 	
-	@Override
-	public UserAuthorizationFacade getUserAuthorization(Long id) {
-		userAuthorizationsLock.readLock().lock();
-		try {
-			return userAuthorizations.get(id);
-		} finally {
-			userAuthorizationsLock.readLock().unlock();
-		}
-	}
-
-	@Override
-	public GroupAuthorizationFacade getGroupAuthorization(Long id) {
-		groupAuthorizationsLock.readLock().lock();
-		try {
-			return groupAuthorizations.get(id);
-		} finally {
-			groupAuthorizationsLock.readLock().unlock();
-		}
-	}
-
 }

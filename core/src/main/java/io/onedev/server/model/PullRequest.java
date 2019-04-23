@@ -713,9 +713,9 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	}
 	
 	@Nullable
-	public PullRequestBuild getBuild(Configuration configuration) {
+	public PullRequestBuild getBuild(String jobName) {
 		for (PullRequestBuild build: getBuilds()) {
-			if (build.getConfiguration().equals(configuration))
+			if (build.getJobName().equals(jobName))
 				return build;
 		}
 		return null;
@@ -821,7 +821,7 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	
 	public boolean isAllBuildsSuccessful() {
 		for (PullRequestBuild build: getBuilds()) {
-			if (build.getBuild() == null || build.getBuild().getStatus() != Build.Status.SUCCESS) {
+			if (build.getBuild() == null || build.getBuild().getStatus() != Build.Status.SUCCESSFUL) {
 				return false;
 			}
 		}

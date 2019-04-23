@@ -18,17 +18,17 @@ import io.onedev.server.OneDev;
 import io.onedev.server.ci.job.log.LogEntry;
 import io.onedev.server.ci.job.log.LogManager;
 import io.onedev.server.ci.job.log.LogSnippet;
-import io.onedev.server.model.Build2;
+import io.onedev.server.model.Build;
 import io.onedev.server.web.behavior.WebSocketObserver;
 
 @SuppressWarnings("serial")
-public class BuildLogPanel extends GenericPanel<Build2> {
+public class BuildLogPanel extends GenericPanel<Build> {
 
 	private static final int MAX_LOG_ENTRIES = 5000;
 	
 	private int nextOffset;
 	
-	public BuildLogPanel(String id, IModel<Build2> model) {
+	public BuildLogPanel(String id, IModel<Build> model) {
 		super(id, model);
 	}
 
@@ -62,7 +62,7 @@ public class BuildLogPanel extends GenericPanel<Build2> {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(Build2.getLogWebSocketObservable(getBuild().getId()));
+				return Sets.newHashSet(Build.getLogWebSocketObservable(getBuild().getId()));
 			}
 			
 		});
@@ -98,7 +98,7 @@ public class BuildLogPanel extends GenericPanel<Build2> {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
-	private Build2 getBuild() {
+	private Build getBuild() {
 		return getModelObject();
 	}
 }

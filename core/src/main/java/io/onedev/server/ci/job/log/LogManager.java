@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 
-import io.onedev.server.model.Build2;
+import io.onedev.server.model.Build;
 
 public interface LogManager {
 	
@@ -25,7 +25,7 @@ public interface LogManager {
 	 * 			log entries. Number of entries may be less than required count if there is no 
 	 * 			enough log entries
 	 */
-	List<LogEntry> readLogEntries(Build2 build, int offset, int count);
+	List<LogEntry> readLogEntries(Build build, int offset, int count);
 	
 	/**
 	 * Read specified number of log entries starting from end of the log
@@ -38,8 +38,8 @@ public interface LogManager {
 	 * 			log entries with normal order. Number of entries may be less than required count 
 	 * 			if there is no enough log entries
 	 */
-	LogSnippet readLogSnippetReversely(Build2 build, int count);
+	LogSnippet readLogSnippetReversely(Build build, int count);
 	
-	InputStream openLogStream(Build2 build);
+	InputStream openLogStream(Build build);
 	
 }

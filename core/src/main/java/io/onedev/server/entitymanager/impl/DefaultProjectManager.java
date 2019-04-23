@@ -334,7 +334,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		if (branchProtection != null) {
 			if (!ReviewRequirement.fromString(branchProtection.getReviewRequirement()).satisfied(user)) 
 				return true;
-			if (!branchProtection.getConfigurations().isEmpty())
+			if (!branchProtection.getJobNames().isEmpty())
 				return true;
 			
 			if (file != null) {
@@ -357,8 +357,8 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 				return true;
 
 			List<Build> builds = buildManager.query(project, newObjectId.name());
-			if (!builds.stream().map(it->it.getConfiguration().getName()).collect(Collectors.toSet())
-					.containsAll(branchProtection.getConfigurations())) {
+			if (!builds.stream().map(it->it.getJobName()).collect(Collectors.toSet())
+					.containsAll(branchProtection.getJobNames())) {
 				return true;
 			}
 			

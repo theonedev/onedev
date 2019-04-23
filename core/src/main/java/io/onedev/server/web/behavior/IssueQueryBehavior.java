@@ -139,7 +139,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								break;
 							case "build":
 								if (getProject() != null)
-									suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedLowerCaseMatchWith, true)));
+									suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedLowerCaseMatchWith)));
 								break;
 							}
 						} else if ("criteriaValue".equals(spec.getLabel())) {
@@ -152,7 +152,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								if (operator == IssueQueryLexer.SubmittedBy)
 									suggestions.addAll(escape(SuggestionUtils.suggestUsers(unfencedLowerCaseMatchWith)));
 								else
-									suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedLowerCaseMatchWith, true)));
+									suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedLowerCaseMatchWith)));
 							} else {
 								String fieldName = IssueQuery.getValue(fieldElements.get(0).getMatchedText());
 								
@@ -174,7 +174,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldSpec instanceof BuildChoiceInput) {
 										List<Build> builds = OneDev.getInstance(BuildManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
 										for (Build build: builds) {
-											InputSuggestion suggestion = new InputSuggestion(build.getVersion(), null, null);
+											InputSuggestion suggestion = new InputSuggestion("#" + build.getNumber(), null, null);
 											suggestions.add(suggestion);
 										}
 									} else if (fieldSpec instanceof PullRequestChoiceInput) {

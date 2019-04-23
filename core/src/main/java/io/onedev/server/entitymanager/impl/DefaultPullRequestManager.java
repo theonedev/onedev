@@ -59,7 +59,6 @@ import io.onedev.commons.utils.concurrent.Prioritized;
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ConfigurationManager;
 import io.onedev.server.entitymanager.PullRequestBuildManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -67,7 +66,7 @@ import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.event.build.BuildEvent;
+import io.onedev.server.event.build2.BuildEvent;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
@@ -80,7 +79,6 @@ import io.onedev.server.exception.OneException;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.FileChange;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -156,8 +154,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final PullRequestChangeManager pullRequestChangeManager;
 	
-	private final ConfigurationManager configurationManager;
-	
 	private final BuildManager buildManager;
 	
 	private final TransactionManager transactionManager;
@@ -168,8 +164,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			MarkdownManager markdownManager, BatchWorkManager batchWorkManager, 
 			ListenerRegistry listenerRegistry, SessionManager sessionManager,  
 			PullRequestChangeManager pullRequestChangeManager, BuildManager buildManager,
-			ConfigurationManager configurationManager, PullRequestBuildManager pullRequestBuildManager, 
-			TransactionManager transactionManager) {
+			PullRequestBuildManager pullRequestBuildManager, TransactionManager transactionManager) {
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
@@ -181,7 +176,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		this.sessionManager = sessionManager;
 		this.listenerRegistry = listenerRegistry;
 		this.pullRequestChangeManager = pullRequestChangeManager;
-		this.configurationManager = configurationManager;
 		this.pullRequestBuildManager = pullRequestBuildManager;
 	}
 	
@@ -637,7 +631,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Build build = event.getBuild();
 		for (PullRequest request: queryOpenByCommit(build.getCommitHash())) { 
 			listenerRegistry.post(new PullRequestBuildEvent(request, build));
-			if (build.getStatus() != Build.Status.RUNNING)
+			if (build.isFinished())
 				checkAsync(request);
 		}
 	}
@@ -686,8 +680,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		if (branchProtection != null) {
 			checkReviews(ReviewRequirement.fromString(branchProtection.getReviewRequirement()), request.getLatestUpdate());
 
-			if (branchProtection.getConfigurations() != null)
-				checkBuilds(request, branchProtection.getConfigurations(), branchProtection.isBuildMerges());
+			if (branchProtection.getJobNames() != null)
+				checkBuilds(request, branchProtection.getJobNames(), branchProtection.isBuildMerges());
 			
 			Set<FileProtection> checkedFileProtections = new HashSet<>();
 			for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
@@ -714,7 +708,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 	}
 
-	private void checkBuilds(PullRequest request, List<String> configurationNames, boolean buildMerges) {
+	private void checkBuilds(PullRequest request, List<String> jobNames, boolean buildMerges) {
 		String commit;
 		if (buildMerges) {
 			MergePreview preview = request.getMergePreview();
@@ -726,33 +720,24 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			commit = request.getHeadCommitHash();			
 		}
 		
-		Map<Configuration, Build> builds = new HashMap<>();
+		Map<String, Build> builds = new HashMap<>();
 		if (commit != null) {
 			for (Build build: buildManager.query(request.getTargetProject(), commit)) 
-				builds.put(build.getConfiguration(), build);
+				builds.put(build.getJobName(), build);
 		}
-		Collection<Configuration> configurations = new HashSet<>();
-		for (String configurationName: configurationNames) {
-			Configuration configuration = configurationManager.find(request.getTargetProject(), configurationName);
-			if (configuration != null) {
-				configurations.add(configuration);
-				PullRequestBuild pullRequestBuild = request.getBuild(configuration);
-				if (pullRequestBuild == null) {
-					pullRequestBuild = new PullRequestBuild();
-					pullRequestBuild.setConfiguration(configuration);
-					pullRequestBuild.setRequest(request);
-					request.getBuilds().add(pullRequestBuild);
-				}
-				pullRequestBuild.setBuild(builds.get(configuration));
-			} else {
-				String errorMessage = String.format("Unable to find configuration (project: %s, name: %s)", 
-						request.getTargetProject().getName(), configurationName);
-				throw new OneException(errorMessage);
+		for (String jobName: jobNames) {
+			PullRequestBuild pullRequestBuild = request.getBuild(jobName);
+			if (pullRequestBuild == null) {
+				pullRequestBuild = new PullRequestBuild();
+				pullRequestBuild.setJobName(jobName);
+				pullRequestBuild.setRequest(request);
+				request.getBuilds().add(pullRequestBuild);
 			}
+			pullRequestBuild.setBuild(builds.get(jobName));
 		}
 		
 		for (Iterator<PullRequestBuild> it = request.getBuilds().iterator(); it.hasNext();) {
-			if (!configurations.contains(it.next().getConfiguration()))
+			if (!jobNames.contains(it.next().getJobName()))
 				it.remove();
 		}
 	}

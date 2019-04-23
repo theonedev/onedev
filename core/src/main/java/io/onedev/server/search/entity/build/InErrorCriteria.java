@@ -17,12 +17,12 @@ public class InErrorCriteria extends EntityCriteria<Build> {
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Build> context, User user) {
 		Path<?> attribute = context.getRoot().get(BuildConstants.ATTR_STATUS);
-		return context.getBuilder().equal(attribute, Build.Status.ERROR);
+		return context.getBuilder().equal(attribute, Build.Status.IN_ERROR);
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return build.getStatus() == Build.Status.ERROR;
+		return build.getStatus() == Build.Status.IN_ERROR;
 	}
 
 	@Override

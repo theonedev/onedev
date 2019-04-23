@@ -5,8 +5,8 @@ import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.build2.BuildFinished;
-import io.onedev.server.model.Build2;
-import io.onedev.server.model.Build2.Status;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=500, name="When dependency jobs finished successfully")
@@ -18,7 +18,7 @@ public class DependencyBuiltTrigger extends JobTrigger {
 	public boolean matches(ProjectEvent event, Job job) {
 		if (event instanceof BuildFinished) {
 			BuildFinished buildFinished = (BuildFinished) event;
-			Build2 build = buildFinished.getBuild();
+			Build build = buildFinished.getBuild();
 			if (build.getStatus() == Status.SUCCESSFUL) {
 				for (Dependency dependency: job.getDependencies()) {
 					if (dependency.getJobName().equals(build.getJobName())) {

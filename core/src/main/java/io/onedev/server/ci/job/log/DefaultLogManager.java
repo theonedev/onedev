@@ -37,7 +37,7 @@ import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.event.build2.BuildFinished;
-import io.onedev.server.model.Build2;
+import io.onedev.server.model.Build;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.web.websocket.WebSocketManager;
@@ -115,7 +115,7 @@ public class DefaultLogManager implements LogManager {
 									}
 								}
 								
-								webSocketManager.notifyObservableChange(Build2.getLogWebSocketObservable(buildId), null);
+								webSocketManager.notifyObservableChange(Build.getLogWebSocketObservable(buildId), null);
 							}
 						} finally {
 							lock.unlock();
@@ -186,7 +186,7 @@ public class DefaultLogManager implements LogManager {
 	
 	@Sessional
 	@Override
-	public List<LogEntry> readLogEntries(Build2 build, int from, int count) {
+	public List<LogEntry> readLogEntries(Build build, int from, int count) {
 		Lock lock = LockUtils.getReadWriteLock(getLockKey(build.getId())).readLock();
 		lock.lock();
 		try {
@@ -214,7 +214,7 @@ public class DefaultLogManager implements LogManager {
 
 	@Sessional
 	@Override
-	public LogSnippet readLogSnippetReversely(Build2 build, int count) {
+	public LogSnippet readLogSnippetReversely(Build build, int count) {
 		Lock lock = LockUtils.getReadWriteLock(getLockKey(build.getId())).readLock();
 		lock.lock();
 		try {
@@ -261,7 +261,7 @@ public class DefaultLogManager implements LogManager {
 	@Sessional
 	@Listen
 	public void on(BuildFinished event) {
-		Build2 build = event.getBuild();
+		Build build = event.getBuild();
 		Lock lock = LockUtils.getReadWriteLock(getLockKey(build.getId())).writeLock();
 		lock.lock();
 		try {
@@ -281,7 +281,7 @@ public class DefaultLogManager implements LogManager {
 	}
 
 	@Override
-	public InputStream openLogStream(Build2 build) {
+	public InputStream openLogStream(Build build) {
 		return new LogStream(build);
 	}
 
@@ -297,7 +297,7 @@ public class DefaultLogManager implements LogManager {
 		
 		private int pos = 0;
 		
-		public LogStream(Build2 build) {
+		public LogStream(Build build) {
 			lock = LockUtils.getReadWriteLock(getLockKey(build.getId())).readLock();
 			lock.lock();
 			try {

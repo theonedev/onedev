@@ -1,21 +1,21 @@
-package io.onedev.server.web.editable.configuration;
+package io.onedev.server.web.editable.jobchoice;
 
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.web.component.configuration.ConfigurationSingleChoice;
+import io.onedev.server.web.component.jobchoice.JobSingleChoice;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
 @SuppressWarnings("serial")
-public class ConfigurationSingleChoiceEditor extends PropertyEditor<String> {
+public class JobSingleChoiceEditor extends PropertyEditor<String> {
 	
-	private ConfigurationSingleChoice input;
+	private JobSingleChoice input;
 	
-	public ConfigurationSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
+	public JobSingleChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
 			IModel<String> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
@@ -24,7 +24,7 @@ public class ConfigurationSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new ConfigurationSingleChoice("input", Model.of(getModelObject()));
+		input = new JobSingleChoice("input", Model.of(getModelObject()));
         input.setConvertEmptyInputStringToNull(true);
         input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
         

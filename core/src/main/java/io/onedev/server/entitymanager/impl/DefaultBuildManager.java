@@ -1,7 +1,9 @@
 package io.onedev.server.entitymanager.impl;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -13,28 +15,23 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.ScheduleBuilder;
+
+import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.commons.launcher.loader.ListenerRegistry;
-import io.onedev.commons.utils.schedule.SchedulableTask;
-import io.onedev.commons.utils.schedule.TaskScheduler;
-import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ConfigurationManager;
-import io.onedev.server.event.build.BuildFinished;
-import io.onedev.server.event.build.BuildStarted;
-import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.entitymanager.BuildDependenceManager;
+import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.event.build2.BuildSubmitted;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Configuration;
+import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.BuildDependence;
+import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -48,26 +45,26 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.BuildQueryBuildContext;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.BuildConstants;
 
 @Singleton
-public class DefaultBuildManager extends AbstractEntityManager<Build> implements BuildManager, SchedulableTask {
+public class DefaultBuildManager extends AbstractEntityManager<Build> implements BuildManager {
 
-	private final TaskScheduler taskScheduler;
+	private final BuildParamManager buildParamManager;
 	
-	private final ListenerRegistry listenerRegistry;
+	private final BuildDependenceManager buildDependenceManager;
 	
-	private final ConfigurationManager configurationManager;
-	
-	private String taskId;
+	private final StorageManager storageManager;
 	
 	@Inject
-	public DefaultBuildManager(Dao dao, ListenerRegistry listenerRegistry, TaskScheduler taskScheduler, 
-			ConfigurationManager configurationManager) {
+	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
+			BuildDependenceManager buildDependenceManager, 
+			StorageManager storageManager) {
 		super(dao);
-		this.listenerRegistry = listenerRegistry;
-		this.taskScheduler = taskScheduler;
-		this.configurationManager = configurationManager;
+		this.buildParamManager = buildParamManager;
+		this.buildDependenceManager = buildDependenceManager;
+		this.storageManager = storageManager;
 	}
 
 	@Transactional
@@ -79,95 +76,124 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
     	
     	super.delete(build);
 	}
+	
+	@Sessional
+	@Override
+	public Build find(Project project, long number) {
+		EntityCriteria<Build> criteria = newCriteria();
+		criteria.add(Restrictions.eq("project", project));
+		criteria.add(Restrictions.eq("number", number));
+		criteria.setCacheable(true);
+		return find(criteria);
+	}
 
 	@Sessional
 	@Override
 	public List<Build> query(Project project, String commitHash) {
-		EntityCriteria<Build> criteria = newCriteria();
-		criteria.createCriteria("configuration").add(Restrictions.eq("project", project));
-		criteria.add(Restrictions.eq("commitHash", commitHash));
-		criteria.addOrder(Order.asc("id"));
-		return query(criteria);
-	}
-
-	@Override
-	public Build findByCommit(Configuration configuration, String commitHash) {
-		EntityCriteria<Build> criteria = newCriteria();
-		criteria.add(Restrictions.eq("configuration", configuration));
-		criteria.add(Restrictions.eq("commitHash", commitHash));
-		return find(criteria);
-	}
-
-	@Override
-	public void save(Build build) {
-		super.save(build);
-		
-		if (build.getStatus() == Build.Status.RUNNING) 
-			listenerRegistry.post(new BuildStarted(build));
-		else
-			listenerRegistry.post(new BuildFinished(build));
+		return query(project, commitHash, null, new HashMap<>());
 	}
 	
 	@Sessional
 	@Override
-	public Build findByVersion(Configuration configuration, String version) {
-		EntityCriteria<Build> criteria = newCriteria();
-		criteria.add(Restrictions.eq("configuration", configuration));
-		criteria.add(Restrictions.eq("version", version));
-		criteria.addOrder(Order.desc("id"));
-		return find(criteria);
+	public List<Build> query(Project project, String commitHash, String jobName, Map<String, String> params) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Build> query = builder.createQuery(Build.class);
+		Root<Build> root = query.from(Build.class);
+		
+		List<Predicate> restrictions = new ArrayList<>();
+		restrictions.add(builder.equal(root.get("project"), project));
+		restrictions.add(builder.equal(root.get("commitHash"), commitHash));
+		if (jobName != null)
+			restrictions.add(builder.equal(root.get("jobName"), jobName));
+		
+		for (Map.Entry<String, String> entry: params.entrySet()) {
+			Join<?, ?> join = root.join("params", JoinType.INNER);
+			restrictions.add(builder.equal(join.get("name"), entry.getKey()));
+			restrictions.add(builder.equal(join.get("value"), entry.getValue()));
+		}
+		return getSession().createQuery(query.where(restrictions.toArray(new Predicate[0]))).list();
 	}
-	
+
+	@Sessional
+	@Override
+	public List<Build> queryUnfinished() {
+		EntityCriteria<Build> criteria = newCriteria();
+		criteria.add(Restrictions.or(
+				Restrictions.eq("status", Status.QUEUEING), 
+				Restrictions.eq("status", Status.RUNNING), 
+				Restrictions.eq("status", Status.WAITING)));
+		criteria.setCacheable(true);
+		return query(criteria);
+	}
+
 	@Sessional
 	@Override
 	public List<Build> query(Project project, String term, int count) {
 		List<Build> builds = new ArrayList<>();
 		
-		EntityCriteria<Build> criteria = newCriteria();
-		Criteria configurationCriteria = criteria.createCriteria("configuration");
-		configurationCriteria.add(Restrictions.eq("project", project));
-		if (term != null) {
-			if (term.contains(Build.FQN_SEPARATOR)) {
-				String configurationTerm = StringUtils.substringBefore(term, Build.FQN_SEPARATOR);
-				String versionTerm = StringUtils.substringAfter(term, Build.FQN_SEPARATOR);
-				configurationCriteria.add(Restrictions.ilike("name", "%" + configurationTerm + "%"));
-				criteria.add(Restrictions.ilike("version", "%" + versionTerm + "%"));
-			} else {
-				criteria.add(Restrictions.ilike("version", "%" + term + "%"));
-			}
+		Long number = null;
+		String numberStr = term;
+		if (numberStr != null) {
+			numberStr = numberStr.trim();
+			if (numberStr.startsWith("#"))
+				numberStr = numberStr.substring(1);
+			if (StringUtils.isNumeric(numberStr))
+				number = Long.valueOf(numberStr);
 		}
-		criteria.addOrder(Order.desc("id"));
-		builds.addAll(query(criteria, 0, count-builds.size()));
+		
+		if (number != null) {
+			Build build = find(project, number);
+			if (build != null)
+				builds.add(build);
+			EntityCriteria<Build> criteria = newCriteria();
+			criteria.add(Restrictions.eq("project", project));
+			criteria.add(Restrictions.and(
+					Restrictions.ilike("numberStr", term + "%"), 
+					Restrictions.ne("number", number)
+				));
+			criteria.addOrder(Order.desc("number"));
+			builds.addAll(query(criteria, 0, count-builds.size()));
+		} else {
+			EntityCriteria<Build> criteria = newCriteria();
+			criteria.add(Restrictions.eq("project", project));
+			if (StringUtils.isNotBlank(term)) {
+				criteria.add(Restrictions.ilike("numberStr", (term.startsWith("#")? term.substring(1): term) + "%"));
+			}
+			criteria.addOrder(Order.desc("number"));
+			builds.addAll(query(criteria, 0, count));
+		} 
 		return builds;
 	}
-
+	
 	@Override
 	public List<Build> queryAfter(Project project, Long afterBuildId, int count) {
 		EntityCriteria<Build> criteria = newCriteria();
-		criteria.createCriteria("configuration").add(Restrictions.eq("project", project));
+		criteria.add(Restrictions.eq("project", project));
 		criteria.addOrder(Order.asc("id"));
 		if (afterBuildId != null)
 			criteria.add(Restrictions.gt("id", afterBuildId));
 		return query(criteria, 0, count);
 	}
-
-	@Sessional
+	
+	@Transactional
 	@Override
-	public Build findByFQN(Project project, String fqn) {
-		String configurationName = StringUtils.substringBefore(fqn, Build.FQN_SEPARATOR);
-		String buildVersion = StringUtils.substringAfter(fqn, Build.FQN_SEPARATOR);
-		Configuration configuration = OneDev.getInstance(ConfigurationManager.class).find(project, configurationName);
-		if (configuration != null)
-			return OneDev.getInstance(BuildManager.class).findByVersion(configuration, buildVersion);
-		else
-			return null;
+	public void create(Build build) {
+		Preconditions.checkArgument(build.isNew());
+		Query<?> query = getSession().createQuery("select max(number) from Build2 where project=:project");
+		query.setParameter("project", build.getProject());
+		build.setNumber(getNextNumber(build.getProject(), query));
+		save(build);
+
+		for (BuildParam param: build.getParams())
+			buildParamManager.save(param);
+		for (BuildDependence dependence: build.getDependencies())
+			buildDependenceManager.save(dependence);
 	}
 
 	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Build> criteria, Project project, 
 			QueryBuildContext<Build> context, User user) {
 		List<Predicate> predicates = new ArrayList<>();
-		Join<?, ?> join = context.getRoot().join(BuildConstants.ATTR_CONFIGURATION, JoinType.INNER);
-		join.on(context.getBuilder().equal(join.get(Configuration.ATTR_PROJECT), project));
+		predicates.add(context.getBuilder().equal(context.getRoot().get(BuildConstants.ATTR_PROJECT), project));
 		if (criteria != null)
 			predicates.add(criteria.getPredicate(project, context, user));
 		return predicates.toArray(new Predicate[0]);
@@ -221,38 +247,10 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
-
-	@Transactional
-	@Override
-	public void cleanupBuilds(Configuration configuration) {
-		configuration.getBuildCleanupRule().cleanup(configuration, getSession());
-	}
-
-	@Listen
-	public void on(SystemStarted event) {
-		taskId = taskScheduler.schedule(this);
-	}
-
-	@Listen
-	public void on(SystemStopping event) {
-		taskScheduler.unschedule(taskId);
-	}
-
-	@Override
-	public void execute() {
-		for (Long configurationId: OneDev.getInstance(CacheManager.class).getConfigurations().keySet())
-			cleanup(configurationId);
-	}
 	
-	@Transactional
-	protected void cleanup(Long configurationId) {
-		Configuration configuration = configurationManager.load(configurationId);
-		cleanupBuilds(configuration);
+	@Listen
+	public void on(BuildSubmitted event) {
+		Build build = event.getBuild();
+		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getId()));
 	}
-
-	@Override
-	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.cronSchedule("0 0 1 * * ?");
-	}
-	
 }

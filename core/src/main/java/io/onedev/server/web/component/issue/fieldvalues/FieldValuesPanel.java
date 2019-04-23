@@ -2,13 +2,11 @@ package io.onedev.server.web.component.issue.fieldvalues;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -40,14 +38,13 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.builds2.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
 @SuppressWarnings("serial")
 public abstract class FieldValuesPanel extends Panel implements EditContext {
 
-	private static final int MAX_BUILD_NAME_LEN = 30;
-	
 	public FieldValuesPanel(String id) {
 		super(id);
 	}
@@ -87,8 +84,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(value));
 						if (build != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
-							ExternalLink link = new ExternalLink("link", build.getUrl());
-							link.add(new Label("label", StringUtils.abbreviate(build.getVersion(), MAX_BUILD_NAME_LEN)));
+							Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDetailPage.class, BuildDetailPage.paramsOf(build));
+							link.add(new Label("label", "#" + build.getNumber()));
 							linkFrag.add(link);
 							item.add(linkFrag);
 						} else {

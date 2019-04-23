@@ -24,7 +24,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
-import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -55,6 +55,7 @@ import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.page.project.builds2.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesOpened;
@@ -257,34 +258,35 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 		
 		List<IColumn<Build, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_CONFIGURATION)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_JOB)) {
 
 			@Override
 			public String getCssClass() {
-				return "configuration";
+				return "job";
 			}
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
 					IModel<Build> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getConfiguration().getName()));
+				cellItem.add(new Label(componentId, rowModel.getObject().getJobName()));
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_VERSION)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_NUMBER)) {
 
 			@Override
 			public String getCssClass() {
-				return "version";
+				return "number";
 			}
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
 					IModel<Build> rowModel) {
-				Fragment fragment = new Fragment(componentId, "versionFrag", BuildListPanel.this);
+				Fragment fragment = new Fragment(componentId, "numberFrag", BuildListPanel.this);
 				fragment.add(new BuildStatusIcon("status", rowModel));
-				ExternalLink link = new ExternalLink("link", rowModel.getObject().getUrl());
-				link.add(new Label("label", rowModel.getObject().getVersion()));
+				Build build = rowModel.getObject();
+				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDetailPage.class, BuildDetailPage.paramsOf(build));
+				link.add(new Label("label", build.getNumber()));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}
@@ -325,7 +327,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			@Override
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
 					IModel<Build> rowModel) {
-				cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getDate())));
+				cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getSubmitDate())));
 			}
 		});
 		

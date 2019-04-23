@@ -333,8 +333,8 @@ public class DefaultPersistManager implements PersistManager {
 
 	/**
 	 * @return hibernate entity types ordered using foreign key dependency
-	 *         information. For example, Build type comes before Configuration
-	 *         type as it has Build has foreign key reference to Configuration.
+	 *         information. For example, Build type comes before Project
+	 *         type as Build has foreign key reference to Project
 	 */
 	private List<Class<?>> getEntityTypes(SessionFactory sessionFactory) {
 		List<Class<?>> entityTypes = new ArrayList<>();

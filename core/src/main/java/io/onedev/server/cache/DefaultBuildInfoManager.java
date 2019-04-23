@@ -137,10 +137,8 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 
 				@Override
 				public void execute(Transaction txn) {
-					ByteIterable configurationKey = new LongByteIterable(build.getConfiguration().getId());
-					Collection<ObjectId> lastCommits = readCommits(lastCommitsStore, txn, configurationKey);
-					if (lastCommits.isEmpty() && build.getConfiguration().getBaseCommit() != null)
-						lastCommits.add(ObjectId.fromString(build.getConfiguration().getBaseCommit()));
+					ByteIterable jobKey = new StringByteIterable(build.getProject().getId() + ":" + build.getJobName());
+					Collection<ObjectId> lastCommits = readCommits(lastCommitsStore, txn, jobKey);
 					writeCommits(prevCommitsStore, txn, new LongByteIterable(build.getId()), lastCommits);
 					
 					ObjectId buildCommit = ObjectId.fromString(build.getCommitHash());
@@ -156,7 +154,7 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 					}
 					if (addCommit)
 						lastCommits.add(buildCommit);
-					writeCommits(lastCommitsStore, txn, configurationKey, lastCommits);
+					writeCommits(lastCommitsStore, txn, jobKey, lastCommits);
 					defaultStore.put(txn, LAST_BUILD_KEY, new LongByteIterable(build.getId()));
 				}
 				
@@ -192,7 +190,7 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 	@Listen
 	public void on(EntityPersisted event) {
 		if (event.isNew() && event.getEntity() instanceof Build) {
-			Long projectId = ((Build) event.getEntity()).getConfiguration().getProject().getId();
+			Long projectId = ((Build) event.getEntity()).getProject().getId();
 			transactionManager.runAfterCommit(new Runnable() {
 
 				@Override

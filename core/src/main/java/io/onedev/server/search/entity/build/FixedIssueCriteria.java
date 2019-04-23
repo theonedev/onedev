@@ -48,10 +48,10 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public boolean matches(Build build, User user) {
-		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(build.getConfiguration().getProject(), value.getNumber()); 
+		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(build.getProject(), value.getNumber()); 
 		for (ObjectId commit: fixCommits) {
 			ObjectId buildCommit = ObjectId.fromString(build.getCommitHash());
-			if (GitUtils.isMergedInto(build.getConfiguration().getProject().getRepository(), null, commit, buildCommit))
+			if (GitUtils.isMergedInto(build.getProject().getRepository(), null, commit, buildCommit))
 				return true;
 		}
 		return false;

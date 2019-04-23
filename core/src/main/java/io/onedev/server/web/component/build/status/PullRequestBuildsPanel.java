@@ -11,7 +11,8 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
@@ -22,6 +23,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
+import io.onedev.server.web.page.project.builds2.detail.BuildDetailPage;
 import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
@@ -70,7 +72,7 @@ public class PullRequestBuildsPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected void populateItem(ListItem<PullRequestBuild> item) {
 				PullRequestBuild build = item.getModelObject();
-				item.add(new Label("configuration", build.getConfiguration().getName()));
+				item.add(new Label("job", build.getJobName()));
 				
 				if (build.getBuild() != null) {
 					item.add(new BuildStatusIcon("status", new AbstractReadOnlyModel<Build>() {
@@ -82,13 +84,13 @@ public class PullRequestBuildsPanel extends GenericPanel<PullRequest> {
 						
 					}));
 					
-					ExternalLink link = new ExternalLink("version", build.getBuild().getUrl());
-					link.add(new Label("label", build.getBuild().getVersion()));
+					Link<Void> link = new BookmarkablePageLink<Void>("number", BuildDetailPage.class, BuildDetailPage.paramsOf(build.getBuild()));
+					link.add(new Label("label", "#" + build.getBuild().getNumber()));
 					item.add(link);
 				} else {
 					WebMarkupContainer status = new WebMarkupContainer("status");
-					status.add(AttributeAppender.append("class", "awaiting fa fa-clock-o"));
-					status.add(AttributeAppender.append("title", "Waiting for build"));
+					status.add(AttributeAppender.append("class", "pending fa fa-clock-o"));
+					status.add(AttributeAppender.append("title", "Build pending"));
 					item.add(status);
 					WebMarkupContainer description = new WebMarkupContainer("version");
 					description.add(new WebMarkupContainer("label"));

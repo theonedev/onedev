@@ -155,22 +155,6 @@ public class IssueSetting implements Serializable {
 		}
 	}
 
-	public void onRenameConfiguration(String oldName, String newName) {
-		if (transitionSpecs != null) {
-			for (TransitionSpec transition: transitionSpecs) 
-				transition.onRenameConfiguration(oldName, newName);
-		}
-	}
-	
-	public void onDeleteConfiguration(String configurationName) {
-		if (transitionSpecs != null) {
-			for (Iterator<TransitionSpec> it = transitionSpecs.iterator(); it.hasNext();) {
-				if (it.next().onDeleteConfiguration(configurationName))
-					it.remove();
-			}
-		}
-	}
-
 	public Collection<String> getUndefinedFields(Project project) {
 		Set<String> undefinedFields = new HashSet<>();
 		if (listFields != null) {

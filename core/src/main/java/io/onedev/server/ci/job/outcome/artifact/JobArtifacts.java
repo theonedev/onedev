@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.ci.job.outcome.JobOutcome;
-import io.onedev.server.model.Build2;
+import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(name="Artifacts")
@@ -20,7 +20,7 @@ public class JobArtifacts extends JobOutcome {
 	public static final String DIR = "artifacts";
 	
 	@Override
-	public void process(Build2 build, File workspace, Logger logger) {
+	public void process(Build build, File workspace, Logger logger) {
 		File outcomeDir = getOutcomeDir(build, DIR);
 		FileUtils.createDir(outcomeDir);
 

@@ -5,13 +5,15 @@ import java.util.List;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.ExternalLink;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Build;
+import io.onedev.server.web.page.project.builds2.detail.BuildDetailPage;
 
 @SuppressWarnings("serial")
 public class BuildDetailPanel extends GenericPanel<List<Build>> {
@@ -26,10 +28,10 @@ public class BuildDetailPanel extends GenericPanel<List<Build>> {
 				item.add(new BuildStatusIcon("status", item.getModel()));
 
 				Build build = item.getModelObject();
-				item.add(new Label("configuration", build.getConfiguration().getName()));
+				item.add(new Label("job", build.getJobName()));
 				
-				ExternalLink link = new ExternalLink("version", build.getUrl());
-				link.add(new Label("label", build.getVersion())); 
+				Link<Void> link = new BookmarkablePageLink<Void>("number", BuildDetailPage.class, BuildDetailPage.paramsOf(build));
+				link.add(new Label("label", "#" + build.getNumber())); 
 				item.add(link);
 			}
 			

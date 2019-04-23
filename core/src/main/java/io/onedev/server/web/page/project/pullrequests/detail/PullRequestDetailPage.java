@@ -453,7 +453,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				fragment.add(new ReviewListPanel("reviews", requestModel));
 				
 				BranchProtection protection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
-				if (protection != null && !protection.getConfigurations().isEmpty() && protection.isBuildMerges()) {
+				if (protection != null && !protection.getJobNames().isEmpty() && protection.isBuildMerges()) {
 					fragment.add(new Label("buildsTitle", "Builds (On Merged Commit)"));
 				} else {
 					fragment.add(new Label("buildsTitle", "Builds"));

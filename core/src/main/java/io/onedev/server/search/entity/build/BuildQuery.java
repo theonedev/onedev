@@ -2,8 +2,8 @@ package io.onedev.server.search.entity.build;
 
 import static io.onedev.server.util.BuildConstants.FIELD_BUILD_DATE;
 import static io.onedev.server.util.BuildConstants.FIELD_COMMIT;
-import static io.onedev.server.util.BuildConstants.FIELD_CONFIGURATION;
-import static io.onedev.server.util.BuildConstants.FIELD_VERSION;
+import static io.onedev.server.util.BuildConstants.FIELD_JOB;
+import static io.onedev.server.util.BuildConstants.FIELD_NUMBER;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -97,8 +97,14 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new SuccessfulCriteria();
 						case BuildQueryLexer.Failed:
 							return new FailedCriteria();
+						case BuildQueryLexer.Cancelled:
+							return new CancelledCriteria();
 						case BuildQueryLexer.InError:
 							return new InErrorCriteria();
+						case BuildQueryLexer.Waiting:
+							return new WaitingCriteria();
+						case BuildQueryLexer.Queueing:
+							return new QueueingCriteria();
 						case BuildQueryLexer.Running:
 							return new RunningCriteria();
 						default:
@@ -133,20 +139,20 @@ public class BuildQuery extends EntityQuery<Build> {
 								return new BuildDateCriteria(dateValue, value, operator);
 							else
 								throw new IllegalStateException();
-						case BuildQueryLexer.Matches:
-							if (fieldName.equals(FIELD_VERSION))
-								return new VersionCriteria(value);
-							else
-								throw new IllegalStateException();
 						case BuildQueryLexer.Is:
 							switch (fieldName) {
 							case FIELD_COMMIT:
 								return new CommitCriteria(getCommitId(project, value));
-							case FIELD_CONFIGURATION:
-								return new ConfigurationCriteria(getConfiguration(project, value));
+							case FIELD_JOB:
+								return new JobCriteria(value);
+							case FIELD_NUMBER:
+								return new NumberCriteria(getIntValue(value), operator);
 							default: 
 								throw new IllegalStateException();
 							}
+						case BuildQueryLexer.IsLessThan:
+						case BuildQueryLexer.IsGreaterThan:
+							return new NumberCriteria(getIntValue(value), operator);
 						default:
 							throw new IllegalStateException();
 						}
@@ -208,12 +214,13 @@ public class BuildQuery extends EntityQuery<Build> {
 			if (!fieldName.equals(BuildConstants.FIELD_BUILD_DATE)) 
 				throw newOperatorException(fieldName, operator);
 			break;
-		case BuildQueryLexer.Matches:
-			if (!fieldName.equals(FIELD_VERSION))
+		case BuildQueryLexer.Is:
+			if (!fieldName.equals(FIELD_COMMIT) && !fieldName.equals(FIELD_JOB) && !fieldName.equals(FIELD_NUMBER)) 
 				throw newOperatorException(fieldName, operator);
 			break;
-		case BuildQueryLexer.Is:
-			if (!fieldName.equals(FIELD_COMMIT) && !fieldName.equals(FIELD_CONFIGURATION)) 
+		case BuildQueryLexer.IsLessThan:
+		case BuildQueryLexer.IsGreaterThan:
+			if (!fieldName.equals(FIELD_NUMBER))
 				throw newOperatorException(fieldName, operator);
 			break;
 		}

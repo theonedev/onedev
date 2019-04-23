@@ -9,12 +9,12 @@ import org.slf4j.Logger;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.ci.job.outcome.DependencyPopulator;
 import io.onedev.server.ci.job.outcome.JobOutcome;
-import io.onedev.server.model.Build2;
+import io.onedev.server.model.Build;
 
 public class ArtifactsPopulator implements DependencyPopulator {
 
 	@Override
-	public void populate(Build2 dependency, File workspace, Logger logger) {
+	public void populate(Build dependency, File workspace, Logger logger) {
 		File outcomeDir = JobOutcome.getOutcomeDir(dependency, JobArtifacts.DIR);
 		LockUtils.read(JobOutcome.getLockKey(dependency, JobArtifacts.DIR), new Callable<Void>() {
 

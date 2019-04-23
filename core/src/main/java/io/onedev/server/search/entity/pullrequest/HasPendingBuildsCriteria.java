@@ -23,14 +23,20 @@ public class HasPendingBuildsCriteria extends PullRequestCriteria {
 		
 		return context.getBuilder().or(
 				context.getBuilder().isNull(status), 
-				context.getBuilder().equal(status, Build.Status.RUNNING));
+				context.getBuilder().equal(status, Build.Status.RUNNING), 
+				context.getBuilder().equal(status, Build.Status.QUEUEING), 
+				context.getBuilder().equal(status, Build.Status.WAITING));
 	}
 
 	@Override
 	public boolean matches(PullRequest request, User user) {
 		for (PullRequestBuild build: request.getBuilds()) {
-			if (build.getBuild() == null || build.getBuild().getStatus() == Build.Status.RUNNING)
+			if (build.getBuild() == null 
+					|| build.getBuild().getStatus() == Build.Status.RUNNING 
+					|| build.getBuild().getStatus() == Build.Status.QUEUEING 
+					|| build.getBuild().getStatus() == Build.Status.WAITING) {
 				return true;
+			}
 		}
 		return false;
 	}

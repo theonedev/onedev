@@ -4,18 +4,18 @@ public class BuildFacade extends EntityFacade {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private final Long configurationId;
+	private final Long projectId;
 	
 	private final String commitHash;
 	
-	public BuildFacade(Long buildId, Long configurationId, String commitHash) {
+	public BuildFacade(Long buildId, Long projectId, String commitHash) {
 		super(buildId);
-		this.configurationId = configurationId;
+		this.projectId = projectId;
 		this.commitHash = commitHash;
 	}
 
-	public Long getConfigurationId() {
-		return configurationId;
+	public Long getProjectId() {
+		return projectId;
 	}
 
 	public String getCommitHash() {

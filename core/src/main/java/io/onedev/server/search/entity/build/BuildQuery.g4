@@ -7,9 +7,9 @@ query
     ;
 
 criteria
-	: operator=(Successful|Failed|InError|Running) #OperatorCriteria
+	: operator=(Successful|Failed|InError|Cancelled|Running|Waiting|Queueing) #OperatorCriteria
 	| operator=FixedIssue WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=(Is|IsBefore|IsAfter|Matches) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria 
@@ -36,9 +36,21 @@ InError
 	: 'in' WS+ 'error'
 	;
 	
+Cancelled
+	: 'cancelled'
+	;
+		
 Running
 	: 'running'
 	;
+	
+Waiting
+	: 'waiting'
+	;
+	
+Queueing
+	: 'queueing'
+	;		
 				
 FixedIssue
 	: 'fixed' WS+ 'issue'
@@ -52,10 +64,14 @@ Is
 	: 'is'
 	;
 	
-Matches
-	: 'matches'
+IsGreaterThan
+	: 'is' WS+ 'greater' WS+ 'than'
 	;
 
+IsLessThan
+	: 'is' WS+ 'less' WS+ 'than'
+	;
+	
 IsAfter
 	: 'is after'
 	;

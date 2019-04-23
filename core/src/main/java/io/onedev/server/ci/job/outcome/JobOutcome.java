@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.model.Build2;
+import io.onedev.server.model.Build;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -39,13 +39,13 @@ public abstract class JobOutcome implements Serializable {
 		return patternSet;
 	}
 	
-	public abstract void process(Build2 build, File workspace, Logger logger);
+	public abstract void process(Build build, File workspace, Logger logger);
 	
-	public static String getLockKey(Build2 build, String outcomeDir) {
+	public static String getLockKey(Build build, String outcomeDir) {
 		return "job-outcome:" + build.getId() + ":" + outcomeDir;
 	}
 	
-	public static File getOutcomeDir(Build2 build, String outcomeDir) {
+	public static File getOutcomeDir(Build build, String outcomeDir) {
 		File buildDir = OneDev.getInstance(StorageManager.class)
 				.getBuildDir(build.getProject().getId(), build.getId());
 		return new File(buildDir, outcomeDir);

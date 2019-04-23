@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.configuration;
+package io.onedev.server.web.editable.jobchoice;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,18 +8,18 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.web.component.configuration.ConfigurationMultiChoice;
+import io.onedev.server.web.component.jobchoice.JobMultiChoice;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
 @SuppressWarnings("serial")
-public class ConfigurationMultiChoiceEditor extends PropertyEditor<List<String>> {
+public class JobMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
-	private ConfigurationMultiChoice input;
+	private JobMultiChoice input;
 	
-	public ConfigurationMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
+	public JobMultiChoiceEditor(String id, PropertyDescriptor propertyDescriptor, 
 			IModel<List<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
 	}
@@ -28,13 +28,13 @@ public class ConfigurationMultiChoiceEditor extends PropertyEditor<List<String>>
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	List<String> configurations;
+    	List<String> jobNames;
 		if (getModelObject() != null)
-			configurations = getModelObject();
+			jobNames = getModelObject();
 		else
-			configurations = new ArrayList<>();
+			jobNames = new ArrayList<>();
 		
-		input = new ConfigurationMultiChoice("input", Model.of(configurations));
+		input = new JobMultiChoice("input", Model.of(jobNames));
         input.setConvertEmptyInputStringToNull(true);
         input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
         

@@ -19,7 +19,7 @@ public class BuildParam extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Build2 build;
+	private Build build;
 	
 	@Column(nullable=false)
 	private String name;
@@ -27,11 +27,11 @@ public class BuildParam extends AbstractEntity {
 	@Column(nullable=false)
 	private String value;
 
-	public Build2 getBuild() {
+	public Build getBuild() {
 		return build;
 	}
 
-	public void setBuild(Build2 build) {
+	public void setBuild(Build build) {
 		this.build = build;
 	}
 

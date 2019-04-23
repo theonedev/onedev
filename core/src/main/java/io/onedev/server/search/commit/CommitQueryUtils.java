@@ -15,6 +15,7 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Ref;
@@ -118,11 +119,18 @@ public class CommitQueryUtils {
 				else
 					revision.value = unescape(removeParens(criteria.revisionCriteria().Value().getText()));
 				if (criteria.revisionCriteria().BUILD() != null) {
-					Build build = OneDev.getInstance(BuildManager.class).findByFQN(project, revision.value);
-					if (build == null)
-						throw new OneException("Unable to find build with FQN: " + revision.value);
-					else
-						revision.value = build.getCommitHash();
+					String numberStr = revision.value;
+					if (numberStr.startsWith("#"))
+						numberStr = numberStr.substring(1);
+					if (NumberUtils.isDigits(numberStr)) {
+						Build build = OneDev.getInstance(BuildManager.class).find(project, Long.parseLong(numberStr));
+						if (build == null)
+							throw new OneException("Unable to find build: #" + revision.value);
+						else
+							revision.value = build.getCommitHash();
+					} else {
+						throw new OneException("Invalid build number: " + numberStr);
+					}
 				}
 				if (criteria.revisionCriteria().SINCE() != null)
 					revision.since = true;

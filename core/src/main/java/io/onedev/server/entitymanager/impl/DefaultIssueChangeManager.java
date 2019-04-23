@@ -22,7 +22,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueFieldEntityManager;
 import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.event.build.BuildEvent;
+import io.onedev.server.event.build2.BuildEvent;
 import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
@@ -205,11 +205,11 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Transactional
 	@Listen
 	public void on(BuildEvent event) {
-		for (TransitionSpec transition: event.getBuild().getConfiguration().getProject().getIssueSetting().getTransitionSpecs(true)) {
+		for (TransitionSpec transition: event.getBuild().getProject().getIssueSetting().getTransitionSpecs(true)) {
 			if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
 				BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
-				if (trigger.getConfiguration().equals(event.getBuild().getConfiguration().getName()) 
-						&& event.getBuild().getStatus() == Build.Status.SUCCESS) {
+				if (trigger.getJobName().equals(event.getBuild().getJobName()) 
+						&& event.getBuild().getStatus() == Build.Status.SUCCESSFUL) {
 					Long buildId = event.getBuild().getId();
 					
 					/* 
@@ -229,7 +229,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 										Collection<Long> fixedIssueNumbers = build.getFixedIssueNumbers();
 										if (fixedIssueNumbers != null) {
 											for (Long issueNumber: fixedIssueNumbers) {
-												Issue issue = issueManager.find(build.getConfiguration().getProject(), issueNumber);
+												Issue issue = issueManager.find(build.getProject(), issueNumber);
 												if (issue != null && transition.getFromStates().contains(issue.getState())) { 
 													issue.removeFields(transition.getRemoveFields());
 													changeState(issue, transition.getToState(), new HashMap<>(), null, null);

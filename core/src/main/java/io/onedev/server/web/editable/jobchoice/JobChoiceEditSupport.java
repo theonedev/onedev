@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.configuration;
+package io.onedev.server.web.editable.jobchoice;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -15,16 +15,16 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.ConfigurationChoice;
+import io.onedev.server.web.editable.annotation.JobChoice;
 
 @SuppressWarnings("serial")
-public class ConfigurationEditSupport implements EditSupport {
+public class JobChoiceEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
         Method propertyGetter = descriptor.getPropertyGetter();
-        ConfigurationChoice configurationChoice = propertyGetter.getAnnotation(ConfigurationChoice.class);
-        if (configurationChoice != null) {
+        JobChoice jobChoice = propertyGetter.getAnnotation(JobChoice.class);
+        if (jobChoice != null) {
         	if (List.class.isAssignableFrom(propertyGetter.getReturnType()) 
         			&& ReflectionUtils.getCollectionElementType(propertyGetter.getGenericReturnType()) == String.class) {
         		return new PropertyContext<List<String>>(descriptor) {
@@ -35,9 +35,9 @@ public class ConfigurationEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-						        List<String> configurations = model.getObject();
-						        if (configurations != null && !configurations.isEmpty()) {
-						            return new Label(id, StringUtils.join(configurations, ", " ));
+						        List<String> jobNames = model.getObject();
+						        if (jobNames != null && !jobNames.isEmpty()) {
+						            return new Label(id, StringUtils.join(jobNames, ", " ));
 						        } else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						        }
@@ -48,7 +48,7 @@ public class ConfigurationEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
-						return new ConfigurationMultiChoiceEditor(componentId, descriptor, model);
+						return new JobMultiChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};
@@ -61,9 +61,9 @@ public class ConfigurationEditSupport implements EditSupport {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-						        String configurationName = model.getObject();
-						        if (configurationName != null) {
-						            return new Label(id, configurationName);
+						        String jobName = model.getObject();
+						        if (jobName != null) {
+						            return new Label(id, jobName);
 						        } else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 						        }
@@ -74,12 +74,12 @@ public class ConfigurationEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-						return new ConfigurationSingleChoiceEditor(componentId, descriptor, model);
+						return new JobSingleChoiceEditor(componentId, descriptor, model);
 					}
         			
         		};
         	} else {
-        		throw new RuntimeException("Annotation 'ConfigurationChoice' should be applied to property with type "
+        		throw new RuntimeException("Annotation 'JobChoice' should be applied to property with type "
         				+ "'List<String> or String'");
         	}
         } else {

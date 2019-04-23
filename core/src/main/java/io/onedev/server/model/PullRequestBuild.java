@@ -10,8 +10,8 @@ import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_request_id"), @Index(columnList="o_configuration_id")},
-		uniqueConstraints={@UniqueConstraint(columnNames={"o_configuration_id", "o_request_id"})}
+		indexes={@Index(columnList="o_request_id"), @Index(columnList="o_job_name")},
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_job_name", "o_request_id"})}
 )
 public class PullRequestBuild extends AbstractEntity {
 
@@ -21,7 +21,7 @@ public class PullRequestBuild extends AbstractEntity {
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Configuration configuration;
+	private String jobName;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -30,12 +30,12 @@ public class PullRequestBuild extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	private Build build;
 	
-	public Configuration getConfiguration() {
-		return configuration;
+	public String getJobName() {
+		return jobName;
 	}
 
-	public void setConfiguration(Configuration configuration) {
-		this.configuration = configuration;
+	public void setJobName(String jobName) {
+		this.jobName = jobName;
 	}
 
 	public Build getBuild() {

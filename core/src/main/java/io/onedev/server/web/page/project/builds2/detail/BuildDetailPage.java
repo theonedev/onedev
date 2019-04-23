@@ -8,8 +8,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.Build2Manager;
-import io.onedev.server.model.Build2;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.web.component.build.log.BuildLogPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 
@@ -18,17 +18,17 @@ public class BuildDetailPage extends ProjectPage {
 
 	public static final String PARAM_BUILD = "build";
 	
-	private final IModel<Build2> buildModel;
+	private final IModel<Build> buildModel;
 	
 	public BuildDetailPage(PageParameters params) {
 		super(params);
 		
-		buildModel = new LoadableDetachableModel<Build2>() {
+		buildModel = new LoadableDetachableModel<Build>() {
 
 			@Override
-			protected Build2 load() {
+			protected Build load() {
 				Long buildNumber = params.get(PARAM_BUILD).toLong();
-				Build2 build = OneDev.getInstance(Build2Manager.class).find(getProject(), buildNumber);
+				Build build = OneDev.getInstance(BuildManager.class).find(getProject(), buildNumber);
 				if (build == null)
 					throw new EntityNotFoundException("Unable to find build #" + buildNumber + " in project " + getProject());
 				return build;
@@ -45,7 +45,7 @@ public class BuildDetailPage extends ProjectPage {
 		add(new BuildLogPanel("log", buildModel));
 	}
 	
-	private Build2 getBuild() {
+	private Build getBuild() {
 		return buildModel.getObject();
 	}
 
@@ -55,7 +55,7 @@ public class BuildDetailPage extends ProjectPage {
 		super.onDetach();
 	}
 
-	public static PageParameters paramsOf(Build2 build) {
+	public static PageParameters paramsOf(Build build) {
 		PageParameters params = ProjectPage.paramsOf(build.getProject());
 		params.add(PARAM_BUILD, build.getNumber());
 		return params;

@@ -19,25 +19,25 @@ public class BuildDependence extends AbstractEntity {
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Build2 dependent;
+	private Build dependent;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
-	private Build2 dependency;
+	private Build dependency;
 
-	public Build2 getDependent() {
+	public Build getDependent() {
 		return dependent;
 	}
 
-	public void setDependent(Build2 dependent) {
+	public void setDependent(Build dependent) {
 		this.dependent = dependent;
 	}
 
-	public Build2 getDependency() {
+	public Build getDependency() {
 		return dependency;
 	}
 
-	public void setDependency(Build2 dependency) {
+	public void setDependency(Build dependency) {
 		this.dependency = dependency;
 	}
 	

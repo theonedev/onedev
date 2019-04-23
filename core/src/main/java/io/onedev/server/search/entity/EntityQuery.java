@@ -16,13 +16,11 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.ConfigurationManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Configuration;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -91,14 +89,6 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		}
 	}
 
-	public static Configuration getConfiguration(Project project, String name) {
-		Configuration configuration = OneDev.getInstance(ConfigurationManager.class).find(project, name);
-		if (configuration != null)
-			return configuration;
-		else
-			throw new OneException("Unable to find configuration: " + name);
-	}
-	
 	public static Issue getIssue(Project project, String numberStr) {
 		if (numberStr.startsWith("#"))
 			numberStr = numberStr.substring(1);
@@ -109,12 +99,12 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			throw new OneException("Unable to find issue: #" + numberStr);
 	}
 	
-	public static Build getBuild(Project project, String fqn) {
-		Build build = OneDev.getInstance(BuildManager.class).findByFQN(project, fqn);
+	public static Build getBuild(Project project, String numberStr) {
+		Build build = OneDev.getInstance(BuildManager.class).find(project, getLongValue(numberStr));
 		if (build != null)
 			return build;
 		else
-			throw new OneException("Unable to find build with FQN: " + fqn);
+			throw new OneException("Unable to find build: #" + numberStr);
 	}
 	
 	public boolean needsLogin() {

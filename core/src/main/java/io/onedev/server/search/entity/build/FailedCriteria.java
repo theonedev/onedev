@@ -17,12 +17,12 @@ public class FailedCriteria extends EntityCriteria<Build> {
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Build> context, User user) {
 		Path<?> attribute = context.getRoot().get(BuildConstants.ATTR_STATUS);
-		return context.getBuilder().equal(attribute, Build.Status.FAILURE);
+		return context.getBuilder().equal(attribute, Build.Status.FAILED);
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return build.getStatus() == Build.Status.FAILURE;
+		return build.getStatus() == Build.Status.FAILED;
 	}
 
 	@Override

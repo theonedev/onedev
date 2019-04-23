@@ -22,15 +22,18 @@ public class HasFailedBuildsCriteria extends PullRequestCriteria {
 		Path<?> status = join.get(Build.STATUS);
 		
 		return context.getBuilder().or(
-				context.getBuilder().equal(status, Build.Status.ERROR), 
-				context.getBuilder().equal(status, Build.Status.FAILURE));
+				context.getBuilder().equal(status, Build.Status.IN_ERROR), 
+				context.getBuilder().equal(status, Build.Status.FAILED), 
+				context.getBuilder().equal(status, Build.Status.CANCELLED));
 	}
 
 	@Override
 	public boolean matches(PullRequest request, User user) {
 		for (PullRequestBuild build: request.getBuilds()) {
 			if (build.getBuild() != null && 
-					(build.getBuild().getStatus() == Build.Status.ERROR || build.getBuild().getStatus() == Build.Status.FAILURE)) {
+					(build.getBuild().getStatus() == Build.Status.IN_ERROR 
+					|| build.getBuild().getStatus() == Build.Status.FAILED
+					|| build.getBuild().getStatus() == Build.Status.CANCELLED)) {
 				return true;
 			}
 		}

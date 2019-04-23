@@ -1,10 +1,10 @@
 package io.onedev.server.event.build2;
 
-import io.onedev.server.model.Build2;
+import io.onedev.server.model.Build;
 
 public class BuildSubmitted extends BuildEvent {
 
-	public BuildSubmitted(Build2 build) {
+	public BuildSubmitted(Build build) {
 		super(build.getUser(), build.getSubmitDate(), build);
 	}
 

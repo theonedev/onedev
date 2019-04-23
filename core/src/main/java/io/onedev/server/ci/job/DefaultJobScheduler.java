@@ -41,7 +41,7 @@ import io.onedev.server.ci.job.outcome.DependencyPopulator;
 import io.onedev.server.ci.job.outcome.JobOutcome;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
-import io.onedev.server.entitymanager.Build2Manager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -55,7 +55,7 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.exception.OneException;
-import io.onedev.server.model.Build2;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
@@ -84,7 +84,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	
 	private final ProjectManager projectManager;
 	
-	private final Build2Manager buildManager;
+	private final BuildManager buildManager;
 	
 	private final UserManager userManager;
 	
@@ -111,7 +111,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	private volatile Status status;
 	
 	@Inject
-	public DefaultJobScheduler(ProjectManager projectManager, Build2Manager buildManager, 
+	public DefaultJobScheduler(ProjectManager projectManager, BuildManager buildManager, 
 			UserManager userManager, ListenerRegistry listenerRegistry, SettingManager settingManager,
 			TransactionManager transactionManager, LogManager logManager, ExecutorService executorService,
 			SessionManager sessionManager, Set<DependencyPopulator> dependencyPopulators, 
@@ -176,16 +176,16 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 		return paramMatrix;
 	}
 	
-	private List<Build2> submit(Project project, @Nullable User user, String commitHash, String jobName, 
+	private List<Build> submit(Project project, @Nullable User user, String commitHash, String jobName, 
 			Map<String, String> paramMap, List<String> dependencyChain) {
-		List<Build2> builds = buildManager.query(project, commitHash, jobName, paramMap);
+		List<Build> builds = buildManager.query(project, commitHash, jobName, paramMap);
 		if (builds.isEmpty()) {
-			Build2 build = new Build2();
+			Build build = new Build();
 			build.setProject(project);
 			build.setCommitHash(commitHash);
 			build.setJobName(jobName);
 			build.setSubmitDate(new Date());
-			build.setStatus(Build2.Status.WAITING);
+			build.setStatus(Build.Status.WAITING);
 			build.setUser(user);
 			
 			builds.add(build);
@@ -229,9 +229,9 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 					
 					@Override
 					public void run(Map<String, String> params) {
-						List<Build2> dependencyBuilds = submit(project, null, commitHash, dependency.getJobName(), 
+						List<Build> dependencyBuilds = submit(project, null, commitHash, dependency.getJobName(), 
 								params, new ArrayList<>(dependencyChain));
-						for (Build2 dependencyBuild: dependencyBuilds) {
+						for (Build dependencyBuild: dependencyBuilds) {
 							BuildDependence dependence = new BuildDependence();
 							dependence.setDependency(dependencyBuild);
 							dependence.setDependent(build);
@@ -257,7 +257,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 		return null;
 	}
 
-	private void run(Build2 build) {
+	private void run(Build build) {
 		ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 		try {
 			CISpec ciSpec = build.getProject().getCISpec(commitId);
@@ -267,7 +267,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 					JobExecutor executor = getJobExecutor(build.getProject(), commitId, job.getName(), job.getEnvironment());
 					if (executor != null) {
 						if (executor.hasCapacity()) {
-							build.setStatus(Build2.Status.RUNNING);
+							build.setStatus(Build.Status.RUNNING);
 							build.setRunningDate(new Date());
 							buildManager.save(build);
 							listenerRegistry.post(new BuildRunning(build));
@@ -296,7 +296,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 
 											@Override
 											public void run() {
-												Build2 build = buildManager.load(buildId);
+												Build build = buildManager.load(buildId);
 												logger.info("Populating dependencies...");
 												for (BuildDependence dependence: build.getDependencies()) {
 													for (DependencyPopulator populator: dependencyPopulators)
@@ -327,7 +327,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 											@Override
 											public void run() {
 												logger.info("Collecting job outcomes...");
-												Build2 build = buildManager.load(buildId);
+												Build build = buildManager.load(buildId);
 												for (JobOutcome outcome: job.getOutcomes())
 													outcome.process(build, workspace, logger);
 											}
@@ -365,8 +365,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 		}
 	}
 	
-	private void markBuildError(Build2 build, String errorMessage) {
-		build.setStatus(Build2.Status.IN_ERROR, errorMessage);
+	private void markBuildError(Build build, String errorMessage) {
+		build.setStatus(Build.Status.IN_ERROR, errorMessage);
 		build.setFinishDate(new Date());
 		listenerRegistry.post(new BuildFinished(build));
 	}
@@ -397,12 +397,12 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	
 	@Transactional
 	@Override
-	public void resubmit(Build2 build) {
+	public void resubmit(Build build) {
 		for (BuildDependence dependence: build.getDependents())
 			resubmit(dependence.getDependent());
 
 		if (build.isFinished()) {
-			build.setStatus(Build2.Status.WAITING);
+			build.setStatus(Build.Status.WAITING);
 			build.setFinishDate(null);
 			build.setPendingDate(null);
 			build.setRunningDate(null);
@@ -417,7 +417,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 
 	@Sessional
 	@Override
-	public void cancel(Build2 build) {
+	public void cancel(Build build) {
 		JobExecution execution = jobExecutions.get(build.getId());
 		if (execution != null)
 			execution.getFuture().cancel(true);
@@ -470,11 +470,11 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	
 					@Override
 					public Boolean call() {
-						for (Build2 build: buildManager.queryUnfinished()) {
-							if (build.getStatus() == Build2.Status.PENDING) {
+						for (Build build: buildManager.queryUnfinished()) {
+							if (build.getStatus() == Build.Status.QUEUEING) {
 								if (status == Status.STARTED) 
 									run(build);									
-							} else if (build.getStatus() == Build2.Status.RUNNING) {
+							} else if (build.getStatus() == Build.Status.RUNNING) {
 								JobExecution execution = jobExecutions.get(build.getId());
 								if (execution != null) {
 									if (System.currentTimeMillis() - build.getRunningDate().getTime() > execution.getTimeout())
@@ -482,14 +482,14 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 								} else {
 									markBuildError(build, "Stopped for unknown reason");
 								}
-							} else if (build.getStatus() == Build2.Status.WAITING) {
+							} else if (build.getStatus() == Build.Status.WAITING) {
 								boolean hasUnsuccessful = false;
 								boolean hasUnfinished = false;
 								
 								for (BuildDependence dependence: build.getDependencies()) {
-									Build2 dependency = dependence.getDependency();
+									Build dependency = dependence.getDependency();
 									
-									if (dependency.getStatus() == Build2.Status.SUCCESSFUL)
+									if (dependency.getStatus() == Build.Status.SUCCESSFUL)
 										continue;
 									else if (dependency.isFinished())
 										hasUnsuccessful = true;
@@ -500,7 +500,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 								if (hasUnsuccessful) {
 									markBuildError(build, "There are failed dependency jobs");
 								} else if (!hasUnfinished) {
-									build.setStatus(Build2.Status.PENDING);
+									build.setStatus(Build.Status.QUEUEING);
 									build.setPendingDate(new Date());
 									listenerRegistry.post(new BuildPending(build));
 								}
@@ -508,20 +508,20 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 						}
 						for (Iterator<Map.Entry<Long, JobExecution>> it = jobExecutions.entrySet().iterator(); it.hasNext();) {
 							Map.Entry<Long, JobExecution> entry = it.next();
-							Build2 build = buildManager.get(entry.getKey());
+							Build build = buildManager.get(entry.getKey());
 							JobExecution execution = entry.getValue();
-							if (build == null || build.getStatus() != Build2.Status.RUNNING) {
+							if (build == null || build.getStatus() != Build.Status.RUNNING) {
 								it.remove();
 								execution.getFuture().cancel(true);
 							} else if (execution.getFuture().isDone()) {
 								it.remove();
 								try {
 									execution.getFuture().get();
-									build.setStatus(Build2.Status.SUCCESSFUL);
+									build.setStatus(Build.Status.SUCCESSFUL);
 								} catch (CancellationException e) {
-									build.setStatus(Build2.Status.CANCELLED);
+									build.setStatus(Build.Status.CANCELLED);
 								} catch (Exception e) {
-									build.setStatus(Build2.Status.FAILED, e.getMessage());
+									build.setStatus(Build.Status.FAILED, e.getMessage());
 								} finally {
 									build.setFinishDate(new Date());
 									listenerRegistry.post(new BuildFinished(build));

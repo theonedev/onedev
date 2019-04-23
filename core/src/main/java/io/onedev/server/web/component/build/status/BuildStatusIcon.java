@@ -28,18 +28,27 @@ public class BuildStatusIcon extends GenericPanel<Build> {
 				super.onComponentTag(tag);
 
 				Build build = getModelObject();
-				if (build.getStatus() == Status.ERROR) {
+				if (build.getStatus() == Status.WAITING) {
+					tag.put("class", "build-status waiting fa fa-clock-o");
+					tag.put("title", "Build is waiting");
+				} else if (build.getStatus() == Status.QUEUEING) {
+					tag.put("class", "build-status queueing fa fa-hourglass-1");
+					tag.put("title", "Build is queueing");
+				} else if (build.getStatus() == Status.IN_ERROR) {
 					tag.put("class", "build-status error fa fa-warning");
 					tag.put("title", "Build is in error");
-				} else if (build.getStatus() == Status.FAILURE) {
+				} else if (build.getStatus() == Status.FAILED) {
 					tag.put("class", "build-status failure fa fa-times");
 					tag.put("title", "Build is failed");
 				} else if (build.getStatus() == Status.RUNNING) {
 					tag.put("class", "build-status running fa fa-circle");
 					tag.put("title", "Build is running");
-				} else if (build.getStatus() == Status.SUCCESS) {
+				} else if (build.getStatus() == Status.SUCCESSFUL) {
 					tag.put("class", "build-status success fa fa-check");
 					tag.put("title", "Build is successful");
+				} else if (build.getStatus() == Status.CANCELLED) {
+					tag.put("class", "build-status cancelled fa fa-ban");
+					tag.put("title", "Build is cancelled");
 				}
 			}
 			

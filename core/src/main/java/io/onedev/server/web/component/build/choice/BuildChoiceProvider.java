@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.wicket.model.IModel;
 import org.json.JSONException;
 import org.json.JSONWriter;
-import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;
 
@@ -39,8 +38,7 @@ public class BuildChoiceProvider extends ChoiceProvider<Build> {
 	public void toJson(Build choice, JSONWriter writer) throws JSONException {
 		writer
 			.key("id").value(choice.getId())
-			.key("version").value(choice.getVersion())
-			.key("configuration").value(HtmlEscape.escapeHtml5(choice.getConfiguration().getName()));
+			.key("number").value(choice.getNumber());
 	}
 
 	@Override

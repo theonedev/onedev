@@ -39,16 +39,16 @@ public class BuildResource {
 	
 	@ValidQueryParams
 	@GET
-    public Response query(@QueryParam("configuration") Long configurationId, @QueryParam("commit") String commit, 
-    		@QueryParam("name") String name, @QueryParam("offset") Integer offset, @QueryParam("count") Integer count, 
-    		@Context UriInfo uriInfo) {
+    public Response query(@QueryParam("job") String jobName, @QueryParam("commit") String commit, 
+    		@QueryParam("number") Long number, @QueryParam("offset") Integer offset, 
+    		@QueryParam("count") Integer count, @Context UriInfo uriInfo) {
 		EntityCriteria<Build> criteria = buildManager.newCriteria();
-		if (configurationId != null)
-			criteria.add(Restrictions.eq("configuration.id", configurationId));
+		if (jobName != null)
+			criteria.add(Restrictions.eq("jobName", jobName));
 		if (commit != null)
 			criteria.add(Restrictions.eq("commit", commit));
-		if (name != null)
-			criteria.add(Restrictions.eq("name", name));
+		if (number != null)
+			criteria.add(Restrictions.eq("number", number));
 		
     	if (offset == null)
     		offset = 0;
@@ -58,8 +58,8 @@ public class BuildResource {
 
     	Collection<Build> builds = buildManager.query(criteria, offset, count);
 		for (Build build: builds) {
-			if (!SecurityUtils.canReadIssues(build.getConfiguration().getProject().getFacade()))
-				throw new UnauthorizedException("Unable to access project '" + build.getConfiguration().getProject().getName() + "'");
+			if (!SecurityUtils.canReadIssues(build.getProject().getFacade()))
+				throw new UnauthorizedException("Unable to access project '" + build.getProject().getName() + "'");
 		}
 		
 		return Response.ok(builds, RestConstants.JSON_UTF8).build();
@@ -70,8 +70,8 @@ public class BuildResource {
     @GET
     public Build get(@PathParam("buildId") Long buildId) {
     	Build build = buildManager.load(buildId);
-    	if (!SecurityUtils.canReadIssues(build.getConfiguration().getProject().getFacade()))
-			throw new UnauthorizedException("Unauthorized access to project " + build.getConfiguration().getProject().getName());
+    	if (!SecurityUtils.canReadIssues(build.getProject().getFacade()))
+			throw new UnauthorizedException("Unauthorized access to project " + build.getProject().getName());
     	else
     		return build;
     }

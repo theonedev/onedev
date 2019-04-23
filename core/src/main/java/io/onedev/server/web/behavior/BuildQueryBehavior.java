@@ -90,10 +90,10 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 										suggestions.addAll(SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, 
 												unfencedLowerCaseMatchWith));
 										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
-									} else if (fieldName.equals(BuildConstants.FIELD_CONFIGURATION)) {
-										suggestions.addAll(escape(SuggestionUtils.suggestConfigurations(projectModel.getObject(), unfencedLowerCaseMatchWith)));
-									} else if (fieldName.equals(BuildConstants.FIELD_VERSION)) {
-										suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedLowerCaseMatchWith, false)));
+									} else if (fieldName.equals(BuildConstants.FIELD_JOB)) {
+										suggestions.addAll(escape(SuggestionUtils.suggestJobs(projectModel.getObject(), unfencedLowerCaseMatchWith)));
+									} else if (fieldName.equals(BuildConstants.FIELD_NUMBER)) {
+										suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedLowerCaseMatchWith)));
 									} else {
 										return null;
 									}
@@ -132,21 +132,4 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		return super.describe(parseExpect, suggestedLiteral);
 	}
 
-	@Override
-	protected List<String> getHints(TerminalExpect terminalExpect) {
-		List<String> hints = new ArrayList<>();
-		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
-			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if ("criteriaValue".equals(spec.getLabel())) {
-				String unmatched = terminalExpect.getUnmatchedText();
-				if (unmatched.indexOf('"') == unmatched.lastIndexOf('"')) { // only when we input criteria value
-					List<Element> elements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
-					if (!elements.isEmpty() && elements.get(0).getFirstMatchedToken().getType() == BuildQueryParser.Matches)
-						hints.add("Use * to match any part of version");
-				}
-			}
-		} 
-		return hints;
-	}
-	
 }

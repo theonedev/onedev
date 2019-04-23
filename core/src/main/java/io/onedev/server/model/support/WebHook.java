@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.event.Event;
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.event.build.BuildEvent;
+import io.onedev.server.event.build2.BuildEvent;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;

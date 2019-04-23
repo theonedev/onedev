@@ -1,7 +1,6 @@
 package io.onedev.server.web.util;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -9,11 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-
 import com.google.common.base.Preconditions;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.Range;
 import io.onedev.commons.utils.stringmatch.PatternApplied;
@@ -34,7 +30,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
-import io.onedev.server.util.facade.ConfigurationFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
@@ -116,24 +111,15 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestBuilds(Project project, String matchWith, boolean withConfiguration) {
+	public static List<InputSuggestion> suggestBuilds(Project project, String matchWith) {
 		matchWith = matchWith.toLowerCase();
+		if (matchWith.startsWith("#"))
+			matchWith = matchWith.substring(1);
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (Build build: OneDev.getInstance(BuildManager.class).query(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
 			InputSuggestion suggestion;
-			if (withConfiguration) {
-				if (matchWith.contains(Build.FQN_SEPARATOR)) 
-					matchWith = StringUtils.substringAfter(matchWith, Build.FQN_SEPARATOR);
-				Range match = Range.match(build.getVersion(), matchWith, true, false, true);
-				if (match != null) {
-					int offset = build.getConfiguration().getName().length()+1;
-					match = new Range(match.getFrom() + offset, match.getTo() + offset);
-				}
-				suggestion = new InputSuggestion(build.getFQN(), null, match);
-			} else {
-				Range match = Range.match(build.getVersion(), matchWith, true, false, true);
-				suggestion = new InputSuggestion(build.getVersion(), null, match);
-			}
+			Range match = Range.match(build.getNumberStr(), matchWith, true, false, true);
+			suggestion = new InputSuggestion(build.getNumberStr(), null, match);
 			suggestions.add(suggestion);
 		}
 		return suggestions;
@@ -171,24 +157,13 @@ public class SuggestionUtils {
 		return suggestPaths(commitInfoManager.getFiles(project), matchWith);
 	}
 	
-	public static List<InputSuggestion> suggestConfigurations(Project project, String matchWith) {
+	public static List<InputSuggestion> suggestJobs(Project project, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		List<ConfigurationFacade> configurations = new ArrayList<>(OneDev.getInstance(CacheManager.class).getConfigurations().values());
-		Collections.sort(configurations, new Comparator<ConfigurationFacade>() {
-
-			@Override
-			public int compare(ConfigurationFacade o1, ConfigurationFacade o2) {
-				return o1.getName().compareTo(o2.getName());
-			}
-			
-		});
-		for (ConfigurationFacade configuration: configurations) {
-			if (matchWith.contains(Build.FQN_SEPARATOR)) 
-				matchWith = StringUtils.substringAfter(matchWith, Build.FQN_SEPARATOR);
-			Range match = Range.match(configuration.getName(), matchWith, true, false, true);
+		for (String jobName: project.getJobNames()) {
+			Range match = Range.match(jobName, matchWith, true, false, true);
 			if (match != null) 
-				suggestions.add(new InputSuggestion(configuration.getName(), null, match));
+				suggestions.add(new InputSuggestion(jobName, null, match));
 		}
 		return suggestions;
 	}

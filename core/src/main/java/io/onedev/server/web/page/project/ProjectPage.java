@@ -45,8 +45,6 @@ import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.BuildListPage;
-import io.onedev.server.web.page.project.builds2.detail.BuildDetailPage;
-import io.onedev.server.web.page.project.builds2.list.BuildListPage2;
 import io.onedev.server.web.page.project.comments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
@@ -66,9 +64,6 @@ import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizat
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
 import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
-import io.onedev.server.web.page.project.setting.configuration.ConfigurationEditPage;
-import io.onedev.server.web.page.project.setting.configuration.ConfigurationListPage;
-import io.onedev.server.web.page.project.setting.configuration.NewConfigurationPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
 import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
@@ -282,21 +277,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			
 		});
 		
-		tabs.add(new ProjectTab(Model.of("Builds2"), "fa fa-fw fa-cubes", 0, BuildListPage2.class, BuildDetailPage.class) {
-
-			@Override
-			public Component render(String componentId) {
-				return new ProjectTabLink(componentId, this) {
-
-					@Override
-					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, BuildListPage2.class, BuildListPage2.paramsOf(getProject()));
-					}
-				};
-			}
-			
-		});
-		
 		if (SecurityUtils.canReadCode(getProject().getFacade())) {
 			tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
 					0, ProjectCodeCommentsPage.class) {
@@ -382,8 +362,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		tabs.add(new ProjectSettingTab("Issue Setting", "fa fa-fw fa-bug", StateTransitionsPage.class, PromptFieldsUponIssueOpenSettingPage.class));
 		tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-comments", CommitMessageTransformPage.class));
 		tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", WebHooksPage.class));
-		tabs.add(new ProjectSettingTab("Build Configurations", "fa fa-fw fa-cube", ConfigurationListPage.class, 
-				NewConfigurationPage.class, ConfigurationEditPage.class));
 		return tabs;
 	}
 

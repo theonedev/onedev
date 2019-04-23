@@ -10,26 +10,19 @@ import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.BuildConstants;
 
-public class VersionCriteria extends EntityCriteria<Build> {
+public class QueueingCriteria extends EntityCriteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final String value;
-	
-	public VersionCriteria(String value) {
-		this.value = value;
-	}
-
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Build> context, User user) {
-		Path<String> attribute = context.getRoot().get(BuildConstants.ATTR_VERSION);
-		String normalized = value.toLowerCase().replace("*", "%");
-		return context.getBuilder().like(context.getBuilder().lower(attribute), normalized);
+		Path<?> attribute = context.getRoot().get(BuildConstants.ATTR_STATUS);
+		return context.getBuilder().equal(attribute, Build.Status.QUEUEING);
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return build.getVersion().toLowerCase().contains(value.toLowerCase());
+		return build.getStatus() == Build.Status.QUEUEING;
 	}
 
 	@Override
@@ -39,7 +32,7 @@ public class VersionCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.quote(BuildConstants.FIELD_VERSION) + " " + BuildQuery.getRuleName(BuildQueryLexer.Matches) + " " + BuildQuery.quote(value);
+		return BuildQuery.getRuleName(BuildQueryLexer.Queueing);
 	}
 
 }

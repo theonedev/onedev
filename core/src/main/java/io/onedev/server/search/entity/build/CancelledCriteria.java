@@ -10,19 +10,19 @@ import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.BuildConstants;
 
-public class SuccessfulCriteria extends EntityCriteria<Build> {
+public class CancelledCriteria extends EntityCriteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Build> context, User user) {
 		Path<?> attribute = context.getRoot().get(BuildConstants.ATTR_STATUS);
-		return context.getBuilder().equal(attribute, Build.Status.SUCCESSFUL);
+		return context.getBuilder().equal(attribute, Build.Status.CANCELLED);
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return build.getStatus() == Build.Status.SUCCESSFUL;
+		return build.getStatus() == Build.Status.CANCELLED;
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class SuccessfulCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.getRuleName(BuildQueryLexer.Successful);
+		return BuildQuery.getRuleName(BuildQueryLexer.Cancelled);
 	}
 
 }

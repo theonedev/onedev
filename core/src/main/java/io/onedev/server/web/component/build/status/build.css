@@ -12,20 +12,20 @@ a.build {
 .build-detail table td.status {
 	padding-right: 4px;
 }
-.build-detail table td.configuration {
+.build-detail table td.job {
 	padding-left: 0;
 }
 
-.build-status.success {
+.build-status.successful {
 	color: #06BC06 !important;
 }
-.build-status.failure, .build-status.error {
+.build-status.failed, .build-status.in_error, .build-status.cancelled {
 	color: red !important;
 }
-.build-status.running, .build-status.awaiting {
+.build-status.running, .build-status.waiting, .build-status.queueing {
 	color: #D2A906 !important;
 }
-.pullrequest-builds .build-status.failure, .pullrequest-builds .build-status.running {
+.pullrequest-builds .build-status.failed, .pullrequest-builds .build-status.running {
 	padding-top: 2px;
 	vertical-align: text-top;
 }
@@ -40,7 +40,7 @@ a.build {
 	font-size: 16px;
 	width: 12px;
 }
-.pullrequest-builds td.configuration {
+.pullrequest-builds td.job {
 	padding-left: 0;
 }
 

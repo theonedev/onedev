@@ -70,9 +70,6 @@ import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizat
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
 import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
-import io.onedev.server.web.page.project.setting.configuration.ConfigurationEditPage;
-import io.onedev.server.web.page.project.setting.configuration.ConfigurationListPage;
-import io.onedev.server.web.page.project.setting.configuration.NewConfigurationPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
 import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
@@ -246,9 +243,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 				PromptFieldsUponIssueOpenSettingPage.class));
 		add(new OnePageMapper("projects/${project}/settings/commit-message-transform", CommitMessageTransformPage.class));
 		add(new OnePageMapper("projects/${project}/settings/web-hooks", WebHooksPage.class));
-		add(new OnePageMapper("projects/${project}/settings/configurations", ConfigurationListPage.class));
-		add(new OnePageMapper("projects/${project}/settings/configurations/new", NewConfigurationPage.class));
-		add(new OnePageMapper("projects/${project}/settings/configurations/${configuration}", ConfigurationEditPage.class));
 		
 		add(new OnePageMapper("projects/${project}/no-commits", NoCommitsPage.class));
 	}

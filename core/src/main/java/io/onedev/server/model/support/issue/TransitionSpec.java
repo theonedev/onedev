@@ -21,7 +21,6 @@ import io.onedev.server.model.support.issue.transitionprerequisite.TransitionPre
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsNotAnyOf;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsOneOf;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueMatcher;
-import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.TransitionTrigger;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
@@ -144,25 +143,6 @@ public class TransitionSpec implements Serializable {
 			pressButton.setAuthorized(UserMatcher.onDeleteUser(pressButton.getAuthorized(), userName));
 		}
 		return false;
-	}
-	
-	public boolean onDeleteConfiguration(String configurationName) {
-		TransitionTrigger trigger = getTrigger();
-		if (trigger instanceof BuildSuccessfulTrigger) {
-			BuildSuccessfulTrigger buildSuccessfulTrigger = (BuildSuccessfulTrigger) trigger;
-			if (buildSuccessfulTrigger.getConfiguration().equals(configurationName))
-				return true;
-		}
-		return false;
-	}
-	
-	public void onRenameConfiguration(String oldName, String newName) {
-		TransitionTrigger trigger = getTrigger();
-		if (trigger instanceof BuildSuccessfulTrigger) {
-			BuildSuccessfulTrigger buildSuccessfulTrigger = (BuildSuccessfulTrigger) trigger;
-			if (buildSuccessfulTrigger.getConfiguration().equals(oldName))
-				buildSuccessfulTrigger.setConfiguration(newName);
-		}
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {

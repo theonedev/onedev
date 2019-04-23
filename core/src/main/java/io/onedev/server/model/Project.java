@@ -153,10 +153,7 @@ public class Project extends AbstractEntity {
 	private long version;
 	
     @OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-    private Collection<Configuration> configurations = new ArrayList<>();
-    
-    @OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-    private Collection<Build2> build2s = new ArrayList<>();
+    private Collection<Build> build2s = new ArrayList<>();
     
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -425,14 +422,6 @@ public class Project extends AbstractEntity {
 		return getRefInfos(Constants.R_TAGS);
     }
 	
-    public Collection<Configuration> getConfigurations() {
-		return configurations;
-	}
-
-	public void setConfigurations(Collection<Configuration> configurations) {
-		this.configurations = configurations;
-	}
-
 	public List<RefInfo> getRefInfos(String prefix) {
 		try (RevWalk revWalk = new RevWalk(getRepository())) {
 			List<Ref> refs = new ArrayList<Ref>(getRepository().getRefDatabase().getRefsByPrefix(prefix));
@@ -670,6 +659,17 @@ public class Project extends AbstractEntity {
 			ciSpecCache.put(commitId, ciSpecOpt);
 		}
 		return ciSpecOpt.orNull();
+	}
+	
+	public List<String> getJobNames() {
+		CISpec ciSpec = getCISpec(getObjectId(getDefaultBranch()));
+		if (ciSpec != null) {
+			List<String> jobNames = new ArrayList<>(ciSpec.getJobMap().keySet());
+			Collections.sort(jobNames);
+			return jobNames;
+		} else {
+			return new ArrayList<>();
+		}
 	}
 	
 	public LastCommitsOfChildren getLastCommitsOfChildren(String revision, @Nullable String path) {

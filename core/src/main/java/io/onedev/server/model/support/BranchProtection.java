@@ -17,7 +17,7 @@ import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usermatcher.Anyone;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.BranchPatterns;
-import io.onedev.server.web.editable.annotation.ConfigurationChoice;
+import io.onedev.server.web.editable.annotation.JobChoice;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
@@ -40,7 +40,7 @@ public class BranchProtection implements Serializable {
 	
 	private String reviewRequirement;
 	
-	private List<String> configurations = new ArrayList<>();
+	private List<String> jobNames = new ArrayList<>();
 	
 	private boolean buildMerges;
 	
@@ -117,14 +117,14 @@ public class BranchProtection implements Serializable {
 	}
 
 	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")
-	@ConfigurationChoice
+	@JobChoice
 	@NameOfEmptyValue("No any")
-	public List<String> getConfigurations() {
-		return configurations;
+	public List<String> getJobNames() {
+		return jobNames;
 	}
 
-	public void setConfigurations(List<String> configurations) {
-		this.configurations = configurations;
+	public void setJobNames(List<String> jobNames) {
+		this.jobNames = jobNames;
 	}
 
 	@Editable(order=600, name="Build Merged Commits", description="If checked, builds of merged commits "
@@ -181,16 +181,6 @@ public class BranchProtection implements Serializable {
 		}
 		
 		return false;
-	}
-	
-	public void onRenameConfiguration(String oldName, String newName) {
-		int index = getConfigurations().indexOf(oldName);
-		if (index != -1)
-			getConfigurations().set(index, newName);
-	}
-	
-	public void onDeleteConfiguration(String configurationName) {
-		getConfigurations().remove(configurationName);
 	}
 	
 	public void onRenameUser(Project project, String oldName, String newName) {

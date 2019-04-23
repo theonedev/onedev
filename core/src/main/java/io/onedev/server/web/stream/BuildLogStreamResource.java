@@ -18,9 +18,9 @@ import com.google.common.base.Charsets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.ci.job.log.LogManager;
-import io.onedev.server.entitymanager.Build2Manager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.Build2;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 
@@ -53,7 +53,7 @@ public class BuildLogStreamResource extends AbstractResource {
 		if (buildNumber == null)
 			throw new IllegalArgumentException("build number has to be specified");
 		
-		Build2 build = OneDev.getInstance(Build2Manager.class).find(project, buildNumber);
+		Build build = OneDev.getInstance(BuildManager.class).find(project, buildNumber);
 
 		if (build == null) {
 			String message = String.format("Unable to find build (project: %s, build number: %d)", 

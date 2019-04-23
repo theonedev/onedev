@@ -1,10 +1,10 @@
 onedev.server.buildChoiceFormatter = {
 	formatSelection: function(build) {
-		return build.configuration + ":" + build.name;
+		return "#" + build.number;
 	},
 	
 	formatResult: function(build) {
-		return "<div class='build'>" + build.configuration + ":" + build.name + "</div>";
+		return "<div class='build'>#" + build.number + "</div>";
 	},
 	
 	escapeMarkup: function(m) {

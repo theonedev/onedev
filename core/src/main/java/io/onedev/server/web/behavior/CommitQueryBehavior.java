@@ -83,7 +83,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 							suggestions.addAll(escape(SuggestionUtils.suggestTags(project, unfencedMatchWith)));
 							break;
 						case CommitQueryParser.BUILD:
-							suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedMatchWith, true)));
+							suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedMatchWith)));
 							break;
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
