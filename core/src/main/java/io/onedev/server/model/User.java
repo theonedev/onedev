@@ -81,9 +81,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
     
-	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-	private Collection<Build> build2s = new ArrayList<>();
-	
     @Override
     public PrincipalCollection getPrincipals() {
         return new SimplePrincipalCollection(getId(), "");

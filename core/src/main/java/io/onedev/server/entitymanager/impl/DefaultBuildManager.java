@@ -27,7 +27,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildParamManager;
-import io.onedev.server.event.build2.BuildSubmitted;
+import io.onedev.server.event.build.BuildSubmitted;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
@@ -74,6 +74,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
     	query.setParameter("build", build);
     	query.executeUpdate();
     	
+		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getId()));
     	super.delete(build);
 	}
 	
@@ -179,7 +180,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Override
 	public void create(Build build) {
 		Preconditions.checkArgument(build.isNew());
-		Query<?> query = getSession().createQuery("select max(number) from Build2 where project=:project");
+		Query<?> query = getSession().createQuery("select max(number) from Build where project=:project");
 		query.setParameter("project", build.getProject());
 		build.setNumber(getNextNumber(build.getProject(), query));
 		save(build);

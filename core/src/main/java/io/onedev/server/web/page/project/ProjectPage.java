@@ -45,6 +45,7 @@ import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.BuildListPage;
+import io.onedev.server.web.page.project.builds2.detail.BuildDetailPage;
 import io.onedev.server.web.page.project.comments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
@@ -262,7 +263,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			
 		});
 		
-		tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-cubes", 0, BuildListPage.class) {
+		tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-cubes", 0, BuildListPage.class, BuildDetailPage.class) {
 
 			@Override
 			public Component render(String componentId) {

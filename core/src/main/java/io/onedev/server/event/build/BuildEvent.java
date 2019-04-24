@@ -1,4 +1,4 @@
-package io.onedev.server.event.build2;
+package io.onedev.server.event.build;
 
 import java.util.Date;
 

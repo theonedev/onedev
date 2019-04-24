@@ -1,11 +1,15 @@
 package io.onedev.server.search.entity.build;
 
-import static io.onedev.server.util.BuildConstants.FIELD_BUILD_DATE;
 import static io.onedev.server.util.BuildConstants.FIELD_COMMIT;
+import static io.onedev.server.util.BuildConstants.FIELD_FINISH_DATE;
 import static io.onedev.server.util.BuildConstants.FIELD_JOB;
 import static io.onedev.server.util.BuildConstants.FIELD_NUMBER;
+import static io.onedev.server.util.BuildConstants.FIELD_QUEUEING_DATE;
+import static io.onedev.server.util.BuildConstants.FIELD_RUNNING_DATE;
+import static io.onedev.server.util.BuildConstants.FIELD_SUBMIT_DATE;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +23,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.cache.CacheManager;
 import io.onedev.server.exception.OneException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -99,6 +105,8 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new FailedCriteria();
 						case BuildQueryLexer.Cancelled:
 							return new CancelledCriteria();
+						case BuildQueryLexer.TimedOut:
+							return new TimedOutCriteria();
 						case BuildQueryLexer.InError:
 							return new InErrorCriteria();
 						case BuildQueryLexer.Waiting:
@@ -107,6 +115,10 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new QueueingCriteria();
 						case BuildQueryLexer.Running:
 							return new RunningCriteria();
+						case BuildQueryLexer.SubmittedByMe:
+							return new SubmittedByMeCriteria();
+						case BuildQueryLexer.CancelledByMe:
+							return new CancelledByMeCriteria();
 						default:
 							throw new OneException("Unexpected operator: " + ctx.operator.getText());
 						}
@@ -115,7 +127,15 @@ public class BuildQuery extends EntityQuery<Build> {
 					@Override
 					public EntityCriteria<Build> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
-						return new FixedIssueCriteria(getIssue(project, value));
+						if (ctx.SubmittedBy() != null) {
+							return new SubmittedByCriteria(getUser(value), value);
+						} else if (ctx.CancelledBy() != null) {
+							return new CancelledByCriteria(getUser(value), value);
+						} else if (ctx.FixedIssue() != null) {
+							return new FixedIssueCriteria(getIssue(project, value));
+						} else {
+							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
+						}
 					}
 					
 					@Override
@@ -135,8 +155,14 @@ public class BuildQuery extends EntityQuery<Build> {
 						case BuildQueryLexer.IsBefore:
 						case BuildQueryLexer.IsAfter:
 							Date dateValue = getDateValue(value);
-							if (fieldName.equals(FIELD_BUILD_DATE))
-								return new BuildDateCriteria(dateValue, value, operator);
+							if (fieldName.equals(FIELD_SUBMIT_DATE))
+								return new SubmitDateCriteria(dateValue, value, operator);
+							else if (fieldName.equals(FIELD_QUEUEING_DATE))
+								return new QueueingDateCriteria(dateValue, value, operator);
+							else if (fieldName.equals(FIELD_RUNNING_DATE))
+								return new RunningDateCriteria(dateValue, value, operator);
+							else if (fieldName.equals(FIELD_FINISH_DATE))
+								return new FinishDateCriteria(dateValue, value, operator);
 							else
 								throw new IllegalStateException();
 						case BuildQueryLexer.Is:
@@ -148,7 +174,7 @@ public class BuildQuery extends EntityQuery<Build> {
 							case FIELD_NUMBER:
 								return new NumberCriteria(getIntValue(value), operator);
 							default: 
-								throw new IllegalStateException();
+								return new ParamCriteria(fieldName, value);
 							}
 						case BuildQueryLexer.IsLessThan:
 						case BuildQueryLexer.IsGreaterThan:
@@ -206,17 +232,23 @@ public class BuildQuery extends EntityQuery<Build> {
 	}
 	
 	public static void checkField(Project project, String fieldName, int operator) {
-		if (!BuildConstants.QUERY_FIELDS.contains(fieldName))
+		Collection<String> paramNames = OneDev.getInstance(CacheManager.class).getBuildParamNames();
+		if (!BuildConstants.QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case BuildQueryLexer.IsBefore:
 		case BuildQueryLexer.IsAfter:
-			if (!fieldName.equals(BuildConstants.FIELD_BUILD_DATE)) 
+			if (!fieldName.equals(BuildConstants.FIELD_SUBMIT_DATE) 
+					&& !fieldName.equals(BuildConstants.FIELD_QUEUEING_DATE)
+					&& !fieldName.equals(BuildConstants.FIELD_RUNNING_DATE)
+					&& !fieldName.equals(BuildConstants.FIELD_FINISH_DATE)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case BuildQueryLexer.Is:
-			if (!fieldName.equals(FIELD_COMMIT) && !fieldName.equals(FIELD_JOB) && !fieldName.equals(FIELD_NUMBER)) 
+			if (!fieldName.equals(FIELD_COMMIT) && !fieldName.equals(FIELD_JOB) && !fieldName.equals(FIELD_NUMBER) 
+					&& !paramNames.contains(fieldName)) {
 				throw newOperatorException(fieldName, operator);
+			}
 			break;
 		case BuildQueryLexer.IsLessThan:
 		case BuildQueryLexer.IsGreaterThan:

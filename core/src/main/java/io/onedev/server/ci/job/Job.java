@@ -40,13 +40,13 @@ public class Job implements Serializable, Validatable {
 	
 	private List<JobOutcome> outcomes = new ArrayList<>();
 
-	private List<JobCache> caches = new ArrayList<>();
-	
 	private List<Dependency> dependencies = new ArrayList<>();
+	
+	private List<JobTrigger> triggers = new ArrayList<>();
 	
 	private List<InputSpec> promptParams = new ArrayList<>();
 	
-	private List<JobTrigger> triggers = new ArrayList<>();
+	private List<JobCache> caches = new ArrayList<>();
 	
 	private long timeout = 3600;
 	
@@ -86,7 +86,8 @@ public class Job implements Serializable, Validatable {
 		this.commands = commands;
 	}
 	
-	@Editable(order=130, description="Whether or not to clone the source code")
+	@Editable(order=130, description="Whether or not to clone the source code. If enabled, the repository will be "
+			+ "cloned into job workspace")
 	public boolean isCloneSource() {
 		return cloneSource;
 	}
@@ -95,16 +96,14 @@ public class Job implements Serializable, Validatable {
 		this.cloneSource = cloneSource;
 	}	
 	
-	@Editable(order=150, description="Cache specific paths to speed up job execution. For instance for node.js "
-			+ "projects, you may cache the <tt>node_modules</tt> folder to avoid downloading node modules for "
-			+ "subsequent job executions. Note that cache is considered as a best-effort approach and your "
-			+ "build script should always consider that cache might not be available")
-	public List<JobCache> getCaches() {
-		return caches;
+	@Editable(name="Dependency Jobs", order=140, description="Job dependencies determines the order and "
+			+ "concurrency when run different jobs")
+	public List<Dependency> getDependencies() {
+		return dependencies;
 	}
 
-	public void setCaches(List<JobCache> caches) {
-		this.caches = caches;
+	public void setDependencies(List<Dependency> dependencies) {
+		this.dependencies = dependencies;
 	}
 
 	@Editable(order=200, description="Specify job outcomes")
@@ -116,26 +115,6 @@ public class Job implements Serializable, Validatable {
 		this.outcomes = outcomes;
 	}
 
-	@Editable(order=300, description="Specify parameters to prompt when the job "
-			+ "is triggered manually")
-	public List<InputSpec> getPromptParams() {
-		return promptParams;
-	}
-
-	public void setPromptParams(List<InputSpec> promptParams) {
-		this.promptParams = promptParams;
-	}
-
-	@Editable(name="Dependency Jobs", order=400, description="Job dependencies determines the order and "
-			+ "concurrency when run different jobs")
-	public List<Dependency> getDependencies() {
-		return dependencies;
-	}
-
-	public void setDependencies(List<Dependency> dependencies) {
-		this.dependencies = dependencies;
-	}
-
 	@Editable(order=500, description="Use triggers to run the job automatically under certain conditions")
 	public List<JobTrigger> getTriggers() {
 		return triggers;
@@ -145,7 +124,29 @@ public class Job implements Serializable, Validatable {
 		this.triggers = triggers;
 	}
 
-	@Editable(order=700, description="Specify timeout in seconds")
+	@Editable(order=10000, group="More Settings", description="Specify parameters to prompt when the job "
+			+ "is triggered manually")
+	public List<InputSpec> getPromptParams() {
+		return promptParams;
+	}
+
+	public void setPromptParams(List<InputSpec> promptParams) {
+		this.promptParams = promptParams;
+	}
+
+	@Editable(order=10100, group="More Settings", description="Cache specific paths to speed up job execution. For instance for node.js "
+			+ "projects, you may cache the <tt>node_modules</tt> folder to avoid downloading node modules for "
+			+ "subsequent job executions. Note that cache is considered as a best-effort approach and your "
+			+ "build script should always consider that cache might not be available")
+	public List<JobCache> getCaches() {
+		return caches;
+	}
+
+	public void setCaches(List<JobCache> caches) {
+		this.caches = caches;
+	}
+
+	@Editable(order=10200, group="More Settings", description="Specify timeout in seconds")
 	public long getTimeout() {
 		return timeout;
 	}
@@ -154,7 +155,7 @@ public class Job implements Serializable, Validatable {
 		this.timeout = timeout;
 	}
 
-	@Editable(order=800)
+	@Editable(order=10300, group="More Settings")
 	public LogLevel getLogLevel() {
 		return logLevel;
 	}

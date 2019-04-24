@@ -22,7 +22,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueFieldEntityManager;
 import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.event.build2.BuildEvent;
+import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;

@@ -58,4 +58,8 @@ public interface CacheManager {
 	
 	Collection<Long> filterBuildIds(Long projectId, Collection<String> commitHashes);
 	
+	Collection<String> getBuildParamNames();
+	
+	Collection<String> getBuildParamValues(String paramName);
+	
 }

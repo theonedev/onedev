@@ -39,9 +39,10 @@ import io.onedev.server.util.jackson.DefaultView;
 
 @Entity
 @Table(
-		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_user_id"), @Index(columnList="commitHash"), 
+		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
+				@Index(columnList="submitterName"), @Index(columnList="cancellerName"), @Index(columnList="commitHash"), 
 				@Index(columnList="number"), @Index(columnList="jobName"), @Index(columnList="numberStr"), 
-				@Index(columnList="status"), @Index(columnList="submitDate"), @Index(columnList="pendingDate"),
+				@Index(columnList="status"), @Index(columnList="submitDate"), @Index(columnList="queueingDate"), 
 				@Index(columnList="runningDate"), @Index(columnList="finishDate")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})}
 )
@@ -55,7 +56,7 @@ public class Build extends AbstractEntity {
 	private static final int MAX_STATUS_MESSAGE = 1024;
 	
 	public enum Status {
-		WAITING, QUEUEING, RUNNING, SUCCESSFUL, FAILED, IN_ERROR, CANCELLED
+		WAITING, QUEUEING, RUNNING, SUCCESSFUL, FAILED, IN_ERROR, CANCELLED, TIMED_OUT
 	};
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -63,7 +64,14 @@ public class Build extends AbstractEntity {
 	private Project project; 
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	private User user;
+	private User submitter;
+	
+	private String submitterName;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	private User canceller;
+	
+	private String cancellerName;
 	
 	@Column(nullable=false)
 	private String jobName;
@@ -84,7 +92,7 @@ public class Build extends AbstractEntity {
 	@Column(nullable=false)
 	private Date submitDate;
 	
-	private Date pendingDate;
+	private Date queueingDate;
 	
 	private Date runningDate;
 
@@ -115,12 +123,39 @@ public class Build extends AbstractEntity {
 	}
 
 	@Nullable
-	public User getUser() {
-		return user;
+	public User getSubmitter() {
+		return submitter;
 	}
 
-	public void setUser(User user) {
-		this.user = user;
+	public void setSubmitter(User submitter) {
+		this.submitter = submitter;
+	}
+
+	@Nullable
+	public String getSubmitterName() {
+		return submitterName;
+	}
+
+	public void setSubmitterName(String submitterName) {
+		this.submitterName = submitterName;
+	}
+
+	@Nullable
+	public String getCancellerName() {
+		return cancellerName;
+	}
+
+	public void setCancellerName(String cancellerName) {
+		this.cancellerName = cancellerName;
+	}
+
+	@Nullable
+	public User getCanceller() {
+		return canceller;
+	}
+
+	public void setCanceller(User canceller) {
+		this.canceller = canceller;
 	}
 
 	public String getJobName() {
@@ -171,7 +206,8 @@ public class Build extends AbstractEntity {
 	
 	public boolean isFinished() {
 		return status == Status.IN_ERROR || status == Status.FAILED 
-				|| status == Status.CANCELLED || status == Status.SUCCESSFUL;
+				|| status == Status.CANCELLED || status == Status.SUCCESSFUL
+				|| status == Status.TIMED_OUT;
 	}
 	
 	public Date getSubmitDate() {
@@ -182,12 +218,12 @@ public class Build extends AbstractEntity {
 		this.submitDate = submitDate;
 	}
 
-	public Date getPendingDate() {
-		return pendingDate;
+	public Date getQueueingDate() {
+		return queueingDate;
 	}
 
-	public void setPendingDate(Date pendingDate) {
-		this.pendingDate = pendingDate;
+	public void setQueueingDate(Date queueingDate) {
+		this.queueingDate = queueingDate;
 	}
 
 	public Date getRunningDate() {

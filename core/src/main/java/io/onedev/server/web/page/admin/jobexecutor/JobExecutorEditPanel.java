@@ -26,8 +26,8 @@ import io.onedev.server.web.behavior.testform.TestResult;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.editable.PathElement;
-import io.onedev.server.web.editable.PropertyUpdating;
 import io.onedev.server.web.util.Testable;
 
 @SuppressWarnings("serial")
@@ -220,9 +220,9 @@ abstract class JobExecutorEditPanel extends Panel {
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 
-				if (event.getPayload() instanceof PropertyUpdating) {
-					PropertyUpdating propertyUpdating = (PropertyUpdating) event.getPayload();
-					propertyUpdating.getHandler().add(testButton);
+				if (event.getPayload() instanceof BeanUpdating) {
+					BeanUpdating beanUpdating = (BeanUpdating) event.getPayload();
+					beanUpdating.getHandler().add(testButton);
 				}
 				
 			}

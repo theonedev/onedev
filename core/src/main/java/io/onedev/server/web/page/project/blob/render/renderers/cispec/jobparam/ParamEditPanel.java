@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
@@ -147,7 +148,7 @@ abstract class ParamEditPanel extends Panel implements InputContext {
 	
 	@Override
 	public boolean isReservedName(String inputName) {
-		return false;
+		return BuildConstants.ALL_FIELDS.contains(inputName);
 	}
 	
 }

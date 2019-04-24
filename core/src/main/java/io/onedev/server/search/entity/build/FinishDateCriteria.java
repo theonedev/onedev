@@ -10,10 +10,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.QueryBuildContext;
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
 import io.onedev.server.util.BuildConstants;
 
-public class BuildDateCriteria extends EntityCriteria<Build> {
+public class FinishDateCriteria extends EntityCriteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -23,7 +22,7 @@ public class BuildDateCriteria extends EntityCriteria<Build> {
 	
 	private final String rawValue;
 	
-	public BuildDateCriteria(Date value, String rawValue, int operator) {
+	public FinishDateCriteria(Date value, String rawValue, int operator) {
 		this.operator = operator;
 		this.value = value;
 		this.rawValue = rawValue;
@@ -31,8 +30,8 @@ public class BuildDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Build> context, User user) {
-		Path<Date> attribute = context.getRoot().get(BuildConstants.ATTR_BUILD_DATE);
-		if (operator == CodeCommentQueryLexer.IsBefore)
+		Path<Date> attribute = context.getRoot().get(BuildConstants.ATTR_FINISH_DATE);
+		if (operator == BuildQueryLexer.IsBefore)
 			return context.getBuilder().lessThan(attribute, value);
 		else
 			return context.getBuilder().greaterThan(attribute, value);
@@ -40,10 +39,10 @@ public class BuildDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public boolean matches(Build build, User user) {
-		if (operator == CodeCommentQueryLexer.IsBefore)
-			return build.getSubmitDate().before(value);
+		if (operator == BuildQueryLexer.IsBefore)
+			return build.getFinishDate().before(value);
 		else
-			return build.getSubmitDate().after(value);
+			return build.getFinishDate().after(value);
 	}
 
 	@Override
@@ -53,7 +52,7 @@ public class BuildDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.quote(BuildConstants.FIELD_BUILD_DATE) + " " + BuildQuery.getRuleName(operator) + " " + BuildQuery.quote(rawValue);
+		return BuildQuery.quote(BuildConstants.FIELD_FINISH_DATE) + " " + BuildQuery.getRuleName(operator) + " " + BuildQuery.quote(rawValue);
 	}
 
 }

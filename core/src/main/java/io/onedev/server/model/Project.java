@@ -152,8 +152,8 @@ public class Project extends AbstractEntity {
 	@Version
 	private long version;
 	
-    @OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-    private Collection<Build> build2s = new ArrayList<>();
+    @OneToMany(mappedBy="project")
+    private Collection<Build> builds = new ArrayList<>();
     
 	@Lob
 	@Column(nullable=false, length=65535)
@@ -261,8 +261,12 @@ public class Project extends AbstractEntity {
 		savedBuildQueries.add(new NamedBuildQuery("Successful", "successful"));
 		savedBuildQueries.add(new NamedBuildQuery("Failed", "failed"));
 		savedBuildQueries.add(new NamedBuildQuery("In error", "in error"));
+		savedBuildQueries.add(new NamedBuildQuery("Cancelled", "cancelled"));
+		savedBuildQueries.add(new NamedBuildQuery("Timed out", "timed out"));
 		savedBuildQueries.add(new NamedBuildQuery("Running", "running"));
-		savedBuildQueries.add(new NamedBuildQuery("Build recently", "\"Build Date\" is after \"last week\""));
+		savedBuildQueries.add(new NamedBuildQuery("Waiting", "waiting"));
+		savedBuildQueries.add(new NamedBuildQuery("Queueing", "queueing"));
+		savedBuildQueries.add(new NamedBuildQuery("Build recently", "\"Submit Date\" is after \"last week\""));
 	}
 	
 	@Lob
@@ -1126,6 +1130,14 @@ public class Project extends AbstractEntity {
 
 	public void setBuildQuerySettings(Collection<BuildQuerySetting> buildQuerySettings) {
 		this.buildQuerySettings = buildQuerySettings;
+	}
+
+	public Collection<Build> getBuilds() {
+		return builds;
+	}
+
+	public void setBuilds(Collection<Build> builds) {
+		this.builds = builds;
 	}
 
 	public long getVersion() {

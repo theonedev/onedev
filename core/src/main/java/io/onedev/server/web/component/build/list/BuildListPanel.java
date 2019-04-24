@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
@@ -258,6 +259,41 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 		
 		List<IColumn<Build, Void>> columns = new ArrayList<>();
 		
+		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_NUMBER)) {
+
+			@Override
+			public String getCssClass() {
+				return "number";
+			}
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
+				Fragment fragment = new Fragment(componentId, "numberFrag", BuildListPanel.this);
+				Build build = rowModel.getObject();
+				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDetailPage.class, BuildDetailPage.paramsOf(build));
+				link.add(new Label("label", "#" + build.getNumber()));
+				fragment.add(link);
+				cellItem.add(fragment);
+			}
+		});
+		
+		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_STATUS)) {
+
+			@Override
+			public String getCssClass() {
+				return "status";
+			}
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
+				Fragment fragment = new Fragment(componentId, "statusFrag", BuildListPanel.this);
+				fragment.add(new BuildStatusIcon("icon", rowModel));
+				String statusName = StringUtils.capitalize(rowModel.getObject().getStatus().name().replace('_', ' ').toLowerCase());
+				fragment.add(new Label("name", statusName));
+				cellItem.add(fragment);
+			}
+		});
+		
 		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_JOB)) {
 
 			@Override
@@ -269,26 +305,6 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
 					IModel<Build> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getJobName()));
-			}
-		});
-		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_NUMBER)) {
-
-			@Override
-			public String getCssClass() {
-				return "number";
-			}
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-					IModel<Build> rowModel) {
-				Fragment fragment = new Fragment(componentId, "numberFrag", BuildListPanel.this);
-				fragment.add(new BuildStatusIcon("status", rowModel));
-				Build build = rowModel.getObject();
-				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDetailPage.class, BuildDetailPage.paramsOf(build));
-				link.add(new Label("label", build.getNumber()));
-				fragment.add(link);
-				cellItem.add(fragment);
 			}
 		});
 		
@@ -317,7 +333,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			});
 		}
 
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_BUILD_DATE)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_SUBMIT_DATE)) {
 
 			@Override
 			public String getCssClass() {
@@ -328,6 +344,32 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
 					IModel<Build> rowModel) {
 				cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getSubmitDate())));
+			}
+		});
+		
+		columns.add(new AbstractColumn<Build, Void>(Model.of("Duration")) {
+
+			@Override
+			public String getCssClass() {
+				return "duration expanded";
+			}
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
+					IModel<Build> rowModel) {
+				Build build = rowModel.getObject();
+				
+				if (build.getRunningDate() != null) {
+					long duration;
+					if (build.getFinishDate() != null)
+						duration = build.getFinishDate().getTime() - build.getRunningDate().getTime();
+					else 
+						duration = System.currentTimeMillis() - build.getRunningDate().getTime();
+					cellItem.add(new Label(componentId, DurationFormatUtils.formatDurationWords(duration, true, true)));
+				} else {
+					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
+				}
+				
 			}
 		});
 		

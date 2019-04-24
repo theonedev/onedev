@@ -36,7 +36,7 @@ import com.google.common.base.Throwables;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.event.build2.BuildFinished;
+import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;

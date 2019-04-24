@@ -12,6 +12,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -67,7 +68,11 @@ public class Dependency implements Serializable, Validatable {
 		Set<String> paramNames = new HashSet<>();
 		boolean isValid = true;
 		for (JobParam param: params) {
-			if (paramNames.contains(param.getName())) {
+			if (BuildConstants.ALL_FIELDS.contains(param.getName())) {
+				isValid = false;
+				context.buildConstraintViolationWithTemplate("Reserved name: " + param.getName())
+						.addPropertyNode("params").addConstraintViolation();
+			} else if (paramNames.contains(param.getName())) {
 				isValid = false;
 				context.buildConstraintViolationWithTemplate("Duplicate param: " + param.getName())
 						.addPropertyNode("params").addConstraintViolation();

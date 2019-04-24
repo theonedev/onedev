@@ -14,6 +14,10 @@ public class IssueConstants {
 	
 	public static final String ATTR_NUMBER = "number";
 	
+	public static final String FIELD_PROJECT = "Project";
+	
+	public static final String ATTR_PROJECT = "project";
+	
 	public static final String FIELD_STATE = "State";
 	
 	public static final String ATTR_STATE = "state";
@@ -54,12 +58,12 @@ public class IssueConstants {
 	
 	public static final String ATTR_MILESTONE = "milestone";
 	
-	public static final String ATTR_FIELD_UNARIES = "fieldUnaries";
+	public static final String ATTR_FIELD_ENTITIES = "fieldEntities";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_SUBMITTER, FIELD_DESCRIPTION, 
 			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, 
-			FIELD_COMMENT_COUNT, FIELD_MILESTONE);
+			FIELD_COMMENT_COUNT, FIELD_MILESTONE, FIELD_PROJECT);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_DESCRIPTION, FIELD_COMMENT, 

@@ -17,6 +17,10 @@ public class BuildParam extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String FIELD_ATTR_NAME = "name";
+	
+	public static final String FIELD_ATTR_VALUE = "value";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Build build;

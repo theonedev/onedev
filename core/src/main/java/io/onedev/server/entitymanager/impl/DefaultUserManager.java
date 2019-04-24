@@ -102,6 +102,18 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("submitterName", user.getDisplayName());
     	query.executeUpdate();
     	
+    	query = getSession().createQuery("update Build set submitter=null, submitterName=:submitterName "
+    			+ "where submitter=:submitter");
+    	query.setParameter("submitter", user);
+    	query.setParameter("submitterName", user.getDisplayName());
+    	query.executeUpdate();
+    	
+    	query = getSession().createQuery("update Build set canceller=null, cancellerName=:cancellerName "
+    			+ "where canceller=:canceller");
+    	query.setParameter("canceller", user);
+    	query.setParameter("cancellerName", user.getDisplayName());
+    	query.executeUpdate();
+    	
     	query = getSession().createQuery("update PullRequest set closeInfo.user=null, "
     			+ "closeInfo.userName=:userName where closeInfo.user=:user");
     	query.setParameter("user", user);

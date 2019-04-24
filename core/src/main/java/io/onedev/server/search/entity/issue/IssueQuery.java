@@ -6,7 +6,6 @@ import static io.onedev.server.util.IssueConstants.FIELD_DESCRIPTION;
 import static io.onedev.server.util.IssueConstants.FIELD_MILESTONE;
 import static io.onedev.server.util.IssueConstants.FIELD_NUMBER;
 import static io.onedev.server.util.IssueConstants.FIELD_STATE;
-import static io.onedev.server.util.IssueConstants.FIELD_SUBMITTER;
 import static io.onedev.server.util.IssueConstants.FIELD_SUBMIT_DATE;
 import static io.onedev.server.util.IssueConstants.FIELD_TITLE;
 import static io.onedev.server.util.IssueConstants.FIELD_UPDATE_DATE;
@@ -163,8 +162,6 @@ public class IssueQuery extends EntityQuery<Issue> {
 							return new MilestoneCriteria(null);
 						else if (fieldName.equals(FIELD_DESCRIPTION))
 							return new DescriptionCriteria(null);
-						else if (fieldName.equals(FIELD_SUBMITTER))
-							return new SubmittedByMeCriteria();
 						else
 							return new FieldOperatorCriteria(fieldName, operator);
 					}

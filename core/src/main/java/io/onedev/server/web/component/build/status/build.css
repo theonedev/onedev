@@ -19,7 +19,7 @@ a.build {
 .build-status.successful {
 	color: #06BC06 !important;
 }
-.build-status.failed, .build-status.in_error, .build-status.cancelled {
+.build-status.failed, .build-status.in_error, .build-status.cancelled, .build-status.timed_out {
 	color: red !important;
 }
 .build-status.running, .build-status.waiting, .build-status.queueing {

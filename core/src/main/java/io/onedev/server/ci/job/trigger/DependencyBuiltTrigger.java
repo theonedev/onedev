@@ -4,7 +4,7 @@ import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.event.ProjectEvent;
-import io.onedev.server.event.build2.BuildFinished;
+import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.editable.annotation.Editable;

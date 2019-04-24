@@ -56,7 +56,7 @@ public class UserMatcher implements Serializable {
 			if (criteria.matches(project, user))
 				return true;
 		}
-		return true;
+		return false;
 	}
 	
 	private static UserMatcherCriteria getUserMatcherCriteria(CriteriaContext criteriaContext) {

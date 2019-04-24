@@ -14,7 +14,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.TimeoutException;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -47,10 +47,10 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.CommitAware;
 import io.onedev.server.event.ProjectEvent;
-import io.onedev.server.event.build2.BuildFinished;
-import io.onedev.server.event.build2.BuildPending;
-import io.onedev.server.event.build2.BuildRunning;
-import io.onedev.server.event.build2.BuildSubmitted;
+import io.onedev.server.event.build.BuildFinished;
+import io.onedev.server.event.build.BuildPending;
+import io.onedev.server.event.build.BuildRunning;
+import io.onedev.server.event.build.BuildSubmitted;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -134,7 +134,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	public void submit(Project project, String commitHash, String jobName, Map<String, List<String>> paramMatrix) {
 		String lockKey = "job-schedule: " + project.getId() + "-" + commitHash;
 		Long projectId = project.getId();
-		Long userId = User.idOf(userManager.getCurrent());
+		Long submitterId = User.idOf(userManager.getCurrent());
 		transactionManager.runAsyncAfterCommit(new Runnable() {
 
 			@Override
@@ -148,12 +148,12 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							@Override
 							public void run() {
 								Project project = projectManager.load(projectId);
-								User user = (userId != null? userManager.load(userId): null);
+								User submitter = (submitterId != null? userManager.load(submitterId): null);
 								new MatrixRunner(paramMatrix).run(new MatrixRunner.Runnable() {
 									
 									@Override
 									public void run(Map<String, String> params) {
-										submit(project, user, commitHash, jobName, params, new ArrayList<>()); 
+										submit(project, submitter, commitHash, jobName, params, new ArrayList<>()); 
 									}
 									
 								});
@@ -186,7 +186,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 			build.setJobName(jobName);
 			build.setSubmitDate(new Date());
 			build.setStatus(Build.Status.WAITING);
-			build.setUser(user);
+			build.setSubmitter(user);
 			
 			builds.add(build);
 			
@@ -281,10 +281,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							Logger logger = logManager.getLogger(build.getProject().getId(), build.getId(), job.getLogLevel()); 
 							
 							Long buildId = build.getId();
-							JobExecution execution = new JobExecution(executorService.submit(new Runnable() {
+							JobExecution execution = new JobExecution(executorService.submit(new Callable<Void>() {
 
 								@Override
-								public void run() {
+								public Void call() {
 									logger.info("Creating workspace...");
 									File workspace = FileUtils.createTempDir("workspace");
 									try {
@@ -305,6 +305,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 												envVars.put("ONEDEV_PROJECT", build.getProject().getName());
 												envVars.put("ONEDEV_COMMIT", commitId.name());
 												envVars.put("ONEDEV_JOB", job.getName());
+												envVars.put("ONEDEV_BUILD_NUMBER", String.valueOf(build.getNumber()));
 												for (BuildParam param: build.getParams()) 
 													envVars.put("ONEDEV_PARAM_" + param.getName(), param.getValue());
 												
@@ -342,6 +343,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 										FileUtils.deleteDir(workspace);
 										logger.info("Workspace deleted");
 									}
+									return null;
 								}
 								
 							}), job.getTimeout() * 1000L);
@@ -349,7 +351,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							JobExecution prevExecution = jobExecutions.put(build.getId(), execution);
 							
 							if (prevExecution != null)
-								prevExecution.getFuture().cancel(true);
+								prevExecution.cancel(null);
 						}
 					} else {
 						markBuildError(build, "No applicable job executor");
@@ -404,10 +406,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 		if (build.isFinished()) {
 			build.setStatus(Build.Status.WAITING);
 			build.setFinishDate(null);
-			build.setPendingDate(null);
+			build.setQueueingDate(null);
 			build.setRunningDate(null);
 			build.setSubmitDate(new Date());
-			build.setUser(userManager.getCurrent());
+			build.setSubmitter(userManager.getCurrent());
 			buildManager.save(build);
 			listenerRegistry.post(new BuildSubmitted(build));
 		} else {
@@ -420,7 +422,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	public void cancel(Build build) {
 		JobExecution execution = jobExecutions.get(build.getId());
 		if (execution != null)
-			execution.getFuture().cancel(true);
+			execution.cancel(User.getCurrentId());
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -477,8 +479,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							} else if (build.getStatus() == Build.Status.RUNNING) {
 								JobExecution execution = jobExecutions.get(build.getId());
 								if (execution != null) {
-									if (System.currentTimeMillis() - build.getRunningDate().getTime() > execution.getTimeout())
-										execution.getFuture().cancel(true);
+									if (execution.isTimedout())
+										execution.cancel(null);
 								} else {
 									markBuildError(build, "Stopped for unknown reason");
 								}
@@ -501,7 +503,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 									markBuildError(build, "There are failed dependency jobs");
 								} else if (!hasUnfinished) {
 									build.setStatus(Build.Status.QUEUEING);
-									build.setPendingDate(new Date());
+									build.setQueueingDate(new Date());
 									listenerRegistry.post(new BuildPending(build));
 								}
 							}
@@ -512,13 +514,20 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							JobExecution execution = entry.getValue();
 							if (build == null || build.getStatus() != Build.Status.RUNNING) {
 								it.remove();
-								execution.getFuture().cancel(true);
-							} else if (execution.getFuture().isDone()) {
+								execution.cancel(null);
+							} else if (execution.isDone()) {
 								it.remove();
 								try {
-									execution.getFuture().get();
+									execution.check();
 									build.setStatus(Build.Status.SUCCESSFUL);
+								} catch (TimeoutException e) {
+									build.setStatus(Build.Status.TIMED_OUT);
 								} catch (CancellationException e) {
+									if (e instanceof CancellerAwareCancellationException) {
+										Long cancellerId = ((CancellerAwareCancellationException) e).getCancellerId();
+										if (cancellerId != null)
+											build.setCanceller(userManager.load(cancellerId));
+									}
 									build.setStatus(Build.Status.CANCELLED);
 								} catch (Exception e) {
 									build.setStatus(Build.Status.FAILED, e.getMessage());
@@ -552,25 +561,4 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
 	
-	private static class JobExecution {
-		
-		private final Future<?> future;
-		
-		private final long timeout;
-		
-		public JobExecution(Future<?> future, long timeout) {
-			this.future = future;
-			this.timeout = timeout;
-		}
-
-		public Future<?> getFuture() {
-			return future;
-		}
-
-		public long getTimeout() {
-			return timeout;
-		}
-		
-	}
-
 }

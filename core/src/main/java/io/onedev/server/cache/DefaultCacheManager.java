@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -24,6 +25,7 @@ import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Issue;
@@ -48,7 +50,9 @@ import io.onedev.server.util.facade.UserFacade;
 @Singleton
 public class DefaultCacheManager implements CacheManager {
 
-	private final Logger logger = LoggerFactory.getLogger(DefaultCacheManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultCacheManager.class);
+	
+	private static final int MAX_PARAM_VALUES = 100; 
 	
 	private final Dao dao;
 	
@@ -93,6 +97,10 @@ public class DefaultCacheManager implements CacheManager {
 	private final Map<Long, UserAuthorizationFacade> userAuthorizations = new HashMap<>();
 	
 	private final ReadWriteLock userAuthorizationsLock = new ReentrantReadWriteLock();
+	
+	private final Map<String, Set<String>> buildParams = new HashMap<>();
+	
+	private final ReadWriteLock buildParamsLock = new ReentrantReadWriteLock();
 	
 	@Inject
 	public DefaultCacheManager(Dao dao, TransactionManager transactionManager) {
@@ -139,6 +147,10 @@ public class DefaultCacheManager implements CacheManager {
 			groupAuthorizations.put(groupAuthorization.getId(), groupAuthorization.getFacade());
 		for (UserAuthorization userAuthorization: dao.query(UserAuthorization.class))
 			userAuthorizations.put(userAuthorization.getId(), userAuthorization.getFacade());
+		
+		query = dao.getSessionManager().getSession().createQuery("select distinct name, value from BuildParam");
+		for (Object[] fields: (List<Object[]>)query.list())
+			addBuildParam((String) fields[0], (String) fields[1]);
 	}
 	
 	@Transactional
@@ -240,10 +252,30 @@ public class DefaultCacheManager implements CacheManager {
 						groupAuthorizationsLock.writeLock().unlock();
 					}
 				}
+				
+				if (event.getEntity() instanceof BuildParam) {
+					buildParamsLock.writeLock().lock();
+					try {
+						BuildParam param = (BuildParam) event.getEntity();
+						addBuildParam(param.getName(), param.getValue());
+					} finally {
+						buildParamsLock.writeLock().unlock();
+					}
+				}
 			}
 			
 		});
 		
+	}
+	
+	private void addBuildParam(String name, String value) {
+		Set<String> values = buildParams.get(name);
+		if (values == null) {
+			values = new HashSet<>();
+			buildParams.put(name, values);
+		}
+		if (values.size() < MAX_PARAM_VALUES)
+			values.add(value);
 	}
 	
 	@Transactional
@@ -578,6 +610,30 @@ public class DefaultCacheManager implements CacheManager {
 			return new HashMap<>(groupAuthorizations);
 		} finally {
 			groupAuthorizationsLock.readLock().unlock();
+		}
+	}
+
+	@Override
+	public Collection<String> getBuildParamNames() {
+		buildParamsLock.readLock().lock();
+		try {
+			return new HashSet<>(buildParams.keySet());
+		} finally {
+			buildParamsLock.readLock().unlock();
+		}
+	}
+	
+	@Override
+	public Collection<String> getBuildParamValues(String paramName) {
+		buildParamsLock.readLock().lock();
+		try {
+			Set<String> paramValues = buildParams.get(paramName);
+			if (paramValues != null) 
+				return new HashSet<>(paramValues);
+			else 
+				return new HashSet<>();
+		} finally {
+			buildParamsLock.readLock().unlock();
 		}
 	}
 	

@@ -24,7 +24,8 @@ public class HasFailedBuildsCriteria extends PullRequestCriteria {
 		return context.getBuilder().or(
 				context.getBuilder().equal(status, Build.Status.IN_ERROR), 
 				context.getBuilder().equal(status, Build.Status.FAILED), 
-				context.getBuilder().equal(status, Build.Status.CANCELLED));
+				context.getBuilder().equal(status, Build.Status.CANCELLED), 
+				context.getBuilder().equal(status, Build.Status.TIMED_OUT));
 	}
 
 	@Override
@@ -33,7 +34,8 @@ public class HasFailedBuildsCriteria extends PullRequestCriteria {
 			if (build.getBuild() != null && 
 					(build.getBuild().getStatus() == Build.Status.IN_ERROR 
 					|| build.getBuild().getStatus() == Build.Status.FAILED
-					|| build.getBuild().getStatus() == Build.Status.CANCELLED)) {
+					|| build.getBuild().getStatus() == Build.Status.CANCELLED
+					|| build.getBuild().getStatus() == Build.Status.TIMED_OUT)) {
 				return true;
 			}
 		}

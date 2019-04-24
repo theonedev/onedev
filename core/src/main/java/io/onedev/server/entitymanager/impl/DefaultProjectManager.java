@@ -148,6 +148,9 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     @Transactional
     @Override
     public void delete(Project project) {
+    	for (Build build: project.getBuilds()) 
+    		buildManager.delete(build);
+    	
     	Query<?> query = getSession().createQuery("update Project set forkedFrom=null where forkedFrom=:forkedFrom");
     	query.setParameter("forkedFrom", project);
     	query.executeUpdate();

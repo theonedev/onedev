@@ -141,7 +141,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 				else
 					orders.add(builder.desc(IssueQuery.getPath(root, IssueConstants.ORDER_FIELDS.get(sort.getField()))));
 			} else {
-				Join<Issue, IssueFieldEntity> join = root.join(IssueConstants.ATTR_FIELD_UNARIES, JoinType.LEFT);
+				Join<Issue, IssueFieldEntity> join = root.join(IssueConstants.ATTR_FIELD_ENTITIES, JoinType.LEFT);
 				join.on(builder.equal(join.get(IssueFieldEntity.FIELD_ATTR_NAME), sort.getField()));
 				if (sort.getDirection() == Direction.ASCENDING)
 					orders.add(builder.asc(join.get(IssueFieldEntity.FIELD_ATTR_ORDINAL)));

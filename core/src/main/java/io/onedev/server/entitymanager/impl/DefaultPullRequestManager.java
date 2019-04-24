@@ -66,7 +66,7 @@ import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
-import io.onedev.server.event.build2.BuildEvent;
+import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
