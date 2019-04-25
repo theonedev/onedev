@@ -426,7 +426,7 @@
 		<wicket.version>7.10.0</wicket.version>
 		<wicketbootstrap.version>0.10.17</wicketbootstrap.version>
 		<jersey.version>2.13</jersey.version>
-		<jetty.version>9.3.24.v20180605</jetty.version>
+		<jetty.version>9.3.27.v20190418</jetty.version>
 		<jackson.version>2.9.8</jackson.version>
 		<servlet.version>3.1.0</servlet.version>
 	</properties>
