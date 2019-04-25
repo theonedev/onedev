@@ -89,22 +89,22 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		}
 	}
 
-	public static Issue getIssue(Project project, String numberStr) {
-		if (numberStr.startsWith("#"))
-			numberStr = numberStr.substring(1);
-		Issue issue = OneDev.getInstance(IssueManager.class).find(project, getLongValue(numberStr));
+	public static Issue getIssue(Project project, String number) {
+		if (number.startsWith("#"))
+			number = number.substring(1);
+		Issue issue = OneDev.getInstance(IssueManager.class).find(project, getLongValue(number));
 		if (issue != null)
 			return issue;
 		else
-			throw new OneException("Unable to find issue: #" + numberStr);
+			throw new OneException("Unable to find issue: #" + number);
 	}
 	
-	public static Build getBuild(Project project, String numberStr) {
-		Build build = OneDev.getInstance(BuildManager.class).find(project, getLongValue(numberStr));
+	public static Build getBuild(Project project, String number) {
+		Build build = OneDev.getInstance(BuildManager.class).find(project, getLongValue(number));
 		if (build != null)
 			return build;
 		else
-			throw new OneException("Unable to find build: #" + numberStr);
+			throw new OneException("Unable to find build: #" + number);
 	}
 	
 	public boolean needsLogin() {

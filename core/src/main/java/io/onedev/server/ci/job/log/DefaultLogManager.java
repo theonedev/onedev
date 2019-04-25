@@ -12,6 +12,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +22,7 @@ import java.util.regex.Pattern;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -36,9 +38,15 @@ import com.google.common.base.Throwables;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.ci.job.log.instruction.LogInstruction;
+import io.onedev.server.ci.job.log.instruction.LogInstructionParser.InstructionContext;
+import io.onedev.server.ci.job.log.instruction.LogInstructionParser.ParamContext;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.web.websocket.WebSocketManager;
 
@@ -61,12 +69,15 @@ public class DefaultLogManager implements LogManager {
 	
 	private final WebSocketManager webSocketManager;
 	
+	private final BuildManager buildManager;
+	
 	private final Map<Long, LogSnippet> recentSnippets = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultLogManager(StorageManager storageManager, WebSocketManager webSocketManager) {
+	public DefaultLogManager(StorageManager storageManager, WebSocketManager webSocketManager, BuildManager buildManager) {
 		this.storageManager = storageManager;
 		this.webSocketManager = webSocketManager;
+		this.buildManager = buildManager;
 	}
 	
 	private File getLogFile(Long projectId, Long buildId) {
@@ -80,6 +91,42 @@ public class DefaultLogManager implements LogManager {
 			
 			private static final long serialVersionUID = 1L;
 
+			private void log(LogLevel logLevel, String message) {
+				if (logLevel.ordinal() <= loggerLevel.ordinal()) {
+					Lock lock = LockUtils.getReadWriteLock(getLockKey(buildId)).writeLock();
+					lock.lock();
+					try {
+						LogSnippet snippet = recentSnippets.get(buildId);
+						if (snippet == null) {
+							File logFile = getLogFile(projectId, buildId);
+							if (!logFile.exists())	{
+								snippet = new LogSnippet();
+								recentSnippets.put(buildId, snippet);
+							}
+						}
+						if (snippet != null) {
+							snippet.entries.add(new LogEntry(new Date(), logLevel, message));
+							if (snippet.entries.size() > MAX_CACHE_ENTRIES) {
+								File logFile = getLogFile(projectId, buildId);
+								try (ObjectOutputStream oos = newOutputStream(logFile)) {
+									while (snippet.entries.size() > MIN_CACHE_ENTRIES) {
+										LogEntry entry = snippet.entries.remove(0);
+										oos.writeObject(entry);
+										snippet.offset++;
+									}
+								} catch (IOException e) {
+									throw new RuntimeException(e);
+								}
+							}
+							
+							webSocketManager.notifyObservableChange(Build.getLogWebSocketObservable(buildId), null);
+						}
+					} finally {
+						lock.unlock();
+					}
+				}
+			}
+			
 			@Override
 			public void log(LogLevel logLevel, String message, Throwable throwable) {
 				try {
@@ -88,38 +135,40 @@ public class DefaultLogManager implements LogManager {
 							message += "\n    " + line;
 					}
 							
-					if (logLevel.ordinal() <= loggerLevel.ordinal()) {
-						Lock lock = LockUtils.getReadWriteLock(getLockKey(buildId)).writeLock();
-						lock.lock();
-						try {
-							LogSnippet snippet = recentSnippets.get(buildId);
-							if (snippet == null) {
-								File logFile = getLogFile(projectId, buildId);
-								if (!logFile.exists())	{
-									snippet = new LogSnippet();
-									recentSnippets.put(buildId, snippet);
-								}
+					if (message.startsWith(LogInstruction.PREFIX)) {
+						log(logLevel, message);
+						
+						InstructionContext instructionContext = LogInstruction.parse(message);
+						String name = instructionContext.Identifier().getText();
+						
+						LogInstruction instruction = null;
+						for (LogInstruction extension: OneDev.getExtensions(LogInstruction.class)) {
+							if (extension.getName().equals(name)) {
+								instruction = extension;
+								break;
 							}
-							if (snippet != null) {
-								snippet.entries.add(new LogEntry(new Date(), logLevel, message));
-								if (snippet.entries.size() > MAX_CACHE_ENTRIES) {
-									File logFile = getLogFile(projectId, buildId);
-									try (ObjectOutputStream oos = newOutputStream(logFile)) {
-										while (snippet.entries.size() > MIN_CACHE_ENTRIES) {
-											LogEntry entry = snippet.entries.remove(0);
-											oos.writeObject(entry);
-											snippet.offset++;
-										}
-									} catch (IOException e) {
-										throw new RuntimeException(e);
-									}
-								}
-								
-								webSocketManager.notifyObservableChange(Build.getLogWebSocketObservable(buildId), null);
-							}
-						} finally {
-							lock.unlock();
 						}
+
+						if (instruction != null) {
+							Map<String, List<String>> params = new HashMap<>();
+							for (ParamContext paramContext: instructionContext.param()) {
+								String paramName;
+								if (paramContext.Identifier() != null)
+									paramName = paramContext.Identifier().getText();
+								else
+									paramName = "";
+								List<String> paramValues = new ArrayList<>();
+								for (TerminalNode terminalNode: paramContext.Value())
+									paramValues.add(LogInstruction.unescape(LogInstruction.removeQuotes(terminalNode.getText())));
+								params.put(paramName, paramValues);
+							}
+							log(LogLevel.DEBUG, "Executing log instruction '" + name + "'...");
+							doInTransaction(instruction, buildId, params);
+						} else {
+							log(LogLevel.ERROR, "Unsupported log instruction: " + name);
+						}
+					} else {
+						log(logLevel, message);
 					}
 				} catch (Exception e) {
 					logger.error("Error logging", e);
@@ -127,6 +176,11 @@ public class DefaultLogManager implements LogManager {
 			}
 			
 		};
+	}
+	
+	@Transactional
+	protected void doInTransaction(LogInstruction instruction, Long buildId, Map<String, List<String>> params) {
+		instruction.execute(buildManager.load(buildId), params);
 	}
 
 	private String getLockKey(Long buildId) {

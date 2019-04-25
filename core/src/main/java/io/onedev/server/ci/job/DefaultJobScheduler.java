@@ -307,7 +307,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 												envVars.put("ONEDEV_JOB", job.getName());
 												envVars.put("ONEDEV_BUILD_NUMBER", String.valueOf(build.getNumber()));
 												for (BuildParam param: build.getParams()) 
-													envVars.put("ONEDEV_PARAM_" + param.getName(), param.getValue());
+													envVars.put("ONEDEV_PARAM_" + param.getName().toUpperCase(), param.getValue());
 												
 												for (JobOutcome outcome: job.getOutcomes()) {
 													PatternSet patternSet = PatternSet.fromString(outcome.getFilePatterns());

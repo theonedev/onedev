@@ -118,8 +118,15 @@ public class SuggestionUtils {
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (Build build: OneDev.getInstance(BuildManager.class).query(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
 			InputSuggestion suggestion;
-			Range match = Range.match(build.getNumberStr(), matchWith, true, false, true);
-			suggestion = new InputSuggestion(build.getNumberStr(), null, match);
+			
+			String description;
+			if (build.getVersion() != null) 
+				description = build.getJobName() + " : " + build.getVersion();
+			else
+				description = null;
+			
+			suggestion = new InputSuggestion("#" + build.getNumber(), description, null);
+			
 			suggestions.add(suggestion);
 		}
 		return suggestions;

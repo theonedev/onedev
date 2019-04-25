@@ -2,6 +2,7 @@ package io.onedev.server.search.entity.build;
 
 import static io.onedev.server.util.BuildConstants.FIELD_COMMIT;
 import static io.onedev.server.util.BuildConstants.FIELD_FINISH_DATE;
+import static io.onedev.server.util.BuildConstants.FIELD_VERSION;
 import static io.onedev.server.util.BuildConstants.FIELD_JOB;
 import static io.onedev.server.util.BuildConstants.FIELD_NUMBER;
 import static io.onedev.server.util.BuildConstants.FIELD_QUEUEING_DATE;
@@ -173,6 +174,8 @@ public class BuildQuery extends EntityQuery<Build> {
 								return new JobCriteria(value);
 							case FIELD_NUMBER:
 								return new NumberCriteria(getIntValue(value), operator);
+							case FIELD_VERSION:
+								return new VersionCriteria(value);
 							default: 
 								return new ParamCriteria(fieldName, value);
 							}
@@ -246,7 +249,7 @@ public class BuildQuery extends EntityQuery<Build> {
 			break;
 		case BuildQueryLexer.Is:
 			if (!fieldName.equals(FIELD_COMMIT) && !fieldName.equals(FIELD_JOB) && !fieldName.equals(FIELD_NUMBER) 
-					&& !paramNames.contains(fieldName)) {
+					&& !fieldName.equals(FIELD_VERSION) && !paramNames.contains(fieldName)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;

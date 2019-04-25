@@ -61,10 +61,10 @@ import io.onedev.server.web.editable.annotation.Editable;
 		indexes={
 				@Index(columnList="o_project_id"), @Index(columnList="state"), 
 				@Index(columnList="title"), @Index(columnList="noSpaceTitle"),  
-				@Index(columnList="number"), @Index(columnList="numberStr"), 
-				@Index(columnList="submitDate"), @Index(columnList="o_submitter_id"),
-				@Index(columnList="voteCount"), @Index(columnList="commentCount"),
-				@Index(columnList="o_milestone_id"), @Index(columnList="updateDate")}, 
+				@Index(columnList="number"), @Index(columnList="submitDate"), 
+				@Index(columnList="o_submitter_id"), @Index(columnList="voteCount"), 
+				@Index(columnList="commentCount"), @Index(columnList="o_milestone_id"), 
+				@Index(columnList="updateDate")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})})
 @Editable
 public class Issue extends AbstractEntity implements Referenceable {
@@ -107,11 +107,6 @@ public class Issue extends AbstractEntity implements Referenceable {
 	private String uuid = UUID.randomUUID().toString();
 
 	private long number;
-	
-	// used for number search in markdown editor
-	@Column(nullable=false)
-	@JsonView(DefaultView.class)
-	private String numberStr;
 	
 	// used for title search in markdown editor
 	@Column(nullable=false)
@@ -190,7 +185,6 @@ public class Issue extends AbstractEntity implements Referenceable {
 
 	public void setNumber(long number) {
 		this.number = number;
-		numberStr = String.valueOf(number);
 	}
 
 	public User getSubmitter() {

@@ -153,4 +153,21 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		return super.describe(parseExpect, suggestedLiteral);
 	}
 
+	@Override
+	protected List<String> getHints(TerminalExpect terminalExpect) {
+		List<String> hints = new ArrayList<>();
+		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
+			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
+			if ("criteriaValue".equals(spec.getLabel())) {
+				String unmatched = terminalExpect.getUnmatchedText();
+				if (unmatched.indexOf('"') == unmatched.lastIndexOf('"')) { // only when we input criteria value
+					List<Element> elements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+					if (!elements.isEmpty() && elements.get(0).getFirstMatchedToken().getText().equals("\"" + BuildConstants.FIELD_VERSION + "\""))
+						hints.add("Use * to match any part of version");
+				}
+			}
+		} 
+		return hints;
+	}
+	
 }

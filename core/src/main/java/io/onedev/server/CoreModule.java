@@ -82,11 +82,12 @@ import io.onedev.server.cache.DefaultCommitInfoManager;
 import io.onedev.server.cache.DefaultUserInfoManager;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.detect.CISpecDetector;
+import io.onedev.server.ci.detector.CISpecDetector;
 import io.onedev.server.ci.job.DefaultJobScheduler;
 import io.onedev.server.ci.job.JobScheduler;
 import io.onedev.server.ci.job.log.DefaultLogManager;
 import io.onedev.server.ci.job.log.LogManager;
+import io.onedev.server.ci.job.log.instruction.LogInstruction;
 import io.onedev.server.ci.job.outcome.DependencyPopulator;
 import io.onedev.server.command.ApplyDBConstraintsCommand;
 import io.onedev.server.command.BackupDBCommand;
@@ -571,6 +572,8 @@ public class CoreModule extends AbstractPluginModule {
 			}
 	    	
 	    }, sessionInterceptor);
+	    
+	    contributeFromPackage(LogInstruction.class, LogInstruction.class);
 	    
 	    contribute(PersistListener.class, new PersistListener() {
 			

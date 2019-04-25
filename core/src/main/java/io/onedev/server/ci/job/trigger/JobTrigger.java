@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.lang.model.SourceVersion;
 import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.server.ci.job.Job;
@@ -42,16 +43,22 @@ public abstract class JobTrigger implements Validatable, Serializable {
 		Set<String> paramNames = new HashSet<>();
 		boolean isValid = true;
 		for (JobParam param: params) {
-			if (BuildConstants.ALL_FIELDS.contains(param.getName())) {
-				isValid = false;
-				context.buildConstraintViolationWithTemplate("Reserved param name: " + param.getName())
-						.addPropertyNode("params").addConstraintViolation();
-			} else if (paramNames.contains(param.getName())) {
-				isValid = false;
-				context.buildConstraintViolationWithTemplate("Duplicate param name: " + param.getName())
-						.addPropertyNode("params").addConstraintViolation();
-			} else {
-				paramNames.add(param.getName());
+			if (param.getName() != null) {
+				if (!SourceVersion.isIdentifier(param.getName())) {
+					isValid = false;
+					context.buildConstraintViolationWithTemplate("Invalid param name '" + param.getName() + "': " + JobParam.INVALID_CHARS_MESSAGE)
+							.addPropertyNode("params").addConstraintViolation();
+				} else if (BuildConstants.ALL_FIELDS.contains(param.getName())) {
+					isValid = false;
+					context.buildConstraintViolationWithTemplate("Reserved param name: " + param.getName())
+							.addPropertyNode("params").addConstraintViolation();
+				} else if (paramNames.contains(param.getName())) {
+					isValid = false;
+					context.buildConstraintViolationWithTemplate("Duplicate param name: " + param.getName())
+							.addPropertyNode("params").addConstraintViolation();
+				} else {
+					paramNames.add(param.getName());
+				}
 			}
 		}
 		

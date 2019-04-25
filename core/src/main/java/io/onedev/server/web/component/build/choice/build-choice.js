@@ -4,9 +4,8 @@ onedev.server.buildChoiceFormatter = {
 	},
 	
 	formatResult: function(build) {
-		return "<div class='build'>#" + build.number + "</div>";
+		return "<div class='build'>#" + build.number + " (" + build.jobName + " : " + build.version + ")</div>";
 	},
-	
 	escapeMarkup: function(m) {
 		return m;
 	},

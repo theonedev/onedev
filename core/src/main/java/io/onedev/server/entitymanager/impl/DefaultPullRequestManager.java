@@ -1036,44 +1036,36 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Override
 	public List<PullRequest> query(Project targetProject, String term, int count) {
 		List<PullRequest> requests = new ArrayList<>();
+
+		EntityCriteria<PullRequest> criteria = newCriteria();
 		
-		Long number = null;
-		String numberStr = term;
-		if (numberStr != null) {
-			numberStr = numberStr.trim();
-			if (numberStr.startsWith("#"))
-				numberStr = numberStr.substring(1);
-			if (StringUtils.isNumeric(numberStr))
-				number = Long.valueOf(numberStr);
+		if (term == null)
+			term = "";
+		
+		if (term.startsWith("#")) {
+			term = term.substring(1);
+			try {
+				long buildNumber = Long.parseLong(term);
+				criteria.add(Restrictions.eq("number", buildNumber));
+			} catch (NumberFormatException e) {
+				criteria.add(Restrictions.or(
+						Restrictions.ilike("title", "%#" + term + "%"),
+						Restrictions.ilike("noSpaceTitle", "%#" + term + "%")));
+			}
+		} else {
+			try {
+				long buildNumber = Long.parseLong(term);
+				criteria.add(Restrictions.eq("number", buildNumber));
+			} catch (NumberFormatException e) {
+				criteria.add(Restrictions.or(
+						Restrictions.ilike("title", "%" + term + "%"),
+						Restrictions.ilike("noSpaceTitle", "%" + term + "%")));
+			}
 		}
 		
-		if (number != null) {
-			PullRequest request = find(targetProject, number);
-			if (request != null)
-				requests.add(request);
-			EntityCriteria<PullRequest> criteria = newCriteria();
-			criteria.add(Restrictions.eq("targetProject", targetProject));
-			criteria.add(Restrictions.and(
-					Restrictions.or(
-							Restrictions.ilike("title", "%" + term + "%"), 
-							Restrictions.ilike("noSpaceTitle", "%" + term + "%"), 
-							Restrictions.ilike("numberStr", term + "%")), 
-					Restrictions.ne("number", number)
-				));
-			criteria.addOrder(Order.desc("number"));
-			requests.addAll(query(criteria, 0, count-requests.size()));
-		} else {
-			EntityCriteria<PullRequest> criteria = newCriteria();
-			criteria.add(Restrictions.eq("targetProject", targetProject));
-			if (StringUtils.isNotBlank(term)) {
-				criteria.add(Restrictions.or(
-						Restrictions.ilike("title", "%" + term + "%"), 
-						Restrictions.ilike("noSpaceTitle", "%" + term + "%"), 
-						Restrictions.ilike("numberStr", (term.startsWith("#")? term.substring(1): term) + "%")));
-			}
-			criteria.addOrder(Order.desc("number"));
-			requests.addAll(query(criteria, 0, count));
-		} 
+		criteria.addOrder(Order.desc("number"));
+		requests.addAll(query(criteria, 0, count));
+		
 		return requests;
 	}
 

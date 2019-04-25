@@ -259,7 +259,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 		
 		List<IColumn<Build, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_NUMBER)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of("Number")) {
 
 			@Override
 			public String getCssClass() {
@@ -271,7 +271,10 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 				Fragment fragment = new Fragment(componentId, "numberFrag", BuildListPanel.this);
 				Build build = rowModel.getObject();
 				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDetailPage.class, BuildDetailPage.paramsOf(build));
-				link.add(new Label("label", "#" + build.getNumber()));
+				if (build.getVersion() != null) 
+					link.add(new Label("label", "#" + build.getNumber() + " (" + build.getVersion() + ")"));
+				else
+					link.add(new Label("label", "#" + build.getNumber()));
 				fragment.add(link);
 				cellItem.add(fragment);
 			}

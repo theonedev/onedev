@@ -71,7 +71,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.detect.CISpecDetector;
+import io.onedev.server.ci.detector.CISpecDetector;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
 import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
 import io.onedev.server.entitymanager.CommitQuerySettingManager;

@@ -42,7 +42,7 @@ public class FixedInCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.getRuleName(IssueQueryLexer.FixedInBuild) + IssueQuery.quote("#" + build.getNumberStr());
+		return IssueQuery.getRuleName(IssueQueryLexer.FixedInBuild) + IssueQuery.quote("#" + build.getNumber());
 	}
 
 }

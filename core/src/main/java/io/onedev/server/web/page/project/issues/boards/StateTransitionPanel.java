@@ -101,7 +101,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 	}
 	
 	@Override
-	public boolean isReservedName(String inputName) {
+	public String validateName(String inputName) {
 		throw new UnsupportedOperationException();
 	}
 	

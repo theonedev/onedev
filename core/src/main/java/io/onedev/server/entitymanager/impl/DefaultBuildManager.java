@@ -14,7 +14,6 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -24,8 +23,8 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildDependenceManager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.event.build.BuildSubmitted;
 import io.onedev.server.model.Build;
@@ -131,38 +130,32 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Override
 	public List<Build> query(Project project, String term, int count) {
 		List<Build> builds = new ArrayList<>();
+
+		EntityCriteria<Build> criteria = newCriteria();
 		
-		Long number = null;
-		String numberStr = term;
-		if (numberStr != null) {
-			numberStr = numberStr.trim();
-			if (numberStr.startsWith("#"))
-				numberStr = numberStr.substring(1);
-			if (StringUtils.isNumeric(numberStr))
-				number = Long.valueOf(numberStr);
+		if (term == null)
+			term = "";
+		
+		if (term.startsWith("#")) {
+			term = term.substring(1);
+			try {
+				long buildNumber = Long.parseLong(term);
+				criteria.add(Restrictions.eq("number", buildNumber));
+			} catch (NumberFormatException e) {
+				criteria.add(Restrictions.ilike("version", "%#" + term + "%"));
+			}
+		} else {
+			try {
+				long buildNumber = Long.parseLong(term);
+				criteria.add(Restrictions.eq("number", buildNumber));
+			} catch (NumberFormatException e) {
+				criteria.add(Restrictions.ilike("version", "%" + term + "%"));
+			}
 		}
 		
-		if (number != null) {
-			Build build = find(project, number);
-			if (build != null)
-				builds.add(build);
-			EntityCriteria<Build> criteria = newCriteria();
-			criteria.add(Restrictions.eq("project", project));
-			criteria.add(Restrictions.and(
-					Restrictions.ilike("numberStr", term + "%"), 
-					Restrictions.ne("number", number)
-				));
-			criteria.addOrder(Order.desc("number"));
-			builds.addAll(query(criteria, 0, count-builds.size()));
-		} else {
-			EntityCriteria<Build> criteria = newCriteria();
-			criteria.add(Restrictions.eq("project", project));
-			if (StringUtils.isNotBlank(term)) {
-				criteria.add(Restrictions.ilike("numberStr", (term.startsWith("#")? term.substring(1): term) + "%"));
-			}
-			criteria.addOrder(Order.desc("number"));
-			builds.addAll(query(criteria, 0, count));
-		} 
+		criteria.addOrder(Order.desc("number"));
+		builds.addAll(query(criteria, 0, count));
+		
 		return builds;
 	}
 	

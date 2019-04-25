@@ -13,6 +13,8 @@ public class JobParam implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final String INVALID_CHARS_MESSAGE = "param name should start with letter and can only consist of alphanumeric and underscore characters";
+	
 	private String name;
 	
 	private ValueProvider valueProvider = new SpecifiedValues();

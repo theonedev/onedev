@@ -16,14 +16,16 @@ public class InputNameValidator implements ConstraintValidator<InputName, String
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
 		if (value == null) {
 			return true;
-		} else if (OneContext.get().getInputContext().isReservedName(value)) {
-			constraintContext.disableDefaultConstraintViolation();
-			String message = "'" + value + "' is a reserved name";
-			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
-			return false;
 		} else {
-			return true;
-		}
+			String errorMessage = OneContext.get().getInputContext().validateName(value);			
+			if (errorMessage != null) {
+				constraintContext.disableDefaultConstraintViolation();
+				constraintContext.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
+				return false;
+			} else {
+				return true;
+			}
+		} 
 	}
 	
 }

@@ -145,7 +145,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	}
 
 	@Override
-	public boolean isReservedName(String inputName) {
+	public String validateName(String inputName) {
 		throw new UnsupportedOperationException();
 	}
 	

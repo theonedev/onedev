@@ -1,4 +1,4 @@
-package io.onedev.server.ci.detect;
+package io.onedev.server.ci.detector;
 
 import javax.annotation.Nullable;
 

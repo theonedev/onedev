@@ -3,6 +3,8 @@ package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobparam;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.lang.model.SourceVersion;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -11,6 +13,7 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -147,8 +150,13 @@ abstract class ParamEditPanel extends Panel implements InputContext {
 	}
 	
 	@Override
-	public boolean isReservedName(String inputName) {
-		return BuildConstants.ALL_FIELDS.contains(inputName);
+	public String validateName(String inputName) {
+		if (!SourceVersion.isIdentifier(inputName)) 
+			return JobParam.INVALID_CHARS_MESSAGE;
+		else if (BuildConstants.ALL_FIELDS.contains(inputName))
+			return "'" + inputName + "' is reserved";
+		else
+			return null;
 	}
 	
 }

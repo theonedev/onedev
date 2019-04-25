@@ -28,22 +28,20 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
-import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Optional;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.BuildInfoManager;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.facade.BuildFacade;
-import io.onedev.server.util.jackson.DefaultView;
 
 @Entity
 @Table(
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
 				@Index(columnList="submitterName"), @Index(columnList="cancellerName"), @Index(columnList="commitHash"), 
-				@Index(columnList="number"), @Index(columnList="jobName"), @Index(columnList="numberStr"), 
-				@Index(columnList="status"), @Index(columnList="submitDate"), @Index(columnList="queueingDate"), 
-				@Index(columnList="runningDate"), @Index(columnList="finishDate")},
+				@Index(columnList="number"), @Index(columnList="jobName"), @Index(columnList="status"), 
+				@Index(columnList="submitDate"), @Index(columnList="queueingDate"), @Index(columnList="runningDate"), 
+				@Index(columnList="finishDate"), @Index(columnList="version")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -76,12 +74,9 @@ public class Build extends AbstractEntity {
 	@Column(nullable=false)
 	private String jobName;
 	
-	private long number;
+	private String version;
 	
-	// used for number search in markdown editor
-	@Column(nullable=false)
-	@JsonView(DefaultView.class)
-	private String numberStr;
+	private long number;
 	
 	@Column(nullable=false)
 	private String commitHash;
@@ -166,21 +161,20 @@ public class Build extends AbstractEntity {
 		this.jobName = jobName;
 	}
 
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
 	public long getNumber() {
 		return number;
 	}
 
 	public void setNumber(long number) {
 		this.number = number;
-		numberStr = String.valueOf(number);
-	}
-
-	public String getNumberStr() {
-		return numberStr;
-	}
-
-	public void setNumberStr(String numberStr) {
-		this.numberStr = numberStr;
 	}
 
 	public String getCommitHash() {

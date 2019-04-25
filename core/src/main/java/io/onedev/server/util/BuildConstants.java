@@ -17,6 +17,10 @@ public class BuildConstants {
 	
 	public static final String ATTR_NUMBER = "number";
 	
+	public static final String FIELD_VERSION = "Version";
+	
+	public static final String ATTR_VERSION = "version";
+	
 	public static final String FIELD_PROJECT = "project";
 	
 	public static final String ATTR_PROJECT = "project";
@@ -62,10 +66,10 @@ public class BuildConstants {
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			FIELD_NUMBER, FIELD_JOB, FIELD_STATUS, FIELD_SUBMITTER, FIELD_CANCELLER, 
 			FIELD_SUBMIT_DATE, FIELD_QUEUEING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE, 
-			FIELD_COMMIT, FIELD_PROJECT);
+			FIELD_COMMIT, FIELD_PROJECT, FIELD_VERSION);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			FIELD_JOB, FIELD_NUMBER, FIELD_COMMIT, FIELD_SUBMIT_DATE, 
+			FIELD_JOB, FIELD_NUMBER, FIELD_VERSION, FIELD_COMMIT, FIELD_SUBMIT_DATE, 
 			FIELD_QUEUEING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = new LinkedHashMap<>();

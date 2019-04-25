@@ -69,13 +69,13 @@ import io.onedev.server.util.jackson.RestView;
 @Table(
 		indexes={
 				@Index(columnList="title"), @Index(columnList="uuid"), 
-				@Index(columnList="numberStr"), @Index(columnList="noSpaceTitle"), 
-				@Index(columnList="number"), @Index(columnList="o_targetProject_id"), 
-				@Index(columnList="submitDate"), @Index(columnList="updateDate"),  
-				@Index(columnList="o_sourceProject_id"), @Index(columnList="o_submitter_id"),
-				@Index(columnList="headCommitHash"), @Index(columnList="PREVIEW_REQUEST_HEAD"), 
-				@Index(columnList="CLOSE_DATE"), @Index(columnList="CLOSE_STATUS"), 
-				@Index(columnList="CLOSE_USER"), @Index(columnList="CLOSE_USER_NAME")},
+				@Index(columnList="noSpaceTitle"), @Index(columnList="number"), 
+				@Index(columnList="o_targetProject_id"), @Index(columnList="submitDate"), 
+				@Index(columnList="updateDate"), @Index(columnList="o_sourceProject_id"), 
+				@Index(columnList="o_submitter_id"), @Index(columnList="headCommitHash"), 
+				@Index(columnList="PREVIEW_REQUEST_HEAD"), @Index(columnList="CLOSE_DATE"), 
+				@Index(columnList="CLOSE_STATUS"), @Index(columnList="CLOSE_USER"), 
+				@Index(columnList="CLOSE_USER_NAME")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_targetProject_id", "number"})})
 public class PullRequest extends AbstractEntity implements Referenceable {
 
@@ -122,11 +122,6 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 	@Column(nullable=true)
 	private Date lastCodeCommentActivityDate;
 
-	// used for number search in markdown editor
-	@Column(nullable=false)
-	@JsonView(DefaultView.class)
-	private String numberStr;
-	
 	// used for title search in markdown editor
 	@Column(nullable=false)
 	@JsonView(DefaultView.class)
@@ -618,7 +613,6 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 
 	public void setNumber(long number) {
 		this.number = number;
-		numberStr = String.valueOf(number);
 	}
 
 	public int getCommentCount() {

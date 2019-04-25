@@ -73,9 +73,14 @@ public abstract class CommentInput extends MarkdownEditor {
 					criteria.add(Restrictions.eq("targetProject", getProject()));
 				if (StringUtils.isNotBlank(query)) {
 					query = StringUtils.deleteWhitespace(query);
-					criteria.add(Restrictions.or(
-							Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE), 
-							Restrictions.ilike("numberStr", query, MatchMode.START)));
+					try {
+						long requestNumber = Long.parseLong(query);
+						criteria.add(Restrictions.or(
+								Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE), 
+								Restrictions.eq("number", requestNumber)));
+					} catch (NumberFormatException e) {
+						criteria.add(Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE));
+					}
 				}
 				criteria.addOrder(Order.desc("number"));
 				return OneDev.getInstance(Dao.class).query(criteria, 0, count);
@@ -90,9 +95,14 @@ public abstract class CommentInput extends MarkdownEditor {
 					criteria.add(Restrictions.eq("project", getProject()));
 				if (StringUtils.isNotBlank(query)) {
 					query = StringUtils.deleteWhitespace(query);
-					criteria.add(Restrictions.or(
-							Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE), 
-							Restrictions.ilike("numberStr", query, MatchMode.START)));
+					try {
+						long issueNumber = Long.parseLong(query);
+						criteria.add(Restrictions.or(
+								Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE), 
+								Restrictions.eq("number", issueNumber)));
+					} catch (NumberFormatException e) {
+						criteria.add(Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE));
+					}
 				}
 				criteria.addOrder(Order.desc("number"));
 				return OneDev.getInstance(Dao.class).query(criteria, 0, count);
