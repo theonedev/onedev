@@ -49,7 +49,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.CommitAware;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.build.BuildFinished;
-import io.onedev.server.event.build.BuildPending;
+import io.onedev.server.event.build.BuildQueueing;
 import io.onedev.server.event.build.BuildRunning;
 import io.onedev.server.event.build.BuildSubmitted;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -503,7 +503,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 								} else if (!hasUnfinished) {
 									build.setStatus(Build.Status.QUEUEING);
 									build.setQueueingDate(new Date());
-									listenerRegistry.post(new BuildPending(build));
+									listenerRegistry.post(new BuildQueueing(build));
 								}
 							}
 						}

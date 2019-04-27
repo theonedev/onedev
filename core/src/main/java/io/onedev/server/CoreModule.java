@@ -262,6 +262,7 @@ import io.onedev.server.web.util.markdown.IssueProcessor;
 import io.onedev.server.web.util.markdown.MentionProcessor;
 import io.onedev.server.web.util.markdown.PullRequestProcessor;
 import io.onedev.server.web.util.markdown.UrlProcessor;
+import io.onedev.server.web.websocket.BuildEventBroadcaster;
 import io.onedev.server.web.websocket.CodeCommentEventBroadcaster;
 import io.onedev.server.web.websocket.CommitIndexedBroadcaster;
 import io.onedev.server.web.websocket.DefaultWebSocketManager;
@@ -506,6 +507,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(CodeCommentEventBroadcaster.class);
 		bind(PullRequestEventBroadcaster.class);
 		bind(IssueEventBroadcaster.class);
+		bind(BuildEventBroadcaster.class);
 		
 		contribute(MainNavContribution.class, new MainNavContribution() {
 			

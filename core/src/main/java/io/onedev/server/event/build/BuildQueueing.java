@@ -2,9 +2,9 @@ package io.onedev.server.event.build;
 
 import io.onedev.server.model.Build;
 
-public class BuildPending extends BuildEvent {
+public class BuildQueueing extends BuildEvent {
 
-	public BuildPending(Build build) {
+	public BuildQueueing(Build build) {
 		super(null, build.getQueueingDate(), build);
 	}
 

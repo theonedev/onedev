@@ -1,5 +1,8 @@
 package io.onedev.server.web.component.build.status;
 
+import java.util.Collection;
+
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -7,9 +10,12 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.server.OneException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
+import io.onedev.server.web.behavior.WebSocketObserver;
 
 @SuppressWarnings("serial")
 public class BuildStatusIcon extends GenericPanel<Build> {
@@ -73,6 +79,27 @@ public class BuildStatusIcon extends GenericPanel<Build> {
 				
 				tag.put("class", cssClass);
 				tag.put("title", title);
+			}
+			
+		});
+		
+		Long buildId = getModelObject().getId();
+		
+		add(new WebSocketObserver() {
+			
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+				handler.add(component);
+			}
+			
+			@Override
+			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+				handler.add(component);
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				return Sets.newHashSet(Build.getWebSocketObservable(buildId));
 			}
 			
 		});

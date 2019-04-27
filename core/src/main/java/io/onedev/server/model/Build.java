@@ -318,4 +318,8 @@ public class Build extends AbstractEntity {
 		return "build-log:" + buildId;
 	}
 	
+	public static String getWebSocketObservable(Long buildId) {
+		return Build.class.getName() + ":" + buildId;
+	}
+	
 }

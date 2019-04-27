@@ -1,17 +1,18 @@
 package io.onedev.server.web.component.build.list;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
@@ -38,6 +39,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
+
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -51,6 +54,7 @@ import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
@@ -270,11 +274,29 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
 				Fragment fragment = new Fragment(componentId, "numberFrag", BuildListPanel.this);
 				Build build = rowModel.getObject();
+				Long buildId = build.getId();
 				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDetailPage.class, BuildDetailPage.paramsOf(build));
-				if (build.getVersion() != null) 
-					link.add(new Label("label", "#" + build.getNumber() + " (" + build.getVersion() + ")"));
-				else
-					link.add(new Label("label", "#" + build.getNumber()));
+				link.add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						Build build = OneDev.getInstance(BuildManager.class).load(buildId);
+						if (build.getVersion() != null) 
+							return "#" + build.getNumber() + " (" + build.getVersion() + ")";
+						else
+							return "#" + build.getNumber();
+					}
+					
+				}) {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						add(newBuildObserver(buildId));
+						setOutputMarkupId(true);
+					}
+					
+				});
 				fragment.add(link);
 				cellItem.add(fragment);
 			}
@@ -291,8 +313,25 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
 				Fragment fragment = new Fragment(componentId, "statusFrag", BuildListPanel.this);
 				fragment.add(new BuildStatusIcon("icon", rowModel));
-				String statusName = StringUtils.capitalize(rowModel.getObject().getStatus().name().replace('_', ' ').toLowerCase());
-				fragment.add(new Label("name", statusName));
+				
+				Long buildId = rowModel.getObject().getId();
+				fragment.add(new Label("name", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return StringUtils.capitalize(rowModel.getObject().getStatus().name().replace('_', ' ').toLowerCase());
+					}
+					
+				}) {
+
+					@Override
+					protected void onInitialize() {
+						super.onInitialize();
+						add(newBuildObserver(buildId));
+						setOutputMarkupId(true);
+					}
+					
+				});
 				cellItem.add(fragment);
 			}
 		});
@@ -350,36 +389,31 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of("Duration")) {
-
-			@Override
-			public String getCssClass() {
-				return "duration expanded";
-			}
-
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-					IModel<Build> rowModel) {
-				Build build = rowModel.getObject();
-				
-				if (build.getRunningDate() != null) {
-					long duration;
-					if (build.getFinishDate() != null)
-						duration = build.getFinishDate().getTime() - build.getRunningDate().getTime();
-					else 
-						duration = System.currentTimeMillis() - build.getRunningDate().getTime();
-					cellItem.add(new Label(componentId, DurationFormatUtils.formatDurationWords(duration, true, true)));
-				} else {
-					cellItem.add(new Label(componentId, "<i>N/A</i>").setEscapeModelStrings(false));
-				}
-				
-			}
-		});
-		
 		add(new HistoryAwareDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);
+	}
+	
+	private WebSocketObserver newBuildObserver(Long buildId) {
+		return new WebSocketObserver() {
+			
+			@Override
+			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+				handler.add(component);
+			}
+			
+			@Override
+			public void onConnectionOpened(IPartialPageRequestHandler handler) {
+				handler.add(component);
+			}
+			
+			@Override
+			public Collection<String> getObservables() {
+				return Sets.newHashSet(Build.getWebSocketObservable(buildId));
+			}
+			
+		};
 	}
 	
 	@Override

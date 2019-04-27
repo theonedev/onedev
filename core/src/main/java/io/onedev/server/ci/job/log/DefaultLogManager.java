@@ -46,7 +46,6 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.web.websocket.WebSocketManager;
 
@@ -179,7 +178,7 @@ public class DefaultLogManager implements LogManager {
 								params.put(paramName, paramValues);
 							}
 							log(LogLevel.DEBUG, "Executing log instruction '" + name + "'...");
-							doInTransaction(instruction, buildId, params);
+							doInSession(instruction, buildId, params);
 						} else {
 							log(LogLevel.ERROR, "Unsupported log instruction: " + name);
 						}
@@ -194,8 +193,8 @@ public class DefaultLogManager implements LogManager {
 		};
 	}
 	
-	@Transactional
-	protected void doInTransaction(LogInstruction instruction, Long buildId, Map<String, List<String>> params) {
+	@Sessional
+	protected void doInSession(LogInstruction instruction, Long buildId, Map<String, List<String>> params) {
 		instruction.execute(buildManager.load(buildId), params);
 	}
 

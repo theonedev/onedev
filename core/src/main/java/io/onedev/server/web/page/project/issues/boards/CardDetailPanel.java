@@ -263,7 +263,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								OneDev.getInstance(IssueManager.class).delete(SecurityUtils.getUser(), getIssue());
+								OneDev.getInstance(IssueManager.class).delete(getIssue());
 								onDeletedIssue(target);
 							}
 							

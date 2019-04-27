@@ -32,6 +32,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQuerySettingManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.issue.IssueDeleted;
 import io.onedev.server.event.issue.IssueEvent;
@@ -79,17 +80,21 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	private final SettingManager settingManager;
 	
 	private final ProjectManager projectManager;
+	
+	private final UserManager userManager;
 
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldEntityManager issueFieldEntityManager, 
 			IssueQuerySettingManager issueQuerySettingManager, SettingManager settingManager, 
-			ListenerRegistry listenerRegistry, ProjectManager projectManager) {
+			ListenerRegistry listenerRegistry, ProjectManager projectManager, 
+			UserManager userManager) {
 		super(dao);
 		this.issueFieldEntityManager = issueFieldEntityManager;
 		this.issueQuerySettingManager = issueQuerySettingManager;
 		this.listenerRegistry = listenerRegistry;
 		this.settingManager = settingManager;
 		this.projectManager = projectManager;
+		this.userManager = userManager;
 	}
 
 	@Sessional
@@ -475,9 +480,9 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	}
 	
 	@Override
-	public void delete(User user, Issue issue) {
+	public void delete(Issue issue) {
 		super.delete(issue);
-		listenerRegistry.post(new IssueDeleted(user, issue));
+		listenerRegistry.post(new IssueDeleted(userManager.getCurrent(), issue));
 	}
 
 }

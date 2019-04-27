@@ -22,10 +22,13 @@ import org.hibernate.query.Query;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.build.BuildDeleted;
 import io.onedev.server.event.build.BuildSubmitted;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
@@ -56,14 +59,20 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	private final StorageManager storageManager;
 	
+	private final ListenerRegistry listenerRegistry;
+	
+	private final UserManager userManager;
+	
 	@Inject
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
-			BuildDependenceManager buildDependenceManager, 
-			StorageManager storageManager) {
+			BuildDependenceManager buildDependenceManager, ListenerRegistry listenerRegistry, 
+			StorageManager storageManager, UserManager userManager) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
 		this.storageManager = storageManager;
+		this.listenerRegistry = listenerRegistry;
+		this.userManager = userManager;
 	}
 
 	@Transactional
@@ -75,6 +84,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
     	
 		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getId()));
     	super.delete(build);
+		listenerRegistry.post(new BuildDeleted(userManager.getCurrent(), build));
 	}
 	
 	@Sessional

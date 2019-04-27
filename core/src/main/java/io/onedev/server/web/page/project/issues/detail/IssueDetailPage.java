@@ -188,7 +188,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 							@Override
 							public void onClick() {
-								OneDev.getInstance(IssueManager.class).delete(SecurityUtils.getUser(), getIssue());
+								OneDev.getInstance(IssueManager.class).delete(getIssue());
 								PageParameters params = IssueListPage.paramsOf(
 										getProject(), 
 										QueryPosition.getQuery(position), 
