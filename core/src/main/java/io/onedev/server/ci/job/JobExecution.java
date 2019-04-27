@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 public class JobExecution {
 
-	private final Future<Boolean> future;
+	private final Future<?> future;
 	
 	private final long beginTime;
 	
@@ -16,7 +16,7 @@ public class JobExecution {
 	
 	private volatile Long cancellerId;
 	
-	public JobExecution(Future<Boolean> future, long timeout) {
+	public JobExecution(Future<?> future, long timeout) {
 		this.future = future;
 		beginTime = System.currentTimeMillis();
 		this.timeout = timeout;
@@ -39,13 +39,13 @@ public class JobExecution {
 		return future.isDone();
 	}
 
-	public boolean get() throws InterruptedException, TimeoutException, ExecutionException {
+	public void check() throws InterruptedException, TimeoutException, ExecutionException {
 		if (isTimedout())
 			throw new TimeoutException();
 		else if (cancellerId != null)
 			throw new CancellerAwareCancellationException(cancellerId);
 		else
-			return future.get();
+			future.get();
 	}
 
 }

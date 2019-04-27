@@ -135,7 +135,7 @@ public abstract class JobExecutor implements Serializable {
 		this.cacheTTL = cacheTTL;
 	}
 
-	public abstract boolean execute(String environment, File workspace, Map<String, String> envVars, 
+	public abstract void execute(String environment, File workspace, Map<String, String> envVars, 
 			List<String> commands, @Nullable SourceSnapshot snapshot, Collection<JobCache> caches, 
 			PatternSet collectFiles, Logger logger);
 

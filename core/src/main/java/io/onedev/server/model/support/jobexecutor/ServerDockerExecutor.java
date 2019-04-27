@@ -26,7 +26,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.commons.utils.command.ProcessKiller;
 import io.onedev.commons.utils.concurrent.ConstrainedRunner;
@@ -206,17 +205,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 
 	@Override
-	public boolean execute(String environment, File workspace, Map<String, String> envVars, 
+	public void execute(String environment, File workspace, Map<String, String> envVars, 
 			List<String> commands, SourceSnapshot snapshot, Collection<JobCache> caches, 
 			PatternSet collectFiles, Logger logger) {
-		return getConstrainedRunner().call(new Callable<Boolean>() {
+		getConstrainedRunner().call(new Callable<Void>() {
 
 			@Override
-			public Boolean call() {
-				return new CacheRunner(getCacheHome(), caches).call(new CacheCallable<Boolean>() {
+			public Void call() {
+				return new CacheRunner(getCacheHome(), caches).call(new CacheCallable<Void>() {
 
 					@Override
-					public Boolean call(Collection<CacheAllocation> allocations) {
+					public Void call(Collection<CacheAllocation> allocations) {
 						login(logger);
 						
 						logger.info("Pulling image...") ;
@@ -266,7 +265,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						cmd.addArgs("-v", effectiveWorkspace.getAbsolutePath() + ":" + dockerWorkspacePath);
 						for (CacheAllocation allocation: allocations) {
 							if (!allocation.isWorkspace())
-								cmd.addArgs("-v", allocation.getInstance().getAbsolutePath() + ":" + allocation.getPath());
+								cmd.addArgs("-v", allocation.getInstance().getAbsolutePath() + ":" + allocation.resolvePath(dockerWorkspacePath));
 						}
 						cmd.addArgs("-w", dockerWorkspacePath);
 						
@@ -291,21 +290,22 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						}
 						
 						logger.info("Running container to execute job...");
-						ExecuteResult result = cmd.execute(newInfoLogger(logger), newErrorLogger(logger), null, new ProcessKiller() {
-
-							@Override
-							public void kill(Process process) {
-								logger.info("Stopping container...");
-								Commandline cmd = getDockerCmd();
-								cmd.addArgs("stop", jobInstance);
-								cmd.execute(newInfoLogger(logger), newErrorLogger(logger));
-							}
-							
-						});
 						
-						if (result.getReturnCode() == 125 || result.getReturnCode() == 126 || result.getReturnCode() == 127) {
-							throw result.buildException();		
-						} else if (result.getReturnCode() != 0) {
+						try {
+							cmd.execute(newInfoLogger(logger), newErrorLogger(logger), null, new ProcessKiller() {
+	
+								@Override
+								public void kill(Process process) {
+									logger.info("Stopping container...");
+									Commandline cmd = getDockerCmd();
+									cmd.addArgs("stop", jobInstance);
+									cmd.execute(newInfoLogger(logger), newErrorLogger(logger));
+								}
+								
+							}).checkReturnCode();
+							
+							return null;
+						} finally {
 							if (workspaceCache != null) {
 								int baseLen = workspaceCache.getAbsolutePath().length()+1;
 								for (File file: collectFiles.listFiles(workspaceCache)) {
@@ -316,9 +316,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									}
 								}
 							}
-							return false;
-						} else {
-							return true;
 						}
 					}
 					

@@ -281,10 +281,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							Logger logger = logManager.getLogger(build.getProject().getId(), build.getId(), job.getLogLevel()); 
 							
 							Long buildId = build.getId();
-							JobExecution execution = new JobExecution(executorService.submit(new Callable<Boolean>() {
+							JobExecution execution = new JobExecution(executorService.submit(new Runnable() {
 
 								@Override
-								public Boolean call() {
+								public void run() {
 									logger.info("Creating workspace...");
 									File workspace = FileUtils.createTempDir("workspace");
 									try {
@@ -320,7 +320,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 
 										logger.info("Executing job with executor '" + executor.getName() + "'...");
 										
-										boolean result = executor.execute(job.getEnvironment(), workspace, envVars, job.getCommands(), snapshot, 
+										executor.execute(job.getEnvironment(), workspace, envVars, job.getCommands(), snapshot, 
 												job.getCaches(), new PatternSet(includeFiles, excludeFiles), logger);
 										
 										sessionManager.run(new Runnable() {
@@ -334,8 +334,6 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 											}
 											
 										});
-										
-										return result;
 									} catch (Exception e) {
 										if (ExceptionUtils.find(e, InterruptedException.class) == null)
 											logger.error("Error running build", e);
@@ -519,10 +517,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							} else if (execution.isDone()) {
 								it.remove();
 								try {
-									if (execution.get())
-										build.setStatus(Build.Status.SUCCESSFUL);
-									else
-										build.setStatus(Build.Status.FAILED);
+									execution.check();
+									build.setStatus(Build.Status.SUCCESSFUL);
 								} catch (TimeoutException e) {
 									build.setStatus(Build.Status.TIMED_OUT);
 								} catch (CancellationException e) {
