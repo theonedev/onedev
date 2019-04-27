@@ -33,6 +33,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.schedule.SchedulableTask;
 import io.onedev.commons.utils.schedule.TaskScheduler;
+import io.onedev.server.OneException;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.InvalidCISpecException;
@@ -54,7 +55,6 @@ import io.onedev.server.event.build.BuildSubmitted;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
-import io.onedev.server.exception.OneException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
@@ -281,10 +281,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							Logger logger = logManager.getLogger(build.getProject().getId(), build.getId(), job.getLogLevel()); 
 							
 							Long buildId = build.getId();
-							JobExecution execution = new JobExecution(executorService.submit(new Callable<Void>() {
+							JobExecution execution = new JobExecution(executorService.submit(new Callable<Boolean>() {
 
 								@Override
-								public Void call() {
+								public Boolean call() {
 									logger.info("Creating workspace...");
 									File workspace = FileUtils.createTempDir("workspace");
 									try {
@@ -320,7 +320,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 
 										logger.info("Executing job with executor '" + executor.getName() + "'...");
 										
-										executor.execute(job.getEnvironment(), workspace, envVars, job.getCommands(), snapshot, 
+										boolean result = executor.execute(job.getEnvironment(), workspace, envVars, job.getCommands(), snapshot, 
 												job.getCaches(), new PatternSet(includeFiles, excludeFiles), logger);
 										
 										sessionManager.run(new Runnable() {
@@ -334,6 +334,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 											}
 											
 										});
+										
+										return result;
 									} catch (Exception e) {
 										if (ExceptionUtils.find(e, InterruptedException.class) == null)
 											logger.error("Error running build", e);
@@ -343,7 +345,6 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 										FileUtils.deleteDir(workspace);
 										logger.info("Workspace deleted");
 									}
-									return null;
 								}
 								
 							}), job.getTimeout() * 1000L);
@@ -518,8 +519,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							} else if (execution.isDone()) {
 								it.remove();
 								try {
-									execution.check();
-									build.setStatus(Build.Status.SUCCESSFUL);
+									if (execution.get())
+										build.setStatus(Build.Status.SUCCESSFUL);
+									else
+										build.setStatus(Build.Status.FAILED);
 								} catch (TimeoutException e) {
 									build.setStatus(Build.Status.TIMED_OUT);
 								} catch (CancellationException e) {

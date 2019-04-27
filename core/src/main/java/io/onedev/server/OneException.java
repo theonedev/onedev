@@ -1,4 +1,4 @@
-package io.onedev.server.exception;
+package io.onedev.server;
 
 public class OneException extends RuntimeException {
 

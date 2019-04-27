@@ -20,7 +20,7 @@ import org.unbescape.java.JavaEscape;
 
 import io.onedev.commons.utils.stringmatch.Matcher;
 import io.onedev.commons.utils.stringmatch.WildcardPathMatcher;
-import io.onedev.server.exception.OneException;
+import io.onedev.server.OneException;
 import io.onedev.server.util.patternset.PatternSetParser.PatternContext;
 import io.onedev.server.util.patternset.PatternSetParser.PatternsContext;
 

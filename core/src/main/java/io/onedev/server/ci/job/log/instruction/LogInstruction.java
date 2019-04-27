@@ -12,8 +12,8 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import io.onedev.commons.launcher.loader.ExtensionPoint;
+import io.onedev.server.OneException;
 import io.onedev.server.ci.job.log.instruction.LogInstructionParser.InstructionContext;
-import io.onedev.server.exception.OneException;
 import io.onedev.server.model.Build;
 
 @ExtensionPoint

@@ -1,4 +1,6 @@
-package io.onedev.server.exception;
+package io.onedev.server.util;
+
+import io.onedev.server.OneException;
 
 public class ScriptException extends OneException {
 

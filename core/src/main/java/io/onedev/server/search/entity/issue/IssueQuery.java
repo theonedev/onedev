@@ -34,8 +34,8 @@ import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.exception.OneException;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;

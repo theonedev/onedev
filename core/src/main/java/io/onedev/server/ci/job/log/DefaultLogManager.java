@@ -92,7 +92,23 @@ public class DefaultLogManager implements LogManager {
 			private static final long serialVersionUID = 1L;
 
 			private void log(LogLevel logLevel, String message) {
-				if (logLevel.ordinal() <= loggerLevel.ordinal()) {
+				if (message.startsWith("[INFO] ")) {
+					logLevel = LogLevel.INFO;
+					message = message.substring("[INFO] ".length());
+				} else if (message.startsWith("[ERROR] ")) {
+					logLevel = LogLevel.ERROR;
+					message = message.substring("[ERROR] ".length());
+				} else if (message.startsWith("[WARNING] ")) {
+					logLevel = LogLevel.WARN;
+					message = message.substring("[WARNING] ".length());
+				} else if (message.startsWith("[DEBUG] ")) {
+					logLevel = LogLevel.DEBUG;
+					message = message.substring("[DEBUG] ".length());
+				} else if (message.startsWith("[TRACE] ")) {
+					logLevel = LogLevel.TRACE;
+					message = message.substring("[TRACE] ".length());
+				}
+ 				if (logLevel.ordinal() <= loggerLevel.ordinal()) {
 					Lock lock = LockUtils.getReadWriteLock(getLockKey(buildId)).writeLock();
 					lock.lock();
 					try {

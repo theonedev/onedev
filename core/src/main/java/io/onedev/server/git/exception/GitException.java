@@ -1,6 +1,6 @@
 package io.onedev.server.git.exception;
 
-import io.onedev.server.exception.OneException;
+import io.onedev.server.OneException;
 
 public class GitException extends OneException {
 

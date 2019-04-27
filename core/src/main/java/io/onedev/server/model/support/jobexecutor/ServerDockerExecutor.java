@@ -26,11 +26,12 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.commons.utils.command.ProcessKiller;
 import io.onedev.commons.utils.concurrent.ConstrainedRunner;
 import io.onedev.server.ci.job.cache.CacheAllocation;
-import io.onedev.server.ci.job.cache.CacheRunnable;
+import io.onedev.server.ci.job.cache.CacheCallable;
 import io.onedev.server.ci.job.cache.CacheRunner;
 import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.model.support.jobexecutor.ServerDockerExecutor.TestData;
@@ -205,17 +206,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 
 	@Override
-	public void execute(String environment, File workspace, Map<String, String> envVars, 
+	public boolean execute(String environment, File workspace, Map<String, String> envVars, 
 			List<String> commands, SourceSnapshot snapshot, Collection<JobCache> caches, 
 			PatternSet collectFiles, Logger logger) {
-		getConstrainedRunner().run(new Runnable() {
+		return getConstrainedRunner().call(new Callable<Boolean>() {
 
 			@Override
-			public void run() {
-				new CacheRunner(getCacheHome(), caches).run(new CacheRunnable() {
+			public Boolean call() {
+				return new CacheRunner(getCacheHome(), caches).call(new CacheCallable<Boolean>() {
 
 					@Override
-					public void run(Collection<CacheAllocation> allocations) {
+					public Boolean call(Collection<CacheAllocation> allocations) {
 						login(logger);
 						
 						logger.info("Pulling image...") ;
@@ -290,7 +291,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						}
 						
 						logger.info("Running container to execute job...");
-						cmd.execute(newInfoLogger(logger), newErrorLogger(logger), null, new ProcessKiller() {
+						ExecuteResult result = cmd.execute(newInfoLogger(logger), newErrorLogger(logger), null, new ProcessKiller() {
 
 							@Override
 							public void kill(Process process) {
@@ -300,17 +301,24 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 								cmd.execute(newInfoLogger(logger), newErrorLogger(logger));
 							}
 							
-						}).checkReturnCode();		
+						});
 						
-						if (workspaceCache != null) {
-							int baseLen = workspaceCache.getAbsolutePath().length()+1;
-							for (File file: collectFiles.listFiles(workspaceCache)) {
-								try {
-									FileUtils.copyFile(file, new File(workspace, file.getAbsolutePath().substring(baseLen)));
-								} catch (IOException e) {
-									throw new RuntimeException(e);
+						if (result.getReturnCode() == 125 || result.getReturnCode() == 126 || result.getReturnCode() == 127) {
+							throw result.buildException();		
+						} else if (result.getReturnCode() != 0) {
+							if (workspaceCache != null) {
+								int baseLen = workspaceCache.getAbsolutePath().length()+1;
+								for (File file: collectFiles.listFiles(workspaceCache)) {
+									try {
+										FileUtils.copyFile(file, new File(workspace, file.getAbsolutePath().substring(baseLen)));
+									} catch (IOException e) {
+										throw new RuntimeException(e);
+									}
 								}
 							}
+							return false;
+						} else {
+							return true;
 						}
 					}
 					

@@ -8,7 +8,6 @@ import com.google.common.collect.MapMaker;
 import groovy.lang.Binding;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.Script;
-import io.onedev.server.exception.ScriptException;
 
 public class GroovyUtils {
 	

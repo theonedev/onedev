@@ -165,7 +165,6 @@ import io.onedev.server.entitymanager.impl.DefaultPullRequestWatchManager;
 import io.onedev.server.entitymanager.impl.DefaultSettingManager;
 import io.onedev.server.entitymanager.impl.DefaultUserAuthorizationManager;
 import io.onedev.server.entitymanager.impl.DefaultUserManager;
-import io.onedev.server.exception.OneException;
 import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitPostReceiveCallback;
 import io.onedev.server.git.GitPreReceiveCallback;

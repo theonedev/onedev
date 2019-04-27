@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
-import io.onedev.server.exception.OneException;
+import io.onedev.server.OneException;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.StateSpec;

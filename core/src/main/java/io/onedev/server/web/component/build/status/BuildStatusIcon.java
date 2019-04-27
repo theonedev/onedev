@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.exception.OneException;
+import io.onedev.server.OneException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 
@@ -34,7 +34,7 @@ public class BuildStatusIcon extends GenericPanel<Build> {
 				String title;
 				
 				if (build.getStatus() == Status.WAITING) {
-					cssClass += "fa-wait";
+					cssClass += "fa-pause";
 					title = "Waiting for completion of dependency builds";
 				} else if (build.getStatus() == Status.QUEUEING) {
 					cssClass += "fa-hourglass-1";

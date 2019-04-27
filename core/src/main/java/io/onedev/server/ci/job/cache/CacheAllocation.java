@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.apache.commons.io.FilenameUtils;
 
-import io.onedev.server.exception.OneException;
+import io.onedev.server.OneException;
 
 public class CacheAllocation {
 

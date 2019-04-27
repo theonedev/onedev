@@ -18,7 +18,7 @@ import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.Element;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.exception.OneException;
+import io.onedev.server.OneException;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;

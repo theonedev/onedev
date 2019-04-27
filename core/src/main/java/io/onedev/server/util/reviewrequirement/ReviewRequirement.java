@@ -18,9 +18,9 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.exception.OneException;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.User;
 import io.onedev.server.util.reviewrequirement.ReviewRequirementParser.CountContext;

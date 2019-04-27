@@ -13,7 +13,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.exception.OneException;
+import io.onedev.server.OneException;
 import io.onedev.server.util.validation.annotation.Path;
 import io.onedev.server.util.validation.annotation.PathSegment;
 import io.onedev.server.web.editable.annotation.Editable;

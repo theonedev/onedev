@@ -17,7 +17,7 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.exception.OneException;
+import io.onedev.server.OneException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.usermatcher.UserMatcherParser.CriteriaContext;

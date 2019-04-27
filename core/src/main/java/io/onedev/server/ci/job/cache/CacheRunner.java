@@ -20,7 +20,7 @@ public class CacheRunner {
 		this.caches = caches;
 	}
 	
-	public void run(CacheRunnable runnable, Logger logger) {
+	public <T> T call(CacheCallable<T> callable, Logger logger) {
 		Collection<CacheAllocation> allocations = new ArrayList<>();
 		try {
 			if (!cacheHome.exists())
@@ -28,7 +28,7 @@ public class CacheRunner {
 			
 			for (JobCache cache: caches)
 				allocations.add(cache.allocate(cacheHome));
-			runnable.run(allocations);
+			return callable.call(allocations);
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		} finally {

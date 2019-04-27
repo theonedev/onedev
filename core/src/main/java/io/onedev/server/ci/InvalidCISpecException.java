@@ -1,6 +1,6 @@
 package io.onedev.server.ci;
 
-import io.onedev.server.exception.OneException;
+import io.onedev.server.OneException;
 
 public class InvalidCISpecException extends OneException {
 

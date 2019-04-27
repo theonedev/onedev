@@ -17,7 +17,7 @@ public class KubernetesExecutor extends JobExecutor {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public void execute(String environment, File workspace, Map<String, String> envVars, 
+	public boolean execute(String environment, File workspace, Map<String, String> envVars, 
 			List<String> commands, SourceSnapshot snapshot, Collection<JobCache> caches, 
 			PatternSet collectFiles, Logger logger) {
 		throw new UnsupportedOperationException();
