@@ -22,6 +22,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.eclipse.jgit.http.server.GitSmartHttpTools;
 import org.eclipse.jgit.http.server.ServletUtils;
 import org.eclipse.jgit.transport.PacketLineOut;
+import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +80,8 @@ public class GitFilter implements Filter {
 		return StringUtils.stripStart(pathInfo, "/");
 	}
 	
-	private Project getProject(HttpServletRequest request, HttpServletResponse response, String projectInfo) 
+	@Sessional
+	protected Project getProject(HttpServletRequest request, HttpServletResponse response, String projectInfo) 
 			throws IOException {
 		projectInfo = StringUtils.stripStart(StringUtils.stripEnd(projectInfo, "/"), "/");
 
@@ -92,9 +94,10 @@ public class GitFilter implements Filter {
 		String projectName = StringUtils.substringAfter(projectInfo, "/");
 		
 		Project project = projectManager.find(projectName);
-		if (project == null) {
+		if (project == null) 
 			throw new GitException(String.format("Unable to find project %s", projectName));
-		}
+		else 
+			Hibernate.initialize(project);
 		
 		return project;
 	}
@@ -105,7 +108,7 @@ public class GitFilter implements Filter {
 		response.setHeader("Cache-Control", "no-cache, max-age=0, must-revalidate");
 	}
 	
-	private void processPacks(final HttpServletRequest request, final HttpServletResponse response) 
+	protected void processPacks(final HttpServletRequest request, final HttpServletResponse response) 
 			throws ServletException, IOException, InterruptedException, ExecutionException {
 		String pathInfo = getPathInfo(request);
 		
@@ -187,7 +190,7 @@ public class GitFilter implements Filter {
 		pack.end();
 	}
 	
-	private void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String pathInfo = request.getRequestURI().substring(request.getContextPath().length());
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
 
@@ -215,7 +218,6 @@ public class GitFilter implements Filter {
 	public void init(FilterConfig filterConfig) throws ServletException {
 	}
 
-	@Sessional
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
