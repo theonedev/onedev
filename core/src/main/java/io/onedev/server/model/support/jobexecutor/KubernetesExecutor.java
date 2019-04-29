@@ -28,4 +28,9 @@ public class KubernetesExecutor extends JobExecutor {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public void cleanDir(File dir) {
+		throw new UnsupportedOperationException();
+	}
+
 }

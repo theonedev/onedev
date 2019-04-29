@@ -3,10 +3,13 @@ package io.onedev.server.web.page.admin.jobexecutor;
 import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang.SystemUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -69,7 +72,11 @@ abstract class JobExecutorEditPanel extends Panel {
 		if (executorIndex != -1)
 			bean.setExecutor(executors.get(executorIndex));
 
-		BeanEditor editor = BeanContext.editBean("editor", bean);
+		Set<String> excludedProperties = new HashSet<>();
+		if (SystemUtils.IS_OS_WINDOWS)
+			excludedProperties.add("maintenanceImage");
+		
+		BeanEditor editor = BeanContext.editBean("editor", bean, excludedProperties, true);
 		editor.setOutputMarkupId(true);
 		
 		AjaxButton saveButton = new AjaxButton("save") {

@@ -14,6 +14,7 @@ import java.util.concurrent.Callable;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.codec.Charsets;
+import org.apache.commons.lang3.SystemUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	private String runOptions;
 	
 	private int capacity = Runtime.getRuntime().availableProcessors();
-
+	
+	private String maintenanceImage = "busybox";
+	
 	private transient ConstrainedRunner constrainedRunner;
 
 	@Editable(order=1000, description="Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
@@ -143,7 +146,19 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	public void setCapacity(int capacity) {
 		this.capacity = capacity;
 	}
-	
+
+	@Editable(order=22000, group="More Settings", description="A maintenance docker image is used by OneDev to do things requiring root "
+			+ "privilege. For instance, job execution in container may generate files owned by root user in cache "
+			+ "directory on host, and OneDev will run this maintenance image to remove outdated cache files as root if necessary")
+	@NotEmpty
+	public String getMaintenanceImage() {
+		return maintenanceImage;
+	}
+
+	public void setMaintenanceImage(String maintenanceImage) {
+		this.maintenanceImage = maintenanceImage;
+	}
+
 	private Commandline getDockerCmd() {
 		if (getDockerExecutable() != null)
 			return new Commandline(getDockerExecutable());
@@ -286,7 +301,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 								throw new RuntimeException(e);
 							}
 							cmd.addArgs(environment);
-							cmd.addArgs("sh", "-c", dockerWorkspacePath + "/onedev-job-commands.sh");
+							cmd.addArgs("sh", dockerWorkspacePath + "/onedev-job-commands.sh");
 						}
 						
 						logger.info("Running container to execute job...");
@@ -391,21 +406,11 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						File lockFile = new File(cacheInstance, JobCache.LOCK_FILE);
 						try {
 							if (lockFile.createNewFile()) {
-								/*
-								 * Remove other files first to avoid locking for too long time
-								 */
-								for (File each: cacheInstance.listFiles()) {
-									if (!each.getName().equals(JobCache.LOCK_FILE)) {
-										if (each.isFile())
-											FileUtils.deleteFile(each);
-										else
-											FileUtils.deleteDir(each);
-									}
-								}
 								LockUtils.call(keyDir.getAbsolutePath(), new Callable<Void>() {
 
 									@Override
 									public Void call() throws Exception {
+										cleanDir(cacheInstance);
 										FileUtils.deleteDir(cacheInstance);
 										return null;
 									}
@@ -467,25 +472,25 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			cmd.addArgs("run", "--rm");
 			if (getRunOptions() != null)
 				cmd.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
-			String dockerWorkspacePath;
-			String dockerCachePath = "$onedev-cache-test$";
+			String containerWorkspacePath;
+			String containerCachePath = "$onedev-cache-test$";
 			if (windows) {
-				dockerWorkspacePath = "C:\\" + WORKSPACE;
-				dockerCachePath = "C:\\" + dockerCachePath;
+				containerWorkspacePath = "C:\\" + WORKSPACE;
+				containerCachePath = "C:\\" + containerCachePath;
 			} else {
-				dockerWorkspacePath = "/" + WORKSPACE;
-				dockerCachePath = "/" + dockerCachePath;
+				containerWorkspacePath = "/" + WORKSPACE;
+				containerCachePath = "/" + containerCachePath;
 			}
-			cmd.addArgs("-v", workspaceDir.getAbsolutePath() + ":" + dockerWorkspacePath);
-			cmd.addArgs("-v", cacheDir.getAbsolutePath() + ":" + dockerCachePath);
+			cmd.addArgs("-v", workspaceDir.getAbsolutePath() + ":" + containerWorkspacePath);
+			cmd.addArgs("-v", cacheDir.getAbsolutePath() + ":" + containerCachePath);
 			
-			cmd.addArgs("-w", dockerWorkspacePath);
-			cmd.addArgs(testData.getDockerImage());
+			cmd.addArgs("-w", containerWorkspacePath);
+			cmd.addArgs(getPullImage(testData.getDockerImage()));
 			
 			if (windows) 
-				cmd.addArgs("cmd", "/c", "echo this is a test");
+				cmd.addArgs("cmd", "/c", "echo hello from container");
 			else 
-				cmd.addArgs("sh", "-c", "echo this is a test");
+				cmd.addArgs("sh", "-c", "echo hello from container");
 			
 			cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 		} finally {
@@ -496,8 +501,28 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			if (!cacheHomeExists)
 				FileUtils.deleteDir(cacheHome);
 		}
+		
+		if (!SystemUtils.IS_OS_WINDOWS) {
+			logger.info("Running maintenance container...");
+			cmd = getDockerCmd();
+			cmd.addArgs("run", "--rm", getPullImage(getMaintenanceImage()), "sh", "-c", "echo hello from maintenance container");			
+			cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
+		}
 	}
 	
+	@Override
+	public void cleanDir(File dir) {
+		if (SystemUtils.IS_OS_WINDOWS) {
+			FileUtils.cleanDir(dir);
+		} else {
+			Commandline cmd = getDockerCmd();
+			String containerPath = "/onedev_dir_to_clean";
+			cmd.addArgs("run", "-v", dir.getAbsolutePath() + ":" + containerPath, "--rm", 
+					getPullImage(getMaintenanceImage()), "sh", "-c", "rm -rf " + containerPath + "/*");			
+			cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
+		}
+	}
+
 	@Editable(name="Specify a Docker Image to Test Against")
 	public static class TestData implements Serializable {
 

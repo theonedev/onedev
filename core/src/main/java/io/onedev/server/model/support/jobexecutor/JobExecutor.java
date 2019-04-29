@@ -169,4 +169,6 @@ public abstract class JobExecutor implements Serializable {
 	
 	public abstract void checkCaches();
 	
+	public abstract void cleanDir(File dir);
+	
 }

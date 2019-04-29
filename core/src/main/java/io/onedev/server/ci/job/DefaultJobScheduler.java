@@ -340,6 +340,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 										throw e;
 									} finally {
 										logger.info("Deleting workspace...");
+										executor.cleanDir(workspace);
 										FileUtils.deleteDir(workspace);
 										logger.info("Workspace deleted");
 									}
