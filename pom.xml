@@ -7,7 +7,7 @@
     	<version>1.0.2</version>
     </parent>
     <artifactId>server</artifactId>  
-    <version>2.1.2</version>  
+    <version>2.1.4</version>  
     <packaging>pom</packaging>  
     <build> 
         <finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>  
