@@ -150,6 +150,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	@Editable(order=22000, group="More Settings", description="A maintenance docker image is used by OneDev to do things requiring root "
 			+ "privilege. For instance, job execution in container may generate files owned by root user in cache "
 			+ "directory on host, and OneDev will run this maintenance image to remove outdated cache files as root if necessary")
+	@ShowCondition("isMaintenanceImageVisible")
 	@NotEmpty
 	public String getMaintenanceImage() {
 		return maintenanceImage;
@@ -157,6 +158,10 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 	public void setMaintenanceImage(String maintenanceImage) {
 		this.maintenanceImage = maintenanceImage;
+	}
+	
+	public static boolean isMaintenanceImageVisible() {
+		return !SystemUtils.IS_OS_WINDOWS;
 	}
 
 	private Commandline getDockerCmd() {

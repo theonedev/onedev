@@ -1,10 +1,7 @@
 package io.onedev.server.web.page.admin.jobexecutor;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import org.apache.commons.lang.SystemUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -103,11 +100,7 @@ abstract class JobExecutorPanel extends Panel {
 			
 		});
 		
-		Set<String> excludedProperties = new HashSet<>();
-		if (SystemUtils.IS_OS_WINDOWS)
-			excludedProperties.add("maintenanceImage");
-		
-		add(BeanContext.viewBean("executor", getExecutor(), excludedProperties, true).setOutputMarkupId(true));
+		add(BeanContext.viewBean("executor", getExecutor()).setOutputMarkupId(true));
 		
 		add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 
