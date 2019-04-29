@@ -40,13 +40,17 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=100, description="This executor interpretates job environments as docker images, "
-		+ "and will execute CI jobs inside docker containers created on OneDev server")
+		+ "and will execute CI jobs inside docker containers created on OneDev server. Please "
+		+ "note that On non-Windows platforms, OneDev needs to run busybox image to do some "
+		+ "cleanups as root. This image has to be pre-pulled on server if your server is not "
+		+ "allowed to connect to official docker registry")
 @ClassValidating
 public class ServerDockerExecutor extends JobExecutor implements Testable<TestData>, Validatable {
 
@@ -54,8 +58,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private static final Logger logger = LoggerFactory.getLogger(ServerDockerExecutor.class);
 
-	private String dockerExecutable;
-	
 	private String dockerRegistry;
 	
 	private boolean authenticateToRegistry;
@@ -64,25 +66,16 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private String password;
 	
+	private String dockerExecutable;
+	
 	private String runOptions;
 	
 	private int capacity = Runtime.getRuntime().availableProcessors();
 	
-	private String maintenanceImage = "busybox";
-	
 	private transient ConstrainedRunner constrainedRunner;
 
-	@Editable(order=1000, description="Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
-			+ "Leave empty to use docker executable in PATH")
-	public String getDockerExecutable() {
-		return dockerExecutable;
-	}
-
-	public void setDockerExecutable(String dockerExecutable) {
-		this.dockerExecutable = dockerExecutable;
-	}
-
-	@Editable(order=1100, description="Optionally specify a docker registry to use. Leave empty to use the official registry")
+	@Editable(order=1100, description="Optionally specify a docker registry to use. Leave empty to use the default registry")
+	@NameOfEmptyValue("Use default")
 	public String getDockerRegistry() {
 		return dockerRegistry;
 	}
@@ -123,7 +116,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.password = password;
 	}
 	
-	@Editable(order=20000, group="More Settings", description="Optionally specify options to run container. For instance, you may use <tt>-m 2g</tt> "
+	@Editable(order=20000, group="More Settings", description="Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
+			+ "Leave empty to use docker executable in PATH")
+	public String getDockerExecutable() {
+		return dockerExecutable;
+	}
+
+	public void setDockerExecutable(String dockerExecutable) {
+		this.dockerExecutable = dockerExecutable;
+	}
+
+	@Editable(order=20100, group="More Settings", description="Optionally specify options to run container. For instance, you may use <tt>-m 2g</tt> "
 			+ "to limit memory of created container to be 2 giga bytes")
 	public String getRunOptions() {
 		return runOptions;
@@ -137,7 +140,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		return (boolean) OneContext.get().getEditContext().getInputValue("authenticateToRegistry");
 	}
 
-	@Editable(order=21000, group="More Settings", description="Specify max number of concurrent jobs being executed. Each job execution "
+	@Editable(order=20200, group="More Settings", description="Specify max number of concurrent jobs being executed. Each job execution "
 			+ "will launch a separate docker container. Defaults to number of processors in the system")
 	public int getCapacity() {
 		return capacity;
@@ -145,23 +148,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 	public void setCapacity(int capacity) {
 		this.capacity = capacity;
-	}
-
-	@Editable(order=22000, group="More Settings", description="A maintenance docker image is used by OneDev to do things requiring root "
-			+ "privilege. For instance, job execution in container may generate files owned by root user in cache "
-			+ "directory on host, and OneDev will run this maintenance image to remove outdated cache files as root if necessary")
-	@ShowCondition("isMaintenanceImageVisible")
-	@NotEmpty
-	public String getMaintenanceImage() {
-		return maintenanceImage;
-	}
-
-	public void setMaintenanceImage(String maintenanceImage) {
-		this.maintenanceImage = maintenanceImage;
-	}
-	
-	public static boolean isMaintenanceImageVisible() {
-		return !SystemUtils.IS_OS_WINDOWS;
 	}
 
 	private Commandline getDockerCmd() {
@@ -508,9 +494,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		}
 		
 		if (!SystemUtils.IS_OS_WINDOWS) {
-			logger.info("Running maintenance container...");
+			logger.info("Checking busybox...");
 			cmd = getDockerCmd();
-			cmd.addArgs("run", "--rm", getPullImage(getMaintenanceImage()), "sh", "-c", "echo hello from maintenance container");			
+			cmd.addArgs("run", "--rm", "busybox", "sh", "-c", "echo hello from busybox");			
 			cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 		}
 	}
@@ -523,7 +509,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			Commandline cmd = getDockerCmd();
 			String containerPath = "/onedev_dir_to_clean";
 			cmd.addArgs("run", "-v", dir.getAbsolutePath() + ":" + containerPath, "--rm", 
-					getPullImage(getMaintenanceImage()), "sh", "-c", "rm -rf " + containerPath + "/*");			
+					"busybox", "sh", "-c", "rm -rf " + containerPath + "/*");			
 			cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 		}
 	}
