@@ -25,8 +25,8 @@ public class DefaultServerConfig implements ServerConfig {
 	
 	private int httpPort;
 	
-	private int sessionTimeout;
-
+	private int sessionTimeout = 1800;
+	
 	private SslConfig sslConfig;
 	
 	@Inject
@@ -75,10 +75,7 @@ public class DefaultServerConfig implements ServerConfig {
 		
 		String sessionTimeoutStr = props.getProperty("sessionTimeout");
 		if (StringUtils.isNotBlank(sessionTimeoutStr))
-			this.sessionTimeout = Integer.parseInt(sessionTimeoutStr.trim());
-		else
-			throw new RuntimeException("sessionTimeout is not specified.");
-		
+			sessionTimeout = Integer.parseInt(sessionTimeoutStr.trim());
 	}
 	
 	@Override

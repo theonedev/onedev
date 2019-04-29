@@ -2,6 +2,8 @@ package io.onedev.server.git;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -148,10 +150,9 @@ public class GitFilter implements Filter {
 				@Override
 				public void run() {
 					try {
-						new UploadCommand(gitDir, environments)
-								.input(ServletUtils.getInputStream(request))
-								.output(response.getOutputStream())
-								.call();
+						InputStream is = ServletUtils.getInputStream(request);
+						OutputStream os = response.getOutputStream();
+						new UploadCommand(gitDir, environments).input(is).output(os).call();
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -167,10 +168,9 @@ public class GitFilter implements Filter {
 				@Override
 				public void run() {
 					try {
-						new ReceiveCommand(gitDir, environments)
-								.input(ServletUtils.getInputStream(request))
-								.output(response.getOutputStream())
-								.call();
+						InputStream is = ServletUtils.getInputStream(request);
+						OutputStream os = response.getOutputStream();
+						new ReceiveCommand(gitDir, environments).input(is).output(os).call();
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -223,7 +223,7 @@ public class GitFilter implements Filter {
 			FilterChain chain) throws IOException, ServletException {
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
 		HttpServletResponse httpResponse = (HttpServletResponse) response;
-
+		
 		try {
 			if (GitSmartHttpTools.isInfoRefs(httpRequest)) {
 				if (oneDev.isReady())

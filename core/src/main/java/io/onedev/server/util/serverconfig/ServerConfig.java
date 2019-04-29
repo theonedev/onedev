@@ -29,4 +29,5 @@ public interface ServerConfig {
 	 * 			web session timeout in seconds
 	 */
 	int getSessionTimeout();
+	
 }
