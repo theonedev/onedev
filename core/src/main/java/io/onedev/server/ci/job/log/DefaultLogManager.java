@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.regex.Pattern;
@@ -42,6 +43,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.ci.job.log.instruction.LogInstruction;
 import io.onedev.server.ci.job.log.instruction.LogInstructionParser.InstructionContext;
 import io.onedev.server.ci.job.log.instruction.LogInstructionParser.ParamContext;
+import io.onedev.server.ci.job.log.normalizer.LogNormalizer;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
@@ -70,13 +72,17 @@ public class DefaultLogManager implements LogManager {
 	
 	private final BuildManager buildManager;
 	
+	private final Set<LogNormalizer> logNormalizers;
+	
 	private final Map<Long, LogSnippet> recentSnippets = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultLogManager(StorageManager storageManager, WebSocketManager webSocketManager, BuildManager buildManager) {
+	public DefaultLogManager(StorageManager storageManager, WebSocketManager webSocketManager, 
+			BuildManager buildManager, Set<LogNormalizer> logNormalizers) {
 		this.storageManager = storageManager;
 		this.webSocketManager = webSocketManager;
 		this.buildManager = buildManager;
+		this.logNormalizers = logNormalizers;
 	}
 	
 	private File getLogFile(Long projectId, Long buildId) {
@@ -91,21 +97,13 @@ public class DefaultLogManager implements LogManager {
 			private static final long serialVersionUID = 1L;
 
 			private void log(LogLevel logLevel, String message) {
-				if (message.startsWith("[INFO] ")) {
-					logLevel = LogLevel.INFO;
-					message = message.substring("[INFO] ".length());
-				} else if (message.startsWith("[ERROR] ")) {
-					logLevel = LogLevel.ERROR;
-					message = message.substring("[ERROR] ".length());
-				} else if (message.startsWith("[WARNING] ")) {
-					logLevel = LogLevel.WARN;
-					message = message.substring("[WARNING] ".length());
-				} else if (message.startsWith("[DEBUG] ")) {
-					logLevel = LogLevel.DEBUG;
-					message = message.substring("[DEBUG] ".length());
-				} else if (message.startsWith("[TRACE] ")) {
-					logLevel = LogLevel.TRACE;
-					message = message.substring("[TRACE] ".length());
+				for (LogNormalizer logNormalizer: logNormalizers) {
+					LogNormalizer.Result result = logNormalizer.normalize(message);
+					if (result != null) {
+						logLevel = result.getLevel();
+						message = result.getMessage();
+						break;
+					}
 				}
  				if (logLevel.ordinal() <= loggerLevel.ordinal()) {
 					Lock lock = LockUtils.getReadWriteLock(getLockKey(buildId)).writeLock();

@@ -36,7 +36,6 @@ import org.apache.wicket.protocol.http.WicketFilter;
 import org.apache.wicket.protocol.http.WicketServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
-import org.eclipse.jgit.lib.ObjectId;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.servlet.ServletContainer;
 import org.hibernate.CallbackException;
@@ -81,13 +80,13 @@ import io.onedev.server.cache.DefaultCodeCommentRelationInfoManager;
 import io.onedev.server.cache.DefaultCommitInfoManager;
 import io.onedev.server.cache.DefaultUserInfoManager;
 import io.onedev.server.cache.UserInfoManager;
-import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.detector.CISpecDetector;
 import io.onedev.server.ci.job.DefaultJobScheduler;
 import io.onedev.server.ci.job.JobScheduler;
 import io.onedev.server.ci.job.log.DefaultLogManager;
 import io.onedev.server.ci.job.log.LogManager;
 import io.onedev.server.ci.job.log.instruction.LogInstruction;
+import io.onedev.server.ci.job.log.normalizer.LogNormalizer;
 import io.onedev.server.ci.job.outcome.DependencyPopulator;
 import io.onedev.server.command.ApplyDBConstraintsCommand;
 import io.onedev.server.command.BackupDBCommand;
@@ -100,8 +99,8 @@ import io.onedev.server.command.RestoreDBCommand;
 import io.onedev.server.command.UpgradeCommand;
 import io.onedev.server.data.DataManager;
 import io.onedev.server.data.DefaultDataManager;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildDependenceManager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
@@ -133,8 +132,8 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.entitymanager.impl.DefaultBuildManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildDependenceManager;
+import io.onedev.server.entitymanager.impl.DefaultBuildManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildParamManager;
 import io.onedev.server.entitymanager.impl.DefaultBuildQuerySettingManager;
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentManager;
@@ -171,7 +170,6 @@ import io.onedev.server.git.GitPreReceiveCallback;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.migration.JpaConverter;
 import io.onedev.server.migration.PersistentBagConverter;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.support.authenticator.Authenticator;
 import io.onedev.server.notification.CodeCommentNotificationManager;
 import io.onedev.server.notification.CommitNotificationManager;
@@ -396,19 +394,7 @@ public class CoreModule extends AbstractPluginModule {
         contributeFromPackage(Authenticator.class, Authenticator.class);
         
         contributeFromPackage(CISpecDetector.class, CISpecDetector.class);
-        contribute(CISpecDetector.class, new CISpecDetector() {
-			
-			@Override
-			public int getPriority() {
-				return CISpecDetector.DEFAULT_PRIORITY;
-			}
-			
-			@Override
-			public CISpec detect(Project project, ObjectId commitId) {
-				return null;
-			}
-			
-		});
+        contributeFromPackage(LogNormalizer.class, LogNormalizer.class);
         
 		bind(IndexManager.class).to(DefaultIndexManager.class);
 		bind(SearchManager.class).to(DefaultSearchManager.class);
