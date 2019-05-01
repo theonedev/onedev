@@ -18,7 +18,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.storage.AttachmentManager;
+import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.util.facade.ProjectFacade;
 
 public class AttachmentStreamResource extends AbstractResource {
@@ -47,15 +47,15 @@ public class AttachmentStreamResource extends AbstractResource {
 		if (!SecurityUtils.canReadCode(project.getFacade())) 
 			throw new UnauthorizedException();
 
-		String storage = params.get(PARAM_UUID).toString();
-		if (StringUtils.isBlank(storage))
+		String uuid = params.get(PARAM_UUID).toString();
+		if (StringUtils.isBlank(uuid))
 			throw new IllegalArgumentException("uuid parameter has to be specified");
 
 		String attachment = params.get(PARAM_ATTACHMENT).toString();
 		if (StringUtils.isBlank(attachment))
 			throw new IllegalArgumentException("attachment parameter has to be specified");
 
-		File attachmentFile = new File(getAttachmentDir(project.getFacade(), storage), attachment);
+		File attachmentFile = new File(getAttachmentDir(project.getFacade(), uuid), attachment);
 		if (!attachmentFile.exists()) 
 			throw new RuntimeException("Attachment not found: " + attachment);
 		
@@ -84,15 +84,15 @@ public class AttachmentStreamResource extends AbstractResource {
 	}
 
 	private static File getAttachmentDir(ProjectFacade project, String uuid) {
-		return OneDev.getInstance(AttachmentManager.class).getAttachmentDir(project, uuid);		
+		return OneDev.getInstance(AttachmentStorageManager.class).getAttachmentStorage(project, uuid);		
 	}
 	
-	public static PageParameters paramsOf(ProjectFacade project, String attachmentDirUUID, String attachmentName) {
+	public static PageParameters paramsOf(ProjectFacade project, String attachmentStorageUUID, String attachmentName) {
 		PageParameters params = new PageParameters();
 		params.set(PARAM_PROJECT, project.getName());
-		params.set(PARAM_UUID, attachmentDirUUID);
+		params.set(PARAM_UUID, attachmentStorageUUID);
 		params.set(PARAM_ATTACHMENT, attachmentName);
-		final File attachmentFile = new File(getAttachmentDir(project, attachmentDirUUID), attachmentName);
+		final File attachmentFile = new File(getAttachmentDir(project, attachmentStorageUUID), attachmentName);
 		params.set("v", attachmentFile.lastModified());
 		
 		return params;

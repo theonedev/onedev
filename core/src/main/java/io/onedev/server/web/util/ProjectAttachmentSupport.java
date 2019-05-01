@@ -20,7 +20,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.storage.AttachmentManager;
+import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.stream.AttachmentStreamResource;
@@ -52,7 +52,7 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 	@Override
 	public List<String> getAttachments() {
 		List<String> attachments = new ArrayList<>();
-		File attachmentDir = OneDev.getInstance(AttachmentManager.class).getAttachmentDir(getProject(), attachmentDirUUID);
+		File attachmentDir = OneDev.getInstance(AttachmentStorageManager.class).getAttachmentStorage(getProject(), attachmentDirUUID);
 		if (attachmentDir.exists()) {
 			for (File file: attachmentDir.listFiles())
 				attachments.add(file.getName());
@@ -61,12 +61,12 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 	}
 
 	private File getAttachmentDir() {
-		return OneDev.getInstance(AttachmentManager.class).getAttachmentDir(getProject(), attachmentDirUUID);
+		return OneDev.getInstance(AttachmentStorageManager.class).getAttachmentStorage(getProject(), attachmentDirUUID);
 	}
 	
 	@Override
 	public void deleteAttachemnt(String attachment) {
-		File attachmentDir = OneDev.getInstance(AttachmentManager.class).getAttachmentDir(getProject(), attachmentDirUUID);
+		File attachmentDir = OneDev.getInstance(AttachmentStorageManager.class).getAttachmentStorage(getProject(), attachmentDirUUID);
 		FileUtils.deleteFile(new File(attachmentDir, attachment));
 	}
 

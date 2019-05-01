@@ -52,6 +52,7 @@ import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.Referenceable;
@@ -77,7 +78,7 @@ import io.onedev.server.util.jackson.RestView;
 				@Index(columnList="CLOSE_STATUS"), @Index(columnList="CLOSE_USER"), 
 				@Index(columnList="CLOSE_USER_NAME")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_targetProject_id", "number"})})
-public class PullRequest extends AbstractEntity implements Referenceable {
+public class PullRequest extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
 
@@ -857,6 +858,16 @@ public class PullRequest extends AbstractEntity implements Referenceable {
 			return whitespaceOption;
 		}
 
+	}
+
+	@Override
+	public String getAttachmentStorageUUID() {
+		return uuid;
+	}
+
+	@Override
+	public Project getAttachmentProject() {
+		return getTargetProject();
 	}
 
 }

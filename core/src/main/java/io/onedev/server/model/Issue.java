@@ -43,6 +43,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.IssueField;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.IssueFacade;
@@ -67,7 +68,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList="updateDate")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})})
 @Editable
-public class Issue extends AbstractEntity implements Referenceable {
+public class Issue extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
 
@@ -482,6 +483,16 @@ public class Issue extends AbstractEntity implements Referenceable {
 			});
 		}
 		return commits;		
+	}
+
+	@Override
+	public String getAttachmentStorageUUID() {
+		return uuid;
+	}
+
+	@Override
+	public Project getAttachmentProject() {
+		return getProject();
 	}
 	
 }

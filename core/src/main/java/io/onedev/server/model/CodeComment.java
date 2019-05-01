@@ -40,6 +40,7 @@ import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.model.support.TextRange;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 
@@ -54,7 +55,7 @@ import io.onedev.server.util.diff.WhitespaceOption;
 		@Index(columnList="commit"), @Index(columnList="path"), 
 		@Index(columnList="createDate"), @Index(columnList="updateDate")})
 @DynamicUpdate 
-public class CodeComment extends AbstractEntity {
+public class CodeComment extends AbstractEntity implements AttachmentStorageSupport {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -311,6 +312,16 @@ public class CodeComment extends AbstractEntity {
 			return compareContext;
 		}
 		
+	}
+
+	@Override
+	public String getAttachmentStorageUUID() {
+		return uuid;
+	}
+
+	@Override
+	public Project getAttachmentProject() {
+		return getProject();
 	}
 	
 }
