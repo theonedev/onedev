@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -40,6 +41,8 @@ import io.onedev.server.web.util.ProjectAttachmentSupport;
 @SuppressWarnings("serial")
 public abstract class NewIssueEditor extends FormComponentPanel<Issue> implements InputContext {
 
+	private String uuid = UUID.randomUUID().toString();
+	
 	private TextField<String> titleInput;
 	
 	private CommentInput descriptionInput;
@@ -49,7 +52,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	private BeanEditor fieldEditor;
 	
 	public NewIssueEditor(String id) {
-		super(id, Model.of(new Issue()));
+		super(id, Model.of((Issue)null));
 	}
 
 	@Override
@@ -145,6 +148,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	
 	private Issue newIssue() {
 		Issue issue = new Issue();
+		issue.setUUID(uuid);
 		issue.setProject(getProject());
 		issue.setSubmitDate(new Date());
 		issue.setState(getIssueSetting().getInitialStateSpec().getName());

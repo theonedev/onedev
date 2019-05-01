@@ -19,6 +19,7 @@ import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.manager.AttachmentManager;
 import io.onedev.server.manager.StorageManager;
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -134,6 +135,10 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 				CodeComment comment = (CodeComment) event.getEntity();
 				projectAttachmentDir = storageManager.getProjectAttachmentDir(comment.getProject().getId());
 				attachmentUUID = comment.getUUID();
+			} else if (event.getEntity() instanceof Issue) {
+				Issue issue = (Issue) event.getEntity();
+				projectAttachmentDir = storageManager.getProjectAttachmentDir(issue.getProject().getId());
+				attachmentUUID = issue.getUUID();
 			} else {
 				projectAttachmentDir = null;
 				attachmentUUID = null;
@@ -162,6 +167,10 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			CodeComment comment = (CodeComment) event.getEntity();
 			dirToDelete = getPermanentAttachmentDir(
 					storageManager.getProjectAttachmentDir(comment.getProject().getId()), comment.getUUID());
+		} else if (event.getEntity() instanceof Issue) {
+			Issue issue = (Issue) event.getEntity();
+			dirToDelete = getPermanentAttachmentDir(
+					storageManager.getProjectAttachmentDir(issue.getProject().getId()), issue.getUUID());
 		} else {
 			dirToDelete = null;
 		}
