@@ -167,6 +167,10 @@ public class DefaultAttachmentManager implements AttachmentManager, SchedulableT
 			CodeComment comment = (CodeComment) event.getEntity();
 			dirToDelete = getPermanentAttachmentDir(
 					storageManager.getProjectAttachmentDir(comment.getProject().getId()), comment.getUUID());
+		} else if (event.getEntity() instanceof PullRequest) {
+			PullRequest request = (PullRequest) event.getEntity();
+			dirToDelete = getPermanentAttachmentDir(
+					storageManager.getProjectAttachmentDir(request.getTargetProject().getId()), request.getUUID());
 		} else if (event.getEntity() instanceof Issue) {
 			Issue issue = (Issue) event.getEntity();
 			dirToDelete = getPermanentAttachmentDir(
