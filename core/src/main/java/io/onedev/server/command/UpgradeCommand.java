@@ -28,10 +28,10 @@ import io.onedev.server.persistence.DefaultPersistManager;
 import io.onedev.server.persistence.HibernateProperties;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.command.Commandline;
 import io.onedev.server.util.validation.EntityValidator;
 import io.onedev.utils.FileUtils;
 import io.onedev.utils.StringUtils;
-import io.onedev.utils.command.Commandline;
 import io.onedev.utils.command.LineConsumer;
 
 @Singleton

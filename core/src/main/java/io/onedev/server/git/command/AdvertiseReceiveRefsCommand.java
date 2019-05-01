@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.utils.command.Commandline;
+import io.onedev.server.util.command.Commandline;
 import io.onedev.utils.command.LineConsumer;
 
 public class AdvertiseReceiveRefsCommand extends GitCommand<Void> {

@@ -24,8 +24,8 @@ import io.onedev.server.git.BlameBlock;
 import io.onedev.server.git.BlameCommit;
 import io.onedev.server.git.GitUtils;
 import io.onedev.utils.Range;
-import io.onedev.utils.command.Commandline;
-import io.onedev.utils.command.ExecuteResult;
+import io.onedev.server.util.command.Commandline;
+import io.onedev.server.util.command.ExecuteResult;
 import io.onedev.utils.command.LineConsumer;
 
 public class BlameCommand extends GitCommand<Collection<BlameBlock>> {

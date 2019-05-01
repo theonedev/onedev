@@ -15,7 +15,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 import io.onedev.server.git.GitUtils;
-import io.onedev.utils.command.Commandline;
+import io.onedev.server.util.command.Commandline;
 import io.onedev.utils.command.LineConsumer;
 
 public abstract class LogCommand extends GitCommand<Void> {

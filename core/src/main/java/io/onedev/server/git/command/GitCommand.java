@@ -14,7 +14,7 @@ import io.onedev.launcher.loader.AppLoader;
 import io.onedev.server.git.GitVersion;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.utils.FileUtils;
-import io.onedev.utils.command.Commandline;
+import io.onedev.server.util.command.Commandline;
 import io.onedev.utils.command.LineConsumer;
 
 public abstract class GitCommand<V> implements Callable<V> {
