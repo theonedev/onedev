@@ -144,7 +144,7 @@ public abstract class CodeCommentPanel extends Panel {
 
 					@Override
 					protected AttachmentSupport getAttachmentSupport() {
-						return new ProjectAttachmentSupport(getComment().getProject(), "codecomment" + getComment().getUUID());
+						return new ProjectAttachmentSupport(getComment().getProject(), getComment().getUUID());
 					}
 
 					@Override
