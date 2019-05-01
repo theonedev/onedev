@@ -134,6 +134,10 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new CancelledByCriteria(getUser(value), value);
 						} else if (ctx.FixedIssue() != null) {
 							return new FixedIssueCriteria(getIssue(project, value));
+						} else if (ctx.DependsOn() != null) {
+							return new DependsOnCriteria(getBuild(project, value));
+						} else if (ctx.DependenciesOf() != null) {
+							return new DependenciesOfCriteria(getBuild(project, value));
 						} else {
 							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
 						}

@@ -100,6 +100,8 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	}
 	
 	public static Build getBuild(Project project, String number) {
+		if (number.startsWith("#"))
+			number = number.substring(1);
 		Build build = OneDev.getInstance(BuildManager.class).find(project, getLongValue(number));
 		if (build != null)
 			return build;

@@ -1,40 +1,39 @@
 package io.onedev.server.search.entity.build;
 
-import java.util.Objects;
-
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.model.BuildParam;
+import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.BuildConstants;
 
-public class ParamCriteria extends EntityCriteria<Build> {
+public class DependsOnCriteria extends EntityCriteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
-	private String name;
+	private Build value;
 	
-	private String value;
-	
-	public ParamCriteria(String name, String value) {
-		this.name = name;
+	public DependsOnCriteria(Build value) {
 		this.value = value;
 	}
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Build> context, User user) {
-		From<?, ?> join = context.getJoin(name);
-		return context.getBuilder().equal(join.get(BuildParam.ATTR_VALUE), value);
+		From<?, ?> join = context.getJoin(BuildConstants.FIELD_DEPENDENCIES);
+		return context.getBuilder().equal(join.get(BuildDependence.ATTR_DEPENDENCY), value);
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		Object fieldValue = build.getParamMap().get(name);
-		return Objects.equals(fieldValue, value);
+		for (BuildDependence dependence: value.getDependents()) {
+			if (dependence.getDependent().equals(build))
+				return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -44,7 +43,7 @@ public class ParamCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.quote(name) + " " + BuildQuery.getRuleName(BuildQueryLexer.Is) + " " + BuildQuery.quote(value);
+		return BuildQuery.getRuleName(BuildQueryLexer.DependsOn) + " " + BuildQuery.quote("#" + value.getNumber());
 	}
-	
+
 }

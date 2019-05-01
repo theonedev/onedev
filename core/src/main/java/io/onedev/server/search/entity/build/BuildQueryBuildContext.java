@@ -18,9 +18,16 @@ public class BuildQueryBuildContext extends QueryBuildContext<Build> {
 	
 	@Override
 	public Join<?, ?> newJoin(String joinName) {
-		Join<Build, ?> join = getRoot().join(BuildConstants.ATTR_PARAMS, JoinType.LEFT);
-		join.on(getBuilder().equal(join.get(BuildParam.FIELD_ATTR_NAME), joinName));
-		return join;
-	}
+		switch (joinName) {
+		case BuildConstants.FIELD_DEPENDENCIES:
+			return getRoot().join(BuildConstants.ATTR_DEPENDENCIES, JoinType.LEFT);
+		case BuildConstants.FIELD_DEPENDENTS:
+			return getRoot().join(BuildConstants.ATTR_DEPENDENTS, JoinType.LEFT);
+		default:
+			Join<Build, ?> join = getRoot().join(BuildConstants.ATTR_PARAMS, JoinType.LEFT);
+			join.on(getBuilder().equal(join.get(BuildParam.ATTR_NAME), joinName));
+			return join;
+		}
+	}		
 
 }

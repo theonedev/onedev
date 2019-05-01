@@ -16,6 +16,10 @@ import javax.persistence.UniqueConstraint;
 public class BuildDependence extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String ATTR_DEPENDENT = "dependent";
+	
+	public static final String ATTR_DEPENDENCY = "dependency";
 
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)

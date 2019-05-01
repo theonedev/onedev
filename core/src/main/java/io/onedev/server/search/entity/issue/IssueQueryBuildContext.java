@@ -25,7 +25,7 @@ public class IssueQueryBuildContext extends QueryBuildContext<Issue> {
 			return getRoot().join(IssueConstants.ATTR_MILESTONE, JoinType.LEFT);
 		default:
 			Join<Issue, ?> join = getRoot().join(IssueConstants.ATTR_FIELD_ENTITIES, JoinType.LEFT);
-			join.on(getBuilder().equal(join.get(IssueFieldEntity.FIELD_ATTR_NAME), joinName));
+			join.on(getBuilder().equal(join.get(IssueFieldEntity.ATTR_NAME), joinName));
 			return join;
 		}
 	}

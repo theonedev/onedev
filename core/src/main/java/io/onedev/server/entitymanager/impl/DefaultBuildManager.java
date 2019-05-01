@@ -14,6 +14,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -143,23 +144,22 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 		EntityCriteria<Build> criteria = newCriteria();
 		
-		if (term == null)
-			term = "";
-		
-		if (term.startsWith("#")) {
-			term = term.substring(1);
-			try {
-				long buildNumber = Long.parseLong(term);
-				criteria.add(Restrictions.eq("number", buildNumber));
-			} catch (NumberFormatException e) {
-				criteria.add(Restrictions.ilike("version", "%#" + term + "%"));
-			}
-		} else {
-			try {
-				long buildNumber = Long.parseLong(term);
-				criteria.add(Restrictions.eq("number", buildNumber));
-			} catch (NumberFormatException e) {
-				criteria.add(Restrictions.ilike("version", "%" + term + "%"));
+		if (StringUtils.isNotBlank(term)) {
+			if (term.startsWith("#")) {
+				term = term.substring(1);
+				try {
+					long buildNumber = Long.parseLong(term);
+					criteria.add(Restrictions.eq("number", buildNumber));
+				} catch (NumberFormatException e) {
+					criteria.add(Restrictions.ilike("version", "%#" + term + "%"));
+				}
+			} else {
+				try {
+					long buildNumber = Long.parseLong(term);
+					criteria.add(Restrictions.eq("number", buildNumber));
+				} catch (NumberFormatException e) {
+					criteria.add(Restrictions.ilike("version", "%" + term + "%"));
+				}
 			}
 		}
 		

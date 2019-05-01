@@ -8,7 +8,7 @@ query
 
 criteria
 	: operator=(Successful|Failed|InError|Cancelled|Running|Waiting|Queueing|TimedOut|SubmittedByMe|CancelledByMe) #OperatorCriteria
-	| operator=(FixedIssue|SubmittedBy|CancelledBy) WS+ criteriaValue=Quoted #OperatorValueCriteria
+	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -72,6 +72,14 @@ CancelledBy
 	: 'cancelled' WS+ 'by'
 	;
 	
+DependsOn
+	: 'depends' WS+ 'on'
+	;
+	
+DependenciesOf
+	: 'dependencies' WS+ 'of'
+	;
+			
 FixedIssue
 	: 'fixed' WS+ 'issue'
 	;

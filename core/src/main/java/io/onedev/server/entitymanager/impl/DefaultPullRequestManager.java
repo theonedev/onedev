@@ -1039,27 +1039,26 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 		EntityCriteria<PullRequest> criteria = newCriteria();
 		
-		if (term == null)
-			term = "";
-		
-		if (term.startsWith("#")) {
-			term = term.substring(1);
-			try {
-				long buildNumber = Long.parseLong(term);
-				criteria.add(Restrictions.eq("number", buildNumber));
-			} catch (NumberFormatException e) {
-				criteria.add(Restrictions.or(
-						Restrictions.ilike("title", "%#" + term + "%"),
-						Restrictions.ilike("noSpaceTitle", "%#" + term + "%")));
-			}
-		} else {
-			try {
-				long buildNumber = Long.parseLong(term);
-				criteria.add(Restrictions.eq("number", buildNumber));
-			} catch (NumberFormatException e) {
-				criteria.add(Restrictions.or(
-						Restrictions.ilike("title", "%" + term + "%"),
-						Restrictions.ilike("noSpaceTitle", "%" + term + "%")));
+		if (StringUtils.isNotBlank(term)) {
+			if (term.startsWith("#")) {
+				term = term.substring(1);
+				try {
+					long buildNumber = Long.parseLong(term);
+					criteria.add(Restrictions.eq("number", buildNumber));
+				} catch (NumberFormatException e) {
+					criteria.add(Restrictions.or(
+							Restrictions.ilike("title", "%#" + term + "%"),
+							Restrictions.ilike("noSpaceTitle", "%#" + term + "%")));
+				}
+			} else {
+				try {
+					long buildNumber = Long.parseLong(term);
+					criteria.add(Restrictions.eq("number", buildNumber));
+				} catch (NumberFormatException e) {
+					criteria.add(Restrictions.or(
+							Restrictions.ilike("title", "%" + term + "%"),
+							Restrictions.ilike("noSpaceTitle", "%" + term + "%")));
+				}
 			}
 		}
 		

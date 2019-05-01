@@ -24,7 +24,7 @@ public class ReferenceableFieldCriteria extends FieldCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		Path<Long> attribute = context.getJoin(getFieldName()).get(IssueFieldEntity.FIELD_ATTR_ORDINAL);
+		Path<Long> attribute = context.getJoin(getFieldName()).get(IssueFieldEntity.ATTR_ORDINAL);
 		return context.getBuilder().equal(attribute, value);
 	}
 

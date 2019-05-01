@@ -18,6 +18,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -146,11 +147,11 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 					orders.add(builder.desc(IssueQuery.getPath(root, IssueConstants.ORDER_FIELDS.get(sort.getField()))));
 			} else {
 				Join<Issue, IssueFieldEntity> join = root.join(IssueConstants.ATTR_FIELD_ENTITIES, JoinType.LEFT);
-				join.on(builder.equal(join.get(IssueFieldEntity.FIELD_ATTR_NAME), sort.getField()));
+				join.on(builder.equal(join.get(IssueFieldEntity.ATTR_NAME), sort.getField()));
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(join.get(IssueFieldEntity.FIELD_ATTR_ORDINAL)));
+					orders.add(builder.asc(join.get(IssueFieldEntity.ATTR_ORDINAL)));
 				else
-					orders.add(builder.desc(join.get(IssueFieldEntity.FIELD_ATTR_ORDINAL)));
+					orders.add(builder.desc(join.get(IssueFieldEntity.ATTR_ORDINAL)));
 			}
 		}
 
@@ -282,27 +283,26 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 		EntityCriteria<Issue> criteria = newCriteria();
 		
-		if (term == null)
-			term = "";
-		
-		if (term.startsWith("#")) {
-			term = term.substring(1);
-			try {
-				long buildNumber = Long.parseLong(term);
-				criteria.add(Restrictions.eq("number", buildNumber));
-			} catch (NumberFormatException e) {
-				criteria.add(Restrictions.or(
-						Restrictions.ilike("title", "%#" + term + "%"),
-						Restrictions.ilike("noSpaceTitle", "%#" + term + "%")));
-			}
-		} else {
-			try {
-				long buildNumber = Long.parseLong(term);
-				criteria.add(Restrictions.eq("number", buildNumber));
-			} catch (NumberFormatException e) {
-				criteria.add(Restrictions.or(
-						Restrictions.ilike("title", "%" + term + "%"),
-						Restrictions.ilike("noSpaceTitle", "%" + term + "%")));
+		if (StringUtils.isNotBlank(term)) {
+			if (term.startsWith("#")) {
+				term = term.substring(1);
+				try {
+					long buildNumber = Long.parseLong(term);
+					criteria.add(Restrictions.eq("number", buildNumber));
+				} catch (NumberFormatException e) {
+					criteria.add(Restrictions.or(
+							Restrictions.ilike("title", "%#" + term + "%"),
+							Restrictions.ilike("noSpaceTitle", "%#" + term + "%")));
+				}
+			} else {
+				try {
+					long buildNumber = Long.parseLong(term);
+					criteria.add(Restrictions.eq("number", buildNumber));
+				} catch (NumberFormatException e) {
+					criteria.add(Restrictions.or(
+							Restrictions.ilike("title", "%" + term + "%"),
+							Restrictions.ilike("noSpaceTitle", "%" + term + "%")));
+				}
 			}
 		}
 		

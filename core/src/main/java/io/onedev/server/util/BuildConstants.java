@@ -63,10 +63,18 @@ public class BuildConstants {
 	
 	public static final String ATTR_PARAMS = "params";
 	
+	public static final String FIELD_DEPENDENCIES = "Dependencies";
+	
+	public static final String ATTR_DEPENDENCIES = "dependencies";
+	
+	public static final String FIELD_DEPENDENTS = "Dependents";
+	
+	public static final String ATTR_DEPENDENTS = "dependents";
+	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			FIELD_NUMBER, FIELD_JOB, FIELD_STATUS, FIELD_SUBMITTER, FIELD_CANCELLER, 
 			FIELD_SUBMIT_DATE, FIELD_QUEUEING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE, 
-			FIELD_COMMIT, FIELD_PROJECT, FIELD_VERSION);
+			FIELD_COMMIT, FIELD_PROJECT, FIELD_VERSION, FIELD_DEPENDENCIES, FIELD_DEPENDENTS);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
 			FIELD_JOB, FIELD_NUMBER, FIELD_VERSION, FIELD_COMMIT, FIELD_SUBMIT_DATE, 

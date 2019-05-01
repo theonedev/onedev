@@ -46,14 +46,14 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
 		From<?, ?> join = context.getJoin(getFieldName());
 		if (allowMultiple) {
-			return context.getBuilder().equal(join.get(IssueFieldEntity.FIELD_ATTR_VALUE), value);
+			return context.getBuilder().equal(join.get(IssueFieldEntity.ATTR_VALUE), value);
 		} else {
 			if (operator == IssueQueryLexer.Is)
-				return context.getBuilder().equal(join.get(IssueFieldEntity.FIELD_ATTR_VALUE), value);
+				return context.getBuilder().equal(join.get(IssueFieldEntity.ATTR_VALUE), value);
 			else if (operator == IssueQueryLexer.IsGreaterThan)
-				return context.getBuilder().greaterThan(join.get(IssueFieldEntity.FIELD_ATTR_ORDINAL), ordinal);
+				return context.getBuilder().greaterThan(join.get(IssueFieldEntity.ATTR_ORDINAL), ordinal);
 			else
-				return context.getBuilder().lessThan(join.get(IssueFieldEntity.FIELD_ATTR_ORDINAL), ordinal);
+				return context.getBuilder().lessThan(join.get(IssueFieldEntity.ATTR_ORDINAL), ordinal);
 		}
 	}
 
