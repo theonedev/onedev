@@ -79,10 +79,10 @@ public class BuildsStatusPanel extends GenericPanel<List<Build>> {
 					cssClass += "fa-hourglass-1 " + Status.QUEUEING.name().toLowerCase();
 					title = "Some builds are queueing, click for details";
 				} else if (hasStatus(builds, Status.RUNNING)) {
-					cssClass += "fa-circle " + Status.RUNNING.name().toLowerCase();
+					cssClass += "fa-circle-o-notch fa-spin " + Status.RUNNING.name().toLowerCase();
 					title = "Some builds are running, click for details";
 				} else {
-					cssClass += "fa-check " + Status.SUCCESSFUL.name().toLowerCase();
+					cssClass += "fa-check-circle " + Status.SUCCESSFUL.name().toLowerCase();
 					title = "Builds are successful, click for details";
 				}
 				tag.put("class", cssClass);

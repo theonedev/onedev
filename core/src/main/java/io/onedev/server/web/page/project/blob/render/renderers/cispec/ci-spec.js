@@ -1,16 +1,44 @@
 onedev.ciSpec = {
+    onDomReady: function() {
+        var activeJobIndex = -1; 
+        var $body = $(".ci-spec>.valid>.jobs>.body");
+        $body.find(">.contents>.content").each(function() {
+            var $this = $(this);
+            if ($this.find(".feedbackPanelERROR").length != 0) {
+                activeJobIndex = $this.index();
+                return false;
+            }
+        });
+        if (activeJobIndex == -1) {
+            var uri = URI(window.location.href);
+            var fragment = uri.fragment();
+            if (fragment.startsWith("jobs/")) {
+                var activeJobName = decodeURIComponent(fragment.substring("jobs/".length));
+                activeJobIndex = $body.find(">.side>.navs>.nav[data-name='" + activeJobName.escape() + "']").index();
+            }
+        }
+        if (activeJobIndex == -1)
+            activeJobIndex = 0;
+
+        onedev.ciSpec.showJob(activeJobIndex);
+
+        $body.find(".side>.navs>.nav>.select").click(function() {
+            onedev.ciSpec.showJob($(this).parent().index());
+        });
+    },
+    showJob: function(index) {
+        var $body = $(".ci-spec>.valid>.jobs>.body");
+        var $navs = $body.find(">.side>.navs");
+        $navs.children().removeClass("active");
+        var $nav = $navs.children().eq(index);
+        $nav.addClass("active");
+        var $contents = $body.children(".contents");
+        $contents.children().hide();
+        var $content = $contents.children().eq(index);
+        $content.show();
+        onedev.server.focus.doFocus($content);
+    },
     edit: {
-        showJob: function(index) {
-            var $body = $(".ci-spec-edit .jobs>.body");
-            var $navs = $body.find(">.side>.navs");
-            $navs.children().removeClass("active");
-            $navs.children().eq(index).addClass("active");
-            var $contents = $body.children(".contents");
-            $contents.children().hide();
-            var $content = $contents.children().eq(index);
-            $content.show();
-            onedev.server.focus.doFocus($content);
-        },
         deleteJob: function(index) {
             var $body = $(".ci-spec-edit .jobs>.body");
             var $navs = $body.find(">.side>.navs");
@@ -21,7 +49,7 @@ onedev.ciSpec = {
             $contents.children().eq(index).remove();
 
             if ($nav.hasClass("active")) 
-                onedev.ciSpec.edit.showJob(0);
+                onedev.ciSpec.showJob(0);
         }, 
         swapJobs: function(index1, index2) {
             var $contents = $(".ci-spec-edit .jobs>.body>.contents");

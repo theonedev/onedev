@@ -8,7 +8,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.web.component.jobchoice.JobMultiChoice;
+import io.onedev.server.web.component.job.JobMultiChoice;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;

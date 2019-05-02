@@ -1,0 +1,72 @@
+<wicket:panel>
+	<div class="build-side">
+        <div wicket:id="buildNav" class="nav"></div>
+        <div wicket:id="general" class="general table">
+            <div class="commit">
+                <div class="name">Commit</div>
+                <div class="value">
+					<a wicket:id="commitHash" class="hash"><span wicket:id="label"></span></a>
+					<a wicket:id="copyCommitHash" class="copy"><i class="fa fa-clipboard"></i></a>
+                </div>
+            </div>
+            <div>
+                <div class="name">Job</div>
+                <div class="value">
+                    <a wicket:id="job"><span wicket:id="label"></span></a>
+                </div>
+            </div>
+            <div>
+                <div class="name">Submitted By</div>
+                <div class="value">
+                    <a wicket:id="submitter"></a>
+                </div>
+            </div>
+            <div>
+                <div class="name">Submitted At</div>
+                <div class="value"><span wicket:id="submitDate"></span></div>
+            </div>
+            <wicket:enclosure child="waitingInQueue">            
+            <div>
+                <div class="name">Waiting in Queue</div>
+                <div class="value"><span wicket:id="waitingInQueue"></span></div>
+            </div>
+            </wicket:enclosure>
+            <wicket:enclosure child="runningTakes">
+            <div>
+                <div class="name">Running Takes</div>
+                <div class="value"><span wicket:id="runningTakes"></span></div>
+            </div>
+            </wicket:enclosure>
+            <wicket:enclosure child="canceller">
+            <div>
+                <div class="name">Cancelled By</div>
+                <div class="value">
+                    <a wicket:id="canceller"></a>
+                </div>
+            </div>
+            </wicket:enclosure>
+        </div>
+        <wicket:enclosure child="params">
+        <div class="params table">
+            <div wicket:id="params">
+                <div wicket:id="name" class="name"></div>
+                <div wicket:id="value" class="value"></div>
+            </div>
+        </div>
+        </wicket:enclosure>
+        <div wicket:id="dependences" class="dependences">
+            <wicket:enclosure child="dependencies">
+            Depends on <a wicket:id="dependencies"><span wicket:id="label"></span></a>             
+            </wicket:enclosure>
+            <span wicket:id="comma">, </span>
+            <wicket:enclosure child="dependents">
+            <a wicket:id="dependents"><span wicket:id="label"></span></a> depends on me
+            </wicket:enclosure>
+        </div>
+		<wicket:enclosure child="delete">
+		<div class="actions">
+			<a wicket:id="delete" class="delete btn btn-danger btn-sm"><i class="fa fa-trash"></i> Delete</a>
+		</div>
+		</wicket:enclosure>
+	</div>
+</wicket:panel>

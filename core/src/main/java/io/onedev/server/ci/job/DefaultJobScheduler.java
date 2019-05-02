@@ -38,8 +38,6 @@ import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.InvalidCISpecException;
 import io.onedev.server.ci.job.log.LogManager;
-import io.onedev.server.ci.job.outcome.DependencyPopulator;
-import io.onedev.server.ci.job.outcome.JobOutcome;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.BuildManager;

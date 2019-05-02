@@ -252,11 +252,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						for (CacheAllocation allocation: allocations) {
 							if (allocation.isWorkspace()) {
 								workspaceCache = allocation.getInstance();
-								try {
-									FileUtils.copyDirectory(workspace, workspaceCache);
-								} catch (IOException e) {
-									throw new RuntimeException(e);
-								}
 								break;
 							}
 						}
@@ -267,7 +262,15 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							logger.info("Cloning source code...");
 							snapshot.checkout(effectiveWorkspace);
 						}
-									
+						
+						if (workspaceCache != null) {
+							try {
+								FileUtils.copyDirectory(workspace, workspaceCache);
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						}
+						
 						cmd.addArgs("-v", effectiveWorkspace.getAbsolutePath() + ":" + dockerWorkspacePath);
 						for (CacheAllocation allocation: allocations) {
 							if (!allocation.isWorkspace())

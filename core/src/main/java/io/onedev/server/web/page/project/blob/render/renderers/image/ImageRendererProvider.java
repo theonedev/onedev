@@ -14,7 +14,7 @@ public class ImageRendererProvider implements BlobRendererContribution {
 	@Override
 	public PrioritizedComponentRenderer getRenderer(BlobRenderContext context) {
 		if (context.getMode() == Mode.VIEW && context.getBlobIdent().isFile()) {
-			if (context.getProject().getBlob(context.getBlobIdent()).getMediaType().getType().equalsIgnoreCase("image")) {
+			if (context.getProject().getBlob(context.getBlobIdent(), true).getMediaType().getType().equalsIgnoreCase("image")) {
 				return new PrioritizedComponentRenderer() {
 
 					private static final long serialVersionUID = 1L;

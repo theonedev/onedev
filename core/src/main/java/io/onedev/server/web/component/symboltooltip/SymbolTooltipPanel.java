@@ -153,7 +153,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 									.build();
 							try {
 								SearchManager searchManager = OneDev.getInstance(SearchManager.class);
-								ObjectId commit = projectModel.getObject().getRevCommit(revision);
+								ObjectId commit = projectModel.getObject().getRevCommit(revision, true);
 								hits = searchManager.search(projectModel.getObject(), commit, query);
 							} catch (InterruptedException e) {
 								throw new RuntimeException(e);
@@ -207,7 +207,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 				// do this check to avoid TooGeneralQueryException
 				if (symbolName.length() != 0 && symbolName.indexOf('?') == -1 && symbolName.indexOf('*') == -1) {
 					BlobIdent blobIdent = new BlobIdent(revision, getBlobPath(), FileMode.TYPE_FILE);
-					Blob blob = projectModel.getObject().getBlob(blobIdent);
+					Blob blob = projectModel.getObject().getBlob(blobIdent, true);
 					
 					if (symbolHits.size() < QUERY_ENTRIES) {
 						// first find in current file for matched symbols
@@ -237,7 +237,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 						// then find in other files for public symbols
 						try {
 							SearchManager searchManager = OneDev.getInstance(SearchManager.class);
-							ObjectId commit = projectModel.getObject().getRevCommit(revision);
+							ObjectId commit = projectModel.getObject().getRevCommit(revision, true);
 							BlobQuery query;
 							if (symbolHits.size() < QUERY_ENTRIES) {
 								query = new SymbolQuery.Builder().term(symbolName)

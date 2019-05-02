@@ -43,9 +43,9 @@ import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
-import io.onedev.server.web.component.issue.side.IssueInfoPanel;
+import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
-import io.onedev.server.web.component.moreinfoside.MoreInfoSidePanel;
+import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
@@ -235,11 +235,11 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		
 		addOrReplace(new Tabbable("tabs", tabs).setOutputMarkupId(true));
 		
-		addOrReplace(new MoreInfoSidePanel("moreInfo") {
+		addOrReplace(new SideInfoPanel("moreInfo") {
 
 			@Override
 			protected Component newContent(String componentId) {
-				return new IssueInfoPanel(componentId) {
+				return new IssueSidePanel(componentId) {
 					
 					@Override
 					protected Issue getIssue() {

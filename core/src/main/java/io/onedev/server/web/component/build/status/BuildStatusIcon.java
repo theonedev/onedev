@@ -47,29 +47,19 @@ public class BuildStatusIcon extends GenericPanel<Build> {
 					title = "Build is being queued due to limited capacity";
 				} else if (build.getStatus() == Status.IN_ERROR) {
 					cssClass += "fa-warning";
-					if (build.getStatusMessage() != null)
-						title = build.getStatusMessage();
-					else
-						title = "Build is in error";
+					title = "Build is in error";
 				} else if (build.getStatus() == Status.FAILED) {
 					cssClass += "fa-times";
 					title = "Build is failed";
-					if (build.getStatusMessage() != null)
-						title = build.getStatusMessage();
-					else
-						title = "Build is failed";
 				} else if (build.getStatus() == Status.RUNNING) {
-					cssClass += "fa-circle";
+					cssClass += "fa-circle-o-notch fa-spin";
 					title = "Build is running";
 				} else if (build.getStatus() == Status.SUCCESSFUL) {
-					cssClass += "fa-check";
+					cssClass += "fa-check-circle";
 					title = "Build is successful";
 				} else if (build.getStatus() == Status.CANCELLED) {
 					cssClass += "fa-ban";
-					if (build.getStatusMessage() != null)
-						title = build.getStatusMessage();
-					else
-						title = "Build is cancelled";
+					title = "Build is cancelled";
 				} else if (build.getStatus() == Status.TIMED_OUT) {
 					cssClass += "fa-clock-o";
 					title = "Build timed out";

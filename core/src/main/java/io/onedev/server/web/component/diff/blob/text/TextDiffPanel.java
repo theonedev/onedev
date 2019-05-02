@@ -477,7 +477,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		if (oldRev.equals(ObjectId.zeroId().name().toString())) {
 			return ObjectId.zeroId();
 		} else {
-			return projectModel.getObject().getRevCommit(oldRev);
+			return projectModel.getObject().getRevCommit(oldRev, true);
 		}
 	}
 	
@@ -486,7 +486,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		if (newRev.equals(ObjectId.zeroId().name().toString())) {
 			return ObjectId.zeroId();
 		} else {
-			return projectModel.getObject().getRevCommit(newRev);
+			return projectModel.getObject().getRevCommit(newRev, true);
 		}
 	}
 	

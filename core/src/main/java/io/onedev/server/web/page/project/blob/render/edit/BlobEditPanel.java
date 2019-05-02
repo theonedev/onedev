@@ -177,7 +177,7 @@ public abstract class BlobEditPanel extends Panel {
 				
 				byte[] content;
 				if (context.getMode() == Mode.EDIT)
-					content = context.getProject().getBlob(context.getBlobIdent()).getBytes();
+					content = context.getProject().getBlob(context.getBlobIdent(), true).getBytes();
 				else
 					content = new byte[0];
 				add(editor = newEditor("editor", content));

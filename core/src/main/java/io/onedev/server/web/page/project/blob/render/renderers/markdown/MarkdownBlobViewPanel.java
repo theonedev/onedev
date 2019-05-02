@@ -20,7 +20,7 @@ public class MarkdownBlobViewPanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Blob blob = context.getProject().getBlob(context.getBlobIdent());
+		Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
 		add(new MarkdownViewer("markdown", Model.of(blob.getText().getContent()), null) {
 
 			@Override

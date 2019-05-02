@@ -31,7 +31,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.component.BlobIcon;
+import io.onedev.server.web.component.blob.BlobIcon;
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
@@ -68,7 +68,7 @@ public abstract class PathSelector extends Panel {
 				Repository repository = projectModel.getObject().getRepository();				
 				try (	RevWalk revWalk = new RevWalk(repository);
 						TreeWalk treeWalk = new TreeWalk(repository)) {
-					RevCommit commit = revWalk.parseCommit(projectModel.getObject().getObjectId(revision));
+					RevCommit commit = revWalk.parseCommit(projectModel.getObject().getObjectId(revision, true));
 					treeWalk.addTree(commit.getTree());
 					
 					List<BlobIdent> roots = new ArrayList<>();
@@ -94,7 +94,7 @@ public abstract class PathSelector extends Panel {
 			public Iterator<? extends BlobIdent> getChildren(BlobIdent node) {
 				Repository repository = projectModel.getObject().getRepository();				
 				try (RevWalk revWalk = new RevWalk(repository)) {
-					RevCommit commit = revWalk.parseCommit(projectModel.getObject().getObjectId(revision));
+					RevCommit commit = revWalk.parseCommit(projectModel.getObject().getObjectId(revision, true));
 					TreeWalk treeWalk = TreeWalk.forPath(repository, node.path, commit.getTree());
 					treeWalk.enterSubtree();
 					List<BlobIdent> children = new ArrayList<>();

@@ -77,7 +77,7 @@ public class RawBlobStreamResource extends AbstractResource {
 		if (!SecurityUtils.canReadCode(project.getFacade()))
 			throw new UnauthorizedException();
 
-		final Blob blob = project.getBlob(new BlobIdent(revision, path, 0));
+		final Blob blob = project.getBlob(new BlobIdent(revision, path, 0), true);
 
 		ResourceResponse response = new ResourceResponse();
 		response.setAcceptRange(ContentRangeType.BYTES);

@@ -98,13 +98,13 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		super(params);
 		
 		state = new State(params);
-		resolvedRevision = getProject().getRevCommit(state.revision).copy();
+		resolvedRevision = getProject().getRevCommit(state.revision, true).copy();
 		if (state.compareWith != null)
-			resolvedCompareWith = getProject().getRevCommit(state.compareWith).copy();
+			resolvedCompareWith = getProject().getRevCommit(state.compareWith, true).copy();
 	}
 
 	private RevCommit getCommit() {
-		return getProject().getRevCommit(state.revision);
+		return getProject().getRevCommit(state.revision, true);
 	}
 	
 	private List<RevCommit> getParents() {
@@ -218,7 +218,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		});
 		
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
-		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent(), true));
+		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 
 		add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 

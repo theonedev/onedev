@@ -274,7 +274,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		String merged = Preconditions.checkNotNull(preview.getMerged());
 		
 		ObjectId mergedId = ObjectId.fromString(merged);
-		RevCommit mergedCommit = request.getTargetProject().getRevCommit(mergedId);
+		RevCommit mergedCommit = request.getTargetProject().getRevCommit(mergedId, true);
 		
         PersonIdent committer = new PersonIdent(OneDev.NAME, "");
         

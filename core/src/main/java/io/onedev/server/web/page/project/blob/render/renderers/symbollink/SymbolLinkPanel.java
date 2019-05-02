@@ -33,7 +33,7 @@ public class SymbolLinkPanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Blob blob = context.getProject().getBlob(context.getBlobIdent());
+		Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
 		String targetPath = PathUtils.normalizeDots(
 				PathUtils.resolveSibling(context.getBlobIdent().path, blob.getText().getContent()));
 		if (targetPath != null && (targetPath.startsWith("/") || new File(targetPath).isAbsolute())) 
@@ -43,7 +43,7 @@ public class SymbolLinkPanel extends BlobViewPanel {
 		if (targetPath != null) {
 			Repository repository = context.getProject().getRepository();				
 			try (RevWalk revWalk = new RevWalk(repository)) {
-				ObjectId commitId = context.getProject().getObjectId(context.getBlobIdent().revision);
+				ObjectId commitId = context.getProject().getObjectId(context.getBlobIdent().revision, true);
 				RevTree revTree = revWalk.parseCommit(commitId).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(repository, targetPath, revTree);
 				if (treeWalk != null) {

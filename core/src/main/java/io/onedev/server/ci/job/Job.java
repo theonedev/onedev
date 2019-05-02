@@ -14,7 +14,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.ci.job.log.LogLevel;
-import io.onedev.server.ci.job.outcome.JobOutcome;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.util.inputspec.InputSpec;

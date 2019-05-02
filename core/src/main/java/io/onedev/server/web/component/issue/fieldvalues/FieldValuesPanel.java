@@ -38,7 +38,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.builds2.detail.BuildDetailPage;
+import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
@@ -84,7 +84,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(value));
 						if (build != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
-							Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDetailPage.class, BuildDetailPage.paramsOf(build));
+							Link<Void> link = new BookmarkablePageLink<Void>("link", BuildLogPage.class, BuildLogPage.paramsOf(build, null));
 							link.add(new Label("label", "#" + build.getNumber()));
 							linkFrag.add(link);
 							item.add(linkFrag);

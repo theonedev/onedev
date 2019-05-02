@@ -314,11 +314,11 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	public RevCommit getBaseCommit() {
-		return getTargetProject().getRevCommit(ObjectId.fromString(getBaseCommitHash()));
+		return getTargetProject().getRevCommit(ObjectId.fromString(getBaseCommitHash()), true);
 	}
 	
 	public RevCommit getHeadCommit() {
-		return getTargetProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()));
+		return getTargetProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()), true);
 	}
 	
 	/**

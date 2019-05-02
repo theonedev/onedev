@@ -74,7 +74,7 @@ public abstract class QuickSearchPanel extends Panel {
 
 	private List<QueryHit> querySymbols(String searchInput, int count) {
 		SearchManager searchManager = OneDev.getInstance(SearchManager.class);
-		ObjectId commit = projectModel.getObject().getRevCommit(revisionModel.getObject());		
+		ObjectId commit = projectModel.getObject().getRevCommit(revisionModel.getObject(), true);		
 		List<QueryHit> symbolHits = new ArrayList<>();
 		try {
 			// first try an exact search against primary symbol to make sure the result 

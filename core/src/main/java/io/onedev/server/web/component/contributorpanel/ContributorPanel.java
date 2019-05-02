@@ -19,13 +19,10 @@ public class ContributorPanel extends Panel {
 	
 	private final PersonIdent committer;
 	
-	private final boolean withDate;
-	
-	public ContributorPanel(String id, PersonIdent author, PersonIdent committer, boolean withDate) {
+	public ContributorPanel(String id, PersonIdent author, PersonIdent committer) {
 		super(id);
 		this.author = author;
 		this.committer = committer;
-		this.withDate = withDate;
 	}
 
 	@Override
@@ -39,10 +36,7 @@ public class ContributorPanel extends Panel {
 		} else {
 			add(new UserIdentPanel("committer", UserIdent.of(committer), Mode.NAME));
 		}
-		if (withDate)
-			add(new Label("date", DateUtils.formatAge(committer.getWhen())));
-		else
-			add(new WebMarkupContainer("date").setVisible(false));
+		add(new Label("date", DateUtils.formatAge(committer.getWhen())));
 	}
 
 	@Override

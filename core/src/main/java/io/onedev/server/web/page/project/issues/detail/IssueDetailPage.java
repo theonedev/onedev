@@ -36,10 +36,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
-import io.onedev.server.web.component.issue.side.IssueInfoPanel;
+import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.moreinfoside.MoreInfoSidePanel;
+import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -153,11 +153,11 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
 		
-		add(new MoreInfoSidePanel("moreInfo") {
+		add(new SideInfoPanel("moreInfo") {
 
 			@Override
 			protected Component newContent(String componentId) {
-				return new IssueInfoPanel(componentId) {
+				return new IssueSidePanel(componentId) {
 
 					@Override
 					protected Issue getIssue() {

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.joda.time.DateTime;
 import org.ocpsoft.prettytime.PrettyTime;
 
@@ -43,4 +44,7 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils {
     		return null;
     }
     
+    public static String formatDuration(long durationMillis) {
+    	return DurationFormatUtils.formatDurationWords(durationMillis, true, true);
+    }
 }

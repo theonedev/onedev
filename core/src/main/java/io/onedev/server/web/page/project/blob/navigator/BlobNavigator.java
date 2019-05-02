@@ -42,7 +42,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.web.component.BlobIcon;
+import io.onedev.server.web.component.blob.BlobIcon;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;

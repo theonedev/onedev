@@ -157,7 +157,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		
 		this.viewPlainMode = viewPlainMode;
 		
-		Blob blob = context.getProject().getBlob(context.getBlobIdent());
+		Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
 		
 		String blobName = context.getBlobIdent().getName();
 		SymbolExtractor<Symbol> extractor = SymbolExtractorRegistry.getExtractor(blobName);
@@ -869,7 +869,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		
 		response.render(JavaScriptHeaderItem.forReference(new SourceViewResourceReference()));
 		
-		Blob blob = context.getProject().getBlob(context.getBlobIdent());
+		Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
 		
 		String jsonOfBlameInfos = getJsonOfBlameInfos(context.getMode() == Mode.BLAME);
 		Map<Integer, List<CommentInfo>> commentInfos = new HashMap<>(); 

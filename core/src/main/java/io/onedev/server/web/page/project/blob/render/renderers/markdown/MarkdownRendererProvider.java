@@ -22,7 +22,7 @@ public class MarkdownRendererProvider implements BlobRendererContribution {
 		if (context.getMode() == Mode.ADD && isMarkdown(context.getNewPath()) 
 				|| context.getMode() == Mode.EDIT 
 					&& isMarkdown(context.getBlobIdent().path) 
-					&& context.getProject().getBlob(context.getBlobIdent()).getText() != null) {
+					&& context.getProject().getBlob(context.getBlobIdent(), true).getText() != null) {
 			return new PrioritizedComponentRenderer() {
 				
 				private static final long serialVersionUID = 1L;
@@ -40,7 +40,7 @@ public class MarkdownRendererProvider implements BlobRendererContribution {
 		} else if ((context.getMode() == Mode.VIEW || context.getMode() == Mode.BLAME) 
 				&& context.getBlobIdent().isFile() 
 				&& isMarkdown(context.getBlobIdent().path) 
-				&& context.getProject().getBlob(context.getBlobIdent()).getText() != null) {
+				&& context.getProject().getBlob(context.getBlobIdent(), true).getText() != null) {
 			return new PrioritizedComponentRenderer() {
 				
 				private static final long serialVersionUID = 1L;

@@ -166,7 +166,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		if (modeStr != null)
 			state.mode = Mode.valueOf(modeStr.toUpperCase());
 
-		resolvedRevision = getProject().getObjectId(state.blobIdent.revision);
+		resolvedRevision = getProject().getObjectId(state.blobIdent.revision, true);
 		
 		state.mark = TextRange.of(params.get(PARAM_MARK).toString());
 		
@@ -216,7 +216,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			protected void onConfigure() {
 				super.onConfigure();
 
-				RevCommit commit = getProject().getRevCommit(resolvedRevision);
+				RevCommit commit = getProject().getRevCommit(resolvedRevision, true);
 				IndexManager indexManager = OneDev.getInstance(IndexManager.class);
 				if (!indexManager.isIndexed(getProject(), commit)) {
 					OneDev.getInstance(IndexManager.class).indexAsync(getProject(), commit);
@@ -242,7 +242,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 					.build();
 			try {
 				SearchManager searchManager = OneDev.getInstance(SearchManager.class);
-				queryHits = searchManager.search(projectModel.getObject(), getProject().getRevCommit(resolvedRevision), 
+				queryHits = searchManager.search(projectModel.getObject(), getProject().getRevCommit(resolvedRevision, true), 
 						query);
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
@@ -699,7 +699,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		 * resolved to existing value of resolvedRevision
 		 */
 		resolvedRevision = null;
-		resolvedRevision = getProject().getObjectId(state.blobIdent.revision);
+		resolvedRevision = getProject().getObjectId(state.blobIdent.revision, true);
 		
 		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 		newRevisionPicker(target);
@@ -926,13 +926,13 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 	@Override
 	public RevCommit getCommit() {
-		return getProject().getRevCommit(resolvedRevision);
+		return getProject().getRevCommit(resolvedRevision, true);
 	}
 	
 	@Override
 	public Collection<String> getWebSocketObservables() {
 		Collection<String> observables = super.getWebSocketObservables();
-		observables.add(CommitIndexed.getWebSocketObservable(getProject().getRevCommit(resolvedRevision).name()));
+		observables.add(CommitIndexed.getWebSocketObservable(getProject().getRevCommit(resolvedRevision, true).name()));
 		if (state.requestId != null)
 			observables.add(PullRequest.getWebSocketObservable(state.requestId));
 		if (state.commentId != null)
@@ -1000,7 +1000,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 		if (state.mode == Mode.DELETE) {
 			try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
-				RevTree revTree = getProject().getRevCommit(refUpdated.getNewCommitId()).getTree();
+				RevTree revTree = getProject().getRevCommit(refUpdated.getNewCommitId(), true).getTree();
 				String parentPath = StringUtils.substringBeforeLast(state.blobIdent.path, "/");
 				while (TreeWalk.forPath(getProject().getRepository(), parentPath, revTree) == null) {
 					if (parentPath.contains("/")) {
@@ -1129,7 +1129,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		} else if (state.mode == Mode.EDIT) {
 			return String.format("autosave:editBlob:%d:%s:%s:%s", 
 					getProject().getId(), state.blobIdent.revision, 
-					state.blobIdent.path, getProject().getBlob(state.blobIdent).getBlobId());
+					state.blobIdent.path, getProject().getBlob(state.blobIdent, true).getBlobId());
 		} else {
 			throw new IllegalStateException();
 		}
@@ -1180,7 +1180,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 		User user = Preconditions.checkNotNull(OneDev.getInstance(UserManager.class).getCurrent());
 
-		ObjectId prevCommitId = getProject().getObjectId(blobIdent.revision);
+		ObjectId prevCommitId = getProject().getObjectId(blobIdent.revision, true);
 
 		while (true) {
 			try {

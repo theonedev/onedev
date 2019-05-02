@@ -13,7 +13,8 @@ import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.web.page.project.builds2.detail.BuildDetailPage;
+import io.onedev.server.web.component.build.BuildTitleLabel;
+import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
 
 @SuppressWarnings("serial")
 public class BuildDetailPanel extends GenericPanel<List<Build>> {
@@ -30,8 +31,8 @@ public class BuildDetailPanel extends GenericPanel<List<Build>> {
 				Build build = item.getModelObject();
 				item.add(new Label("job", build.getJobName()));
 				
-				Link<Void> link = new BookmarkablePageLink<Void>("number", BuildDetailPage.class, BuildDetailPage.paramsOf(build));
-				link.add(new Label("label", "#" + build.getNumber())); 
+				Link<Void> link = new BookmarkablePageLink<Void>("number", BuildLogPage.class, BuildLogPage.paramsOf(build, null));
+				link.add(new BuildTitleLabel("label", item.getModel())); 
 				item.add(link);
 			}
 			

@@ -216,14 +216,14 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	@Nullable
 	public TextRange mapRange(BlobIdent blobIdent) {
-		RevCommit commit = project.getRevCommit(blobIdent.revision);
+		RevCommit commit = project.getRevCommit(blobIdent.revision, true);
 		if (commit.name().equals(getMarkPos().getCommit())) {
 			return getMarkPos().getRange();
 		} else {
 			List<String> newLines = GitUtils.readLines(getProject().getRepository(), 
 					commit, blobIdent.path, WhitespaceOption.DEFAULT);
 			List<String> oldLines = GitUtils.readLines(getProject().getRepository(), 
-					project.getRevCommit(getMarkPos().getCommit()), getMarkPos().getPath(), 
+					project.getRevCommit(getMarkPos().getCommit(), true), getMarkPos().getPath(), 
 					WhitespaceOption.DEFAULT);
 			return DiffUtils.mapRange(DiffUtils.mapLines(oldLines, newLines), getMarkPos().getRange());
 		}
@@ -245,7 +245,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 									treeWalk.getRawMode(0));
 							Blob newBlob = new Blob(blobIdent, blobId, treeWalk.getObjectReader()); 
 							Blob oldBlob = project.getBlob(new BlobIdent(markPos.getCommit(), 
-									markPos.getPath(), FileMode.REGULAR_FILE.getBits()));
+									markPos.getPath(), FileMode.REGULAR_FILE.getBits()), true);
 							Preconditions.checkState(oldBlob != null && oldBlob.getText() != null);
 							
 							List<String> oldLines = new ArrayList<>();

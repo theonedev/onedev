@@ -48,9 +48,9 @@ import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
-import io.onedev.server.web.component.moreinfoside.MoreInfoSideClosed;
-import io.onedev.server.web.component.moreinfoside.MoreInfoSideOpened;
 import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.sideinfo.SideInfoClosed;
+import io.onedev.server.web.component.sideinfo.SideInfoOpened;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
@@ -211,8 +211,8 @@ public abstract class IssueOperationsPanel extends Panel {
 			@Override
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
-				if (event.getPayload() instanceof MoreInfoSideClosed) {
-					MoreInfoSideClosed moreInfoSideClosed = (MoreInfoSideClosed) event.getPayload();
+				if (event.getPayload() instanceof SideInfoClosed) {
+					SideInfoClosed moreInfoSideClosed = (SideInfoClosed) event.getPayload();
 					setVisible(true);
 					moreInfoSideClosed.getHandler().add(this);
 				}
@@ -222,7 +222,7 @@ public abstract class IssueOperationsPanel extends Panel {
 			public void onClick(AjaxRequestTarget target) {
 				setVisible(false);
 				target.add(this);
-				send(getPage(), Broadcast.BREADTH, new MoreInfoSideOpened(target));
+				send(getPage(), Broadcast.BREADTH, new SideInfoOpened(target));
 			}
 			
 		}.setOutputMarkupPlaceholderTag(true));

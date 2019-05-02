@@ -139,8 +139,8 @@ public class RevisionDiffPanel extends Panel {
 
 		@Override
 		protected List<DiffEntry> load() {
-			AnyObjectId oldRevId = projectModel.getObject().getObjectId(oldRev);
-			AnyObjectId newRevId = projectModel.getObject().getObjectId(newRev);
+			AnyObjectId oldRevId = projectModel.getObject().getObjectId(oldRev, true);
+			AnyObjectId newRevId = projectModel.getObject().getObjectId(newRev, true);
 			return GitUtils.diff(projectModel.getObject().getRepository(), oldRevId, newRevId);
 		}
 		
@@ -159,7 +159,7 @@ public class RevisionDiffPanel extends Panel {
 
 					@Override
 					public Blob getBlob(BlobIdent blobIdent) {
-						return projectModel.getObject().getBlob(blobIdent);
+						return projectModel.getObject().getBlob(blobIdent, true);
 					}
 
 	    		};
@@ -177,7 +177,7 @@ public class RevisionDiffPanel extends Panel {
 
 						@Override
 						public Blob getBlob(BlobIdent blobIdent) {
-							return projectModel.getObject().getBlob(blobIdent);
+							return projectModel.getObject().getBlob(blobIdent, true);
 						}
 						
 					});
@@ -193,7 +193,7 @@ public class RevisionDiffPanel extends Panel {
 
 					@Override
 					public Blob getBlob(BlobIdent blobIdent) {
-						return projectModel.getObject().getBlob(blobIdent);
+						return projectModel.getObject().getBlob(blobIdent, true);
 					}
 					
 				});
@@ -260,7 +260,7 @@ public class RevisionDiffPanel extends Panel {
 
 	    					@Override
 	    					public Blob getBlob(BlobIdent blobIdent) {
-	    						return projectModel.getObject().getBlob(blobIdent);
+	    						return projectModel.getObject().getBlob(blobIdent, true);
 	    					}
 
 	    	    		};
@@ -1261,7 +1261,7 @@ public class RevisionDiffPanel extends Panel {
 		if (oldRev.equals(ObjectId.zeroId().name().toString())) {
 			return ObjectId.zeroId();
 		} else {
-			return projectModel.getObject().getRevCommit(oldRev);
+			return projectModel.getObject().getRevCommit(oldRev, true);
 		}
 	}
 	
@@ -1269,7 +1269,7 @@ public class RevisionDiffPanel extends Panel {
 		if (newRev.equals(ObjectId.zeroId().name().toString())) {
 			return ObjectId.zeroId();
 		} else {
-			return projectModel.getObject().getRevCommit(newRev);
+			return projectModel.getObject().getRevCommit(newRev, true);
 		}
 	}
 	

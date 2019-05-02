@@ -10,9 +10,17 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 public class PageTabLink extends Panel {
 
 	private static final long serialVersionUID = 1L;
+
+	private final PageTab tab;
 	
 	public PageTabLink(String id, PageTab tab) {
 		super(id);
+		this.tab = tab;
+	}
+
+	@Override
+	protected void onInitialize() {
+		super.onInitialize();
 		
 		Link<?> pageLink = newLink("link", tab.getMainPageClass());
 		add(pageLink);

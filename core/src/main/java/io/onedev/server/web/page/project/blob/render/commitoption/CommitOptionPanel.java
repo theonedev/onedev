@@ -311,7 +311,7 @@ public class CommitOptionPanel extends Panel {
 			User user = Preconditions.checkNotNull(OneDev.getInstance(UserManager.class).getCurrent());
 
 			String refName = GitUtils.branch2ref(context.getBlobIdent().revision);
-			ObjectId prevCommitId = context.getProject().getObjectId(context.getBlobIdent().revision);
+			ObjectId prevCommitId = context.getProject().getObjectId(context.getBlobIdent().revision, true);
 			
 			Repository repository = context.getProject().getRepository();
 			ObjectId newCommitId = null;
@@ -427,7 +427,7 @@ public class CommitOptionPanel extends Panel {
 
 			@Override
 			public Blob getBlob(BlobIdent blobIdent) {
-				return context.getProject().getBlob(blobIdent);
+				return context.getProject().getBlob(blobIdent, true);
 			}
 
 		};
@@ -445,7 +445,7 @@ public class CommitOptionPanel extends Panel {
 		if (context.getMode() == Mode.EDIT) {
 			contentModified = !Arrays.equals(
 					newContentProvider.get(), 
-					context.getProject().getBlob(context.getBlobIdent()).getBytes());
+					context.getProject().getBlob(context.getBlobIdent(), true).getBytes());
 		} else {
 			contentModified = newContentProvider.get().length != 0;
 		}

@@ -243,7 +243,7 @@ public class FolderViewPanel extends Panel {
 
 			@Override
 			protected String load() {
-				Blob blob = context.getProject().getBlob(readmeModel.getObject());
+				Blob blob = context.getProject().getBlob(readmeModel.getObject(), true);
 				Blob.Text text = blob.getText();
 				if (text != null)
 					return text.getContent();

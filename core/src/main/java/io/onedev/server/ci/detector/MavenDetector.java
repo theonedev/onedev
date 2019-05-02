@@ -9,17 +9,17 @@ import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.ci.job.trigger.BranchPushedTrigger;
+import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Project;
 
 public class MavenDetector implements CISpecDetector {
 
 	@Override
 	public CISpec detect(Project project, ObjectId commitId) {
-		try {
-			project.getBlob(new BlobIdent(commitId.name(), "pom.xml", FileMode.TYPE_FILE));
+		Blob blob = project.getBlob(new BlobIdent(commitId.name(), "pom.xml", FileMode.TYPE_FILE), false);
 
+		if (blob != null) {
 			CISpec ciSpec = new CISpec();
 
 			Job job = new Job();
@@ -44,9 +44,9 @@ public class MavenDetector implements CISpecDetector {
 			ciSpec.getJobs().add(job);
 			
 			return ciSpec;
-		} catch (ObjectNotFoundException e) {
+		} else {
 			return null;
-		}		
+		} 	
 	}
 
 	@Override

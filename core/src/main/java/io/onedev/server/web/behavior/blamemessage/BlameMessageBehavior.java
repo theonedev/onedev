@@ -24,7 +24,7 @@ public abstract class BlameMessageBehavior extends AbstractPostAjaxBehavior {
 		
 		String tooltipId = params.getParameterValue("tooltip").toString();
 		String commitHash = params.getParameterValue("commit").toString();
-		RevCommit commit = getProject().getRevCommit(commitHash);
+		RevCommit commit = getProject().getRevCommit(commitHash, true);
 		String authoring;
 		if (commit.getAuthorIdent() != null) {
 			authoring = commit.getAuthorIdent().getName();

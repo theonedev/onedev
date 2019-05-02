@@ -93,7 +93,7 @@ ul>li>a.code-comments.new .fa-circle {
 	display: inline;
 }
 
-#request-detail>.more-info-side>.content>.nav {
+#request-detail>.side-info>.content>.nav {
 	font-size: 16px;
 	position: relative;
 	text-align: center;
@@ -101,35 +101,35 @@ ul>li>a.code-comments.new .fa-circle {
 	border-right: 1px solid #D8D8D8;
 	margin-right: 30px;
 }
-#request-detail>.more-info-side>.content>.nav a {
+#request-detail>.side-info>.content>.nav a {
 	position: absolute;
 	color: #666;
 	top: 0;
 }
 
-#request-detail>.more-info-side>.content>.nav .prev {
+#request-detail>.side-info>.content>.nav .prev {
 	left: 0;
 }
-#request-detail>.more-info-side>.content>.nav .next {
+#request-detail>.side-info>.content>.nav .next {
 	right: 0;
 }
 
-#request-detail>.more-info-side>.content>div>.head {
+#request-detail>.side-info>.content>div>.head {
 	font-weight: bold;
 	margin-bottom: 12px;
 }
 
-#request-detail>.more-info-side {
+#request-detail>.side-info {
 	width: 360px;
 	padding: 20px;
 	background: #F9F9F9;
 }
-#request-detail>.more-info-side>.content>* {
+#request-detail>.side-info>.content>* {
 	margin-bottom: 20px;
 	border-top: 1px solid #E8E8E8;
 	padding-top: 20px;
 }
-#request-detail>.more-info-side>.content>div:first-child {
+#request-detail>.side-info>.content>div:first-child {
 	border-top: none;
 	padding-top: 0;
 }
@@ -161,18 +161,18 @@ ul>li>a.code-comments.new .fa-circle {
 	#request-detail>.main {
 		padding-right: 360px;
 	}
-	#request-detail .more-info-side {
+	#request-detail .side-info {
 		box-shadow: none;
 		border-left-width: 2px;
 		display: block !important;
 	}
-	#request-detail .more-info-side.closed {
+	#request-detail .side-info.closed {
 		display: block;
 	}
-	#request-detail .status-and-branches a.more-info, #request-detail .more-info-side>a.close {
+	#request-detail .status-and-branches a.more-info, #request-detail .side-info>a.close {
 		display: none;
 	}
-	#request-detail>.more-info-side>.content>.nav {
+	#request-detail>.side-info>.content>.nav {
 		padding-right: 0;
 		border-right: none;
 		margin-right: 0;

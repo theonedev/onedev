@@ -89,7 +89,7 @@ public class ArchiveStreamResource extends AbstractResource {
 				try {
 					ArchiveCommand archive = Git.wrap(project.getRepository()).archive();
 					archive.setFormat(format);
-					archive.setTree(project.getRevCommit(revision).getId());
+					archive.setTree(project.getRevCommit(revision, true).getId());
 					archive.setOutputStream(attributes.getResponse().getOutputStream());
 					archive.call();
 				} catch (GitAPIException e) {

@@ -14,7 +14,7 @@ public class VideoRendererProvider implements BlobRendererContribution {
 	@Override
 	public PrioritizedComponentRenderer getRenderer(BlobRenderContext context) {
 		if (context.getMode() == Mode.VIEW && context.getBlobIdent().isFile()) {
-			if (context.getProject().getBlob(context.getBlobIdent()).getMediaType().getType().equalsIgnoreCase("video")) {
+			if (context.getProject().getBlob(context.getBlobIdent(), true).getMediaType().getType().equalsIgnoreCase("video")) {
 				return new PrioritizedComponentRenderer() {
 
 					private static final long serialVersionUID = 1L;

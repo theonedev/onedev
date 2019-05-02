@@ -17,7 +17,11 @@
         </div>
     </wicket:fragment>
     <wicket:fragment wicket:id="hasJobsFrag">
-        <ul wicket:id="navs" class="navs list-unstyled"></ul>
-        <div wicket:id="content" class="content"></div>
+        <div class="side"><div class="navs"><div wicket:id="navs" class="nav">
+            <a class="select"><span wicket:id="jobName"></span></a>
+        </div></div></div>
+        <div class="contents">
+            <div wicket:id="contents" class="content"></div>
+        </div>
     </wicket:fragment>
 </wicket:extend>

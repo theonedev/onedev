@@ -15,7 +15,7 @@ public class SourceRendererProvider implements BlobRendererContribution {
 	public PrioritizedComponentRenderer getRenderer(BlobRenderContext context) {
 		if (context.getMode() == Mode.ADD 
 				|| context.getMode() == Mode.EDIT 
-						&& context.getProject().getBlob(context.getBlobIdent()).getText() != null) {
+						&& context.getProject().getBlob(context.getBlobIdent(), true).getText() != null) {
 			return new PrioritizedComponentRenderer() {
 				
 				private static final long serialVersionUID = 1L;
@@ -32,7 +32,7 @@ public class SourceRendererProvider implements BlobRendererContribution {
 			};
 		} else if ((context.getMode() == Mode.VIEW || context.getMode() == Mode.BLAME) 
 				&& context.getBlobIdent().isFile() 
-				&& context.getProject().getBlob(context.getBlobIdent()).getText() != null) {
+				&& context.getProject().getBlob(context.getBlobIdent(), true).getText() != null) {
 			return new PrioritizedComponentRenderer() {
 				
 				private static final long serialVersionUID = 1L;

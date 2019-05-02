@@ -150,7 +150,7 @@ public class CommitQueryUtils {
 	public static boolean matches(RefUpdated event, User user, @Nullable String queryString) {
 		if (!event.getNewCommitId().equals(ObjectId.zeroId())) {
 			Project project = event.getProject();
-			RevCommit commit = project.getRevCommit(event.getNewCommitId());
+			RevCommit commit = project.getRevCommit(event.getNewCommitId(), true);
 			
 			QueryContext query = parse(queryString);
 			if (query != null && query.ALL() == null) { 

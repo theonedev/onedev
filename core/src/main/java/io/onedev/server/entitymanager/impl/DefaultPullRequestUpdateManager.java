@@ -64,7 +64,7 @@ public class DefaultPullRequestUpdateManager extends AbstractEntityManager<PullR
 						.setRemote(request.getSourceProject().getGitDir().getAbsolutePath())
 						.setRefSpecs(new RefSpec(GitUtils.branch2ref(request.getSourceBranch()) + ":" + update.getHeadRef()))
 						.call();
-				if (!request.getTargetProject().getObjectId(update.getHeadRef()).equals(updateHeadId)) {
+				if (!request.getTargetProject().getObjectId(update.getHeadRef(), true).equals(updateHeadId)) {
 					RefUpdate refUpdate = GitUtils.getRefUpdate(request.getTargetProject().getRepository(), 
 							update.getHeadRef());
 					refUpdate.setNewObjectId(updateHeadId);

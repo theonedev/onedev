@@ -207,7 +207,7 @@
 .board-card-detail>.body>.main .commits {
 	margin-bottom: 20px;
 }
-.board-card-detail>.body>.more-info-side {
+.board-card-detail>.body>.side-info {
 	position: absolute;
 	top: 0;
 	width: 320px;

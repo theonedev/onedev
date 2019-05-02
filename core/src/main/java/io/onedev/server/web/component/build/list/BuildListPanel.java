@@ -17,6 +17,7 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
 import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.ComponentTag;
@@ -31,6 +32,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -56,15 +58,19 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
+import io.onedev.server.web.component.build.BuildTitleLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
+import io.onedev.server.web.component.build.status.BuildStatusLabel;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
+import io.onedev.server.web.component.job.JobLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.page.project.builds2.detail.BuildDetailPage;
+import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.util.PagingHistorySupport;
+import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.VisibleVisitor;
 
@@ -95,6 +101,8 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 		}
 		
 	};
+	
+	private DataTable<Build, Void> buildsTable;
 	
 	private SortableDataProvider<Build, Void> dataProvider;	
 	
@@ -272,22 +280,16 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
-				Fragment fragment = new Fragment(componentId, "numberFrag", BuildListPanel.this);
+				Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
 				Build build = rowModel.getObject();
 				Long buildId = build.getId();
-				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDetailPage.class, BuildDetailPage.paramsOf(build));
-				link.add(new Label("label", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						Build build = OneDev.getInstance(BuildManager.class).load(buildId);
-						if (build.getVersion() != null) 
-							return "#" + build.getNumber() + " (" + build.getVersion() + ")";
-						else
-							return "#" + build.getNumber();
-					}
-					
-				}) {
+				
+				OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
+				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
+						(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
+				
+				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildLogPage.class, BuildLogPage.paramsOf(build, position));
+				link.add(new BuildTitleLabel("label", rowModel) {
 
 					@Override
 					protected void onInitialize() {
@@ -315,14 +317,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 				fragment.add(new BuildStatusIcon("icon", rowModel));
 				
 				Long buildId = rowModel.getObject().getId();
-				fragment.add(new Label("name", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						return StringUtils.capitalize(rowModel.getObject().getStatus().name().replace('_', ' ').toLowerCase());
-					}
-					
-				}) {
+				fragment.add(new BuildStatusLabel("label", rowModel) {
 
 					@Override
 					protected void onInitialize() {
@@ -346,7 +341,19 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			@Override
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
 					IModel<Build> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getJobName()));
+				Build build = rowModel.getObject();
+				Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+				Link<Void> link = new JobLink("link", new AbstractReadOnlyModel<Project>() {
+
+					@Override
+					public Project getObject() {
+						return getProject();
+					}
+					
+				}, build.getCommitHash(), build.getJobName());
+				link.add(new Label("label", build.getJobName()));
+				fragment.add(link);
+				cellItem.add(fragment);
 			}
 		});
 		
@@ -389,7 +396,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			}
 		});
 		
-		add(new HistoryAwareDataTable<Build, Void>("builds", columns, dataProvider, 
+		add(buildsTable = new HistoryAwareDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 		
 		setOutputMarkupId(true);

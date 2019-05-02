@@ -8,9 +8,7 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.git.command.CheckoutCommand;
-import io.onedev.server.git.command.CleanCommand;
 import io.onedev.server.git.command.FetchCommand;
 import io.onedev.server.model.Project;
 
@@ -41,7 +39,6 @@ public class SourceSnapshot {
 	public void checkout(File dir) {
 		if (new File(dir, ".git").exists()) {
 			try (Git git = Git.open(dir)) {
-				new CleanCommand(dir).options("-d", "-f", "--exclude", JobCache.LOCK_FILE).call();
 				fetchAndCheckout(dir);
 			} catch (IOException e) {
 				throw new RuntimeException(e);

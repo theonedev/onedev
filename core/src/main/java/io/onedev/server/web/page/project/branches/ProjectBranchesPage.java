@@ -454,7 +454,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				link.add(new Label("name", branch));
 				item.add(link);
 				
-				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId());
+				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId(), true);
 				String lastCommitHash = lastCommit.name();
 				item.add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
@@ -492,8 +492,7 @@ public class ProjectBranchesPage extends ProjectPage {
 					
 				});
 				
-				item.add(new ContributorPanel("contributor", lastCommit.getAuthorIdent(), 
-						lastCommit.getCommitterIdent(), true));
+				item.add(new ContributorPanel("contributor", lastCommit.getAuthorIdent(), lastCommit.getCommitterIdent()));
 				
 				PageParameters params = CommitDetailPage.paramsOf(getProject(), lastCommit.name());
 				link = new ViewStateAwarePageLink<Void>("messageLink", CommitDetailPage.class, params);

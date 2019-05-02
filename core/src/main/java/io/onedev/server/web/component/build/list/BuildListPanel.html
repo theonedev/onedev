@@ -17,14 +17,13 @@
 		<div class="body">
 			<div wicket:id="feedback"></div>
 			<table wicket:id="builds" class="table"></table>
-			<div class="help-block"><i class="fa fa-info-circle"></i> This page lists builds containig recent commits fixing the issue</div>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="numberFrag">
+	<wicket:fragment wicket:id="linkFrag">
 		<a wicket:id="link"><span wicket:id="label"></span></a>
-	</wicket:fragment>	
+    </wicket:fragment>	
 	<wicket:fragment wicket:id="statusFrag">
-		<span wicket:id="icon"></span> <span wicket:id="name"></span>
+		<span wicket:id="icon"></span> <span wicket:id="label"></span>
 	</wicket:fragment>	
 	<wicket:fragment wicket:id="commitFrag">
 		<a wicket:id="hashLink" class="hash"><span wicket:id="hash"></span></a>

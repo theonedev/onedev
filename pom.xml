@@ -161,6 +161,7 @@
     </build>  	
     <modules> 
         <module>core</module>
+		<module>plugin</module>
         <module>product</module>
     </modules>  
 	<dependencyManagement>

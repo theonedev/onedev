@@ -23,7 +23,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
-import io.onedev.server.web.page.project.builds2.detail.BuildDetailPage;
+import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
 import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
@@ -84,7 +84,7 @@ public class PullRequestBuildsPanel extends GenericPanel<PullRequest> {
 						
 					}));
 					
-					Link<Void> link = new BookmarkablePageLink<Void>("number", BuildDetailPage.class, BuildDetailPage.paramsOf(build.getBuild()));
+					Link<Void> link = new BookmarkablePageLink<Void>("number", BuildLogPage.class, BuildLogPage.paramsOf(build.getBuild(), null));
 					link.add(new Label("label", "#" + build.getBuild().getNumber()));
 					item.add(link);
 				} else {

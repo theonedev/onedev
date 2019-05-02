@@ -247,7 +247,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 						 * note that we can not get merge commit object in current revWalk as 
 						 * it has been marked and this will make the commit object incomplete
 						 */
-						commits.add(getProject().getRevCommit(mergeBase));
+						commits.add(getProject().getRevCommit(mergeBase, true));
 					} else {
 						revWalk.markStart(revWalk.parseCommit(rightCommitId));
 						revWalk.markUninteresting(revWalk.parseCommit(mergeBase));

@@ -276,7 +276,7 @@ public class Project extends AbstractEntity {
 	
 	private transient Repository repository;
 	
-    private transient Map<BlobIdent, Blob> blobCache;
+    private transient Map<BlobIdent, Optional<Blob>> blobCache;
     
     private transient Map<String, Optional<ObjectId>> objectIdCache;
     
@@ -516,7 +516,7 @@ public class Project extends AbstractEntity {
 		defaultBranchOptional = null;
 	}
 	
-	private Map<BlobIdent, Blob> getBlobCache() {
+	private Map<BlobIdent, Optional<Blob>> getBlobCache() {
 		if (blobCache == null) {
 			synchronized(this) {
 				if (blobCache == null)
@@ -542,43 +542,51 @@ public class Project extends AbstractEntity {
 	 * 			ObjectNotFoundException if blob of specified ident can not be found in repository 
 	 * 			
 	 */
-	public Blob getBlob(BlobIdent blobIdent) {
+	@Nullable
+	public Blob getBlob(BlobIdent blobIdent, boolean mustExist) {
 		Preconditions.checkArgument(blobIdent.revision!=null && blobIdent.path!=null && blobIdent.mode!=null, 
 				"Revision, path and mode of ident param should be specified");
 		
-		Blob blob = getBlobCache().get(blobIdent);
+		Optional<Blob> blob = getBlobCache().get(blobIdent);
 		if (blob == null) {
 			try (RevWalk revWalk = new RevWalk(getRepository())) {
-				ObjectId revId = getObjectId(blobIdent.revision);		
+				ObjectId revId = getObjectId(blobIdent.revision, true);		
 				RevTree revTree = revWalk.parseCommit(revId).getTree();
 				TreeWalk treeWalk = TreeWalk.forPath(getRepository(), blobIdent.path, revTree);
 				if (treeWalk != null) {
 					ObjectId blobId = treeWalk.getObjectId(0);
 					if (blobIdent.isGitLink()) {
 						String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
-						if (url == null)
-							throw new ObjectNotFoundException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
-						String hash = blobId.name();
-						blob = new Blob(blobIdent, blobId, new Submodule(url, hash).toString().getBytes());
+						if (url == null) {
+							if (mustExist)
+								throw new ObjectNotFoundException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
+							else
+								blob = Optional.absent();
+						} else {
+							String hash = blobId.name();
+							blob = Optional.of(new Blob(blobIdent, blobId, new Submodule(url, hash).toString().getBytes()));
+						}
 					} else if (blobIdent.isTree()) {
 						throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
 					} else {
-						blob = new Blob(blobIdent, blobId, treeWalk.getObjectReader());
+						blob = Optional.of(new Blob(blobIdent, blobId, treeWalk.getObjectReader()));
 					}
-					getBlobCache().put(blobIdent, blob);
-				} else {
+				} else if (mustExist) {
 					throw new ObjectNotFoundException("Unable to find blob path '" + blobIdent.path + "' in revision '" + blobIdent.revision + "'");
+				} else {
+					blob = Optional.absent();
 				}
+				getBlobCache().put(blobIdent, blob);
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
-		return blob;
+		return blob.orNull();
 	}
 	
 	public InputStream getInputStream(BlobIdent ident) {
 		try (RevWalk revWalk = new RevWalk(getRepository())) {
-			ObjectId commitId = getObjectId(ident.revision);
+			ObjectId commitId = getObjectId(ident.revision, true);
 			RevTree revTree = revWalk.parseCommit(commitId).getTree();
 			TreeWalk treeWalk = TreeWalk.forPath(getRepository(), ident.path, revTree);
 			if (treeWalk != null) {
@@ -619,10 +627,6 @@ public class Project extends AbstractEntity {
 		return optional.orNull();
 	}
 	
-	public ObjectId getObjectId(String revision) {
-		return getObjectId(revision, true);
-	}
-	
 	public void cacheObjectId(String revision, @Nullable ObjectId objectId) {
 		if (objectIdCache == null)
 			objectIdCache = new HashMap<>();
@@ -646,10 +650,10 @@ public class Project extends AbstractEntity {
 			ciSpecCache = new HashMap<>();
 		Optional<CISpec> ciSpecOpt = ciSpecCache.get(commitId);
 		if (ciSpecOpt == null) {
-			try {
-				Blob blob = getBlob(new BlobIdent(commitId.name(), CISpec.BLOB_PATH, FileMode.TYPE_FILE));
+			Blob blob = getBlob(new BlobIdent(commitId.name(), CISpec.BLOB_PATH, FileMode.TYPE_FILE), false);
+			if (blob != null) {
 				ciSpecOpt = Optional.of(CISpec.parse(blob.getBytes()));
-			} catch (ObjectNotFoundException e) {
+			} else {				
 				List<CISpecDetector> detectors = new ArrayList<>(OneDev.getExtensions(CISpecDetector.class));
 				detectors.sort(Comparator.comparing(CISpecDetector::getPriority));
 				CISpec ciSpec = null;
@@ -666,7 +670,7 @@ public class Project extends AbstractEntity {
 	}
 	
 	public List<String> getJobNames() {
-		CISpec ciSpec = getCISpec(getObjectId(getDefaultBranch()));
+		CISpec ciSpec = getCISpec(getObjectId(getDefaultBranch(), true));
 		if (ciSpec != null) {
 			List<String> jobNames = new ArrayList<>(ciSpec.getJobMap().keySet());
 			Collections.sort(jobNames);
@@ -730,7 +734,7 @@ public class Project extends AbstractEntity {
 			cache = null;
 		}
 
-		final AnyObjectId commitId = getObjectId(revision);
+		final AnyObjectId commitId = getObjectId(revision, true);
 		
 		long time = System.currentTimeMillis();
 		LastCommitsOfChildren lastCommits = new LastCommitsOfChildren(getRepository(), commitId, path, cache);
@@ -796,10 +800,6 @@ public class Project extends AbstractEntity {
 		}
 	}
 	
-	public RevCommit getRevCommit(String revision) {
-		return getRevCommit(revision, true);
-	}
-	
 	@Nullable
 	public RevCommit getRevCommit(ObjectId revId, boolean mustExist) {
 		if (commitCache == null)
@@ -820,10 +820,6 @@ public class Project extends AbstractEntity {
 			return commit;
 	}
 	
-	public RevCommit getRevCommit(ObjectId revId) {
-		return getRevCommit(revId, true);
-	}
-	
 	public List<Ref> getRefs(String prefix) {
 		try {
 			return getRepository().getRefDatabase().getRefsByPrefix(prefix);
@@ -835,7 +831,7 @@ public class Project extends AbstractEntity {
 	public Map<String, String> getSubmodules(String revision) {
 		Map<String, String> submodules = new HashMap<>();
 		
-		Blob blob = getBlob(new BlobIdent(revision, ".gitmodules", FileMode.REGULAR_FILE.getBits()));
+		Blob blob = getBlob(new BlobIdent(revision, ".gitmodules", FileMode.REGULAR_FILE.getBits()), true);
 		String content = new String(blob.getBytes());
 		
 		String path = null;
@@ -861,7 +857,7 @@ public class Project extends AbstractEntity {
 
     public void deleteBranch(String branch) {
     	String refName = GitUtils.branch2ref(branch);
-    	ObjectId commitId = getObjectId(refName);
+    	ObjectId commitId = getObjectId(refName, true);
     	try {
 			git().branchDelete().setForce(true).setBranchNames(branch).call();
 		} catch (Exception e) {
@@ -897,8 +893,8 @@ public class Project extends AbstractEntity {
 		try {
 			CreateBranchCommand command = git().branchCreate();
 			command.setName(branchName);
-			RevCommit commit = getRevCommit(branchRevision);
-			command.setStartPoint(getRevCommit(branchRevision));
+			RevCommit commit = getRevCommit(branchRevision, true);
+			command.setStartPoint(getRevCommit(branchRevision, true));
 			command.call();
 			String refName = GitUtils.branch2ref(branchName); 
 			cacheObjectId(refName, commit);
@@ -939,7 +935,7 @@ public class Project extends AbstractEntity {
 			if (tagMessage != null)
 				tag.setMessage(tagMessage);
 			tag.setTagger(taggerIdent);
-			tag.setObjectId(getRevCommit(tagRevision));
+			tag.setObjectId(getRevCommit(tagRevision, true));
 			tag.call();
 			
 			String refName = GitUtils.tag2ref(tagName);
@@ -976,7 +972,7 @@ public class Project extends AbstractEntity {
     
     public void deleteTag(String tag) {
     	String refName = GitUtils.tag2ref(tag);
-    	ObjectId commitId = getRevCommit(refName).getId();
+    	ObjectId commitId = getRevCommit(refName, true).getId();
     	try {
 			git().tagDelete().setTags(tag).call();
 		} catch (GitAPIException e) {
@@ -1145,7 +1141,7 @@ public class Project extends AbstractEntity {
 	}
 
 	public List<BlobIdent> getChildren(BlobIdent blobIdent, BlobIdentFilter blobIdentFilter) {
-		return getChildren(blobIdent, blobIdentFilter, getObjectId(blobIdent.revision));
+		return getChildren(blobIdent, blobIdentFilter, getObjectId(blobIdent.revision, true));
 	}
 	
 	public List<BlobIdent> getChildren(BlobIdent blobIdent, BlobIdentFilter blobIdentFilter, ObjectId commitId) {
@@ -1177,7 +1173,7 @@ public class Project extends AbstractEntity {
 
 	public int getMode(String revision, @Nullable String path) {
 		if (path != null) {
-			RevCommit commit = getRevCommit(revision);
+			RevCommit commit = getRevCommit(revision, true);
 			try {
 				TreeWalk treeWalk = TreeWalk.forPath(getRepository(), path, commit.getTree());
 				if (treeWalk != null) {

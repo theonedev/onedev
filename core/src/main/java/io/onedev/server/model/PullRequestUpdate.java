@@ -249,7 +249,7 @@ public class PullRequestUpdate extends AbstractEntity {
 	}
 	
 	public RevCommit getHeadCommit() {
-		return request.getWorkProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()));
+		return request.getWorkProject().getRevCommit(ObjectId.fromString(getHeadCommitHash()), true);
 	}
 	
 }

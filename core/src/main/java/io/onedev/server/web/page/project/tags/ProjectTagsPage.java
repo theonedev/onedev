@@ -326,7 +326,7 @@ public class ProjectTagsPage extends ProjectPage {
 				link.add(new Label("message", commit.getShortMessage()));
 				item.add(link);
 				
-				item.add(new ContributorPanel("contributor", commit.getAuthorIdent(), commit.getCommitterIdent(), true));
+				item.add(new ContributorPanel("contributor", commit.getAuthorIdent(), commit.getCommitterIdent()));
 				
 				item.add(new ArchiveMenuLink("download", projectModel) {
 

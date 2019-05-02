@@ -50,7 +50,7 @@ import io.onedev.commons.utils.UrlUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.component.blobpicker.BlobPicker;
+import io.onedev.server.web.component.blob.BlobPicker;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;

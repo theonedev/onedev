@@ -163,7 +163,7 @@ public abstract class BlobViewPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return context.getProject().getBlob(context.getBlobIdent()).getText().getLines().size() + " lines";
+				return context.getProject().getBlob(context.getBlobIdent(), true).getText().getLines().size() + " lines";
 			}
 			
 		}) {
@@ -172,7 +172,7 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(context.getProject().getBlob(context.getBlobIdent()).getText() != null);
+				setVisible(context.getProject().getBlob(context.getBlobIdent(), true).getText() != null);
 			}
 			
 		});
@@ -181,7 +181,7 @@ public abstract class BlobViewPanel extends Panel {
 
 			@Override
 			public String getObject() {
-				return context.getProject().getBlob(context.getBlobIdent()).getText().getCharset().displayName();
+				return context.getProject().getBlob(context.getBlobIdent(), true).getText().getCharset().displayName();
 			}
 			
 		}) {
@@ -190,12 +190,12 @@ public abstract class BlobViewPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				setVisible(context.getProject().getBlob(context.getBlobIdent()).getText() != null);
+				setVisible(context.getProject().getBlob(context.getBlobIdent(), true).getText() != null);
 			}
 			
 		});
 		
-		add(new Label("size", FileUtils.byteCountToDisplaySize(context.getProject().getBlob(context.getBlobIdent()).getSize())));
+		add(new Label("size", FileUtils.byteCountToDisplaySize(context.getProject().getBlob(context.getBlobIdent(), true).getSize())));
 		
 		add(newOptions("options"));
 		
@@ -234,7 +234,7 @@ public abstract class BlobViewPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(context.getProject().getBlob(context.getBlobIdent()).getText() != null);
+				setVisible(context.getProject().getBlob(context.getBlobIdent(), true).getText() != null);
 			}
 
 		}.add(new OnChangeAjaxBehavior() {

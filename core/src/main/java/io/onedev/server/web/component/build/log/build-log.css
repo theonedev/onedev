@@ -1,9 +1,8 @@
 .build-log {
     overflow: auto;
-    height: 600px;
     background: black;
     color: white;
-    border-radius: 4px;
+    position: relative;
 }
 .build-log>.log-entry.ERROR {
     color: red;
@@ -23,7 +22,7 @@
 .build-log>.log-entry>.message {
     padding-right: 0;
 }
-.build-log>.too-many-entries {
+.build-log>.too-many-entries, .build-log>.no-entries {
     color: red;
     font-size: 16px;
     font-weight: bold;

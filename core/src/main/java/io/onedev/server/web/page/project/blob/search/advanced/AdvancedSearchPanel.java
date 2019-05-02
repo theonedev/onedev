@@ -545,7 +545,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 					.fileNames(fileNames)
 					.count(SearchResultPanel.MAX_QUERY_ENTRIES)
 					.build();
-			ObjectId commit = context.projectModel.getObject().getRevCommit(context.revisionModel.getObject());
+			ObjectId commit = context.projectModel.getObject().getRevCommit(context.revisionModel.getObject(), true);
 			hits = searchManager.search(context.projectModel.getObject(), commit, query);
 			
 			if (hits.size() < SearchResultPanel.MAX_QUERY_ENTRIES) {
@@ -582,7 +582,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 					.directory(context.getDirectory(insideCurrentDir))
 					.count(SearchResultPanel.MAX_QUERY_ENTRIES)
 					.build();
-			ObjectId commit = context.projectModel.getObject().getRevCommit(context.revisionModel.getObject());
+			ObjectId commit = context.projectModel.getObject().getRevCommit(context.revisionModel.getObject(), true);
 			return searchManager.search(context.projectModel.getObject(), commit, query);
 		}
 		
@@ -613,7 +613,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 					.fileNames(fileNames)
 					.count(SearchResultPanel.MAX_QUERY_ENTRIES)
 					.build();
-			ObjectId commit = context.projectModel.getObject().getRevCommit(context.revisionModel.getObject());
+			ObjectId commit = context.projectModel.getObject().getRevCommit(context.revisionModel.getObject(), true);
 			return searchManager.search(context.projectModel.getObject(), commit, query);
 		}
 		

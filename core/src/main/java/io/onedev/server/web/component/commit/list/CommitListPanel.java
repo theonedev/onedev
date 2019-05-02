@@ -145,8 +145,7 @@ public class CommitListPanel extends Panel {
 						labelsView.add(new Label(labelsView.newChildId(), label));
 					fragment.add(labelsView);
 					
-					fragment.add(new ContributorPanel("contribution", 
-							commit.getAuthorIdent(), commit.getCommitterIdent(), true));
+					fragment.add(new ContributorPanel("contribution", commit.getAuthorIdent(), commit.getCommitterIdent()));
 
 					fragment.add(new BuildsStatusPanel("buildStatus", 
 							new LoadableDetachableModel<List<Build>>() {

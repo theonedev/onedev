@@ -94,11 +94,11 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
-import io.onedev.server.web.component.moreinfoside.MoreInfoSideClosed;
-import io.onedev.server.web.component.moreinfoside.MoreInfoSideOpened;
-import io.onedev.server.web.component.moreinfoside.MoreInfoSidePanel;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.review.ReviewListPanel;
+import io.onedev.server.web.component.sideinfo.SideInfoClosed;
+import io.onedev.server.web.component.sideinfo.SideInfoOpened;
+import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -393,7 +393,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			
 		});
 		
-		add(new MoreInfoSidePanel("moreInfo") {
+		add(new SideInfoPanel("moreInfo") {
 
 			@Override
 			protected Component newContent(String componentId) {
@@ -670,8 +670,8 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			@Override
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
-				if (event.getPayload() instanceof MoreInfoSideClosed) {
-					MoreInfoSideClosed moreInfoSideClosed = (MoreInfoSideClosed) event.getPayload();
+				if (event.getPayload() instanceof SideInfoClosed) {
+					SideInfoClosed moreInfoSideClosed = (SideInfoClosed) event.getPayload();
 					setVisible(true);
 					moreInfoSideClosed.getHandler().add(this);
 				}
@@ -681,7 +681,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			public void onClick(AjaxRequestTarget target) {
 				setVisible(false);
 				target.add(this);
-				send(getPage(), Broadcast.BREADTH, new MoreInfoSideOpened(target));
+				send(getPage(), Broadcast.BREADTH, new SideInfoOpened(target));
 			}
 			
 		}.setOutputMarkupPlaceholderTag(true));

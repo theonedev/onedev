@@ -571,8 +571,7 @@ public class ProjectCommitsPage extends ProjectPage {
 				labelsView.add(new Label(labelsView.newChildId(), label));
 			item.add(labelsView);
 			
-			item.add(new ContributorPanel("contribution", 
-					commit.getAuthorIdent(), commit.getCommitterIdent(), true));
+			item.add(new ContributorPanel("contribution", commit.getAuthorIdent(), commit.getCommitterIdent()));
 			
 			/*
 			 * If we query a single definitive path, let's record it to be used for 
