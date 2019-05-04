@@ -1,6 +1,7 @@
 .issue-commits {
-    border-top: 1px solid #E8E8E8;
-    padding-top: 12px;
+    border: 2px dotted #BBB;
+    padding: 12px;
+    border-radius: 4px;
 }
 .issue-commits>.head {
     font-weight: bold;
