@@ -1,11 +1,11 @@
-.issue-pull-requests {
+.issue-commits {
     border-top: 1px solid #E8E8E8;
     padding-top: 12px;
 }
-.issue-pull-requests>.head {
+.issue-commits>.head {
     font-weight: bold;
     margin-bottom: 8px;
 }
-.issue-pull-requests>.body .pull-request {
+.issue-commits>.body .commit {
     margin-bottom: 6px;
 }

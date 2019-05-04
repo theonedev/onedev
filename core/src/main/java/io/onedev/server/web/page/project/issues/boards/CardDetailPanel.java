@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.issues.boards;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -12,9 +11,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
@@ -23,10 +20,8 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CodeCommentRelationInfoManager;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.IssueManager;
@@ -39,8 +34,8 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.build.list.BuildListPanel;
-import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
+import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
@@ -120,6 +115,10 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 		});
 
+		add(new IssuePullRequestsPanel("pullRequests", getModel()));
+		
+		add(new IssueCommitsPanel("commits", getModel()));
+		
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new AjaxActionTab(Model.of("Activities")) {
 
@@ -140,59 +139,6 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
 		Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
 		
-		if (SecurityUtils.canReadCode(getProject().getFacade())) {
-			if (!fixCommits.isEmpty()) {		
-				tabs.add(new AjaxActionTab(Model.of("Commits")) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-						Fragment fragment = new Fragment(TAB_CONTENT_ID, "commitsFrag", CardDetailPanel.this);
-						fragment.add(new CommitListPanel("commits", new AbstractReadOnlyModel<Project>() {
-
-							@Override
-							public Project getObject() {
-								return getIssue().getProject();
-							}
-							
-						}, new AbstractReadOnlyModel<List<RevCommit>>() {
-
-							@Override
-							public List<RevCommit> getObject() {
-								return getIssue().getCommits();
-							}
-							
-						}));
-						fragment.setOutputMarkupId(true);
-						CardDetailPanel.this.replace(fragment);
-						target.add(fragment);
-					}
-					
-				});
-			}
-			CodeCommentRelationInfoManager codeCommentRelationInfoManager = OneDev.getInstance(CodeCommentRelationInfoManager.class); 
-			Collection<Long> pullRequestIds = new HashSet<>();
-			for (ObjectId commit: fixCommits) 
-				pullRequestIds.addAll(codeCommentRelationInfoManager.getPullRequestIds(getProject(), commit));		
-			if (!pullRequestIds.isEmpty()) {
-				tabs.add(new AjaxActionTab(Model.of("Pull Requests")) {
-
-					@Override
-					protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-						Component content = new IssuePullRequestsPanel(TAB_CONTENT_ID) {
-
-							@Override
-							protected Issue getIssue() {
-								return CardDetailPanel.this.getIssue();
-							}
-							
-						}.setOutputMarkupId(true);
-						CardDetailPanel.this.replace(content);
-						target.add(content);
-					}
-					
-				});
-			}
-		}
 		if (!fixCommits.isEmpty()) {
 			tabs.add(new AjaxActionTab(Model.of("Builds")) {
 

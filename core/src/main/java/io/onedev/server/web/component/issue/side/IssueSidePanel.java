@@ -376,10 +376,10 @@ public abstract class IssueSidePanel extends Panel {
 	}
 	
 	private Component newVotesContainer() {
-		WebMarkupContainer votesContainer = new WebMarkupContainer("votes");
-		votesContainer.setOutputMarkupId(true);
+		WebMarkupContainer container = new WebMarkupContainer("votes");
+		container.setOutputMarkupId(true);
 
-		votesContainer.add(new Label("count", new AbstractReadOnlyModel<String>() {
+		container.add(new Label("count", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
@@ -388,7 +388,7 @@ public abstract class IssueSidePanel extends Panel {
 			
 		}));
 
-		votesContainer.add(new ListView<IssueVote>("voters", new LoadableDetachableModel<List<IssueVote>>() {
+		container.add(new ListView<IssueVote>("voters", new LoadableDetachableModel<List<IssueVote>>() {
 
 			@Override
 			protected List<IssueVote> load() {
@@ -414,7 +414,7 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		votesContainer.add(new UserListLink("more") {
+		container.add(new UserListLink("more") {
 
 			@Override
 			protected void onConfigure() {
@@ -459,7 +459,7 @@ public abstract class IssueSidePanel extends Panel {
 						getIssue().getVotes().remove(vote);
 						OneDev.getInstance(IssueVoteManager.class).delete(vote);
 					}
-					target.add(votesContainer);
+					target.add(container);
 				} else {
 					throw new RestartResponseAtInterceptPageException(LoginPage.class);
 				}
@@ -486,9 +486,9 @@ public abstract class IssueSidePanel extends Panel {
 			}
 			
 		};
-		votesContainer.add(voteLink);
+		container.add(voteLink);
 		
-		return votesContainer;
+		return container;
 	}
 	
 	private Project getProject() {

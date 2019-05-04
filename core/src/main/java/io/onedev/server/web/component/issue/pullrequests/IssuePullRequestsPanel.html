@@ -1,9 +1,11 @@
 <wicket:panel>
-	<table wicket:id="requests" class="table issue-pull-requests"></table>
-	<div class="help-block">
-		<i class="fa fa-info-circle"></i> This page lists pull requests containing recent commits fixing the issue 
-	</div>
-	<wicket:fragment wicket:id="sourceFrag">
-		<a wicket:id="link"></a>
-	</wicket:fragment>
+    <div class="issue-pull-requests">
+        <div class="head">Pull Requests</div>
+        <div class="body">
+            <div wicket:id="pullRequests" class="pull-request clearfix">
+                <a wicket:id="title" class="pull-left title"><span wicket:id="label"></span></a>
+                <span wicket:id="status" class="pull-right"></span>
+            </div>
+        </div>
+    </div>
 </wicket:panel>

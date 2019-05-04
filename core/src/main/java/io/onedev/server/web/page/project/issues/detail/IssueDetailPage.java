@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.issues.detail;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -26,7 +25,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CodeCommentRelationInfoManager;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.IssueManager;
@@ -35,7 +33,9 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
+import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -124,6 +124,10 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 		});
 
+		add(new IssuePullRequestsPanel("pullRequests", issueModel));
+		
+		add(new IssueCommitsPanel("commits", issueModel));
+		
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new IssueTab("Activities", IssueActivitiesPage.class) {
 
@@ -138,16 +142,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
 		Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
 		
-		if (SecurityUtils.canReadCode(getProject().getFacade())) {
-			if (!fixCommits.isEmpty())		
-				tabs.add(new IssueTab("Commits", IssueCommitsPage.class));
-			CodeCommentRelationInfoManager codeCommentRelationInfoManager = OneDev.getInstance(CodeCommentRelationInfoManager.class); 
-			Collection<Long> pullRequestIds = new HashSet<>();
-			for (ObjectId commit: fixCommits) 
-				pullRequestIds.addAll(codeCommentRelationInfoManager.getPullRequestIds(getProject(), commit));		
-			if (!pullRequestIds.isEmpty())
-				tabs.add(new IssueTab("Pull Requests", IssuePullRequestsPage.class));
-		}
 		if (!fixCommits.isEmpty()) // Do not calculate fix builds now as it might be slow
 			tabs.add(new IssueTab("Builds", IssueBuildsPage.class));
 		

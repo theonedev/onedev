@@ -5,25 +5,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.wicket.extensions.ajax.markup.html.repeater.data.table.AjaxFallbackHeadersToolbar;
-import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulator;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
-import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
-import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.markup.repeater.Item;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
@@ -32,20 +26,19 @@ import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.util.DateUtils;
-import io.onedev.server.web.component.branch.BranchLink;
-import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
-import io.onedev.server.web.component.pullrequest.summary.PullRequestSummaryPanel;
+import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
 @SuppressWarnings("serial")
-public abstract class IssuePullRequestsPanel extends Panel {
+public class IssuePullRequestsPanel extends GenericPanel<Issue> {
 
 	private final IModel<List<PullRequest>> requestsModel = new LoadableDetachableModel<List<PullRequest>>() {
 
 		@Override
 		protected List<PullRequest> load() {
 			List<PullRequest> requests = new ArrayList<>();
-
+			
 			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
 			Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getIssue().getProject(), getIssue().getNumber());
 			CodeCommentRelationInfoManager codeCommentRelationInfoManager = OneDev.getInstance(CodeCommentRelationInfoManager.class); 
@@ -71,109 +64,52 @@ public abstract class IssuePullRequestsPanel extends Panel {
 		
 	};
 	
-	public IssuePullRequestsPanel(String panelId) {
-		super(panelId);
+	public IssuePullRequestsPanel(String id, IModel<Issue> model) {
+		super(id, model);
+	}
+	
+	@Override
+	public void onInitialize() {
+		super.onInitialize();
+		
+		add(new ListView<PullRequest>("pullRequests", requestsModel) {
+
+			@Override
+			protected void populateItem(ListItem<PullRequest> item) {
+				PullRequest request = item.getModelObject();
+
+				Link<Void> link = new BookmarkablePageLink<Void>("title", PullRequestActivitiesPage.class, 
+						PullRequestActivitiesPage.paramsOf(request, null));
+				link.add(new Label("label",  "#" + request.getNumber() + " - " + request.getTitle()));
+				link.add(AttributeAppender.append("title", request.getTitle()));
+				item.add(link);
+				item.add(new RequestStatusLabel("status", item.getModel()));
+			}}
+		
+		);
+	}
+
+	private Issue getIssue() {
+		return getModelObject();
+	}
+
+	@Override
+	protected void onConfigure() {
+		super.onConfigure();
+		setVisible(SecurityUtils.canReadCode(getIssue().getProject().getFacade()) 
+				&& !requestsModel.getObject().isEmpty());
+	}
+
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new IssuePullRequestsCssResourceReference()));
 	}
 
 	@Override
 	protected void onDetach() {
 		requestsModel.detach();
 		super.onDetach();
-	}
-
-	@Override
-	protected void onInitialize() {
-		super.onInitialize();
-		
-		List<IColumn<PullRequest, Void>> columns = new ArrayList<>();
-		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Summary")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				cellItem.add(new PullRequestSummaryPanel(componentId, rowModel));
-			}	
-
-			@Override
-			public String getCssClass() {
-				return "summary";
-			}
-			
-		});
-		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Source")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				if (rowModel.getObject().getSource() != null) {
-					Fragment fragment = new Fragment(componentId, "sourceFrag", IssuePullRequestsPanel.this);
-					fragment.add(new BranchLink("link", rowModel.getObject().getSource(), rowModel.getObject()));
-					cellItem.add(fragment);
-				} else {
-					cellItem.add(new Label(componentId, "<i>Unknown</i>").setEscapeModelStrings(false));
-				}
-			}
-
-			@Override
-			public String getCssClass() {
-				return "source expanded";
-			}
-
-		});
-		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Last Update")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				PullRequest request = rowModel.getObject();
-				cellItem.add(new Label(componentId, DateUtils.formatAge(request.getUpdateDate())));
-			}
-
-			@Override
-			public String getCssClass() {
-				return "last-update expanded";
-			}
-			
-		});
-		
-		SortableDataProvider<PullRequest, Void> dataProvider = new LoadableDetachableDataProvider<PullRequest, Void>() {
-
-			@Override
-			public Iterator<? extends PullRequest> iterator(long first, long count) {
-				return requestsModel.getObject().iterator();
-			}
-
-			@Override
-			public long calcSize() {
-				return requestsModel.getObject().size();
-			}
-
-			@Override
-			public IModel<PullRequest> model(PullRequest object) {
-				Long id = object.getId();
-				return new LoadableDetachableModel<PullRequest>() {
-
-					@Override
-					protected PullRequest load() {
-						return OneDev.getInstance(PullRequestManager.class).load(id);
-					}
-					
-				};
-			}
-		};
-		
-		DataTable<PullRequest, Void> buildsTable = new DataTable<PullRequest, Void>("requests", columns, dataProvider, Integer.MAX_VALUE);
-		buildsTable.addTopToolbar(new AjaxFallbackHeadersToolbar<Void>(buildsTable, dataProvider));
-		buildsTable.addBottomToolbar(new NoRecordsToolbar(buildsTable));
-		add(buildsTable);
-	}
-
-	protected abstract Issue getIssue();
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new IssuePullRequestsCssResourceReference()));
 	}
 	
 }

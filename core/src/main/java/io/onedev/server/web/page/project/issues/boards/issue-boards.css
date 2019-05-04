@@ -213,7 +213,7 @@
 	width: 320px;
 	border-radius: 0 0 4px 0;
 }
-.board-card-detail>.body .issue-info>.nav {
+.board-card-detail>.body .issue-side>.nav {
 	padding-right: 20px;
 	border-right: 1px solid #D8D8D8;
 	margin-right: 30px;
