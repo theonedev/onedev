@@ -11,9 +11,9 @@ onedev.ciSpec = {
         });
         if (activeJobIndex == -1) {
             var uri = URI(window.location.href);
-            var fragment = uri.fragment();
+            var fragment = decodeURIComponent(uri.fragment());
             if (fragment.startsWith("jobs/")) {
-                var activeJobName = decodeURIComponent(fragment.substring("jobs/".length));
+                var activeJobName = fragment.substring("jobs/".length);
                 activeJobIndex = $body.find(">.side>.navs>.nav[data-name='" + activeJobName.escape() + "']").index();
             }
         }

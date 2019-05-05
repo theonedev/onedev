@@ -14,6 +14,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -30,6 +31,7 @@ public class BranchPushedTrigger extends JobTrigger {
 			description="Optionally specify space-separated branches to check. Use * or ? for wildcard match. "
 					+ "Leave empty to match all branches")
 	@BranchPatterns
+	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
 		return branches;
 	}
@@ -42,6 +44,7 @@ public class BranchPushedTrigger extends JobTrigger {
 			description="Optionally specify space-separated files to check. Use * or ? for wildcard match. "
 					+ "Leave empty to match all files")
 	@Patterns("getPathSuggestions")
+	@NameOfEmptyValue("Any file")
 	public String getPaths() {
 		return paths;
 	}

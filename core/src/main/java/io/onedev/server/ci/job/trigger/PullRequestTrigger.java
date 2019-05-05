@@ -6,6 +6,7 @@ import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(order=300, name="When pull requests are created/updated")
 public class PullRequestTrigger extends JobTrigger {
@@ -17,6 +18,7 @@ public class PullRequestTrigger extends JobTrigger {
 	@Editable(order=100, description="Optionally specify target branches of the pull request to check. "
 			+ "Use * or ? for wildcard match. Leave empty to match all pull requests")
 	@BranchPatterns
+	@NameOfEmptyValue("Any branch")
 	public String getTargetBranches() {
 		return targetBranches;
 	}

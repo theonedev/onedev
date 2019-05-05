@@ -8,6 +8,7 @@ import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.TagPatterns;
 
 @Editable(order=200, name="When tags are created")
@@ -21,6 +22,7 @@ public class TagCreatedTrigger extends JobTrigger {
 			description="Optionally specify space-separated tags to check. Use * or ? for wildcard match. "
 					+ "Leave empty to match all tags")
 	@TagPatterns
+	@NameOfEmptyValue("Any tag")
 	public String getTags() {
 		return tags;
 	}
