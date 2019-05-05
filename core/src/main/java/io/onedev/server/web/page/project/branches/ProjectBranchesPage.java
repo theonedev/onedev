@@ -83,8 +83,8 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
-import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
@@ -638,8 +638,8 @@ public class ProjectBranchesPage extends ProjectPage {
 									PullRequestConstants.FIELD_TARGET_BRANCH, PullRequestQuery.getRuleName(PullRequestQueryLexer.Is), 
 									branch, PullRequestQuery.getRuleName(PullRequestQueryLexer.And), 
 									new OpenCriteria().toString());
-							PageParameters params = PullRequestListPage.paramsOf(getProject(), query, 0);
-							bodyFrag.add(new ViewStateAwarePageLink<Void>("openRequests", PullRequestListPage.class, params));
+							PageParameters params = ProjectPullRequestsPage.paramsOf(getProject(), query, 0);
+							bodyFrag.add(new ViewStateAwarePageLink<Void>("openRequests", ProjectPullRequestsPage.class, params));
 							bodyFrag.add(new Label("branch", branch));
 							fragment.add(bodyFrag);
 						} else {

@@ -1,8 +1,8 @@
-.invalid-request {
+.invalid-pullrequest {
 	margin: 20px;
 }
 
-.invalid-request>.head {
+.invalid-pullrequest>.head {
 	font-size: 20px;
 	font-weight: bold;
 	color: #444;

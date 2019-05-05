@@ -30,9 +30,9 @@ import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
 import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowChangeAlertPanel;
 
 @SuppressWarnings("serial")
-public abstract class IssuesPage extends ProjectPage {
+public abstract class ProjectIssuesPage extends ProjectPage {
 
-	public IssuesPage(PageParameters params) {
+	public ProjectIssuesPage(PageParameters params) {
 		super(params);
 	}
 
@@ -114,7 +114,7 @@ public abstract class IssuesPage extends ProjectPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new IssuesCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new ProjectIssuesCssResourceReference()));
 	}
 	
 }

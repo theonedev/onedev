@@ -44,21 +44,21 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
-import io.onedev.server.web.page.project.builds.list.BuildListPage;
-import io.onedev.server.web.page.project.comments.ProjectCodeCommentsPage;
+import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.info.ProjectInfoPanel;
-import io.onedev.server.web.page.project.issues.IssuesPage;
+import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
 import io.onedev.server.web.page.project.issues.list.IssueListPage;
-import io.onedev.server.web.page.project.pullrequests.InvalidRequestPage;
+import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
+import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
-import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingTab;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
@@ -214,10 +214,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 						@Override
 						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-							ProjectCommitsPage.State state = new ProjectCommitsPage.State();
-							state.query = "";
 							return new ViewStateAwarePageLink<Void>(linkId, ProjectCommitsPage.class, 
-									ProjectCommitsPage.paramsOf(getProject(), state));
+									ProjectCommitsPage.paramsOf(getProject(), "", null));
 						}
 					};
 				}
@@ -229,7 +227,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					0, ProjectTagsPage.class));
 			
 			tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
-					0, PullRequestListPage.class, NewPullRequestPage.class, PullRequestDetailPage.class, InvalidRequestPage.class) {
+					0, ProjectPullRequestsPage.class, NewPullRequestPage.class, PullRequestDetailPage.class, InvalidPullRequestPage.class) {
 				
 				@Override
 				public Component render(String componentId) {
@@ -237,8 +235,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 						@Override
 						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-							return new ViewStateAwarePageLink<Void>(linkId, PullRequestListPage.class, 
-									PullRequestListPage.paramsOf(getProject(), "", 0));
+							return new ViewStateAwarePageLink<Void>(linkId, ProjectPullRequestsPage.class, 
+									ProjectPullRequestsPage.paramsOf(getProject(), "", 0));
 						}
 					};
 				}
@@ -246,7 +244,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			});
 		}
 		
-		tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, IssuesPage.class, 
+		tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, ProjectIssuesPage.class, 
 				IssueDetailPage.class, NewIssuePage.class) {
 
 			@Override
@@ -263,7 +261,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			
 		});
 		
-		tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-cubes", 0, BuildListPage.class, BuildDetailPage.class) {
+		tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-cubes", 0, ProjectBuildsPage.class, BuildDetailPage.class) {
 
 			@Override
 			public Component render(String componentId) {
@@ -271,7 +269,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, BuildListPage.class, BuildListPage.paramsOf(getProject(), ""));
+						return new ViewStateAwarePageLink<Void>(linkId, ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), ""));
 					}
 				};
 			}

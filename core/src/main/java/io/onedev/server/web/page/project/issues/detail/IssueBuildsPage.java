@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Issue;
@@ -15,7 +14,6 @@ import io.onedev.server.search.entity.build.FixedIssueCriteria;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
 public class IssueBuildsPage extends IssueDetailPage {
@@ -35,7 +33,7 @@ public class IssueBuildsPage extends IssueDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new BuildListPanel("builds", new PropertyModel<String>(this, "query")) {
+		add(new BuildListPanel("builds", query) {
 
 			@Override
 			protected Project getProject() {
@@ -67,13 +65,8 @@ public class IssueBuildsPage extends IssueDetailPage {
 			}
 
 			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target) {
+			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
 				setResponsePage(IssueBuildsPage.class, IssueBuildsPage.paramsOf(getIssue(), getPosition(), query));
-			}
-
-			@Override
-			protected QuerySaveSupport getQuerySaveSupport() {
-				return null;
 			}
 
 		});

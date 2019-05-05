@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.project.pullrequests.create;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,7 +35,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
+
+import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.Pair;
 import io.onedev.server.OneDev;
@@ -57,6 +57,9 @@ import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.search.code.CommitIndexed;
+import io.onedev.server.search.commit.CommitQuery;
+import io.onedev.server.search.commit.Revision;
+import io.onedev.server.search.commit.RevisionCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.component.branch.BranchLink;
@@ -91,8 +94,6 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	private ProjectAndBranch target;
 	
 	private ProjectAndBranch source;
-	
-	private IModel<List<RevCommit>> commitsModel;
 	
 	private IModel<PullRequest> requestModel;
 	
@@ -229,26 +230,6 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		}
 		requestModel.setObject(pullRequestRef.get());
 		
-		commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
-
-			@Override
-			protected List<RevCommit> load() {
-				PullRequest request = getPullRequest();
-				List<RevCommit> commits = new ArrayList<>();
-				try (RevWalk revWalk = new RevWalk(source.getProject().getRepository())) {
-					ObjectId headId = ObjectId.fromString(request.getHeadCommitHash());
-					revWalk.markStart(revWalk.parseCommit(headId));
-					ObjectId baseId = ObjectId.fromString(request.getBaseCommitHash());
-					revWalk.markUninteresting(revWalk.parseCommit(baseId));
-					revWalk.forEach(c->commits.add(c));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-				return commits;
-			}
-			
-		};
-		
 	}
 	
 	private PullRequest getPullRequest() {
@@ -369,14 +350,28 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	}
 	
 	private Component newCommitsPanel() {
-		return new CommitListPanel(TAB_PANEL_ID, projectModel, commitsModel) {
+		return new CommitListPanel(TAB_PANEL_ID, null) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!getPullRequest().isMerged());
 			}
-			
+
+			@Override
+			protected Project getProject() {
+				return NewPullRequestPage.this.getProject();
+			}
+
+			@Override
+			protected CommitQuery getBaseQuery() {
+				PullRequest request = getPullRequest();
+				List<Revision> revisions = new ArrayList<>();
+				revisions.add(new Revision(request.getBaseCommitHash(), Revision.Scope.SINCE));
+				revisions.add(new Revision(request.getHeadCommitHash(), Revision.Scope.UNTIL));
+				return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
+			}
+
 		}.setOutputMarkupId(true);
 	}
 	
@@ -757,7 +752,6 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 	@Override
 	protected void onDetach() {
-		commitsModel.detach();
 		requestModel.detach();
 		
 		super.onDetach();

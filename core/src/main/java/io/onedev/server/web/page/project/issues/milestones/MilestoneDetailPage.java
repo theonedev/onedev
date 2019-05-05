@@ -10,7 +10,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -24,12 +23,11 @@ import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.milestone.MilestoneDueLabel;
 import io.onedev.server.web.component.milestone.MilestoneStatusLabel;
-import io.onedev.server.web.page.project.issues.IssuesPage;
+import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
-public class MilestoneDetailPage extends IssuesPage {
+public class MilestoneDetailPage extends ProjectIssuesPage {
 
 	private static final String PARAM_MILESTONE = "milestone";
 	
@@ -119,7 +117,7 @@ public class MilestoneDetailPage extends IssuesPage {
 			
 		};
 				
-		add(new IssueListPanel("issues", new PropertyModel<String>(this, "query")) {
+		add(new IssueListPanel("issues", query) {
 
 			@Override
 			protected Project getProject() {
@@ -137,13 +135,8 @@ public class MilestoneDetailPage extends IssuesPage {
 			}
 
 			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target) {
+			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
 				setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getMilestone(), query));
-			}
-
-			@Override
-			protected QuerySaveSupport getQuerySaveSupport() {
-				return null;
 			}
 
 		});

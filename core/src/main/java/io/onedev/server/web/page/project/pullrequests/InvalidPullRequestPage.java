@@ -16,17 +16,16 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 
 @SuppressWarnings("serial")
-public class InvalidRequestPage extends ProjectPage {
+public class InvalidPullRequestPage extends ProjectPage {
 
 	public static final String PARAM_REQUEST = "request";
 	
 	private IModel<PullRequest> requestModel;
 	
-	public InvalidRequestPage(PageParameters params) {
+	public InvalidPullRequestPage(PageParameters params) {
 		super(params);
 		
 		requestModel = new LoadableDetachableModel<PullRequest>() {
@@ -36,7 +35,7 @@ public class InvalidRequestPage extends ProjectPage {
 				Long requestNumber = params.get(PARAM_REQUEST).toLong();
 				PullRequest request = OneDev.getInstance(PullRequestManager.class).find(getProject(), requestNumber);
 				if (request == null)
-					throw new EntityNotFoundException("Unable to find request #" + requestNumber + " in project " + getProject());
+					throw new EntityNotFoundException("Unable to find pull request #" + requestNumber + " in project " + getProject());
 				Preconditions.checkState(!request.isValid());
 				return request;
 			}
@@ -52,7 +51,7 @@ public class InvalidRequestPage extends ProjectPage {
 			@Override
 			public void onClick() {
 				OneDev.getInstance(PullRequestManager.class).delete(requestModel.getObject());
-				setResponsePage(PullRequestListPage.class, PullRequestListPage.paramsOf(getProject()));
+				setResponsePage(ProjectPullRequestsPage.class, ProjectPullRequestsPage.paramsOf(getProject()));
 			}
 
 			@Override
@@ -84,7 +83,7 @@ public class InvalidRequestPage extends ProjectPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new InvalidRequestResourceReference()));
+		response.render(CssHeaderItem.forReference(new InvalidPullRequestResourceReference()));
 	}
 
 }

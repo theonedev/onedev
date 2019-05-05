@@ -42,7 +42,7 @@ import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.job.JobLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.page.project.builds.list.BuildListPage;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.QueryPositionSupport;
 
@@ -213,8 +213,8 @@ public abstract class BuildSidePanel extends Panel {
 		WebMarkupContainer dependencesContainer = new WebMarkupContainer("dependences");
 		add(dependencesContainer);
 		
-		Link<Void> dependentsLink = new BookmarkablePageLink<Void>("dependents", BuildListPage.class, 
-				BuildListPage.paramsOf(getProject(), "depends on " + BuildQuery.quote("#" + getBuild().getNumber())));
+		Link<Void> dependentsLink = new BookmarkablePageLink<Void>("dependents", ProjectBuildsPage.class, 
+				ProjectBuildsPage.paramsOf(getProject(), "depends on " + BuildQuery.quote("#" + getBuild().getNumber())));
 		dependentsLink.setVisible(!getBuild().getDependents().isEmpty());
 		
 		if (getBuild().getDependents().size() > 1)
@@ -224,8 +224,8 @@ public abstract class BuildSidePanel extends Panel {
 		
 		dependencesContainer.add(dependentsLink);
 		
-		Link<Void> dependenciesLink = new BookmarkablePageLink<Void>("dependencies", BuildListPage.class, 
-				BuildListPage.paramsOf(getProject(), "dependencies of " + BuildQuery.quote("#" + getBuild().getNumber())));
+		Link<Void> dependenciesLink = new BookmarkablePageLink<Void>("dependencies", ProjectBuildsPage.class, 
+				ProjectBuildsPage.paramsOf(getProject(), "dependencies of " + BuildQuery.quote("#" + getBuild().getNumber())));
 		dependenciesLink.setVisible(!getBuild().getDependencies().isEmpty());
 		if (getBuild().getDependencies().size() > 1)
 			dependenciesLink.add(new Label("label", getBuild().getDependencies().size() + " builds"));

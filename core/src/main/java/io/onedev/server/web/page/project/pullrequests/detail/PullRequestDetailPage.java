@@ -106,12 +106,12 @@ import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.pullrequests.InvalidRequestPage;
+import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
+import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.codecomments.PullRequestCodeCommentsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergePreviewPage;
-import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.QueryPosition;
@@ -157,7 +157,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		};
 		
 		if (!getPullRequest().isValid())
-			throw new RestartResponseException(InvalidRequestPage.class, InvalidRequestPage.paramsOf(getPullRequest()));
+			throw new RestartResponseException(InvalidPullRequestPage.class, InvalidPullRequestPage.paramsOf(getPullRequest()));
 			
 		reviewUpdateId = requestModel.getObject().getLatestUpdate().getId();
 		
@@ -513,11 +513,11 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				PullRequest request = getPullRequest();
 				getPullRequestManager().delete(SecurityUtils.getUser(), request);
 				Session.get().success("Pull request #" + request.getNumber() + " is deleted");
-				PageParameters params = PullRequestListPage.paramsOf(
+				PageParameters params = ProjectPullRequestsPage.paramsOf(
 						getProject(), 
 						QueryPosition.getQuery(position), 
 						QueryPosition.getPage(position) + 1);
-				setResponsePage(PullRequestListPage.class, params);
+				setResponsePage(ProjectPullRequestsPage.class, params);
 			}
 			
 		}.add(new ConfirmOnClick("Do you really want to delete this pull request?")));

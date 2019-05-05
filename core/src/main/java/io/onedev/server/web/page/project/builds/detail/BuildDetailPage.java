@@ -52,7 +52,7 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.builds.list.BuildListPage;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.issues.list.IssueListPage;
 import io.onedev.server.web.util.ConfirmOnClick;
@@ -313,7 +313,7 @@ public abstract class BuildDetailPage extends ProjectPage {
 										getProject(), 
 										QueryPosition.getQuery(position), 
 										QueryPosition.getPage(position) + 1); 
-								setResponsePage(BuildListPage.class, params);
+								setResponsePage(ProjectBuildsPage.class, params);
 							}
 							
 						};

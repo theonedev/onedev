@@ -1,32 +1,32 @@
-package io.onedev.server.web.page.project.comments;
+package io.onedev.server.web.page.project.pullrequests;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.model.support.NamedCodeCommentQuery;
+import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
 
 @Editable
-public class NamedCodeCommentQueriesBean extends NamedQueriesBean<NamedCodeCommentQuery> {
+public class NamedPullRequestQueriesBean extends NamedQueriesBean<NamedPullRequestQuery> {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<NamedCodeCommentQuery> queries = new ArrayList<>();
+	private List<NamedPullRequestQuery> queries = new ArrayList<>();
 
 	@Override
 	@NotNull
 	@Editable
 	@OmitName
-	public List<NamedCodeCommentQuery> getQueries() {
+	public List<NamedPullRequestQuery> getQueries() {
 		return queries;
 	}
 
 	@Override
-	public void setQueries(List<NamedCodeCommentQuery> queries) {
+	public void setQueries(List<NamedPullRequestQuery> queries) {
 		this.queries = queries;
 	}
 

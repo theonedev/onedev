@@ -3,7 +3,6 @@ package io.onedev.server.web.page.project.pullrequests.detail.codecomments;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
@@ -19,7 +18,6 @@ import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
-import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
 public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
@@ -61,7 +59,7 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 			
 		};
 		
-		add(new CodeCommentListPanel("codeComments", new PropertyModel<String>(this, "query")) {
+		add(new CodeCommentListPanel("codeComments", query) {
 
 			@Override
 			protected Project getProject() {
@@ -74,7 +72,7 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 			}
 
 			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target) {
+			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
 				PageParameters params = paramsOf(getPullRequest(), getPosition(), query);
 				setResponsePage(PullRequestCodeCommentsPage.class, params);
 			}
@@ -84,11 +82,6 @@ public class PullRequestCodeCommentsPage extends PullRequestDetailPage {
 				return PullRequestCodeCommentsPage.this.getPullRequest();
 			}
 
-			@Override
-			protected QuerySaveSupport getQuerySaveSupport() {
-				return null;
-			}
-			
 		});
 		
 		RequestCycle.get().getListeners().add(new IRequestCycleListener() {

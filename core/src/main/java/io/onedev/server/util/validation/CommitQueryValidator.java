@@ -4,7 +4,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.search.commit.CommitQueryUtils;
+import io.onedev.server.util.OneContext;
 import io.onedev.server.web.editable.annotation.CommitQuery;
 
 public class CommitQueryValidator implements ConstraintValidator<CommitQuery, String> {
@@ -19,7 +19,7 @@ public class CommitQueryValidator implements ConstraintValidator<CommitQuery, St
 			return true;
 		} else {
 			try {
-				CommitQueryUtils.parse(value);
+				io.onedev.server.search.commit.CommitQuery.parse(OneContext.get().getProject(), value);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

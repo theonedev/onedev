@@ -15,10 +15,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathElement;
-import io.onedev.server.web.page.project.issues.IssuesPage;
+import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 
 @SuppressWarnings("serial")
-public class MilestoneEditPage extends IssuesPage {
+public class MilestoneEditPage extends ProjectIssuesPage {
 
 	private static final String PARAM_MILESTONE = "milestone";
 	

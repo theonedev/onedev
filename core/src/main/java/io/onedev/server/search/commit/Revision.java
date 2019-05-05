@@ -2,14 +2,33 @@ package io.onedev.server.search.commit;
 
 import java.io.Serializable;
 
-class Revision implements Serializable {
+import javax.annotation.Nullable;
+
+public class Revision implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 
-	public boolean since;
+	public enum Scope {SINCE, UNTIL};
 	
-	public boolean until;
+	private final String value;
 	
-	public String value;
+	private Scope scope;
+	
+	public Revision(String value, @Nullable Scope scope) {
+		this.value = value;
+		this.scope = scope;
+	}
+
+	public Scope getScope() {
+		return scope;
+	}
+
+	public void setScope(Scope scope) {
+		this.scope = scope;
+	}
+
+	public String getValue() {
+		return value;
+	}
 	
 }

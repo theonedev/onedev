@@ -9,7 +9,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -24,7 +23,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.page.project.issues.IssuesPage;
+import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
 import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
@@ -32,7 +31,7 @@ import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
-public class IssueListPage extends IssuesPage {
+public class IssueListPage extends ProjectIssuesPage {
 
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
@@ -135,7 +134,7 @@ public class IssueListPage extends IssuesPage {
 			
 		};
 		
-		add(new IssueListPanel("main", new PropertyModel<String>(this, "query")) {
+		add(new IssueListPanel("main", query) {
 
 			@Override
 			protected Project getProject() {
@@ -148,7 +147,7 @@ public class IssueListPage extends IssuesPage {
 			}
 
 			@Override
-			protected void onQueryUpdated(AjaxRequestTarget target) {
+			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
 				setResponsePage(IssueListPage.class, paramsOf(getProject(), query, 0));
 			}
 
@@ -157,7 +156,7 @@ public class IssueListPage extends IssuesPage {
 				return new QuerySaveSupport() {
 
 					@Override
-					public void onSaveQuery(AjaxRequestTarget target) {
+					public void onSaveQuery(AjaxRequestTarget target, String query) {
 						new ModalPanel(target)  {
 
 							@Override

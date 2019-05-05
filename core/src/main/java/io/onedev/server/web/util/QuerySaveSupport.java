@@ -6,7 +6,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 
 public interface QuerySaveSupport extends Serializable {
 	
-	void onSaveQuery(AjaxRequestTarget target);
+	void onSaveQuery(AjaxRequestTarget target, String query);
 	
 	boolean isSavedQueriesVisible();
 	

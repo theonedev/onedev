@@ -34,13 +34,14 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,16 +83,18 @@ import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.VisibleVisitor;
 
 @SuppressWarnings("serial")
-public abstract class IssueListPanel extends GenericPanel<String> {
+public abstract class IssueListPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(IssueListPanel.class);
+	
+	private String query;
 	
 	private IModel<IssueQuery> parsedQueryModel = new LoadableDetachableModel<IssueQuery>() {
 
 		@Override
 		protected IssueQuery load() {
 			try {
-				IssueQuery additionalQuery = IssueQuery.parse(getProject(), getQuery(), true);
+				IssueQuery additionalQuery = IssueQuery.parse(getProject(), query, true);
 				if (SecurityUtils.getUser() == null && additionalQuery.needsLogin()) { 
 					error("Please login to perform this query");
 				} else { 
@@ -101,7 +104,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						return IssueQuery.merge(getBaseQuery(), additionalQuery);
 				}
 			} catch (Exception e) {
-				logger.error("Error parsing issue query: " + getQuery(), e);
+				logger.error("Error parsing issue query: " + query, e);
 				error(e.getMessage());
 			}
 			return null;
@@ -117,16 +120,13 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 	
 	private SortableDataProvider<Issue, Void> dataProvider;	
 	
-	public IssueListPanel(String id, IModel<String> queryModel) {
-		super(id, queryModel);
+	public IssueListPanel(String id, @Nullable String query) {
+		super(id);
+		this.query = query;
 	}
 	
 	private IssueManager getIssueManager() {
 		return OneDev.getInstance(IssueManager.class);
-	}
-	
-	private String getQuery() {
-		return getModelObject();
 	}
 	
 	@Override
@@ -141,12 +141,18 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 		return new IssueQuery();
 	}
 
-	protected abstract PagingHistorySupport getPagingHistorySupport();
+	@Nullable
+	protected PagingHistorySupport getPagingHistorySupport() {
+		return null;
+	}
 	
-	protected abstract void onQueryUpdated(AjaxRequestTarget target);
+	protected void onQueryUpdated(AjaxRequestTarget target, @Nullable String query) {
+	}
 	
 	@Nullable
-	protected abstract QuerySaveSupport getQuerySaveSupport();
+	protected QuerySaveSupport getQuerySaveSupport() {
+		return null;
+	}
 	
 	private GlobalIssueSetting getGlobalIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
@@ -197,7 +203,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(StringUtils.isNotBlank(getQuery()));
+				setEnabled(StringUtils.isNotBlank(query));
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -213,12 +219,12 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target);
+				getQuerySaveSupport().onSaveQuery(target, query);
 			}		
 			
 		});
 		
-		TextField<String> input = new TextField<String>("input", getModel());
+		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
 		input.add(new IssueQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
@@ -245,7 +251,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				target.add(IssueListPanel.this);
-				onQueryUpdated(target);
+				onQueryUpdated(target, query);
 			}
 			
 		});
@@ -305,7 +311,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						modal.close();
 						getProject().getIssueSetting().setListFields(fieldSet);
 						OneDev.getInstance(ProjectManager.class).save(getProject());
-						onQueryUpdated(target);
+						onQueryUpdated(target, query);
 					}
 					
 				});
@@ -317,7 +323,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 						modal.close();
 						getProject().getIssueSetting().setListFields(null);
 						OneDev.getInstance(ProjectManager.class).save(getProject());
-						onQueryUpdated(target);
+						onQueryUpdated(target, query);
 					}
 					
 				}.setVisible(getProject().getIssueSetting().getListFields(false) != null));
@@ -370,7 +376,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					@Override
 					protected void onUpdated(AjaxRequestTarget target) {
 						modal.close();
-						onQueryUpdated(target);
+						onQueryUpdated(target, query);
 					}
 
 					@Override
@@ -423,7 +429,7 @@ public abstract class IssueListPanel extends GenericPanel<String> {
 					@Override
 					protected void onUpdated(AjaxRequestTarget target) {
 						modal.close();
-						onQueryUpdated(target);
+						onQueryUpdated(target, query);
 					}
 
 					@Override

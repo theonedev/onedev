@@ -36,7 +36,7 @@ public class BuildsStatusPanel extends GenericPanel<List<Build>> {
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 
-		if (event.getPayload() instanceof PageDataChanged) {
+		if (event.getPayload() instanceof PageDataChanged && isVisibleInHierarchy()) {
 			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
 			pageDataChanged.getHandler().add(this);
 		}

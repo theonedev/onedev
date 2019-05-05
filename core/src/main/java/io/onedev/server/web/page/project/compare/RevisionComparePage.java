@@ -26,8 +26,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
+
+import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
@@ -41,6 +41,9 @@ import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.ProjectAndRevision;
 import io.onedev.server.search.code.CommitIndexed;
+import io.onedev.server.search.commit.CommitQuery;
+import io.onedev.server.search.commit.Revision;
+import io.onedev.server.search.commit.RevisionCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
@@ -96,8 +99,6 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 	private static final String TABS_ID = "tabs";
 	
 	private static final String TAB_PANEL_ID = "tabPanel";
-	
-	private IModel<List<RevCommit>> commitsModel;
 	
 	private IModel<PullRequest> requestModel;
 	
@@ -226,42 +227,6 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		
-		commitsModel = new LoadableDetachableModel<List<RevCommit>>() {
-
-			@Override
-			protected List<RevCommit> load() {
-				List<RevCommit> commits = new ArrayList<>();
-				Project rightProject = state.rightSide.getProject();
-				
-				try (RevWalk revWalk = new RevWalk(state.rightSide.getProject().getRepository())) {
-					if (rightProject.equals(state.leftSide.getProject()) 
-							&& !state.compareWithMergeBase 
-							&& !mergeBase.equals(leftCommitId)) {
-						revWalk.markStart(revWalk.parseCommit(rightCommitId));
-						revWalk.markStart(revWalk.parseCommit(leftCommitId));
-						revWalk.markUninteresting(revWalk.parseCommit(mergeBase));
-						revWalk.forEach(c->commits.add(c));
-						/* 
-						 * Add the merge base commit to make the revision graph understandable, 
-						 * note that we can not get merge commit object in current revWalk as 
-						 * it has been marked and this will make the commit object incomplete
-						 */
-						commits.add(getProject().getRevCommit(mergeBase, true));
-					} else {
-						revWalk.markStart(revWalk.parseCommit(rightCommitId));
-						revWalk.markUninteresting(revWalk.parseCommit(mergeBase));
-						revWalk.forEach(c->commits.add(c));
-					}
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-				
-				return commits;
-			}
-			
-		};
-		
 	}
 	
 	@Override
@@ -610,11 +575,34 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this);
 			break;
 		default:
-			tabPanel = new CommitListPanel(TAB_PANEL_ID, projectModel, commitsModel);
+			tabPanel = new CommitListPanel(TAB_PANEL_ID, null) {
+
+				@Override
+				protected Project getProject() {
+					return RevisionComparePage.this.getProject();
+				}
+
+				@Override
+				protected CommitQuery getBaseQuery() {
+					List<Revision> revisions = new ArrayList<>();
+					
+					revisions.add(new Revision(mergeBase.name(), Revision.Scope.SINCE));
+					revisions.add(new Revision(rightCommitId.name(), Revision.Scope.UNTIL));
+					
+					Project rightProject = state.rightSide.getProject();
+					if (rightProject.equals(state.leftSide.getProject()) 
+							&& !state.compareWithMergeBase 
+							&& !mergeBase.equals(leftCommitId)) {
+						revisions.add(new Revision(leftCommitId.name(), Revision.Scope.UNTIL));
+					} 
+					return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
+				}
+				
+			};
 			
-			if (!mergeBase.equals(leftCommitId) && !state.compareWithMergeBase) {
+			if (!mergeBase.equals(leftCommitId) && !state.compareWithMergeBase) 
 				tabPanel.add(AttributeAppender.append("class", "with-merge-base"));
-			}
+			
 			break;
 		}
 		tabPanel.setOutputMarkupId(true);
@@ -646,8 +634,6 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 	@Override
 	protected void onDetach() {
 		requestModel.detach();
-		commitsModel.detach();
-
 		super.onDetach();
 	}
 

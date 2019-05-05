@@ -26,12 +26,13 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +53,9 @@ import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
-import io.onedev.server.web.page.project.pullrequests.list.PullRequestListPage;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -62,24 +63,26 @@ import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.VisibleVisitor;
 
 @SuppressWarnings("serial")
-public abstract class CodeCommentListPanel extends GenericPanel<String> {
+public abstract class CodeCommentListPanel extends Panel {
 
-	private static final Logger logger = LoggerFactory.getLogger(PullRequestListPage.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProjectPullRequestsPage.class);
 	
 	private static final int MAX_COMMENT_LEN = 75;
+	
+	private String query;
 	
 	private IModel<CodeCommentQuery> parsedQueryModel = new LoadableDetachableModel<CodeCommentQuery>() {
 
 		@Override
 		protected CodeCommentQuery load() {
 			try {
-				CodeCommentQuery parsedQuery = CodeCommentQuery.parse(getProject(), getQuery(), true);
+				CodeCommentQuery parsedQuery = CodeCommentQuery.parse(getProject(), query, true);
 				if (SecurityUtils.getUser() == null && parsedQuery.needsLogin())  
 					error("Please login to perform this query");
 				else
 					return parsedQuery;
 			} catch (Exception e) {
-				logger.error("Error parsing code comment query: " + getQuery(), e);
+				logger.error("Error parsing code comment query: " + query, e);
 				error(e.getMessage());
 			}
 			return null;
@@ -87,16 +90,13 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 		
 	};
 	
-	public CodeCommentListPanel(String id, IModel<String> queryModel) {
-		super(id, queryModel);
+	public CodeCommentListPanel(String id, String query) {
+		super(id);
+		this.query = query;
 	}
 
 	private CodeCommentManager getCodeCommentManager() {
 		return OneDev.getInstance(CodeCommentManager.class);
-	}
-	
-	private String getQuery() {
-		return getModelObject();
 	}
 	
 	@Override
@@ -145,7 +145,7 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(StringUtils.isNotBlank(getQuery()));
+				setEnabled(StringUtils.isNotBlank(query));
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -161,12 +161,12 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target);
+				getQuerySaveSupport().onSaveQuery(target, query);
 			}		
 			
 		});
 		
-		TextField<String> input = new TextField<String>("input", getModel());
+		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
 		input.add(new CodeCommentQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
@@ -192,7 +192,7 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				onQueryUpdated(target);
+				onQueryUpdated(target, query);
 			}
 			
 		});
@@ -354,13 +354,22 @@ public abstract class CodeCommentListPanel extends GenericPanel<String> {
 
 	protected abstract Project getProject();
 	
-	protected abstract PagingHistorySupport getPagingHistorySupport();
+	@Nullable
+	protected PagingHistorySupport getPagingHistorySupport() {
+		return null;
+	}
 
-	protected abstract void onQueryUpdated(AjaxRequestTarget target);
+	protected void onQueryUpdated(AjaxRequestTarget target, @Nullable String query) {
+	}
 
 	@Nullable
-	protected abstract QuerySaveSupport getQuerySaveSupport();
+	protected QuerySaveSupport getQuerySaveSupport() {
+		return null;
+	}
 	
 	@Nullable
-	protected abstract PullRequest getPullRequest();
+	protected PullRequest getPullRequest() {
+		return null;
+	}
+	
 }

@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.builds.list;
+package io.onedev.server.web.page.project.builds;
 
 import java.util.ArrayList;
 import java.util.List;

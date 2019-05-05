@@ -513,12 +513,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			
 		});
 		
-		ProjectCommitsPage.State commitsState = new ProjectCommitsPage.State();
-		commitsState.compareWith = resolvedRevision.name();
+		String compareWith = resolvedRevision.name();
+		String query;
 		if (state.blobIdent.path != null)
-			commitsState.query = String.format("path(%s)", ProjectBlobPage.this.state.blobIdent.path);
+			query = String.format("path(%s)", ProjectBlobPage.this.state.blobIdent.path);
+		else
+			query = null;
 		blobOperations.add(new ViewStateAwarePageLink<Void>("history", ProjectCommitsPage.class, 
-				ProjectCommitsPage.paramsOf(getProject(), commitsState)));
+				ProjectCommitsPage.paramsOf(getProject(), query, compareWith)));
 		
 		blobOperations.add(new ArchiveMenuLink("download", projectModel) {
 

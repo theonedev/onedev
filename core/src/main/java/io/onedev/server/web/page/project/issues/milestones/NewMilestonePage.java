@@ -15,10 +15,10 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issues.IssuesPage;
+import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 
 @SuppressWarnings("serial")
-public class NewMilestonePage extends IssuesPage {
+public class NewMilestonePage extends ProjectIssuesPage {
 
 	public NewMilestonePage(PageParameters params) {
 		super(params);

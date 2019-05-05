@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.pullrequests.list;
+package io.onedev.server.web.page.project.pullrequests;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,6 +35,7 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,9 +72,9 @@ import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.VisibleVisitor;
 
 @SuppressWarnings("serial")
-public class PullRequestListPage extends ProjectPage {
+public class ProjectPullRequestsPage extends ProjectPage {
 
-	private static final Logger logger = LoggerFactory.getLogger(PullRequestListPage.class);
+	private static final Logger logger = LoggerFactory.getLogger(ProjectPullRequestsPage.class);
 	
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
@@ -102,7 +103,7 @@ public class PullRequestListPage extends ProjectPage {
 	
 	private DataTable<PullRequest, Void> requestsTable;
 	
-	public PullRequestListPage(PageParameters params) {
+	public ProjectPullRequestsPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toOptionalString();
 		if (query != null && query.length() == 0) {
@@ -159,8 +160,8 @@ public class PullRequestListPage extends ProjectPage {
 
 			@Override
 			protected Link<Void> newQueryLink(String componentId, NamedPullRequestQuery namedQuery) {
-				return new BookmarkablePageLink<Void>(componentId, PullRequestListPage.class, 
-						PullRequestListPage.paramsOf(getProject(), namedQuery.getQuery(), 0));
+				return new BookmarkablePageLink<Void>(componentId, ProjectPullRequestsPage.class, 
+						ProjectPullRequestsPage.paramsOf(getProject(), namedQuery.getQuery(), 0));
 			}
 
 			@Override
@@ -293,7 +294,7 @@ public class PullRequestListPage extends ProjectPage {
 			
 		});
 		
-		TextField<String> input = new TextField<String>("input", Model.of(query));
+		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
 		input.add(new PullRequestQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
@@ -306,7 +307,6 @@ public class PullRequestListPage extends ProjectPage {
 			
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				query = input.getModelObject();
 				if (SecurityUtils.getUser() != null)
 					target.add(querySave);
 			}
@@ -320,7 +320,7 @@ public class PullRequestListPage extends ProjectPage {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				setResponsePage(PullRequestListPage.class, paramsOf(getProject(), query, 0));
+				setResponsePage(ProjectPullRequestsPage.class, paramsOf(getProject(), query, 0));
 			}
 			
 		});
@@ -382,7 +382,7 @@ public class PullRequestListPage extends ProjectPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
 				if (rowModel.getObject().getSource() != null) {
-					Fragment fragment = new Fragment(componentId, "sourceFrag", PullRequestListPage.this);
+					Fragment fragment = new Fragment(componentId, "sourceFrag", ProjectPullRequestsPage.this);
 					fragment.add(new BranchLink("link", rowModel.getObject().getSource(), rowModel.getObject()));
 					cellItem.add(fragment);
 				} else {
@@ -487,7 +487,7 @@ public class PullRequestListPage extends ProjectPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new PullRequestListCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new ProjectPullRequestsCssResourceReference()));
 	}
 	
 	@Override

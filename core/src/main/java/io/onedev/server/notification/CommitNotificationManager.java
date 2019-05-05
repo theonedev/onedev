@@ -20,7 +20,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.search.commit.CommitQueryUtils;
+import io.onedev.server.search.commit.CommitQuery;
 
 @Singleton
 public class CommitNotificationManager {
@@ -64,7 +64,7 @@ public class CommitNotificationManager {
 				User user = entry.getKey();
 				for (String queryString: entry.getValue()) {
 					try {
-						if (CommitQueryUtils.matches(event, user, queryString)) {
+						if (CommitQuery.parse(event.getProject(), queryString).matches(event, user)) {
 							notifyEmails.add(user.getEmail());
 							break;
 						}

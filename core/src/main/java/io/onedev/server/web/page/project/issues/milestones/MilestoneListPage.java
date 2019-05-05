@@ -42,11 +42,11 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
 import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.component.milestone.MilestoneDueLabel;
-import io.onedev.server.web.page.project.issues.IssuesPage;
+import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
-public class MilestoneListPage extends IssuesPage {
+public class MilestoneListPage extends ProjectIssuesPage {
 
 	private static final String PARAM_STATE = "state";
 	

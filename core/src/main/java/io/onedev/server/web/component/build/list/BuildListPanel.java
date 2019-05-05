@@ -30,13 +30,14 @@ import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
 import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,16 +76,18 @@ import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.VisibleVisitor;
 
 @SuppressWarnings("serial")
-public abstract class BuildListPanel extends GenericPanel<String> {
+public abstract class BuildListPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(BuildListPanel.class);
+	
+	private String query;
 	
 	private IModel<BuildQuery> parsedQueryModel = new LoadableDetachableModel<BuildQuery>() {
 
 		@Override
 		protected BuildQuery load() {
 			try {
-				BuildQuery additionalQuery = BuildQuery.parse(getProject(), getQuery(), true);
+				BuildQuery additionalQuery = BuildQuery.parse(getProject(), query, true);
 				if (SecurityUtils.getUser() == null && additionalQuery.needsLogin()) { 
 					error("Please login to perform this query");
 				} else { 
@@ -94,7 +97,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 						return BuildQuery.merge(getBaseQuery(), additionalQuery);
 				}
 			} catch (Exception e) {
-				logger.error("Error parsing build query: " + getQuery(), e);
+				logger.error("Error parsing build query: " + query, e);
 				error(e.getMessage());
 			}
 			return null;
@@ -106,16 +109,13 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 	
 	private SortableDataProvider<Build, Void> dataProvider;	
 	
-	public BuildListPanel(String id, IModel<String> queryModel) {
-		super(id, queryModel);
+	public BuildListPanel(String id, @Nullable String query) {
+		super(id);
+		this.query = query;
 	}
 	
 	private BuildManager getBuildManager() {
 		return OneDev.getInstance(BuildManager.class);
-	}
-	
-	private String getQuery() {
-		return getModelObject();
 	}
 	
 	@Override
@@ -130,12 +130,18 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 		return new BuildQuery();
 	}
 
-	protected abstract PagingHistorySupport getPagingHistorySupport();
+	@Nullable
+	protected PagingHistorySupport getPagingHistorySupport() {
+		return null;
+	}
 	
-	protected abstract void onQueryUpdated(AjaxRequestTarget target);
+	protected void onQueryUpdated(AjaxRequestTarget target, @Nullable String query) {
+	}
 	
 	@Nullable
-	protected abstract QuerySaveSupport getQuerySaveSupport();
+	protected QuerySaveSupport getQuerySaveSupport() {
+		return null;
+	}
 	
 	@Override
 	protected void onInitialize() {
@@ -182,7 +188,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setEnabled(StringUtils.isNotBlank(getQuery()));
+				setEnabled(StringUtils.isNotBlank(query));
 				setVisible(SecurityUtils.getUser() != null && getQuerySaveSupport() != null);
 			}
 
@@ -198,12 +204,12 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				getQuerySaveSupport().onSaveQuery(target);
+				getQuerySaveSupport().onSaveQuery(target, query);
 			}		
 			
 		});
 		
-		TextField<String> input = new TextField<String>("input", getModel());
+		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
 		input.add(new BuildQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
 			@Override
@@ -230,7 +236,7 @@ public abstract class BuildListPanel extends GenericPanel<String> {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				target.add(BuildListPanel.this);
-				onQueryUpdated(target);
+				onQueryUpdated(target, query);
 			}
 			
 		});

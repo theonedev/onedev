@@ -1,8 +1,8 @@
 package io.onedev.server.web.component.commit.list;
 
-import org.apache.wicket.request.resource.CssResourceReference;
+import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 
-public class CommitListResourceReference extends CssResourceReference {
+public class CommitListResourceReference extends BaseDependentCssResourceReference {
 
 	private static final long serialVersionUID = 1L;
 

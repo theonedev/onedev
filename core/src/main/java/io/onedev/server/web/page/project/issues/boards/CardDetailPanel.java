@@ -14,7 +14,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
-import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.cycle.IRequestCycleListener;
@@ -44,9 +43,7 @@ import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPositionSupport;
-import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 
@@ -54,9 +51,6 @@ import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 abstract class CardDetailPanel extends GenericPanel<Issue> implements InputContext {
 
 	private static final String TAB_CONTENT_ID = "tabContent";
-	
-	@SuppressWarnings("unused")
-	private String buildQuery;
 	
 	private IssueActivitiesPanel activities;
 	
@@ -144,7 +138,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-					Component content = new BuildListPanel(TAB_CONTENT_ID, new PropertyModel<String>(CardDetailPanel.this, "buildQuery")) {
+					Component content = new BuildListPanel(TAB_CONTENT_ID, null) {
 
 						@Override
 						protected Project getProject() {
@@ -154,20 +148,6 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 						@Override
 						protected BuildQuery getBaseQuery() {
 							return new BuildQuery(new FixedIssueCriteria(getIssue()), new ArrayList<>());
-						}
-
-						@Override
-						protected PagingHistorySupport getPagingHistorySupport() {
-							return null;
-						}
-
-						@Override
-						protected void onQueryUpdated(AjaxRequestTarget target) {
-						}
-
-						@Override
-						protected QuerySaveSupport getQuerySaveSupport() {
-							return null;
 						}
 
 					}.setOutputMarkupId(true);
