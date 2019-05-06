@@ -12,7 +12,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.QueryBuildContext;
 
-public class NumberFieldCriteria extends FieldCriteria {
+public class NumericFieldCriteria extends FieldCriteria {
 
 	private static final long serialVersionUID = 1L;
 
@@ -20,7 +20,7 @@ public class NumberFieldCriteria extends FieldCriteria {
 	
 	private final int operator;
 	
-	public NumberFieldCriteria(String name, int value, int operator) {
+	public NumericFieldCriteria(String name, int value, int operator) {
 		super(name);
 		this.value = value;
 		this.operator = operator;

@@ -268,7 +268,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 								} else if (field instanceof BooleanInput) {
 									return new BooleanFieldCriteria(fieldName, getBooleanValue(value));
 								} else if (field instanceof NumberInput) {
-									return new NumberFieldCriteria(fieldName, getIntValue(value), operator);
+									return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
 								} else if (field instanceof ChoiceInput) { 
 									long ordinal = getValueOrdinal((ChoiceInput) field, value);
 									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
@@ -290,7 +290,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else {
 								InputSpec field = getIssueSetting().getFieldSpec(fieldName);
 								if (field instanceof NumberInput) {
-									return new NumberFieldCriteria(fieldName, getIntValue(value), operator);
+									return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
 								} else {
 									long ordinal;
 									if (validate)

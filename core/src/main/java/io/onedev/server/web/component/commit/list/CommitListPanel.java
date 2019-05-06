@@ -335,14 +335,23 @@ public abstract class CommitListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				target.add(CommitListPanel.this);
+				target.add(body);
+				target.add(foot);
 				onQueryUpdated(target, query);
 			}
 			
 		});
 		add(form);
 		
-		body = new WebMarkupContainer("body");
+		body = new WebMarkupContainer("body") {
+			
+			@Override
+			protected void onBeforeRender() {
+				replace(commitsView = newCommitsView());
+				super.onBeforeRender();
+			}
+
+		};
 		body.setOutputMarkupId(true);
 		add(body);
 		
@@ -430,16 +439,8 @@ public abstract class CommitListPanel extends Panel {
 			}
 			
 		});
-		
-		setOutputMarkupId(true);
 	}
 	
-	@Override
-	protected void onBeforeRender() {
-		body.replace(commitsView = newCommitsView());
-		super.onBeforeRender();
-	}
-
 	private RepeatingView newCommitsView() {
 		RepeatingView commitsView = new RepeatingView("commits");
 		commitsView.setOutputMarkupId(true);
@@ -553,7 +554,7 @@ public abstract class CommitListPanel extends Panel {
 				compareState.rightSide = new ProjectAndRevision(getProject(), getCompareWith());
 				if (path != null)
 					compareState.pathFilter = PatternSet.quoteIfNecessary(path);
-				compareState.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+				compareState.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 				
 				params = RevisionComparePage.paramsOf(getProject(), compareState);
 				item.add(new ViewStateAwarePageLink<Void>("compare", RevisionComparePage.class, params));

@@ -769,7 +769,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getBaseCommitHash());
 		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getHeadCommitHash());
 		state.pathFilter = pathFilter;
-		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 		state.whitespaceOption = whitespaceOption;
 		state.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getProject(), state)).toString();
@@ -828,7 +828,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		state.leftSide = new ProjectAndBranch(source.getProject(), getPullRequest().getBaseCommitHash());
 		state.rightSide = new ProjectAndBranch(source.getProject(), getPullRequest().getHeadCommitHash());
 		state.pathFilter = pathFilter;
-		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 		state.whitespaceOption = whitespaceOption;
 		state.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, RevisionComparePage.paramsOf(source.getProject(), state)).toString();

@@ -1137,7 +1137,7 @@ public class RevisionDiffPanel extends Panel {
 						state.leftSide = new ProjectAndRevision(comment.getProject(), 
 								comment.getMarkPos().getCommit());
 						state.rightSide = new ProjectAndRevision(comment.getProject(), revision);
-						state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+						state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 						state.whitespaceOption = whitespaceOptionModel.getObject();
 						PageParameters params = RevisionComparePage.paramsOf(comment.getProject(), state);
 						setResponsePage(RevisionComparePage.class, params);

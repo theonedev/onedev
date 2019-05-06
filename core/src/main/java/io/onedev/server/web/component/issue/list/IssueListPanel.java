@@ -243,6 +243,9 @@ public abstract class IssueListPanel extends Panel {
 			
 		});
 		
+		WebMarkupContainer body = new WebMarkupContainer("body");
+		add(body.setOutputMarkupId(true));
+		
 		Form<?> form = new Form<Void>("query");
 		form.add(input);
 		form.add(new AjaxButton("submit") {
@@ -250,7 +253,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				target.add(IssueListPanel.this);
+				target.add(body);
 				onQueryUpdated(target, query);
 			}
 			
@@ -489,7 +492,7 @@ public abstract class IssueListPanel extends Panel {
 			
 		};
 		
-		add(new NotificationPanel("feedback", this));
+		body.add(new NotificationPanel("feedback", this));
 		
 		List<IColumn<Issue, Void>> columns = new ArrayList<>();
 		
@@ -585,7 +588,7 @@ public abstract class IssueListPanel extends Panel {
 			});
 		}
 		
-		add(issuesTable = new HistoryAwareDataTable<Issue, Void>("issues", columns, dataProvider, 
+		body.add(issuesTable = new HistoryAwareDataTable<Issue, Void>("issues", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
 
 			@Override
@@ -597,8 +600,6 @@ public abstract class IssueListPanel extends Panel {
 				return item;
 			}
 		});
-		
-		setOutputMarkupId(true);
 	}
 	
 	@Override

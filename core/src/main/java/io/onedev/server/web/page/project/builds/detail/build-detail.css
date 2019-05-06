@@ -76,3 +76,7 @@
 		margin-right: 0;
 	}
 }
+
+#build-detail>.main>.changes .help-block {
+    margin-top: 16px;
+}

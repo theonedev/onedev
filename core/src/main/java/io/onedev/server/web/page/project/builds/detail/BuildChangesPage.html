@@ -1,3 +1,10 @@
 <wicket:extend>
-    This is build changes
+    <div wicket:id="content" class="changes"></div>
+    <wicket:fragment wicket:id="availableFrag">
+        <div wicket:id="commits"></div>
+        <div class="help-block"><i class="fa fa-info-circle"></i> This page lists changes in the build compared to all previous builds in job '<span wicket:id="jobName"></span>'</div>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="notAvailableFrag">
+        <div class="alert alert-warning">Changes not calcualted yet, please wait a while and refresh again</div>
+    </wicket:fragment>
 </wicket:extend>

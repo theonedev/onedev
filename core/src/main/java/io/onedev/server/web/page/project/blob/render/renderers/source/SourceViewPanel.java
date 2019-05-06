@@ -306,7 +306,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 						state.leftSide = new ProjectAndRevision(comment.getProject(), 
 								comment.getMarkPos().getCommit());
 						state.rightSide = new ProjectAndRevision(comment.getProject(), revision);
-						state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+						state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 						state.whitespaceOption = context.getOpenComment().getCompareContext().getWhitespaceOption();
 						PageParameters params = RevisionComparePage.paramsOf(comment.getProject(), state);
 						setResponsePage(RevisionComparePage.class, params);

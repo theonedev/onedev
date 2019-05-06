@@ -143,7 +143,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
 		
 		if (!fixCommits.isEmpty()) // Do not calculate fix builds now as it might be slow
-			tabs.add(new IssueTab("Builds", IssueBuildsPage.class));
+			tabs.add(new IssueTab("Fixing Builds", FixingBuildsPage.class));
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
 		

@@ -185,6 +185,9 @@ public abstract class CodeCommentListPanel extends Panel {
 			
 		});
 		
+		WebMarkupContainer body = new WebMarkupContainer("body");
+		add(body.setOutputMarkupId(true));
+		
 		Form<?> form = new Form<Void>("query");
 		form.add(input);
 		form.add(new AjaxButton("submit") {
@@ -192,19 +195,16 @@ public abstract class CodeCommentListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
+				target.add(body);
 				onQueryUpdated(target, query);
 			}
 			
 		});
 		add(form);
 		
-		add(new NotificationPanel("feedback", this));
+		body.add(new NotificationPanel("feedback", this));
 
 		SortableDataProvider<CodeComment, Void> dataProvider = new LoadableDetachableDataProvider<CodeComment, Void>() {
-
-			@Override
-			public void detach() {
-			}
 
 			@Override
 			public Iterator<? extends CodeComment> iterator(long first, long count) {
@@ -325,7 +325,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 		});
 		
-		add(new HistoryAwareDataTable<CodeComment, Void>("comments", columns, dataProvider, 
+		body.add(new HistoryAwareDataTable<CodeComment, Void>("comments", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
 
 			@Override

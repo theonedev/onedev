@@ -152,6 +152,9 @@ a.wicket_orderUp:AFTER {
 a.wicket_orderDown:AFTER { 
 	content: "\f063"; 
 }
+.pagination {
+    margin-bottom: 0;
+}
 .pagination a.first, .pagination a.prev, .pagination a.next, .pagination a.last {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }

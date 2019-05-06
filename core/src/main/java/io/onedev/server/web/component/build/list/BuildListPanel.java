@@ -107,8 +107,6 @@ public abstract class BuildListPanel extends Panel {
 	
 	private DataTable<Build, Void> buildsTable;
 	
-	private SortableDataProvider<Build, Void> dataProvider;	
-	
 	public BuildListPanel(String id, @Nullable String query) {
 		super(id);
 		this.query = query;
@@ -228,6 +226,9 @@ public abstract class BuildListPanel extends Panel {
 			
 		});
 		
+		WebMarkupContainer body = new WebMarkupContainer("body");
+		add(body.setOutputMarkupId(true));
+		
 		Form<?> form = new Form<Void>("query");
 		form.add(input);
 		form.add(new AjaxButton("submit") {
@@ -235,14 +236,14 @@ public abstract class BuildListPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				target.add(BuildListPanel.this);
+				target.add(body);
 				onQueryUpdated(target, query);
 			}
 			
 		});
 		add(form);
 		
-		dataProvider = new LoadableDetachableDataProvider<Build, Void>() {
+		SortableDataProvider<Build, Void> dataProvider = new LoadableDetachableDataProvider<Build, Void>() {
 
 			@Override
 			public Iterator<? extends Build> iterator(long first, long count) {
@@ -273,7 +274,7 @@ public abstract class BuildListPanel extends Panel {
 			
 		};
 		
-		add(new NotificationPanel("feedback", this));
+		body.add(new NotificationPanel("feedback", this));
 		
 		List<IColumn<Build, Void>> columns = new ArrayList<>();
 		
@@ -402,10 +403,8 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		add(buildsTable = new HistoryAwareDataTable<Build, Void>("builds", columns, dataProvider, 
+		body.add(buildsTable = new HistoryAwareDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
-		
-		setOutputMarkupId(true);
 	}
 	
 	private WebSocketObserver newBuildObserver(Long buildId) {

@@ -72,7 +72,7 @@
 	text-align: center;
 }
 .commit-list>.foot>.alert, .commit-list>.foot>.btn {
-	margin-top: 8px;
+	margin-top: 12px;
 	margin-bottom: 0;
 }
 .commit-list li.date {

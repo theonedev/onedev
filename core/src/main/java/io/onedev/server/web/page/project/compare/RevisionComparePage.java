@@ -66,7 +66,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 
 	public enum TabPanel {
 		COMMITS, 
-		CHANGES;
+		FILE_CHANGES;
 
 		public static TabPanel of(@Nullable String name) {
 			if (name != null) {
@@ -131,7 +131,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 			state.leftSide = new ProjectAndRevision(project, comment.getMarkPos().getCommit());
 			state.rightSide = new ProjectAndRevision(project, compareCommit);
 		}
-		state.tabPanel = RevisionComparePage.TabPanel.CHANGES;
+		state.tabPanel = RevisionComparePage.TabPanel.FILE_CHANGES;
 		state.whitespaceOption = compareContext.getWhitespaceOption();
 		state.pathFilter = compareContext.getPathFilter();
 		return state;
@@ -466,16 +466,16 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 				
 			});
 
-			tabs.add(new AjaxActionTab(Model.of("Changes")) {
+			tabs.add(new AjaxActionTab(Model.of("File Changes")) {
 				
 				@Override
 				public boolean isSelected() {
-					return state.tabPanel == TabPanel.CHANGES;
+					return state.tabPanel == TabPanel.FILE_CHANGES;
 				}
 				
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-					state.tabPanel = TabPanel.CHANGES;
+					state.tabPanel = TabPanel.FILE_CHANGES;
 					newTabPanel(target);
 					pushState(target);
 				}
@@ -512,7 +512,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		};
 		WebMarkupContainer tabPanel;
 		switch (state.tabPanel) {
-		case CHANGES:
+		case FILE_CHANGES:
 			IModel<String> blameModel = new IModel<String>() {
 
 				@Override
@@ -699,7 +699,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		commentState.rightSide = new ProjectAndRevision(state.rightSide.getProject(), rightCommitId.name());
 		commentState.mark = comment.getMarkPos();
 		commentState.commentId = comment.getId();
-		commentState.tabPanel = TabPanel.CHANGES;
+		commentState.tabPanel = TabPanel.FILE_CHANGES;
 		commentState.pathFilter = state.pathFilter;
 		commentState.whitespaceOption = state.whitespaceOption;
 		commentState.compareWithMergeBase = false;
@@ -754,7 +754,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		markState.rightSide = new ProjectAndRevision(state.rightSide.getProject(), rightCommitId.name());
 		markState.mark = mark;
 		markState.pathFilter = state.pathFilter;
-		markState.tabPanel = TabPanel.CHANGES;
+		markState.tabPanel = TabPanel.FILE_CHANGES;
 		markState.whitespaceOption = state.whitespaceOption;
 		markState.compareWithMergeBase = false;
 		return urlFor(RevisionComparePage.class, paramsOf(markState.rightSide.getProject(), markState)).toString();
