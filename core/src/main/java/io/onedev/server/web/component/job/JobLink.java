@@ -1,9 +1,5 @@
 package io.onedev.server.web.component.job;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
-import org.apache.commons.io.Charsets;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
@@ -11,10 +7,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
 import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecRendererProvider;
 
 @SuppressWarnings("serial")
 public class JobLink extends BookmarkablePageLink<Void> {
@@ -53,17 +51,10 @@ public class JobLink extends BookmarkablePageLink<Void> {
 
 	@Override
 	public PageParameters getPageParameters() {
-		return ProjectBlobPage.paramsOf(projectModel.getObject(), 
-				new BlobIdent(revision, CISpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits()));
-	}
-
-	@Override
-	protected CharSequence getURL() {
-		try {
-			return super.getURL() + "#jobs/" + URLEncoder.encode(jobName, Charsets.UTF_8.name());
-		} catch (UnsupportedEncodingException e) {
-			throw new RuntimeException(e);
-		}
+		ProjectBlobPage.State state = new ProjectBlobPage.State();
+		state.blobIdent = new BlobIdent(revision, CISpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits()); 
+		state.position = CISpecRendererProvider.getPosition(Job.SELECTION_PREFIX + jobName);
+		return ProjectBlobPage.paramsOf(projectModel.getObject(), state);
 	}
 
 }

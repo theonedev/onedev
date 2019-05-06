@@ -47,7 +47,7 @@ public class MarkdownRendererProvider implements BlobRendererContribution {
 
 				@Override
 				public Component render(String componentId) {
-					if (context.getMark() != null || context.getMode() == Mode.BLAME) 
+					if (context.getPosition() != null || context.getMode() == Mode.BLAME) 
 						return new SourceViewPanel(componentId, context, false);
 					else
 						return new MarkdownBlobViewPanel(componentId, context);

@@ -60,8 +60,8 @@ import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.jsymbol.SymbolExtractor;
 import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.PlanarRange;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.matchscore.MatchScoreProvider;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
@@ -100,7 +100,7 @@ import io.onedev.server.web.component.symboltooltip.SymbolTooltipPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
-import io.onedev.server.web.page.project.blob.render.view.Markable;
+import io.onedev.server.web.page.project.blob.render.view.Positionable;
 import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
@@ -116,7 +116,7 @@ import io.onedev.server.web.websocket.PageDataChanged;
  *
  */
 @SuppressWarnings("serial")
-public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMenuContributor {
+public class SourceViewPanel extends BlobViewPanel implements Positionable, SearchMenuContributor {
 
 	private static final Logger logger = LoggerFactory.getLogger(SourceViewPanel.class);
 	
@@ -328,8 +328,10 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 				} else {
 					mark = (PlanarRange) commentContainer.getDefaultModelObject();
 				}
-				mark(target, mark);
-				context.onMark(target, mark);
+				
+				String position = SourceRendererProvider.getPosition(mark);
+				position(target, position);
+				context.onPosition(target, position);
 				target.appendJavaScript(String.format("$('#%s').blur();", getMarkupId()));
 			}
 
@@ -421,8 +423,9 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 						}
 					}
 							
+					String position = SourceRendererProvider.getPosition(mark);
 					String script = String.format("onedev.server.sourceView.openSelectionPopover(%s, '%s', %s, %s);", 
-							getJson(mark), context.getMarkUrl(mark), SecurityUtils.getUser()!=null, 
+							getJson(mark), context.getPositionUrl(position), SecurityUtils.getUser()!=null, 
 							unableCommentMessage!=null?"'" + unableCommentMessage + "'":"undefined");
 					target.appendJavaScript(script);
 					break;
@@ -487,7 +490,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 							clearComment(target);
 							target.appendJavaScript("onedev.server.sourceView.mark(undefined);");
 							target.appendJavaScript("$(window).resize();");
-							context.onMark(target, null);
+							context.onPosition(target, null);
 						}
 						
 					});
@@ -690,7 +693,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						context.onSelect(target, context.getBlobIdent(), symbol.getPosition());
+						context.onSelect(target, context.getBlobIdent(), SourceRendererProvider.getPosition(symbol.getPosition()));
 					}
 					
 				};
@@ -722,7 +725,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				BlobIdent blobIdent = new BlobIdent(
 						getRevision(), hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
-				context.onSelect(target, blobIdent, hit.getTokenPos());
+				context.onSelect(target, blobIdent, SourceRendererProvider.getPosition(hit.getTokenPos()));
 			}
 
 			@Override
@@ -897,7 +900,8 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 			throw new RuntimeException(e);
 		}
 		
-		String jsonOfMark = context.getMark()!=null?getJson(context.getMark()):"undefined";
+		PlanarRange mark = SourceRendererProvider.getRange(context.getPosition());
+		String jsonOfMark = mark!=null? getJson(mark): "undefined";
 			
 		CharSequence callback = ajaxBehavior.getCallbackFunction(
 				explicit("action"), explicit("param1"), explicit("param2"), 
@@ -964,8 +968,9 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	}
 	
 	@Override
-	public void mark(AjaxRequestTarget target, PlanarRange mark) {
+	public void position(AjaxRequestTarget target, String position) {
 		String script;
+		PlanarRange mark = SourceRendererProvider.getRange(position);
 		if (mark != null) {
 			script = String.format("onedev.server.sourceView.mark(%s);", getJson(mark));
 		} else {
@@ -1032,7 +1037,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						modal.close();
-						context.onSelect(target, context.getBlobIdent(), symbol.getPosition());
+						context.onSelect(target, context.getBlobIdent(), SourceRendererProvider.getPosition(symbol.getPosition()));
 					}
 					
 				};
@@ -1123,7 +1128,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 				} else if (key.equals("return")) {
 					int symbolIndex = params.getParameterValue("param").toInt();
 					Symbol symbol = filteredSymbols.get(symbolIndex); 
-					context.onSelect(target, context.getBlobIdent(), symbol.getPosition());
+					context.onSelect(target, context.getBlobIdent(), SourceRendererProvider.getPosition(symbol.getPosition()));
 					modal.close();
 				} else {
 					throw new IllegalStateException("Unrecognized key: " + key);

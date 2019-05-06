@@ -53,14 +53,14 @@ public class MarkPos implements Serializable {
 	public void setRange(PlanarRange range) {
 		this.range = range;
 	}
-
+	
 	public MarkPos() {
 	}
 	
-	public MarkPos(String commit, @Nullable String path, @Nullable PlanarRange mark) {
+	public MarkPos(String commit, @Nullable String path, @Nullable PlanarRange range) {
 		this.commit = commit;
 		this.path = path;
-		this.range = mark;
+		this.range = range;
 	}
 	
 	@Override
@@ -73,19 +73,19 @@ public class MarkPos implements Serializable {
 			return commit;
 	}
 	
-	public static MarkPos fromString(@Nullable String str) {
-		if (str != null) {
-			String commit = StringUtils.substringBefore(str, ":");
+	public static MarkPos fromString(@Nullable String string) {
+		if (string != null) {
+			String commit = StringUtils.substringBefore(string, ":");
 			String path = null;
-			PlanarRange mark = null;
-			String pathAndMark = StringUtils.substringAfter(str, ":");
-			if (pathAndMark.length() != 0) {
-				path = StringUtils.substringBefore(pathAndMark, ":");
-				String markStr = StringUtils.substringAfter(pathAndMark, ":");
-				if (markStr.length() != 0)
-					mark = new PlanarRange(markStr);
+			PlanarRange range = null;
+			String pathAndRange = StringUtils.substringAfter(string, ":");
+			if (pathAndRange.length() != 0) {
+				path = StringUtils.substringBefore(pathAndRange, ":");
+				String rangeString = StringUtils.substringAfter(pathAndRange, ":");
+				if (rangeString.length() != 0)
+					range = new PlanarRange(rangeString);
 			}
-			return new MarkPos(commit, path, mark);
+			return new MarkPos(commit, path, range);
 		} else {
 			return null;
 		}

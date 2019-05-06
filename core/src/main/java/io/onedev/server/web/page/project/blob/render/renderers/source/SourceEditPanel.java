@@ -19,10 +19,10 @@ import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.page.project.blob.render.edit.BlobEditPanel;
-import io.onedev.server.web.page.project.blob.render.view.Markable;
+import io.onedev.server.web.page.project.blob.render.view.Positionable;
 
 @SuppressWarnings("serial")
-public class SourceEditPanel extends BlobEditPanel implements Markable {
+public class SourceEditPanel extends BlobEditPanel implements Positionable {
 
 	private SourceFormatPanel sourceFormat;
 	
@@ -74,7 +74,8 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 		response.render(JavaScriptHeaderItem.forReference(new SourceEditResourceReference()));
 
 		String autosaveKey = JavaScriptEscape.escapeJavaScript(context.getAutosaveKey());
-		String jsonOfMark = context.getMark()!=null?getJson(context.getMark()):"undefined"; 
+		PlanarRange mark = SourceRendererProvider.getRange(context.getPosition());
+		String jsonOfMark = mark!=null?getJson(mark):"undefined"; 
 		String script = String.format("onedev.server.sourceEdit.onDomReady('%s', '%s', %s, '%s', %s, '%s', %b, '%s');", 
 				getEditor().getMarkupId(), 
 				JavaScriptEscape.escapeJavaScript(context.getNewPath()), 
@@ -100,8 +101,9 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 	}
 	
 	@Override
-	public void mark(AjaxRequestTarget target, PlanarRange mark) {
+	public void position(AjaxRequestTarget target, String position) {
 		String script;
+		PlanarRange mark = SourceRendererProvider.getRange(position);
 		if (mark != null) {
 			script = String.format("onedev.server.sourceEdit.mark('%s', %s);", 
 					getEditor().getMarkupId(), getJson(mark));

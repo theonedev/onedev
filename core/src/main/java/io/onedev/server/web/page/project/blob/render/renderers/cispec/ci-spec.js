@@ -1,5 +1,5 @@
 onedev.ciSpec = {
-    onDomReady: function() {
+    onDomReady: function(selection, callback) {
         var activeJobIndex = -1; 
         var $body = $(".ci-spec>.valid>.jobs>.body");
         $body.find(">.contents>.content").each(function() {
@@ -10,10 +10,8 @@ onedev.ciSpec = {
             }
         });
         if (activeJobIndex == -1) {
-            var uri = URI(window.location.href);
-            var fragment = decodeURIComponent(uri.fragment());
-            if (fragment.startsWith("jobs/")) {
-                var activeJobName = fragment.substring("jobs/".length);
+            if (selection && selection.startsWith("jobs/")) {
+                var activeJobName = selection.substring("jobs/".length);
                 activeJobIndex = $body.find(">.side>.navs>.nav[data-name='" + activeJobName.escape() + "']").index();
             }
         }
@@ -23,7 +21,10 @@ onedev.ciSpec = {
         onedev.ciSpec.showJob(activeJobIndex);
 
         $body.find(".side>.navs>.nav>.select").click(function() {
-            onedev.ciSpec.showJob($(this).parent().index());
+            var $nav = $(this).parent();
+            onedev.ciSpec.showJob($nav.index());
+            if (callback)
+                callback("jobs/" + $nav.data("name"));
         });
     },
     showJob: function(index) {

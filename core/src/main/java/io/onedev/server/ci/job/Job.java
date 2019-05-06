@@ -29,6 +29,8 @@ public class Job implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final String SELECTION_PREFIX = "jobs/";
+	
 	private String name;
 	
 	private String environment;

@@ -40,11 +40,11 @@ public interface BlobRenderContext extends Serializable {
 	BlobIdent getBlobIdent();
 	
 	@Nullable
-	PlanarRange getMark();
+	String getPosition();
 	
-	void onMark(AjaxRequestTarget target, PlanarRange mark);
+	void onPosition(AjaxRequestTarget target, String position);
 	
-	String getMarkUrl(PlanarRange mark);
+	String getPositionUrl(String position);
 	
 	/**
 	 * Get directory of the blob. If the blob itself is a directory, the blob path will be returned instead
@@ -71,7 +71,7 @@ public interface BlobRenderContext extends Serializable {
 	
 	boolean isOnBranch();
 	
-	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable PlanarRange tokenPos);
+	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable String position);
 	
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
 	
@@ -81,7 +81,7 @@ public interface BlobRenderContext extends Serializable {
 	
 	void onCommentOpened(AjaxRequestTarget target, @Nullable CodeComment comment);
 
-	void onAddComment(AjaxRequestTarget target, PlanarRange mark);
+	void onAddComment(AjaxRequestTarget target, PlanarRange range);
 	
 	RefUpdated uploadFiles(Collection<FileUpload> uploads, @Nullable String directory, String commitMessage);
 	

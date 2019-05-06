@@ -4,10 +4,8 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import io.onedev.commons.utils.PlanarRange;
+public interface Positionable {
 
-public interface Markable {
-
-	void mark(AjaxRequestTarget target, @Nullable PlanarRange mark);
+	void position(AjaxRequestTarget target, @Nullable String position);
 	
 }

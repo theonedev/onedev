@@ -45,6 +45,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.page.project.blob.render.renderers.source.SourceRendererProvider;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
 
 @SuppressWarnings("serial")
@@ -292,7 +293,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	public PageParameters getQueryHitParams(QueryHit hit) {
 		BlobIdent blobIdent = new BlobIdent(revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
 		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-		state.mark = hit.getTokenPos();
+		state.position = SourceRendererProvider.getPosition(hit.getTokenPos());
 		return ProjectBlobPage.paramsOf(projectModel.getObject(), state);
 	}
 	

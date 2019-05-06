@@ -94,7 +94,8 @@ import io.onedev.server.web.page.project.blob.navigator.BlobNavigator;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.page.project.blob.render.BlobUploadException;
-import io.onedev.server.web.page.project.blob.render.view.Markable;
+import io.onedev.server.web.page.project.blob.render.renderers.source.SourceRendererProvider;
+import io.onedev.server.web.page.project.blob.render.view.Positionable;
 import io.onedev.server.web.page.project.blob.search.SearchMenuContributor;
 import io.onedev.server.web.page.project.blob.search.advanced.AdvancedSearchPanel;
 import io.onedev.server.web.page.project.blob.search.quick.QuickSearchPanel;
@@ -121,7 +122,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private static final String PARAM_MARK = "mark";
+	private static final String PARAM_POSITION = "position";
 	
 	private static final String PARAM_RAW = "raw";
 	
@@ -167,7 +168,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 		resolvedRevision = getProject().getObjectId(state.blobIdent.revision, true);
 		
-		state.mark = PlanarRange.of(params.get(PARAM_MARK).toString());
+		state.position = params.get(PARAM_POSITION).toString();
 		
 		state.requestId = params.get(PARAM_REQUEST).toOptionalLong();
 		
@@ -558,7 +559,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			protected void onSelect(AjaxRequestTarget target, QueryHit hit) {
 				BlobIdent selected = new BlobIdent(state.blobIdent.revision, hit.getBlobPath(), 
 						FileMode.REGULAR_FILE.getBits()); 
-				ProjectBlobPage.this.onSelect(target, selected, hit.getTokenPos());
+				ProjectBlobPage.this.onSelect(target, selected, SourceRendererProvider.getPosition(hit.getTokenPos()));
 				modal.close();
 			}
 			
@@ -730,7 +731,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 				FileMode.REGULAR_FILE.getBits());
 		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
 		state.commentId = comment.getId();
-		state.mark = comment.getMarkPos().getRange();
+		state.position = SourceRendererProvider.getPosition(comment.getMarkPos().getRange());
 		return state;
 	}	
 	
@@ -747,8 +748,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			params.add(PARAM_REVISION, state.blobIdent.revision);
 		if (state.blobIdent.path != null)
 			params.add(PARAM_PATH, state.blobIdent.path);
-		if (state.mark != null)
-			params.add(PARAM_MARK, state.mark.toString());
+		if (state.position != null)
+			params.add(PARAM_POSITION, state.position.toString());
 		if (state.requestId != null)
 			params.add(PARAM_REQUEST, state.requestId);
 		if (state.commentId != null)
@@ -827,23 +828,23 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	}
 	
 	@Override
-	public PlanarRange getMark() {
-		return state.mark;
+	public String getPosition() {
+		return state.position;
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, PlanarRange mark) {
-		state.mark = mark;
+	public void onPosition(AjaxRequestTarget target, String position) {
+		state.position = position;
 		pushState(target);
 	}
 
 	@Override
-	public String getMarkUrl(PlanarRange mark) {
-		State markState = SerializationUtils.clone(state);
-		markState.blobIdent.revision = resolvedRevision.name();
-		markState.commentId = null;
-		markState.mark = mark;
-		PageParameters params = paramsOf(getProject(), markState);		
+	public String getPositionUrl(String position) {
+		State positionState = SerializationUtils.clone(state);
+		positionState.blobIdent.revision = resolvedRevision.name();
+		positionState.commentId = null;
+		positionState.position = position;
+		PageParameters params = paramsOf(getProject(), positionState);		
 		return RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
 	}
 	
@@ -853,9 +854,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	}
 
 	@Override
-	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable PlanarRange tokenPos) {
-		PlanarRange prevMark = state.mark;
-		state.mark = tokenPos;
+	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable String position) {
+		String prevPosition = state.position;
+		state.position = position;
 		if (!blobIdent.revision.equals(state.blobIdent.revision)) {
 			state.blobIdent = blobIdent;
 			state.mode = Mode.VIEW;
@@ -873,18 +874,18 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			newBlobContent(target);
 			resizeWindow(target);
 			OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
-		} else if (state.mark != null) {
-			if (get(BLOB_CONTENT_ID) instanceof Markable) {
+		} else if (state.position != null) {
+			if (get(BLOB_CONTENT_ID) instanceof Positionable) {
 				// This logic is added for performance reason, we do not want to 
 				// reload the file if go to different mark positions in same file
-				((Markable)get(BLOB_CONTENT_ID)).mark(target, state.mark);
+				((Positionable)get(BLOB_CONTENT_ID)).position(target, state.position);
 			} else {
 				state.mode = Mode.VIEW;
 				newBlobOperations(target);
 				newBlobContent(target);
 				resizeWindow(target);
 			}
-		} else if (prevMark != null) {
+		} else if (prevPosition != null) {
 			state.mode = Mode.VIEW;
 			newBlobOperations(target);
 			newBlobContent(target);
@@ -903,20 +904,20 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	public void onCommentOpened(AjaxRequestTarget target, CodeComment comment) {
 		if (comment != null) {
 			state.commentId = comment.getId();
-			state.mark = Preconditions.checkNotNull(comment.mapRange(state.blobIdent));
+			state.position = SourceRendererProvider.getPosition(Preconditions.checkNotNull(comment.mapRange(state.blobIdent)));
 		} else {
 			state.commentId = null;
-			state.mark = null;
+			state.position = null;
 		}
 		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 		pushState(target);
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, PlanarRange mark) {
+	public void onAddComment(AjaxRequestTarget target, PlanarRange range) {
 		state.commentId = null;
 		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
-		state.mark = mark;
+		state.position = SourceRendererProvider.getPosition(range);
 		pushState(target);
 	}
 	
@@ -952,7 +953,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		
 		public Long commentId;
 		
-		public PlanarRange mark;
+		public String position;
 		
 		public Mode mode = Mode.VIEW;
 		
@@ -1046,7 +1047,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		
 		if (newBlobIdent != null) {
 			state.blobIdent = newBlobIdent;
-			state.mark = null;
+			state.position = null;
 			state.commentId = null;
 			state.mode = Mode.VIEW;
 			onResolvedRevisionChange(target);

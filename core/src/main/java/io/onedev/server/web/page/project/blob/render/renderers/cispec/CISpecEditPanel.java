@@ -21,6 +21,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
+import org.unbescape.javascript.JavaScriptEscape;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
@@ -45,6 +46,8 @@ import io.onedev.server.web.util.WicketUtils;
 @SuppressWarnings("serial")
 public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 
+	private final BlobRenderContext context;
+	
 	private Serializable parseResult;
 	
 	private RepeatingView jobNavs;
@@ -53,6 +56,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 	
 	public CISpecEditPanel(String id, BlobRenderContext context, byte[] initialContent) {
 		super(id, Model.of(initialContent));
+		this.context = context;
 		parseResult = parseCISpec(getModelObject());
 	}
 	
@@ -235,7 +239,10 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new CISpecResourceReference()));
-		response.render(OnDomReadyHeaderItem.forScript("onedev.ciSpec.onDomReady();"));
+		String selection = CISpecRendererProvider.getSelection(context.getPosition());
+		String script = String.format("onedev.ciSpec.onDomReady(%s);", 
+				selection!=null? "'" + JavaScriptEscape.escapeJavaScript(selection) + "'": "undefined");
+		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
 	@Nullable
