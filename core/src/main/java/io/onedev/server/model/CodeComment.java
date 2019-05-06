@@ -31,6 +31,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.git.Blob;
@@ -38,7 +39,6 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
-import io.onedev.server.model.support.TextRange;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.diff.DiffUtils;
@@ -215,7 +215,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	}
 	
 	@Nullable
-	public TextRange mapRange(BlobIdent blobIdent) {
+	public PlanarRange mapRange(BlobIdent blobIdent) {
 		RevCommit commit = project.getRevCommit(blobIdent.revision, true);
 		if (commit.name().equals(getMarkPos().getCommit())) {
 			return getMarkPos().getRange();
@@ -257,8 +257,8 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 								newLines.add(WhitespaceOption.DEFAULT.process(line));
 							
 							Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
-							int oldBeginLine = markPos.getRange().getBeginLine();
-							int oldEndLine = markPos.getRange().getEndLine();
+							int oldBeginLine = markPos.getRange().getFromRow();
+							int oldEndLine = markPos.getRange().getToRow();
 							Integer newBeginLine = lineMapping.get(oldBeginLine);
 							if (newBeginLine != null) {
 								for (int oldLine=oldBeginLine; oldLine<=oldEndLine; oldLine++) {

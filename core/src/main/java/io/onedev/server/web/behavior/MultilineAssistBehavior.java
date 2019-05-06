@@ -6,7 +6,7 @@ import java.util.List;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 
 @SuppressWarnings("serial")
@@ -37,7 +37,7 @@ public abstract class MultilineAssistBehavior extends InputAssistBehavior {
 	protected abstract List<InputSuggestion> getLineSuggestions(String matchWith);
 	
 	@Override
-	protected List<Range> getErrors(String inputContent) {
+	protected List<LinearRange> getErrors(String inputContent) {
 		return null;
 	}
 	

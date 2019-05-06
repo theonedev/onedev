@@ -497,7 +497,7 @@ onedev.server.textDiff = {
 					return;
 				}
 				$container.data("callback")("addComment", mark.leftSide, 
-						mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
+						mark.fromRow, mark.fromColumn, mark.toRow, mark.toColumn);
 			});
 		} else {
 			$content.append("<span class='comment'><i class='fa fa-warning'></i> Login to comment on selection</span>");
@@ -572,8 +572,8 @@ onedev.server.textDiff = {
 	},
 	getMarkInfo: function($container, mark) {
 		var oldOrNew = mark.leftSide?"old":"new";
-		var startCursor = [mark.beginLine+1, mark.beginChar];
-		var endCursor = [mark.endLine+1, mark.endChar];
+		var startCursor = [mark.fromRow+1, mark.fromColumn];
+		var endCursor = [mark.toRow+1, mark.toColumn];
 		var $startTd = $container.find("td.content[data-" + oldOrNew + "='" + (startCursor[0]-1) + "']");
 		var $endTd = $container.find("td.content[data-" + oldOrNew + "='" + (endCursor[0]-1) + "']");
 		if ($startTd.length == 0) { 
@@ -843,7 +843,7 @@ onedev.server.textDiff = {
 		$container.find(".comment-trigger").removeClass("active");
 		var openComment = $container.data("openComment");
 		if (openComment) {
-			var line = parseInt(openComment.mark.beginLine);
+			var line = parseInt(openComment.mark.fromRow);
 			var $indicator = onedev.server.textDiff.getLineNumTd($container, openComment.mark.leftSide, line).children(".comment-indicator");
 			if ($indicator.length != 0) {
 				var comments = $indicator.data("comments");
@@ -865,7 +865,7 @@ onedev.server.textDiff = {
 		$container.data("openComment", comment);
 		$container.data("mark", comment.mark);
 		
-		var line = parseInt(comment.mark.beginLine);		
+		var line = parseInt(comment.mark.fromRow);		
 		var leftSide = comment.mark.leftSide;
 		
 		var $indicator = onedev.server.textDiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
@@ -882,7 +882,7 @@ onedev.server.textDiff = {
 	onCommentDeleted: function($container, comment) {
 		$container.removeData("openComment");
 		
-		var line = parseInt(comment.mark.beginLine);
+		var line = parseInt(comment.mark.fromRow);
 		var leftSide = comment.mark.leftSide;
 		var $indicator = onedev.server.textDiff.getLineNumTd($container, leftSide, line).children(".comment-indicator");
 		var comments = $indicator.data("comments");

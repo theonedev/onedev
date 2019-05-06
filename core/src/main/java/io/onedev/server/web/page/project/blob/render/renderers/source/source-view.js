@@ -31,7 +31,7 @@ onedev.server.sourceView = {
 	    if (mark) {
 	    	onedev.server.codemirror.mark(cm, mark);
 			$sourceView.data("mark", mark);
-			cm.setCursor({line: mark.beginLine, ch: 0});
+			cm.setCursor({line: mark.fromRow, ch: 0});
 	    }
 
 	    if (openComment)
@@ -338,8 +338,8 @@ onedev.server.sourceView = {
 	},
 	openSelectionPopover: function(mark, markUrl, loggedIn, unableCommentMessage) {
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;	
-		var ch = (mark.beginChar + mark.endChar)/2;
-		var position = cm.charCoords({line:mark.beginLine, ch:ch});
+		var ch = (mark.fromColumn + mark.toColumn)/2;
+		var position = cm.charCoords({line:mark.fromRow, ch:ch});
 		
 		var $content;
 		if (unableCommentMessage) {
@@ -368,7 +368,7 @@ onedev.server.sourceView = {
 					}
 					$(".selection-popover").remove();
 					var callback = $(".source-view").data("callback");
-					callback("addComment", mark.beginLine, mark.beginChar, mark.endLine, mark.endChar);
+					callback("addComment", mark.fromRow, mark.fromColumn, mark.toRow, mark.toColumn);
 				});
 			} else {
 				$content.append("<span class='comment'><i class='fa fa-warning'></i> Login to comment on selection</span>");
@@ -386,7 +386,7 @@ onedev.server.sourceView = {
 		$sourceView.data("mark", comment.mark);
 		
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
-		var line = parseInt(comment.mark.beginLine);		
+		var line = parseInt(comment.mark.fromRow);		
 		var lineInfo = cm.lineInfo(line);
 		var gutter;
 		if (lineInfo.gutterMarkers)
@@ -406,7 +406,7 @@ onedev.server.sourceView = {
 		var $sourceView = $(".source-view");
 		$sourceView.removeData("openComment");
 		
-		var line = parseInt(comment.mark.beginLine);
+		var line = parseInt(comment.mark.fromRow);
 		var cm = $(".source-view>.code>.CodeMirror")[0].CodeMirror;		
 		var lineInfo = cm.lineInfo(line);
 		var $gutter = $(lineInfo.gutterMarkers["CodeMirror-comments"]);
@@ -489,7 +489,7 @@ onedev.server.sourceView = {
 		
 		var openComment = $(".source-view").data("openComment");
 		if (openComment) {
-			var line = parseInt(openComment.mark.beginLine);
+			var line = parseInt(openComment.mark.fromRow);
 			var lineInfo = cm.lineInfo(line);
 			if (lineInfo && lineInfo.gutterMarkers) {
 				var gutter = lineInfo.gutterMarkers["CodeMirror-comments"];
@@ -515,7 +515,7 @@ onedev.server.sourceView = {
 			$(".source-view").data("mark", mark);
 			onedev.server.codemirror.mark(cm, mark);
 			onedev.server.codemirror.scrollTo(cm, mark);
-			cm.setCursor({line: mark.beginLine, ch: 0});
+			cm.setCursor({line: mark.fromRow, ch: 0});
 		} else {
 			$(".source-view").removeData("mark");
 			onedev.server.codemirror.clearMark(cm);			

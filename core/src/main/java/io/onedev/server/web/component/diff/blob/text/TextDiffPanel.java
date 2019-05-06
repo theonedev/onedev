@@ -42,9 +42,10 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.jsyntax.TextToken;
 import io.onedev.commons.jsyntax.TokenUtils;
 import io.onedev.commons.jsyntax.Tokenized;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.RangeUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.BlameBlock;
@@ -57,7 +58,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.MarkPos;
-import io.onedev.server.model.support.TextRange;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
@@ -156,7 +156,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		if (oldPath != null) {
 			cmd.commitHash(getOldCommit().name()).file(oldPath);
 			for (BlameBlock blame: cmd.call()) {
-				for (Range range: blame.getRanges()) {
+				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.oldBlame.put(i, blame.getCommit());
 				}
@@ -166,7 +166,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		if (newPath != null) {
 			cmd.commitHash(getNewCommit().name()).file(newPath);
 			for (BlameBlock blame: cmd.call()) {
-				for (Range range: blame.getRanges()) {
+				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.newBlame.put(i, blame.getCommit());
 				}
@@ -290,18 +290,18 @@ public class TextDiffPanel extends Panel implements SourceAware {
 				else 
 					lines = change.getNewText().getLines();
 				StringBuilder builder = new StringBuilder();
-				if (mark.getRange().getBeginLine() != mark.getRange().getEndLine()) {
-					String line = lines.get(mark.getRange().getBeginLine());
-					int beginChar = mark.getRange().getBeginChar();
+				if (mark.getRange().getFromRow() != mark.getRange().getToRow()) {
+					String line = lines.get(mark.getRange().getFromRow());
+					int beginChar = mark.getRange().getFromColumn();
 					if (beginChar < line.length())
 						builder.append(line.substring(beginChar));
-					for (int i=mark.getRange().getBeginLine()+1; i<mark.getRange().getEndLine(); i++) {
+					for (int i=mark.getRange().getFromRow()+1; i<mark.getRange().getToRow(); i++) {
 						if (builder.length() != 0)
 							builder.append("\n");
 						builder.append(lines.get(i));
 					}
-					line = lines.get(mark.getRange().getEndLine());
-					int endChar = mark.getRange().getEndChar();
+					line = lines.get(mark.getRange().getToRow());
+					int endChar = mark.getRange().getToColumn();
 					if (endChar > 0) {
 						if (endChar > line.length())
 							endChar = line.length();
@@ -310,9 +310,9 @@ public class TextDiffPanel extends Panel implements SourceAware {
 						builder.append(line.substring(0, endChar));
 					}
 				} else {
-					String line = lines.get(mark.getRange().getBeginLine());
-					int beginChar = mark.getRange().getBeginChar();
-					int endChar = mark.getRange().getEndChar();
+					String line = lines.get(mark.getRange().getFromRow());
+					int beginChar = mark.getRange().getFromColumn();
+					int endChar = mark.getRange().getToColumn();
 					if (beginChar < line.length() && endChar > 0) {
 						if (endChar > line.length())
 							endChar = line.length();
@@ -430,7 +430,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		int endLine = params.getParameterValue(endLineParam).toInt();
 		int endChar = params.getParameterValue(endCharParam).toInt();
 		String commit = leftSide?getOldCommit().name():getNewCommit().name();
-		return new MarkPos(commit, change.getPath(), new TextRange(beginLine, beginChar, endLine, endChar));
+		return new MarkPos(commit, change.getPath(), new PlanarRange(beginLine, beginChar, endLine, endChar));
 	}
 	
 	private void appendEquals(StringBuilder builder, int index, int lastContextSize, int contextSize) {
@@ -507,7 +507,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			Map<Integer, List<CommentInfo>> newCommentInfos = new HashMap<>(); 
 			for (CodeComment comment: commentSupport.getComments()) {
 				if (comment.getMarkPos().getRange() != null) {
-					int line = comment.getMarkPos().getRange().getBeginLine();
+					int line = comment.getMarkPos().getRange().getFromRow();
 					List<CommentInfo> commentInfosAtLine;
 					CommentInfo commentInfo = new CommentInfo();
 					commentInfo.id = comment.getId();
@@ -1062,12 +1062,12 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	private List<MarkAwareDiffBlock> getDiffBlocks() {
 		if (diffBlocks == null) {
 			diffBlocks = new ArrayList<>();
-			List<Range> oldRanges = new ArrayList<>();
-			List<Range> newRanges = new ArrayList<>();
+			List<LinearRange> oldRanges = new ArrayList<>();
+			List<LinearRange> newRanges = new ArrayList<>();
 			if (commentSupport != null) {
 				String oldCommitHash = getOldCommit().name();
 				for (MarkPos each: initialMarks) {
-					Range range = new Range(each.getRange().beginLine, each.getRange().endLine+1);
+					LinearRange range = new LinearRange(each.getRange().fromRow, each.getRange().toRow+1);
 					if (each.getCommit().equals(oldCommitHash)) {
 						oldRanges.add(range);
 					} else {
@@ -1084,17 +1084,17 @@ public class TextDiffPanel extends Panel implements SourceAware {
 					diffBlocks.add(new MarkAwareDiffBlock(Type.INSERT, diffBlock.getUnits(), 
 							diffBlock.getOldStart(), diffBlock.getNewStart()));
 				} else {
-					List<Range> ranges = new ArrayList<>();
-					for (Range range: oldRanges) {
-						ranges.add(new Range(range.getFrom()-diffBlock.getOldStart(), range.getTo()-diffBlock.getOldStart()));
+					List<LinearRange> ranges = new ArrayList<>();
+					for (LinearRange range: oldRanges) {
+						ranges.add(new LinearRange(range.getFrom()-diffBlock.getOldStart(), range.getTo()-diffBlock.getOldStart()));
 					}
-					for (Range range: newRanges) {
-						ranges.add(new Range(range.getFrom()-diffBlock.getNewStart(), range.getTo()-diffBlock.getNewStart()));
+					for (LinearRange range: newRanges) {
+						ranges.add(new LinearRange(range.getFrom()-diffBlock.getNewStart(), range.getTo()-diffBlock.getNewStart()));
 					}
 					ranges = RangeUtils.merge(ranges);
 					
 					int lastIndex = 0;
-					for (Range range: ranges) {
+					for (LinearRange range: ranges) {
 						int from = range.getFrom();
 						int to = range.getTo();
 						if (from < diffBlock.getUnits().size() && to > 0) {
@@ -1210,7 +1210,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 	}
 
 	@SuppressWarnings("unused")
-	private static class MarkInfo extends TextRange {
+	private static class MarkInfo extends PlanarRange {
 		
 		String path;
 		

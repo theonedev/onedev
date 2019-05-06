@@ -15,7 +15,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.patternset.PatternSetLexer;
 import io.onedev.server.util.patternset.PatternSetParser;
@@ -46,7 +46,7 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 				List<InputSuggestion> suggestions = suggest(unmatched);
 				int index = "*".indexOf(unmatched);
 				if (index != -1)
-					suggestions.add(new InputSuggestion("*", "all", new Range(index, unmatched.length())));
+					suggestions.add(new InputSuggestion("*", "all", new LinearRange(index, unmatched.length())));
 				return suggestions
 						.stream()
 						.filter(it->!matches.contains(it.getContent()))
@@ -56,7 +56,7 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 								suggestion = new InputSuggestion("\"" + suggestion.getContent() + "\"", 
 										suggestion.getCaret()!=-1? suggestion.getCaret()+1: -1,
 										suggestion.getDescription(), 
-										new Range(suggestion.getMatch().getFrom()+1, suggestion.getMatch().getTo()+1));
+										new LinearRange(suggestion.getMatch().getFrom()+1, suggestion.getMatch().getTo()+1));
 								return suggestion;
 							} else {
 								return it;

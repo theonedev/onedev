@@ -59,9 +59,9 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.jsymbol.SymbolExtractor;
 import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
-import io.onedev.commons.jsymbol.TokenPosition;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.matchscore.MatchScoreProvider;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
@@ -78,7 +78,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.model.support.ProjectAndRevision;
-import io.onedev.server.model.support.TextRange;
 import io.onedev.server.search.code.SearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.security.SecurityUtils;
@@ -127,11 +126,11 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	
 	private final List<Symbol> symbols = new ArrayList<>();
 	
-	private final IModel<Map<CodeComment, TextRange>> commentsModel = 
-			new LoadableDetachableModel<Map<CodeComment, TextRange>>() {
+	private final IModel<Map<CodeComment, PlanarRange>> commentsModel = 
+			new LoadableDetachableModel<Map<CodeComment, PlanarRange>>() {
 
 		@Override
-		protected Map<CodeComment, TextRange> load() {
+		protected Map<CodeComment, PlanarRange> load() {
 			return OneDev.getInstance(CodeCommentManager.class).findHistory(
 					context.getProject(), context.getCommit(), context.getBlobIdent().path);
 		}
@@ -241,7 +240,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		target.appendJavaScript("onedev.server.sourceView.onToggleOutline();");
 	}
 
-	private String getJson(TextRange mark) {
+	private String getJson(PlanarRange mark) {
 		try {
 			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(mark);
 		} catch (JsonProcessingException e) {
@@ -253,7 +252,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	protected void onInitialize() {
 		super.onInitialize();
 
-		commentContainer = new WebMarkupContainer("comment", Model.of((TextRange)null)) {
+		commentContainer = new WebMarkupContainer("comment", Model.of((PlanarRange)null)) {
 			
 			@Override
 			public void renderHead(IHeaderResponse response) {
@@ -323,11 +322,11 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				CodeComment comment = context.getOpenComment();
-				TextRange mark;
+				PlanarRange mark;
 				if (comment != null) {
 					mark = comment.getMarkPos().getRange();
 				} else {
-					mark = (TextRange) commentContainer.getDefaultModelObject();
+					mark = (PlanarRange) commentContainer.getDefaultModelObject();
 				}
 				mark(target, mark);
 				context.onMark(target, mark);
@@ -398,7 +397,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				switch(params.getParameterValue("action").toString()) {
 				case "openSelectionPopover": 
-					TextRange mark = getMark(params, "param1", "param2", "param3", "param4");
+					PlanarRange mark = getMark(params, "param1", "param2", "param3", "param4");
 					String unableCommentMessage = null;
 					PullRequest request = context.getPullRequest();
 					String commitHash = context.getCommit().name();
@@ -449,7 +448,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 						 * Outside of pull request, no one will be notified of the comment. So we automatically 
 						 * mention authors of commented lines
 						 */
-						Range range = new Range(mark.getBeginLine(), mark.getEndLine());
+						LinearRange range = new LinearRange(mark.getFromRow(), mark.getToRow());
 						for (User user: context.getProject().getAuthors(context.getBlobIdent().path, context.getCommit(), range)) {
 							if (user.getEmail() != null)
 								mentions.append("@").append(user.getName()).append(" ");
@@ -610,12 +609,12 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 					int ch = params.getParameterValue("param2").toInt();
 					Symbol closest = null;
 					for (Symbol symbol: symbols) {
-						TokenPosition scope = symbol.getScope();
+						PlanarRange scope = symbol.getScope();
 						if (scope != null) {
 							if (contains(scope, line, ch)) {
 								if (closest != null) {
-									if (contains(closest.getScope(), scope.getFromLine(), scope.getFromCh()) 
-											&& contains(closest.getScope(), scope.getToLine(), scope.getToCh())) {
+									if (contains(closest.getScope(), scope.getFromRow(), scope.getFromColumn()) 
+											&& contains(closest.getScope(), scope.getToRow(), scope.getToColumn())) {
 										closest = symbol;
 									}
 								} else {
@@ -753,11 +752,11 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		}
 	}
 	
-	private boolean contains(TokenPosition scope, int line, int ch) {
-		int fromLine = scope.getFromLine();
-		int toLine = scope.getToLine();
-		int fromCh = scope.getFromCh();
-		int toCh = scope.getToCh();
+	private boolean contains(PlanarRange scope, int line, int ch) {
+		int fromLine = scope.getFromRow();
+		int toLine = scope.getToRow();
+		int fromCh = scope.getFromColumn();
+		int toCh = scope.getToColumn();
 		return (fromLine < line || fromLine == line && fromCh<=ch) && (toLine > line || toLine == line && toCh >= ch);
 	}
 	
@@ -769,17 +768,17 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		return compareContext;
 	}
 	
-	private TextRange getMark(IRequestParameters params, String beginLineParam, String beginCharParam, 
+	private PlanarRange getMark(IRequestParameters params, String beginLineParam, String beginCharParam, 
 			String endLineParam, String endCharParam) {
 		int beginLine = params.getParameterValue(beginLineParam).toInt();
 		int beginChar = params.getParameterValue(beginCharParam).toInt();
 		int endLine = params.getParameterValue(endLineParam).toInt();
 		int endChar = params.getParameterValue(endCharParam).toInt();
-		TextRange mark = new TextRange();
-		mark.beginLine = beginLine;
-		mark.beginChar = beginChar;
-		mark.endLine = endLine;
-		mark.endChar = endChar;
+		PlanarRange mark = new PlanarRange();
+		mark.fromRow = beginLine;
+		mark.fromColumn = beginChar;
+		mark.toRow = endLine;
+		mark.toColumn = endChar;
 		return mark;
 	}
 
@@ -873,10 +872,10 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		
 		String jsonOfBlameInfos = getJsonOfBlameInfos(context.getMode() == Mode.BLAME);
 		Map<Integer, List<CommentInfo>> commentInfos = new HashMap<>(); 
-		for (Map.Entry<CodeComment, TextRange> entry: commentsModel.getObject().entrySet()) {
+		for (Map.Entry<CodeComment, PlanarRange> entry: commentsModel.getObject().entrySet()) {
 			CodeComment comment = entry.getKey();
-			TextRange textRange = entry.getValue();
-			int line = textRange.getBeginLine();
+			PlanarRange textRange = entry.getValue();
+			int line = textRange.getFromRow();
 			List<CommentInfo> commentInfosAtLine = commentInfos.get(line);
 			if (commentInfosAtLine == null) {
 				commentInfosAtLine = new ArrayList<>();
@@ -943,7 +942,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		
 		String commitDate;
 		
-		List<Range> ranges;
+		List<LinearRange> ranges;
 	}
 	
 	private String getSymbolId(List<Symbol> symbols, Symbol symbol) {
@@ -956,7 +955,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 		
 		String title;
 		
-		TextRange mark;
+		PlanarRange mark;
 	}
 
 	@Override
@@ -965,7 +964,7 @@ public class SourceViewPanel extends BlobViewPanel implements Markable, SearchMe
 	}
 	
 	@Override
-	public void mark(AjaxRequestTarget target, TextRange mark) {
+	public void mark(AjaxRequestTarget target, PlanarRange mark) {
 		String script;
 		if (mark != null) {
 			script = String.format("onedev.server.sourceView.mark(%s);", getJson(mark));

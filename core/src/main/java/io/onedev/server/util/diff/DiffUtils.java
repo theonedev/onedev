@@ -20,7 +20,7 @@ import io.onedev.commons.jsyntax.Tokenized;
 import io.onedev.commons.jsyntax.Tokenizer;
 import io.onedev.commons.jsyntax.TokenizerRegistry;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.model.support.TextRange;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.util.diff.DiffMatchPatch.Diff;
 import io.onedev.server.util.diff.DiffMatchPatch.Operation;
 
@@ -272,14 +272,14 @@ public class DiffUtils {
 		return mapLines(diff(oldLines, newLines));
 	}
 	
-	public static TextRange mapRange(Map<Integer, Integer> lineMapping, TextRange range) {
-		int oldBeginLine = range.getBeginLine();
-		int oldEndLine = range.getEndLine();
+	public static PlanarRange mapRange(Map<Integer, Integer> lineMapping, PlanarRange range) {
+		int oldBeginLine = range.getFromRow();
+		int oldEndLine = range.getToRow();
 		Integer newBeginLine = lineMapping.get(oldBeginLine);
 		Integer newEndLine = lineMapping.get(oldEndLine);
 		if (newBeginLine != null && newEndLine != null && newEndLine >= newBeginLine) {
-			TextRange newRange = new TextRange(newBeginLine, range.getBeginChar(), 
-					newEndLine, range.getEndChar()); 
+			PlanarRange newRange = new PlanarRange(newBeginLine, range.getFromColumn(), 
+					newEndLine, range.getToColumn()); 
 			return newRange;
 		} else {
 			return null;

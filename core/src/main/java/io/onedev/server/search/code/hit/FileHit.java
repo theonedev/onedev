@@ -9,15 +9,15 @@ import org.apache.wicket.request.resource.PackageResourceReference;
 
 import io.onedev.commons.jsymbol.util.HighlightableLabel;
 import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 
 public class FileHit extends QueryHit {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Range match;
+	private final LinearRange match;
 	
-	public FileHit(String blobPath, @Nullable Range match) {
+	public FileHit(String blobPath, @Nullable LinearRange match) {
 		super(blobPath, null);
 		this.match = match;
 	}
@@ -49,7 +49,7 @@ public class FileHit extends QueryHit {
 			return null;
 	}
 
-	public Range getMatch() {
+	public LinearRange getMatch() {
 		return match;
 	}
 

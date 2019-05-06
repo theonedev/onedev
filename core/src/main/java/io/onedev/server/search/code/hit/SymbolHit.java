@@ -6,7 +6,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.image.Image;
 
 import io.onedev.commons.jsymbol.Symbol;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 
 public class SymbolHit extends QueryHit {
 
@@ -14,9 +14,9 @@ public class SymbolHit extends QueryHit {
 
 	private final Symbol symbol;
 	
-	private final Range match;
+	private final LinearRange match;
 	
-	public SymbolHit(String blobPath, Symbol symbol, @Nullable Range match) {
+	public SymbolHit(String blobPath, Symbol symbol, @Nullable LinearRange match) {
 		super(blobPath, symbol.getPosition());
 		this.symbol = symbol;
 		this.match = match;

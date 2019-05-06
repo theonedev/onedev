@@ -4,8 +4,10 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 
-import io.onedev.server.model.support.TextRange;
+import io.onedev.commons.utils.PlanarRange;
 
 public interface Markable {
-	void mark(AjaxRequestTarget target, @Nullable TextRange mark);
+
+	void mark(AjaxRequestTarget target, @Nullable PlanarRange mark);
+	
 }

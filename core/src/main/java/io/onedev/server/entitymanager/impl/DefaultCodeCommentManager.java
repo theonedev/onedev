@@ -38,6 +38,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
@@ -51,7 +52,6 @@ import io.onedev.server.model.CodeCommentRelation;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.TextRange;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -149,8 +149,8 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	}
 	
 	@Override
-	public Map<CodeComment, TextRange> findHistory(Project project, ObjectId commitId, String path) {
-		Map<CodeComment, TextRange> comments = new HashMap<>();
+	public Map<CodeComment, PlanarRange> findHistory(Project project, ObjectId commitId, String path) {
+		Map<CodeComment, PlanarRange> comments = new HashMap<>();
 		
 		Map<String, Map<String, List<CodeComment>>> possibleComments = new HashMap<>();
 		for (String possibleHistoryPath: commitInfoManager.getHistoryPaths(project, path)) {
@@ -221,7 +221,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 									pathEntry.getKey(), WhitespaceOption.DEFAULT);
 							Map<Integer, Integer> lineMapping = DiffUtils.mapLines(oldLines, newLines);
 							for (CodeComment comment: pathEntry.getValue()) {
-								TextRange newRange = DiffUtils.mapRange(lineMapping, comment.getMarkPos().getRange());
+								PlanarRange newRange = DiffUtils.mapRange(lineMapping, comment.getMarkPos().getRange());
 								if (newRange != null) 
 									comments.put(comment, newRange);
 							}

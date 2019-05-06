@@ -9,15 +9,15 @@ onedev.server.codemirror = {
     	cm.setCursor(cm.getCursor("from"));
 	},
 	mark: function(cm, mark) {
-		onedev.server.codemirror.clearMark(cm);
+        onedev.server.codemirror.clearMark(cm);
 		cm.markText(
-				{line: mark.beginLine, ch: mark.beginChar}, 
-				{line: mark.endLine, ch: mark.endChar},
+				{line: mark.fromRow, ch: mark.fromColumn}, 
+				{line: mark.toRow, ch: mark.toColumn},
 				{className: "CodeMirror-mark"});
 	},
 	scrollTo: function(cm, mark) {
-		var top = cm.charCoords({line: mark.beginLine, ch: 0}, "local").top;
-		var bottom = cm.charCoords({line: mark.endLine, ch: 0}, "local").bottom;
+		var top = cm.charCoords({line: mark.fromRow, ch: 0}, "local").top;
+		var bottom = cm.charCoords({line: mark.toRow, ch: 0}, "local").bottom;
 		
 		var markHeight = bottom - top;
 		var clientHeight = cm.getScrollInfo().clientHeight;

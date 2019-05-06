@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.commons.utils.command.LineConsumer;
@@ -41,7 +41,7 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 	
 	private String file;
 	
-	private Range range;
+	private LinearRange range;
 	
 	public BlameCommand(File gitDir) {
 		super(gitDir);
@@ -63,7 +63,7 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 	 * 			0-indexed and inclusive from and to
 	 * @return
 	 */
-	public BlameCommand range(@Nullable Range range) {
+	public BlameCommand range(@Nullable LinearRange range) {
 		this.range = range;
 		return this;
 	}
@@ -128,7 +128,7 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 							block = new BlameBlock(commit, new ArrayList<>());
 							blocks.put(commit.getHash(), block);
 						}
-						block.getRanges().add(new Range(beginLine.get(), endLine.get()-1));
+						block.getRanges().add(new LinearRange(beginLine.get(), endLine.get()-1));
 						commitRef.set(null);
 						beginLine.set(endLine.get());
 					}
@@ -173,10 +173,10 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 			BlameCommit commit = commitRef.get();
 			BlameBlock block = blocks.get(commit.getHash());
 			if (block == null) {
-				block = new BlameBlock(commit, new ArrayList<Range>());
+				block = new BlameBlock(commit, new ArrayList<LinearRange>());
 				blocks.put(commit.getHash(), block);
 			}
-			block.getRanges().add(new Range(beginLine.get(), endLine.get()-1));
+			block.getRanges().add(new LinearRange(beginLine.get(), endLine.get()-1));
 		}
 		
 		if (System.currentTimeMillis()-time > CACHE_THRESHOLD)

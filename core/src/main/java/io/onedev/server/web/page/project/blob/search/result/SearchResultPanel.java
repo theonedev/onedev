@@ -28,11 +28,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 
-import io.onedev.commons.jsymbol.TokenPosition;
 import io.onedev.commons.jsymbol.util.HighlightableLabel;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.model.support.TextRange;
 import io.onedev.server.search.code.hit.FileHit;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.TextHit;
@@ -90,7 +89,7 @@ public abstract class SearchResultPanel extends Panel {
 				FileHit fileHit = (FileHit) hit;
 				if (fileHit.getMatch() != null) {
 					int index = blob.getBlobPath().lastIndexOf('/');
-					blob.setMatch(new Range(fileHit.getMatch().getFrom()+index+1, fileHit.getMatch().getTo()+index+1));
+					blob.setMatch(new LinearRange(fileHit.getMatch().getFrom()+index+1, fileHit.getMatch().getTo()+index+1));
 				}
 			}
 		}
@@ -103,7 +102,7 @@ public abstract class SearchResultPanel extends Panel {
 				public int compare(QueryHit o1, QueryHit o2) {
 					if (o1.getTokenPos() != null) {
 						if (o2.getTokenPos() != null) 
-							return o1.getTokenPos().getFromLine() - o2.getTokenPos().getFromLine();
+							return o1.getTokenPos().getFromRow() - o2.getTokenPos().getFromRow();
 						else
 							return -1;
 					} else {
@@ -162,7 +161,7 @@ public abstract class SearchResultPanel extends Panel {
 			return activeBlob.getBlobPath();
 	}
 	
-	private TokenPosition getActiveBlobMark(ActiveIndex activeIndex) {
+	private PlanarRange getActiveBlobMark(ActiveIndex activeIndex) {
 		MatchedBlob activeBlob = blobs.get(activeIndex.blob);
 		if (activeIndex.hit != -1)
 			return activeBlob.getHits().get(activeIndex.hit).getTokenPos();
@@ -260,7 +259,7 @@ public abstract class SearchResultPanel extends Panel {
 				ActiveIndex activeIndex = getPrevMatch();
 				if (activeIndex != null) {
 					String prevBlobPath = getActiveBlobPath(activeIndex);
-					TokenPosition prevTokenPos = getActiveBlobMark(activeIndex);
+					PlanarRange prevTokenPos = getActiveBlobMark(activeIndex);
 					
 					String prevUrlPath = getUrlPath(prevBlobPath);
 					attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener(prevUrlPath, prevTokenPos!=null));
@@ -291,7 +290,7 @@ public abstract class SearchResultPanel extends Panel {
 				ActiveIndex nextIndex = getNextMatch();
 				if (nextIndex != null) {
 					String nextBlobPath = getActiveBlobPath(nextIndex);
-					TokenPosition nextTokenPos = getActiveBlobMark(nextIndex);
+					PlanarRange nextTokenPos = getActiveBlobMark(nextIndex);
 					
 					String nextUrlPath = getUrlPath(nextBlobPath);
 					attributes.getAjaxCallListeners().add(new ConfirmSwitchFileListener(nextUrlPath, nextTokenPos!=null));
@@ -497,7 +496,7 @@ public abstract class SearchResultPanel extends Panel {
 								
 								add(hit.renderIcon("icon"));
 								if (hit.getTokenPos() != null)
-									add(new Label("lineNo", String.valueOf(hit.getTokenPos().getFromLine()+1) + ":"));
+									add(new Label("lineNo", String.valueOf(hit.getTokenPos().getFromRow()+1) + ":"));
 								else
 									add(new Label("lineNo").setVisible(false));
 								add(hit.render("label"));
@@ -510,7 +509,7 @@ public abstract class SearchResultPanel extends Panel {
 								BlobIdent blobIdent = new BlobIdent(context.getBlobIdent().revision, hit.getBlobPath(), 
 										FileMode.REGULAR_FILE.getBits());
 								ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-								state.mark = TextRange.of(hit.getTokenPos());
+								state.mark = hit.getTokenPos();
 								PageParameters params = ProjectBlobPage.paramsOf(context.getProject(), state);
 								CharSequence url = RequestCycle.get().urlFor(ProjectBlobPage.class, params);
 								add(AttributeAppender.replace("href", url.toString()));

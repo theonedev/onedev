@@ -17,7 +17,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import io.onedev.commons.jsymbol.Symbol;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.stringmatch.WildcardUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.search.code.SearchManager;
@@ -94,7 +94,7 @@ public class SymbolQuery extends BlobQuery {
 						if (WildcardUtils.matchString(normalizedTerm, normalizedSymbolName)
 								&& (normalizedExcludeTerm == null || !normalizedSymbolName.equals(normalizedExcludeTerm))
 								&& (excludeBlobPath == null || !excludeBlobPath.equals(blobPath))) {
-							Range match = WildcardUtils.rangeOfMatch(normalizedTerm, normalizedSymbolName);
+							LinearRange match = WildcardUtils.rangeOfMatch(normalizedTerm, normalizedSymbolName);
 							hits.add(new SymbolHit(blobPath, symbol, match));
 						}
 					}

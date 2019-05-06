@@ -26,7 +26,7 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.RangeUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -69,25 +69,25 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 		attributes.setChannel(new AjaxChannel("input-assist", AjaxChannel.Type.DROP));
 	}
 
-	private List<Range> normalizeErrors(String inputContent, List<Range> errors) {
-		List<Range> normalizedErrors = new ArrayList<>();
+	private List<LinearRange> normalizeErrors(String inputContent, List<LinearRange> errors) {
+		List<LinearRange> normalizedErrors = new ArrayList<>();
 		
 		List<String> lines = Splitter.on('\n').splitToList(inputContent);
-		for (Range error: RangeUtils.merge(errors)) {
+		for (LinearRange error: RangeUtils.merge(errors)) {
 			int fromLine = getLine(inputContent, error.getFrom());
 			int toLine = getLine(inputContent, error.getTo());
 			if (fromLine != toLine) {
 				int index = getCharIndex(inputContent, fromLine, lines.get(fromLine).length()-1);
 				if (index >= error.getFrom())
-					normalizedErrors.add(new Range(error.getFrom(), index));
+					normalizedErrors.add(new LinearRange(error.getFrom(), index));
 				index = getCharIndex(inputContent, toLine, 0);
 				if (index <= error.getTo())
-					normalizedErrors.add(new Range(index, error.getTo()));
+					normalizedErrors.add(new LinearRange(index, error.getTo()));
 				for (int i=fromLine+1; i<toLine; i++) {
 					String line = lines.get(i);
 					if (line.length() != 0) {
 						int from = getCharIndex(inputContent, i, 0);
-						normalizedErrors.add(new Range(from, from+line.length()-1));
+						normalizedErrors.add(new LinearRange(from, from+line.length()-1));
 					}
 				}
 			} else {
@@ -119,10 +119,10 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 			Preconditions.checkArgument(inputContent.indexOf('\r') == -1);
 			
-			List<Range> errors = getErrors(inputContent);
+			List<LinearRange> errors = getErrors(inputContent);
 			if (errors == null)
 				errors = new ArrayList<>();
-			List<Range> normalizedErrors = normalizeErrors(inputContent, errors);
+			List<LinearRange> normalizedErrors = normalizeErrors(inputContent, errors);
 			String json;
 			try {
 				json = AppLoader.getInstance(ObjectMapper.class).writeValueAsString(normalizedErrors);
@@ -215,7 +215,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 		return new ArrayList<>();
 	}
 	
-	protected abstract List<Range> getErrors(String inputContent);
+	protected abstract List<LinearRange> getErrors(String inputContent);
 	
 	/**
 	 * Given an input content, anchor is index of the char at which place to display left side 

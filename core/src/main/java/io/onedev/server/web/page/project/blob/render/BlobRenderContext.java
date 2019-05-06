@@ -10,13 +10,12 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.commons.jsymbol.TokenPosition;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.TextRange;
 import io.onedev.server.search.code.hit.QueryHit;
 
 public interface BlobRenderContext extends Serializable {
@@ -41,11 +40,11 @@ public interface BlobRenderContext extends Serializable {
 	BlobIdent getBlobIdent();
 	
 	@Nullable
-	TextRange getMark();
+	PlanarRange getMark();
 	
-	void onMark(AjaxRequestTarget target, TextRange mark);
+	void onMark(AjaxRequestTarget target, PlanarRange mark);
 	
-	String getMarkUrl(TextRange mark);
+	String getMarkUrl(PlanarRange mark);
 	
 	/**
 	 * Get directory of the blob. If the blob itself is a directory, the blob path will be returned instead
@@ -72,7 +71,7 @@ public interface BlobRenderContext extends Serializable {
 	
 	boolean isOnBranch();
 	
-	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos);
+	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable PlanarRange tokenPos);
 	
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
 	
@@ -82,7 +81,7 @@ public interface BlobRenderContext extends Serializable {
 	
 	void onCommentOpened(AjaxRequestTarget target, @Nullable CodeComment comment);
 
-	void onAddComment(AjaxRequestTarget target, TextRange mark);
+	void onAddComment(AjaxRequestTarget target, PlanarRange mark);
 	
 	RefUpdated uploadFiles(Collection<FileUpload> uploads, @Nullable String directory, String commitMessage);
 	

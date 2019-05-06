@@ -15,7 +15,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.stringmatch.WildcardUtils;
 import io.onedev.server.search.code.hit.FileHit;
 import io.onedev.server.search.code.hit.QueryHit;
@@ -44,13 +44,13 @@ public class FileQuery extends BlobQuery {
 		if (caseSensitive) {
 			if (WildcardUtils.matchString(fileNames, blobName) 
 					&& (excludeFileName == null || !excludeFileName.equals(blobName))) {
-				Range match = WildcardUtils.rangeOfMatch(fileNames, blobName);
+				LinearRange match = WildcardUtils.rangeOfMatch(fileNames, blobName);
 				hits.add(new FileHit(blobPath, match));
 			}
 		} else {
 			if (WildcardUtils.matchString(fileNames, blobName.toLowerCase()) 
 					&& (excludeFileName == null || !excludeFileName.equalsIgnoreCase(blobName))) {
-				Range match = WildcardUtils.rangeOfMatch(fileNames, blobName.toLowerCase());
+				LinearRange match = WildcardUtils.rangeOfMatch(fileNames, blobName.toLowerCase());
 				hits.add(new FileHit(blobPath, match));
 			}
 		}

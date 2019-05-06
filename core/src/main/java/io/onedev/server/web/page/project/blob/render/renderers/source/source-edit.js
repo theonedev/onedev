@@ -104,8 +104,8 @@ onedev.server.sourceEdit = {
 				var dmp = new diff_match_patch();
 				var diffs = dmp.diff_main(cm.oldDocValue, cm.doc.getValue());
 				
-				var beginLine = mark.beginLine, beginChar = mark.beginChar;
-				var endLine = mark.endLine, endChar = mark.endChar;
+				var beginLine = mark.fromRow, beginChar = mark.fromColumn;
+				var endLine = mark.toRow, endChar = mark.toColumn;
 				var newBeginLine, newBeginChar, newEndLine, newEndChar;
 				var oldLine = oldChar = newLine = newChar = 0;
 				for (var i=0; i<diffs.length; i++) {
@@ -159,10 +159,10 @@ onedev.server.sourceEdit = {
 			
 			if (newBeginLine!=undefined && newEndLine!=undefined) {
 				var newMark = {
-					beginLine: newBeginLine, 
-					beginChar: newBeginChar, 
-					endLine: newEndLine, 
-					endChar: newEndChar
+					fromRow: newBeginLine, 
+					fromColumn: newBeginChar, 
+					toRow: newEndLine, 
+					toColumn: newEndChar
 				};
 				onedev.server.codemirror.mark(cm, newMark);
 				onedev.server.codemirror.scrollTo(cm, newMark);

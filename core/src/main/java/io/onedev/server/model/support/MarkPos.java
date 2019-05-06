@@ -11,6 +11,8 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.OptimisticLock;
 
+import io.onedev.commons.utils.PlanarRange;
+
 @Embeddable
 public class MarkPos implements Serializable {
 
@@ -26,7 +28,7 @@ public class MarkPos implements Serializable {
 	
 	@OptimisticLock(excluded=true)
 	@Column(nullable=false)
-	private TextRange range;
+	private PlanarRange range;
 
 	public String getCommit() {
 		return commit;
@@ -44,18 +46,18 @@ public class MarkPos implements Serializable {
 		this.path = path;
 	}
 
-	public TextRange getRange() {
+	public PlanarRange getRange() {
 		return range;
 	}
 
-	public void setRange(TextRange range) {
+	public void setRange(PlanarRange range) {
 		this.range = range;
 	}
 
 	public MarkPos() {
 	}
 	
-	public MarkPos(String commit, @Nullable String path, @Nullable TextRange mark) {
+	public MarkPos(String commit, @Nullable String path, @Nullable PlanarRange mark) {
 		this.commit = commit;
 		this.path = path;
 		this.range = mark;
@@ -75,13 +77,13 @@ public class MarkPos implements Serializable {
 		if (str != null) {
 			String commit = StringUtils.substringBefore(str, ":");
 			String path = null;
-			TextRange mark = null;
+			PlanarRange mark = null;
 			String pathAndMark = StringUtils.substringAfter(str, ":");
 			if (pathAndMark.length() != 0) {
 				path = StringUtils.substringBefore(pathAndMark, ":");
 				String markStr = StringUtils.substringAfter(pathAndMark, ":");
 				if (markStr.length() != 0)
-					mark = new TextRange(markStr);
+					mark = new PlanarRange(markStr);
 			}
 			return new MarkPos(commit, path, mark);
 		} else {

@@ -8,11 +8,11 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.TextRange;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -23,7 +23,7 @@ public interface CodeCommentManager extends EntityManager<CodeComment> {
 	
 	Collection<CodeComment> query(Project project, ObjectId...commitIds);
 	
-	Map<CodeComment, TextRange> findHistory(Project project, ObjectId commitId, String path);
+	Map<CodeComment, PlanarRange> findHistory(Project project, ObjectId commitId, String path);
 		
 	List<CodeComment> queryAfter(Project project, @Nullable Long afterCommentId, int count);
 	

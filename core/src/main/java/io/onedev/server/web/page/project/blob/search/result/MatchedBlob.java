@@ -3,7 +3,7 @@ package io.onedev.server.web.page.project.blob.search.result;
 import java.io.Serializable;
 import java.util.List;
 
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.search.code.hit.QueryHit;
 
 public class MatchedBlob implements Serializable {
@@ -14,7 +14,7 @@ public class MatchedBlob implements Serializable {
 	
 	private final List<QueryHit> hits;
 	
-	private Range match;
+	private LinearRange match;
 	
 	public MatchedBlob(String blobPath, List<QueryHit> hits) {
 		this.blobPath = blobPath;
@@ -29,11 +29,11 @@ public class MatchedBlob implements Serializable {
 		return hits;
 	}
 
-	public Range getMatch() {
+	public LinearRange getMatch() {
 		return match;
 	}
 
-	public void setMatch(Range match) {
+	public void setMatch(LinearRange match) {
 		this.match = match;
 	}
 

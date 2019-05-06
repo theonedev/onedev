@@ -6,7 +6,7 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.git.AbstractGitTest;
 import io.onedev.server.git.BlameBlock;
 
@@ -52,7 +52,7 @@ public class BlameCommandTest extends AbstractGitTest {
 		blames = new BlameCommand(git.getRepository().getDirectory())
 				.commitHash(commitHash)
 				.file("file")
-				.range(new Range(5, 8))
+				.range(new LinearRange(5, 8))
 				.call();
 		assertEquals(2, blames.size());
 		

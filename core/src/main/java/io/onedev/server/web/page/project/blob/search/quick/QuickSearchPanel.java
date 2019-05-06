@@ -36,7 +36,6 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.TextRange;
 import io.onedev.server.search.code.SearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
@@ -261,7 +260,7 @@ public abstract class QuickSearchPanel extends Panel {
 				BlobIdent blobIdent = new BlobIdent(revisionModel.getObject(), hit.getBlobPath(), 
 						FileMode.REGULAR_FILE.getBits());
 				ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-				state.mark = TextRange.of(hit.getTokenPos());
+				state.mark = hit.getTokenPos();
 				PageParameters params = ProjectBlobPage.paramsOf(projectModel.getObject(), state);
 				CharSequence url = RequestCycle.get().urlFor(ProjectBlobPage.class, params);
 				link.add(AttributeAppender.replace("href", url.toString()));

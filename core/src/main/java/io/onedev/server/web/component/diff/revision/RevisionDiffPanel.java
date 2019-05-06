@@ -62,7 +62,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
 import io.onedev.commons.utils.PathComparator;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.stringmatch.Matcher;
 import io.onedev.commons.utils.stringmatch.WildcardUtils;
@@ -813,7 +813,7 @@ public class RevisionDiffPanel extends Panel {
 								 * Outside of pull request, no one will be notified of the comment. So we automatically 
 								 * mention authors of commented lines
 								 */
-								Range range = new Range(markPos.getRange().getBeginLine(), markPos.getRange().getEndLine());
+								LinearRange range = new LinearRange(markPos.getRange().getFromRow(), markPos.getRange().getToRow());
 								ObjectId commitId = ObjectId.fromString(markPos.getCommit());
 								for (User user: projectModel.getObject().getAuthors(markPos.getPath(), commitId, range)) {
 									if (user.getEmail() != null)

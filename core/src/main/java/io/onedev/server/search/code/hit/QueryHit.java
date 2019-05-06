@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.image.Image;
 
-import io.onedev.commons.jsymbol.TokenPosition;
+import io.onedev.commons.utils.PlanarRange;
 
 public abstract class QueryHit implements Serializable {
 	
@@ -15,9 +15,9 @@ public abstract class QueryHit implements Serializable {
 	
 	private final String blobPath;
 	
-	private final TokenPosition tokenPos;
+	private final PlanarRange tokenPos;
 	
-	public QueryHit(String blobPath, @Nullable TokenPosition tokenPos) {
+	public QueryHit(String blobPath, @Nullable PlanarRange tokenPos) {
 		this.blobPath = blobPath;
 		this.tokenPos = tokenPos;
 	}
@@ -27,7 +27,7 @@ public abstract class QueryHit implements Serializable {
 	}
 	
 	@Nullable
-	public TokenPosition getTokenPos() {
+	public PlanarRange getTokenPos() {
 		return tokenPos;
 	}
 

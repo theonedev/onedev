@@ -50,9 +50,9 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.jsymbol.TokenPosition;
 import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -70,7 +70,6 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.TextRange;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.code.IndexManager;
@@ -168,7 +167,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 		resolvedRevision = getProject().getObjectId(state.blobIdent.revision, true);
 		
-		state.mark = TextRange.of(params.get(PARAM_MARK).toString());
+		state.mark = PlanarRange.of(params.get(PARAM_MARK).toString());
 		
 		state.requestId = params.get(PARAM_REQUEST).toOptionalLong();
 		
@@ -828,18 +827,18 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	}
 	
 	@Override
-	public TextRange getMark() {
+	public PlanarRange getMark() {
 		return state.mark;
 	}
 
 	@Override
-	public void onMark(AjaxRequestTarget target, TextRange mark) {
+	public void onMark(AjaxRequestTarget target, PlanarRange mark) {
 		state.mark = mark;
 		pushState(target);
 	}
 
 	@Override
-	public String getMarkUrl(TextRange mark) {
+	public String getMarkUrl(PlanarRange mark) {
 		State markState = SerializationUtils.clone(state);
 		markState.blobIdent.revision = resolvedRevision.name();
 		markState.commentId = null;
@@ -854,9 +853,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	}
 
 	@Override
-	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable TokenPosition tokenPos) {
-		TextRange prevMark = state.mark;
-		state.mark = TextRange.of(tokenPos);
+	public void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable PlanarRange tokenPos) {
+		PlanarRange prevMark = state.mark;
+		state.mark = tokenPos;
 		if (!blobIdent.revision.equals(state.blobIdent.revision)) {
 			state.blobIdent = blobIdent;
 			state.mode = Mode.VIEW;
@@ -914,7 +913,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	}
 
 	@Override
-	public void onAddComment(AjaxRequestTarget target, TextRange mark) {
+	public void onAddComment(AjaxRequestTarget target, PlanarRange mark) {
 		state.commentId = null;
 		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 		state.mark = mark;
@@ -953,7 +952,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		
 		public Long commentId;
 		
-		public TextRange mark;
+		public PlanarRange mark;
 		
 		public Mode mode = Mode.VIEW;
 		

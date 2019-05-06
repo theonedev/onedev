@@ -29,7 +29,7 @@ import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 
 @SuppressWarnings("serial")
@@ -130,8 +130,8 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 	}
 	
 	@Override
-	protected List<Range> getErrors(final String inputContent) {
-		final List<Range> errors = new ArrayList<>();
+	protected List<LinearRange> getErrors(final String inputContent) {
+		final List<LinearRange> errors = new ArrayList<>();
 		
 		Lexer lexer;
 		try {
@@ -148,7 +148,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 			public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line,
 					int charPositionInLine, String msg, RecognitionException e) {
 				int charIndex = getCharIndex(inputContent, line-1, charPositionInLine);
-				errors.add(new Range(charIndex, recognizer.getInputStream().index()));
+				errors.add(new LinearRange(charIndex, recognizer.getInputStream().index()));
 			}
 			
 		});
@@ -173,7 +173,7 @@ public abstract class ANTLRAssistBehavior extends InputAssistBehavior {
 					toIndex = fromIndex + token.getText().length() - 1;
 				else
 					toIndex = fromIndex;
-				errors.add(new Range(fromIndex, toIndex));
+				errors.add(new LinearRange(fromIndex, toIndex));
 			}
 			
 		});

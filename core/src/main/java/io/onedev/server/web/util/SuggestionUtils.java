@@ -11,7 +11,7 @@ import java.util.Set;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.stringmatch.PatternApplied;
 import io.onedev.commons.utils.stringmatch.WildcardUtils;
 import io.onedev.server.OneDev;
@@ -40,7 +40,7 @@ public class SuggestionUtils {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (String candidate: candidates) {
-			Range match = Range.match(candidate, matchWith, true, false, false);
+			LinearRange match = LinearRange.match(candidate, matchWith, true, false, false);
 			if (match != null) 
 				suggestions.add(new InputSuggestion(candidate, null, match));
 		}
@@ -55,7 +55,7 @@ public class SuggestionUtils {
 			String branch = GitUtils.ref2branch(ref.getRef().getName());
 			int index = branch.toLowerCase().indexOf(matchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
-				suggestions.add(new InputSuggestion(branch, new Range(index, index+matchWith.length())));
+				suggestions.add(new InputSuggestion(branch, new LinearRange(index, index+matchWith.length())));
 		}
 		return suggestions;
 	}
@@ -68,7 +68,7 @@ public class SuggestionUtils {
 		for (ProjectFacade project: OneDev.getInstance(ProjectManager.class).getAccessibleProjects(user)) {
 			int index = project.getName().toLowerCase().indexOf(matchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
-				suggestions.add(new InputSuggestion(project.getName(), new Range(index, index+matchWith.length())));
+				suggestions.add(new InputSuggestion(project.getName(), new LinearRange(index, index+matchWith.length())));
 		}
 		return suggestions;
 	}
@@ -81,7 +81,7 @@ public class SuggestionUtils {
 			String tag = GitUtils.ref2tag(ref.getRef().getName());
 			int index = tag.toLowerCase().indexOf(matchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
-				suggestions.add(new InputSuggestion(tag, new Range(index, index+matchWith.length())));
+				suggestions.add(new InputSuggestion(tag, new LinearRange(index, index+matchWith.length())));
 		}
 		return suggestions;
 	}
@@ -90,7 +90,7 @@ public class SuggestionUtils {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (UserFacade user: OneDev.getInstance(CacheManager.class).getUsers().values()) {
-			Range match = Range.match(user.getName(), matchWith, true, false, true);
+			LinearRange match = LinearRange.match(user.getName(), matchWith, true, false, true);
 			if (match != null) {
 				String description;
 				if (!user.getDisplayName().equals(user.getName()))
@@ -140,7 +140,7 @@ public class SuggestionUtils {
 			String name = user.getName();
 			int index = name.toLowerCase().indexOf(matchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
-				Range match = new Range(index, index+matchWith.length());
+				LinearRange match = new LinearRange(index, index+matchWith.length());
 				suggestions.add(new InputSuggestion(name, user.getDisplayName(), match));
 			}
 		}
@@ -154,7 +154,7 @@ public class SuggestionUtils {
 			String name = group.getName();
 			int index = name.toLowerCase().indexOf(matchWith);
 			if (index != -1) 
-				suggestions.add(new InputSuggestion(name, new Range(index, index+matchWith.length())));
+				suggestions.add(new InputSuggestion(name, new LinearRange(index, index+matchWith.length())));
 		}
 		return suggestions;
 	}
@@ -168,7 +168,7 @@ public class SuggestionUtils {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (String jobName: project.getJobNames()) {
-			Range match = Range.match(jobName, matchWith, true, false, true);
+			LinearRange match = LinearRange.match(jobName, matchWith, true, false, true);
 			if (match != null) 
 				suggestions.add(new InputSuggestion(jobName, null, match));
 		}
@@ -203,9 +203,9 @@ public class SuggestionUtils {
 		allApplied.sort((o1, o2) -> o1.getMatch().getFrom() - o2.getMatch().getFrom());
 
 		Map<String, Set<String>> childrenCache = new HashMap<>();
-		Map<String, Range> suggestedInputs = new LinkedHashMap<>();
+		Map<String, LinearRange> suggestedInputs = new LinkedHashMap<>();
 		for (PatternApplied applied: allApplied) {
-			Range match = applied.getMatch();
+			LinearRange match = applied.getMatch();
 			String suffix = applied.getText().substring(match.getTo());
 			int index = suffix.indexOf('/');
 			String suggestedInput = applied.getText().substring(0, match.getTo());
@@ -235,7 +235,7 @@ public class SuggestionUtils {
 				break;
 		}
 		
-		for (Map.Entry<String, Range> entry: suggestedInputs.entrySet()) { 
+		for (Map.Entry<String, LinearRange> entry: suggestedInputs.entrySet()) { 
 			String text = entry.getKey();
 			int caret;
 			if (text.endsWith("/"))

@@ -14,7 +14,7 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 import io.onedev.commons.utils.PathUtils;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.search.code.hit.PathHit;
 import io.onedev.server.search.code.hit.QueryHit;
 
@@ -30,7 +30,7 @@ public class PathQuery extends BlobQuery {
 	@Override
 	public void collect(IndexSearcher searcher, TreeWalk treeWalk, List<QueryHit> hits) {
 		String blobPath = treeWalk.getPathString();
-		Range range = PathUtils.matchSegments(blobPath, match, true);
+		LinearRange range = PathUtils.matchSegments(blobPath, match, true);
 		if (range != null) {
 			hits.add(new PathHit(blobPath, range));
 		}

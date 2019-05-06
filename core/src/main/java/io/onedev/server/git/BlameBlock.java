@@ -4,15 +4,15 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 
 public class BlameBlock {
 	
 	private final BlameCommit commit;
 
-	private final List<Range> ranges;
+	private final List<LinearRange> ranges;
 	
-	public BlameBlock(BlameCommit commit, List<Range> ranges) {
+	public BlameBlock(BlameCommit commit, List<LinearRange> ranges) {
 		this.commit = commit;
 		this.ranges = ranges;
 	}
@@ -27,7 +27,7 @@ public class BlameBlock {
 	 * @return
 	 * 			list of ranges. Range is 0-indexed and inclusive for from and to
 	 */
-	public List<Range> getRanges() {
+	public List<LinearRange> getRanges() {
 		return ranges;
 	}
 
@@ -35,7 +35,7 @@ public class BlameBlock {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append(commit.getHash()).append(": ");
-		for (Range range: ranges) 
+		for (LinearRange range: ranges) 
 			builder.append(range).append(", ");
 		
 		return StringUtils.stripEnd(builder.toString(), ", ");

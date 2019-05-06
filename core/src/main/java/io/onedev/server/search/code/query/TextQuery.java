@@ -20,16 +20,16 @@ import org.apache.lucene.search.WildcardQuery;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import io.onedev.commons.jsymbol.TokenPosition;
-import io.onedev.commons.utils.Range;
+import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+
+import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.search.code.IndexConstants;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.TextHit;
 import io.onedev.server.search.code.query.regex.RegexLiterals;
 import io.onedev.server.util.ContentDetector;
-
-import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 
 public class TextQuery extends BlobQuery {
 
@@ -96,8 +96,8 @@ public class TextQuery extends BlobQuery {
 							if (line.length() <= MAX_LINE_LEN) {
 								Matcher matcher = pattern.matcher(line);
 								while (matcher.find()) {
-									Range range = new Range(matcher.start(), matcher.end());
-									TokenPosition position = new TokenPosition(lineNo, range.getFrom(), lineNo, range.getTo());
+									LinearRange range = new LinearRange(matcher.start(), matcher.end());
+									PlanarRange position = new PlanarRange(lineNo, range.getFrom(), lineNo, range.getTo());
 									hits.add(new TextHit(blobPath, line, position));
 									if (hits.size() >= getCount())
 										break;
@@ -140,15 +140,15 @@ public class TextQuery extends BlobQuery {
 											afterChar = line.charAt(end);
 										
 										if (!isWordChar(beforeChar) && !isWordChar(afterChar)) {
-											Range range = new Range(start, end);
-											TokenPosition position = new TokenPosition(lineNo, range.getFrom(), lineNo, range.getTo());
+											LinearRange range = new LinearRange(start, end);
+											PlanarRange position = new PlanarRange(lineNo, range.getFrom(), lineNo, range.getTo());
 											hits.add(new TextHit(blobPath, line, position));
 											if (hits.size() >= getCount())
 												break;
 										}
 									} else {
-										Range range = new Range(start, end);
-										TokenPosition position = new TokenPosition(lineNo, range.getFrom(), lineNo, range.getTo());
+										LinearRange range = new LinearRange(start, end);
+										PlanarRange position = new PlanarRange(lineNo, range.getFrom(), lineNo, range.getTo());
 										hits.add(new TextHit(blobPath, line, position));
 										if (hits.size() >= getCount())
 											break;

@@ -66,7 +66,7 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.server.OneDev;
@@ -1277,7 +1277,7 @@ public class Project extends AbstractEntity {
 		return getName();
 	}
 
-	public List<User> getAuthors(String filePath, ObjectId commitId, @Nullable Range range) {
+	public List<User> getAuthors(String filePath, ObjectId commitId, @Nullable LinearRange range) {
 		BlameCommand cmd = new BlameCommand(getGitDir());
 		cmd.commitHash(commitId.name());
 		cmd.file(filePath);

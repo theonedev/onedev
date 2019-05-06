@@ -34,7 +34,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.TextRange;
 import io.onedev.server.search.code.IndexConstants;
 import io.onedev.server.search.code.SearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
@@ -293,7 +292,7 @@ public abstract class SymbolTooltipPanel extends Panel {
 	public PageParameters getQueryHitParams(QueryHit hit) {
 		BlobIdent blobIdent = new BlobIdent(revision, hit.getBlobPath(), FileMode.REGULAR_FILE.getBits());
 		ProjectBlobPage.State state = new ProjectBlobPage.State(blobIdent);
-		state.mark = TextRange.of(hit.getTokenPos());
+		state.mark = hit.getTokenPos();
 		return ProjectBlobPage.paramsOf(projectModel.getObject(), state);
 	}
 	

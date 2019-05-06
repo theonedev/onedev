@@ -12,8 +12,8 @@ import org.unbescape.javascript.JavaScriptEscape;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
-import io.onedev.server.model.support.TextRange;
 import io.onedev.server.web.component.sourceformat.OptionChangeCallback;
 import io.onedev.server.web.component.sourceformat.SourceFormatPanel;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -91,7 +91,7 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
-	private String getJson(TextRange mark) {
+	private String getJson(PlanarRange mark) {
 		try {
 			return OneDev.getInstance(ObjectMapper.class).writeValueAsString(mark);
 		} catch (JsonProcessingException e) {
@@ -100,7 +100,7 @@ public class SourceEditPanel extends BlobEditPanel implements Markable {
 	}
 	
 	@Override
-	public void mark(AjaxRequestTarget target, TextRange mark) {
+	public void mark(AjaxRequestTarget target, PlanarRange mark) {
 		String script;
 		if (mark != null) {
 			script = String.format("onedev.server.sourceEdit.mark('%s', %s);", 

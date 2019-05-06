@@ -13,7 +13,7 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 
 import io.onedev.commons.codeassist.InputCompletion;
 import io.onedev.commons.codeassist.InputStatus;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 
 @SuppressWarnings("serial")
@@ -91,7 +91,7 @@ class AssistPanel extends Panel {
 	private Component newSuggestionItem(String itemId, InputCompletion suggestion) {
 		WebMarkupContainer item = new WebMarkupContainer(itemId);
 		WebMarkupContainer link = new WebMarkupContainer("link");
-		Range match = suggestion.getMatch();
+		LinearRange match = suggestion.getMatch();
 		String label = suggestion.getLabel();
 		if (match != null) {
 			String prefix = StringEscapeUtils.escapeHtml4(label.substring(0, match.getFrom()));

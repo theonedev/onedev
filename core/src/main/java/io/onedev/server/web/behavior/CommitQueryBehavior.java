@@ -18,7 +18,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.commons.utils.Range;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.stringmatch.PatternApplied;
 import io.onedev.commons.utils.stringmatch.WildcardUtils;
@@ -87,7 +87,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 							break;
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
-							Map<String, Range> suggestedInputs = new LinkedHashMap<>();
+							Map<String, LinearRange> suggestedInputs = new LinkedHashMap<>();
 							CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
 							List<NameAndEmail> users = commitInfoManager.getUsers(project);
 							for (NameAndEmail user: users) {
@@ -103,7 +103,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 									suggestedInputs.put(applied.getText(), applied.getMatch());
 							}
 							
-							for (Map.Entry<String, Range> entry: suggestedInputs.entrySet()) 
+							for (Map.Entry<String, LinearRange> entry: suggestedInputs.entrySet()) 
 								suggestions.add(new InputSuggestion(entry.getKey(), -1, null, entry.getValue()).escape(ESCAPE_CHARS));
 							break;
 						case CommitQueryParser.BEFORE:
