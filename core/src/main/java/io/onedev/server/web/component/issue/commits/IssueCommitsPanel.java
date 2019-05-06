@@ -18,8 +18,10 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
+import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
@@ -46,14 +48,19 @@ public class IssueCommitsPanel extends GenericPanel<Issue> {
 			@Override
 			protected void populateItem(ListItem<RevCommit> item) {
 				RevCommit commit = item.getModelObject();
+				item.add(new CommitMessagePanel("message", new AbstractReadOnlyModel<Project>() {
+
+					@Override
+					public Project getObject() {
+						return getIssue().getProject();
+					}
+					
+				}, item.getModel()));
+				
 				CommitDetailPage.State commitState = new CommitDetailPage.State();
 				commitState.revision = commit.name();
 				PageParameters params = CommitDetailPage.paramsOf(getIssue().getProject(), commitState);
 
-				Link<Void> messageLink = new ViewStateAwarePageLink<Void>("message", CommitDetailPage.class, params);
-				messageLink.add(new Label("label", commit.getShortMessage()));
-				item.add(messageLink);
-				
 				Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hash", CommitDetailPage.class, params);
 				hashLink.add(new Label("label", GitUtils.abbreviateSHA(commit.name())));
 				item.add(hashLink);

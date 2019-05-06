@@ -32,7 +32,7 @@
 }
 #commit-detail>.info>.message>.detail {
 	color: #666;
-	padding: 12px;
+	padding: 0 0 12px 0;
 	font-size: 13px;
 	border: none;
 	background: none;

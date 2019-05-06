@@ -10,3 +10,9 @@
 .issue-pull-requests>.body .pull-request {
     margin-bottom: 6px;
 }
+.issue-pull-requests>.body .pull-request a {
+    color: #444;
+}
+.issue-pull-requests>.body .pull-request:hover {
+    background: #F2F2F2;
+}

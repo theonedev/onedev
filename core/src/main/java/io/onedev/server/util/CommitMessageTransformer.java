@@ -34,9 +34,9 @@ public class CommitMessageTransformer implements Transformer<String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitMessageTransformer.class);
 	
-	private static final Pattern PULL_REQUEST_PATTERN = Pattern.compile("(.*pull\\s*request\\s+)([\\w\\.-]*)#(\\d+)($|\\W+?)");
+	private static final Pattern PULL_REQUEST_PATTERN = Pattern.compile("(.*pull\\s*request\\s+)([\\w\\.-]*)#(\\d+)(?=$|\\W+?)");
 	
-	private static final Pattern ISSUE_PATTERN = Pattern.compile("(^|\\W+)([\\w\\.-]*)#(\\d+)($|\\W+?)");
+	private static final Pattern ISSUE_PATTERN = Pattern.compile("(^|\\W+)([\\w\\.-]*)#(\\d+)(?=$|\\W+?)");
 	
 	private final Project project;
 	
@@ -140,7 +140,7 @@ public class CommitMessageTransformer implements Transformer<String> {
 			    			AbstractEntity entity = entityInfoProvider.find(referencedProject, Long.parseLong(matcher.group(3)));
 			    			if (entity != null) {
 			    				String link = String.format("<a href=\"%s\">%s#%s</a>", entityInfoProvider.getUrl(referencedProject, entity), referencedProjectName, matcher.group(3));
-			    				matcher.appendReplacement(buffer, matcher.group(1) + link + matcher.group(4));
+			    				matcher.appendReplacement(buffer, matcher.group(1) + link);
 			    			} else {
 			    				matcher.appendReplacement(buffer, matcher.group());
 			    			}
@@ -149,7 +149,7 @@ public class CommitMessageTransformer implements Transformer<String> {
 		    			AbstractEntity entity = entityInfoProvider.find(project, Long.parseLong(matcher.group(3)));
 		    			if (entity != null) {
 		    				String link = String.format("<a href=\"%s\">#%s</a>", entityInfoProvider.getUrl(project, entity), matcher.group(3));
-		    				matcher.appendReplacement(buffer, matcher.group(1) + link + matcher.group(4));
+		    				matcher.appendReplacement(buffer, matcher.group(1) + link);
 		    			} else {
 		    				matcher.appendReplacement(buffer, matcher.group());			    		
 		    			}

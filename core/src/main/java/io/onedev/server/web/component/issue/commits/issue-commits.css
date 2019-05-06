@@ -10,3 +10,9 @@
 .issue-commits>.body .commit {
     margin-bottom: 6px;
 }
+.issue-commits>.body .commit .hash {
+    color: #444;
+}
+.issue-commits>.body .commit:hover {
+    background: #F2F2F2;
+}

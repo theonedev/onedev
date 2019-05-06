@@ -43,6 +43,7 @@ import io.onedev.server.web.component.build.BuildTitleLabel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.build.status.BuildStatusLabel;
+import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sideinfo.SideInfoClosed;
@@ -233,15 +234,20 @@ public abstract class BuildDetailPage extends ProjectPage {
 			
 		});
 		
-		RevCommit commit = getProject().getRevCommit(getBuild().getCommitHash(), true); 
-
 		CommitDetailPage.State commitState = new CommitDetailPage.State();
-		commitState.revision = commit.name();
+		commitState.revision = getBuild().getCommitHash();
 		PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
-		Link<Void> messageLink = new ViewStateAwarePageLink<Void>("commitMessage", CommitDetailPage.class, params);
-		add(messageLink);
-		messageLink.add(new Label("label", commit.getShortMessage()));
 		
+		add(new CommitMessagePanel("commitMessage", projectModel, new AbstractReadOnlyModel<RevCommit>() {
+
+			@Override
+			public RevCommit getObject() {
+				return getProject().getRevCommit(getBuild().getCommitHash(), true);
+			}
+			
+		}));
+		
+		RevCommit commit = getProject().getRevCommit(getBuild().getCommitHash(), true);
 		add(new ContributorAvatars("commitAvatars", commit.getAuthorIdent(), commit.getCommitterIdent()));
 		add(new ContributorPanel("commitNames", commit.getAuthorIdent(), commit.getCommitterIdent()));
 		

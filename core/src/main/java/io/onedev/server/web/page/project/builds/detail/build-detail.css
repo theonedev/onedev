@@ -36,6 +36,9 @@
     background: #F9F9F9;
     display: none;
 }
+#build-detail>.main>.commit-info a.hash {
+    color: #444;
+}
 #build-detail>.main>.commit-info>* {
     margin-right: 16px;
 }
