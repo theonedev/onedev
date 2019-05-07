@@ -65,8 +65,8 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.server.OneDev;
@@ -671,13 +671,10 @@ public class Project extends AbstractEntity {
 	
 	public List<String> getJobNames() {
 		CISpec ciSpec = getCISpec(getObjectId(getDefaultBranch(), true));
-		if (ciSpec != null) {
-			List<String> jobNames = new ArrayList<>(ciSpec.getJobMap().keySet());
-			Collections.sort(jobNames);
-			return jobNames;
-		} else {
+		if (ciSpec != null)
+			return new ArrayList<>(ciSpec.getJobMap().keySet());
+		else 
 			return new ArrayList<>();
-		}
 	}
 	
 	public LastCommitsOfChildren getLastCommitsOfChildren(String revision, @Nullable String path) {

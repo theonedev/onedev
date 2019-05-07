@@ -142,7 +142,8 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class); 
 		Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
 		
-		if (!fixCommits.isEmpty()) // Do not calculate fix builds now as it might be slow
+		// Do not calculate fix builds now as it might be slow
+		if (!fixCommits.isEmpty() && SecurityUtils.canReadCode(getProject().getFacade())) 
 			tabs.add(new IssueTab("Fixing Builds", FixingBuildsPage.class));
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));

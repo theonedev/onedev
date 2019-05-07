@@ -68,7 +68,7 @@ public class OverallStatusPanel extends GenericPanel<List<Build>> {
 							title = "Some builds are "; 
 						else
 							title = "Builds are "; 
-						title += status.getTitle().toLowerCase() + ", click for details";
+						title += status.getDisplayName().toLowerCase() + ", click for details";
 						break;
 					}
 				}

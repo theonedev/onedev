@@ -57,7 +57,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	public enum Status {
 		IN_ERROR, FAILED, CANCELLED, TIMED_OUT, WAITING, QUEUEING, RUNNING, SUCCESSFUL;
 		
-		public String getTitle() {
+		public String getDisplayName() {
 			return StringUtils.capitalize(name().replace('_', ' ').toLowerCase());
 		}
 		

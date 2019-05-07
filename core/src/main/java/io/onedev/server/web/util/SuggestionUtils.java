@@ -121,9 +121,9 @@ public class SuggestionUtils {
 			
 			String description;
 			if (build.getVersion() != null) 
-				description = build.getJobName() + " : " + build.getVersion();
+				description = build.getVersion() + " : " + build.getJobName();
 			else
-				description = null;
+				description = build.getJobName();
 			
 			suggestion = new InputSuggestion("#" + build.getNumber(), description, null);
 			

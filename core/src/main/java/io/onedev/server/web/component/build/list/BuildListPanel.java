@@ -59,7 +59,6 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.build.BuildTitleLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
@@ -277,11 +276,11 @@ public abstract class BuildListPanel extends Panel {
 		
 		List<IColumn<Build, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of("Number")) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of("Build")) {
 
 			@Override
 			public String getCssClass() {
-				return "number";
+				return "build";
 			}
 
 			@Override
@@ -295,7 +294,18 @@ public abstract class BuildListPanel extends Panel {
 						(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
 				
 				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildLogPage.class, BuildLogPage.paramsOf(build, position));
-				link.add(new BuildTitleLabel("label", rowModel) {
+				link.add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						Build build = rowModel.getObject();
+						StringBuilder builder = new StringBuilder("#" + build.getNumber());
+						if (build.getVersion() != null)
+							builder.append(" (" + build.getVersion() + ")");
+						return builder.toString();
+					}
+					
+				}) {
 
 					@Override
 					protected void onInitialize() {
@@ -327,7 +337,7 @@ public abstract class BuildListPanel extends Panel {
 
 					@Override
 					public String getObject() {
-						return rowModel.getObject().getStatus().getTitle();
+						return rowModel.getObject().getStatus().getDisplayName();
 					}
 					
 				}) {

@@ -1,17 +1,12 @@
 <wicket:panel>
-	<div class="build-detail">
-		<table>
-			<tr wicket:id="builds">
-				<td class="status">
-					<span wicket:id="status" class="build-status"></span> 				
-				</td>
-				<td class="job">
-					<span wicket:id="job"></span>
-				</td>
-				<td class="number">
-					<a wicket:id="number"><span wicket:id="label"></span></a>
-				</td>
-			</tr>
-		</table>
-	</div>
+    <table class="build-status-list">
+        <tr wicket:id="builds">
+            <td class="status">
+                <span wicket:id="icon"></span> <span wicket:id="name"></span> 
+            </td>
+            <td class="title">
+                <a wicket:id="title"><span wicket:id="label"></span></a>
+            </td>
+        </tr>
+    </table>
 </wicket:panel>

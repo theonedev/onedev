@@ -46,7 +46,7 @@ public class BuildStatusIcon extends GenericPanel<Build> {
 				else if (build.getStatus() == Status.QUEUEING) 
 					title = "Build is being queued due to limited capacity";
 				else
-					title = "Build is " + build.getStatus().getTitle().toLowerCase();
+					title = "Build is " + build.getStatus().getDisplayName().toLowerCase();
 				
 				tag.put("class", cssClass);
 				tag.put("title", title);

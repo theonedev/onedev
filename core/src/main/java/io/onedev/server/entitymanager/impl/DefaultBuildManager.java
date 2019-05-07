@@ -123,7 +123,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			restrictions.add(builder.equal(join.get("name"), entry.getKey()));
 			restrictions.add(builder.equal(join.get("value"), entry.getValue()));
 		}
-		return getSession().createQuery(query.where(restrictions.toArray(new Predicate[0]))).list();
+		query.where(restrictions.toArray(new Predicate[0]));
+		return getSession().createQuery(query).list();
 	}
 
 	@Sessional

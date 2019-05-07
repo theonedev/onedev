@@ -168,7 +168,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 					Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(referenceId));
 					if (build != null) {
 						String statusCss = "fa build-status build-status-" + build.getStatus().name().toLowerCase();
-						String statusTitle = build.getStatus().getTitle();
+						String statusTitle = build.getStatus().getDisplayName();
 						
 						String title = build.getJobName();
 						if (build.getVersion() != null)

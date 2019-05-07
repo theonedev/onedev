@@ -40,8 +40,9 @@ public class BuildChoiceProvider extends ChoiceProvider<Build> {
 		writer
 			.key("id").value(choice.getId())
 			.key("number").value(choice.getNumber())
-			.key("version").value(HtmlEscape.escapeHtml5(choice.getVersion()))
 			.key("jobName").value(HtmlEscape.escapeHtml5(choice.getJobName()));
+		if (choice.getVersion() != null)
+			writer.key("version").value(HtmlEscape.escapeHtml5(choice.getVersion()));
 	}
 
 	@Override

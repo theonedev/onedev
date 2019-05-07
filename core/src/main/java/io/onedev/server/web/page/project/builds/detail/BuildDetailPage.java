@@ -39,7 +39,6 @@ import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.build.BuildTitleLabel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
@@ -123,17 +122,28 @@ public abstract class BuildDetailPage extends ProjectPage {
 		summary.setOutputMarkupId(true);
 		add(summary);
 		
-		summary.add(new BuildTitleLabel("title", buildModel));
+		summary.add(new Label("title", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				StringBuilder builder = new StringBuilder("#" + getBuild().getNumber());
+				if (getBuild().getVersion() != null)
+					builder.append(" (" + getBuild().getVersion() + ")");
+				return builder.toString();
+				
+			}
+			
+		}));
 		
 		summary.add(new BuildStatusIcon("statusIcon", buildModel));
 		summary.add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return buildModel.getObject().getStatus().getTitle();
+				return buildModel.getObject().getStatus().getDisplayName();
 			}
 			
-		}).add(newBuildObserver(getBuild().getId())).setOutputMarkupId(true));
+		}));
 		
 		summary.add(new Link<Void>("rebuild") {
 

@@ -2,8 +2,8 @@ package io.onedev.server.ci;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,7 +44,7 @@ public class CISpec implements Serializable, Validatable {
 	
 	public Map<String, Job> getJobMap() {
 		if (jobMap == null) { 
-			jobMap = new HashMap<>();
+			jobMap = new LinkedHashMap<>();
 			for (Job job: jobs)
 				jobMap.put(job.getName(), job);
 		}

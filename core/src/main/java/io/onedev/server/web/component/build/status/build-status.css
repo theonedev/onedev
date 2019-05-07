@@ -31,3 +31,18 @@
 .build-status-running, .build-status-waiting, .build-status-queueing {
 	color: #D2A906 !important;
 }
+
+/* The pending status is for not generated pull request build */
+.build-status-pending {
+	color: #D2A906 !important;
+}
+.build-status-pending:before { 
+    content: "\f017";
+}
+
+.build-status-list {
+    width: auto;
+}
+.build-status-list>tbody>tr>td {
+    padding: 4px 8px;
+}
