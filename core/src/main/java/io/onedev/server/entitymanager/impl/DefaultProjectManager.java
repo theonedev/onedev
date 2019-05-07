@@ -62,7 +62,7 @@ import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
-import io.onedev.server.web.util.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarManager;
 
 @Singleton
 public class DefaultProjectManager extends AbstractEntityManager<Project> implements ProjectManager {

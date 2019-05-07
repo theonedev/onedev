@@ -27,7 +27,7 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.build.status.BuildsStatusPanel;
+import io.onedev.server.web.component.build.status.OverallStatusPanel;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
@@ -87,7 +87,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				};
 				item.add(new CommitMessagePanel("message", projectModel, item.getModel()));
 
-				item.add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+				item.add(new OverallStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 					@Override
 					protected List<Build> load() {

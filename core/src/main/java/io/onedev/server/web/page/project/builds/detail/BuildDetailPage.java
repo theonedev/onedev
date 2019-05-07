@@ -42,7 +42,6 @@ import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.BuildTitleLabel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.build.status.BuildStatusLabel;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -98,11 +97,13 @@ public abstract class BuildDetailPage extends ProjectPage {
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
 				handler.add(component);
+				handler.appendJavaScript("$(window).resize();");
 			}
 			
 			@Override
 			public void onConnectionOpened(IPartialPageRequestHandler handler) {
 				handler.add(component);
+				handler.appendJavaScript("$(window).resize();");
 			}
 			
 			@Override
@@ -125,7 +126,14 @@ public abstract class BuildDetailPage extends ProjectPage {
 		summary.add(new BuildTitleLabel("title", buildModel));
 		
 		summary.add(new BuildStatusIcon("statusIcon", buildModel));
-		summary.add(new BuildStatusLabel("statusLabel", buildModel));
+		summary.add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return buildModel.getObject().getStatus().getTitle();
+			}
+			
+		}).add(newBuildObserver(getBuild().getId())).setOutputMarkupId(true));
 		
 		summary.add(new Link<Void>("rebuild") {
 

@@ -12,7 +12,6 @@ import org.apache.wicket.model.IModel;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.OneException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -36,36 +35,18 @@ public class BuildStatusIcon extends GenericPanel<Build> {
 
 				Build build = getModelObject();
 
-				String cssClass = "build-status fa fa-fw " + build.getStatus().name().toLowerCase() + " ";
+				String cssClass = "fa fa-fw build-status build-status-" + build.getStatus().name().toLowerCase();
+				if (build.getStatus() == Status.RUNNING)
+					cssClass += " fa-spin";
+
 				String title;
 				
-				if (build.getStatus() == Status.WAITING) {
-					cssClass += "fa-pause";
+				if (build.getStatus() == Status.WAITING) 
 					title = "Waiting for completion of dependency builds";
-				} else if (build.getStatus() == Status.QUEUEING) {
-					cssClass += "fa-hourglass-1";
+				else if (build.getStatus() == Status.QUEUEING) 
 					title = "Build is being queued due to limited capacity";
-				} else if (build.getStatus() == Status.IN_ERROR) {
-					cssClass += "fa-warning";
-					title = "Build is in error";
-				} else if (build.getStatus() == Status.FAILED) {
-					cssClass += "fa-times";
-					title = "Build is failed";
-				} else if (build.getStatus() == Status.RUNNING) {
-					cssClass += "fa-circle-o-notch fa-spin";
-					title = "Build is running";
-				} else if (build.getStatus() == Status.SUCCESSFUL) {
-					cssClass += "fa-check-circle";
-					title = "Build is successful";
-				} else if (build.getStatus() == Status.CANCELLED) {
-					cssClass += "fa-ban";
-					title = "Build is cancelled";
-				} else if (build.getStatus() == Status.TIMED_OUT) {
-					cssClass += "fa-clock-o";
-					title = "Build timed out";
-				} else {
-					throw new OneException("Unexpected build status: " + build.getStatus());
-				}
+				else
+					title = "Build is " + build.getStatus().getTitle().toLowerCase();
 				
 				tag.put("class", cssClass);
 				tag.put("title", title);
@@ -100,7 +81,7 @@ public class BuildStatusIcon extends GenericPanel<Build> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new BuildCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new BuildStatusCssResourceReference()));
 	}
 	
 }

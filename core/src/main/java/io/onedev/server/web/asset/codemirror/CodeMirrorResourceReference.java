@@ -11,7 +11,7 @@ import de.agilecoders.wicket.webjars.request.resource.WebjarsJavaScriptResourceR
 import io.onedev.server.web.asset.hotkeys.HotkeysResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
-import io.onedev.server.web.util.resourcebundle.ResourceBundle;
+import io.onedev.server.web.resourcebundle.ResourceBundle;
 
 @ResourceBundle
 public class CodeMirrorResourceReference extends BaseDependentResourceReference {

@@ -9,10 +9,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
+import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.util.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
 public class ProjectAvatarLink extends ViewStateAwarePageLink<Void> {

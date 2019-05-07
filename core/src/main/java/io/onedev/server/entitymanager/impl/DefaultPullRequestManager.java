@@ -43,6 +43,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.Session;
 import org.hibernate.criterion.Criterion;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -1047,8 +1048,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					criteria.add(Restrictions.eq("number", buildNumber));
 				} catch (NumberFormatException e) {
 					criteria.add(Restrictions.or(
-							Restrictions.ilike("title", "%#" + term + "%"),
-							Restrictions.ilike("noSpaceTitle", "%#" + term + "%")));
+							Restrictions.ilike("title", "#" + term, MatchMode.ANYWHERE),
+							Restrictions.ilike("noSpaceTitle", "#" + term, MatchMode.ANYWHERE)));
 				}
 			} else {
 				try {
@@ -1056,8 +1057,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					criteria.add(Restrictions.eq("number", buildNumber));
 				} catch (NumberFormatException e) {
 					criteria.add(Restrictions.or(
-							Restrictions.ilike("title", "%" + term + "%"),
-							Restrictions.ilike("noSpaceTitle", "%" + term + "%")));
+							Restrictions.ilike("title", term, MatchMode.ANYWHERE),
+							Restrictions.ilike("noSpaceTitle", term, MatchMode.ANYWHERE)));
 				}
 			}
 		}

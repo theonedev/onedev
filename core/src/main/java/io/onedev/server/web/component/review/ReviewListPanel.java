@@ -34,10 +34,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
-import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")

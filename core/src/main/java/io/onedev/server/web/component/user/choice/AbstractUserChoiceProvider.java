@@ -13,8 +13,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cache.CacheManager;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.select2.ChoiceProvider;
-import io.onedev.server.web.util.avatar.AvatarManager;
 
 public abstract class AbstractUserChoiceProvider extends ChoiceProvider<UserFacade> {
 

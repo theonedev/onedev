@@ -57,8 +57,8 @@ import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.error.ErrorPage;
 import io.onedev.server.web.page.project.ProjectListPage;
+import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
-import io.onedev.server.web.util.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @Singleton

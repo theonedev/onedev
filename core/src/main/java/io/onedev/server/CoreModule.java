@@ -240,6 +240,8 @@ import io.onedev.server.web.ExpectedExceptionContribution;
 import io.onedev.server.web.OneWebApplication;
 import io.onedev.server.web.ResourcePackScopeContribution;
 import io.onedev.server.web.WebApplicationConfigurator;
+import io.onedev.server.web.avatar.AvatarManager;
+import io.onedev.server.web.avatar.DefaultAvatarManager;
 import io.onedev.server.web.component.diff.DiffRenderer;
 import io.onedev.server.web.component.markdown.SourcePositionTrackExtension;
 import io.onedev.server.web.component.markdown.emoji.EmojiExtension;
@@ -247,19 +249,12 @@ import io.onedev.server.web.editable.DefaultEditSupportRegistry;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
+import io.onedev.server.web.mapper.OnePageMapper;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.layout.MainNavContribution;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecRendererProvider;
 import io.onedev.server.web.page.test.TestPage;
-import io.onedev.server.web.util.avatar.AvatarManager;
-import io.onedev.server.web.util.avatar.DefaultAvatarManager;
-import io.onedev.server.web.util.mapper.OnePageMapper;
-import io.onedev.server.web.util.markdown.CommitProcessor;
-import io.onedev.server.web.util.markdown.IssueProcessor;
-import io.onedev.server.web.util.markdown.MentionProcessor;
-import io.onedev.server.web.util.markdown.PullRequestProcessor;
-import io.onedev.server.web.util.markdown.UrlProcessor;
 import io.onedev.server.web.websocket.BuildEventBroadcaster;
 import io.onedev.server.web.websocket.CodeCommentEventBroadcaster;
 import io.onedev.server.web.websocket.CommitIndexedBroadcaster;
@@ -463,11 +458,7 @@ public class CoreModule extends AbstractPluginModule {
 		contribute(Extension.class, new EmojiExtension());
 		contribute(Extension.class, new SourcePositionTrackExtension());
 		
-		contribute(MarkdownProcessor.class, new MentionProcessor());
-		contribute(MarkdownProcessor.class, new PullRequestProcessor());
-		contribute(MarkdownProcessor.class, new IssueProcessor());
-		contribute(MarkdownProcessor.class, new CommitProcessor());
-		contribute(MarkdownProcessor.class, new UrlProcessor());
+		contributeFromPackage(MarkdownProcessor.class, MarkdownProcessor.class);
 
 		contribute(ResourcePackScopeContribution.class, new ResourcePackScopeContribution() {
 			

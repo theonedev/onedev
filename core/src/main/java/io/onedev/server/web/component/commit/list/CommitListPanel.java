@@ -2,7 +2,9 @@ package io.onedev.server.web.component.commit.list;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
@@ -36,6 +38,7 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.joda.time.DateTime;
@@ -51,6 +54,7 @@ import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.RefInfo;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
@@ -64,7 +68,7 @@ import io.onedev.server.util.Constants;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.behavior.CommitQueryBehavior;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.build.status.BuildsStatusPanel;
+import io.onedev.server.web.component.build.status.OverallStatusPanel;
 import io.onedev.server.web.component.commit.graph.CommitGraphResourceReference;
 import io.onedev.server.web.component.commit.graph.CommitGraphUtils;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
@@ -78,7 +82,6 @@ import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.VisibleVisitor;
-import io.onedev.server.web.util.model.CommitRefsModel;
 
 @SuppressWarnings("serial")
 public abstract class CommitListPanel extends Panel {
@@ -196,14 +199,27 @@ public abstract class CommitListPanel extends Panel {
 		
 	};
 	
-	private final CommitRefsModel labelsModel = new CommitRefsModel(new AbstractReadOnlyModel<Project>() {
-
-		@Override
-		public Project getObject() {
-			return getProject();
-		}
+	private final IModel<Map<String, List<String>>> labelsModel = new LoadableDetachableModel<Map<String, List<String>>>() {
 		
-	});
+		@Override
+		protected Map<String, List<String>> load() {
+			Map<String, List<String>> labels = new HashMap<>();
+			List<RefInfo> refInfos = getProject().getBranches();
+			refInfos.addAll(getProject().getTags());
+			for (RefInfo refInfo: refInfos) {
+				if (refInfo.getPeeledObj() instanceof RevCommit) {
+					RevCommit commit = (RevCommit) refInfo.getPeeledObj();
+					List<String> commitLabels = labels.get(commit.name());
+					if (commitLabels == null) {
+						commitLabels = new ArrayList<>();
+						labels.put(commit.name(), commitLabels);
+					}
+					commitLabels.add(Repository.shortenRefName(refInfo.getRef().getName()));
+				}
+			}
+			return labels;
+		}
+	};
 	
 	private WebMarkupContainer body;
 	
@@ -570,7 +586,7 @@ public abstract class CommitListPanel extends Panel {
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 			item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 			
-			item.add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+			item.add(new OverallStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 				@Override
 				protected List<Build> load() {

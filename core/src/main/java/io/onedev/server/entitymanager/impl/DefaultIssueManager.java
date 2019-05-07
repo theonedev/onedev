@@ -20,6 +20,7 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -291,8 +292,8 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 					criteria.add(Restrictions.eq("number", buildNumber));
 				} catch (NumberFormatException e) {
 					criteria.add(Restrictions.or(
-							Restrictions.ilike("title", "%#" + term + "%"),
-							Restrictions.ilike("noSpaceTitle", "%#" + term + "%")));
+							Restrictions.ilike("title", "#" + term, MatchMode.ANYWHERE),
+							Restrictions.ilike("noSpaceTitle", "#" + term, MatchMode.ANYWHERE)));
 				}
 			} else {
 				try {
@@ -300,8 +301,8 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 					criteria.add(Restrictions.eq("number", buildNumber));
 				} catch (NumberFormatException e) {
 					criteria.add(Restrictions.or(
-							Restrictions.ilike("title", "%" + term + "%"),
-							Restrictions.ilike("noSpaceTitle", "%" + term + "%")));
+							Restrictions.ilike("title", term, MatchMode.ANYWHERE),
+							Restrictions.ilike("noSpaceTitle", term, MatchMode.ANYWHERE)));
 				}
 			}
 		}

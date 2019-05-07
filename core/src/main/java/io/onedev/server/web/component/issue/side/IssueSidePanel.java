@@ -57,6 +57,7 @@ import io.onedev.server.util.IssueField;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.web.ajaxlistener.AppendLoadingIndicatorListener;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
@@ -70,7 +71,6 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.QueryPositionSupport;
-import io.onedev.server.web.util.ajaxlistener.AppendLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
 public abstract class IssueSidePanel extends Panel {

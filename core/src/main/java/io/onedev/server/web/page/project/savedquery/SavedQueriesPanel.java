@@ -39,6 +39,8 @@ import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.WebConstants;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.subscriptionstatus.SubscriptionStatusLink;
@@ -49,8 +51,6 @@ import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 
 @SuppressWarnings("serial")
 public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {

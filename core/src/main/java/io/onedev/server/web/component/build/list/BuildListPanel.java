@@ -61,7 +61,6 @@ import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.BuildTitleLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.build.status.BuildStatusLabel;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.job.JobLink;
@@ -324,7 +323,14 @@ public abstract class BuildListPanel extends Panel {
 				fragment.add(new BuildStatusIcon("icon", rowModel));
 				
 				Long buildId = rowModel.getObject().getId();
-				fragment.add(new BuildStatusLabel("label", rowModel) {
+				fragment.add(new Label("label", new AbstractReadOnlyModel<String>() {
+
+					@Override
+					public String getObject() {
+						return rowModel.getObject().getStatus().getTitle();
+					}
+					
+				}) {
 
 					@Override
 					protected void onInitialize() {

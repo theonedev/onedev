@@ -33,6 +33,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.issue.board.BoardEditPanel;
@@ -40,7 +41,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")

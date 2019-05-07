@@ -17,9 +17,9 @@ import io.onedev.server.ci.job.DependencyPopulator;
 import io.onedev.server.ci.job.JobOutcome;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.WebApplicationConfigurator;
+import io.onedev.server.web.mapper.OnePageMapper;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
-import io.onedev.server.web.util.mapper.OnePageMapper;
 
 public class ArtifactModule extends AbstractPluginModule {
 

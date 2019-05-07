@@ -7,7 +7,7 @@ import org.apache.wicket.markup.html.WebComponent;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.util.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
 public class ProjectAvatar extends WebComponent {

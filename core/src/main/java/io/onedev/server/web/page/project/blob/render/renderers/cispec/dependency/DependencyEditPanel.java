@@ -13,10 +13,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.job.Job;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathElement;
-import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
 
 @SuppressWarnings("serial")
 public abstract class DependencyEditPanel extends Panel {

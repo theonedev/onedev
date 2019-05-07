@@ -31,13 +31,13 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 import io.onedev.server.web.stream.RawBlobStreamResource;
 import io.onedev.server.web.stream.RawBlobStreamResourceReference;
-import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.util.ajaxlistener.TrackViewStateListener;
 
 @SuppressWarnings("serial")
 public abstract class BlobViewPanel extends Panel {

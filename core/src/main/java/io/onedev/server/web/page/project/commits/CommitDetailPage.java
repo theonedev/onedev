@@ -55,7 +55,7 @@ import io.onedev.server.util.CommitMessageTransformer;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
-import io.onedev.server.web.component.build.status.BuildsStatusPanel;
+import io.onedev.server.web.component.build.status.OverallStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
@@ -220,7 +220,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 
-		add(new BuildsStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+		add(new OverallStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
 
 			@Override
 			protected List<Build> load() {

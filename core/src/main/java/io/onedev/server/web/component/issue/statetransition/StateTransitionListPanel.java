@@ -33,6 +33,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -41,7 +42,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.util.ConfirmOnClick;
-import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")

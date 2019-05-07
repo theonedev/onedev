@@ -22,8 +22,8 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.util.avatar.AvatarManager;
 
 /**
  * Loading commits of children may take some time, and we do this via resource loading to avoid blocking 

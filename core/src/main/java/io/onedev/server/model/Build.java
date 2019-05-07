@@ -33,6 +33,7 @@ import com.google.common.base.Optional;
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.BuildInfoManager;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
 
 @Entity
@@ -45,7 +46,7 @@ import io.onedev.server.util.facade.BuildFacade;
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-public class Build extends AbstractEntity {
+public class Build extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -54,7 +55,12 @@ public class Build extends AbstractEntity {
 	private static final int MAX_STATUS_MESSAGE = 1024;
 	
 	public enum Status {
-		WAITING, QUEUEING, RUNNING, SUCCESSFUL, FAILED, IN_ERROR, CANCELLED, TIMED_OUT
+		IN_ERROR, FAILED, CANCELLED, TIMED_OUT, WAITING, QUEUEING, RUNNING, SUCCESSFUL;
+		
+		public String getTitle() {
+			return StringUtils.capitalize(name().replace('_', ' ').toLowerCase());
+		}
+		
 	};
 	
 	@ManyToOne(fetch=FetchType.LAZY)
@@ -169,6 +175,7 @@ public class Build extends AbstractEntity {
 		this.version = version;
 	}
 
+	@Override
 	public long getNumber() {
 		return number;
 	}

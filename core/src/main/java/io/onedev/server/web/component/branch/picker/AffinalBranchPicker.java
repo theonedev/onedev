@@ -12,7 +12,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.web.component.project.ProjectPicker;
-import io.onedev.server.web.util.model.AffinalProjectsModel;
+import io.onedev.server.web.model.AffinalProjectsModel;
 
 @SuppressWarnings("serial")
 public abstract class AffinalBranchPicker extends Panel {

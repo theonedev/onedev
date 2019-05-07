@@ -15,8 +15,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.model.support.jobexecutor.JobExecutor;
+import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 
 @SuppressWarnings("serial")
 abstract class JobExecutorPanel extends Panel {

@@ -24,10 +24,12 @@ import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.ColorUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -36,9 +38,9 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.util.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
 public class MarkdownViewer extends GenericPanel<String> {
@@ -159,6 +161,20 @@ public class MarkdownViewer extends GenericPanel<String> {
 						
 						String script = String.format("onedev.server.markdown.renderPullRequestTooltip('%s', '%s', '%s')", 
 								JavaScriptEscape.escapeJavaScript(request.getTitle()), status, statusCss);
+						target.appendJavaScript(script);
+					}
+					break;
+				case "build":
+					Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(referenceId));
+					if (build != null) {
+						String statusCss = "fa build-status build-status-" + build.getStatus().name().toLowerCase();
+						String statusTitle = build.getStatus().getTitle();
+						
+						String title = build.getJobName();
+						if (build.getVersion() != null)
+							title += " : " + build.getVersion();
+						String script = String.format("onedev.server.markdown.renderBuildTooltip('%s', '%s', '%s')", 
+								JavaScriptEscape.escapeJavaScript(title), statusTitle, statusCss);
 						target.appendJavaScript(script);
 					}
 					break;

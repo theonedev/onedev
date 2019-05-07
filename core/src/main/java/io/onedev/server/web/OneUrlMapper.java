@@ -10,6 +10,8 @@ import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
+import io.onedev.server.web.mapper.OnePageMapper;
+import io.onedev.server.web.mapper.OneResourceMapper;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.group.GroupAuthorizationsPage;
@@ -91,8 +93,6 @@ import io.onedev.server.web.stream.AttachmentStreamResourceReference;
 import io.onedev.server.web.stream.BuildLogStreamResourceReference;
 import io.onedev.server.web.stream.RawBlobStreamResourceReference;
 import io.onedev.server.web.stream.ServerLogStreamResourceReference;
-import io.onedev.server.web.util.mapper.OnePageMapper;
-import io.onedev.server.web.util.mapper.OneResourceMapper;
 
 public class OneUrlMapper extends CompoundRequestMapper {
 

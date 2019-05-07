@@ -32,6 +32,8 @@ import io.onedev.server.search.entity.build.FixedIssueCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
 import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
@@ -44,8 +46,6 @@ import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.util.QueryPositionSupport;
-import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.util.ajaxlistener.ConfirmListener;
 
 @SuppressWarnings("serial")
 abstract class CardDetailPanel extends GenericPanel<Issue> implements InputContext {

@@ -365,6 +365,12 @@ body.fullscreen {
 	padding: 0;
 	margin: 0;
 }
+#reference-tooltip .content.build .status:before {
+    margin-right: 4px;
+}
+#reference-tooltip .content.build .title {
+    margin-left: 10px;
+}
 
 .markdown-image-loading {
 	position: absolute;

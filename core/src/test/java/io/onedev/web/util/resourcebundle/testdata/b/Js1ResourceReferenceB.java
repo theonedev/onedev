@@ -2,7 +2,7 @@ package io.onedev.web.util.resourcebundle.testdata.b;
 
 import org.apache.wicket.request.resource.JavaScriptResourceReference;
 
-import io.onedev.server.web.util.resourcebundle.ResourceBundle;
+import io.onedev.server.web.resourcebundle.ResourceBundle;
 
 @ResourceBundle
 public class Js1ResourceReferenceB extends JavaScriptResourceReference {

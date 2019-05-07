@@ -27,11 +27,11 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.web.ajaxlistener.ChangeTextListener;
+import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
+import io.onedev.server.web.ajaxlistener.SelfDisableListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValueResolution.FixType;
-import io.onedev.server.web.util.ajaxlistener.ChangeTextListener;
-import io.onedev.server.web.util.ajaxlistener.DisableGlobalLoadingIndicatorListener;
-import io.onedev.server.web.util.ajaxlistener.SelfDisableListener;
 
 @SuppressWarnings("serial")
 public abstract class WorkflowReconcilePanel extends Panel {

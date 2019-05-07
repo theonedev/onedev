@@ -61,6 +61,8 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
@@ -68,8 +70,6 @@ import io.onedev.server.web.page.project.blob.RevisionResolved;
 import io.onedev.server.web.page.project.blob.navigator.BlobNameChanging;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
-import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.util.ajaxlistener.TrackViewStateListener;
 
 @SuppressWarnings("serial")
 public class CommitOptionPanel extends Panel {

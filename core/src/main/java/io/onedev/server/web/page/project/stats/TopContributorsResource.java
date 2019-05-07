@@ -22,7 +22,7 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.userident.UserIdent;
-import io.onedev.server.web.util.avatar.AvatarManager;
+import io.onedev.server.web.avatar.AvatarManager;
 
 class TopContributorsResource extends AbstractResource {
 

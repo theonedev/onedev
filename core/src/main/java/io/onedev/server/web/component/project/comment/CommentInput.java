@@ -5,24 +5,22 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.matchscore.MatchScoreProvider;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.AtWhoReferenceSupport;
+import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.UserMentionSupport;
 
 @SuppressWarnings("serial")
@@ -66,46 +64,23 @@ public abstract class CommentInput extends MarkdownEditor {
 
 			@Override
 			public List<PullRequest> findPullRequests(Project project, String query, int count) {
-				EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-				if (project != null)
-					criteria.add(Restrictions.eq("targetProject", project));
-				else
-					criteria.add(Restrictions.eq("targetProject", getProject()));
-				if (StringUtils.isNotBlank(query)) {
-					query = StringUtils.deleteWhitespace(query);
-					try {
-						long requestNumber = Long.parseLong(query);
-						criteria.add(Restrictions.or(
-								Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE), 
-								Restrictions.eq("number", requestNumber)));
-					} catch (NumberFormatException e) {
-						criteria.add(Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE));
-					}
-				}
-				criteria.addOrder(Order.desc("number"));
-				return OneDev.getInstance(Dao.class).query(criteria, 0, count);
+				if (project == null)
+					project = getProject();
+				return OneDev.getInstance(PullRequestManager.class).query(project, query, count);
 			}
 
 			@Override
 			public List<Issue> findIssues(Project project, String query, int count) {
-				EntityCriteria<Issue> criteria = EntityCriteria.of(Issue.class);
-				if (project != null)
-					criteria.add(Restrictions.eq("project", project));
-				else
-					criteria.add(Restrictions.eq("project", getProject()));
-				if (StringUtils.isNotBlank(query)) {
-					query = StringUtils.deleteWhitespace(query);
-					try {
-						long issueNumber = Long.parseLong(query);
-						criteria.add(Restrictions.or(
-								Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE), 
-								Restrictions.eq("number", issueNumber)));
-					} catch (NumberFormatException e) {
-						criteria.add(Restrictions.ilike("noSpaceTitle", query, MatchMode.ANYWHERE));
-					}
-				}
-				criteria.addOrder(Order.desc("number"));
-				return OneDev.getInstance(Dao.class).query(criteria, 0, count);
+				if (project == null)
+					project = getProject();
+				return OneDev.getInstance(IssueManager.class).query(project, query, count);
+			}
+
+			@Override
+			public List<Build> findBuilds(Project project, String query, int count) {
+				if (project == null)
+					project = getProject();
+				return OneDev.getInstance(BuildManager.class).query(project, query, count);
 			}
 			
 		};

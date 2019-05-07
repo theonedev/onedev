@@ -570,17 +570,26 @@ onedev.server.markdown = {
 
 	    if (canReferenceEntity) {
 	    	function getReferencePullRequestProject() {
-	    		var input = $input.val().substring(0, $input.caret());
-	    		var match = /.*pull\s*request\s+([\w\.-]*)#/gi.exec(input);
+	    		var input = $input.val().substring(0, $input.caret()).trim();
+	    		var match = /.*pull\s*request\s+([\w\.-]*)#$/gi.exec(input);
 	    		if (match)
 	    			return match[1];		
 	    		else
 	    			return undefined;   		
 	    	}
 
+	    	function getReferenceBuildProject() {
+                var input = $input.val().substring(0, $input.caret()).trim();
+                var match = /.*build\s+([\w\.-]*)#$/gi.exec(input);
+	    		if (match)
+	    			return match[1];		
+	    		else
+	    			return undefined;   		
+            }
+            
 	    	function getReferenceIssueProject() {
-	    		var input = $input.val().substring(0, $input.caret())
-	    		var match = /.*issue\s+([\w\.-]*)#/gi.exec(input);
+	    		var input = $input.val().substring(0, $input.caret()).trim();
+	    		var match = /.*issue\s+([\w\.-]*)#$/gi.exec(input);
 	    		if (match)
 	    			return match[1];		
 	    		else
@@ -597,27 +606,38 @@ onedev.server.markdown = {
 		        		var queryType;
 		        		var project = getReferencePullRequestProject();
 		        		if (project != undefined) {
-			            	callback("referenceQuery", query, "pull request", project);
-		        		} else {
-		        			project = getReferenceIssueProject();
-		        			if (project != undefined)
-		        				callback("referenceQuery", query, "issue", project);
-		        			else if ($input.val().substring(0, $input.caret()).match(/(.*\s+|^)#/gi))
-		        				callback("referenceQuery", query, undefined, undefined);
-		        		}
+                            callback("referenceQuery", query, "pull request", project);
+                        } else {
+                            project = getReferenceBuildProject();
+                            if (project != undefined) {
+                                callback("referenceQuery", query, "build", project);
+                            } else {
+                                project = getReferenceIssueProject();
+                                if (project != undefined)
+                                    callback("referenceQuery", query, "issue", project);
+                                else if ($input.val().substring(0, $input.caret()).match(/(.*\s+|^)#/gi))
+                                    callback("referenceQuery", query, undefined, undefined);
+                            }
+                        }
 		        	}
 		        },
 		        displayTpl: function() {
-		    		if (getReferencePullRequestProject() != undefined || getReferenceIssueProject() != undefined)
+                    if (getReferencePullRequestProject() != undefined 
+                            || getReferenceBuildProject() != undefined 
+                            || getReferenceIssueProject() != undefined) {
 			    		return "<li><span class='text-muted'>#${referenceNumber}</span> - ${referenceTitle}</li>";
-		    		else
-			    		return "<li><span class='text-muted'>${referenceType} #${referenceNumber}</span> - ${referenceTitle}</li>";
+                    } else {
+                        return "<li><span class='text-muted'>${referenceType} #${referenceNumber}</span> - ${referenceTitle}</li>";
+                    }
 		        },
 		        insertTpl: function() {
-		    		if (getReferencePullRequestProject() != undefined || getReferenceIssueProject() != undefined)
+                    if (getReferencePullRequestProject() != undefined
+                            || getReferenceBuildProject() != undefined 
+                            || getReferenceIssueProject() != undefined) {
 		    			return "#${referenceNumber}";
-		    		else
-		    			return '${referenceType} #${referenceNumber}';	    		
+                    } else {
+                        return '${referenceType} #${referenceNumber}';
+                    }	    		
 		        }, 
 		        limit: atWhoLimit
 		    });		
@@ -945,6 +965,8 @@ onedev.server.markdown = {
 				referenceType = "issue";
 			} else if ($reference.hasClass("pull-request")) {
 				referenceType = "pull request";
+			} else if ($reference.hasClass("build")) {
+				referenceType = "build";
 			} else if ($reference.hasClass("mention")) {
 				referenceType = "user";
 			} else if ($reference.hasClass("commit")) {
@@ -980,6 +1002,16 @@ onedev.server.markdown = {
 		$tooltip.append("" +
 				"<div class='content pull-request'>" +
 				"  <span class='label status'></span> <span class='title'></span>" +
+				"</div>");
+		$tooltip.find(".status").addClass(statusCss).text(status);
+		$tooltip.find(".title").text(title);
+		$tooltip.align({placement: $tooltip.data("alignment"), target: {element: $tooltip.data("trigger")}});
+	},
+	renderBuildTooltip: function(title, status, statusCss) {
+		var $tooltip = $("#reference-tooltip");
+		$tooltip.append("" +
+				"<div class='content build'>" +
+				"  <span class='status'></span> <span class='title'></span>" +
 				"</div>");
 		$tooltip.find(".status").addClass(statusCss).text(status);
 		$tooltip.find(".title").text(title);

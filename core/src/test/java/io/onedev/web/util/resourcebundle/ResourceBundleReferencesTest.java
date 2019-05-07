@@ -6,7 +6,7 @@ import org.apache.wicket.request.resource.CssResourceReference;
 import org.junit.Assert;
 import org.junit.Test;
 
-import io.onedev.server.web.util.resourcebundle.ResourceBundleReferences;
+import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
 import io.onedev.web.util.resourcebundle.testdata.a.Js1ResourceReferenceA;
 import io.onedev.web.util.resourcebundle.testdata.a.Js2ResourceReferenceA;
 import io.onedev.web.util.resourcebundle.testdata.a.Js3ResourceReferenceA;

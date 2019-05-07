@@ -3,7 +3,7 @@ package io.onedev.server.web.component.link;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.web.util.ajaxlistener.TrackViewStateListener;
+import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 
 @SuppressWarnings("serial")
 public abstract class ViewStateAwareAjaxLink<T> extends PreventDefaultAjaxLink<T> {

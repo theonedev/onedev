@@ -86,8 +86,9 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.branch.BranchLink;
-import io.onedev.server.web.component.build.status.PullRequestBuildsPanel;
+import io.onedev.server.web.component.build.status.PullRequestBuildStatusListPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -105,6 +106,7 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
+import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
@@ -117,8 +119,6 @@ import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
 import io.onedev.server.web.util.WicketUtils;
-import io.onedev.server.web.util.ajaxlistener.ConfirmLeaveListener;
-import io.onedev.server.web.util.model.EntityModel;
 import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
@@ -458,7 +458,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				} else {
 					fragment.add(new Label("buildsTitle", "Builds"));
 				}
-				fragment.add(new PullRequestBuildsPanel("builds", requestModel));
+				fragment.add(new PullRequestBuildStatusListPanel("builds", requestModel));
 				
 				fragment.add(new EntityWatchesPanel("watches") {
 

@@ -8,7 +8,7 @@ import org.apache.wicket.util.string.Strings;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.web.util.mapper.PathAwareUrl;
+import io.onedev.server.web.mapper.PathAwareUrl;
 
 public class AbsoluteUrlRenderer extends UrlRenderer {
 

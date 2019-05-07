@@ -19,8 +19,8 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 import org.unbescape.javascript.JavaScriptEscape;
 
+import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
-import io.onedev.server.web.util.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 
 public abstract class InfiniteScrollBehavior extends AbstractPostAjaxBehavior {
 

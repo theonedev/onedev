@@ -8,11 +8,11 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.avatarupload.AvatarFileSelected;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
-import io.onedev.server.web.util.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
 public class AvatarEditPage extends ProjectSettingPage {

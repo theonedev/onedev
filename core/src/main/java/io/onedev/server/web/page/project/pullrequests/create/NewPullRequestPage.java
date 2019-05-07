@@ -62,9 +62,10 @@ import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.branch.picker.AffinalBranchPicker;
-import io.onedev.server.web.component.build.status.PullRequestBuildsPanel;
+import io.onedev.server.web.component.build.status.PullRequestBuildStatusListPanel;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
@@ -82,7 +83,6 @@ import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPa
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
-import io.onedev.server.web.util.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 
 @SuppressWarnings("serial")
 public class NewPullRequestPage extends ProjectPage implements CommentSupport {
@@ -634,7 +634,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		
 		form.add(new ReviewListPanel("reviewers", requestModel));
 
-		form.add(new PullRequestBuildsPanel("builds", requestModel));
+		form.add(new PullRequestBuildStatusListPanel("builds", requestModel));
 		
 		return fragment;
 	}

@@ -16,6 +16,7 @@ import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
+import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
@@ -151,14 +152,14 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 					long buildNumber = Long.parseLong(term);
 					criteria.add(Restrictions.eq("number", buildNumber));
 				} catch (NumberFormatException e) {
-					criteria.add(Restrictions.ilike("version", "%#" + term + "%"));
+					criteria.add(Restrictions.ilike("version", "#" + term, MatchMode.ANYWHERE));
 				}
 			} else {
 				try {
 					long buildNumber = Long.parseLong(term);
 					criteria.add(Restrictions.eq("number", buildNumber));
 				} catch (NumberFormatException e) {
-					criteria.add(Restrictions.ilike("version", "%" + term + "%"));
+					criteria.add(Restrictions.ilike("version", term, MatchMode.ANYWHERE));
 				}
 			}
 		}

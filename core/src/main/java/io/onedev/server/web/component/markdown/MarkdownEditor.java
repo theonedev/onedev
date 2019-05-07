@@ -49,18 +49,19 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.markdown.MarkdownManager;
+import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.markdown.emoji.EmojiOnes;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.util.userident.UserIdent;
-import io.onedev.server.web.util.avatar.AvatarManager;
 
 @SuppressWarnings("serial")
 public class MarkdownEditor extends FormComponentPanel<String> {
@@ -321,6 +322,20 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 								referenceMap.put("referenceNumber", String.valueOf(request.getNumber()));
 								referenceMap.put("referenceTitle", request.getTitle());
 								referenceMap.put("searchKey", request.getNumber() + " " + StringUtils.deleteWhitespace(request.getTitle()));
+								referenceList.add(referenceMap);
+							}
+						}
+						if (StringUtils.isBlank(referenceQueryType) || "build".equals(referenceQueryType)) {
+							for (Build build: getReferenceSupport().findBuilds(referenceProject, referenceQuery, ATWHO_LIMIT)) {
+								Map<String, String> referenceMap = new HashMap<>();
+								referenceMap.put("referenceType", "build");
+								referenceMap.put("referenceNumber", String.valueOf(build.getNumber()));
+								
+								String title = build.getJobName();
+								if (build.getVersion() != null)
+									title += " : " + build.getVersion();
+								referenceMap.put("referenceTitle", title);
+								referenceMap.put("searchKey", build.getNumber() + " " + StringUtils.deleteWhitespace(title));
 								referenceList.add(referenceMap);
 							}
 						}

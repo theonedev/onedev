@@ -58,9 +58,9 @@ import io.onedev.server.web.component.milestone.closelink.MilestoneCloseLink;
 import io.onedev.server.web.component.milestone.deletelink.MilestoneDeleteLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.ConfirmOnClick;
-import io.onedev.server.web.util.model.EntityModel;
 
 @SuppressWarnings("serial")
 public class IssueBoardsPage extends ProjectIssuesPage {

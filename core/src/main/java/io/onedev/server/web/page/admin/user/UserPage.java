@@ -25,8 +25,8 @@ import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
+import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.model.EntityModel;
 
 @SuppressWarnings("serial")
 public abstract class UserPage extends AdministrationPage {
