@@ -85,13 +85,16 @@ public class DefaultLogManager implements LogManager {
 		this.logNormalizers = logNormalizers;
 	}
 	
-	private File getLogFile(Long projectId, Long buildId) {
-		File buildDir = storageManager.getBuildDir(projectId, buildId);
+	private File getLogFile(Long projectId, Long buildNumber) {
+		File buildDir = storageManager.getBuildDir(projectId, buildNumber);
 		return new File(buildDir, LOG_FILE);
 	}
 	
 	@Override
-	public Logger getLogger(Long projectId, Long buildId, LogLevel loggerLevel) {
+	public Logger getLogger(Build build, LogLevel loggerLevel) {
+		Long projectId = build.getProject().getId();
+		Long buildId = build.getId();
+		Long buildNumber = build.getNumber();
 		return new JobLogger(loggerLevel) {
 			
 			private static final long serialVersionUID = 1L;
@@ -111,7 +114,7 @@ public class DefaultLogManager implements LogManager {
 					try {
 						LogSnippet snippet = recentSnippets.get(buildId);
 						if (snippet == null) {
-							File logFile = getLogFile(projectId, buildId);
+							File logFile = getLogFile(projectId, buildNumber);
 							if (!logFile.exists())	{
 								snippet = new LogSnippet();
 								recentSnippets.put(buildId, snippet);
@@ -120,7 +123,7 @@ public class DefaultLogManager implements LogManager {
 						if (snippet != null) {
 							snippet.entries.add(new LogEntry(new Date(), logLevel, message));
 							if (snippet.entries.size() > MAX_CACHE_ENTRIES) {
-								File logFile = getLogFile(projectId, buildId);
+								File logFile = getLogFile(projectId, buildNumber);
 								try (ObjectOutputStream oos = newOutputStream(logFile)) {
 									while (snippet.entries.size() > MIN_CACHE_ENTRIES) {
 										LogEntry entry = snippet.entries.remove(0);
@@ -257,7 +260,7 @@ public class DefaultLogManager implements LogManager {
 		Lock lock = LockUtils.getReadWriteLock(getLockKey(build.getId())).readLock();
 		lock.lock();
 		try {
-			File logFile = getLogFile(build.getProject().getId(), build.getId());
+			File logFile = getLogFile(build.getProject().getId(), build.getNumber());
 			LogSnippet snippet = recentSnippets.get(build.getId());
 			if (snippet != null) {
 				if (from >= snippet.offset) {
@@ -285,7 +288,7 @@ public class DefaultLogManager implements LogManager {
 		Lock lock = LockUtils.getReadWriteLock(getLockKey(build.getId())).readLock();
 		lock.lock();
 		try {
-			File logFile = getLogFile(build.getProject().getId(), build.getId());
+			File logFile = getLogFile(build.getProject().getId(), build.getNumber());
 			LogSnippet recentSnippet = recentSnippets.get(build.getId());
 			if (recentSnippet != null) {
 				LogSnippet snippet = new LogSnippet();
@@ -334,7 +337,7 @@ public class DefaultLogManager implements LogManager {
 		try {
 			LogSnippet snippet = recentSnippets.remove(build.getId());
 			if (snippet != null) {
-				File logFile = getLogFile(build.getProject().getId(), build.getId());
+				File logFile = getLogFile(build.getProject().getId(), build.getNumber());
 				try (ObjectOutputStream oos = newOutputStream(logFile)) {
 					for (LogEntry entry: snippet.entries)
 						oos.writeObject(entry);
@@ -368,7 +371,7 @@ public class DefaultLogManager implements LogManager {
 			lock = LockUtils.getReadWriteLock(getLockKey(build.getId())).readLock();
 			lock.lock();
 			try {
-				File logFile = getLogFile(build.getProject().getId(), build.getId());
+				File logFile = getLogFile(build.getProject().getId(), build.getNumber());
 				
 				if (logFile.exists())
 					ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)));

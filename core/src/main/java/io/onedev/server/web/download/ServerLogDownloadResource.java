@@ -1,4 +1,4 @@
-package io.onedev.server.web.stream;
+package io.onedev.server.web.download;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,7 @@ import io.onedev.server.security.SecurityUtils;
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
 
-public class ServerLogStreamResource extends AbstractResource {
+public class ServerLogDownloadResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 

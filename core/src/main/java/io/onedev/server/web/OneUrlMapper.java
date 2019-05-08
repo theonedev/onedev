@@ -10,6 +10,11 @@ import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
+import io.onedev.server.web.download.ArchiveDownloadResourceReference;
+import io.onedev.server.web.download.AttachmentDownloadResourceReference;
+import io.onedev.server.web.download.BuildLogDownloadResourceReference;
+import io.onedev.server.web.download.RawBlobDownloadResourceReference;
+import io.onedev.server.web.download.ServerLogDownloadResourceReference;
 import io.onedev.server.web.mapper.OnePageMapper;
 import io.onedev.server.web.mapper.OneResourceMapper;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
@@ -58,8 +63,8 @@ import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
-import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.detail.FixingBuildsPage;
+import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.issues.list.IssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
@@ -88,11 +93,6 @@ import io.onedev.server.web.page.security.ForgetPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
 import io.onedev.server.web.page.security.RegisterPage;
-import io.onedev.server.web.stream.ArchiveStreamResourceReference;
-import io.onedev.server.web.stream.AttachmentStreamResourceReference;
-import io.onedev.server.web.stream.BuildLogStreamResourceReference;
-import io.onedev.server.web.stream.RawBlobStreamResourceReference;
-import io.onedev.server.web.stream.ServerLogStreamResourceReference;
 
 public class OneUrlMapper extends CompoundRequestMapper {
 
@@ -115,13 +115,11 @@ public class OneUrlMapper extends CompoundRequestMapper {
 	}
 
 	private void addResources() {
-		add(new ResourceMapper("server-log-stream", new ServerLogStreamResourceReference()));
-		add(new ResourceMapper("projects/${project}/archive/${revision}", new ArchiveStreamResourceReference()));
-		add(new ResourceMapper("projects/${project}/builds/${build}/log-stream", new BuildLogStreamResourceReference()));
-		
-		add(new OneResourceMapper("projects/${project}/raw/${revision}/${path}", new RawBlobStreamResourceReference()));
-		add(new ResourceMapper("projects/${project}/attachment/${uuid}/${attachment}", 
-				new AttachmentStreamResourceReference()));
+		add(new ResourceMapper("downloads/server-log", new ServerLogDownloadResourceReference()));
+		add(new ResourceMapper("downloads/projects/${project}/builds/${build}/log", new BuildLogDownloadResourceReference()));
+		add(new ResourceMapper("projects/${project}/archive/${revision}", new ArchiveDownloadResourceReference()));
+		add(new OneResourceMapper("projects/${project}/raw/${revision}/${path}", new RawBlobDownloadResourceReference()));
+		add(new ResourceMapper("projects/${project}/attachment/${uuid}/${attachment}", new AttachmentDownloadResourceReference()));
 	}
 	
 	private void addSecurityPages() {

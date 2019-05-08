@@ -34,10 +34,10 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
+import io.onedev.server.web.download.RawBlobDownloadResource;
+import io.onedev.server.web.download.RawBlobDownloadResourceReference;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
-import io.onedev.server.web.stream.RawBlobStreamResource;
-import io.onedev.server.web.stream.RawBlobStreamResourceReference;
 
 @SuppressWarnings("serial")
 public abstract class BlobViewPanel extends Panel {
@@ -199,8 +199,8 @@ public abstract class BlobViewPanel extends Panel {
 		
 		add(newOptions("options"));
 		
-		add(new ResourceLink<Void>("raw", new RawBlobStreamResourceReference(), 
-				RawBlobStreamResource.paramsOf(context.getProject(), context.getBlobIdent())));
+		add(new ResourceLink<Void>("raw", new RawBlobDownloadResourceReference(), 
+				RawBlobDownloadResource.paramsOf(context.getProject(), context.getBlobIdent())));
 		add(new CheckBox("viewPlain", Model.of(context.getMode() == Mode.VIEW_PLAIN)) {
 			
 			@Override

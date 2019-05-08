@@ -4,10 +4,10 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.image.Image;
 
+import io.onedev.server.web.download.RawBlobDownloadResource;
+import io.onedev.server.web.download.RawBlobDownloadResourceReference;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
-import io.onedev.server.web.stream.RawBlobStreamResource;
-import io.onedev.server.web.stream.RawBlobStreamResourceReference;
 
 @SuppressWarnings("serial")
 public class ImageViewPanel extends BlobViewPanel {
@@ -20,8 +20,8 @@ public class ImageViewPanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new Image("img", new RawBlobStreamResourceReference(), 
-				RawBlobStreamResource.paramsOf(context.getProject(), context.getBlobIdent())));
+		add(new Image("img", new RawBlobDownloadResourceReference(), 
+				RawBlobDownloadResource.paramsOf(context.getProject(), context.getBlobIdent())));
 	}
 
 	@Override

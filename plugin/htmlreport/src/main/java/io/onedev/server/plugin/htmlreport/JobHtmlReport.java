@@ -2,7 +2,8 @@ package io.onedev.server.plugin.htmlreport;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.SerializationUtils;
@@ -20,9 +21,9 @@ public class JobHtmlReport extends JobOutcome {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String DIR = "html";
+	public static final String DIR = "html-reports";
 	
-	public static final String INFO = "$onedev-htmlreport-info$";
+	public static final String START_PAGES = "$onedev-htmlreport-startpages$";
 
 	private String reportName;
 	
@@ -59,14 +60,14 @@ public class JobHtmlReport extends JobOutcome {
 			public Void call() throws Exception {
 				File startPage = new File(workspace, getStartPage()); 
 				if (startPage.exists()) {
-					ArrayList<HtmlReportInfo> infos;
-					File infoFile = new File(outcomeDir, INFO);
-					if (infoFile.exists()) 
-						infos = SerializationUtils.deserialize(FileUtils.readFileToByteArray(infoFile));
+					HashMap<String, String> startPages;
+					File startPagesFile = new File(outcomeDir, START_PAGES);
+					if (startPagesFile.exists()) 
+						startPages = SerializationUtils.deserialize(FileUtils.readFileToByteArray(startPagesFile));
 					else
-						infos = new ArrayList<>();
-					infos.add(new HtmlReportInfo(getReportName(), getStartPage()));
-					FileUtils.writeByteArrayToFile(infoFile, SerializationUtils.serialize(infos));
+						startPages = new LinkedHashMap<>();
+					startPages.put(getReportName(), getStartPage());
+					FileUtils.writeByteArrayToFile(startPagesFile, SerializationUtils.serialize(startPages));
 					
 					int baseLen = workspace.getAbsolutePath().length() + 1;
 					for (File file: getPatternSet().listFiles(workspace)) {

@@ -1,4 +1,4 @@
-package io.onedev.server.web.stream;
+package io.onedev.server.web.download;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -24,7 +24,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 
-public class ArchiveStreamResource extends AbstractResource {
+public class ArchiveDownloadResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 

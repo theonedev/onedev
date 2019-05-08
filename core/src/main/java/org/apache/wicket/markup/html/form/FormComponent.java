@@ -469,8 +469,6 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	public FormComponent(final String id, IModel<T> model)
 	{
 		super(id, model);
-		if (model != null)
-			setConvertedInput(model.getObject());
 		// the form decides whether form components are versioned or not
 		// see Form.setVersioned
 		setVersioned(false);

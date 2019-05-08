@@ -65,7 +65,7 @@ public abstract class BuildDetailPage extends ProjectPage {
 	
 	protected final IModel<Build> buildModel;
 	
-	final QueryPosition position;
+	private final QueryPosition position;
 	
 	public BuildDetailPage(PageParameters params) {
 		super(params);
@@ -86,8 +86,13 @@ public abstract class BuildDetailPage extends ProjectPage {
 		position = QueryPosition.from(params);
 	}
 	
-	protected Build getBuild() {
+	public Build getBuild() {
 		return buildModel.getObject();
+	}
+	
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canReadCode(getProject().getFacade());
 	}
 	
 	private WebSocketObserver newBuildObserver(Long buildId) {

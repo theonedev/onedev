@@ -9,7 +9,7 @@ import io.onedev.server.model.Build;
 
 public interface LogManager {
 	
-	Logger getLogger(Long projectId, Long buildId, LogLevel logLevel);
+	Logger getLogger(Build build, LogLevel logLevel);
 	
 	/**
 	 * Read specified number of log entries from specified build, starting from specified index 

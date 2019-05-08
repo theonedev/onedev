@@ -161,8 +161,8 @@ public class DefaultStorageManager implements StorageManager {
 	}
 	
 	@Override
-	public File getBuildDir(Long projectId, Long buildId) {
-		File buildDir = new File(getBuildsDir(projectId), String.valueOf(buildId));
+	public File getBuildDir(Long projectId, Long buildNumber) {
+		File buildDir = new File(getBuildsDir(projectId), String.valueOf(buildNumber));
 		FileUtils.createDir(buildDir);
 		return buildDir;
 	}

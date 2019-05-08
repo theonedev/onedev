@@ -18,6 +18,7 @@ import io.onedev.server.ci.job.JobOutcome;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.OnePageMapper;
+import io.onedev.server.web.mapper.OneResourceMapper;
 import io.onedev.server.web.page.project.builds.detail.BuildTab;
 import io.onedev.server.web.page.project.builds.detail.BuildTabContribution;
 
@@ -74,6 +75,8 @@ public class ArtifactModule extends AbstractPluginModule {
 			@Override
 			public void configure(WebApplication application) {
 				application.mount(new OnePageMapper("projects/${project}/builds/${build}/artifacts", BuildArtifactsPage.class));
+				application.mount(new OneResourceMapper("downloads/projects/${project}/builds/${build}/artifacts/${path}", 
+						new ArtifactDownloadResourceReference()));
 			}
 			
 		});

@@ -47,7 +47,7 @@ public abstract class JobOutcome implements Serializable {
 	
 	public static File getOutcomeDir(Build build, String outcomeDir) {
 		File buildDir = OneDev.getInstance(StorageManager.class)
-				.getBuildDir(build.getProject().getId(), build.getId());
+				.getBuildDir(build.getProject().getId(), build.getNumber());
 		return new File(buildDir, outcomeDir);
 	}
 	

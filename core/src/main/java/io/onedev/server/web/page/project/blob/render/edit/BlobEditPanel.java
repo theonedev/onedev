@@ -1,10 +1,9 @@
 package io.onedev.server.web.page.project.blob.render.edit;
 
-import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.AjaxCallListener;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
-import org.apache.wicket.ajax.attributes.IAjaxCallListener;
 import org.apache.wicket.ajax.markup.html.form.AjaxSubmitLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
@@ -116,54 +115,8 @@ public abstract class BlobEditPanel extends Panel {
 					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 						super.updateAjaxAttributes(attributes);
 						
-						attributes.getAjaxCallListeners().add(new IAjaxCallListener() {
-							
-							@Override
-							public CharSequence getSuccessHandler(Component component) {
-								return null;
-							}
-							
-							@Override
-							public CharSequence getPrecondition(Component component) {
-								return null;
-							}
-							
-							@Override
-							public CharSequence getInitHandler(Component component) {
-								return null;
-							}
-							
-							@Override
-							public CharSequence getFailureHandler(Component component) {
-								return null;
-							}
-							
-							@Override
-							public CharSequence getDoneHandler(Component component) {
-								return null;
-							}
-							
-							@Override
-							public CharSequence getCompleteHandler(Component component) {
-								return null;
-							}
-							
-							@Override
-							public CharSequence getBeforeSendHandler(Component component) {
-								return null;
-							}
-							
-							@Override
-							public CharSequence getBeforeHandler(Component component) {
-								return "$('.blob-submit-aware').trigger('beforeSubmit');";
-							}
-							
-							@Override
-							public CharSequence getAfterHandler(Component component) {
-								return null;
-							}
-							
-						});
+						attributes.getAjaxCallListeners().add(new AjaxCallListener()
+								.onBefore("$('.blob-submit-aware').trigger('beforeSubmit');"));
 					}
 					
 				};

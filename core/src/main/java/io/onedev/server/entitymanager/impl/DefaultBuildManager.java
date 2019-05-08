@@ -84,7 +84,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
     	query.setParameter("build", build);
     	query.executeUpdate();
     	
-		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getId()));
+		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getNumber()));
     	super.delete(build);
 		listenerRegistry.post(new BuildDeleted(userManager.getCurrent(), build));
 	}
@@ -257,6 +257,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Listen
 	public void on(BuildSubmitted event) {
 		Build build = event.getBuild();
-		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getId()));
+		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getNumber()));
 	}
 }

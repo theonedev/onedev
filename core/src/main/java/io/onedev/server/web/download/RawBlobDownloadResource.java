@@ -1,4 +1,4 @@
-package io.onedev.server.web.stream;
+package io.onedev.server.web.download;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -28,11 +28,11 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 
-public class RawBlobStreamResource extends AbstractResource {
+public class RawBlobDownloadResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 
-	private static final String PARAM_DEPOT = "project";
+	private static final String PARAM_PROJECT = "project";
 
 	private static final String PARAM_REVISION = "revision";
 
@@ -44,7 +44,7 @@ public class RawBlobStreamResource extends AbstractResource {
 	protected ResourceResponse newResourceResponse(Attributes attributes) {
 		PageParameters params = attributes.getParameters();
 
-		String projectName = params.get(PARAM_DEPOT).toString();
+		String projectName = params.get(PARAM_PROJECT).toString();
 		if (StringUtils.isBlank(projectName))
 			throw new IllegalArgumentException("project name has to be specified");
 
@@ -152,7 +152,7 @@ public class RawBlobStreamResource extends AbstractResource {
 
 	public static PageParameters paramsOf(Project project, BlobIdent blobIdent) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_DEPOT, project.getName());
+		params.set(PARAM_PROJECT, project.getName());
 		params.set(PARAM_REVISION, blobIdent.revision);
 		params.set(PARAM_PATH, blobIdent.path);
 

@@ -276,7 +276,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							else 
 								snapshot = null;
 							
-							Logger logger = logManager.getLogger(build.getProject().getId(), build.getId(), job.getLogLevel()); 
+							Logger logger = logManager.getLogger(build, job.getLogLevel()); 
 							
 							Long buildId = build.getId();
 							JobExecution execution = new JobExecution(executorService.submit(new Runnable() {

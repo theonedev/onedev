@@ -47,6 +47,6 @@ public interface StorageManager {
      * 			directory store build related files such as logs, artifacts and reports. The directory 
      * 			will be exist after calling this method
      */
-    File getBuildDir(Long projectId, Long buildId);
+    File getBuildDir(Long projectId, Long buildNumber);
     
 }

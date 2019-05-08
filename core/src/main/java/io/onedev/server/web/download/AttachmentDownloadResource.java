@@ -1,4 +1,4 @@
-package io.onedev.server.web.stream;
+package io.onedev.server.web.download;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,7 +21,7 @@ import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.util.facade.ProjectFacade;
 
-public class AttachmentStreamResource extends AbstractResource {
+public class AttachmentDownloadResource extends AbstractResource {
 
 	private static final long serialVersionUID = 1L;
 

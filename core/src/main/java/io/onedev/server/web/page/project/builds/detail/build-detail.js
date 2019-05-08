@@ -7,10 +7,10 @@ onedev.server.buildDetail = {
     },
     onLogDomReady: function() {
         var $log = $("#build-detail>.main>div>.build-log");
-        function calcLogHeight() {
+        function setLogHeight() {
             $log.height($(window).height() - $log.offset().top - 40);
         }
-        $(window).resize(calcLogHeight);
-        calcLogHeight();
+        $(window).resize(setLogHeight);
+        setLogHeight();
     }
 }
