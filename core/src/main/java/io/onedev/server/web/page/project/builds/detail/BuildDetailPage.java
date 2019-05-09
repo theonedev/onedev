@@ -324,8 +324,7 @@ public abstract class BuildDetailPage extends ProjectPage {
 
 							@Override
 							public void navTo(AjaxRequestTarget target, Build entity, QueryPosition position) {
-								PageParameters params = BuildDetailPage.paramsOf(entity, position);
-								setResponsePage(getPageClass(), params);
+								BuildDetailPage.this.navTo(target, entity, position);
 							}
 							
 						};
@@ -380,6 +379,11 @@ public abstract class BuildDetailPage extends ProjectPage {
 		if (position != null)
 			position.fill(params);
 		return params;
+	}
+	
+	protected void navTo(AjaxRequestTarget target, Build entity, QueryPosition position) {
+		PageParameters params = BuildDetailPage.paramsOf(entity, position);
+		setResponsePage(getPageClass(), params);
 	}
 	
 }

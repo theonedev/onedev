@@ -58,130 +58,134 @@ public class BuildArtifactsPage extends BuildDetailPage {
 	public void onInitialize() {
 		super.onInitialize();
 		
-		List<IColumn<File, Void>> columns = new ArrayList<>();
-		
-		columns.add(new TreeColumn<File, Void>(Model.of("Name")));
-		columns.add(new AbstractColumn<File, Void>(Model.of("Size")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<File>> cellItem, String componentId, IModel<File> rowModel) {
-				File file = rowModel.getObject();
-				if (file.isDirectory())
-					cellItem.add(new Label(componentId, ""));
-				else
-					cellItem.add(new Label(componentId, FileUtils.byteCountToDisplaySize(file.length())));
-			}
+		if (getArtifactsDir().exists()) {
+			List<IColumn<File, Void>> columns = new ArrayList<>();
 			
-		});
-		columns.add(new AbstractColumn<File, Void>(Model.of("Last Modified")) {
+			columns.add(new TreeColumn<File, Void>(Model.of("Name")));
+			columns.add(new AbstractColumn<File, Void>(Model.of("Size")) {
 
-			@Override
-			public void populateItem(Item<ICellPopulator<File>> cellItem, String componentId, IModel<File> rowModel) {
-				File file = rowModel.getObject();
-				cellItem.add(new Label(componentId, DateUtils.formatAge(new Date(file.lastModified()))));
-			}
-			
-		});
-		
-		ITreeProvider<File> dataProvider = new ITreeProvider<File>() {
-
-			@Override
-			public void detach() {
-			}
-
-			@Override
-			public Iterator<? extends File> getChildren(File node) {
-				List<File> dirs = new ArrayList<File>(Arrays.asList(node.listFiles(new FileFilter() {
-
-					@Override
-					public boolean accept(File pathname) {
-						return pathname.isDirectory();
-					}
-					
-				})));
-				dirs.sort(Comparator.comparing(File::getName));
-
-				List<File> files = new ArrayList<File>(Arrays.asList(node.listFiles(new FileFilter() {
-
-					@Override
-					public boolean accept(File pathname) {
-						return pathname.isFile();
-					}
-					
-				})));
-				files.sort(Comparator.comparing(File::getName));
+				@Override
+				public void populateItem(Item<ICellPopulator<File>> cellItem, String componentId, IModel<File> rowModel) {
+					File file = rowModel.getObject();
+					if (file.isDirectory())
+						cellItem.add(new Label(componentId, ""));
+					else
+						cellItem.add(new Label(componentId, FileUtils.byteCountToDisplaySize(file.length())));
+				}
 				
-				List<File> children = new ArrayList<>();
-				children.addAll(dirs);
-				children.addAll(files);
+			});
+			columns.add(new AbstractColumn<File, Void>(Model.of("Last Modified")) {
+
+				@Override
+				public void populateItem(Item<ICellPopulator<File>> cellItem, String componentId, IModel<File> rowModel) {
+					File file = rowModel.getObject();
+					cellItem.add(new Label(componentId, DateUtils.formatAge(new Date(file.lastModified()))));
+				}
 				
-				return children.iterator();
-			}
+			});
 			
-			@Override
-			public Iterator<? extends File> getRoots() {
-				return getChildren(getArtifactsDir());
-			}
+			ITreeProvider<File> dataProvider = new ITreeProvider<File>() {
 
-			@Override
-			public boolean hasChildren(File node) {
-				return node.isDirectory() && node.listFiles().length != 0;
-			}
+				@Override
+				public void detach() {
+				}
 
-			@Override
-			public IModel<File> model(File object) {
-				return Model.of(object);
-			}
-			
-		};
-		
-		add(new TableTree<File, Void>("artifacts", columns, dataProvider, Integer.MAX_VALUE) {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-			    getTable().addTopToolbar(new HeadersToolbar<Void>(getTable(), null));
-			    getTable().addBottomToolbar(new NoRecordsToolbar(getTable()));		
-			    add(new HumanTheme());
-			}
-
-			@Override
-			protected Item<File> newRowItem(String id, int index, IModel<File> model) {
-				return new OddEvenItem<File>(id, index, model);
-			}
-
-			@Override
-			protected Component newContentComponent(String id, IModel<File> model) {
-				Fragment fragment = new Fragment(id, "contentFrag", BuildArtifactsPage.this);
-				File file = model.getObject();
-				WebMarkupContainer link;
-				if (file.isDirectory()) {
-					link = new AjaxLink<Void>("link") {
+				@Override
+				public Iterator<? extends File> getChildren(File node) {
+					List<File> dirs = new ArrayList<File>(Arrays.asList(node.listFiles(new FileFilter() {
 
 						@Override
-						public void onClick(AjaxRequestTarget target) {
-							if (getState(file) == State.EXPANDED)
-								collapse(file);
-							else
-								expand(file);
+						public boolean accept(File pathname) {
+							return pathname.isDirectory();
 						}
 						
-					};
-					link.add(AttributeAppender.append("class", "folder"));
-				} else {
-					String artifactPath = getArtifactsDir().toURI().relativize(file.toURI()).getPath();
-					PageParameters params = ArtifactDownloadResource.paramsOf(
-							getBuild().getProject(), getBuild().getNumber(), artifactPath); 
-					link = new ResourceLink<Void>("link", new ArtifactDownloadResourceReference(), params);
-					link.add(AttributeAppender.append("class", "file"));
+					})));
+					dirs.sort(Comparator.comparing(File::getName));
+
+					List<File> files = new ArrayList<File>(Arrays.asList(node.listFiles(new FileFilter() {
+
+						@Override
+						public boolean accept(File pathname) {
+							return pathname.isFile();
+						}
+						
+					})));
+					files.sort(Comparator.comparing(File::getName));
+					
+					List<File> children = new ArrayList<>();
+					children.addAll(dirs);
+					children.addAll(files);
+					
+					return children.iterator();
 				}
-				link.add(new Label("label", file.getName()));
-				fragment.add(link);
 				
-				return fragment;
-			}
+				@Override
+				public Iterator<? extends File> getRoots() {
+					return getChildren(getArtifactsDir());
+				}
+
+				@Override
+				public boolean hasChildren(File node) {
+					return node.isDirectory() && node.listFiles().length != 0;
+				}
+
+				@Override
+				public IModel<File> model(File object) {
+					return Model.of(object);
+				}
+				
+			};
 			
-		});
+			add(new TableTree<File, Void>("artifacts", columns, dataProvider, Integer.MAX_VALUE) {
+
+				@Override
+				protected void onInitialize() {
+					super.onInitialize();
+				    getTable().addTopToolbar(new HeadersToolbar<Void>(getTable(), null));
+				    getTable().addBottomToolbar(new NoRecordsToolbar(getTable()));		
+				    add(new HumanTheme());
+				}
+
+				@Override
+				protected Item<File> newRowItem(String id, int index, IModel<File> model) {
+					return new OddEvenItem<File>(id, index, model);
+				}
+
+				@Override
+				protected Component newContentComponent(String id, IModel<File> model) {
+					Fragment fragment = new Fragment(id, "contentFrag", BuildArtifactsPage.this);
+					File file = model.getObject();
+					WebMarkupContainer link;
+					if (file.isDirectory()) {
+						link = new AjaxLink<Void>("link") {
+
+							@Override
+							public void onClick(AjaxRequestTarget target) {
+								if (getState(file) == State.EXPANDED)
+									collapse(file);
+								else
+									expand(file);
+							}
+							
+						};
+						link.add(AttributeAppender.append("class", "folder"));
+					} else {
+						String artifactPath = getArtifactsDir().toURI().relativize(file.toURI()).getPath();
+						PageParameters params = ArtifactDownloadResource.paramsOf(
+								getBuild().getProject(), getBuild().getNumber(), artifactPath); 
+						link = new ResourceLink<Void>("link", new ArtifactDownloadResourceReference(), params);
+						link.add(AttributeAppender.append("class", "file"));
+					}
+					link.add(new Label("label", file.getName()));
+					fragment.add(link);
+					
+					return fragment;
+				}
+				
+			});
+		} else {
+			add(new Label("artifacts", "No artifacts published").add(AttributeAppender.append("class", "alert alert-warning")));
+		}
 	}
 
 	private File getArtifactsDir() {

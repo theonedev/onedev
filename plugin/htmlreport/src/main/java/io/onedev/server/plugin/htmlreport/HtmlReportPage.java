@@ -8,17 +8,19 @@ import java.util.concurrent.Callable;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.OneException;
 import io.onedev.server.ci.job.JobOutcome;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
@@ -72,7 +74,15 @@ public class HtmlReportPage extends BuildDetailPage {
 
 			}.add(AttributeAppender.append("src", startPageUrl.toString())));
 		} else {
-			throw new OneException("Unable to find html report: " + reportName);
+			add(new Label("htmlReport", "No html report published: " + reportName) {
+
+				@Override
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					tag.setName("div");
+				}
+				
+			}.add(AttributeAppender.append("class", "alert alert-warning")));
 		}
 	}
 
@@ -83,6 +93,13 @@ public class HtmlReportPage extends BuildDetailPage {
 	
 	public String getReportName() {
 		return reportName;
+	}
+
+	@Override
+	protected void navTo(AjaxRequestTarget target, Build entity, QueryPosition position) {
+		PageParameters params = BuildDetailPage.paramsOf(entity, position);
+		params.add(PARAM_REPORT, getReportName());
+		setResponsePage(getPageClass(), params);
 	}
 
 	public static PageParameters paramsOf(Build build, @Nullable QueryPosition position, String reportName) {
