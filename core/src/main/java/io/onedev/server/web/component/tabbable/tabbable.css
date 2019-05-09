@@ -9,6 +9,13 @@ li.collapsed {
         display: none;
     }
 }
+ul.nav-tabs.collapsed>li.collapsed {
+    display: block;
+}
+ul.nav-tabs.collapsed>li.expanded {
+    display: none;
+}
+
 li.collapsed>a.multiple {
     cursor: pointer !important;
 }

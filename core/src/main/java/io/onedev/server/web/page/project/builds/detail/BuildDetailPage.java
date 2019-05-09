@@ -63,6 +63,8 @@ public abstract class BuildDetailPage extends ProjectPage {
 
 	public static final String PARAM_BUILD = "build";
 	
+	private static final int MAX_TABS_BEFORE_COLLAPSE = 10;
+	
 	protected final IModel<Build> buildModel;
 	
 	private final QueryPosition position;
@@ -307,7 +309,16 @@ public abstract class BuildDetailPage extends ProjectPage {
 				return tabs;
 			}
 			
-		}).add(newBuildObserver(getBuild().getId())).setOutputMarkupId(true));
+		}, MAX_TABS_BEFORE_COLLAPSE) {
+
+			@Override
+			public void onInitialize() {
+				super.onInitialize();
+				add(newBuildObserver(getBuild().getId()));
+				setOutputMarkupId(true);
+			}
+			
+		});
 		
 		add(new SideInfoPanel("side") {
 

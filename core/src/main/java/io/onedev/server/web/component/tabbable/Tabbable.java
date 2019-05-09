@@ -30,13 +30,24 @@ public class Tabbable extends GenericPanel<List<? extends Tab>> {
 	
 	private static final String OPTIONS_ID = "options";
 	
-	public Tabbable(String id, IModel<List<? extends Tab>> tabsModel) {
+	private final int maxTabsBeforeCollapse;
+	
+	public Tabbable(String id, IModel<List<? extends Tab>> tabsModel, int maxTabsBeforeCollapse) {
 		super(id, tabsModel);
+		this.maxTabsBeforeCollapse = maxTabsBeforeCollapse;
 	}
 
+	public Tabbable(String id, IModel<List<? extends Tab>> tabsModel) {
+		this(id, tabsModel, Integer.MAX_VALUE);
+	}
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Tabbable(String id, List<? extends Tab> tabs, int maxTabsBeforeCollapse) {
+		this(id, new Model((Serializable) tabs), maxTabsBeforeCollapse);
+	}
+	
 	public Tabbable(String id, List<? extends Tab> tabs) {
-		this(id, new Model((Serializable) tabs));
+		this(id, tabs, Integer.MAX_VALUE);
 	}
 	
 	@Override
@@ -150,6 +161,9 @@ public class Tabbable extends GenericPanel<List<? extends Tab>> {
 		}
 		if (!found)
 			addOrReplace(new WebMarkupContainer(OPTIONS_ID).setVisible(false));
+		
+		if (getTabs().size() > maxTabsBeforeCollapse)
+			add(AttributeAppender.append("class", "collapsed"));
 		
 		super.onBeforeRender();
 	}
