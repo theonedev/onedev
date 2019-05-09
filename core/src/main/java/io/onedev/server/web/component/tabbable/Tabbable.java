@@ -1,7 +1,9 @@
 package io.onedev.server.web.component.tabbable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.Component;
@@ -15,30 +17,35 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.model.Model;
 
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 
 @SuppressWarnings("serial")
-public class Tabbable extends Panel {
+public class Tabbable extends GenericPanel<List<? extends Tab>> {
 	
 	private static final String OPTIONS_ID = "options";
 	
-	private final List<Tab> tabs;
-	
-	public Tabbable(String id, List<? extends Tab> tabs) {
-		super(id);
-		
-		this.tabs = new ArrayList<>();
-		for (Tab tab: tabs) {
-			this.tabs.add(tab);
-		}
+	public Tabbable(String id, IModel<List<? extends Tab>> tabsModel) {
+		super(id, tabsModel);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public Tabbable(String id, List<? extends Tab> tabs) {
+		this(id, new Model((Serializable) tabs));
+	}
+	
 	@Override
 	public void onComponentTagBody(MarkupStream markupStream, ComponentTag openTag) {
 		checkComponentTag(openTag, "ul");
+	}
+	
+	private List<? extends Tab> getTabs() {
+		return getModelObject();
 	}
 	
 	@Override
@@ -46,7 +53,7 @@ public class Tabbable extends Panel {
 		super.onInitialize();
 		
 		List<ActionTab> actionTabs = new ArrayList<>();
-		for (Tab tab: tabs) {
+		for (Tab tab: getTabs()) {
 			if (tab instanceof ActionTab)
 				actionTabs.add((ActionTab) tab);
 		}
@@ -62,7 +69,14 @@ public class Tabbable extends Panel {
 				actionTabs.get(0).setSelected(true);
 		}
 		
-		add(new ListView<Tab>("tabs", tabs){
+		add(new ListView<Tab>("tabs", new LoadableDetachableModel<List<Tab>>() {
+
+			@Override
+			protected List<Tab> load() {
+				return getTabs().stream().collect(Collectors.toList());
+			}
+			
+		}) {
 
 			@Override
 			protected void populateItem(ListItem<Tab> item) {
@@ -71,7 +85,7 @@ public class Tabbable extends Panel {
 					item.add(AttributeModifier.append("class", "active"));
 				if (item.getIndex() == 0)
 					item.add(AttributeModifier.append("class", "first"));
-				if (item.getIndex() == tabs.size()-1)
+				if (item.getIndex() == getTabs().size()-1)
 					item.add(AttributeModifier.append("class", "last"));
 
 				item.add(tab.render("tab"));
@@ -79,7 +93,7 @@ public class Tabbable extends Panel {
 			
 		});
 
-		if (tabs.size() > 1) {
+		if (getTabs().size() > 1) {
 			Fragment fragment = new Fragment("collapsed", "multiTabCollapsedFrag", this);
 			fragment.add(new DropdownLink("link") {
 
@@ -97,7 +111,7 @@ public class Tabbable extends Panel {
 				@Override
 				protected void onBeforeRender() {
 					boolean found = false;
-					for (Tab tab: tabs) {
+					for (Tab tab: getTabs()) {
 						if (tab.isSelected()) {
 							addOrReplace(new Label("label", tab.getTitle()));
 							found = true;
@@ -114,7 +128,7 @@ public class Tabbable extends Panel {
 			add(fragment);
 		} else {
 			Fragment fragment = new Fragment("collapsed", "singleTabCollapsedFrag", this);
-			fragment.add(new Label("label", tabs.iterator().next().getTitle()));
+			fragment.add(new Label("label", getTabs().iterator().next().getTitle()));
 			add(fragment);
 		}
 		
@@ -124,7 +138,7 @@ public class Tabbable extends Panel {
 	@Override
 	protected void onBeforeRender() {
 		boolean found = false;
-		for (Tab tab: tabs) {
+		for (Tab tab: getTabs()) {
 			if (tab.isSelected()) {
 				Component options = tab.renderOptions(OPTIONS_ID);
 				if (options != null) {
@@ -152,7 +166,14 @@ public class Tabbable extends Panel {
 		@Override
 		protected void onInitialize() {
 			super.onInitialize();
-			add(new ListView<Tab>("tabs", tabs){
+			add(new ListView<Tab>("tabs", new LoadableDetachableModel<List<Tab>>() {
+
+				@Override
+				protected List<Tab> load() {
+					return getTabs().stream().collect(Collectors.toList());
+				}
+				
+			}) {
 
 				@Override
 				protected void populateItem(ListItem<Tab> item) {

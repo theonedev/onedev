@@ -280,27 +280,34 @@ public abstract class BuildDetailPage extends ProjectPage {
 		
 		add(new WebMarkupContainer("copyCommitHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 
-		List<Tab> tabs = new ArrayList<>();
-
-		tabs.add(new BuildTab("Log", BuildLogPage.class) {
+		add(new Tabbable("buildTabs", new LoadableDetachableModel<List<? extends Tab>>() {
 
 			@Override
-			protected Component renderOptions(String componentId) {
-				BuildLogPage page = (BuildLogPage) getPage();
-				return page.renderOptions(componentId);
+			protected List<Tab> load() {
+				List<Tab> tabs = new ArrayList<>();
+
+				tabs.add(new BuildTab("Log", BuildLogPage.class) {
+
+					@Override
+					protected Component renderOptions(String componentId) {
+						BuildLogPage page = (BuildLogPage) getPage();
+						return page.renderOptions(componentId);
+					}
+					
+				});
+				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class));
+				tabs.add(new BuildTab("Changes", BuildChangesPage.class));
+				
+				List<BuildTabContribution> contributions = new ArrayList<>(OneDev.getExtensions(BuildTabContribution.class));
+				contributions.sort(Comparator.comparing(BuildTabContribution::getOrder));
+				
+				for (BuildTabContribution contribution: contributions)
+					tabs.addAll(contribution.getTabs(getBuild()));
+				
+				return tabs;
 			}
 			
-		});
-		tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class));
-		tabs.add(new BuildTab("Changes", BuildChangesPage.class));
-		
-		List<BuildTabContribution> contributions = new ArrayList<>(OneDev.getExtensions(BuildTabContribution.class));
-		contributions.sort(Comparator.comparing(BuildTabContribution::getOrder));
-		
-		for (BuildTabContribution contribution: contributions)
-			tabs.addAll(contribution.getTabs(getBuild()));
-		
-		add(new Tabbable("buildTabs", tabs).setOutputMarkupId(true));
+		}).add(newBuildObserver(getBuild().getId())).setOutputMarkupId(true));
 		
 		add(new SideInfoPanel("side") {
 
