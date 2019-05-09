@@ -144,11 +144,21 @@ public class BuildArtifactsPage extends BuildDetailPage {
 				    getTable().addTopToolbar(new HeadersToolbar<Void>(getTable(), null));
 				    getTable().addBottomToolbar(new NoRecordsToolbar(getTable()));		
 				    add(new HumanTheme());
+					expand(getArtifactsDir());
 				}
 
 				@Override
 				protected Item<File> newRowItem(String id, int index, IModel<File> model) {
 					return new OddEvenItem<File>(id, index, model);
+				}
+
+				@Override
+				public void expand(File file) {
+					super.expand(file);
+					
+					File[] children = file.listFiles();
+					if (children.length == 1 && children[0].isDirectory())
+						expand(children[0]);
 				}
 
 				@Override
