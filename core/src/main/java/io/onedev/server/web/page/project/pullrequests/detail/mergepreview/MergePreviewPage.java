@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.pullrequests.detail.mergepreview;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -18,21 +17,20 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
-import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.build.status.OverallStatusPanel;
+import io.onedev.server.web.component.build.status.CommitStatusPanel;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -115,14 +113,19 @@ public class MergePreviewPage extends PullRequestDetailPage {
 			fragment.add(hashLink);
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getMerged())));
 			fragment.add(new WebMarkupContainer("copyMergedCommit").add(new CopyClipboardBehavior(Model.of(preview.getMerged()))));
-			fragment.add(new OverallStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+			fragment.add(new CommitStatusPanel("buildStatus") {
 
 				@Override
-				protected List<Build> load() {
-					return OneDev.getInstance(BuildManager.class).query(getProject(), preview.getMerged());
+				protected Project getProject() {
+					return MergePreviewPage.this.getProject();
+				}
+
+				@Override
+				protected ObjectId getCommitId() {
+					return ObjectId.fromString(preview.getMerged());
 				}
 				
-			}));
+			});
 			fragment.add(new WebMarkupContainer("outDated") {
 
 				@Override

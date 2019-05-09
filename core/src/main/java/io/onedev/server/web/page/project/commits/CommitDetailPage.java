@@ -39,12 +39,10 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -55,7 +53,7 @@ import io.onedev.server.util.CommitMessageTransformer;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
-import io.onedev.server.web.component.build.status.OverallStatusPanel;
+import io.onedev.server.web.component.build.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
@@ -220,14 +218,19 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 
-		add(new OverallStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+		add(new CommitStatusPanel("buildStatus") {
 
 			@Override
-			protected List<Build> load() {
-				return OneDev.getInstance(BuildManager.class).query(getProject(), getCommit().name());
+			protected Project getProject() {
+				return CommitDetailPage.this.getProject();
+			}
+
+			@Override
+			protected ObjectId getCommitId() {
+				return CommitDetailPage.this.getCommit().copy();
 			}
 			
-		}));
+		});
 		
 		add(new Label("hash", GitUtils.abbreviateSHA(getCommit().name())));
 		add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(getCommit().name()))));

@@ -4,7 +4,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.server.event.pullrequest.PullRequestDeleted;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.web.util.WicketUtils;
@@ -21,10 +20,8 @@ public class PullRequestEventBroadcaster {
 
 	@Listen
 	public void on(PullRequestEvent event) {
-		if (!(event instanceof PullRequestDeleted)) {
-			PageKey sourcePageKey = WicketUtils.getPageKey();
-			webSocketManager.notifyObservableChange(PullRequest.getWebSocketObservable(event.getRequest().getId()), sourcePageKey);
-		}
+		PageKey sourcePageKey = WicketUtils.getPageKey();
+		webSocketManager.notifyObservableChange(PullRequest.getWebSocketObservable(event.getRequest().getId()), sourcePageKey);
 	}
 
 }

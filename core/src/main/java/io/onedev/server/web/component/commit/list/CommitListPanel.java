@@ -49,14 +49,11 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.git.command.RevListCommand;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.ProjectAndRevision;
 import io.onedev.server.search.commit.CommitCriteria;
@@ -68,7 +65,7 @@ import io.onedev.server.util.Constants;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.behavior.CommitQueryBehavior;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.build.status.OverallStatusPanel;
+import io.onedev.server.web.component.build.status.CommitStatusPanel;
 import io.onedev.server.web.component.commit.graph.CommitGraphResourceReference;
 import io.onedev.server.web.component.commit.graph.CommitGraphUtils;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
@@ -586,14 +583,19 @@ public abstract class CommitListPanel extends Panel {
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 			item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 			
-			item.add(new OverallStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+			item.add(new CommitStatusPanel("buildStatus") {
 
 				@Override
-				protected List<Build> load() {
-					return OneDev.getInstance(BuildManager.class).query(getProject(), commit.name());
+				protected Project getProject() {
+					return CommitListPanel.this.getProject();
+				}
+
+				@Override
+				protected ObjectId getCommitId() {
+					return commit.copy();
 				}
 				
-			}));
+			});
 
 			item.add(AttributeAppender.append("class", "commit clearfix"));
 		} else {

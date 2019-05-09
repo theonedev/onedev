@@ -34,9 +34,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQuerySettingManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.issue.IssueCommitted;
-import io.onedev.server.event.issue.IssueDeleted;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.model.Issue;
@@ -83,20 +81,16 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	
 	private final ProjectManager projectManager;
 	
-	private final UserManager userManager;
-
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldEntityManager issueFieldEntityManager, 
 			IssueQuerySettingManager issueQuerySettingManager, SettingManager settingManager, 
-			ListenerRegistry listenerRegistry, ProjectManager projectManager, 
-			UserManager userManager) {
+			ListenerRegistry listenerRegistry, ProjectManager projectManager) {
 		super(dao);
 		this.issueFieldEntityManager = issueFieldEntityManager;
 		this.issueQuerySettingManager = issueQuerySettingManager;
 		this.listenerRegistry = listenerRegistry;
 		this.settingManager = settingManager;
 		this.projectManager = projectManager;
-		this.userManager = userManager;
 	}
 
 	@Sessional
@@ -184,7 +178,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Transactional
 	@Listen
 	public void on(IssueEvent event) {
-		if (!(event instanceof IssueDeleted) && !(event instanceof IssueCommitted))
+		if (!(event instanceof IssueCommitted))
 			event.getIssue().setUpdateDate(event.getDate());
 	}
 	
@@ -480,10 +474,4 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 	}
 	
-	@Override
-	public void delete(Issue issue) {
-		super.delete(issue);
-		listenerRegistry.post(new IssueDeleted(userManager.getCurrent(), issue));
-	}
-
 }

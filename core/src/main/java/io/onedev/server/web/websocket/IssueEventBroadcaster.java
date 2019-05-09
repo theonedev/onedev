@@ -4,7 +4,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.server.event.issue.IssueDeleted;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.issue.BoardSpec;
@@ -22,8 +21,7 @@ public class IssueEventBroadcaster {
 
 	@Listen
 	public void on(IssueEvent event) {
-		if (!(event instanceof IssueDeleted))
-			webSocketManager.notifyObservableChange(Issue.getWebSocketObservable(event.getIssue().getId()), WicketUtils.getPageKey());
+		webSocketManager.notifyObservableChange(Issue.getWebSocketObservable(event.getIssue().getId()), WicketUtils.getPageKey());
 		if (event.affectsBoards())
 			webSocketManager.notifyObservableChange(BoardSpec.getWebSocketObservable(event.getIssue().getProject().getId()), null);
 	}

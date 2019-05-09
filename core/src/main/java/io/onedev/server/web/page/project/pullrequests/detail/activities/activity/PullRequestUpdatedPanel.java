@@ -15,26 +15,24 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.build.status.OverallStatusPanel;
+import io.onedev.server.web.component.build.status.CommitStatusPanel;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
@@ -87,14 +85,19 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				};
 				item.add(new CommitMessagePanel("message", projectModel, item.getModel()));
 
-				item.add(new OverallStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+				item.add(new CommitStatusPanel("buildStatus") {
 
 					@Override
-					protected List<Build> load() {
-						return OneDev.getInstance(BuildManager.class).query(projectModel.getObject(), commit.name());
+					protected Project getProject() {
+						return projectModel.getObject();
+					}
+
+					@Override
+					protected ObjectId getCommitId() {
+						return commit.copy();
 					}
 					
-				}));
+				});
 				
 				CommitDetailPage.State commitState = new CommitDetailPage.State();
 				commitState.revision = commit.name();

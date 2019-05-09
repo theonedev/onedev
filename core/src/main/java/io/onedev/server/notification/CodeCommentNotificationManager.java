@@ -10,7 +10,6 @@ import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
-import io.onedev.server.event.codecomment.CodeCommentDeleted;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.codecomment.CodeCommentReplied;
 import io.onedev.server.model.User;
@@ -37,7 +36,7 @@ public class CodeCommentNotificationManager {
 	@Transactional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		if (event.getRequest() == null && !(event instanceof CodeCommentDeleted)) {
+		if (event.getRequest() == null) {
 			MarkdownAware markdownAware = (MarkdownAware) event;
 			String markdown = markdownAware.getMarkdown();
 			String rendered = markdownManager.render(markdown);

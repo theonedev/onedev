@@ -29,25 +29,23 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTag;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.build.status.OverallStatusPanel;
+import io.onedev.server.web.component.build.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
@@ -289,14 +287,19 @@ public class ProjectTagsPage extends ProjectPage {
 				item.add(link);
 				
 				String tagCommitHash = ref.getPeeledObj().name();
-				item.add(new OverallStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+				item.add(new CommitStatusPanel("buildStatus") {
 
 					@Override
-					protected List<Build> load() {
-						return OneDev.getInstance(BuildManager.class).query(getProject(), tagCommitHash);
+					protected Project getProject() {
+						return ProjectTagsPage.this.getProject();
+					}
+
+					@Override
+					protected ObjectId getCommitId() {
+						return ObjectId.fromString(tagCommitHash);
 					}
 					
-				}));
+				});
 
 				if (ref.getObj() instanceof RevTag) {
 					RevTag revTag = (RevTag) ref.getObj();

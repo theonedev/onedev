@@ -73,7 +73,6 @@ import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
-import io.onedev.server.event.pullrequest.PullRequestDeleted;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
@@ -615,8 +614,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Listen
 	public void on(PullRequestEvent event) {
-		if (!(event instanceof PullRequestDeleted) && !(event instanceof PullRequestMergePreviewCalculated)
-				&& !(event instanceof PullRequestBuildEvent))
+		if (!(event instanceof PullRequestMergePreviewCalculated) && !(event instanceof PullRequestBuildEvent))
 			event.getRequest().setUpdateDate(event.getDate());
 	}
 	
@@ -632,32 +630,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Build build = event.getBuild();
 		for (PullRequest request: queryOpenByCommit(build.getCommitHash())) { 
 			listenerRegistry.post(new PullRequestBuildEvent(request, build));
-			if (build.isFinished())
-				checkAsync(request);
+			checkAsync(request);
 		}
 	}
 	
 	@Listen
 	public void on(PullRequestMergePreviewCalculated event) {
 		checkAsync(event.getRequest());
-	}
-	
-	private Runnable newCheckStatusRunnable(Long requestId, Subject subject) {
-		return new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-			        ThreadContext.bind(subject);
-					check(load(requestId));
-				} catch (Exception e) {
-					logger.error("Error checking pull request status", e);
-				} finally {
-					ThreadContext.unbindSubject();
-				}
-			}
-	
-		};		
 	}
 	
 	@Sessional
@@ -668,7 +647,21 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 			@Override
 			public void run() {
-				dao.getSessionManager().runAsync(newCheckStatusRunnable(requestId, subject));
+				dao.getSessionManager().runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+					        ThreadContext.bind(subject);
+							check(load(requestId));
+						} catch (Exception e) {
+							logger.error("Error checking pull request status", e);
+						} finally {
+							ThreadContext.unbindSubject();
+						}
+					}
+					
+				});
 			}
 			
 		});
@@ -682,7 +675,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			checkReviews(ReviewRequirement.fromString(branchProtection.getReviewRequirement()), request.getLatestUpdate());
 
 			if (branchProtection.getJobNames() != null)
-				checkBuilds(request, branchProtection.getJobNames(), branchProtection.isBuildMerges());
+				checkBuilds(request, branchProtection.getJobNames());
 			
 			Set<FileProtection> checkedFileProtections = new HashSet<>();
 			for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
@@ -709,17 +702,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 	}
 
-	private void checkBuilds(PullRequest request, List<String> jobNames, boolean buildMerges) {
+	private void checkBuilds(PullRequest request, List<String> jobNames) {
 		String commit;
-		if (buildMerges) {
-			MergePreview preview = request.getMergePreview();
-			if (preview != null && preview.getMerged() != null) 
-				commit = preview.getMerged();
-			else 
-				commit = null;
-		} else {
-			commit = request.getHeadCommitHash();			
-		}
+		MergePreview preview = request.getMergePreview();
+		if (preview != null && preview.getMerged() != null) 
+			commit = preview.getMerged();
+		else 
+			commit = null;
 		
 		Map<String, Build> builds = new HashMap<>();
 		if (commit != null) {
@@ -1069,11 +1058,4 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		return requests;
 	}
 
-	@Transactional
-	@Override
-	public void delete(User user, PullRequest request) {
-		delete(request);
-		listenerRegistry.post(new PullRequestDeleted(user, request));
-	}
-	
 }

@@ -17,8 +17,8 @@ import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usermatcher.Anyone;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.BranchPatterns;
-import io.onedev.server.web.editable.annotation.JobChoice;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.JobChoice;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
@@ -41,8 +41,6 @@ public class BranchProtection implements Serializable {
 	private String reviewRequirement;
 	
 	private List<String> jobNames = new ArrayList<>();
-	
-	private boolean buildMerges;
 	
 	private List<FileProtection> fileProtections = new ArrayList<>();
 
@@ -125,16 +123,6 @@ public class BranchProtection implements Serializable {
 
 	public void setJobNames(List<String> jobNames) {
 		this.jobNames = jobNames;
-	}
-
-	@Editable(order=600, name="Build Merged Commits", description="If checked, builds of merged commits "
-			+ "(instead of head commits) are required when pull request is involved")
-	public boolean isBuildMerges() {
-		return buildMerges;
-	}
-
-	public void setBuildMerges(boolean buildMerges) {
-		this.buildMerges = buildMerges;
 	}
 
 	@Editable(order=700, description="Optionally specify additional users to review particular paths. For each changed file, "

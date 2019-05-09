@@ -11,13 +11,10 @@ import org.joda.time.DateTime;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.server.event.codecomment.CodeCommentDeleted;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.issue.IssueDeleted;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
-import io.onedev.server.event.pullrequest.PullRequestDeleted;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;
@@ -254,19 +251,19 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 
 	@Listen
 	public void on(IssueEvent event) {
-		if (event.getUser() != null && !(event instanceof IssueDeleted))
+		if (event.getUser() != null)
 			visitIssue(event.getUser(), event.getIssue());
 	}
 	
 	@Listen
 	public void on(CodeCommentEvent event) {
-		if (event.getUser() != null && !(event instanceof CodeCommentDeleted))
+		if (event.getUser() != null)
 			visitCodeComment(event.getUser(), event.getComment());
 	}
 
 	@Listen
 	public void on(PullRequestEvent event) {
-		if (event.getUser() != null && !(event instanceof PullRequestDeleted)) {
+		if (event.getUser() != null) {
 			if (!(event instanceof PullRequestCodeCommentEvent)) {			
 				visitPullRequest(event.getUser(), event.getRequest());
 			} else if (!((PullRequestCodeCommentEvent) event).isDerived()) {

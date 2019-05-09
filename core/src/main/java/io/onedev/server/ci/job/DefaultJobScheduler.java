@@ -44,7 +44,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.event.CommitAware;
+import io.onedev.server.event.BuildCommitsAware;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.build.BuildQueueing;
@@ -374,9 +374,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	@Sessional
 	@Listen
 	public void on(ProjectEvent event) {
-		if (event instanceof CommitAware) {
-			ObjectId commitId = ((CommitAware) event).getCommitId();
-			if (!commitId.equals(ObjectId.zeroId())) {
+		if (event instanceof BuildCommitsAware) {
+			for (ObjectId commitId: ((BuildCommitsAware) event).getBuildCommits()) {
 				try {
 					CISpec ciSpec = event.getProject().getCISpec(commitId);
 					if (ciSpec != null) {

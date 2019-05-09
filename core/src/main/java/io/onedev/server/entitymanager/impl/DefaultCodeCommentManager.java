@@ -42,7 +42,6 @@ import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.event.codecomment.CodeCommentCreated;
-import io.onedev.server.event.codecomment.CodeCommentDeleted;
 import io.onedev.server.event.codecomment.CodeCommentEvent;
 import io.onedev.server.event.codecomment.CodeCommentUpdated;
 import io.onedev.server.git.GitUtils;
@@ -107,8 +106,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Transactional
 	@Listen
 	public void on(CodeCommentEvent event) {
-		if (!(event instanceof CodeCommentDeleted)) 
-			event.getComment().setUpdateDate(event.getDate());
+		event.getComment().setUpdateDate(event.getDate());
 	}
 	
 	@Sessional
@@ -309,7 +307,6 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 	@Override
 	public void delete(User user, CodeComment comment) {
 		delete(comment);
-		listenerRegistry.post(new CodeCommentDeleted(user, comment));
 	}
 	
 	@Transactional

@@ -54,12 +54,10 @@ import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.BranchProtection;
@@ -72,7 +70,7 @@ import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branch.choice.BranchChoiceProvider;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
-import io.onedev.server.web.component.build.status.OverallStatusPanel;
+import io.onedev.server.web.component.build.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -456,14 +454,19 @@ public class ProjectBranchesPage extends ProjectPage {
 				
 				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId(), true);
 				String lastCommitHash = lastCommit.name();
-				item.add(new OverallStatusPanel("buildStatus", new LoadableDetachableModel<List<Build>>() {
+				item.add(new CommitStatusPanel("buildStatus") {
 
 					@Override
-					protected List<Build> load() {
-						return OneDev.getInstance(BuildManager.class).query(getProject(), lastCommitHash);
+					protected Project getProject() {
+						return ProjectBranchesPage.this.getProject();
+					}
+
+					@Override
+					protected ObjectId getCommitId() {
+						return ObjectId.fromString(lastCommitHash);
 					}
 					
-				}));
+				});
 				
 				item.add(new AjaxLink<Void>("makeDefault") {
 

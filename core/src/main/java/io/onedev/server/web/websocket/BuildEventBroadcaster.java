@@ -4,7 +4,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.server.event.build.BuildDeleted;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.util.WicketUtils;
@@ -21,8 +20,8 @@ public class BuildEventBroadcaster {
 
 	@Listen
 	public void on(BuildEvent event) {
-		if (!(event instanceof BuildDeleted))
-			webSocketManager.notifyObservableChange(Build.getWebSocketObservable(event.getBuild().getId()), WicketUtils.getPageKey());
+		webSocketManager.notifyObservableChange(Build.getWebSocketObservable(event.getBuild().getId()), WicketUtils.getPageKey());
+		webSocketManager.notifyObservableChange("commit-status:" + event.getBuild().getCommitHash(), WicketUtils.getPageKey());
 	}
 
 }

@@ -4,6 +4,7 @@ import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
+import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -29,14 +30,17 @@ public class PullRequestTrigger extends JobTrigger {
 	
 	@Override
 	public boolean matches(ProjectEvent event, Job job) {
-		if (event instanceof PullRequestMergePreviewCalculated) {
+		String branch;
+		if (event instanceof PullRequestOpened) {
+			PullRequestOpened pullRequestOpened = (PullRequestOpened) event;
+			branch = pullRequestOpened.getRequest().getTargetBranch();
+		} else if (event instanceof PullRequestMergePreviewCalculated) {
 			PullRequestMergePreviewCalculated pullRequestMergePreviewCalculated = (PullRequestMergePreviewCalculated) event;
-			if (getTargetBranches() == null 
-					|| PathUtils.matchChildAware(getTargetBranches(), pullRequestMergePreviewCalculated.getRequest().getTargetBranch())) { 
-				return true;
-			}
-		} 
-		return false;
+			branch = pullRequestMergePreviewCalculated.getRequest().getTargetBranch();
+		} else {
+			branch = null;
+		}
+		return branch != null && (getTargetBranches() == null || PathUtils.matchChildAware(getTargetBranches(), branch)); 
 	}
 
 	@Override

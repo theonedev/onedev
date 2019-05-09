@@ -75,7 +75,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.PullRequestWatch;
-import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.MergePreview;
@@ -452,12 +451,6 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				fragment.add(newMergeStrategyContainer());
 				fragment.add(new ReviewListPanel("reviews", requestModel));
 				
-				BranchProtection protection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
-				if (protection != null && !protection.getJobNames().isEmpty() && protection.isBuildMerges()) {
-					fragment.add(new Label("buildsTitle", "Builds (On Merged Commit)"));
-				} else {
-					fragment.add(new Label("buildsTitle", "Builds"));
-				}
 				fragment.add(new PullRequestBuildStatusListPanel("builds", requestModel));
 				
 				fragment.add(new EntityWatchesPanel("watches") {
@@ -511,7 +504,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			@Override
 			public void onClick() {
 				PullRequest request = getPullRequest();
-				getPullRequestManager().delete(SecurityUtils.getUser(), request);
+				getPullRequestManager().delete(request);
 				Session.get().success("Pull request #" + request.getNumber() + " is deleted");
 				PageParameters params = ProjectPullRequestsPage.paramsOf(
 						getProject(), 

@@ -190,7 +190,7 @@ public class BuildArtifactsPage extends BuildDetailPage {
 					fragment.add(link);
 					
 					return fragment;
-				}
+				}				
 				
 			});
 		} else {
