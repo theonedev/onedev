@@ -82,7 +82,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 				int index = WicketUtils.getChildIndex(jobNavs, nav);
 				jobNavs.remove(nav);
 				jobContents.remove(jobContents.get(index));
-				target.appendJavaScript(String.format("onedev.ciSpec.edit.deleteJob(%d);", index));
+				target.appendJavaScript(String.format("onedev.server.ciSpec.edit.deleteJob(%d);", index));
 			}
 			
 		});
@@ -101,7 +101,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				int index = WicketUtils.getChildIndex(jobContents, content);
-				String script = String.format("onedev.ciSpec.edit.trackJobNameChange(%d);", index);
+				String script = String.format("onedev.server.ciSpec.edit.trackJobNameChange(%d);", index);
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
@@ -147,7 +147,10 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 					target.prependJavaScript(script);
 					target.add(content);
 					
-					script = String.format("onedev.ciSpec.showJob(%d);", jobNavs.size() - 1);
+					script = String.format(""
+							+ "onedev.server.ciSpec.showJob(%d); "
+							+ "$('#%s .select').click(onedev.server.ciSpec.selectJob);", 
+							jobNavs.size() - 1, nav.getMarkupId());
 					target.appendJavaScript(script);
 				}
 				
@@ -171,7 +174,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 							jobContents.swap(fromIndex-i, fromIndex-i-1);
 						}
 					}
-					target.appendJavaScript(String.format("onedev.ciSpec.edit.swapJobs(%d, %d)", fromIndex, toIndex));
+					target.appendJavaScript(String.format("onedev.server.ciSpec.edit.swapJobs(%d, %d)", fromIndex, toIndex));
 				}
 				
 			}.sortable(".jobs>.body>.side>.navs"));
@@ -240,7 +243,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new CISpecResourceReference()));
 		String selection = CISpecRendererProvider.getSelection(context.getPosition());
-		String script = String.format("onedev.ciSpec.onDomReady(%s);", 
+		String script = String.format("onedev.server.ciSpec.onDomReady(%s);", 
 				selection!=null? "'" + JavaScriptEscape.escapeJavaScript(selection) + "'": "undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

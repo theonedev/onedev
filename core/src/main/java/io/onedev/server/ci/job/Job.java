@@ -33,19 +33,19 @@ public class Job implements Serializable, Validatable {
 	
 	private String name;
 	
+	private List<InputSpec> paramSpecs = new ArrayList<>();
+	
 	private String environment;
 	
 	private List<String> commands;
 	
 	private boolean cloneSource = true;
 	
-	private List<JobOutcome> outcomes = new ArrayList<>();
-
 	private List<Dependency> dependencies = new ArrayList<>();
 	
+	private List<JobOutcome> outcomes = new ArrayList<>();
+
 	private List<JobTrigger> triggers = new ArrayList<>();
-	
-	private List<InputSpec> promptParams = new ArrayList<>();
 	
 	private List<JobCache> caches = new ArrayList<>();
 	
@@ -61,6 +61,15 @@ public class Job implements Serializable, Validatable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Editable(order=105, name="Parameter Specifications", description="Define parameter specifications of the job")
+	public List<InputSpec> getParamSpecs() {
+		return paramSpecs;
+	}
+
+	public void setParamSpecs(List<InputSpec> paramSpecs) {
+		this.paramSpecs = paramSpecs;
 	}
 
 	@Editable(order=110, description="Specify the environment to run the command. Environment will be interpretated "
@@ -123,16 +132,6 @@ public class Job implements Serializable, Validatable {
 
 	public void setTriggers(List<JobTrigger> triggers) {
 		this.triggers = triggers;
-	}
-
-	@Editable(order=10000, group="More Settings", description="Specify parameters to prompt when the job "
-			+ "is triggered manually")
-	public List<InputSpec> getPromptParams() {
-		return promptParams;
-	}
-
-	public void setPromptParams(List<InputSpec> promptParams) {
-		this.promptParams = promptParams;
 	}
 
 	@Editable(order=10100, group="More Settings", description="Cache specific paths to speed up job execution. For instance for node.js "
@@ -208,7 +207,7 @@ public class Job implements Serializable, Validatable {
 		}
 		
 		Set<String> promptParamNames = new HashSet<>();
-		for (InputSpec promptParam: promptParams) {
+		for (InputSpec promptParam: paramSpecs) {
 			if (promptParamNames.contains(promptParam.getName())) {
 				isValid = false;
 				context.buildConstraintViolationWithTemplate("Duplicate prompt param: " + promptParam.getName())

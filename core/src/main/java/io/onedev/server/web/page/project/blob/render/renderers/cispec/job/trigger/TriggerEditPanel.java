@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobtrigger;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.job.trigger;
 
 import java.util.List;
 

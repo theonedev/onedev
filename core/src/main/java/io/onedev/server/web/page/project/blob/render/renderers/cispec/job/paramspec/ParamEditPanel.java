@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobparam;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.job.paramspec;
 
 import java.util.ArrayList;
 import java.util.List;

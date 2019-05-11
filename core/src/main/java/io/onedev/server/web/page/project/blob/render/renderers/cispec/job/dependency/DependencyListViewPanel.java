@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobtrigger;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.job.dependency;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,48 +23,48 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.server.ci.job.trigger.JobTrigger;
+import io.onedev.server.ci.Dependency;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
+import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
-public class TriggerListViewPanel extends Panel {
+public class DependencyListViewPanel extends Panel {
 
-	private final List<JobTrigger> triggers = new ArrayList<>();
+	private final List<Dependency> dependencies = new ArrayList<>();
 	
-	public TriggerListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
+	public DependencyListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
-			triggers.add((JobTrigger) each);
+			dependencies.add((Dependency) each);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<IColumn<JobTrigger, Void>> columns = new ArrayList<>();
+		List<IColumn<Dependency, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("Description")) {
+		columns.add(new AbstractColumn<Dependency, Void>(Model.of("Job")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
+			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getDescription());
+						return new Label(componentId, rowModel.getObject().getJobName());
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<Dependency, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
+			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
@@ -73,7 +73,6 @@ public class TriggerListViewPanel extends Panel {
 					}
 					
 				});
-				
 			}
 
 			@Override
@@ -83,16 +82,16 @@ public class TriggerListViewPanel extends Panel {
 			
 		});		
 		
-		IDataProvider<JobTrigger> dataProvider = new ListDataProvider<JobTrigger>() {
+		IDataProvider<Dependency> dataProvider = new ListDataProvider<Dependency>() {
 
 			@Override
-			protected List<JobTrigger> getData() {
-				return triggers;
+			protected List<Dependency> getData() {
+				return dependencies;
 			}
 
 		};
 		
-		add(new DataTable<JobTrigger, Void>("triggers", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new DataTable<Dependency, Void>("dependencies", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
@@ -109,7 +108,7 @@ public class TriggerListViewPanel extends Panel {
 		private final int index;
 		
 		public ColumnFragment(String id, int index) {
-			super(id, "columnFrag", TriggerListViewPanel.this);
+			super(id, "columnFrag", DependencyListViewPanel.this);
 			this.index = index;
 		}
 		
@@ -126,18 +125,18 @@ public class TriggerListViewPanel extends Panel {
 
 						@Override
 						protected String getTitle() {
-							return EditableUtils.getDisplayName(triggers.get(index).getClass());
+							return dependencies.get(index).getJobName();
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "job-trigger def-detail"));
+							add(AttributeAppender.append("class", "dependency def-detail"));
 						}
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.viewBean(id, triggers.get(index));
+							return BeanContext.viewBean(id, dependencies.get(index), Sets.newHashSet("job"), true);
 						}
 
 					};

@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.cispec.joboutcome;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.job.trigger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -23,63 +23,48 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.server.ci.job.JobOutcome;
+import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
 
 @SuppressWarnings("serial")
-public class OutcomeListViewPanel extends Panel {
+public class TriggerListViewPanel extends Panel {
 
-	private final List<JobOutcome> outcomes = new ArrayList<>();
+	private final List<JobTrigger> triggers = new ArrayList<>();
 	
-	public OutcomeListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
+	public TriggerListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
-			outcomes.add((JobOutcome) each);
+			triggers.add((JobTrigger) each);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<IColumn<JobOutcome, Void>> columns = new ArrayList<>();
+		List<IColumn<JobTrigger, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("Type")) {
+		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("Description")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
+			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, EditableUtils.getDisplayName(rowModel.getObject().getClass()));
+						return new Label(componentId, rowModel.getObject().getDescription());
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("File Patterns")) {
+		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getFilePatterns());
-					}
-					
-				});
-			}
-		});		
-		
-		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
+			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
@@ -98,16 +83,16 @@ public class OutcomeListViewPanel extends Panel {
 			
 		});		
 		
-		IDataProvider<JobOutcome> dataProvider = new ListDataProvider<JobOutcome>() {
+		IDataProvider<JobTrigger> dataProvider = new ListDataProvider<JobTrigger>() {
 
 			@Override
-			protected List<JobOutcome> getData() {
-				return outcomes;
+			protected List<JobTrigger> getData() {
+				return triggers;
 			}
 
 		};
 		
-		add(new DataTable<JobOutcome, Void>("outcomes", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new DataTable<JobTrigger, Void>("triggers", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
@@ -124,7 +109,7 @@ public class OutcomeListViewPanel extends Panel {
 		private final int index;
 		
 		public ColumnFragment(String id, int index) {
-			super(id, "columnFrag", OutcomeListViewPanel.this);
+			super(id, "columnFrag", TriggerListViewPanel.this);
 			this.index = index;
 		}
 		
@@ -141,18 +126,18 @@ public class OutcomeListViewPanel extends Panel {
 
 						@Override
 						protected String getTitle() {
-							return EditableUtils.getDisplayName(outcomes.get(index).getClass());
+							return EditableUtils.getDisplayName(triggers.get(index).getClass());
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "job-outcome def-detail"));
+							add(AttributeAppender.append("class", "job-trigger def-detail"));
 						}
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.viewBean(id, outcomes.get(index));
+							return BeanContext.viewBean(id, triggers.get(index));
 						}
 
 					};

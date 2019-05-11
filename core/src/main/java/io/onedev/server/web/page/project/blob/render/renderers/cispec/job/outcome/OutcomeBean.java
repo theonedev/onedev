@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.cispec.joboutcome;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.job.outcome;
 
 import java.io.Serializable;
 

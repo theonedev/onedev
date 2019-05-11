@@ -1,7 +1,9 @@
-onedev.ciSpec = {
+onedev.server.ciSpec = {
     onDomReady: function(selection, callback) {
         var activeJobIndex = -1; 
         var $body = $(".ci-spec>.valid>.jobs>.body");
+        $body.data("callback", callback);
+
         $body.find(">.contents>.content").each(function() {
             var $this = $(this);
             if ($this.find(".feedbackPanelERROR").length != 0) {
@@ -18,14 +20,16 @@ onedev.ciSpec = {
         if (activeJobIndex == -1)
             activeJobIndex = 0;
 
-        onedev.ciSpec.showJob(activeJobIndex);
+        onedev.server.ciSpec.showJob(activeJobIndex);
 
-        $body.find(".side>.navs>.nav>.select").click(function() {
-            var $nav = $(this).parent();
-            onedev.ciSpec.showJob($nav.index());
-            if (callback)
-                callback("jobs/" + $nav.data("name"));
-        });
+        $body.find(".side>.navs>.nav>.select").click(onedev.server.ciSpec.selectJob);
+    },
+    selectJob: function() {
+        var $nav = $(this).parent();
+        onedev.server.ciSpec.showJob($nav.index());
+        var $body = $(".ci-spec>.valid>.jobs>.body");
+        if ($body.data("callback"))
+            $body.data("callback")("jobs/" + $nav.data("name"));
     },
     showJob: function(index) {
         var $body = $(".ci-spec>.valid>.jobs>.body");
@@ -50,7 +54,7 @@ onedev.ciSpec = {
             $contents.children().eq(index).remove();
 
             if ($nav.hasClass("active")) 
-                onedev.ciSpec.showJob(0);
+                onedev.server.ciSpec.showJob(0);
         }, 
         swapJobs: function(index1, index2) {
             var $contents = $(".ci-spec-edit .jobs>.body>.contents");

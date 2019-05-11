@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobparam;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.job.paramspec;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -68,6 +68,7 @@ public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 					@Override
 					protected void onSave(AjaxRequestTarget target) {
 						modal.close();
+						onPropertyUpdating(target);
 						target.add(ParamListEditPanel.this);
 					}
 
@@ -97,6 +98,7 @@ public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 							@Override
 							protected void onSave(AjaxRequestTarget target) {
 								modal.close();
+								onPropertyUpdating(target);
 								target.add(ParamListEditPanel.this);
 							}
 
@@ -138,6 +140,7 @@ public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						params.remove(rowModel.getObject());
+						onPropertyUpdating(target);
 						target.add(ParamListEditPanel.this);
 					}
 					
@@ -179,6 +182,7 @@ public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 					for (int i=0; i<fromIndex-toIndex; i++) 
 						Collections.swap(params, fromIndex-i, fromIndex-i-1);
 				}
+				onPropertyUpdating(target);
 				target.add(ParamListEditPanel.this);
 			}
 			

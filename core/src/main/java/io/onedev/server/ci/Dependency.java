@@ -19,7 +19,7 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.page.project.blob.render.renderers.cispec.dependency.DependencyEditPanel;
+import io.onedev.server.web.page.project.blob.render.renderers.cispec.job.dependency.DependencyEditPanel;
 
 @Editable
 @ClassValidating
@@ -58,7 +58,8 @@ public class Dependency implements Serializable, Validatable {
 		List<String> choices = new ArrayList<>();
 		Job belongingJob = editor.getBelongingJob();
 		for (Job job: editor.getEditingCISpec().getJobs()) {
-			choices.add(job.getName());
+			if (job.getName() != null)
+				choices.add(job.getName());
 		}
 		choices.remove(belongingJob.getName());
 		return choices;

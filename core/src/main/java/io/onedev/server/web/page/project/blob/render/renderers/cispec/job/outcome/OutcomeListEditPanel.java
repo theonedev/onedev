@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.blob.render.renderers.cispec.jobtrigger;
+package io.onedev.server.web.page.project.blob.render.renderers.cispec.job.outcome;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,11 +24,12 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.ci.job.trigger.JobTrigger;
+import io.onedev.server.ci.job.JobOutcome;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -36,16 +37,16 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
 
 @SuppressWarnings("serial")
-public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
+public class OutcomeListEditPanel extends PropertyEditor<List<Serializable>> {
 
-	private final List<JobTrigger> triggers;
+	private final List<JobOutcome> outcomes;
 	
-	public TriggerListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
+	public OutcomeListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
-		triggers = new ArrayList<>();
+		outcomes = new ArrayList<>();
 		for (Serializable each: model.getObject()) {
-			triggers.add((JobTrigger) each);
+			outcomes.add((JobOutcome) each);
 		}
 	}
 	
@@ -56,7 +57,7 @@ public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new TriggerEditPanel(id, triggers, -1) {
+				return new OutcomeEditPanel(id, outcomes, -1) {
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
@@ -66,7 +67,8 @@ public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 					@Override
 					protected void onSave(AjaxRequestTarget target) {
 						modal.close();
-						target.add(TriggerListEditPanel.this);
+						onPropertyUpdating(target);
+						target.add(OutcomeListEditPanel.this);
 					}
 
 				};
@@ -74,18 +76,18 @@ public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});
 		
-		List<IColumn<JobTrigger, Void>> columns = new ArrayList<>();
+		List<IColumn<JobOutcome, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("Description")) {
+		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("Type")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
-				Fragment fragment = new Fragment(componentId, "descriptionColumnFrag", TriggerListEditPanel.this);
+			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
+				Fragment fragment = new Fragment(componentId, "typeColumnFrag", OutcomeListEditPanel.this);
 				ModalLink link = new ModalLink("link") {
 
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
-						return new TriggerEditPanel(id, triggers, cellItem.findParent(Item.class).getIndex()) {
+						return new OutcomeEditPanel(id, outcomes, cellItem.findParent(Item.class).getIndex()) {
 
 							@Override
 							protected void onCancel(AjaxRequestTarget target) {
@@ -95,31 +97,41 @@ public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 							@Override
 							protected void onSave(AjaxRequestTarget target) {
 								modal.close();
-								target.add(TriggerListEditPanel.this);
+								onPropertyUpdating(target);
+								target.add(OutcomeListEditPanel.this);
 							}
 
 						};
 					}
 					
 				};
-				link.add(new Label("label", rowModel.getObject().getDescription()));
+				link.add(new Label("label", EditableUtils.getDisplayName(rowModel.getObject().getClass())));
 				fragment.add(link);
 				
 				cellItem.add(fragment);
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("File Patterns")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
-				Fragment fragment = new Fragment(componentId, "actionColumnFrag", TriggerListEditPanel.this);
+			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getFilePatterns()));
+			}
+		});		
+		
+		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", OutcomeListEditPanel.this);
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						triggers.remove(rowModel.getObject());
-						target.add(TriggerListEditPanel.this);
+						outcomes.remove(rowModel.getObject());
+						onPropertyUpdating(target);
+						target.add(OutcomeListEditPanel.this);
 					}
 					
 				});
@@ -133,17 +145,17 @@ public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});		
 		
-		IDataProvider<JobTrigger> dataProvider = new ListDataProvider<JobTrigger>() {
+		IDataProvider<JobOutcome> dataProvider = new ListDataProvider<JobOutcome>() {
 
 			@Override
-			protected List<JobTrigger> getData() {
-				return triggers;			
+			protected List<JobOutcome> getData() {
+				return outcomes;			
 			}
 
 		};
 		
-		DataTable<JobTrigger, Void> dataTable;
-		add(dataTable = new DataTable<JobTrigger, Void>("triggers", columns, dataProvider, Integer.MAX_VALUE));
+		DataTable<JobOutcome, Void> dataTable;
+		add(dataTable = new DataTable<JobOutcome, Void>("outcomes", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
 		
@@ -155,12 +167,13 @@ public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
-						Collections.swap(triggers, fromIndex+i, fromIndex+i+1);
+						Collections.swap(outcomes, fromIndex+i, fromIndex+i+1);
 				} else {
 					for (int i=0; i<fromIndex-toIndex; i++) 
-						Collections.swap(triggers, fromIndex-i, fromIndex-i-1);
+						Collections.swap(outcomes, fromIndex-i, fromIndex-i-1);
 				}
-				target.add(TriggerListEditPanel.this);
+				onPropertyUpdating(target);
+				target.add(OutcomeListEditPanel.this);
 			}
 			
 		}.sortable("tbody"));
@@ -186,7 +199,7 @@ public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 	@Override
 	protected List<Serializable> convertInputToValue() throws ConversionException {
 		List<Serializable> value = new ArrayList<>();
-		for (JobTrigger each: triggers)
+		for (JobOutcome each: outcomes)
 			value.add(each);
 		return value;
 	}

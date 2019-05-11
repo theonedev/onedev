@@ -90,7 +90,7 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new CISpecResourceReference()));
 		String selection = CISpecRendererProvider.getSelection(context.getPosition());
-		String script = String.format("onedev.ciSpec.onDomReady(%s, %s);", 
+		String script = String.format("onedev.server.ciSpec.onDomReady(%s, %s);", 
 				selection!=null? "'" + JavaScriptEscape.escapeJavaScript(selection) + "'": "undefined", 
 				behavior.getCallbackFunction(CallbackParameter.explicit("selection")));
 		response.render(OnDomReadyHeaderItem.forScript(script));
