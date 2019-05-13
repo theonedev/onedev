@@ -1,4 +1,4 @@
-package io.onedev.server.command;
+package io.onedev.server.maintenance;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -36,16 +36,18 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
 
 @Singleton
-public class UpgradeCommand extends DefaultPersistManager {
+public class Upgrade extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(UpgradeCommand.class);
+	public static final String COMMAND = "upgrade";
+	
+	private static final Logger logger = LoggerFactory.getLogger(Upgrade.class);
 	
 	private static final String BACKUP_DATETIME_FORMAT = "yyyy-MM-dd_HH-mm-ss";
 	
 	private final String appName;
 	
 	@Inject
-	public UpgradeCommand(PhysicalNamingStrategy physicalNamingStrategy,
+	public Upgrade(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator, PluginManager pluginManager) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);

@@ -62,7 +62,7 @@ abstract class OutcomeEditPanel extends Panel {
 			
 		});
 		
-		BeanEditor editor = BeanContext.editBean("editor", bean);
+		BeanEditor editor = BeanContext.edit("editor", bean);
 		form.add(editor);
 		form.add(new AjaxButton("save") {
 

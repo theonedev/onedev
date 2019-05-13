@@ -502,7 +502,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			form.setOutputMarkupId(true);
 			
 			form.add(new NotificationPanel("feedback", form));
-			form.add(BeanContext.editBean("editor", bean));
+			form.add(BeanContext.edit("editor", bean));
 			form.add(new AjaxButton("save") {
 
 				@Override

@@ -3,8 +3,6 @@ package io.onedev.server.ci.detector;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.google.common.collect.Lists;
-
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.cache.JobCache;
@@ -26,12 +24,11 @@ public class MavenDetector implements CISpecDetector {
 
 			job.setName("ci");
 			job.setEnvironment("maven:3.6.1-jdk-8");
-			job.setCommands(Lists.newArrayList(
-					"buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)",
-					"echo \"##onedev[SetBuildVersion '$buildVersion']\"",
-					"echo",
-					"mvn clean test"
-					));
+			job.setCommands(""
+					+ "buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)\n"
+					+ "echo \"##onedev[SetBuildVersion '$buildVersion']\"\n"
+					+ "echo\n" 
+					+ "mvn clean test");
 
 			BranchPushedTrigger trigger = new BranchPushedTrigger();
 			job.getTriggers().add(trigger);

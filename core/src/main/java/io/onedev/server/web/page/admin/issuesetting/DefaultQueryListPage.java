@@ -30,7 +30,7 @@ public class DefaultQueryListPage extends GlobalIssueSettingPage {
 			}
 			
 		};
-		form.add(PropertyContext.editBean("editor", getSetting(), "defaultQueries"));
+		form.add(PropertyContext.edit("editor", getSetting(), "defaultQueries"));
 		
 		add(form);
 	}

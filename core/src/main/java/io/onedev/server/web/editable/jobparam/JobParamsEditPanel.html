@@ -1,0 +1,22 @@
+<wicket:panel>
+    <div class="job-params-edit">
+        <div wicket:id="params" class="job-param form-group">
+            <label class="name control-label">
+                <span wicket:id="name"></span>
+                <span wicket:id="required" class="required">*</span>
+            </label>
+            <select wicket:id="valuesProvider" class="form-control values-provider"></select>
+            <div wicket:id="values" class="values"></div>
+        </div>
+    </div>
+    <wicket:fragment wicket:id="specifiedValuesFrag">
+        <div wicket:id="values" class="specified-value">
+            <div wicket:id="value"></div>
+            <a wicket:id="delete" title="Delete this value"><i class="fa fa-trash"></i></a>
+            <div wicket:id="feedback" class="feedback"></div>
+        </div>
+        <div wicket:id="feedback" class="feedback"></div>
+        <a wicket:id="add" class="btn btn-success btn-sm"><i class="fa fa-plus"></i> Add Value</a>
+        <a class="help" title="Add additional values to run matrix build. The job will run for each possible combination of different values across all parameters"><i class="fa fa-question-circle"></i></a>
+    </wicket:fragment>
+</wicket:panel>

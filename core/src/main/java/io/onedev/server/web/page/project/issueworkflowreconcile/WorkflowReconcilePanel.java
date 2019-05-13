@@ -89,7 +89,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 					for (String undefinedState: undefinedStates) {
 						WebMarkupContainer row = new WebMarkupContainer(rows.newChildId());
 						row.add(new Label("undefined", undefinedState));
-						row.add(BeanContext.editBean("resolution", resolutions.get(undefinedState)));
+						row.add(BeanContext.edit("resolution", resolutions.get(undefinedState)));
 						rows.add(row);
 					}
 					form.add(rows);
@@ -179,7 +179,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						resolutions.put(undefinedField, resolution);
 						WebMarkupContainer row = new WebMarkupContainer(rows.newChildId());
 						row.add(new Label("name", undefinedField));
-						row.add(BeanContext.editBean("resolution", resolution));
+						row.add(BeanContext.edit("resolution", resolution));
 						rows.add(row);
 					}
 					form.add(rows);
@@ -270,7 +270,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						UndefinedFieldValueContainer row = new UndefinedFieldValueContainer(rows.newChildId(), undefinedFieldValue.getFieldName());
 						row.add(new Label("name", undefinedFieldValue.getFieldName()));
 						row.add(new Label("value", undefinedFieldValue.getFieldValue()));
-						row.add(BeanContext.editBean("resolution", resolution));
+						row.add(BeanContext.edit("resolution", resolution));
 						rows.add(row);
 					}
 					form.add(rows);

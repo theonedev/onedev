@@ -2,9 +2,9 @@ package io.onedev.server.web.editable;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
-import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.util.convert.ConversionException;
@@ -46,10 +46,10 @@ public abstract class ValueEditor<T> extends FormComponentPanel<T> implements Er
 	
 	public void clearErrors(boolean recursive) {
 		if (recursive) {
-			visitFormComponentsPostOrder(this, new IVisitor<FormComponent<?>, Void>() {
+			visitComponentsPostOrder(this, new IVisitor<Component, Void>() {
 				
 				@Override
-				public void component(FormComponent<?> formComponent, IVisit<Void> visit) {
+				public void component(Component formComponent, IVisit<Void> visit) {
 					formComponent.getFeedbackMessages().clear();
 				}
 				

@@ -178,11 +178,6 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	}
 	
 	@Override
-	protected String getErrorClass() {
-		return null;
-	}
-
-	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);
 		
@@ -195,7 +190,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	private Component newBeanEditor(Serializable propertyValue) {
 		Component beanEditor;
 		if (propertyValue != null) {
-			beanEditor = BeanContext.editBean(BEAN_EDITOR_ID, propertyValue);
+			beanEditor = BeanContext.edit(BEAN_EDITOR_ID, propertyValue);
 		} else {
 			beanEditor = new WebMarkupContainer(BEAN_EDITOR_ID);
 		}

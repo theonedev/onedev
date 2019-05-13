@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintValidatorContext;
-import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -21,6 +20,7 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
+import io.onedev.server.web.editable.annotation.Multiline;
 
 @Editable
 @Horizontal
@@ -37,7 +37,7 @@ public class Job implements Serializable, Validatable {
 	
 	private String environment;
 	
-	private List<String> commands;
+	private String commands;
 	
 	private boolean cloneSource = true;
 	
@@ -63,7 +63,7 @@ public class Job implements Serializable, Validatable {
 		this.name = name;
 	}
 
-	@Editable(order=105, name="Parameter Specifications", description="Define parameter specifications of the job")
+	@Editable(order=105, name="Parameter Specs", description="Define parameter specifications of the job")
 	public List<InputSpec> getParamSpecs() {
 		return paramSpecs;
 	}
@@ -87,12 +87,13 @@ public class Job implements Serializable, Validatable {
 	@Editable(order=120, description="Specify commands to execute in above environment, with one command per line. "
 			+ "For Windows based environments, commands will be interpretated by PowerShell, and for Unix/Linux "
 			+ "based environments, commands will be interpretated by shell")
-	@Size(min=1, message="At least one command needs to be specified")
-	public List<String> getCommands() {
+	@Multiline
+	@NotEmpty
+	public String getCommands() {
 		return commands;
 	}
 
-	public void setCommands(List<String> commands) {
+	public void setCommands(String commands) {
 		this.commands = commands;
 	}
 	
@@ -206,14 +207,14 @@ public class Job implements Serializable, Validatable {
 			}
 		}
 		
-		Set<String> promptParamNames = new HashSet<>();
-		for (InputSpec promptParam: paramSpecs) {
-			if (promptParamNames.contains(promptParam.getName())) {
+		Set<String> paramSpecNames = new HashSet<>();
+		for (InputSpec paramSpec: paramSpecs) {
+			if (paramSpecNames.contains(paramSpec.getName())) {
 				isValid = false;
-				context.buildConstraintViolationWithTemplate("Duplicate prompt param: " + promptParam.getName())
-						.addPropertyNode("promptParams").addConstraintViolation();
+				context.buildConstraintViolationWithTemplate("Duplicate parameter spec: " + paramSpec.getName())
+						.addPropertyNode("paramSpecs").addConstraintViolation();
 			} else {
-				promptParamNames.add(promptParam.getName());
+				paramSpecNames.add(paramSpec.getName());
 			}
 		}
 		

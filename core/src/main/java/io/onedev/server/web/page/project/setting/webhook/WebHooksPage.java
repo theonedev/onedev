@@ -27,8 +27,7 @@ public class WebHooksPage extends ProjectSettingPage {
 
 		WebHooksEditBean bean = new WebHooksEditBean();
 		bean.setWebHooks(getProject().getWebHooks());
-		PropertyEditor<Serializable> editor = 
-				PropertyContext.editBean("editor", bean, "webHooks");
+		PropertyEditor<Serializable> editor = PropertyContext.edit("editor", bean, "webHooks");
 		Form<?> form = new Form<Void>("form") {
 
 			@Override

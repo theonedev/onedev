@@ -54,13 +54,13 @@ public class TokenGeneratePanel extends GenericPanel<User> {
 				token = new String(Base64.encode((getUser().getName() + ":" + bean.getPassword()).getBytes()));
 				
 				bean.setPassword(null);
-				replace(BeanContext.editBean("editor", bean));
+				replace(BeanContext.edit("editor", bean));
 			}
 
 		};
 		add(form);
 		
-		form.add(BeanContext.editBean("editor", bean));
+		form.add(BeanContext.edit("editor", bean));
 		
 		add(new Label("token", new AbstractReadOnlyModel<String>() {
 

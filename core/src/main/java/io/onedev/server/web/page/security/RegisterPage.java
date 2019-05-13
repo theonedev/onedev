@@ -38,7 +38,7 @@ public class RegisterPage extends BasePage {
 		super.onInitialize();
 	
 		final User user = new User();
-		final BeanEditor editor = BeanContext.editBean("editor", user);
+		final BeanEditor editor = BeanContext.edit("editor", user);
 		
 		Form<?> form = new Form<Void>("form") {
 

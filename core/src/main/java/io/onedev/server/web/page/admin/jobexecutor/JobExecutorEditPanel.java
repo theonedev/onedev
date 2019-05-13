@@ -69,7 +69,7 @@ abstract class JobExecutorEditPanel extends Panel {
 		if (executorIndex != -1)
 			bean.setExecutor(executors.get(executorIndex));
 
-		BeanEditor editor = BeanContext.editBean("editor", bean);
+		BeanEditor editor = BeanContext.edit("editor", bean);
 		editor.setOutputMarkupId(true);
 		
 		AjaxButton saveButton = new AjaxButton("save") {

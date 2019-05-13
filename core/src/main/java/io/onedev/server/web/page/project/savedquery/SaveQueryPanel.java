@@ -39,7 +39,7 @@ public abstract class SaveQueryPanel extends Panel {
 			
 		};
 		SaveQueryBean bean = new SaveQueryBean();
-		BeanEditor editor = BeanContext.editBean("editor", bean); 
+		BeanEditor editor = BeanContext.edit("editor", bean); 
 		form.add(editor);
 		form.add(new AjaxButton("save") {
 

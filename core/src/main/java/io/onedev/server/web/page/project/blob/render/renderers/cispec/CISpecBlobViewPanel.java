@@ -38,8 +38,8 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
 		try {
+			Blob blob = context.getProject().getBlob(context.getBlobIdent(), true);
 			CISpec ciSpec = CISpec.parse(blob.getBytes());
 			if (ciSpec != null) {
 				Fragment validFrag = new Fragment("content", "validFrag", this);			
@@ -53,7 +53,7 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 						nav.add(new Label("jobName", job.getName()));
 						nav.add(AttributeAppender.append("data-name", job.getName()));
 						navsView.add(nav);
-						jobsView.add(BeanContext.viewBean(jobsView.newChildId(), job));
+						jobsView.add(BeanContext.view(jobsView.newChildId(), job));
 					}
 					hasJobsFrag.add(navsView);
 					hasJobsFrag.add(jobsView);

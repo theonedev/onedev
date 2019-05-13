@@ -34,7 +34,7 @@ abstract class ConfirmDeleteWithIssuesPanel extends Panel {
 		
 		MilestoneDeleteOption option = new MilestoneDeleteOption();
 		option.setMilestoneToDelete(getMilestone().getName());
-		form.add(BeanContext.editBean("editor", option, Sets.newHashSet("milestoneToDelete"), true));
+		form.add(BeanContext.edit("editor", option, Sets.newHashSet("milestoneToDelete"), true));
 		
 		form.add(new AjaxLink<Void>("close") {
 

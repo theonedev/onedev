@@ -24,11 +24,13 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -70,6 +72,11 @@ public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 						target.add(TriggerListEditPanel.this);
 					}
 
+					@Override
+					public Job getJob() {
+						return (Job) TriggerListEditPanel.this.findParent(BeanEditor.class).getConvertedInput();
+					}
+
 				};
 			}
 			
@@ -100,6 +107,11 @@ public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 								target.add(TriggerListEditPanel.this);
 							}
 
+							@Override
+							public Job getJob() {
+								return (Job) TriggerListEditPanel.this.findParent(BeanEditor.class).getConvertedInput();
+							}
+
 						};
 					}
 					
@@ -109,6 +121,15 @@ public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 				
 				cellItem.add(fragment);
 			}
+		});		
+		
+		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("#Params")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getParams().size()));
+			}
+			
 		});		
 		
 		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
@@ -170,11 +191,6 @@ public class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 		}.sortable("tbody"));
 		
 		setOutputMarkupId(true);		
-	}
-
-	@Override
-	protected String getErrorClass() {
-		return null;
 	}
 
 	@Override

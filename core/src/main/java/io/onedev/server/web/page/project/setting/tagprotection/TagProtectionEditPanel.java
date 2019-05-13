@@ -30,7 +30,7 @@ abstract class TagProtectionEditPanel extends Panel {
 		Form<?> form = new Form<Void>("form");
 		form.add(new NotificationPanel("feedback", form));
 
-		form.add(BeanContext.editBean("editor", protection));
+		form.add(BeanContext.edit("editor", protection));
 		
 		form.add(new AjaxButton("save") {
 

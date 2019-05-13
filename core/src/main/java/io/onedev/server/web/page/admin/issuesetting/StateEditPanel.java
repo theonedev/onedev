@@ -64,7 +64,7 @@ abstract class StateEditPanel extends Panel {
 			
 		});
 		
-		BeanEditor editor = BeanContext.editBean("editor", state);
+		BeanEditor editor = BeanContext.edit("editor", state);
 		form.add(editor);
 		form.add(new AjaxButton("save") {
 

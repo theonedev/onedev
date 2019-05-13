@@ -8,20 +8,20 @@ import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public class ParamBean implements Serializable {
+public class ParamSpecBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private InputSpec param;
+	private InputSpec paramSpec;
 
 	@Editable(name="Type", order=100)
 	@NotNull(message="may not be empty")
-	public InputSpec getParam() {
-		return param;
+	public InputSpec getParamSpec() {
+		return paramSpec;
 	}
 
-	public void setParam(InputSpec param) {
-		this.param = param;
+	public void setParamSpec(InputSpec paramSpec) {
+		this.paramSpec = paramSpec;
 	}
 
 }

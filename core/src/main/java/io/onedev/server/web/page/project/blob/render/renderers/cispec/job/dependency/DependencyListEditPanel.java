@@ -75,12 +75,12 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 					}
 
 					@Override
-					public CISpec getEditingCISpec() {
-						return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getEditingCISpec();
+					public CISpec getCISpec() {
+						return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getCISpec();
 					}
 
 					@Override
-					public Job getBelongingJob() {
+					public Job getJob() {
 						return (Job) DependencyListEditPanel.this.findParent(BeanEditor.class).getConvertedInput();
 					}
 
@@ -91,7 +91,7 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 		
 		List<IColumn<Dependency, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Dependency, Void>(Model.of("Job")) {
+		columns.add(new AbstractColumn<Dependency, Void>(Model.of("Name")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
@@ -115,12 +115,12 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 							}
 
 							@Override
-							public CISpec getEditingCISpec() {
-								return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getEditingCISpec();
+							public CISpec getCISpec() {
+								return DependencyListEditPanel.this.findParent(CISpecEditPanel.class).getCISpec();
 							}
 
 							@Override
-							public Job getBelongingJob() {
+							public Job getJob() {
 								return (Job) DependencyListEditPanel.this.findParent(BeanEditor.class).getConvertedInput();
 							}
 
@@ -133,6 +133,15 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 				
 				cellItem.add(fragment);
 			}
+		});		
+		
+		columns.add(new AbstractColumn<Dependency, Void>(Model.of("#Params")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getJobParams().size()));
+			}
+			
 		});		
 		
 		columns.add(new AbstractColumn<Dependency, Void>(Model.of("")) {
@@ -194,11 +203,6 @@ public class DependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 		}.sortable("tbody"));
 		
 		setOutputMarkupId(true);		
-	}
-
-	@Override
-	protected String getErrorClass() {
-		return null;
 	}
 
 	@Override

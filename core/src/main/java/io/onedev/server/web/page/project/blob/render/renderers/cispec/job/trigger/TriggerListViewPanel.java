@@ -61,7 +61,7 @@ public class TriggerListViewPanel extends Panel {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("#Params")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
@@ -69,11 +69,29 @@ public class TriggerListViewPanel extends Panel {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+						return new Label(componentId, rowModel.getObject().getParams().size());
 					}
 					
 				});
-				
+			}
+		});		
+		
+		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
+				if (!rowModel.getObject().getParams().isEmpty()) {
+					cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
+
+						@Override
+						protected Component newLabel(String componentId) {
+							return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+						}
+						
+					});
+				} else {
+					cellItem.add(new Label(componentId));
+				}
 			}
 
 			@Override
@@ -137,7 +155,7 @@ public class TriggerListViewPanel extends Panel {
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.viewBean(id, triggers.get(index));
+							return BeanContext.view(id, triggers.get(index));
 						}
 
 					};

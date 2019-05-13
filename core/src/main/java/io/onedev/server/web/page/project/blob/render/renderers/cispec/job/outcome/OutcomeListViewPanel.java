@@ -152,7 +152,7 @@ public class OutcomeListViewPanel extends Panel {
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.viewBean(id, outcomes.get(index));
+							return BeanContext.view(id, outcomes.get(index));
 						}
 
 					};

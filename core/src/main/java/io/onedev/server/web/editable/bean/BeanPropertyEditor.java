@@ -99,7 +99,7 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 	private Component newBeanEditor(Serializable propertyValue) {
 		Component beanEditor;
 		if (propertyValue != null) {
-			beanEditor = BeanContext.editBean(BEAN_EDITOR_ID, propertyValue);
+			beanEditor = BeanContext.edit(BEAN_EDITOR_ID, propertyValue);
 		} else {
 			beanEditor = new WebMarkupContainer(BEAN_EDITOR_ID).setVisible(false);
 		}
@@ -111,11 +111,6 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 	@Override
 	public ErrorContext getErrorContext(PathElement element) {
 		return ((ErrorContext) get(BEAN_EDITOR_ID)).getErrorContext(element);
-	}
-
-	@Override
-	protected String getErrorClass() {
-		return null;
 	}
 
 	@Override

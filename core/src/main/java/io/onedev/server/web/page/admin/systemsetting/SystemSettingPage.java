@@ -34,7 +34,7 @@ public class SystemSettingPage extends AdministrationPage {
 			}
 			
 		};
-		form.add(BeanContext.editBean("editor", systemSetting));
+		form.add(BeanContext.edit("editor", systemSetting));
 		
 		add(form);
 	}

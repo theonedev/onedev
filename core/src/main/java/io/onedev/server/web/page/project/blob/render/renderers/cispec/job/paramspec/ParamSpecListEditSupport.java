@@ -17,7 +17,7 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 
 @SuppressWarnings("serial")
-public class ParamListEditSupport implements EditSupport {
+public class ParamSpecListEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
@@ -33,7 +33,7 @@ public class ParamListEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
-									return new ParamListViewPanel(id, elementClass, model.getObject());
+									return new ParamSpecListViewPanel(id, elementClass, model.getObject());
 								} else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 								}
@@ -44,7 +44,7 @@ public class ParamListEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<Serializable>> renderForEdit(String componentId, IModel<List<Serializable>> model) {
-						return new ParamListEditPanel(componentId, descriptor, model);
+						return new ParamSpecListEditPanel(componentId, descriptor, model);
 					}
 					
 				};

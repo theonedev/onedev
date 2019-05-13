@@ -90,12 +90,11 @@ public class BeanContext implements Serializable {
 		return beanContext.renderForEdit(componentId, (IModel<Serializable>)beanModel);
 	}
 	
-	public static BeanEditor editBean(String componentId, Serializable bean) {
-		return editBean(componentId, bean, Sets.newHashSet(), true);
+	public static BeanEditor edit(String componentId, Serializable bean) {
+		return edit(componentId, bean, Sets.newHashSet(), true);
 	}
 	
-	public static BeanEditor editBean(String componentId, final Serializable bean, 
-			Collection<String> properties, boolean excluded) {
+	public static BeanEditor edit(String componentId, Serializable bean, Collection<String> properties, boolean excluded) {
 		IModel<Serializable> beanModel = new IModel<Serializable>() {
 
 			@Override
@@ -129,12 +128,12 @@ public class BeanContext implements Serializable {
 		return editContext.renderForView(componentId, beanModel);
 	}
 	
-	public static Component viewBean(String componentId, Serializable bean, Set<String> properties, boolean excluded) {
+	public static Component view(String componentId, Serializable bean, Set<String> properties, boolean excluded) {
 		return viewModel(componentId, Model.of(bean), properties, excluded);
 	}
 	
-	public static Component viewBean(String componentId, Serializable bean) {
-		return viewBean(componentId, bean, new HashSet<>(), true);
+	public static Component view(String componentId, Serializable bean) {
+		return view(componentId, bean, new HashSet<>(), true);
 	}
 	
 }

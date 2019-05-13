@@ -3,8 +3,6 @@ package io.onedev.server.web.page.project.blob.render.renderers.cispec.job.param
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.lang.model.SourceVersion;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -13,7 +11,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -23,26 +20,26 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathElement;
 
 @SuppressWarnings("serial")
-abstract class ParamEditPanel extends Panel implements InputContext {
+abstract class ParamSpecEditPanel extends Panel implements InputContext {
 
-	private final List<InputSpec> params;
+	private final List<InputSpec> paramSpecs;
 	
-	private final int paramIndex;
+	private final int paramSpecIndex;
 	
-	public ParamEditPanel(String id, List<InputSpec> params, int paramIndex) {
+	public ParamSpecEditPanel(String id, List<InputSpec> paramSpecs, int paramSpecIndex) {
 		super(id);
 	
-		this.params = params;
-		this.paramIndex = paramIndex;
+		this.paramSpecs = paramSpecs;
+		this.paramSpecIndex = paramSpecIndex;
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		ParamBean bean = new ParamBean();
-		if (paramIndex != -1)
-			bean.setParam(params.get(paramIndex));
+		ParamSpecBean bean = new ParamSpecBean();
+		if (paramSpecIndex != -1)
+			bean.setParamSpec(paramSpecs.get(paramSpecIndex));
 
 		Form<?> form = new Form<Void>("form") {
 
@@ -59,7 +56,7 @@ abstract class ParamEditPanel extends Panel implements InputContext {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(ParamEditPanel.this));
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(ParamSpecEditPanel.this));
 			}
 
 			@Override
@@ -69,7 +66,7 @@ abstract class ParamEditPanel extends Panel implements InputContext {
 			
 		});
 		
-		BeanEditor editor = BeanContext.editBean("editor", bean);
+		BeanEditor editor = BeanContext.edit("editor", bean);
 		form.add(editor);
 		form.add(new AjaxButton("save") {
 
@@ -77,9 +74,9 @@ abstract class ParamEditPanel extends Panel implements InputContext {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				InputSpec param = bean.getParam();
-				if (paramIndex != -1) { 
-					InputSpec oldParam = params.get(paramIndex);
+				InputSpec param = bean.getParamSpec();
+				if (paramSpecIndex != -1) { 
+					InputSpec oldParam = paramSpecs.get(paramSpecIndex);
 					if (!param.getName().equals(oldParam.getName()) && getInputSpec(param.getName()) != null) {
 						editor.getErrorContext(new PathElement.Named("param"))
 								.getErrorContext(new PathElement.Named("name"))
@@ -92,10 +89,10 @@ abstract class ParamEditPanel extends Panel implements InputContext {
 				}
 
 				if (!editor.hasErrors(true)) {
-					if (paramIndex != -1) {
-						params.set(paramIndex, param);
+					if (paramSpecIndex != -1) {
+						paramSpecs.set(paramSpecIndex, param);
 					} else {
-						params.add(param);
+						paramSpecs.add(param);
 					}
 					onSave(target);
 				} else {
@@ -110,7 +107,7 @@ abstract class ParamEditPanel extends Panel implements InputContext {
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(ParamEditPanel.this));
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(ParamSpecEditPanel.this));
 			}
 
 			@Override
@@ -132,8 +129,8 @@ abstract class ParamEditPanel extends Panel implements InputContext {
 	public List<String> getInputNames() {
 		List<String> inputNames = new ArrayList<>();
 		int currentIndex = 0;
-		for (InputSpec param: params) {
-			if (currentIndex != paramIndex)
+		for (InputSpec param: paramSpecs) {
+			if (currentIndex != paramSpecIndex)
 				inputNames.add(param.getName());
 			currentIndex++;
 		}
@@ -142,7 +139,7 @@ abstract class ParamEditPanel extends Panel implements InputContext {
 	
 	@Override
 	public InputSpec getInputSpec(String paramName) {
-		for (InputSpec param: params) {
+		for (InputSpec param: paramSpecs) {
 			if (paramName.equals(param.getName()))
 				return param;
 		}
@@ -151,9 +148,7 @@ abstract class ParamEditPanel extends Panel implements InputContext {
 	
 	@Override
 	public String validateName(String inputName) {
-		if (!SourceVersion.isIdentifier(inputName)) 
-			return JobParam.INVALID_CHARS_MESSAGE;
-		else if (BuildConstants.ALL_FIELDS.contains(inputName))
+		if (BuildConstants.ALL_FIELDS.contains(inputName))
 			return "'" + inputName + "' is reserved";
 		else
 			return null;

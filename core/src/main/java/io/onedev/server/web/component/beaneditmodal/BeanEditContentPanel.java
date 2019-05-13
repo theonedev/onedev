@@ -40,7 +40,7 @@ abstract class BeanEditContentPanel extends Panel {
 		
 		form.add(new Label("title", EditableUtils.getDisplayName(bean.getClass())));
 		
-		form.add(BeanContext.editBean("editor", bean));
+		form.add(BeanContext.edit("editor", bean));
 		
 		form.add(new AjaxButton("ok") {
 

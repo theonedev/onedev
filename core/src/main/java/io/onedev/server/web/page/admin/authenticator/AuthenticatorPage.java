@@ -54,7 +54,7 @@ public class AuthenticatorPage extends AdministrationPage {
 		bean.setAuthenticator(OneDev.getInstance(SettingManager.class).getAuthenticator());
 		
 		PropertyEditor<Serializable> editor = 
-				PropertyContext.editBean("editor", bean, "authenticator");
+				PropertyContext.edit("editor", bean, "authenticator");
 		editor.setOutputMarkupId(true);
 		Button saveButton = new Button("save") {
 
@@ -145,7 +145,7 @@ public class AuthenticatorPage extends AdministrationPage {
 					@Override
 					protected Component newContent(String id) {
 						Fragment fragment = new Fragment(id, "testFrag", AuthenticatorPage.this);
-						BeanEditor tokenEditor = BeanContext.editBean("editor", token);
+						BeanEditor tokenEditor = BeanContext.edit("editor", token);
 						tokenEditor.setOutputMarkupId(true);
 						Form<?> form = new Form<Void>("form") {
 

@@ -45,14 +45,14 @@ abstract class JobExecutorPanel extends Panel {
 					@Override
 					protected void onSave(AjaxRequestTarget target) {
 						JobExecutorPanel.this.onSave(target);
-						Component viewer = BeanContext.viewBean("executor", getExecutor()).setOutputMarkupId(true);
+						Component viewer = BeanContext.view("executor", getExecutor()).setOutputMarkupId(true);
 						JobExecutorPanel.this.replace(viewer);
 						target.add(viewer);
 					}
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
-						Component viewer = BeanContext.viewBean("executor", getExecutor()).setOutputMarkupId(true);
+						Component viewer = BeanContext.view("executor", getExecutor()).setOutputMarkupId(true);
 						JobExecutorPanel.this.replace(viewer);
 						target.add(viewer);
 					}
@@ -100,7 +100,7 @@ abstract class JobExecutorPanel extends Panel {
 			
 		});
 		
-		add(BeanContext.viewBean("executor", getExecutor()).setOutputMarkupId(true));
+		add(BeanContext.view("executor", getExecutor()).setOutputMarkupId(true));
 		
 		add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 

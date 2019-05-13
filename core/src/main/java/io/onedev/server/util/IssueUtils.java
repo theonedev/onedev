@@ -35,7 +35,7 @@ public class IssueUtils {
 	
     private static final Set<String> FIX_ISSUE_WORDS = Sets.newHashSet("fix", "fixed", "fixes", "resolve", "resolved", "resolves");
     
-	private static final String BEAN_PREFIX = "IssueFieldBean";
+	private static final String FIELD_BEAN_PREFIX = "IssueFieldBean";
 	
 	public static void clearFields(Serializable fieldBean) {
 		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(fieldBean.getClass()).getPropertyDescriptors().values()) {
@@ -45,18 +45,18 @@ public class IssueUtils {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Class<? extends Serializable> defineBeanClass(Project project) {
-		String className = BEAN_PREFIX + project.getId();
+	public static Class<? extends Serializable> defineFieldBeanClass(Project project) {
+		String className = FIELD_BEAN_PREFIX + project.getId();
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		return (Class<? extends Serializable>) InputSpec.defineClass(className, issueSetting.getFieldSpecs());
 	}
 	
 	@Nullable
-	public static Class<? extends Serializable> loadBeanClass(String className) {
-		if (className.startsWith(BEAN_PREFIX)) {
-			Long projectId = Long.parseLong(className.substring(BEAN_PREFIX.length()));
+	public static Class<? extends Serializable> loadFieldBeanClass(String className) {
+		if (className.startsWith(FIELD_BEAN_PREFIX)) {
+			Long projectId = Long.parseLong(className.substring(FIELD_BEAN_PREFIX.length()));
 			Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-			return defineBeanClass(project);
+			return defineFieldBeanClass(project);
 		} else {
 			return null;
 		}

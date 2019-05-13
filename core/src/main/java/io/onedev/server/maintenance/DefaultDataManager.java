@@ -1,4 +1,4 @@
-package io.onedev.server.data;
+package io.onedev.server.maintenance;
 
 import java.io.File;
 import java.io.ObjectStreamException;

@@ -42,7 +42,7 @@ public class MailSettingPage extends AdministrationPage {
 		MailSettingHolder mailSettingHolder = new MailSettingHolder();
 		mailSettingHolder.setMailSetting(OneDev.getInstance(SettingManager.class).getMailSetting());
 		
-		BeanEditor editor = BeanContext.editBean("editor", mailSettingHolder);
+		BeanEditor editor = BeanContext.edit("editor", mailSettingHolder);
 		
 		Button saveButton = new Button("save") {
 

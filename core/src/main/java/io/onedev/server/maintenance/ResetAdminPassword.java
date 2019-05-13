@@ -1,4 +1,4 @@
-package io.onedev.server.command;
+package io.onedev.server.maintenance;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -20,16 +20,18 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
 
 @Singleton
-public class ResetAdminPasswordCommand extends DefaultPersistManager {
+public class ResetAdminPassword extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(ResetAdminPasswordCommand.class);
+	public static final String COMMAND = "reset_admin_password";
+	
+	private static final Logger logger = LoggerFactory.getLogger(ResetAdminPassword.class);
 	
 	private final UserManager userManager;
 	
 	private final PasswordService passwordService;
 	
 	@Inject
-	public ResetAdminPasswordCommand(PhysicalNamingStrategy physicalNamingStrategy, HibernateProperties properties, 
+	public ResetAdminPassword(PhysicalNamingStrategy physicalNamingStrategy, HibernateProperties properties, 
 			Interceptor interceptor, IdManager idManager, Dao dao, 
 			EntityValidator validator, UserManager userManager, PasswordService passwordService) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);

@@ -3,6 +3,7 @@ package io.onedev.server.util.inputspec.booleaninput;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 
 import com.google.common.collect.Lists;
@@ -61,7 +62,13 @@ public class BooleanInput extends InputSpec {
 
 	@Override
 	public Object convertToObject(List<String> strings) {
-		return Boolean.valueOf(strings.iterator().next());
+		String string = strings.iterator().next();
+		if (string.equalsIgnoreCase("true"))
+			return true;
+		else if (string.equalsIgnoreCase("false"))
+			return false;
+		else
+			throw new ValidationException("Invalid boolean value: " + string);
 	}
 
 	@Override

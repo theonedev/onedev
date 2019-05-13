@@ -30,7 +30,7 @@ public class NewMilestonePage extends ProjectIssuesPage {
 
 		Milestone milestone = new Milestone();
 		
-		BeanEditor editor = BeanContext.editBean("editor", milestone);
+		BeanEditor editor = BeanContext.edit("editor", milestone);
 		Form<?> form = new Form<Void>("form") {
 
 			@Override

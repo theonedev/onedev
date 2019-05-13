@@ -31,7 +31,7 @@ abstract class MilestoneEditPanel extends Panel {
 		super.onInitialize();
 
 		Milestone milestone = getMilestone();
-		BeanEditor editor = BeanContext.editBean("editor", milestone);
+		BeanEditor editor = BeanContext.edit("editor", milestone);
 		Form<?> form = new Form<Void>("form");
 		form.add(editor);
 		

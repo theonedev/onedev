@@ -969,19 +969,21 @@ public abstract class FormComponent<T> extends LabeledWebMarkupContainer impleme
 	 */
 	public final boolean isValid()
 	{
-		class IsValidVisitor implements IVisitor<FormComponent<?>, Boolean>
+		class IsValidVisitor implements IVisitor<Component, Boolean>
 		{
 			@Override
-			public void component(final FormComponent<?> formComponent, final IVisit<Boolean> visit)
+			public void component(final Component component, final IVisit<Boolean> visit)
 			{
-				if (formComponent.hasErrorMessage())
+				if (component.hasErrorMessage())
 				{
 					visit.stop(Boolean.FALSE);
 				}
 			}
 		}
 		IsValidVisitor tmp = new IsValidVisitor();
-		final Object result = visitFormComponentsPostOrder(this, tmp);
+		// Visit Component instead of FormComponent as sometimes we add error message to 
+		// ordinary components inside a FormComponentPanel
+		final Object result = visitComponentsPostOrder(this, tmp);
 		return (Boolean.FALSE != result);
 	}
 

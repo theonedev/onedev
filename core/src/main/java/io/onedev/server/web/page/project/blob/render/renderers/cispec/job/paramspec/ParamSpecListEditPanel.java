@@ -38,11 +38,11 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
 
 @SuppressWarnings("serial")
-public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
+public class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 
 	private final List<InputSpec> params;
 	
-	public ParamListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
+	public ParamSpecListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
 		params = new ArrayList<>();
@@ -58,7 +58,7 @@ public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new ParamEditPanel(id, params, -1) {
+				return new ParamSpecEditPanel(id, params, -1) {
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
@@ -69,7 +69,7 @@ public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 					protected void onSave(AjaxRequestTarget target) {
 						modal.close();
 						onPropertyUpdating(target);
-						target.add(ParamListEditPanel.this);
+						target.add(ParamSpecListEditPanel.this);
 					}
 
 				};
@@ -83,12 +83,12 @@ public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "nameColumnFrag", ParamListEditPanel.this);
+				Fragment fragment = new Fragment(componentId, "nameColumnFrag", ParamSpecListEditPanel.this);
 				ModalLink link = new ModalLink("link") {
 
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
-						return new ParamEditPanel(id, params, cellItem.findParent(Item.class).getIndex()) {
+						return new ParamSpecEditPanel(id, params, cellItem.findParent(Item.class).getIndex()) {
 
 							@Override
 							protected void onCancel(AjaxRequestTarget target) {
@@ -99,7 +99,7 @@ public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 							protected void onSave(AjaxRequestTarget target) {
 								modal.close();
 								onPropertyUpdating(target);
-								target.add(ParamListEditPanel.this);
+								target.add(ParamSpecListEditPanel.this);
 							}
 
 						};
@@ -134,14 +134,14 @@ public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "actionColumnFrag", ParamListEditPanel.this);
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", ParamSpecListEditPanel.this);
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						params.remove(rowModel.getObject());
 						onPropertyUpdating(target);
-						target.add(ParamListEditPanel.this);
+						target.add(ParamSpecListEditPanel.this);
 					}
 					
 				});
@@ -165,7 +165,7 @@ public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 		};
 		
 		DataTable<InputSpec, Void> dataTable;
-		add(dataTable = new DataTable<InputSpec, Void>("params", columns, dataProvider, Integer.MAX_VALUE));
+		add(dataTable = new DataTable<InputSpec, Void>("paramSpecs", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
 		
@@ -183,17 +183,12 @@ public class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 						Collections.swap(params, fromIndex-i, fromIndex-i-1);
 				}
 				onPropertyUpdating(target);
-				target.add(ParamListEditPanel.this);
+				target.add(ParamSpecListEditPanel.this);
 			}
 			
 		}.sortable("tbody"));
 		
 		setOutputMarkupId(true);		
-	}
-
-	@Override
-	protected String getErrorClass() {
-		return null;
 	}
 
 	@Override

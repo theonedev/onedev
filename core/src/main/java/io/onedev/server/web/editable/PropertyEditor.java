@@ -2,7 +2,6 @@ package io.onedev.server.web.editable;
 
 import java.util.Set;
 
-import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -60,18 +59,13 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 			@Override
 			protected String load() {
 				String classes = " property-editor editable ";
-				if (hasErrors(true) && getErrorClass() != null)
-					classes += getErrorClass();
+				if (hasErrors(false))
+					classes += "has-error";
 				return classes;
 			}
 			
 		}));
 		
-	}
-	
-	@Nullable
-	protected String getErrorClass() {
-		return "has-error";
 	}
 	
 	protected void onPropertyUpdating(IPartialPageRequestHandler target) {

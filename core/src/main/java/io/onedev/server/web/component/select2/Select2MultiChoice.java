@@ -73,7 +73,7 @@ public class Select2MultiChoice<T> extends AbstractSelect2Choice<T, Collection<T
 		if (choices == null) {
 			getModel().setObject(selection);
 		} else {
-			choices.clear();
+			choices = new ArrayList<>();
 			choices.addAll(selection);
 			getModel().setObject(choices);
 		}

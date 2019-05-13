@@ -14,9 +14,10 @@ import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.page.project.blob.render.renderers.cispec.job.JobAware;
 
 @SuppressWarnings("serial")
-abstract class TriggerEditPanel extends Panel {
+abstract class TriggerEditPanel extends Panel implements JobAware {
 
 	private final List<JobTrigger> triggers;
 	
@@ -62,7 +63,7 @@ abstract class TriggerEditPanel extends Panel {
 			
 		});
 		
-		BeanEditor editor = BeanContext.editBean("editor", bean);
+		BeanEditor editor = BeanContext.edit("editor", bean);
 		form.add(editor);
 		form.add(new AjaxButton("save") {
 

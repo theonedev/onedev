@@ -18,7 +18,7 @@ public class ManualConfigStep implements WizardStep {
 	
 	@Override
 	public FormComponent<Serializable> render(String componentId) {
-		return BeanContext.editBean(componentId, config.getSetting(), config.getExcludeProperties(), true);
+		return BeanContext.edit(componentId, config.getSetting(), config.getExcludeProperties(), true);
 	}
 
 	@Override

@@ -179,7 +179,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		});
 		
 		builtInFieldsBean = new BuiltInFieldsBean();
-		Class<? extends Serializable> fieldBeanClass = IssueUtils.defineBeanClass(getProject());
+		Class<? extends Serializable> fieldBeanClass = IssueUtils.defineFieldBeanClass(getProject());
 		Issue issue = new Issue();
 		issue.setProject(getProject());
 		if (getIssueQuery() != null && getIssueQuery().getCriteria() != null) {
@@ -201,7 +201,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		if (!selectedFields.contains(IssueConstants.FIELD_MILESTONE))
 			excludedProperties.add(IssueConstants.ATTR_MILESTONE);
 		
-		builtInFieldsEditor = BeanContext.editBean("builtInFieldsEditor", builtInFieldsBean, excludedProperties, true); 
+		builtInFieldsEditor = BeanContext.edit("builtInFieldsEditor", builtInFieldsBean, excludedProperties, true); 
 		form.add(builtInFieldsEditor);
 
 		excludedProperties = new HashSet<>();
@@ -212,7 +212,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 			}
 		}
 		
-		customFieldsEditor = BeanContext.editBean("customFieldsEditor", customFieldsBean, excludedProperties, true); 
+		customFieldsEditor = BeanContext.edit("customFieldsEditor", customFieldsBean, excludedProperties, true); 
 		form.add(customFieldsEditor);				
 
 		form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment"), false) {

@@ -184,11 +184,6 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		setOutputMarkupId(true);
 	}
 
-	@Override
-	protected String getErrorClass() {
-		return null;
-	}
-
 	private WebMarkupContainer addRow(Serializable element) {
 		WebMarkupContainer row = new WebMarkupContainer(rows.newChildId());
 		row.setOutputMarkupId(true);
@@ -278,7 +273,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	private Component newElementEditor(Serializable element) {
 		Component elementEditor;
 		if (element != null) {
-			elementEditor = BeanContext.editBean("elementEditor", element);
+			elementEditor = BeanContext.edit("elementEditor", element);
 		} else {
 			elementEditor = new WebMarkupContainer("elementEditor").setVisible(false);
 		}

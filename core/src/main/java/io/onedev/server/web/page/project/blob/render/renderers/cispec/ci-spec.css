@@ -98,7 +98,15 @@
 .ci-spec>.valid .def-list table>tbody>tr>td:first-child>div>a {
     margin-left: 0;
 }
-.floating.job-param>.content>.body>.bean-viewer>.bean-properties>table>tbody>tr>td.name {
+.floating.job-param-spec>.content>.body>.bean-viewer>.bean-properties>table>tbody>tr>td.name {
 	min-width: 150px;
 } 
+.floating.job-param-spec .property-uuid, .job-param-spec-edit .property-uuid {
+	display: none;
+}
 
+.floating.dependency td.name, .floating.job-trigger td.name {
+    width: 120px !important;
+    word-break: break-all !important;
+    white-space: normal !important;
+}

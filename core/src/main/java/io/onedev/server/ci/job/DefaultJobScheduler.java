@@ -19,12 +19,15 @@ import java.util.concurrent.TimeoutException;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.validation.ValidationException;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Splitter;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
@@ -170,7 +173,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	private Map<String, List<String>> getParamMatrix(List<JobParam> params) {
 		Map<String, List<String>> paramMatrix = new LinkedHashMap<>();
 		for (JobParam param: params) 
-			paramMatrix.put(param.getName(), param.getValueProvider().getValues());
+			paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
 		return paramMatrix;
 	}
 	
@@ -222,8 +225,15 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 				return builds;
 			}
 
+			try {
+				JobParam.validateParamMap(job.getParamSpecs(), paramMap);
+			} catch (ValidationException e) {
+				markBuildError(build, e.getMessage());
+				return builds;
+			}
+			
 			for (Dependency dependency: job.getDependencies()) {
-				new MatrixRunner(getParamMatrix(dependency.getParams())).run(new MatrixRunner.Runnable() {
+				new MatrixRunner(getParamMatrix(dependency.getJobParams())).run(new MatrixRunner.Runnable() {
 					
 					@Override
 					public void run(Map<String, String> params) {
@@ -318,7 +328,9 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 
 										logger.info("Executing job with executor '" + executor.getName() + "'...");
 										
-										executor.execute(job.getEnvironment(), workspace, envVars, job.getCommands(), snapshot, 
+										List<String> commands = Splitter.on("\n").trimResults().omitEmptyStrings()
+												.splitToList(job.getCommands());
+										executor.execute(job.getEnvironment(), workspace, envVars, commands, snapshot, 
 												job.getCaches(), new PatternSet(includeFiles, excludeFiles), logger);
 										
 										sessionManager.run(new Runnable() {

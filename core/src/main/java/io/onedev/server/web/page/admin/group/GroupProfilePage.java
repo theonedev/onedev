@@ -141,7 +141,7 @@ public class GroupProfilePage extends GroupPage {
 		} else {
 			Group group = new Group();
 			new BeanDescriptor(Group.class).copyProperties(getGroup(), group);
-			add(BeanContext.viewBean("content", group));
+			add(BeanContext.view("content", group));
 		}
 
 	}

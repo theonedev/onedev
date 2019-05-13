@@ -35,7 +35,7 @@ public class PolymorphicListPropertyViewer extends Panel {
 				String displayName = EditableUtils.getDisplayName(item.getModelObject().getClass());
 				displayName = Application.get().getResourceSettings().getLocalizer().getString(displayName, this, displayName);
 				item.add(new Label("elementType", displayName));
-				item.add(BeanContext.viewBean("element", item.getModelObject()));
+				item.add(BeanContext.view("element", item.getModelObject()));
 			}
 			
 		});

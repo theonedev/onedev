@@ -38,7 +38,7 @@ public class NewGroupPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BeanEditor editor = BeanContext.editBean("editor", group, 
+		BeanEditor editor = BeanContext.edit("editor", group, 
 				Sets.newHashSet("administrator", "canCreateProjects"), true);
 		
 		Form<?> form = new Form<Void>("form") {

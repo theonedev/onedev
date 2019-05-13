@@ -1,10 +1,11 @@
-package io.onedev.server.command;
+package io.onedev.server.maintenance;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
+import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,12 +18,14 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
 
 @Singleton
-public class CheckDataVersionCommand extends DefaultPersistManager {
+public class CleanDatabase extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(CheckDataVersionCommand.class);
+	public static final String COMMAND = "clean";
+	
+	private static final Logger logger = LoggerFactory.getLogger(CleanDatabase.class);
 	
 	@Inject
-	public CheckDataVersionCommand(PhysicalNamingStrategy physicalNamingStrategy,
+	public CleanDatabase(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);
@@ -30,14 +33,23 @@ public class CheckDataVersionCommand extends DefaultPersistManager {
 
 	@Override
 	public void start() {
-		if (Bootstrap.isServerRunning(Bootstrap.installDir) && getDialect().toLowerCase().contains("hsql")) {
-			logger.error("Please stop server before checking data version");
+		if (Bootstrap.isServerRunning(Bootstrap.installDir)) {
+			logger.error("Please stop server before cleaning database");
 			System.exit(1);
 		}
+		checkDataVersion(false);
+
+		Metadata metadata = buildMetadata();
+		cleanDatabase(metadata);
+
+		if (getDialect().toLowerCase().contains("hsql")) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
+		}
+		logger.info("Database is cleaned successfully");
 		
-		// Use system.out in case logger is suppressed by user as this output is important to 
-		// upgrade procedure
-		System.out.println("Data version: " + checkDataVersion(false));
 		System.exit(0);
 	}
 

@@ -40,14 +40,14 @@ abstract class TagProtectionPanel extends Panel {
 					@Override
 					protected void onSave(AjaxRequestTarget target, TagProtection protection) {
 						TagProtectionPanel.this.onSave(target, protection);
-						Component protectionViewer = BeanContext.viewBean("protection", protection).setOutputMarkupId(true);
+						Component protectionViewer = BeanContext.view("protection", protection).setOutputMarkupId(true);
 						TagProtectionPanel.this.replace(protectionViewer);
 						target.add(protectionViewer);
 					}
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
-						Component protectionViewer = BeanContext.viewBean("protection", protection).setOutputMarkupId(true);
+						Component protectionViewer = BeanContext.view("protection", protection).setOutputMarkupId(true);
 						TagProtectionPanel.this.replace(protectionViewer);
 						target.add(protectionViewer);
 					}
@@ -104,7 +104,7 @@ abstract class TagProtectionPanel extends Panel {
 			
 		}));
 		
-		add(BeanContext.viewBean("protection", protection).setOutputMarkupId(true));
+		add(BeanContext.view("protection", protection).setOutputMarkupId(true));
 		
 		setOutputMarkupId(true);
 	}

@@ -1,6 +1,7 @@
 package io.onedev.server.util.inputspec;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -271,7 +272,7 @@ public abstract class InputSpec implements Serializable {
 		return false;
 	}
 	
-	public static Class<?> defineClass(String className, List<InputSpec> inputs) {
+	public static Class<?> defineClass(String className, Collection<InputSpec> inputs) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("import org.apache.commons.lang3.SerializationUtils;\n");
 		buffer.append("import com.google.common.base.Optional;\n");

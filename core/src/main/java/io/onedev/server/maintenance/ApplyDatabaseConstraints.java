@@ -1,4 +1,4 @@
-package io.onedev.server.command;
+package io.onedev.server.maintenance;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,12 +22,14 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
 
 @Singleton
-public class ApplyDBConstraintsCommand extends DefaultPersistManager {
+public class ApplyDatabaseConstraints extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(ApplyDBConstraintsCommand.class);
+	public static final String COMMAND = "apply_db_constraints";
+	
+	private static final Logger logger = LoggerFactory.getLogger(ApplyDatabaseConstraints.class);
 	
 	@Inject
-	public ApplyDBConstraintsCommand(PhysicalNamingStrategy physicalNamingStrategy,
+	public ApplyDatabaseConstraints(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);

@@ -35,7 +35,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getIssue().getProject());
+		Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass(getIssue().getProject());
 		Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
 
 		Form<?> form = new Form<Void>("form");
@@ -46,7 +46,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 		
 		PressButtonTrigger trigger = (PressButtonTrigger) getTransition().getTrigger();
 		
-		BeanEditor editor = BeanContext.editBean("editor", fieldBean, 
+		BeanEditor editor = BeanContext.edit("editor", fieldBean, 
 				IssueUtils.getPropertyNames(getIssue().getProject(), fieldBeanClass, trigger.getPromptFields()), false); 
 		form.add(editor);
 		

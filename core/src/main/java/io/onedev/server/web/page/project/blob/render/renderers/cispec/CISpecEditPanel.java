@@ -44,7 +44,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.util.WicketUtils;
 
 @SuppressWarnings("serial")
-public class CISpecEditPanel extends FormComponentPanel<byte[]> {
+public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpecAware {
 
 	private final BlobRenderContext context;
 	
@@ -94,7 +94,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 	}
 	
 	private Component newJobContent(Job job) {
-		BeanEditor content = BeanContext.editBean(jobContents.newChildId(), job);
+		BeanEditor content = BeanContext.edit(jobContents.newChildId(), job);
 		content.add(new Behavior() {
 
 			@Override
@@ -230,7 +230,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 
 	@Override
 	public void convertInput() {
-		CISpec editingCISpec = getEditingCISpec();
+		CISpec editingCISpec = getCISpec();
 		if (editingCISpec != null) {
 			setConvertedInput(VersionedDocument.fromBean(editingCISpec).toXML().getBytes(Charsets.UTF_8));
 		} else {
@@ -248,8 +248,9 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
+	@Override
 	@Nullable
-	public CISpec getEditingCISpec() {
+	public CISpec getCISpec() {
 		if (parseResult instanceof CISpec) {
 			CISpec ciSpec = new CISpec();
 			for (Component child: jobContents) {

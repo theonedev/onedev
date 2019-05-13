@@ -2,34 +2,33 @@ package io.onedev.server.ci;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import javax.lang.model.SourceVersion;
-import javax.validation.ConstraintValidatorContext;
-
+import org.apache.wicket.Component;
 import org.hibernate.validator.constraints.NotEmpty;
+
+import com.google.common.base.Preconditions;
 
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
-import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.web.editable.annotation.ParamSpecProvider;
+import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecAware;
 import io.onedev.server.web.page.project.blob.render.renderers.cispec.job.dependency.DependencyEditPanel;
+import io.onedev.server.web.util.WicketUtils;
 
 @Editable
-@ClassValidating
-public class Dependency implements Serializable, Validatable {
+public class Dependency implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private String jobName;
 	
-	private List<JobParam> params = new ArrayList<>();
+	private List<JobParam> jobParams = new ArrayList<>();
 	
 	@Editable(order=100)
 	@ChoiceProvider("getJobChoices")
@@ -42,56 +41,43 @@ public class Dependency implements Serializable, Validatable {
 		this.jobName = jobName;
 	}
 
-	@Editable(name="Job Parameters", order=200, description="Specify parameters of the dependency job. Dependency is satisfied only when "
-			+ "there are builds of the job with same set of parameters specified here")
-	public List<JobParam> getParams() {
-		return params;
+	@Editable(order=200)
+	@ParamSpecProvider("getParamSpecs")
+	@OmitName
+	public List<JobParam> getJobParams() {
+		return jobParams;
 	}
 
-	public void setParams(List<JobParam> params) {
-		this.params = params;
+	public void setJobParams(List<JobParam> jobParams) {
+		this.jobParams = jobParams;
 	}
-
+	
 	@SuppressWarnings("unused")
 	private static List<String> getJobChoices() {
 		DependencyEditPanel editor = OneContext.get().getComponent().findParent(DependencyEditPanel.class);
+		Preconditions.checkNotNull(editor);
 		List<String> choices = new ArrayList<>();
-		Job belongingJob = editor.getBelongingJob();
-		for (Job job: editor.getEditingCISpec().getJobs()) {
+		Job belongingJob = editor.getJob();
+		for (Job job: editor.getCISpec().getJobs()) {
 			if (job.getName() != null)
 				choices.add(job.getName());
 		}
 		choices.remove(belongingJob.getName());
 		return choices;
 	}
-
-	@Override
-	public boolean isValid(ConstraintValidatorContext context) {
-		Set<String> paramNames = new HashSet<>();
-		boolean isValid = true;
-		for (JobParam param: params) {
-			if (param.getName() != null) {
-				if (!SourceVersion.isIdentifier(param.getName())) {
-					isValid = false;
-					context.buildConstraintViolationWithTemplate("Invalid param name '" + param.getName() + "': " + JobParam.INVALID_CHARS_MESSAGE)
-							.addPropertyNode("params").addConstraintViolation();
-				} else if (BuildConstants.ALL_FIELDS.contains(param.getName())) {
-					isValid = false;
-					context.buildConstraintViolationWithTemplate("Reserved name: " + param.getName())
-							.addPropertyNode("params").addConstraintViolation();
-				} else if (paramNames.contains(param.getName())) {
-					isValid = false;
-					context.buildConstraintViolationWithTemplate("Duplicate param: " + param.getName())
-							.addPropertyNode("params").addConstraintViolation();
-				} else {
-					paramNames.add(param.getName());
-				}
-			}
+	
+	@SuppressWarnings("unused")
+	private static List<InputSpec> getParamSpecs() {
+		String jobName = (String) OneContext.get().getEditContext().getInputValue("jobName");
+		if (jobName != null) {
+			Component component = OneContext.get().getComponent();
+			CISpecAware ciSpecAware = Preconditions.checkNotNull(WicketUtils.findInnermost(component, CISpecAware.class));
+			CISpec ciSpec = Preconditions.checkNotNull(ciSpecAware.getCISpec());
+			Job job = Preconditions.checkNotNull(ciSpec.getJobMap().get(jobName));
+			return job.getParamSpecs();
+		} else {
+			return new ArrayList<>();
 		}
-		
-		if (!isValid)
-			context.disableDefaultConstraintViolation();
-		return isValid;
 	}
 	
 }

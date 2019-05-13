@@ -45,7 +45,7 @@ public class PolymorphicPropertyViewer extends Panel {
 			}
 			
 		});
-		add(BeanContext.viewBean("beanViewer", propertyValue));
+		add(BeanContext.view("beanViewer", propertyValue));
 	}
 
 }

@@ -104,7 +104,7 @@ public abstract class IssueOperationsPanel extends Panel {
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							Fragment fragment = new Fragment(ACTION_OPTIONS_ID, "transitionFrag", IssueOperationsPanel.this);
-							Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getIssue().getProject());
+							Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass(getIssue().getProject());
 							Serializable fieldBean = getIssue().getFieldBean(fieldBeanClass, true);
 
 							Form<?> form = new Form<Void>("form") {
@@ -119,7 +119,7 @@ public abstract class IssueOperationsPanel extends Panel {
 							
 							Collection<String> propertyNames = IssueUtils.getPropertyNames(getIssue().getProject(), 
 									fieldBeanClass, trigger.getPromptFields());
-							BeanEditor editor = BeanContext.editBean("fields", fieldBean, propertyNames, false); 
+							BeanEditor editor = BeanContext.edit("fields", fieldBean, propertyNames, false); 
 							form.add(editor);
 							
 							form.add(new CommentInput("comment", new PropertyModel<String>(this, "comment"), false) {

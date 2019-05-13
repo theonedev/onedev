@@ -55,7 +55,7 @@ public abstract class BoardEditPanel extends Panel {
 		for (String column: board.getColumns()) 
 			board.getEditColumns().add(column!=null?column:BoardSpec.NULL_COLUMN);
 		
-		BeanEditor editor = BeanContext.editBean("editor", board);
+		BeanEditor editor = BeanContext.edit("editor", board);
 		
 		Form<?> form = new Form<Void>("form");
 		form.add(editor);

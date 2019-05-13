@@ -1,16 +1,12 @@
-package io.onedev.server.command;
+package io.onedev.server.maintenance;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.hibernate.Interceptor;
 import org.hibernate.SessionFactory;
-import org.hibernate.boot.Metadata;
 import org.hibernate.boot.model.naming.PhysicalNamingStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.server.persistence.DefaultPersistManager;
 import io.onedev.server.persistence.HibernateProperties;
 import io.onedev.server.persistence.IdManager;
@@ -18,12 +14,12 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
 
 @Singleton
-public class CleanDBCommand extends DefaultPersistManager {
+public class DatabaseDialect extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(CleanDBCommand.class);
-	
+	public static final String COMMAND = "db_dialect";
+
 	@Inject
-	public CleanDBCommand(PhysicalNamingStrategy physicalNamingStrategy,
+	public DatabaseDialect(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);
@@ -31,23 +27,9 @@ public class CleanDBCommand extends DefaultPersistManager {
 
 	@Override
 	public void start() {
-		if (Bootstrap.isServerRunning(Bootstrap.installDir)) {
-			logger.error("Please stop server before cleaning database");
-			System.exit(1);
-		}
-		checkDataVersion(false);
-
-		Metadata metadata = buildMetadata();
-		cleanDatabase(metadata);
-
-		if (getDialect().toLowerCase().contains("hsql")) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-			}
-		}
-		logger.info("Database is cleaned successfully");
-		
+		// Use system.out in case logger is suppressed by user as this output is important to 
+		// upgrade procedure
+		System.out.println("Database dialect: " + getDialect());
 		System.exit(0);
 	}
 

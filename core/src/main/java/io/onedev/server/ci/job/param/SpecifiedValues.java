@@ -2,21 +2,15 @@ package io.onedev.server.ci.job.param;
 
 import java.util.List;
 
-import javax.validation.constraints.Size;
-
-import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.OmitName;
-
-@Editable(order=100, name="Use specified values")
-public class SpecifiedValues implements ValueProvider {
+public class SpecifiedValues implements ValuesProvider {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<String> values;
+	public static final String DISPLAY_NAME = "Use specified values";
 	
-	@Editable(name="Values", description="Specify values of the parameter, with each line representing a separate value")
-	@OmitName
-	@Size(min=1, message="At least one value needs to be specified")
+	private List<String> values;
+
+	@Override
 	public List<String> getValues() {
 		return values;
 	}

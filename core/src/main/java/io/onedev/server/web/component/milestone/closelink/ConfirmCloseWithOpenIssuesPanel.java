@@ -34,7 +34,7 @@ abstract class ConfirmCloseWithOpenIssuesPanel extends Panel {
 		
 		MilestoneCloseOption option = new MilestoneCloseOption();
 		option.setMilestoneToClose(getMilestone().getName());
-		form.add(BeanContext.editBean("editor", option, Sets.newHashSet("milestoneToClose"), true));
+		form.add(BeanContext.edit("editor", option, Sets.newHashSet("milestoneToClose"), true));
 		
 		form.add(new AjaxLink<Void>("close") {
 

@@ -31,7 +31,7 @@ public class BeanEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 							if (model.getObject() != null) {
-								return BeanContext.viewBean(id, model.getObject());
+								return BeanContext.view(id, model.getObject());
 							} else {
 								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 							}

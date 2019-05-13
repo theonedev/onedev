@@ -46,7 +46,7 @@ public class DatabaseBackupPage extends AdministrationPage {
 			}
 			
 		};
-		form.add(BeanContext.editBean("editor", backupSettingHolder));
+		form.add(BeanContext.edit("editor", backupSettingHolder));
 		form.add(new ResourceLink<Void>("backupNow", new AbstractResource() {
 
 			@Override

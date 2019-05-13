@@ -256,11 +256,11 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 						protected Component newBody(String id) {
 							SideFloating sideFloating = this;
 							Fragment fragment = new Fragment(id, "viewFieldFrag", IssueFieldListPage.this);
-							fragment.add(BeanContext.viewBean("viewer1", getField(), Sets.newHashSet("name"), true));
+							fragment.add(BeanContext.view("viewer1", getField(), Sets.newHashSet("name"), true));
 							FieldBean bean = new FieldBean();
 							bean.setPromptUponIssueOpen(getSetting().getDefaultPromptFieldsUponIssueOpen().contains(getField().getName()));
 							bean.setDisplayInIssueList(getSetting().getDefaultListFields().contains(getField().getName()));
-							fragment.add(BeanContext.viewBean("viewer2", bean, Sets.newHashSet("field"), true));
+							fragment.add(BeanContext.view("viewer2", bean, Sets.newHashSet("field"), true));
 							fragment.add(new ModalLink("edit") {
 
 								@Override

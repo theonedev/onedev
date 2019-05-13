@@ -10,12 +10,15 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.ValidationException;
 
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
@@ -67,23 +70,42 @@ public class CISpec implements Serializable, Validatable {
 		for (int i=0; i<jobs.size(); i++) {
 			Job job = jobs.get(i);
 			for (Dependency dependency: job.getDependencies()) {
-				if (!getJobMap().containsKey(dependency.getJobName())) {
+				Job dependencyJob = getJobMap().get(dependency.getJobName());
+				if (dependencyJob != null) {
+					try {
+						JobParam.validateParams(dependencyJob.getParamSpecs(), dependency.getJobParams());
+					} catch (ValidationException e) {
+						String message = "Error validating job parameters of dependency '" 
+								+ dependencyJob.getName() + "': " + e.getMessage();
+						context.buildConstraintViolationWithTemplate(message)
+								.addPropertyNode("jobs").addPropertyNode("dependencies")
+									.inIterable().atIndex(i)
+								.addConstraintViolation();
+						valid = false;
+					}
+				} else {
 					context.buildConstraintViolationWithTemplate("Dependency job not found: " + dependency.getJobName())
 							.addPropertyNode("jobs").addPropertyNode("dependencies")
 								.inIterable().atIndex(i)
 							.addConstraintViolation();
 					valid = false;
 				}
-			}
-		}
-		
-		for (int i=0; i<jobs.size(); i++) {
-			Job job = jobs.get(i);
-			for (Dependency dependency: job.getDependencies()) {
 				List<String> dependencyChain = Lists.newArrayList(job.getName());
 				if (hasCircularDependencies(dependencyChain, dependency.getJobName())) {
 					context.buildConstraintViolationWithTemplate("Circular dependencies found: " + dependencyChain)
 							.addPropertyNode("jobs").addPropertyNode("dependencies")
+								.inIterable().atIndex(i)
+							.addConstraintViolation();
+					valid = false;
+				}
+			}
+			for (JobTrigger trigger: job.getTriggers()) {
+				try {
+					JobParam.validateParams(job.getParamSpecs(), trigger.getParams());
+				} catch (ValidationException e) {
+					String message = "Error validating job parameters: " + e.getMessage();
+					context.buildConstraintViolationWithTemplate(message)
+							.addPropertyNode("jobs").addPropertyNode("triggers")
 								.inIterable().atIndex(i)
 							.addConstraintViolation();
 					valid = false;

@@ -31,7 +31,7 @@ public class NewProjectPage extends LayoutPage {
 		
 		Project project = new Project();
 		
-		BeanEditor editor = BeanContext.editBean("editor", project, 
+		BeanEditor editor = BeanContext.edit("editor", project, 
 				Lists.newArrayList("name", "description", "defaultPrivilege"), false);
 		
 		Form<?> form = new Form<Void>("form") {

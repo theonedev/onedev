@@ -10,16 +10,17 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.ci.CISpec;
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecAware;
 
 @SuppressWarnings("serial")
-public abstract class DependencyEditPanel extends Panel {
+public abstract class DependencyEditPanel extends Panel implements CISpecAware {
 
 	private final List<Dependency> dependencies;
 	
@@ -52,6 +53,8 @@ public abstract class DependencyEditPanel extends Panel {
 			
 		};
 		
+		form.add(new NotificationPanel("feedback", form));
+		
 		form.add(new AjaxLink<Void>("close") {
 
 			@Override
@@ -67,7 +70,7 @@ public abstract class DependencyEditPanel extends Panel {
 			
 		});
 		
-		BeanEditor editor = BeanContext.editBean("editor", dependency);
+		BeanEditor editor = BeanContext.edit("editor", dependency);
 		form.add(editor);
 		form.add(new AjaxButton("save") {
 
@@ -78,11 +81,11 @@ public abstract class DependencyEditPanel extends Panel {
 				if (dependencyIndex != -1) { 
 					Dependency oldDependency = dependencies.get(dependencyIndex);
 					if (!dependency.getJobName().equals(oldDependency.getJobName()) && getDependency(dependency.getJobName()) != null) {
-						editor.getErrorContext(new PathElement.Named("job"))
+						editor.getErrorContext(new PathElement.Named("jobName"))
 								.addError("Dependency to this job is already defined");
 					}
 				} else if (getDependency(dependency.getJobName()) != null) {
-					editor.getErrorContext(new PathElement.Named("job"))
+					editor.getErrorContext(new PathElement.Named("jobName"))
 							.addError("Dependency to this job is already defined");
 				}
 
@@ -131,8 +134,6 @@ public abstract class DependencyEditPanel extends Panel {
 	
 	protected abstract void onCancel(AjaxRequestTarget target);
 
-	public abstract CISpec getEditingCISpec();
-	
-	public abstract Job getBelongingJob();
-	
+	public abstract Job getJob();
+
 }

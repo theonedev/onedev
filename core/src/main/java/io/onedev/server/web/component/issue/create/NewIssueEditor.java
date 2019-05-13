@@ -62,7 +62,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 
 		Issue issue = newIssue();
 		
-		Class<?> fieldBeanClass = IssueUtils.defineBeanClass(getProject());
+		Class<?> fieldBeanClass = IssueUtils.defineFieldBeanClass(getProject());
 		Serializable fieldBean = issue.getFieldBean(fieldBeanClass, true);
 		titleInput = new TextField<String>("title", Model.of("")); 
 		titleInput.setRequired(true).setLabel(Model.of("Title"));

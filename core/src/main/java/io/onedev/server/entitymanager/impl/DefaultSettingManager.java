@@ -10,8 +10,8 @@ import org.hibernate.criterion.Restrictions;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.server.data.DataManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.authenticator.Authenticator;

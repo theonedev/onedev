@@ -34,7 +34,7 @@ public class SecuritySettingPage extends AdministrationPage {
 			}
 			
 		};
-		form.add(BeanContext.editBean("editor", securitySetting));
+		form.add(BeanContext.edit("editor", securitySetting));
 		
 		add(form);
 	}

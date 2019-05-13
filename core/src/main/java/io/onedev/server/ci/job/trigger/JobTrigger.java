@@ -2,30 +2,33 @@ package io.onedev.server.ci.job.trigger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import javax.lang.model.SourceVersion;
-import javax.validation.ConstraintValidatorContext;
+import org.apache.wicket.Component;
+
+import com.google.common.base.Preconditions;
 
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.event.ProjectEvent;
-import io.onedev.server.util.BuildConstants;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
+import io.onedev.server.util.OneContext;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.OmitName;
+import io.onedev.server.web.editable.annotation.ParamSpecProvider;
+import io.onedev.server.web.page.project.blob.render.renderers.cispec.job.JobAware;
+import io.onedev.server.web.util.WicketUtils;
 
 @Editable
-@ClassValidating
-public abstract class JobTrigger implements Validatable, Serializable {
+public abstract class JobTrigger implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private List<JobParam> params = new ArrayList<>();
 
 	@Editable(name="Trigger Parameters", order=1000, description="Specify parameters to trigger the job")
+	@ParamSpecProvider("getParamSpecs")
+	@OmitName
 	public List<JobParam> getParams() {
 		return params;
 	}
@@ -34,37 +37,15 @@ public abstract class JobTrigger implements Validatable, Serializable {
 		this.params = params;
 	}
 	
+	@SuppressWarnings("unused")
+	private static List<InputSpec> getParamSpecs() {
+		Component component = OneContext.get().getComponent();
+		JobAware jobAware = Preconditions.checkNotNull(WicketUtils.findInnermost(component, JobAware.class));
+		return jobAware.getJob().getParamSpecs();
+	}
+	
 	public abstract boolean matches(ProjectEvent event, Job job);
 	
 	public abstract String getDescription();
 
-	@Override
-	public boolean isValid(ConstraintValidatorContext context) {
-		Set<String> paramNames = new HashSet<>();
-		boolean isValid = true;
-		for (JobParam param: params) {
-			if (param.getName() != null) {
-				if (!SourceVersion.isIdentifier(param.getName())) {
-					isValid = false;
-					context.buildConstraintViolationWithTemplate("Invalid param name '" + param.getName() + "': " + JobParam.INVALID_CHARS_MESSAGE)
-							.addPropertyNode("params").addConstraintViolation();
-				} else if (BuildConstants.ALL_FIELDS.contains(param.getName())) {
-					isValid = false;
-					context.buildConstraintViolationWithTemplate("Reserved param name: " + param.getName())
-							.addPropertyNode("params").addConstraintViolation();
-				} else if (paramNames.contains(param.getName())) {
-					isValid = false;
-					context.buildConstraintViolationWithTemplate("Duplicate param name: " + param.getName())
-							.addPropertyNode("params").addConstraintViolation();
-				} else {
-					paramNames.add(param.getName());
-				}
-			}
-		}
-		
-		if (!isValid)
-			context.disableDefaultConstraintViolation();
-		return isValid;
-	}
-	
 }

@@ -26,6 +26,7 @@ import org.apache.wicket.model.Model;
 import io.onedev.server.ci.Dependency;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
+import io.onedev.server.web.page.layout.SideFloating.Placement;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
@@ -46,7 +47,7 @@ public class DependencyListViewPanel extends Panel {
 		
 		List<IColumn<Dependency, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<Dependency, Void>(Model.of("Job")) {
+		columns.add(new AbstractColumn<Dependency, Void>(Model.of("Name")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
@@ -61,7 +62,7 @@ public class DependencyListViewPanel extends Panel {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<Dependency, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<Dependency, Void>(Model.of("#Params")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
@@ -69,10 +70,29 @@ public class DependencyListViewPanel extends Panel {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+						return new Label(componentId, rowModel.getObject().getJobParams().size());
 					}
 					
 				});
+			}
+		});		
+		
+		columns.add(new AbstractColumn<Dependency, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<Dependency>> cellItem, String componentId, IModel<Dependency> rowModel) {
+				if (!rowModel.getObject().getJobParams().isEmpty()) {
+					cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
+
+						@Override
+						protected Component newLabel(String componentId) {
+							return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+						}
+						
+					});
+				} else {
+					cellItem.add(new Label(componentId));
+				}
 			}
 
 			@Override
@@ -102,7 +122,7 @@ public class DependencyListViewPanel extends Panel {
 			
 		});
 	}
-
+	
 	private abstract class ColumnFragment extends Fragment {
 
 		private final int index;
@@ -121,7 +141,7 @@ public class DependencyListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, SideFloating.Placement.RIGHT) {
+					new SideFloating(target, Placement.RIGHT) {
 
 						@Override
 						protected String getTitle() {
@@ -136,9 +156,9 @@ public class DependencyListViewPanel extends Panel {
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.viewBean(id, dependencies.get(index), Sets.newHashSet("job"), true);
+							return BeanContext.view(id, dependencies.get(index), Sets.newHashSet("job"), true);
 						}
-
+							
 					};
 				}
 				

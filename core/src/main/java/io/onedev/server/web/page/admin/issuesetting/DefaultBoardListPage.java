@@ -225,7 +225,7 @@ public class DefaultBoardListPage extends GlobalIssueSettingPage {
 			protected Component newBody(String id) {
 				SideFloating sideFloating = this;
 				Fragment fragment = new Fragment(id, "viewBoardFrag", DefaultBoardListPage.this);
-				fragment.add(BeanContext.viewBean("viewer", getBoard(), Sets.newHashSet("name"), true));
+				fragment.add(BeanContext.view("viewer", getBoard(), Sets.newHashSet("name"), true));
 				fragment.add(new ModalLink("edit") {
 
 					@Override

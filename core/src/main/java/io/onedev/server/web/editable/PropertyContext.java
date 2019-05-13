@@ -39,10 +39,9 @@ public abstract class PropertyContext<T> implements Serializable {
 		return Lists.newArrayList();
 	}
 
-	public static PropertyEditor<Serializable> editModel(String componentId, 
-			final IModel<Serializable> beanModel, String propertyName) {
+	public static PropertyEditor<Serializable> editModel(String componentId, IModel<Serializable> beanModel, String propertyName) {
 		
-		final PropertyContext<Serializable> editContext = of(ClassUtils.unproxy(beanModel.getObject().getClass()), propertyName);
+		PropertyContext<Serializable> editContext = of(ClassUtils.unproxy(beanModel.getObject().getClass()), propertyName);
 		return editContext.renderForEdit(componentId, new IModel<Serializable>() {
 
 			@Override
@@ -63,8 +62,7 @@ public abstract class PropertyContext<T> implements Serializable {
 		});
 	}
 
-	public static PropertyEditor<Serializable> editBean(String componentId, 
-			final Serializable bean, String propertyName) {
+	public static PropertyEditor<Serializable> edit(String componentId, Serializable bean, String propertyName) {
 		
 		IModel<Serializable> beanModel = new IModel<Serializable>() {
 
@@ -86,8 +84,8 @@ public abstract class PropertyContext<T> implements Serializable {
 		return editModel(componentId, beanModel, propertyName);
 	}
 
-	public static Component viewModel(String componentId, final IModel<Serializable> beanModel, String propertyName) {
-		final PropertyContext<Serializable> editContext = of(ClassUtils.unproxy(beanModel.getObject().getClass()), propertyName);
+	public static Component viewModel(String componentId, IModel<Serializable> beanModel, String propertyName) {
+		PropertyContext<Serializable> editContext = of(ClassUtils.unproxy(beanModel.getObject().getClass()), propertyName);
 		return editContext.renderForView(componentId, new LoadableDetachableModel<Serializable>() {
 
 			@Override
@@ -98,7 +96,7 @@ public abstract class PropertyContext<T> implements Serializable {
 		});
 	}
 
-	public static Component viewBean(String componentId, Serializable bean, String propertyName) {
+	public static Component view(String componentId, Serializable bean, String propertyName) {
 		return viewModel(componentId, Model.of(bean), propertyName);
 	}
 

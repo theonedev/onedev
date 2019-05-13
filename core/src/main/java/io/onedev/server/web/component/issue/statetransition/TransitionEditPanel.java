@@ -69,7 +69,7 @@ abstract class TransitionEditPanel extends Panel implements InputContext {
 			
 		});
 		
-		BeanEditor editor = BeanContext.editBean("editor", transition);
+		BeanEditor editor = BeanContext.edit("editor", transition);
 		form.add(editor);
 		form.add(new AjaxButton("save") {
 

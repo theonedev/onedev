@@ -35,7 +35,7 @@ abstract class NewBoardPanel extends Panel {
 		
 		BoardSpec board = new BoardSpec();
 		
-		BeanEditor editor = BeanContext.editBean("editor", board);
+		BeanEditor editor = BeanContext.edit("editor", board);
 		Form<?> form = new Form<Void>("form");
 		form.add(editor);
 		form.add(new AjaxButton("create") {

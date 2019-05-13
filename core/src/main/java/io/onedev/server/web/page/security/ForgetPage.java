@@ -42,7 +42,7 @@ public class ForgetPage extends BasePage {
 		final HelperBean bean = new HelperBean();
 		Form<?> form = new Form<Void>("form");
 		form.add(new NotificationPanel("feedback", form));		
-		form.add(BeanContext.editBean("editor", bean));
+		form.add(BeanContext.edit("editor", bean));
 		
 		form.add(new AjaxButton("reset") {
 			private TestFormBehavior testBehavior;

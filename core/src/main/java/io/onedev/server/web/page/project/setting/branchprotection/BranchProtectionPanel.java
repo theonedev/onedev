@@ -40,14 +40,14 @@ abstract class BranchProtectionPanel extends Panel {
 					@Override
 					protected void onSave(AjaxRequestTarget target, BranchProtection protection) {
 						BranchProtectionPanel.this.onSave(target, protection);
-						Component protectionViewer = BeanContext.viewBean("protection", protection).setOutputMarkupId(true);
+						Component protectionViewer = BeanContext.view("protection", protection).setOutputMarkupId(true);
 						BranchProtectionPanel.this.replace(protectionViewer);
 						target.add(protectionViewer);
 					}
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
-						Component protectionViewer = BeanContext.viewBean("protection", protection).setOutputMarkupId(true);
+						Component protectionViewer = BeanContext.view("protection", protection).setOutputMarkupId(true);
 						BranchProtectionPanel.this.replace(protectionViewer);
 						target.add(protectionViewer);
 					}
@@ -95,7 +95,7 @@ abstract class BranchProtectionPanel extends Panel {
 			
 		});
 		
-		add(BeanContext.viewBean("protection", protection).setOutputMarkupId(true));
+		add(BeanContext.view("protection", protection).setOutputMarkupId(true));
 		
 		add(AttributeAppender.append("class", new LoadableDetachableModel<String>() {
 

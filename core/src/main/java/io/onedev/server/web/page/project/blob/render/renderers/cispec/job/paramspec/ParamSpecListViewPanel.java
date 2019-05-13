@@ -31,15 +31,15 @@ import io.onedev.server.web.page.layout.SideFloating;
 import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
-public class ParamListViewPanel extends Panel {
+public class ParamSpecListViewPanel extends Panel {
 
-	private final List<InputSpec> params = new ArrayList<>();
+	private final List<InputSpec> paramSpecs = new ArrayList<>();
 	
-	public ParamListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
+	public ParamSpecListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
-			params.add((InputSpec) each);
+			paramSpecs.add((InputSpec) each);
 	}
 
 	@Override
@@ -120,12 +120,12 @@ public class ParamListViewPanel extends Panel {
 
 			@Override
 			protected List<InputSpec> getData() {
-				return params;
+				return paramSpecs;
 			}
 
 		};
 		
-		add(new DataTable<InputSpec, Void>("params", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new DataTable<InputSpec, Void>("paramSpecs", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
@@ -142,7 +142,7 @@ public class ParamListViewPanel extends Panel {
 		private final int index;
 		
 		public ColumnFragment(String id, int index) {
-			super(id, "columnFrag", ParamListViewPanel.this);
+			super(id, "columnFrag", ParamSpecListViewPanel.this);
 			this.index = index;
 		}
 		
@@ -159,19 +159,19 @@ public class ParamListViewPanel extends Panel {
 
 						@Override
 						protected String getTitle() {
-							InputSpec param = params.get(index);
+							InputSpec param = paramSpecs.get(index);
 							return param.getName() + " (type: " + EditableUtils.getDisplayName(param.getClass()) + ")";
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "job-param def-detail"));
+							add(AttributeAppender.append("class", "job-param-spec def-detail"));
 						}
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.viewBean(id, params.get(index), Sets.newHashSet("name"), true);
+							return BeanContext.view(id, paramSpecs.get(index), Sets.newHashSet("name"), true);
 						}
 
 					};

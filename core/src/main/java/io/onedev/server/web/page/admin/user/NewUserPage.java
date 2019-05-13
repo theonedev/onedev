@@ -33,7 +33,7 @@ public class NewUserPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BeanEditor editor = BeanContext.editBean("editor", user);
+		BeanEditor editor = BeanContext.edit("editor", user);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -58,7 +58,7 @@ public class NewUserPage extends AdministrationPage {
 					Session.get().success("New user created");
 					if (continueToAdd) {
 						user = new User();
-						replace(BeanContext.editBean("editor", user));
+						replace(BeanContext.edit("editor", user));
 					} else {
 						setResponsePage(UserMembershipsPage.class, UserMembershipsPage.paramsOf(user));
 					}

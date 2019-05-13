@@ -56,7 +56,7 @@ public class EntityColumn<T extends AbstractEntity> implements IStyledColumn<T, 
 	@Override
 	public void populateItem(Item<ICellPopulator<T>> cellItem,
 			String componentId, IModel<T> rowModel) {
-		cellItem.add(PropertyContext.viewBean(componentId, rowModel.getObject(), propertyName));
+		cellItem.add(PropertyContext.view(componentId, rowModel.getObject(), propertyName));
 	}
 
 	@Override

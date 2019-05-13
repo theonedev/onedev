@@ -580,12 +580,6 @@ a.disabled, a[disabled="disabled"] {
 	display: block;
 	color: #666;
 	text-decoration: none;
-	padding: 5px;
-}
-.def-list table a {
-	display: block;
-	color: #666;
-	text-decoration: none;
 	padding: 8px;
 }
 .def-list table>tbody>tr>td:first-child>div {

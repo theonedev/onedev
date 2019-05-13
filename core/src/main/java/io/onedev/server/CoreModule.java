@@ -88,17 +88,6 @@ import io.onedev.server.ci.job.log.DefaultLogManager;
 import io.onedev.server.ci.job.log.LogManager;
 import io.onedev.server.ci.job.log.instruction.LogInstruction;
 import io.onedev.server.ci.job.log.normalizer.LogNormalizer;
-import io.onedev.server.command.ApplyDBConstraintsCommand;
-import io.onedev.server.command.BackupDBCommand;
-import io.onedev.server.command.CheckDataVersionCommand;
-import io.onedev.server.command.CleanDBCommand;
-import io.onedev.server.command.CommandNames;
-import io.onedev.server.command.DBDialectCommand;
-import io.onedev.server.command.ResetAdminPasswordCommand;
-import io.onedev.server.command.RestoreDBCommand;
-import io.onedev.server.command.UpgradeCommand;
-import io.onedev.server.data.DataManager;
-import io.onedev.server.data.DefaultDataManager;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -168,6 +157,16 @@ import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitPostReceiveCallback;
 import io.onedev.server.git.GitPreReceiveCallback;
 import io.onedev.server.git.config.GitConfig;
+import io.onedev.server.maintenance.ApplyDatabaseConstraints;
+import io.onedev.server.maintenance.BackupDatabase;
+import io.onedev.server.maintenance.CheckDataVersion;
+import io.onedev.server.maintenance.CleanDatabase;
+import io.onedev.server.maintenance.DataManager;
+import io.onedev.server.maintenance.DatabaseDialect;
+import io.onedev.server.maintenance.DefaultDataManager;
+import io.onedev.server.maintenance.ResetAdminPassword;
+import io.onedev.server.maintenance.RestoreDatabase;
+import io.onedev.server.maintenance.Upgrade;
 import io.onedev.server.migration.JpaConverter;
 import io.onedev.server.migration.PersistentBagConverter;
 import io.onedev.server.model.support.authenticator.Authenticator;
@@ -632,23 +631,23 @@ public class CoreModule extends AbstractPluginModule {
 		}).in(Singleton.class);
 		
 		if (Bootstrap.command != null) {
-			if (CommandNames.RESTORE.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(RestoreDBCommand.class);
-			else if (CommandNames.APPLY_DB_CONSTRAINTS.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(ApplyDBConstraintsCommand.class);
-			else if (CommandNames.BACKUP.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(BackupDBCommand.class);
-			else if (CommandNames.CHECK_DATA_VERSION.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(CheckDataVersionCommand.class);
-			else if (CommandNames.UPGRADE.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(UpgradeCommand.class);
-			else if (CommandNames.CLEAN.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(CleanDBCommand.class);
-			else if (CommandNames.DB_DIALECT.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(DBDialectCommand.class);
-			else if (CommandNames.RESET_ADMIN_PASSWORD.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(ResetAdminPasswordCommand.class);
-			else
+			if (RestoreDatabase.COMMAND.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(RestoreDatabase.class);
+			else if (ApplyDatabaseConstraints.COMMAND.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(ApplyDatabaseConstraints.class);
+			else if (BackupDatabase.COMMAND.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(BackupDatabase.class);
+			else if (CheckDataVersion.COMMAND.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(CheckDataVersion.class);
+			else if (Upgrade.COMMAND.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(Upgrade.class);
+			else if (CleanDatabase.COMMAND.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(CleanDatabase.class);
+			else if (DatabaseDialect.COMMAND.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(DatabaseDialect.class);
+			else if (ResetAdminPassword.COMMAND.equals(Bootstrap.command.getName()))
+				bind(PersistManager.class).to(ResetAdminPassword.class);
+			else	
 				throw new RuntimeException("Unrecognized command: " + Bootstrap.command.getName());
 		} else {
 			bind(PersistManager.class).to(DefaultPersistManager.class);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
@@ -105,6 +106,11 @@ public class ChoiceInput extends InputSpec {
 
 	@Override
 	public Object convertToObject(List<String> strings) {
+		List<String> copyOfStrings = new ArrayList<>(strings);
+		copyOfStrings.removeAll(getPossibleValues());
+		if (!copyOfStrings.isEmpty())
+			throw new ValidationException("Invalid choice value: " + copyOfStrings);
+		
 		if (isAllowMultiple())
 			return strings;
 		else

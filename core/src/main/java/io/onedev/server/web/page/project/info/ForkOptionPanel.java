@@ -37,7 +37,7 @@ abstract class ForkOptionPanel extends Panel {
 		project.setForkedFrom(getProject());
 		project.setName(getProject().getName() + "." + SecurityUtils.getUser().getName());
 		
-		BeanEditor editor = BeanContext.editBean("editor", project, 
+		BeanEditor editor = BeanContext.edit("editor", project, 
 				Lists.newArrayList("name", "description", "defaultPrivilege"), false);
 		
 		Form<?> form = new Form<Void>("form");

@@ -1,4 +1,4 @@
-package io.onedev.server.command;
+package io.onedev.server.maintenance;
 
 import java.io.File;
 
@@ -22,12 +22,14 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
 
 @Singleton
-public class RestoreDBCommand extends DefaultPersistManager {
+public class RestoreDatabase extends DefaultPersistManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(RestoreDBCommand.class);
+	private static final Logger logger = LoggerFactory.getLogger(RestoreDatabase.class);
+	
+	public static final String COMMAND = "restore";
 	
 	@Inject
-	public RestoreDBCommand(PhysicalNamingStrategy physicalNamingStrategy,
+	public RestoreDatabase(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
 			IdManager idManager, Dao dao, EntityValidator validator) {
 		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);

@@ -56,7 +56,7 @@ public class PasswordEditPanel extends GenericPanel<User> {
 		};
 		add(form);
 		
-		form.add(BeanContext.editBean("editor", bean, excludedProperties, true));
+		form.add(BeanContext.edit("editor", bean, excludedProperties, true));
 	}
 	
 }

@@ -255,7 +255,7 @@ public abstract class StateTransitionListPanel extends Panel {
 						protected Component newBody(String id) {
 							SideFloating sideFloating = this;
 							Fragment fragment = new Fragment(id, "viewTransitionFrag", StateTransitionListPanel.this);
-							fragment.add(BeanContext.viewBean("viewer", getTransition(), Sets.newHashSet("name"), true));
+							fragment.add(BeanContext.view("viewer", getTransition(), Sets.newHashSet("name"), true));
 							
 							fragment.add(new ModalLink("edit") {
 
