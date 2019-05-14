@@ -19,7 +19,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
@@ -248,8 +247,6 @@ public class JobParamsEditPanel extends PropertyEditor<List<Serializable>> {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				item.remove();
-				target.appendJavaScript(String.format("onedev.server.form.markDirty($('#%s'));", 
-						JobParamsEditPanel.this.findParent(Form.class).getMarkupId(true)));
 				String script = String.format("$('#%s').remove();", item.getMarkupId());
 				target.appendJavaScript(script);
 				onPropertyUpdating(target);
@@ -284,13 +281,8 @@ public class JobParamsEditPanel extends PropertyEditor<List<Serializable>> {
 					valuesView.add(newSpecifiedValueEditor);
 					String script = String.format("$('#%s').before('<li id=\"%s\"></li>')", 
 							getMarkupId(), newSpecifiedValueEditor.getMarkupId());
-					
 					target.prependJavaScript(script);
 					target.add(newSpecifiedValueEditor);
-					
-					script = String.format("onedev.server.form.markDirty($('#%s').closest('form'));", 
-							getMarkupId(), newSpecifiedValueEditor.getMarkupId());
-					target.appendJavaScript(script);
 					
 					onPropertyUpdating(target);
 				}
