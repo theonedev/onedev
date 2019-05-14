@@ -51,7 +51,7 @@ public class GeneralSettingPage extends ProjectSettingPage {
 			public void setObject(Serializable object) {
 				// check contract of projectManager.save on why we assign oldName here
 				oldName = getProject().getName();
-				editor.getBeanDescriptor().copyProperties(object, getProject());
+				editor.getDescriptor().copyProperties(object, getProject());
 			}
 			
 		}, Lists.newArrayList("name", "description", "defaultPrivilege"), false);

@@ -54,7 +54,7 @@ public class ProfileEditPanel extends GenericPanel<User> {
 			public void setObject(Serializable object) {
 				// check contract of UserManager.save on why we assign oldName here
 				oldName = getUser().getName();
-				editor.getBeanDescriptor().copyProperties(object, getUser());
+				editor.getDescriptor().copyProperties(object, getUser());
 			}
 			
 		}, Sets.newHashSet("password"), true);

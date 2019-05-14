@@ -80,8 +80,8 @@ public class BeanDescriptor implements Serializable {
 	public void copyProperties(Object from, Object to) {
 		for (List<PropertyDescriptor> groupProperties: getPropertyDescriptors().values()) {
 			for (PropertyDescriptor property: groupProperties) {
-			if (!property.isPropertyExcluded())
-				property.copyProperty(from, to);
+				if (!property.isPropertyExcluded())
+					property.copyProperty(from, to);
 			}
 		}
 	}

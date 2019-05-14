@@ -57,7 +57,7 @@ public class MilestoneEditPage extends ProjectIssuesPage {
 							.addError("This name has already been used by another milestone in the project");
 				} 
 				if (!editor.hasErrors(true)){
-					editor.getBeanDescriptor().copyProperties(milestone, milestoneModel.getObject());
+					editor.getDescriptor().copyProperties(milestone, milestoneModel.getObject());
 					milestoneManager.save(milestoneModel.getObject());
 					Session.get().success("Milestone saved");
 					setResponsePage(MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(milestoneModel.getObject(), null));

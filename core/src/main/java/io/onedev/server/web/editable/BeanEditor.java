@@ -45,7 +45,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 	public static final String SCRIPT_CONTEXT_BEAN = "beanEditor";
 	
-	private final BeanDescriptor beanDescriptor;
+	private final BeanDescriptor descriptor;
 	
 	private final Map<String, List<PropertyContext<Serializable>>> propertyContexts = new LinkedHashMap<>();
 	
@@ -53,17 +53,17 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	
 	private RepeatingView groupsView;
 	
-	public BeanEditor(String id, BeanDescriptor beanDescriptor, IModel<Serializable> model) {
+	public BeanEditor(String id, BeanDescriptor descriptor, IModel<Serializable> model) {
 		super(id, model);
 		
-		this.beanDescriptor = beanDescriptor;
+		this.descriptor = descriptor;
 		
-		for (Map.Entry<String, List<PropertyDescriptor>> entry: beanDescriptor.getPropertyDescriptors().entrySet()) {
+		for (Map.Entry<String, List<PropertyDescriptor>> entry: descriptor.getPropertyDescriptors().entrySet()) {
 			propertyContexts.put(entry.getKey(), 
 					entry.getValue().stream().map(it->PropertyContext.of(it)).collect(Collectors.toList()));
 		}
 		
-		Class<?> beanClass = beanDescriptor.getBeanClass();
+		Class<?> beanClass = descriptor.getBeanClass();
 		if (beanClass.getAnnotation(Vertical.class) != null)
 			vertical = true;
 		else if (beanClass.getAnnotation(Horizontal.class) != null)
@@ -204,7 +204,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				 * Field will be display name of the property when the bean class being edited is 
 				 * generated via groovy script    
 				 */
-				String propertyName = beanDescriptor.getPropertyName(name);
+				String propertyName = descriptor.getPropertyName(name);
 				property.getDescriptor().getDependencyPropertyNames().add(propertyName);
 				
 				Optional<Object> result= BeanEditor.this.visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<?>, Optional<Object>>() {
@@ -228,7 +228,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!property.getDescriptor().isPropertyExcluded() 
-						&& property.getDescriptor().isPropertyVisible(new OneContext(this), beanDescriptor));
+						&& property.getDescriptor().isPropertyVisible(new OneContext(this), descriptor));
 			}
 
 		};
@@ -312,8 +312,8 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		setOutputMarkupId(true);
 	}
 	
-	public BeanDescriptor getBeanDescriptor() {
-		return beanDescriptor;
+	public BeanDescriptor getDescriptor() {
+		return descriptor;
 	}
 
 	@Override
@@ -341,7 +341,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 	@Override
 	protected Serializable convertInputToValue() throws ConversionException {
-		final Serializable bean = (Serializable) getBeanDescriptor().newBeanInstance();
+		final Serializable bean = (Serializable) getDescriptor().newBeanInstance();
 		
 		visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>() {
 

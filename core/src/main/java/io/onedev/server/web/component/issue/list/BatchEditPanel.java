@@ -76,11 +76,11 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				for (List<PropertyDescriptor> values: builtInFieldsEditor.getBeanDescriptor().getPropertyDescriptors().values()) {
+				for (List<PropertyDescriptor> values: builtInFieldsEditor.getDescriptor().getPropertyDescriptors().values()) {
 					for (PropertyDescriptor value: values) 
 						value.setPropertyExcluded(!selectedFields.contains(value.getDisplayName()));
 				}
-				for (List<PropertyDescriptor> values: customFieldsEditor.getBeanDescriptor().getPropertyDescriptors().values()) { 
+				for (List<PropertyDescriptor> values: customFieldsEditor.getDescriptor().getPropertyDescriptors().values()) { 
 					for (PropertyDescriptor value: values)
 						value.setPropertyExcluded(!selectedFields.contains(value.getDisplayName()));
 				}

@@ -154,9 +154,9 @@ abstract class JobExecutorEditPanel extends Panel {
 				});
 				if (jobExecutorEditor != null 
 						&& jobExecutorEditor.isVisibleInHierarchy()
-						&& Testable.class.isAssignableFrom(jobExecutorEditor.getBeanDescriptor().getBeanClass())) {
+						&& Testable.class.isAssignableFrom(jobExecutorEditor.getDescriptor().getBeanClass())) {
 					Class<? extends Serializable> testDataClass = null;					
-					for (Type type: jobExecutorEditor.getBeanDescriptor().getBeanClass().getGenericInterfaces()) {
+					for (Type type: jobExecutorEditor.getDescriptor().getBeanClass().getGenericInterfaces()) {
 						ParameterizedType parameterizedType = (ParameterizedType) type;
 						if (parameterizedType.getRawType() == Testable.class) {
 							testDataClass = (Class<? extends Serializable>) parameterizedType.getActualTypeArguments()[0];

@@ -61,7 +61,7 @@ public class GroupProfilePage extends GroupPage {
 				public void setObject(Serializable object) {
 					// check contract of GroupManager.save on why we assign oldName here
 					oldName = getGroup().getName();
-					editor.getBeanDescriptor().copyProperties(object, getGroup());
+					editor.getDescriptor().copyProperties(object, getGroup());
 				}
 				
 			}, Sets.newHashSet("administrator", "canCreateProjects"), true);

@@ -206,7 +206,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 			public String getObject() {
 				Component elementEditor = row.get("elementEditor");
 				if (elementEditor.isVisible()) {
-					return EditableUtils.getDisplayName(((BeanEditor) elementEditor).getBeanDescriptor().getBeanClass());
+					return EditableUtils.getDisplayName(((BeanEditor) elementEditor).getDescriptor().getBeanClass());
 				} else {
 					return null;
 				}

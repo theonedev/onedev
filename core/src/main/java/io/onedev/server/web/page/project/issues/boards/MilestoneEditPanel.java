@@ -49,7 +49,7 @@ abstract class MilestoneEditPanel extends Panel {
 				} 
 				if (!editor.hasErrors(true)){
 					Milestone reloaded = getMilestone();
-					editor.getBeanDescriptor().copyProperties(milestone, reloaded);
+					editor.getDescriptor().copyProperties(milestone, reloaded);
 					milestoneManager.save(reloaded);
 					Session.get().success("Milestone saved");
 					onMilestoneSaved(target, reloaded);

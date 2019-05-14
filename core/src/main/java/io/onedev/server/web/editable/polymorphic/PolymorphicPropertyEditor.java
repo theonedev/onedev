@@ -24,6 +24,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.launcher.loader.ImplementationRegistry;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.editable.EditableUtils;
@@ -40,10 +41,10 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	
 	private final List<Class<?>> implementations = new ArrayList<>();
 
-	public PolymorphicPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<Serializable> propertyModel) {
-		super(id, propertyDescriptor, propertyModel);
+	public PolymorphicPropertyEditor(String id, PropertyDescriptor descriptor, IModel<Serializable> propertyModel) {
+		super(id, descriptor, propertyModel);
 		
-		Class<?> baseClass = propertyDescriptor.getPropertyClass();
+		Class<?> baseClass = descriptor.getPropertyClass();
 		ImplementationRegistry registry = AppLoader.getInstance(ImplementationRegistry.class);
 		implementations.addAll(registry.getImplementations(baseClass));
 		
@@ -93,7 +94,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			public String getObject() {
 				Component beanEditor = PolymorphicPropertyEditor.this.get(BEAN_EDITOR_ID);
 				if (beanEditor instanceof BeanEditor) {
-					return EditableUtils.getDisplayName(((BeanEditor) beanEditor).getBeanDescriptor().getBeanClass());
+					return EditableUtils.getDisplayName(((BeanEditor) beanEditor).getDescriptor().getBeanClass());
 				} else {
 					return null;
 				}
@@ -106,6 +107,18 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 					if (getDisplayName(each).equals(object)) {
 						try {
 							propertyValue = (Serializable) each.newInstance();
+							Serializable prevPropertyValue = PolymorphicPropertyEditor.this.getConvertedInput();
+							if (prevPropertyValue != null) {
+								BeanDescriptor prevDescriptor = new BeanDescriptor(prevPropertyValue.getClass());
+								for (List<PropertyDescriptor> prevGroupProperties: prevDescriptor.getPropertyDescriptors().values()) {
+									for (PropertyDescriptor prevProperty: prevGroupProperties) {
+										Class<?> declaringClass = prevProperty.getPropertyGetter().getDeclaringClass();
+										Class<?> baseClass = prevProperty.getPropertyGetter().getDeclaringClass();
+										if (!prevProperty.isPropertyExcluded() && declaringClass.isAssignableFrom(baseClass))
+											prevProperty.copyProperty(prevPropertyValue, propertyValue);
+									}
+								}
+							}
 						} catch (InstantiationException | IllegalAccessException e) {
 							throw new RuntimeException(e);
 						}
@@ -150,7 +163,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 			public String getObject() {
 				Component beanEditor = PolymorphicPropertyEditor.this.get(BEAN_EDITOR_ID);				
 				if (beanEditor instanceof BeanEditor) {
-					Class<?> beanClass = ((BeanEditor) beanEditor).getBeanDescriptor().getBeanClass(); 
+					Class<?> beanClass = ((BeanEditor) beanEditor).getDescriptor().getBeanClass(); 
 					return EditableUtils.getDescription(beanClass);
 				} else {
 					return null;
@@ -165,7 +178,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 				Component beanEditor = PolymorphicPropertyEditor.this.get(BEAN_EDITOR_ID);				
 				if (beanEditor instanceof BeanEditor) {
-					Class<?> beanClass = ((BeanEditor) beanEditor).getBeanDescriptor().getBeanClass(); 
+					Class<?> beanClass = ((BeanEditor) beanEditor).getDescriptor().getBeanClass(); 
 					setVisible(EditableUtils.getDescription(beanClass) != null);
 				} else {
 					setVisible(false);
