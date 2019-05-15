@@ -7,12 +7,12 @@ import org.apache.wicket.markup.html.image.Image;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.resource.DynamicImageResource;
 import org.apache.wicket.request.resource.PackageResourceReference;
+import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.Provider;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
 
 @SuppressWarnings("serial")
 public class ImageDiffPanel extends Panel {
@@ -57,7 +57,7 @@ public class ImageDiffPanel extends Panel {
 				@Override
 				protected void configureResponse(ResourceResponse response, Attributes attributes) {
 					super.configureResponse(response, attributes);
-					if (!GitUtils.isHash(blobIdent.revision))
+					if (!ObjectId.isId(blobIdent.revision))
 						response.disableCaching();
 					response.setContentType(blobProvider.get().getMediaType().toString());
 					response.setFileName(blobIdent.getName());

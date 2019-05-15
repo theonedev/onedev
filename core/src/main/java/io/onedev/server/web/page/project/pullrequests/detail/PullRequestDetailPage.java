@@ -87,7 +87,7 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.branch.BranchLink;
-import io.onedev.server.web.component.build.status.PullRequestBuildStatusListPanel;
+import io.onedev.server.web.component.build.status.BuildRequirementListPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -451,7 +451,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				fragment.add(newMergeStrategyContainer());
 				fragment.add(new ReviewListPanel("reviews", requestModel));
 				
-				fragment.add(new PullRequestBuildStatusListPanel("builds", requestModel));
+				fragment.add(new BuildRequirementListPanel("builds", requestModel));
 				
 				fragment.add(new EntityWatchesPanel("watches") {
 

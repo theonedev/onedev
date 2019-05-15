@@ -4,7 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MatrixRunner {
+public abstract class MatrixRunner {
 
 	private final Map<String, String> params;
 	
@@ -19,7 +19,7 @@ public class MatrixRunner {
 		this.paramMatrix = paramMatrix;
 	}
 	
-	public void run(Runnable runnable) {
+	public void run() {
 		if (!paramMatrix.isEmpty()) {
 			Map.Entry<String, List<String>> entry = paramMatrix.entrySet().iterator().next();
 			for (String value: entry.getValue()) {
@@ -27,17 +27,20 @@ public class MatrixRunner {
 				paramsCopy.put(entry.getKey(), value);
 				Map<String, List<String>> matrixCopy = new LinkedHashMap<>(paramMatrix);
 				matrixCopy.remove(entry.getKey());
-				new MatrixRunner(paramsCopy, matrixCopy).run(runnable);
+				new MatrixRunner(paramsCopy, matrixCopy) {
+
+					@Override
+					protected void run(Map<String, String> paramMap) {
+						MatrixRunner.this.run(paramMap);
+					}
+					
+				}.run();
 			}
 		} else {
-			runnable.run(params);
+			run(params);
 		}
 	}
 	
-	public static interface Runnable {
-		
-		void run(Map<String, String> params);
-		
-	}
+	protected abstract void run(Map<String, String> paramMap);
 	
 }

@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -63,20 +62,14 @@ import io.onedev.server.util.diff.WhitespaceOption;
 
 public class GitUtils {
 	
-	public static final Pattern PATTERN_HASH = Pattern.compile("[a-z0-9]{40}");
-	
     public static final int SHORT_SHA_LENGTH = 8;
-    
-    public static boolean isHash(String sha) {
-    	return PATTERN_HASH.matcher(sha).matches();
-    }
     
     public static boolean isEmptyPath(String path) {
     	return Strings.isNullOrEmpty(path) || Objects.equal(path, DiffEntry.DEV_NULL);
     }
     
     public static String abbreviateSHA(String sha, int length) {
-        Preconditions.checkArgument(isHash(sha));
+        Preconditions.checkArgument(ObjectId.isId(sha));
         return sha.substring(0, length);
     }
 

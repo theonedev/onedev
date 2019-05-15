@@ -2,7 +2,6 @@ package io.onedev.server.web.page.project.blob.render.renderers.cispec;
 
 import java.io.Serializable;
 
-import javax.annotation.Nullable;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -28,12 +27,14 @@ import com.google.common.base.Throwables;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.CISpecAware;
 import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.JobAware;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.MultilineLabel;
-import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
@@ -94,7 +95,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 	}
 	
 	private Component newJobContent(Job job) {
-		BeanEditor content = BeanContext.edit(jobContents.newChildId(), job);
+		BeanEditor content = new JobEditor(jobContents.newChildId(), job);
 		content.add(new Behavior() {
 
 			@Override
@@ -230,9 +231,9 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 
 	@Override
 	public void convertInput() {
-		CISpec editingCISpec = getCISpec();
-		if (editingCISpec != null) {
-			setConvertedInput(VersionedDocument.fromBean(editingCISpec).toXML().getBytes(Charsets.UTF_8));
+		if (parseResult instanceof CISpec) {
+			CISpec ciSpec = getCISpec();
+			setConvertedInput(VersionedDocument.fromBean(ciSpec).toXML().getBytes(Charsets.UTF_8));
 		} else {
 			setConvertedInput(getModelObject());
 		}
@@ -249,7 +250,6 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 	}
 
 	@Override
-	@Nullable
 	public CISpec getCISpec() {
 		if (parseResult instanceof CISpec) {
 			CISpec ciSpec = new CISpec();
@@ -263,4 +263,16 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 		}
 	}
 	
+	private static class JobEditor extends BeanEditor implements JobAware {
+
+		public JobEditor(String id, Job job) {
+			super(id, new BeanDescriptor(Job.class), Model.of(job));
+		}
+
+		@Override
+		public Job getJob() {
+			return (Job) getConvertedInput();
+		}
+		
+	}
 }

@@ -6,6 +6,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
@@ -82,7 +83,7 @@ public abstract class RevisionPicker extends DropdownLink {
 				iconClass = "fa fa-tag";
 			} else {
 				label = revision;
-				if (GitUtils.isHash(label))
+				if (ObjectId.isId(label))
 					label = GitUtils.abbreviateSHA(label);
 				iconClass = "fa fa-ext fa-commit";
 			}

@@ -7,7 +7,7 @@ import javax.persistence.criteria.Predicate;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.PullRequestBuild;
+import io.onedev.server.model.BuildRequirement;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.PullRequestConstants;
@@ -18,7 +18,7 @@ public class HasPendingBuildsCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context, User user) {
-		From<?, ?> join = context.getJoin(PullRequestConstants.ATTR_BUILDS + "." + PullRequestBuild.ATTR_BUILD);
+		From<?, ?> join = context.getJoin(PullRequestConstants.ATTR_BUILDS + "." + BuildRequirement.ATTR_BUILD);
 		Path<?> status = join.get(Build.STATUS);
 		
 		return context.getBuilder().or(
@@ -30,7 +30,7 @@ public class HasPendingBuildsCriteria extends PullRequestCriteria {
 
 	@Override
 	public boolean matches(PullRequest request, User user) {
-		for (PullRequestBuild build: request.getBuilds()) {
+		for (BuildRequirement build: request.getBuildRequirements()) {
 			if (build.getBuild() == null 
 					|| build.getBuild().getStatus() == Build.Status.RUNNING 
 					|| build.getBuild().getStatus() == Build.Status.QUEUEING 

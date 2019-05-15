@@ -1,9 +1,11 @@
 package io.onedev.server.util.inputspec.userchoiceinput;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
@@ -116,12 +118,20 @@ public class UserChoiceInput extends InputSpec {
 	
 	@Override
 	public Object convertToObject(List<String> strings) {
-		return strings.iterator().next();
+		if (strings.size() == 0) 
+			return null;
+		else if (strings.size() == 1) 
+			return strings.iterator().next();
+		else 
+			throw new ValidationException("Not eligible for multi-value");
 	}
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		return Lists.newArrayList((String) value);
+		if (value != null)
+			return Lists.newArrayList((String) value);
+		else
+			return new ArrayList<>();
 	}
 
 }

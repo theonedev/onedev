@@ -320,16 +320,17 @@ public abstract class InputSpec implements Serializable {
 		return false;
 	}
 	
-	public abstract List<String> convertToStrings(Object object);
+	public abstract List<String> convertToStrings(@Nullable Object object);
 
 	/**
 	 * Convert list of strings to object
 	 * 
 	 * @param strings
-	 * 			list of strings, will not be empty
+	 * 			list of strings
 	 * @return
 	 * 			converted object
 	 */
+	@Nullable
 	public abstract Object convertToObject(List<String> strings);
 	
 	public long getOrdinal(Object fieldValue) {

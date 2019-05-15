@@ -10,7 +10,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.ci.Dependency;
+import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.ci.job.log.LogLevel;
 import io.onedev.server.ci.job.trigger.JobTrigger;
@@ -41,7 +41,7 @@ public class Job implements Serializable, Validatable {
 	
 	private boolean cloneSource = true;
 	
-	private List<Dependency> dependencies = new ArrayList<>();
+	private List<JobDependency> dependencies = new ArrayList<>();
 	
 	private List<JobOutcome> outcomes = new ArrayList<>();
 
@@ -109,11 +109,11 @@ public class Job implements Serializable, Validatable {
 	
 	@Editable(name="Dependency Jobs", order=140, description="Job dependencies determines the order and "
 			+ "concurrency when run different jobs")
-	public List<Dependency> getDependencies() {
+	public List<JobDependency> getDependencies() {
 		return dependencies;
 	}
 
-	public void setDependencies(List<Dependency> dependencies) {
+	public void setDependencies(List<JobDependency> dependencies) {
 		this.dependencies = dependencies;
 	}
 
@@ -197,7 +197,7 @@ public class Job implements Serializable, Validatable {
 		}
 
 		Set<String> dependencyJobs = new HashSet<>();
-		for (Dependency dependency: dependencies) {
+		for (JobDependency dependency: dependencies) {
 			if (dependencyJobs.contains(dependency.getJobName())) {
 				isValid = false;
 				context.buildConstraintViolationWithTemplate("Duplicate dependency: " + dependency.getJobName())

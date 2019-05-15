@@ -419,17 +419,13 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			field.setOrdinal(ordinal);
 			field.setType(fieldSpec.getType());
 			
-			if (fieldValue != null) {
-				List<String> strings = fieldSpec.convertToStrings(fieldValue);
-				if (!strings.isEmpty()) {
-					for (String string: strings) {
-						IssueFieldEntity cloned = (IssueFieldEntity) SerializationUtils.clone(field);
-						cloned.setIssue(this);
-						cloned.setValue(string);
-						getFieldEntities().add(cloned);
-					}
-				} else {
-					getFieldEntities().add(field);
+			List<String> strings = fieldSpec.convertToStrings(fieldValue);
+			if (!strings.isEmpty()) {
+				for (String string: strings) {
+					IssueFieldEntity cloned = (IssueFieldEntity) SerializationUtils.clone(field);
+					cloned.setIssue(this);
+					cloned.setValue(string);
+					getFieldEntities().add(cloned);
 				}
 			} else {
 				getFieldEntities().add(field);

@@ -8,9 +8,11 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatcher.Anyone;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.TagPatterns;
 
 @Editable
+@Horizontal
 public class TagProtection implements Serializable {
 
 	private static final long serialVersionUID = 1L;

@@ -1,13 +1,15 @@
 package io.onedev.server.util.inputspec.textinput;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.validation.ValidationException;
 
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.textinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=100, name=InputSpec.TEXT)
 public class TextInput extends InputSpec {
@@ -74,12 +76,20 @@ public class TextInput extends InputSpec {
 
 	@Override
 	public Object convertToObject(List<String> strings) {
-		return strings.iterator().next();
+		if (strings.size() == 0)
+			return null;
+		else if (strings.size() == 1)
+			return strings.iterator().next();
+		else
+			throw new ValidationException("Not eligible for multi-value");
 	}
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		return Lists.newArrayList((String) value);
+		List<String> strings = new ArrayList<>();
+		if (value != null)
+			strings.add((String) value);
+		return strings;
 	}
 	
 }

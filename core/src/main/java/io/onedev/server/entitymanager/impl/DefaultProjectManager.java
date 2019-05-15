@@ -5,12 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -36,6 +37,8 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.cache.CacheManager;
 import io.onedev.server.cache.CommitInfoManager;
+import io.onedev.server.ci.JobDependency;
+import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
@@ -52,11 +55,13 @@ import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
 import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
+import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.facade.GroupAuthorizationFacade;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
@@ -331,13 +336,14 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		}
 	}
 	
+	@Sessional
 	@Override
 	public boolean isModificationNeedsQualityCheck(User user, Project project, String branch, @Nullable String file) {
 		BranchProtection branchProtection = project.getBranchProtection(branch, user);
 		if (branchProtection != null) {
 			if (!ReviewRequirement.fromString(branchProtection.getReviewRequirement()).satisfied(user)) 
 				return true;
-			if (!branchProtection.getJobNames().isEmpty())
+			if (!branchProtection.getJobDependencies().isEmpty())
 				return true;
 			
 			if (file != null) {
@@ -351,6 +357,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		return false;
 	}
 
+	@Sessional
 	@Override
 	public boolean isPushNeedsQualityCheck(User user, Project project, String branch, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
@@ -360,9 +367,28 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 				return true;
 
 			List<Build> builds = buildManager.query(project, newObjectId.name());
-			if (!builds.stream().map(it->it.getJobName()).collect(Collectors.toSet())
-					.containsAll(branchProtection.getJobNames())) {
-				return true;
+
+			for (JobDependency dependency: branchProtection.getJobDependencies()) {
+				Map<String, List<String>> paramMatrix = new HashMap<>();
+				for (JobParam param: dependency.getJobParams()) 
+					paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
+				
+				AtomicBoolean buildRequirementUnsatisfied = new AtomicBoolean(false);
+				new MatrixRunner(paramMatrix) {
+					
+					@Override
+					public void run(Map<String, String> params) {
+						for (Build build: builds) {
+							if (build.getJobName().equals(dependency.getJobName()) && build.getParamMap().equals(params))
+								return;
+						}
+						buildRequirementUnsatisfied.set(true);
+					}
+					
+				}.run();
+				
+				if (buildRequirementUnsatisfied.get())
+					return true;
 			}
 			
 			for (String changedFile: getChangedFiles(project, oldObjectId, newObjectId, gitEnvs)) {

@@ -1,6 +1,6 @@
 package io.onedev.server.ci.job.trigger;
 
-import io.onedev.server.ci.Dependency;
+import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.event.ProjectEvent;
@@ -20,7 +20,7 @@ public class DependencyBuiltTrigger extends JobTrigger {
 			BuildFinished buildFinished = (BuildFinished) event;
 			Build build = buildFinished.getBuild();
 			if (build.getStatus() == Status.SUCCESSFUL) {
-				for (Dependency dependency: job.getDependencies()) {
+				for (JobDependency dependency: job.getDependencies()) {
 					if (dependency.getJobName().equals(build.getJobName())) {
 						for (JobParam param: dependency.getJobParams()) {
 							String paramValue = build.getParamMap().get(param.getName());

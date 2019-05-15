@@ -106,15 +106,24 @@ public class ChoiceInput extends InputSpec {
 
 	@Override
 	public Object convertToObject(List<String> strings) {
-		List<String> copyOfStrings = new ArrayList<>(strings);
-		copyOfStrings.removeAll(getPossibleValues());
-		if (!copyOfStrings.isEmpty())
-			throw new ValidationException("Invalid choice value: " + copyOfStrings);
-		
-		if (isAllowMultiple())
-			return strings;
-		else
-			return strings.iterator().next();
+		if (isAllowMultiple()) {
+			List<String> copyOfStrings = new ArrayList<>(strings);
+			copyOfStrings.removeAll(getPossibleValues());
+			if (!copyOfStrings.isEmpty())
+				throw new ValidationException("Invalid choice values: " + copyOfStrings);
+			else
+				return strings;
+		} else if (strings.size() == 0) {
+			return null;
+		} else if (strings.size() == 1) {
+			String value = strings.iterator().next();
+			if (!getPossibleValues().contains(value))
+				throw new ValidationException("Invalid choice value");
+			else
+				return value;
+		} else {
+			throw new ValidationException("Not eligible for multi-value");
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -122,8 +131,10 @@ public class ChoiceInput extends InputSpec {
 	public List<String> convertToStrings(Object value) {
 		if (isAllowMultiple())
 			return (List<String>) value;
-		else
+		else if (value != null)
 			return Lists.newArrayList((String) value);
+		else
+			return new ArrayList<>();
 	}
 
 	@Override

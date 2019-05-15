@@ -20,14 +20,14 @@ public class MatrixRunnerTest {
 		Map<String, List<String>> matrix = new LinkedHashMap<>();
 		
 		List<Map<String, String>> usedParams = new ArrayList<>();
-		new MatrixRunner(matrix).run(new MatrixRunner.Runnable() {
+		new MatrixRunner(matrix) {
 			
 			@Override
 			public void run(Map<String, String> params) {
 				usedParams.add(params);
 			}
 			
-		});
+		}.run();
 		
 		assertEquals(1, usedParams.size());
 		assertTrue(usedParams.iterator().next().isEmpty());
@@ -37,14 +37,14 @@ public class MatrixRunnerTest {
 		
 		usedParams.clear();
 		
-		new MatrixRunner(matrix).run(new MatrixRunner.Runnable() {
+		new MatrixRunner(matrix) {
 			
 			@Override
 			public void run(Map<String, String> params) {
 				usedParams.add(params);
 			}
 			
-		});
+		}.run();
 		assertEquals(4, usedParams.size());
 		Map<String, String> params = new HashMap<>();
 		params.put("db", "oracle");

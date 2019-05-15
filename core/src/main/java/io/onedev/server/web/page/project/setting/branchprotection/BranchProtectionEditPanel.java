@@ -5,13 +5,18 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.eclipse.jgit.lib.ObjectId;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.CISpecAware;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
-abstract class BranchProtectionEditPanel extends Panel {
+abstract class BranchProtectionEditPanel extends Panel implements CISpecAware {
 
 	private final BranchProtection protection;
 	
@@ -56,6 +61,13 @@ abstract class BranchProtectionEditPanel extends Panel {
 			
 		});
 		add(form);
+	}
+
+	@Override
+	public CISpec getCISpec() {
+		Project project = ((ProjectPage) getPage()).getProject();
+		ObjectId commitId = project.getObjectId(project.getDefaultBranch(), true);
+		return project.getCISpec(commitId);
 	}
 
 	protected abstract void onSave(AjaxRequestTarget target, BranchProtection protection);

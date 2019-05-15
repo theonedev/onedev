@@ -652,7 +652,7 @@ public class Project extends AbstractEntity {
 		if (ciSpecOpt == null) {
 			Blob blob = getBlob(new BlobIdent(commitId.name(), CISpec.BLOB_PATH, FileMode.TYPE_FILE), false);
 			if (blob != null) {
-				ciSpecOpt = Optional.of(CISpec.parse(blob.getBytes()));
+				ciSpecOpt = Optional.fromNullable(CISpec.parse(blob.getBytes()));
 			} else {				
 				List<CISpecDetector> detectors = new ArrayList<>(OneDev.getExtensions(CISpecDetector.class));
 				detectors.sort(Comparator.comparing(CISpecDetector::getPriority));

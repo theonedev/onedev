@@ -1,7 +1,10 @@
 package io.onedev.server.util.inputspec.numberinput;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.validation.ValidationException;
 
 import com.google.common.collect.Lists;
 
@@ -73,12 +76,25 @@ public class NumberInput extends InputSpec {
 
 	@Override
 	public Object convertToObject(List<String> strings) {
-		return Integer.valueOf(strings.iterator().next());
+		if (strings.size() == 0) { 
+			return null;
+		} else if (strings.size() == 1) {
+			try {
+				return Integer.valueOf(strings.iterator().next());
+			} catch (NumberFormatException e) {
+				throw new ValidationException("Invalid number value");
+			}
+		} else {
+			throw new ValidationException("Not eligible for multi-value");
+		}
 	}
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		return Lists.newArrayList(String.valueOf(value));
+		if (value != null)
+			return Lists.newArrayList(String.valueOf(value));
+		else
+			return new ArrayList<>();
 	}
 
 	@Editable

@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
+import io.onedev.server.ci.JobDependency;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
@@ -18,10 +19,11 @@ import io.onedev.server.util.usermatcher.Anyone;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.JobChoice;
+import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
+@Horizontal
 public class BranchProtection implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -40,7 +42,7 @@ public class BranchProtection implements Serializable {
 	
 	private String reviewRequirement;
 	
-	private List<String> jobNames = new ArrayList<>();
+	private List<JobDependency> jobDependencies = new ArrayList<>();
 	
 	private List<FileProtection> fileProtections = new ArrayList<>();
 
@@ -114,15 +116,14 @@ public class BranchProtection implements Serializable {
 		this.reviewRequirement = reviewRequirement;
 	}
 
-	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")
-	@JobChoice
+	@Editable(order=500, name="Required Builds", description="Optionally specify required builds")
 	@NameOfEmptyValue("No any")
-	public List<String> getJobNames() {
-		return jobNames;
+	public List<JobDependency> getJobDependencies() {
+		return jobDependencies;
 	}
 
-	public void setJobNames(List<String> jobNames) {
-		this.jobNames = jobNames;
+	public void setJobDependencies(List<JobDependency> jobDependencies) {
+		this.jobDependencies = jobDependencies;
 	}
 
 	@Editable(order=700, description="Optionally specify additional users to review particular paths. For each changed file, "

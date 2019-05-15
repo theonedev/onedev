@@ -70,7 +70,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Transactional
 	@Override
 	public void delete(Build build) {
-    	Query<?> query = getSession().createQuery("update PullRequestBuild set build=null where build=:build");
+    	Query<?> query = getSession().createQuery("update BuildRequirement set build=null where build=:build");
     	query.setParameter("build", build);
     	query.executeUpdate();
     	
@@ -110,7 +110,10 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		for (Map.Entry<String, String> entry: params.entrySet()) {
 			Join<?, ?> join = root.join("params", JoinType.INNER);
 			restrictions.add(builder.equal(join.get("name"), entry.getKey()));
-			restrictions.add(builder.equal(join.get("value"), entry.getValue()));
+			if (entry.getValue() != null)
+				restrictions.add(builder.equal(join.get("value"), entry.getValue()));
+			else
+				restrictions.add(builder.isNull(join.get("value")));
 		}
 		query.where(restrictions.toArray(new Predicate[0]));
 		return getSession().createQuery(query).list();

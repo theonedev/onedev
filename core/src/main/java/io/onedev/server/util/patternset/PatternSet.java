@@ -46,16 +46,23 @@ public class PatternSet implements Serializable {
 		return excludes;
 	}
 
-	public boolean matches(Matcher matcher, String value) {
+	public int getMatchIndex(Matcher matcher, String value) {
 		for (String exclude: excludes) {
 			if (matcher.matches(exclude, value))
-				return false;
+				return -1;
 		}
+		int index = 0;
 		for (String include: includes) {
 			if (matcher.matches(include, value))
-				return true;
+				return index;
+			else
+				index++;
 		}
-		return false;
+		return -1;
+	}
+	
+	public boolean matches(Matcher matcher, String value) {
+		return getMatchIndex(matcher, value) != -1;
 	}
 	
 	public Collection<File> listFiles(File dir) {

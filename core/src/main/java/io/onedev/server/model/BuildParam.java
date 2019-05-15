@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import javax.annotation.Nullable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -28,7 +29,6 @@ public class BuildParam extends AbstractEntity {
 	@Column(nullable=false)
 	private String name;
 
-	@Column(nullable=false)
 	private String value;
 
 	public Build getBuild() {
@@ -47,11 +47,12 @@ public class BuildParam extends AbstractEntity {
 		this.name = name;
 	}
 
+	@Nullable
 	public String getValue() {
 		return value;
 	}
 
-	public void setValue(String value) {
+	public void setValue(@Nullable String value) {
 		this.value = value;
 	}
 

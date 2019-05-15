@@ -109,7 +109,7 @@ import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestBuildManager;
+import io.onedev.server.entitymanager.BuildRequirementManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -142,7 +142,7 @@ import io.onedev.server.entitymanager.impl.DefaultIssueWatchManager;
 import io.onedev.server.entitymanager.impl.DefaultMembershipManager;
 import io.onedev.server.entitymanager.impl.DefaultMilestoneManager;
 import io.onedev.server.entitymanager.impl.DefaultProjectManager;
-import io.onedev.server.entitymanager.impl.DefaultPullRequestBuildManager;
+import io.onedev.server.entitymanager.impl.DefaultBuildRequirementManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestChangeManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestCommentManager;
 import io.onedev.server.entitymanager.impl.DefaultPullRequestManager;
@@ -252,7 +252,6 @@ import io.onedev.server.web.mapper.OnePageMapper;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.layout.MainNavContribution;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
-import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecRendererProvider;
 import io.onedev.server.web.page.test.TestPage;
 import io.onedev.server.web.websocket.BuildEventBroadcaster;
 import io.onedev.server.web.websocket.CodeCommentEventBroadcaster;
@@ -318,7 +317,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BuildDependenceManager.class).to(DefaultBuildDependenceManager.class);
 		bind(JobScheduler.class).to(DefaultJobScheduler.class);
 		bind(LogManager.class).to(DefaultLogManager.class);
-		bind(PullRequestBuildManager.class).to(DefaultPullRequestBuildManager.class);
+		bind(BuildRequirementManager.class).to(DefaultBuildRequirementManager.class);
 		bind(MailManager.class).to(DefaultMailManager.class);
 		bind(IssueManager.class).to(DefaultIssueManager.class);
 		bind(IssueFieldEntityManager.class).to(DefaultIssueFieldEntityManager.class);
@@ -431,7 +430,6 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WebSocketManager.class).to(DefaultWebSocketManager.class);
 		
 		contributeFromPackage(EditSupport.class, EditSupport.class);
-		contributeFromPackage(EditSupport.class, CISpecRendererProvider.class);
 		
 		bind(WebApplication.class).to(OneWebApplication.class);
 		bind(Application.class).to(OneWebApplication.class);

@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.collections4.map.AbstractReferenceMap.ReferenceStrength;
 import org.apache.commons.collections4.map.ReferenceMap;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +79,7 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 	
 	@Override
 	public Collection<BlameBlock> call() {
-		Preconditions.checkArgument(commitHash!=null && GitUtils.isHash(commitHash), "commit hash has to be specified.");
+		Preconditions.checkArgument(commitHash!=null && ObjectId.isId(commitHash), "commit hash has to be specified.");
 		Preconditions.checkNotNull(file, "file parameter has to be specified.");
 
 		String cacheKey = commitHash + ":" + file + ":" + (range!=null?range.toString():"");

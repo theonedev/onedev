@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -155,7 +156,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private Collection<PullRequestReview> reviews = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestBuild> builds = new ArrayList<>();
+	private Collection<BuildRequirement> buildRequirements = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
@@ -342,12 +343,12 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		sortedUpdates = null;
 	}
 
-	public Collection<PullRequestBuild> getBuilds() {
-		return builds;
+	public Collection<BuildRequirement> getBuildRequirements() {
+		return buildRequirements;
 	}
 
-	public void setPullRequestBuilds(Collection<PullRequestBuild> builds) {
-		this.builds = builds;
+	public void setBuildRequirements(Collection<BuildRequirement> buildRequirements) {
+		this.buildRequirements = buildRequirements;
 	}
 
 	public Collection<PullRequestComment> getComments() {
@@ -711,10 +712,10 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	@Nullable
-	public PullRequestBuild getBuild(String jobName) {
-		for (PullRequestBuild build: getBuilds()) {
-			if (build.getJobName().equals(jobName))
-				return build;
+	public BuildRequirement getBuildRequirement(String jobName, Map<String, String> buildParams) {
+		for (BuildRequirement requirement: getBuildRequirements()) {
+			if (requirement.getJobName().equals(jobName) && requirement.getBuildParams().equals(buildParams))
+				return requirement;
 		}
 		return null;
 	}
@@ -818,10 +819,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	public boolean isAllBuildsSuccessful() {
-		for (PullRequestBuild build: getBuilds()) {
-			if (build.getBuild() == null || build.getBuild().getStatus() != Build.Status.SUCCESSFUL) {
+		for (BuildRequirement requirement: getBuildRequirements()) {
+			if (requirement.getBuild() == null || requirement.getBuild().getStatus() != Build.Status.SUCCESSFUL)
 				return false;
-			}
 		}
 		return true;
 	}

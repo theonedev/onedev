@@ -59,17 +59,13 @@ public class ShowCondition implements Serializable {
 		InputSpec inputSpec = OneContext.get().getInputContext().getInputSpec(getInputName());
 		if (inputSpec != null) {
 			Object inputValue = OneContext.get().getEditContext().getInputValue(getInputName());
-			if (inputValue != null) {
-				List<String> strings = inputSpec.convertToStrings(inputValue);
-				if (strings.isEmpty())
-					return getValueMatcher().matches(null);
-				else if (strings.size() == 1)
-					return getValueMatcher().matches(strings.iterator().next());
-				else 
-					throw new OneException("Show condition should not be based on a multi-value input");
-			} else {
+			List<String> strings = inputSpec.convertToStrings(inputValue);
+			if (strings.isEmpty())
 				return getValueMatcher().matches(null);
-			}
+			else if (strings.size() == 1)
+				return getValueMatcher().matches(strings.iterator().next());
+			else 
+				throw new OneException("Show condition should not be based on a multi-value input");
 		} else {
 			logger.error("Unable to find input spec: " + getInputName());
 			return false;

@@ -62,13 +62,19 @@ public class BooleanInput extends InputSpec {
 
 	@Override
 	public Object convertToObject(List<String> strings) {
-		String string = strings.iterator().next();
-		if (string.equalsIgnoreCase("true"))
-			return true;
-		else if (string.equalsIgnoreCase("false"))
-			return false;
-		else
-			throw new ValidationException("Invalid boolean value: " + string);
+		if (strings.size() == 0) {
+			throw new ValidationException("Invalid boolean value");
+		} else if (strings.size() == 1) {
+			String string = strings.iterator().next();
+			if (string.equalsIgnoreCase("true"))
+				return true;
+			else if (string.equalsIgnoreCase("false"))
+				return false;
+			else
+				throw new ValidationException("Invalid boolean value");
+		} else {
+			throw new ValidationException("Not eligible for multi-value");
+		}
 	}
 
 	@Override

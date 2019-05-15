@@ -69,7 +69,7 @@ public class CISpec implements Serializable, Validatable {
 
 		for (int i=0; i<jobs.size(); i++) {
 			Job job = jobs.get(i);
-			for (Dependency dependency: job.getDependencies()) {
+			for (JobDependency dependency: job.getDependencies()) {
 				Job dependencyJob = getJobMap().get(dependency.getJobName());
 				if (dependencyJob != null) {
 					try {
@@ -129,7 +129,7 @@ public class CISpec implements Serializable, Validatable {
 			dependencyChain.add(jobName);
 			Job job = getJobMap().get(jobName);
 			if (job != null) {
-				for (Dependency dependency: job.getDependencies()) {
+				for (JobDependency dependency: job.getDependencies()) {
 					if (hasCircularDependencies(new ArrayList<>(dependencyChain), dependency.getJobName()))
 						return true;
 				}

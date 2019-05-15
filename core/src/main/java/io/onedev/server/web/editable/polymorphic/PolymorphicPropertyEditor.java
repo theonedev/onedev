@@ -113,8 +113,8 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 								for (List<PropertyDescriptor> prevGroupProperties: prevDescriptor.getPropertyDescriptors().values()) {
 									for (PropertyDescriptor prevProperty: prevGroupProperties) {
 										Class<?> declaringClass = prevProperty.getPropertyGetter().getDeclaringClass();
-										Class<?> baseClass = prevProperty.getPropertyGetter().getDeclaringClass();
-										if (!prevProperty.isPropertyExcluded() && declaringClass.isAssignableFrom(baseClass))
+										Class<?> baseClass = descriptor.getPropertyClass();
+										if (!prevProperty.isPropertyExcluded() && declaringClass.isAssignableFrom(baseClass)) 
 											prevProperty.copyProperty(prevPropertyValue, propertyValue);
 									}
 								}

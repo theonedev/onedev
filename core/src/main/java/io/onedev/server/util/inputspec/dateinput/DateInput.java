@@ -1,8 +1,11 @@
 package io.onedev.server.util.inputspec.dateinput;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import javax.validation.ValidationException;
 
 import org.joda.time.DateTime;
 
@@ -46,7 +49,12 @@ public class DateInput extends InputSpec {
 
 	@Override
 	public Object convertToObject(List<String> strings) {
-		return Constants.DATE_FORMATTER.parseDateTime(strings.iterator().next()).toDate();
+		if (strings.size() == 1)
+			return Constants.DATE_FORMATTER.parseDateTime(strings.iterator().next()).toDate();
+		else if (strings.size() == 0)
+			return null;
+		else
+			throw new ValidationException("Not eligible for multi-value");
 	}
 
 	@Editable
@@ -57,7 +65,10 @@ public class DateInput extends InputSpec {
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		return Lists.newArrayList(Constants.DATE_FORMATTER.print(new DateTime(value)));
+		if (value != null)
+			return Lists.newArrayList(Constants.DATE_FORMATTER.print(new DateTime(value)));
+		else
+			return new ArrayList<>();
 	}
 
 	@Override

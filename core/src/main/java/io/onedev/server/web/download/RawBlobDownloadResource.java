@@ -17,6 +17,7 @@ import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Charsets;
 
@@ -24,7 +25,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
 
@@ -87,7 +87,7 @@ public class RawBlobDownloadResource extends AbstractResource {
 			response.setContentType(MediaType.TEXT_PLAIN);
 		}
 
-		if (!GitUtils.isHash(revision))
+		if (!ObjectId.isId(revision))
 			response.disableCaching();
 
 		try {

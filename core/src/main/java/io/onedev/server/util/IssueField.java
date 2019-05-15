@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -75,13 +76,13 @@ public class IssueField implements Serializable {
 
 	@Nullable
 	public Object getValue(Project project) {
-		InputSpec fieldSpec = OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(name);
+		InputSpec fieldSpec = OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(getName());
 		if (fieldSpec != null) {
 			try {
-				if (!getValues().isEmpty())
-					return fieldSpec.convertToObject(getValues());
-			} catch (Exception e) {
-				logger.error("Error converting field values to object: " + name, e);
+				return fieldSpec.convertToObject(getValues());
+			} catch (ValidationException e) {
+				logger.error("Error converting field value (field: {}, value: {}, error: {})", 
+						getName(), getValues(), e.getMessage());
 			}
 		}
 		return null;

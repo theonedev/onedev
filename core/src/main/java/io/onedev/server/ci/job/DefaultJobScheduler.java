@@ -38,8 +38,8 @@ import io.onedev.commons.utils.schedule.SchedulableTask;
 import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.Dependency;
 import io.onedev.server.ci.InvalidCISpecException;
+import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.log.LogManager;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
@@ -150,14 +150,14 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							public void run() {
 								Project project = projectManager.load(projectId);
 								User submitter = (submitterId != null? userManager.load(submitterId): null);
-								new MatrixRunner(paramMatrix).run(new MatrixRunner.Runnable() {
+								new MatrixRunner(paramMatrix) {
 									
 									@Override
 									public void run(Map<String, String> params) {
 										submit(project, submitter, commitHash, jobName, params, new ArrayList<>()); 
 									}
 									
-								});
+								}.run();
 							}
 							
 						});
@@ -226,14 +226,14 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 			}
 
 			try {
-				JobParam.validateParamMap(job.getParamSpecs(), paramMap);
+				JobParam.validateParams(job.getParamSpecs(), JobParam.getParamMatrix(paramMap));
 			} catch (ValidationException e) {
 				markBuildError(build, e.getMessage());
 				return builds;
 			}
 			
-			for (Dependency dependency: job.getDependencies()) {
-				new MatrixRunner(getParamMatrix(dependency.getJobParams())).run(new MatrixRunner.Runnable() {
+			for (JobDependency dependency: job.getDependencies()) {
+				new MatrixRunner(getParamMatrix(dependency.getJobParams())) {
 					
 					@Override
 					public void run(Map<String, String> params) {
@@ -247,7 +247,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 						}
 					}
 					
-				});
+				}.run();
 			}
 
 			buildManager.create(build);
@@ -380,6 +380,8 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	private void markBuildError(Build build, String errorMessage) {
 		build.setStatus(Build.Status.IN_ERROR, errorMessage);
 		build.setFinishDate(new Date());
+		if (build.isNew())
+			buildManager.create(build);
 		listenerRegistry.post(new BuildFinished(build));
 	}
 	
