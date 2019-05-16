@@ -7,17 +7,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.criteria.From;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueFieldEntity;
+import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
@@ -43,17 +43,16 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		From<?, ?> join = context.getJoin(getFieldName());
+	protected Predicate getValuePredicate(Project project, Join<?, ?> field, CriteriaBuilder builder, User user) {
 		if (allowMultiple) {
-			return context.getBuilder().equal(join.get(IssueFieldEntity.ATTR_VALUE), value);
+			return builder.equal(field.get(IssueField.ATTR_VALUE), String.valueOf(value));
 		} else {
-			if (operator == IssueQueryLexer.Is)
-				return context.getBuilder().equal(join.get(IssueFieldEntity.ATTR_VALUE), value);
-			else if (operator == IssueQueryLexer.IsGreaterThan)
-				return context.getBuilder().greaterThan(join.get(IssueFieldEntity.ATTR_ORDINAL), ordinal);
+			if (operator == IssueQueryLexer.Is) 
+				return builder.equal(field.get(IssueField.ATTR_VALUE), String.valueOf(value));
+			else if (operator == IssueQueryLexer.IsGreaterThan) 
+				return builder.greaterThan(field.get(IssueField.ATTR_ORDINAL), ordinal);
 			else
-				return context.getBuilder().lessThan(join.get(IssueFieldEntity.ATTR_ORDINAL), ordinal);
+				return builder.lessThan(field.get(IssueField.ATTR_ORDINAL), ordinal);
 		}
 	}
 

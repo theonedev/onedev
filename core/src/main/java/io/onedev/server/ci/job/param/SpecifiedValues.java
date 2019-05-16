@@ -8,14 +8,14 @@ public class SpecifiedValues implements ValuesProvider {
 
 	public static final String DISPLAY_NAME = "Use specified values";
 	
-	private List<String> values;
+	private List<List<String>> values;
 
 	@Override
-	public List<String> getValues() {
+	public List<List<String>> getValues() {
 		return values;
 	}
 
-	public void setValues(List<String> values) {
+	public void setValues(List<List<String>> values) {
 		this.values = values;
 	}
 

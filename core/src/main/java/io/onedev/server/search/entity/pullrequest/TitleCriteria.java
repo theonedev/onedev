@@ -1,12 +1,13 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.PullRequestConstants;
 
 public class TitleCriteria extends PullRequestCriteria {
@@ -20,9 +21,9 @@ public class TitleCriteria extends PullRequestCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context, User user) {
-		Path<String> attribute = context.getRoot().get(PullRequestConstants.ATTR_TITLE);
-		return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
+	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
+		Path<String> attribute = root.get(PullRequestConstants.ATTR_TITLE);
+		return builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
 	}
 
 	@Override

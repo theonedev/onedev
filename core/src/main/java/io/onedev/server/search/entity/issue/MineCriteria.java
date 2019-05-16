@@ -3,7 +3,9 @@ package io.onedev.server.search.entity.issue;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -11,7 +13,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 
@@ -38,8 +39,8 @@ public class MineCriteria extends IssueCriteria {
 	}
 	
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		return getCriteria(project, user).getPredicate(project, context, user);
+	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+		return getCriteria(project, user).getPredicate(project, root, builder, user);
 	}
 
 	@Override

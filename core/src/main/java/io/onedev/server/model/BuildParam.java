@@ -10,6 +10,10 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+/**
+ * @author robin
+ *
+ */
 @Entity
 @Table(
 		indexes={@Index(columnList="o_build_id"), @Index(columnList="name"), @Index(columnList="value")}, 
@@ -28,7 +32,10 @@ public class BuildParam extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private String name;
-
+	
+	@Column(nullable=false)
+	private String type;
+	
 	private String value;
 
 	public Build getBuild() {
@@ -45,6 +52,14 @@ public class BuildParam extends AbstractEntity {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	@Nullable

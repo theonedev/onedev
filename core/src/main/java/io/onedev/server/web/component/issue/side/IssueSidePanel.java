@@ -53,7 +53,7 @@ import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
@@ -138,12 +138,12 @@ public abstract class IssueSidePanel extends Panel {
 	}
 
 	private Component newFieldsContainer() {
-		IModel<List<IssueField>> fieldsModel = new LoadableDetachableModel<List<IssueField>>() {
+		IModel<List<Input>> fieldsModel = new LoadableDetachableModel<List<Input>>() {
 
 			@Override
-			protected List<IssueField> load() {
-				List<IssueField> fields = new ArrayList<>();
-				for (IssueField field: getIssue().getFields().values()) {
+			protected List<Input> load() {
+				List<Input> fields = new ArrayList<>();
+				for (Input field: getIssue().getFieldInputs().values()) {
 					if (getIssue().isFieldVisible(field.getName()))
 						fields.add(field);
 				}
@@ -163,11 +163,11 @@ public abstract class IssueSidePanel extends Panel {
 		
 		fragment.setOutputMarkupId(true);
 		
-		fragment.add(new ListView<IssueField>("fields", fieldsModel) {
+		fragment.add(new ListView<Input>("fields", fieldsModel) {
 
 			@Override
-			protected void populateItem(ListItem<IssueField> item) {
-				IssueField field = item.getModelObject();
+			protected void populateItem(ListItem<Input> item) {
+				Input field = item.getModelObject();
 				item.add(new Label("name", field.getName()));
 				item.add(new FieldValuesPanel("values") {
 
@@ -177,7 +177,7 @@ public abstract class IssueSidePanel extends Panel {
 					}
 
 					@Override
-					protected IssueField getField() {
+					protected Input getField() {
 						return item.getModelObject();
 					}
 					

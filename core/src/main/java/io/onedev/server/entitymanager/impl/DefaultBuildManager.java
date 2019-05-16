@@ -43,9 +43,7 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.search.entity.build.BuildQueryBuildContext;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.BuildConstants;
 
@@ -96,7 +94,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	@Sessional
 	@Override
-	public List<Build> query(Project project, String commitHash, String jobName, Map<String, String> params) {
+	public List<Build> query(Project project, String commitHash, String jobName, Map<String, List<String>> params) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
@@ -107,13 +105,18 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		if (jobName != null)
 			restrictions.add(builder.equal(root.get("jobName"), jobName));
 		
-		for (Map.Entry<String, String> entry: params.entrySet()) {
-			Join<?, ?> join = root.join("params", JoinType.INNER);
-			restrictions.add(builder.equal(join.get("name"), entry.getKey()));
-			if (entry.getValue() != null)
-				restrictions.add(builder.equal(join.get("value"), entry.getValue()));
-			else
-				restrictions.add(builder.isNull(join.get("value")));
+		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
+			if (!entry.getValue().isEmpty()) {
+				for (String value: entry.getValue()) {
+					Join<?, ?> join = root.join(BuildConstants.ATTR_PARAMS, JoinType.INNER);
+					restrictions.add(builder.equal(join.get(BuildParam.ATTR_NAME), entry.getKey()));
+					restrictions.add(builder.equal(join.get(BuildParam.ATTR_VALUE), value));
+				}
+			} else {
+				Join<?, ?> join = root.join(BuildConstants.ATTR_PARAMS, JoinType.INNER);
+				restrictions.add(builder.equal(join.get(BuildParam.ATTR_NAME), entry.getKey()));
+				restrictions.add(builder.isNull(join.get(BuildParam.ATTR_VALUE)));
+			}
 		}
 		query.where(restrictions.toArray(new Predicate[0]));
 		return getSession().createQuery(query).list();
@@ -189,11 +192,11 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	}
 
 	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Build> criteria, Project project, 
-			QueryBuildContext<Build> context, User user) {
+			Root<Build> root, CriteriaBuilder builder, User user) {
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(context.getBuilder().equal(context.getRoot().get(BuildConstants.ATTR_PROJECT), project));
+		predicates.add(builder.equal(root.get(BuildConstants.ATTR_PROJECT), project));
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(project, context, user));
+			predicates.add(criteria.getPredicate(project, root, builder, user));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
@@ -203,8 +206,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		Root<Build> root = query.from(Build.class);
 		query.select(root).distinct(true);
 		
-		QueryBuildContext<Build> context = new BuildQueryBuildContext(root, builder);
-		query.where(getPredicates(buildQuery.getCriteria(), project, context, user));
+		query.where(getPredicates(buildQuery.getCriteria(), project, root, builder, user));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: buildQuery.getSorts()) {
@@ -239,8 +241,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Build> root = criteriaQuery.from(Build.class);
 
-		QueryBuildContext<Build> context = new BuildQueryBuildContext(root, builder);
-		criteriaQuery.where(getPredicates(buildCriteria, project, context, user));
+		criteriaQuery.where(getPredicates(buildCriteria, project, root, builder, user));
 
 		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

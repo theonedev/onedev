@@ -7,7 +7,7 @@ import javax.inject.Singleton;
 
 import io.onedev.server.cache.CacheManager;
 import io.onedev.server.entitymanager.GroupManager;
-import io.onedev.server.entitymanager.IssueFieldEntityManager;
+import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Group;
@@ -27,17 +27,17 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 	
 	private final SettingManager settingManager;
 	
-	private final IssueFieldEntityManager issueFieldEntityManager;
+	private final IssueFieldManager issueFieldManager;
 	
 	private final CacheManager cacheManager;
 	
 	@Inject
 	public DefaultGroupManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
-			IssueFieldEntityManager issueFieldEntityManager, CacheManager cacheManager) {
+			IssueFieldManager issueFieldManager, CacheManager cacheManager) {
 		super(dao);
 		this.projectManager = projectManager;
 		this.settingManager = settingManager;
-		this.issueFieldEntityManager = issueFieldEntityManager;
+		this.issueFieldManager = issueFieldManager;
 		this.cacheManager = cacheManager;
 	}
 
@@ -59,7 +59,7 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 				settingManager.saveAuthenticator(authenticator);
 			}
 			
-			issueFieldEntityManager.onRenameGroup(oldName, group.getName());
+			issueFieldManager.onRenameGroup(oldName, group.getName());
 			settingManager.getIssueSetting().onRenameGroup(oldName, group.getName());
 		}
 		dao.persist(group);

@@ -73,7 +73,7 @@ public class DateInput extends InputSpec {
 
 	@Override
 	public long getOrdinal(Object fieldValue) {
-		if (fieldValue != null) 
+		if (fieldValue instanceof Date) 
 			return ((Date)fieldValue).getTime();
 		else
 			return super.getOrdinal(fieldValue);

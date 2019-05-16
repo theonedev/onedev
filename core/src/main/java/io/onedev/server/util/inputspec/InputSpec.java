@@ -376,4 +376,16 @@ public abstract class InputSpec implements Serializable {
 		return false;
 	}
 	
+	protected boolean checkListElements(Object value, Class<?> elementClass) {
+		if (value instanceof List) {
+			for (Object element: (List<?>)value) {
+				if (element == null || element.getClass() != elementClass)
+					return false;
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 }

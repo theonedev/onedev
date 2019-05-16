@@ -15,16 +15,15 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.secretinput.SecretInput;
 
 public class JobParam implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String STRING_SEPARATOR = "@@";
+	public static final String VALUE_SEPARATOR = "@@";
 	
 	private String name;
 	
@@ -49,37 +48,26 @@ public class JobParam implements Serializable {
 	}
 
 	@Nullable
-	public static String toValue(List<String> strings) {
+	public static String toString(List<String> strings) {
 		if (!strings.isEmpty())
-			return Joiner.on(STRING_SEPARATOR).join(strings);
+			return Joiner.on(VALUE_SEPARATOR).join(strings);
 		else
 			return null;
 	}
 	
-	public static List<String> fromValue(@Nullable String value) {
-		if (value != null) 
-			return Splitter.on(STRING_SEPARATOR).splitToList(value);
-		else 
-			return new ArrayList<>();
-	}
-	
-	public static void validateValues(List<String> values) {
+	public static void validateValues(List<List<String>> values) {
 		if (values.isEmpty())
 			throw new ValidationException("At least one value needs to be specified");
-		Set<String> valueSet = new HashSet<>();
-		for (String value: values) {
-			if (valueSet.contains(value)) {
-				if (value != null)
-					throw new ValidationException("Duplicate values are not allowed: " + value);
-				else
-					throw new ValidationException("Empty value added multiple times");
-			} else {
-				valueSet.add(value);
-			}
+		Set<List<String>> encountered = new HashSet<>();
+		for (List<String> value: values) {
+			if (encountered.contains(value)) 
+				throw new ValidationException("Duplicate values not allowed");
+			else 
+				encountered.add(value);
 		}
 	}
 	
-	public static void validateParams(List<InputSpec> paramSpecs, Map<String, List<String>> params) {
+	public static void validateParams(List<InputSpec> paramSpecs, Map<String, List<List<String>>> params) {
 		Map<String, InputSpec> paramSpecMap = new HashMap<>();
 		for (InputSpec paramSpec: paramSpecs) {
 			paramSpecMap.put(paramSpec.getName(), paramSpec);
@@ -87,7 +75,7 @@ public class JobParam implements Serializable {
 				throw new ValidationException("Missing job parameter: " + paramSpec.getName());
 		}
 		
-		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
+		for (Map.Entry<String, List<List<String>>> entry: params.entrySet()) {
 			InputSpec paramSpec = paramSpecMap.get(entry.getKey());
 			if (paramSpec == null)
 				throw new ValidationException("Unknown job parameter: " + entry.getKey());
@@ -100,12 +88,16 @@ public class JobParam implements Serializable {
 							+ entry.getKey() + "': " + e.getMessage());
 				}
 				
-				for (String value: entry.getValue()) {
-					List<String> strings = fromValue(value);
+				for (List<String> value: entry.getValue()) {
 					try {
-						paramSpec.convertToObject(strings);
+						paramSpec.convertToObject(value);
 					} catch (Exception e) {
-						throw new ValidationException("Error validating value '" + value + "' of parameter '" 
+						String displayValue;
+						if (paramSpec instanceof SecretInput)
+							displayValue = SecretInput.MASK;
+						else
+							displayValue = value.toString();
+						throw new ValidationException("Error validating value '" + displayValue + "' of parameter '" 
 								+ entry.getKey() + "': " + e.getMessage());
 					}
 				}
@@ -114,9 +106,9 @@ public class JobParam implements Serializable {
 	}
 	
 	public static void validateParams(List<InputSpec> paramSpecs, List<JobParam> params) {
-		Map<String, List<String>> paramMap = new HashMap<>();
+		Map<String, List<List<String>>> paramMap = new HashMap<>();
 		for (JobParam param: params) {
-			List<String> values;
+			List<List<String>> values;
 			if (param.getValuesProvider() instanceof SpecifiedValues)
 				values = param.getValuesProvider().getValues();
 			else
@@ -127,10 +119,13 @@ public class JobParam implements Serializable {
 		validateParams(paramSpecs, paramMap);
 	}
 	
-	public static Map<String, List<String>> getParamMatrix(Map<String, String> paramMap) {
-		Map<String, List<String>> paramMatrix = new HashMap<>();
-		for (Map.Entry<String, String> entry: paramMap.entrySet()) 
-			paramMatrix.put(entry.getKey(), Lists.newArrayList(entry.getValue()));
+	public static Map<String, List<List<String>>> getParamMatrix(Map<String, List<String>> paramMap) {
+		Map<String, List<List<String>>> paramMatrix = new HashMap<>();
+		for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) { 
+			List<List<String>> values = new ArrayList<>();
+			values.add(entry.getValue());
+			paramMatrix.put(entry.getKey(), values);
+		}
 		return paramMatrix;
 	}
 	

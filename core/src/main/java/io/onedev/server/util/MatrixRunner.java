@@ -4,33 +4,33 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class MatrixRunner {
+public abstract class MatrixRunner<T> {
 
-	private final Map<String, String> params;
+	private final Map<String, T> params;
 	
-	private final Map<String, List<String>> paramMatrix;
+	private final Map<String, List<T>> paramMatrix;
 	
-	public MatrixRunner(Map<String, List<String>> paramMatrix) {
+	public MatrixRunner(Map<String, List<T>> paramMatrix) {
 		this(new LinkedHashMap<>(), paramMatrix);
 	}
 	
-	private MatrixRunner(Map<String, String> params, Map<String, List<String>> paramMatrix) {
+	private MatrixRunner(Map<String, T> params, Map<String, List<T>> paramMatrix) {
 		this.params = params;
 		this.paramMatrix = paramMatrix;
 	}
 	
 	public void run() {
 		if (!paramMatrix.isEmpty()) {
-			Map.Entry<String, List<String>> entry = paramMatrix.entrySet().iterator().next();
-			for (String value: entry.getValue()) {
-				Map<String, String> paramsCopy = new LinkedHashMap<>(params);
+			Map.Entry<String, List<T>> entry = paramMatrix.entrySet().iterator().next();
+			for (T value: entry.getValue()) {
+				Map<String, T> paramsCopy = new LinkedHashMap<>(params);
 				paramsCopy.put(entry.getKey(), value);
-				Map<String, List<String>> matrixCopy = new LinkedHashMap<>(paramMatrix);
+				Map<String, List<T>> matrixCopy = new LinkedHashMap<>(paramMatrix);
 				matrixCopy.remove(entry.getKey());
-				new MatrixRunner(paramsCopy, matrixCopy) {
+				new MatrixRunner<T>(paramsCopy, matrixCopy) {
 
 					@Override
-					protected void run(Map<String, String> paramMap) {
+					protected void run(Map<String, T> paramMap) {
 						MatrixRunner.this.run(paramMap);
 					}
 					
@@ -41,6 +41,6 @@ public abstract class MatrixRunner {
 		}
 	}
 	
-	protected abstract void run(Map<String, String> paramMap);
+	protected abstract void run(Map<String, T> paramMap);
 	
 }

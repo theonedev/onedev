@@ -27,7 +27,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueConstants;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.userident.UserIdent;
@@ -79,7 +79,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		RepeatingView fieldsView = new RepeatingView("fields");
 		for (String fieldName: displayFields) {
 			if (!fieldName.equals(IssueConstants.FIELD_STATE)) {
-				IssueField field = getIssue().getFields().get(fieldName);
+				Input field = getIssue().getFieldInputs().get(fieldName);
 				if (field != null && !field.getType().equals(InputSpec.USER) && !field.getValues().isEmpty()) {
 					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId()) {
 
@@ -89,7 +89,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 						}
 
 						@Override
-						protected IssueField getField() {
+						protected Input getField() {
 							return field;
 						}
 						
@@ -102,7 +102,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 		
 		RepeatingView avatarsView = new RepeatingView("avatars");
 		for (String fieldName: displayFields) {
-			IssueField field = getIssue().getFields().get(fieldName);
+			Input field = getIssue().getFieldInputs().get(fieldName);
 			if (field != null && field.getType().equals(InputSpec.USER) && !field.getValues().isEmpty()) {
 				User user = OneDev.getInstance(UserManager.class)
 						.findByName(field.getValues().iterator().next());
@@ -203,7 +203,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 				Issue issue = OneDev.getInstance(IssueManager.class).load(issueId);
 				Hibernate.initialize(issue.getProject());
 				Hibernate.initialize(issue.getMilestone());
-				Hibernate.initialize(issue.getFieldEntities());
+				Hibernate.initialize(issue.getFields());
 				Hibernate.initialize(issue.getSubmitter());
 				send(getPage(), Broadcast.BREADTH, new IssueDragging(target, issue));
 			}

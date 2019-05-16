@@ -90,7 +90,7 @@ public class GroupChoiceInput extends InputSpec {
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		if (value != null)
+		if (value instanceof String)
 			return Lists.newArrayList((String) value);
 		else
 			return new ArrayList<>();

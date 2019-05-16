@@ -79,7 +79,10 @@ public class BooleanInput extends InputSpec {
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		return Lists.newArrayList(((Boolean)value)?"true":"false");
+		if (value instanceof Boolean)
+			return Lists.newArrayList(((Boolean)value)?"true":"false");
+		else
+			return Lists.newArrayList("false");
 	}
 
 }

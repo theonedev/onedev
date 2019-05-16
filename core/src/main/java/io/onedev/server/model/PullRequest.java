@@ -712,7 +712,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	@Nullable
-	public BuildRequirement getBuildRequirement(String jobName, Map<String, String> buildParams) {
+	public BuildRequirement getBuildRequirement(String jobName, Map<String, List<String>> buildParams) {
 		for (BuildRequirement requirement: getBuildRequirements()) {
 			if (requirement.getJobName().equals(jobName) && requirement.getBuildParams().equals(buildParams))
 				return requirement;

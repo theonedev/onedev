@@ -41,7 +41,7 @@ import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueConstants;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
@@ -183,7 +183,7 @@ public abstract class IssueOperationsPanel extends Panel {
 		List<String> criterias = new ArrayList<>();
 		if (getIssue().getMilestone() != null)
 			criterias.add(IssueQuery.quote(IssueConstants.FIELD_MILESTONE) + " is " + IssueQuery.quote(getIssue().getMilestoneName()));
-		for (Map.Entry<String, IssueField> entry: getIssue().getFields().entrySet()) {
+		for (Map.Entry<String, Input> entry: getIssue().getFieldInputs().entrySet()) {
 			List<String> strings = entry.getValue().getValues();
 			if (strings.isEmpty()) {
 				criterias.add(IssueQuery.quote(entry.getKey()) + " is empty");

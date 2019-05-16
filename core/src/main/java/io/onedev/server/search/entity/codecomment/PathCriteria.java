@@ -1,16 +1,16 @@
 package io.onedev.server.search.entity.codecomment;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
-import io.onedev.server.util.CodeCommentConstants;
 import io.onedev.commons.utils.stringmatch.WildcardUtils;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.CodeCommentConstants;
 
 public class PathCriteria extends EntityCriteria<CodeComment>  {
 
@@ -23,12 +23,12 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<CodeComment> context, User user) {
-		Path<String> attribute = CodeCommentQuery.getPath(context.getRoot(), CodeCommentConstants.ATTR_PATH);
+	public Predicate getPredicate(Project project, Root<CodeComment> root, CriteriaBuilder builder, User user) {
+		Path<String> attribute = CodeCommentQuery.getPath(root, CodeCommentConstants.ATTR_PATH);
 		String normalized = value.toLowerCase().replace('*', '%');
 		if (normalized.endsWith("/"))
 			normalized += "%";
-		return context.getBuilder().like(context.getBuilder().lower(attribute), normalized);
+		return builder.like(builder.lower(attribute), normalized);
 	}
 	
 	@Override

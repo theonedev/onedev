@@ -1,17 +1,17 @@
 package io.onedev.server.search.entity.codecomment;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
-import io.onedev.server.util.CodeCommentConstants;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.CodeCommentConstants;
 
 public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 
@@ -24,9 +24,9 @@ public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<CodeComment> context, User user) {
-		Path<?> attribute = CodeCommentQuery.getPath(context.getRoot(), CodeCommentConstants.ATTR_COMMIT);
-		return context.getBuilder().equal(attribute, value.name());
+	public Predicate getPredicate(Project project, Root<CodeComment> root, CriteriaBuilder builder, User user) {
+		Path<?> attribute = CodeCommentQuery.getPath(root, CodeCommentConstants.ATTR_COMMIT);
+		return builder.equal(attribute, value.name());
 	}
 
 	@Override

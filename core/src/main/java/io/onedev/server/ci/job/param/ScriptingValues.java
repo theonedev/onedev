@@ -1,11 +1,14 @@
 package io.onedev.server.ci.job.param;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Script;
@@ -32,9 +35,20 @@ public class ScriptingValues implements ValuesProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<String> getValues() {
+	public List<List<String>> getValues() {
 		Map<String, Object> variables = new HashMap<>();
-		return (List<String>) GroovyUtils.evalScript(getScript(), variables);
+		List<List<String>> values = new ArrayList<>();
+		for (Object each: (List<Object>) GroovyUtils.evalScript(getScript(), variables)) {
+			List<String> strings = new ArrayList<>();
+			if (each instanceof Collection) { 
+				strings.addAll((Collection<? extends String>) each);
+				Collections.sort(strings);
+			} else {
+				strings.add((String) each);
+			}
+			values.add(strings);
+		}
+		return values;
 	}
 
 }

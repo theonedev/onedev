@@ -13,16 +13,14 @@ import org.slf4j.LoggerFactory;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Project;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.secretinput.SecretInput;
 
-public class IssueField implements Serializable {
+public class Input implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private static final Logger logger = LoggerFactory.getLogger(IssueField.class);
+	private static final Logger logger = LoggerFactory.getLogger(Input.class);
 
 	private final String name;
 	
@@ -31,7 +29,7 @@ public class IssueField implements Serializable {
 	
 	private final List<String> values;
 	
-	public IssueField(String name, String type, List<String> values) {
+	public Input(String name, String type, List<String> values) {
 		this.name = name;
 		this.type = type;
 		this.values = values;
@@ -53,8 +51,8 @@ public class IssueField implements Serializable {
 	public boolean equals(Object other) {
 		if (this == other) {
 			return true;
-		} else if (other instanceof IssueField) {
-			IssueField otherField = (IssueField) other;
+		} else if (other instanceof Input) {
+			Input otherField = (Input) other;
 			return new EqualsBuilder()
 					.append(getName(), otherField.getName())
 					.append(getType(), otherField.getType())
@@ -75,17 +73,20 @@ public class IssueField implements Serializable {
 	}
 
 	@Nullable
-	public Object getValue(Project project) {
-		InputSpec fieldSpec = OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(getName());
-		if (fieldSpec != null) {
-			try {
-				return fieldSpec.convertToObject(getValues());
-			} catch (ValidationException e) {
-				logger.error("Error converting field value (field: {}, value: {}, error: {})", 
-						getName(), getValues(), e.getMessage());
-			}
+	public Object getTypedValue(@Nullable InputSpec inputSpec) {
+		try {
+			return inputSpec.convertToObject(getValues());
+		} catch (ValidationException e) {
+			String displayValue;
+			if (type.equals(InputSpec.SECRET)) 
+				displayValue = SecretInput.MASK;
+			else 
+				displayValue = "" + getValues();
+			
+			logger.error("Error converting field value (field: {}, value: {}, error: {})", 
+					getName(), displayValue, e.getMessage());
+			return null;
 		}
-		return null;
 	}
 	
 }

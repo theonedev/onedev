@@ -369,15 +369,15 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			List<Build> builds = buildManager.query(project, newObjectId.name());
 
 			for (JobDependency dependency: branchProtection.getJobDependencies()) {
-				Map<String, List<String>> paramMatrix = new HashMap<>();
+				Map<String, List<List<String>>> paramMatrix = new HashMap<>();
 				for (JobParam param: dependency.getJobParams()) 
 					paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
 				
 				AtomicBoolean buildRequirementUnsatisfied = new AtomicBoolean(false);
-				new MatrixRunner(paramMatrix) {
+				new MatrixRunner<List<String>>(paramMatrix) {
 					
 					@Override
-					public void run(Map<String, String> params) {
+					public void run(Map<String, List<String>> params) {
 						for (Build build: builds) {
 							if (build.getJobName().equals(dependency.getJobName()) && build.getParamMap().equals(params))
 								return;

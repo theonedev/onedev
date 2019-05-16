@@ -2,14 +2,15 @@ package io.onedev.server.search.entity.build;
 
 import java.util.Date;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.BuildConstants;
 
 public class QueueingDateCriteria extends EntityCriteria<Build> {
@@ -29,12 +30,12 @@ public class QueueingDateCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Build> context, User user) {
-		Path<Date> attribute = context.getRoot().get(BuildConstants.ATTR_QUEUEING_DATE);
+	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
+		Path<Date> attribute = root.get(BuildConstants.ATTR_QUEUEING_DATE);
 		if (operator == BuildQueryLexer.IsBefore)
-			return context.getBuilder().lessThan(attribute, value);
+			return builder.lessThan(attribute, value);
 		else
-			return context.getBuilder().greaterThan(attribute, value);
+			return builder.greaterThan(attribute, value);
 	}
 
 	@Override

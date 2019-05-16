@@ -2,13 +2,14 @@ package io.onedev.server.search.entity.issue;
 
 import java.util.Collection;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.IssueConstants;
 
 public class FixedInCriteria extends IssueCriteria {
@@ -22,12 +23,12 @@ public class FixedInCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
+	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
 		Collection<Long> fixedIssueNumbers = build.getFixedIssueNumbers();
 		if (fixedIssueNumbers != null && !fixedIssueNumbers.isEmpty())
-			return context.getRoot().get(IssueConstants.ATTR_NUMBER).in(fixedIssueNumbers);
+			return root.get(IssueConstants.ATTR_NUMBER).in(fixedIssueNumbers);
 		else
-			return context.getBuilder().disjunction();
+			return builder.disjunction();
 	}
 
 	@Override

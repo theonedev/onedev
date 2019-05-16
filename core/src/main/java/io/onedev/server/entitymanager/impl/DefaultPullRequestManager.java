@@ -116,9 +116,7 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
-import io.onedev.server.search.entity.pullrequest.PullRequestQueryBuildContext;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ProjectPrivilege;
@@ -726,14 +724,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Collection<BuildRequirement> effectiveRequirements = new HashSet<>();
 		
 		for (JobDependency dependency: jobDependencies) {
-			Map<String, List<String>> paramMatrix = new HashMap<>();
+			Map<String, List<List<String>>> paramMatrix = new HashMap<>();
 			for (JobParam param: dependency.getJobParams())
 				paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
 			
-			new MatrixRunner(paramMatrix) {
+			new MatrixRunner<List<String>>(paramMatrix) {
 				
 				@Override
-				public void run(Map<String, String> params) {
+				public void run(Map<String, List<String>> params) {
 					BuildRequirement requirement = request.getBuildRequirement(dependency.getJobName(), params);
 					if (requirement == null) {
 						requirement = new BuildRequirement();
@@ -952,11 +950,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 	
 	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 
-			Project targetProject, User user, QueryBuildContext<PullRequest> context) {
+			Project targetProject, User user, Root<PullRequest> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(context.getBuilder().equal(context.getRoot().get("targetProject"), targetProject));
+		predicates.add(builder.equal(root.get("targetProject"), targetProject));
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(targetProject, context, user));
+			predicates.add(criteria.getPredicate(targetProject, root, builder, user));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
@@ -967,8 +965,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Root<PullRequest> root = query.from(PullRequest.class);
 		query.select(root).distinct(true);
 		
-		QueryBuildContext<PullRequest> context = new PullRequestQueryBuildContext(root, builder);
-		query.where(getPredicates(requestQuery.getCriteria(), targetProject, user, context));
+		query.where(getPredicates(requestQuery.getCriteria(), targetProject, user, root, builder));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: requestQuery.getSorts()) {
@@ -1002,8 +999,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 
-		QueryBuildContext<PullRequest> context = new PullRequestQueryBuildContext(root, builder);
-		criteriaQuery.where(getPredicates(requestCriteria, targetProject, user, context));
+		criteriaQuery.where(getPredicates(requestCriteria, targetProject, user, root, builder));
 
 		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

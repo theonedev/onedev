@@ -14,7 +14,7 @@ import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.cache.CacheManager;
-import io.onedev.server.entitymanager.IssueFieldEntityManager;
+import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -38,7 +38,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     
     private final SettingManager settingManager;
     
-    private final IssueFieldEntityManager issueFieldEntityManager;
+    private final IssueFieldManager issueFieldManager;
     
     private final CacheManager cacheManager;
     
@@ -46,14 +46,14 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
-    		IssueFieldEntityManager issueFieldEntityManager, CacheManager cacheManager, 
+    		IssueFieldManager issueFieldManager, CacheManager cacheManager, 
     		PasswordService passwordService, ListenerRegistry listenerRegistry) {
         super(dao);
         
         this.passwordService = passwordService;
         this.projectManager = projectManager;
         this.settingManager = settingManager;
-        this.issueFieldEntityManager = issueFieldEntityManager;
+        this.issueFieldManager = issueFieldManager;
         this.cacheManager = cacheManager;
         this.listenerRegistry = listenerRegistry;
     }
@@ -77,7 +77,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     			project.getIssueSetting().onRenameUser(oldName, user.getName());
     		}
     		
-    		issueFieldEntityManager.onRenameUser(oldName, user.getName());
+    		issueFieldManager.onRenameUser(oldName, user.getName());
     		settingManager.getIssueSetting().onRenameUser(oldName, user.getName());
     	}
     }

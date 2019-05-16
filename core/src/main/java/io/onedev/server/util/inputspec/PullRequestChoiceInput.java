@@ -52,7 +52,7 @@ public class PullRequestChoiceInput extends InputSpec {
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		if (value != null)
+		if (value instanceof Long)
 			return Lists.newArrayList((String) value);
 		else
 			return new ArrayList<>();

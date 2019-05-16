@@ -8,7 +8,7 @@ import io.onedev.server.model.Project;
 
 public interface JobScheduler {
 	
-	void submit(Project project, String commitHash, String jobName, Map<String, List<String>> paramMatrix);
+	void submit(Project project, String commitHash, String jobName, Map<String, List<List<String>>> paramMatrix);
 	
 	void resubmit(Build build);
 	

@@ -17,6 +17,8 @@ public class SecretInput extends InputSpec {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String MASK = "******";
+	
 	private DefaultValueProvider defaultValueProvider;
 	
 	@Editable(order=1000, name="Default Value")
@@ -61,7 +63,7 @@ public class SecretInput extends InputSpec {
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		if (value != null)
+		if (value instanceof String)
 			return Lists.newArrayList((String)value);
 		else
 			return new ArrayList<>();

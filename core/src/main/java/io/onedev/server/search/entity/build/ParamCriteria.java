@@ -1,16 +1,19 @@
 package io.onedev.server.search.entity.build;
 
-import java.util.Objects;
+import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.search.entity.QueryBuildContext;
+import io.onedev.server.util.BuildConstants;
 
 public class ParamCriteria extends EntityCriteria<Build> {
 
@@ -26,15 +29,20 @@ public class ParamCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Build> context, User user) {
-		From<?, ?> join = context.getJoin(name);
-		return context.getBuilder().equal(join.get(BuildParam.ATTR_VALUE), value);
+	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
+		From<?, ?> join = root.join(BuildConstants.ATTR_PARAMS, JoinType.LEFT);
+		return builder.and(
+				builder.equal(join.get(BuildParam.ATTR_NAME), name),
+				builder.equal(join.get(BuildParam.ATTR_VALUE), value));
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		Object fieldValue = build.getParamMap().get(name);
-		return Objects.equals(fieldValue, value);
+		List<String> paramValues = build.getParamMap().get(name);
+		if (paramValues == null || paramValues.isEmpty())
+			return value == null;
+		else 
+			return paramValues.contains(value);
 	}
 
 	@Override

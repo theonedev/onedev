@@ -5,15 +5,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.IssueConstants;
 
 public class StateCriteria extends IssueCriteria {
@@ -27,9 +28,9 @@ public class StateCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		Path<?> attribute = context.getRoot().get(IssueConstants.ATTR_STATE);
-		return context.getBuilder().equal(attribute, value);
+	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+		Path<?> attribute = root.get(IssueConstants.ATTR_STATE);
+		return builder.equal(attribute, value);
 	}
 
 	@Override

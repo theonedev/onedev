@@ -27,12 +27,13 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.util.inputspec.secretinput.SecretInput;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
@@ -103,7 +104,12 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 							item.add(new Label("value", "#" + value));
 						}
 					} else {
-						Label label = new Label("value", value);
+						Label label;
+						if (getField().getType().equals(InputSpec.SECRET))
+							label = new Label("value", SecretInput.MASK);
+						else
+							label = new Label("value", value);
+						
 						InputSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
 						if (fieldSpec != null && fieldSpec instanceof ChoiceInput) {
 							ChoiceProvider choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
@@ -146,7 +152,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 
 	@Override
 	public Object getInputValue(String name) {
-		IssueField field = getIssue().getFields().get(name);
+		Input field = getIssue().getFieldInputs().get(name);
 		InputSpec fieldSpec = getIssueSetting().getFieldSpec(name);
 		if (field != null && fieldSpec != null && field.getType().equals(EditableUtils.getDisplayName(fieldSpec.getClass()))) {
 			return fieldSpec.convertToObject(field.getValues());
@@ -158,7 +164,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 	protected abstract Issue getIssue();
 	
 	@Nullable
-	protected abstract IssueField getField();
+	protected abstract Input getField();
 
 	@Override
 	public void renderHead(IHeaderResponse response) {

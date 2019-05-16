@@ -2,8 +2,10 @@ package io.onedev.server.ci.job;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintValidatorContext;
@@ -52,6 +54,8 @@ public class Job implements Serializable, Validatable {
 	private long timeout = 3600;
 	
 	private LogLevel logLevel = LogLevel.INFO;
+	
+	private transient Map<String, InputSpec> paramSpecMap;
 	
 	@Editable(order=100, description="Specify name of the job")
 	@NotEmpty
@@ -222,6 +226,15 @@ public class Job implements Serializable, Validatable {
 			context.disableDefaultConstraintViolation();
 		
 		return isValid;
+	}
+
+	public Map<String, InputSpec> getParamSpecMap() {
+		if (paramSpecMap == null) {
+			paramSpecMap = new HashMap<>();
+			for (InputSpec paramSpec: getParamSpecs()) 
+				paramSpecMap.put(paramSpec.getName(), paramSpec);
+		}
+		return paramSpecMap;
 	}
 	
 }

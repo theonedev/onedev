@@ -29,7 +29,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
-import io.onedev.server.entitymanager.IssueFieldEntityManager;
+import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQuerySettingManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -38,7 +38,7 @@ import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueFieldEntity;
+import io.onedev.server.model.IssueField;
 import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
@@ -54,11 +54,9 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.search.entity.issue.AndCriteria;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryBuildContext;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.ValueSetEdit;
@@ -71,7 +69,7 @@ import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateRe
 @Singleton
 public class DefaultIssueManager extends AbstractEntityManager<Issue> implements IssueManager {
 
-	private final IssueFieldEntityManager issueFieldEntityManager;
+	private final IssueFieldManager issueFieldManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
@@ -82,11 +80,11 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	private final ProjectManager projectManager;
 	
 	@Inject
-	public DefaultIssueManager(Dao dao, IssueFieldEntityManager issueFieldEntityManager, 
+	public DefaultIssueManager(Dao dao, IssueFieldManager issueFieldManager, 
 			IssueQuerySettingManager issueQuerySettingManager, SettingManager settingManager, 
 			ListenerRegistry listenerRegistry, ProjectManager projectManager) {
 		super(dao);
-		this.issueFieldEntityManager = issueFieldEntityManager;
+		this.issueFieldManager = issueFieldManager;
 		this.issueQuerySettingManager = issueQuerySettingManager;
 		this.listenerRegistry = listenerRegistry;
 		this.settingManager = settingManager;
@@ -112,16 +110,16 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		issue.setNumber(getNextNumber(issue.getProject(), query));
 		save(issue);
 
-		issueFieldEntityManager.saveFields(issue);
+		issueFieldManager.saveFields(issue);
 		
 		listenerRegistry.post(new IssueOpened(issue));
 	}
 
-	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Issue> criteria, Project project, QueryBuildContext<Issue> context, User user) {
+	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Issue> criteria, Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(context.getBuilder().equal(context.getRoot().get("project"), project));
+		predicates.add(builder.equal(root.get("project"), project));
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(project, context, user));
+			predicates.add(criteria.getPredicate(project, root, builder, user));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
@@ -130,8 +128,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		CriteriaQuery<Issue> query = builder.createQuery(Issue.class);
 		Root<Issue> root = query.from(Issue.class);
 		
-		QueryBuildContext<Issue> context = new IssueQueryBuildContext(root, builder);
-		query.where(getPredicates(issueQuery.getCriteria(), project, context, user));
+		query.where(getPredicates(issueQuery.getCriteria(), project, root, builder, user));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: issueQuery.getSorts()) {
@@ -141,12 +138,12 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 				else
 					orders.add(builder.desc(IssueQuery.getPath(root, IssueConstants.ORDER_FIELDS.get(sort.getField()))));
 			} else {
-				Join<Issue, IssueFieldEntity> join = root.join(IssueConstants.ATTR_FIELD_ENTITIES, JoinType.LEFT);
-				join.on(builder.equal(join.get(IssueFieldEntity.ATTR_NAME), sort.getField()));
+				Join<Issue, IssueField> join = root.join(IssueConstants.ATTR_FIELDS, JoinType.LEFT);
+				join.on(builder.equal(join.get(IssueField.ATTR_NAME), sort.getField()));
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(join.get(IssueFieldEntity.ATTR_ORDINAL)));
+					orders.add(builder.asc(join.get(IssueField.ATTR_ORDINAL)));
 				else
-					orders.add(builder.desc(join.get(IssueFieldEntity.ATTR_ORDINAL)));
+					orders.add(builder.desc(join.get(IssueField.ATTR_ORDINAL)));
 			}
 		}
 
@@ -170,7 +167,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		query.setMaxResults(maxResults);
 		List<Issue> issues = query.getResultList();
 		if (!issues.isEmpty())
-			issueFieldEntityManager.populateFields(issues);
+			issueFieldManager.populateFields(issues);
 		
 		return issues;
 	}
@@ -189,8 +186,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
 
-		QueryBuildContext<Issue> context = new IssueQueryBuildContext(root, builder);
-		criteriaQuery.where(getPredicates(issueCriteria, project, context, user));
+		criteriaQuery.where(getPredicates(issueCriteria, project, root, builder, user));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
@@ -311,7 +307,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Sessional
 	@Override
 	public Collection<String> getUndefinedFields() {
-		Query<?> query = getSession().createQuery("select distinct name from IssueFieldEntity");
+		Query<?> query = getSession().createQuery("select distinct name from IssueField");
 		Set<String> undefinedFields = new HashSet<>();
 		for (String fieldName: (List<String>)query.getResultList()) {
 			InputSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
@@ -338,11 +334,11 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 			Query<?> query;
 			if (entry.getValue().getFixType() == UndefinedFieldResolution.FixType.CHANGE_TO_ANOTHER_FIELD) {
-				query = getSession().createQuery("update IssueFieldEntity set name=:newName where name=:oldName");
+				query = getSession().createQuery("update IssueField set name=:newName where name=:oldName");
 				query.setParameter("oldName", entry.getKey());
 				query.setParameter("newName", entry.getValue().getNewField());
 			} else {
-				query = getSession().createQuery("delete from IssueFieldEntity where name=:fieldName");
+				query = getSession().createQuery("delete from IssueField where name=:fieldName");
 				query.setParameter("fieldName", entry.getKey());
 			}				
 			query.executeUpdate();
@@ -382,7 +378,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Sessional
 	@Override
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
-		Query query = getSession().createQuery("select distinct name, value from IssueFieldEntity where type=:choice");
+		Query query = getSession().createQuery("select distinct name, value from IssueField where type=:choice");
 		query.setParameter("choice", InputSpec.ENUMERATION);
 		Set<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
 		for (Object[] row: (List<Object[]>)query.getResultList()) {
@@ -415,13 +411,13 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	public void fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits) {
 		for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
 			for (String deletion: entry.getValue().getDeletions()) {
-				Query query = getSession().createQuery("delete from IssueFieldEntity where name=:fieldName and value=:fieldValue");
+				Query query = getSession().createQuery("delete from IssueField where name=:fieldName and value=:fieldValue");
 				query.setParameter("fieldName", entry.getKey());
 				query.setParameter("fieldValue", deletion);
 				query.executeUpdate();
 			}
 			for (Map.Entry<String, String> renameEntry: entry.getValue().getRenames().entrySet()) {
-				Query query = getSession().createQuery("update IssueFieldEntity set value=:newValue where name=:fieldName and value=:oldValue");
+				Query query = getSession().createQuery("update IssueField set value=:newValue where name=:fieldName and value=:oldValue");
 				query.setParameter("fieldName", entry.getKey());
 				query.setParameter("oldValue", renameEntry.getKey());
 				query.setParameter("newValue", renameEntry.getValue());
@@ -453,7 +449,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Transactional
 	@Override
 	public void fixFieldValueOrders() {
-		Query query = getSession().createQuery("select distinct name, value, ordinal from IssueFieldEntity where type=:choice");
+		Query query = getSession().createQuery("select distinct name, value, ordinal from IssueField where type=:choice");
 		query.setParameter("choice", InputSpec.ENUMERATION);
 
 		for (Object[] row: (List<Object[]>)query.getResultList()) {
@@ -464,7 +460,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			if (specifiedChoices != null) {
 				long newOrdinal = specifiedChoices.getChoiceValues().indexOf(value);
 				if (ordinal != newOrdinal) {
-					query = getSession().createQuery("update IssueFieldEntity set ordinal=:newOrdinal where name=:fieldName and value=:fieldValue");
+					query = getSession().createQuery("update IssueField set ordinal=:newOrdinal where name=:fieldName and value=:fieldValue");
 					query.setParameter("fieldName", name);
 					query.setParameter("fieldValue", value);
 					query.setParameter("newOrdinal", newOrdinal);

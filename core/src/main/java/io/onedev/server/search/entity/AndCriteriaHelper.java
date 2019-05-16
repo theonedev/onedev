@@ -3,7 +3,9 @@ package io.onedev.server.search.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
@@ -20,11 +22,11 @@ public class AndCriteriaHelper<T extends AbstractEntity> extends EntityCriteria<
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<T> context, User user) {
+	public Predicate getPredicate(Project project, Root<T> root, CriteriaBuilder builder, User user) {
 		List<Predicate> predicates = new ArrayList<>();
 		for (EntityCriteria<T> criteria: criterias)
-			predicates.add(criteria.getPredicate(project, context, user));
-		return context.getBuilder().and(predicates.toArray(new Predicate[0]));
+			predicates.add(criteria.getPredicate(project, root, builder, user));
+		return builder.and(predicates.toArray(new Predicate[0]));
 	}
 
 	@Override

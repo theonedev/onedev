@@ -24,7 +24,7 @@ import io.onedev.server.model.support.issue.transitionprerequisite.ValueMatcher;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.TransitionTrigger;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
@@ -308,7 +308,7 @@ public class TransitionSpec implements Serializable {
 			if (getPrerequisite() == null) {
 				return true;
 			} else {
-				IssueField field = issue.getFields().get(getPrerequisite().getInputName());
+				Input field = issue.getFieldInputs().get(getPrerequisite().getInputName());
 				List<String> fieldValues;
 				if (field != null)
 					fieldValues = field.getValues();

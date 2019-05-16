@@ -3,9 +3,12 @@ package io.onedev.server.model;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -32,6 +35,7 @@ import com.google.common.base.Optional;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.BuildInfoManager;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
@@ -111,7 +115,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	@OneToMany(mappedBy="dependency", cascade=CascadeType.REMOVE)
 	private Collection<BuildDependence> dependents= new ArrayList<>();
 	
-	private transient Map<String, String> paramMap;
+	private transient Map<String, List<String>> paramMap;
 	
 	private transient Optional<Collection<Long>> fixedIssueNumbers;
 	
@@ -277,11 +281,22 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.statusMessage = statusMessage;
 	}
 
-	public Map<String, String> getParamMap() {
+	public Map<String, List<String>> getParamMap() {
 		if (paramMap == null) {
 			paramMap = new HashMap<>();
-			for (BuildParam param: getParams())
-				paramMap.put(param.getName(), param.getValue());
+			for (BuildParam param: getParams()) {
+				List<String> values = paramMap.get(param.getName());
+				if (values == null) {
+					values = new ArrayList<>();
+					paramMap.put(param.getName(), values);
+				}
+				values.add(param.getValue());
+			}
+			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) { 
+				List<String> values = entry.getValue();
+				Collections.sort(values);
+				entry.setValue(values);
+			}
 		}
 		return paramMap;
 	}
@@ -315,6 +330,20 @@ public class Build extends AbstractEntity implements Referenceable {
 			}
 		}
 		return fixedIssueNumbers.orNull();
+	}
+	
+	public Map<String, Input> getParamInputs() {
+		Map<String, Input> inputs = new LinkedHashMap<>();
+		for (BuildParam param: getParams()) {
+			Input input = inputs.get(param.getName());
+			if (input == null) {
+				input = new Input(param.getName(), param.getType(), new ArrayList<>());
+				inputs.put(param.getName(), input);
+			}
+			if (param.getValue() != null)
+				input.getValues().add(param.getValue());
+		}
+		return inputs;
 	}
 	
 	public BuildFacade getFacade() {

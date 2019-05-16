@@ -2,14 +2,15 @@ package io.onedev.server.search.entity.pullrequest;
 
 import java.util.List;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.AndCriteriaHelper;
 import io.onedev.server.search.entity.ParensAware;
-import io.onedev.server.search.entity.QueryBuildContext;
 
 public class AndCriteria extends PullRequestCriteria implements ParensAware {
 	
@@ -22,8 +23,8 @@ public class AndCriteria extends PullRequestCriteria implements ParensAware {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context, User user) {
-		return new AndCriteriaHelper<PullRequest>(criterias).getPredicate(project, context, user);
+	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
+		return new AndCriteriaHelper<PullRequest>(criterias).getPredicate(project, root, builder, user);
 	}
 
 	@Override

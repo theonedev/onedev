@@ -16,7 +16,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
 import io.onedev.server.util.CommentSupport;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
 
@@ -24,23 +24,23 @@ public class IssueFieldChangeData implements IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
-	protected final Map<String, IssueField> oldFields;
+	protected final Map<String, Input> oldFields;
 	
-	protected final Map<String, IssueField> newFields;
+	protected final Map<String, Input> newFields;
 	
-	public IssueFieldChangeData(Map<String, IssueField> oldFields, Map<String, IssueField> newFields) {
+	public IssueFieldChangeData(Map<String, Input> oldFields, Map<String, Input> newFields) {
 		this.oldFields = copyNonEmptyFields(oldFields);
 		this.newFields = copyNonEmptyFields(newFields);
 	}
 	
 	protected List<String> getOldLines() {
 		List<String> oldLines = new ArrayList<>();
-		for (IssueField oldField: oldFields.values()) {
-			IssueField newField = newFields.get(oldField.getName());
+		for (Input oldField: oldFields.values()) {
+			Input newField = newFields.get(oldField.getName());
 			if (newField == null || !describe(oldField).equals(describe(newField)))
 				oldLines.add(describe(oldField));
 		}
-		for (IssueField newField: newFields.values()) {
+		for (Input newField: newFields.values()) {
 			if (!oldFields.containsKey(newField.getName()))
 				oldLines.add("");
 		}
@@ -49,8 +49,8 @@ public class IssueFieldChangeData implements IssueChangeData {
 	
 	protected List<String> getNewLines() {
 		List<String> newLines = new ArrayList<>();
-		for (IssueField oldField: oldFields.values()) {
-			IssueField newField = newFields.get(oldField.getName());
+		for (Input oldField: oldFields.values()) {
+			Input newField = newFields.get(oldField.getName());
 			if (newField != null) {
 				if (!describe(oldField).equals(describe(newField))) {
 					newLines.add(describe(newField));
@@ -59,23 +59,23 @@ public class IssueFieldChangeData implements IssueChangeData {
 				newLines.add("");
 			}
 		}
-		for (IssueField newField: newFields.values()) {
+		for (Input newField: newFields.values()) {
 			if (!oldFields.containsKey(newField.getName()))
 				newLines.add(describe(newField));
 		}
 		return newLines;
 	}
 	
-	private Map<String, IssueField> copyNonEmptyFields(Map<String, IssueField> fields) {
-		Map<String, IssueField> copy = new LinkedHashMap<>();
-		for (Map.Entry<String, IssueField> entry: fields.entrySet()) {
+	private Map<String, Input> copyNonEmptyFields(Map<String, Input> fields) {
+		Map<String, Input> copy = new LinkedHashMap<>();
+		for (Map.Entry<String, Input> entry: fields.entrySet()) {
 			if (!entry.getValue().getValues().isEmpty())
 				copy.put(entry.getKey(), entry.getValue());
 		}
 		return copy;
 	}
 	
-	private String describe(IssueField field) {
+	private String describe(Input field) {
 		return field.getName() + ": " + StringUtils.join(field.getValues(), ", ");		
 	}
 	
@@ -89,9 +89,9 @@ public class IssueFieldChangeData implements IssueChangeData {
 		return "changed fields";
 	}
 
-	public List<String> getLines(Map<String, IssueField> fields) {
+	public List<String> getLines(Map<String, Input> fields) {
 		List<String> lines = new ArrayList<>();
-		for (Map.Entry<String, IssueField> entry: fields.entrySet())
+		for (Map.Entry<String, Input> entry: fields.entrySet())
 			lines.add(entry.getKey() + ": " + StringUtils.join(entry.getValue().getValues(), ", "));
 		return lines;
 	}
@@ -105,8 +105,8 @@ public class IssueFieldChangeData implements IssueChangeData {
 	public Map<String, User> getNewUsers() {
 		UserManager userManager = OneDev.getInstance(UserManager.class);
 		Map<String, User> newUsers = new HashMap<>();
-		for (IssueField oldField: oldFields.values()) {
-			IssueField newField = newFields.get(oldField.getName());
+		for (Input oldField: oldFields.values()) {
+			Input newField = newFields.get(oldField.getName());
 			if (newField != null && !describe(oldField).equals(describe(newField)) 
 					&& newField.getType().equals(InputSpec.USER) && !newField.getValues().isEmpty()) { 
 				User user = userManager.findByName(newField.getValues().iterator().next());
@@ -114,7 +114,7 @@ public class IssueFieldChangeData implements IssueChangeData {
 					newUsers.put(newField.getName(), user);
 			}
 		}
-		for (IssueField newField: newFields.values()) {
+		for (Input newField: newFields.values()) {
 			if (!oldFields.containsKey(newField.getName()) && newField.getType().equals(InputSpec.USER) 
 					&& !newField.getValues().isEmpty()) { 
 				User user = userManager.findByName(newField.getValues().iterator().next());
@@ -130,8 +130,8 @@ public class IssueFieldChangeData implements IssueChangeData {
 	public Map<String, Group> getNewGroups() {
 		Map<String, Group> newGroups = new HashMap<>();
 		GroupManager groupManager = OneDev.getInstance(GroupManager.class);
-		for (IssueField oldField: oldFields.values()) {
-			IssueField newField = newFields.get(oldField.getName());
+		for (Input oldField: oldFields.values()) {
+			Input newField = newFields.get(oldField.getName());
 			if (newField != null 
 					&& !describe(oldField).equals(describe(newField)) 
 					&& newField.getType().equals(InputSpec.GROUP) 
@@ -141,7 +141,7 @@ public class IssueFieldChangeData implements IssueChangeData {
 					newGroups.put(newField.getName(), group);
 			}
 		}
-		for (IssueField newField: newFields.values()) {
+		for (Input newField: newFields.values()) {
 			if (!oldFields.containsKey(newField.getName()) 
 					&& newField.getType().equals(InputSpec.GROUP) 
 					&& !newField.getValues().isEmpty()) { 

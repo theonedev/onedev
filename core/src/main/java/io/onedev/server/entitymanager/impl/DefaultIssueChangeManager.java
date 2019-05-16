@@ -20,7 +20,7 @@ import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
-import io.onedev.server.entitymanager.IssueFieldEntityManager;
+import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.issue.IssueChangeEvent;
@@ -52,7 +52,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 
 @Singleton
 public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange>
@@ -60,7 +60,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 
 	private final IssueManager issueManager;
 	
-	private final IssueFieldEntityManager issueFieldEntityManager;
+	private final IssueFieldManager issueFieldManager;
 	
 	private final ListenerRegistry listenerRegistry;
 	
@@ -72,11 +72,11 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	
 	@Inject
 	public DefaultIssueChangeManager(Dao dao, IssueManager issueManager, SessionManager sessionManager,
-			IssueFieldEntityManager issueFieldEntityManager, ListenerRegistry listenerRegistry, 
+			IssueFieldManager issueFieldManager, ListenerRegistry listenerRegistry, 
 			ExecutorService executorService, BuildManager buildManager) {
 		super(dao);
 		this.issueManager = issueManager;
-		this.issueFieldEntityManager = issueFieldEntityManager;
+		this.issueFieldManager = issueFieldManager;
 		this.listenerRegistry = listenerRegistry;
 		this.sessionManager = sessionManager;
 		this.executorService = executorService;
@@ -141,16 +141,16 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Transactional
 	@Override
 	public void changeFields(Issue issue, Map<String, Object> fieldValues, @Nullable User user) {
-		Map<String, IssueField> prevFields = issue.getFields(); 
+		Map<String, Input> prevFields = issue.getFieldInputs(); 
 		issue.setFieldValues(fieldValues);
-		if (!prevFields.equals(issue.getFields())) {
-			issueFieldEntityManager.saveFields(issue);
+		if (!prevFields.equals(issue.getFieldInputs())) {
+			issueFieldManager.saveFields(issue);
 			
 			IssueChange change = new IssueChange();
 			change.setIssue(issue);
 			change.setDate(new Date());
 			change.setUser(user);
-			change.setData(new IssueFieldChangeData(prevFields, issue.getFields()));
+			change.setData(new IssueFieldChangeData(prevFields, issue.getFieldInputs()));
 			save(change);
 		}
 	}
@@ -159,18 +159,18 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Override
 	public void changeState(Issue issue, String state, Map<String, Object> fieldValues, @Nullable String comment, @Nullable User user) {
 		String prevState = issue.getState();
-		Map<String, IssueField> prevFields = issue.getFields();
+		Map<String, Input> prevFields = issue.getFieldInputs();
 		issue.setState(state);
 
 		issue.setFieldValues(fieldValues);
 		
-		issueFieldEntityManager.saveFields(issue);
+		issueFieldManager.saveFields(issue);
 		
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
 		change.setDate(new Date());
 		change.setUser(user);
-		change.setData(new IssueStateChangeData(prevState, issue.getState(), prevFields, issue.getFields(), comment));
+		change.setData(new IssueStateChangeData(prevState, issue.getState(), prevFields, issue.getFieldInputs(), comment));
 		save(change);
 	}
 	
@@ -183,20 +183,20 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 			Issue issue = issues.next();
 			String prevState = issue.getState();
 			Milestone prevMilestone = issue.getMilestone();
-			Map<String, IssueField> prevFields = issue.getFields();
+			Map<String, Input> prevFields = issue.getFieldInputs();
 			if (state != null)
 				issue.setState(state);
 			if (milestone != null)
 				issue.setMilestone(milestone.orNull());
 			
 			issue.setFieldValues(fieldValues);
-			issueFieldEntityManager.saveFields(issue);
+			issueFieldManager.saveFields(issue);
 
 			IssueChange change = new IssueChange();
 			change.setIssue(issue);
 			change.setDate(new Date());
 			change.setUser(user);
-			change.setData(new IssueBatchUpdateData(prevState, issue.getState(), prevMilestone, issue.getMilestone(), prevFields, issue.getFields(), comment));
+			change.setData(new IssueBatchUpdateData(prevState, issue.getState(), prevMilestone, issue.getMilestone(), prevFields, issue.getFieldInputs(), comment));
 			
 			save(change);
 		}

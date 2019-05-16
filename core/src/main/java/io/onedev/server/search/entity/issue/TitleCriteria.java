@@ -1,12 +1,13 @@
 package io.onedev.server.search.entity.issue;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.IssueConstants;
 
 public class TitleCriteria extends IssueCriteria {
@@ -20,9 +21,9 @@ public class TitleCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		Path<String> attribute = context.getRoot().get(IssueConstants.ATTR_TITLE);
-		return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
+	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+		Path<String> attribute = root.get(IssueConstants.ATTR_TITLE);
+		return builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
 	}
 
 	@Override

@@ -1,12 +1,13 @@
 package io.onedev.server.search.entity.issue;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.IssueConstants;
 
 public class VoteCountCriteria extends IssueCriteria {
@@ -23,14 +24,14 @@ public class VoteCountCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		Path<Integer> attribute = context.getRoot().get(IssueConstants.ATTR_VOTE_COUNT);
+	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+		Path<Integer> attribute = root.get(IssueConstants.ATTR_VOTE_COUNT);
 		if (operator == IssueQueryLexer.Is)
-			return context.getBuilder().equal(attribute, value);
+			return builder.equal(attribute, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)
-			return context.getBuilder().greaterThan(attribute, value);
+			return builder.greaterThan(attribute, value);
 		else
-			return context.getBuilder().lessThan(attribute, value);
+			return builder.lessThan(attribute, value);
 	}
 
 	@Override

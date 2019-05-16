@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -21,13 +22,14 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.ValidationException;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.SerializationUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.launcher.loader.Listen;
@@ -70,7 +72,9 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.MatrixRunner;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.patternset.PatternSet;
 
 @Singleton
@@ -133,7 +137,7 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 
 	@Sessional
 	@Override
-	public void submit(Project project, String commitHash, String jobName, Map<String, List<String>> paramMatrix) {
+	public void submit(Project project, String commitHash, String jobName, Map<String, List<List<String>>> paramMatrix) {
 		String lockKey = "job-schedule: " + project.getId() + "-" + commitHash;
 		Long projectId = project.getId();
 		Long submitterId = User.idOf(userManager.getCurrent());
@@ -151,10 +155,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 							public void run() {
 								Project project = projectManager.load(projectId);
 								User submitter = (submitterId != null? userManager.load(submitterId): null);
-								new MatrixRunner(paramMatrix) {
+								new MatrixRunner<List<String>>(paramMatrix) {
 									
 									@Override
-									public void run(Map<String, String> params) {
+									public void run(Map<String, List<String>> params) {
 										submit(project, submitter, commitHash, jobName, params, new ArrayList<>()); 
 									}
 									
@@ -171,15 +175,15 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 		});
 	}
 	
-	private Map<String, List<String>> getParamMatrix(List<JobParam> params) {
-		Map<String, List<String>> paramMatrix = new LinkedHashMap<>();
+	private Map<String, List<List<String>>> getParamMatrix(List<JobParam> params) {
+		Map<String, List<List<String>>> paramMatrix = new LinkedHashMap<>();
 		for (JobParam param: params) 
 			paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
 		return paramMatrix;
 	}
 	
 	private List<Build> submit(Project project, @Nullable User user, String commitHash, String jobName, 
-			Map<String, String> paramMap, List<String> dependencyChain) {
+			Map<String, List<String>> paramMap, List<String> dependencyChain) {
 		List<Build> builds = buildManager.query(project, commitHash, jobName, paramMap);
 		if (builds.isEmpty()) {
 			Build build = new Build();
@@ -191,22 +195,6 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 			build.setSubmitter(user);
 			
 			builds.add(build);
-			
-			for (Map.Entry<String, String> entry: paramMap.entrySet()) {
-				BuildParam param = new BuildParam();
-				param.setBuild(build);
-				param.setName(entry.getKey());
-				param.setValue(entry.getValue());
-				build.getParams().add(param);
-			}
-			
-			if (dependencyChain.contains(jobName)) {
-				dependencyChain.add(jobName);
-				markBuildError(build, "Circular job dependencies found: " + dependencyChain);
-				return builds;
-			}
-			
-			dependencyChain.add(jobName);
 			
 			CISpec ciSpec;
 			try {
@@ -233,11 +221,36 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 				return builds;
 			}
 			
+			if (dependencyChain.contains(jobName)) {
+				dependencyChain.add(jobName);
+				markBuildError(build, "Circular job dependencies found: " + dependencyChain);
+				return builds;
+			}
+			dependencyChain.add(jobName);
+			
+			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
+				BuildParam param = new BuildParam();
+				param.setBuild(build);
+				param.setName(entry.getKey());
+				InputSpec paramSpec = Preconditions.checkNotNull(job.getParamSpecMap().get(param.getName()));
+				param.setType(paramSpec.getType());
+				if (!entry.getValue().isEmpty()) {
+					for (String string: entry.getValue()) {
+						BuildParam cloned = (BuildParam) SerializationUtils.clone(param);
+						cloned.setBuild(build);
+						cloned.setValue(string);
+						build.getParams().add(cloned);
+					}
+				} else {
+					build.getParams().add(param);
+				}
+			}
+			
 			for (JobDependency dependency: job.getDependencies()) {
-				new MatrixRunner(getParamMatrix(dependency.getJobParams())) {
+				new MatrixRunner<List<String>>(getParamMatrix(dependency.getJobParams())) {
 					
 					@Override
-					public void run(Map<String, String> params) {
+					public void run(Map<String, List<String>> params) {
 						List<Build> dependencyBuilds = submit(project, null, commitHash, dependency.getJobName(), 
 								params, new ArrayList<>(dependencyChain));
 						for (Build dependencyBuild: dependencyBuilds) {
@@ -315,9 +328,14 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 												envVars.put("ONEDEV_COMMIT", commitId.name());
 												envVars.put("ONEDEV_JOB", job.getName());
 												envVars.put("ONEDEV_BUILD_NUMBER", String.valueOf(build.getNumber()));
-												for (BuildParam param: build.getParams()) {
-													if (StringUtils.isNotBlank(param.getValue()))
-														envVars.put(param.getName(), param.getValue());
+												for (Entry<String, Input> entry: build.getParamInputs().entrySet()) {
+													List<String> values = entry.getValue().getValues();
+													if (values.size() > 1) {
+														for (int i=0; i<values.size(); i++) 
+															envVars.put(entry.getKey() + "_" + (i+1), values.get(i));
+													} else if (values.size() == 1) {
+														envVars.put(entry.getKey(), values.iterator().next());
+													}
 												}
 												
 												for (JobOutcome outcome: job.getOutcomes()) {

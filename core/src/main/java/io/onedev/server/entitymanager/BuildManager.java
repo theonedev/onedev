@@ -17,7 +17,7 @@ public interface BuildManager extends EntityManager<Build> {
     @Nullable
     Build find(Project project, long number);
     
-	List<Build> query(Project project, String commitHash, @Nullable String jobName, Map<String, String> params); 
+	List<Build> query(Project project, String commitHash, @Nullable String jobName, Map<String, List<String>> params); 
 	
 	List<Build> query(Project project, String commitHash); 
 	

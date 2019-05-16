@@ -7,14 +7,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.AndCriteriaHelper;
 import io.onedev.server.search.entity.ParensAware;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
 
@@ -29,8 +30,8 @@ public class AndCriteria extends IssueCriteria implements ParensAware {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		return new AndCriteriaHelper<Issue>(criterias).getPredicate(project, context, user);
+	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+		return new AndCriteriaHelper<Issue>(criterias).getPredicate(project, root, builder, user);
 	}
 
 	@Override

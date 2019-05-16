@@ -3,14 +3,14 @@ package io.onedev.server.search.entity.issue;
 import java.util.Objects;
 import java.util.Set;
 
-import javax.persistence.criteria.Path;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueFieldEntity;
+import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 
 public class BooleanFieldCriteria extends FieldCriteria {
 
@@ -24,9 +24,8 @@ public class BooleanFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		Path<String> attribute = context.getJoin(getFieldName()).get(IssueFieldEntity.ATTR_VALUE);
-		return context.getBuilder().equal(attribute, String.valueOf(value));
+	public Predicate getValuePredicate(Project project, Join<?, ?> field, CriteriaBuilder builder, User user) {
+		return builder.equal(field.get(IssueField.ATTR_VALUE), String.valueOf(value));
 	}
 
 	@Override

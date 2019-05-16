@@ -8,8 +8,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -21,7 +23,6 @@ import io.onedev.server.cache.CacheManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueUtils;
 
@@ -52,7 +53,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
+	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
 		Set<Long> fixedIssueNumbers = new HashSet<>();
 		
 		Repository repository = project.getRepository();
@@ -67,14 +68,14 @@ public class FixedBetweenCriteria extends IssueCriteria {
 			throw new RuntimeException(e);
 		}
 		
-		Path<Long> attribute = context.getRoot().get(IssueConstants.ATTR_NUMBER);		
+		Path<Long> attribute = root.get(IssueConstants.ATTR_NUMBER);		
 		if (fixedIssueNumbers.size() > IN_CLAUSE_LIMIT) {
 			Collection<Long> allIssueNumbers = OneDev.getInstance(CacheManager.class).getIssueNumbers(project.getId());
-			return inManyValues(context.getBuilder(), attribute, fixedIssueNumbers, allIssueNumbers);
+			return inManyValues(builder, attribute, fixedIssueNumbers, allIssueNumbers);
 		} else if (!fixedIssueNumbers.isEmpty()) {
-			return context.getRoot().get(IssueConstants.ATTR_NUMBER).in(fixedIssueNumbers);
+			return root.get(IssueConstants.ATTR_NUMBER).in(fixedIssueNumbers);
 		} else {
-			return context.getBuilder().disjunction();
+			return builder.disjunction();
 		}
 	}
 

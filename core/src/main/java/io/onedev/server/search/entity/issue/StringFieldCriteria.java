@@ -2,14 +2,15 @@ package io.onedev.server.search.entity.issue;
 
 import java.util.Set;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueFieldEntity;
+import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 
 public class StringFieldCriteria extends FieldCriteria {
 
@@ -30,12 +31,12 @@ public class StringFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		Path<String> attribute = context.getJoin(getFieldName()).get(IssueFieldEntity.ATTR_VALUE);
+	protected Predicate getValuePredicate(Project project, Join<?, ?> field, CriteriaBuilder builder, User user) {
+		Path<String> attribute = field.get(IssueField.ATTR_VALUE);
 		if (operator == IssueQueryLexer.Is)
-			return context.getBuilder().equal(context.getBuilder().lower(attribute), value.toLowerCase());
+			return builder.equal(builder.lower(attribute), value.toLowerCase());
 		else 
-			return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
+			return builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
 	}
 
 	@Override

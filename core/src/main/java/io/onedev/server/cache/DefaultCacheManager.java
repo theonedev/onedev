@@ -46,6 +46,7 @@ import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.inputspec.InputSpec;
 
 @Singleton
 public class DefaultCacheManager implements CacheManager {
@@ -148,9 +149,11 @@ public class DefaultCacheManager implements CacheManager {
 		for (UserAuthorization userAuthorization: dao.query(UserAuthorization.class))
 			userAuthorizations.put(userAuthorization.getId(), userAuthorization.getFacade());
 		
-		query = dao.getSessionManager().getSession().createQuery("select distinct name, value from BuildParam");
-		for (Object[] fields: (List<Object[]>)query.list())
-			addBuildParam((String) fields[0], (String) fields[1]);
+		query = dao.getSessionManager().getSession().createQuery("select distinct name, type, value from BuildParam");
+		for (Object[] fields: (List<Object[]>)query.list()) {
+			if (!fields[1].equals(InputSpec.SECRET))
+				addBuildParam((String) fields[0], (String) fields[2]);
+		}
 	}
 	
 	@Transactional
@@ -257,7 +260,8 @@ public class DefaultCacheManager implements CacheManager {
 					buildParamsLock.writeLock().lock();
 					try {
 						BuildParam param = (BuildParam) event.getEntity();
-						addBuildParam(param.getName(), param.getValue());
+						if (!param.getType().equals(InputSpec.SECRET))
+							addBuildParam(param.getName(), param.getValue());
 					} finally {
 						buildParamsLock.writeLock().unlock();
 					}

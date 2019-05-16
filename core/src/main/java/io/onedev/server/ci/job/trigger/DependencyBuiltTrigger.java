@@ -1,5 +1,7 @@
 package io.onedev.server.ci.job.trigger;
 
+import java.util.List;
+
 import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
@@ -23,7 +25,7 @@ public class DependencyBuiltTrigger extends JobTrigger {
 				for (JobDependency dependency: job.getDependencies()) {
 					if (dependency.getJobName().equals(build.getJobName())) {
 						for (JobParam param: dependency.getJobParams()) {
-							String paramValue = build.getParamMap().get(param.getName());
+							List<String> paramValue = build.getParamMap().get(param.getName());
 							if (!param.getValuesProvider().getValues().contains(paramValue))
 								return false;
 						}

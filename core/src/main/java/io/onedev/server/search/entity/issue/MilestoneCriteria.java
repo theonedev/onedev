@@ -3,14 +3,16 @@ package io.onedev.server.search.entity.issue;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.IssueConstants;
 
 public class MilestoneCriteria extends IssueCriteria {
@@ -28,12 +30,12 @@ public class MilestoneCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		Path<?> attribute = context.getJoin(IssueConstants.FIELD_MILESTONE).get(Milestone.FIELD_ATTR_NAME);
+	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+		Path<?> attribute = root.join(IssueConstants.ATTR_MILESTONE, JoinType.LEFT).get(Milestone.FIELD_ATTR_NAME);
 		if (value != null)
-			return context.getBuilder().equal(attribute, value);
+			return builder.equal(attribute, value);
 		else
-			return context.getBuilder().isNull(attribute);
+			return builder.isNull(attribute);
 	}
 
 	@Override

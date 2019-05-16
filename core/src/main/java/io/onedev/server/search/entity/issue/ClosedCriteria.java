@@ -1,6 +1,8 @@
 package io.onedev.server.search.entity.issue;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
@@ -8,7 +10,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.search.entity.QueryBuildContext;
 
 public class ClosedCriteria extends IssueCriteria {
 
@@ -19,8 +20,8 @@ public class ClosedCriteria extends IssueCriteria {
 	}
 	
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		return getCriteria(project).getPredicate(project, context, user);
+	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+		return getCriteria(project).getPredicate(project, root, builder, user);
 	}
 
 	@Override

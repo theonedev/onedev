@@ -8,6 +8,7 @@ import java.util.List;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.model.AbstractEntity;
@@ -21,7 +22,7 @@ public abstract class EntityCriteria<T extends AbstractEntity> implements Serial
 	
 	public static final int IN_CLAUSE_LIMIT = 1000;
 	
-	public abstract Predicate getPredicate(Project project, QueryBuildContext<T> context, User user);
+	public abstract Predicate getPredicate(Project project, Root<T> root, CriteriaBuilder builder, User user);
 
 	public abstract boolean matches(T entity, User user);
 	

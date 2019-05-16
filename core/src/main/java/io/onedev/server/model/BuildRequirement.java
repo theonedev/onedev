@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -24,7 +25,7 @@ public class BuildRequirement extends AbstractEntity {
 	
 	@Column(nullable=false)
 	@Lob
-	private LinkedHashMap<String, String> buildParams = new LinkedHashMap<>();
+	private LinkedHashMap<String, List<String>> buildParams = new LinkedHashMap<>();
 	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
@@ -41,11 +42,11 @@ public class BuildRequirement extends AbstractEntity {
 		this.jobName = jobName;
 	}
 
-	public LinkedHashMap<String, String> getBuildParams() {
+	public LinkedHashMap<String, List<String>> getBuildParams() {
 		return buildParams;
 	}
 
-	public void setBuildParams(LinkedHashMap<String, String> buildParams) {
+	public void setBuildParams(LinkedHashMap<String, List<String>> buildParams) {
 		this.buildParams = buildParams;
 	}
 

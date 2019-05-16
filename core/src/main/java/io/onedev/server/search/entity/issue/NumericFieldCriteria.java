@@ -3,14 +3,15 @@ package io.onedev.server.search.entity.issue;
 import java.util.Objects;
 import java.util.Set;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueFieldEntity;
+import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 
 public class NumericFieldCriteria extends FieldCriteria {
 
@@ -27,14 +28,14 @@ public class NumericFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		Path<Integer> attribute = context.getJoin(getFieldName()).get(IssueFieldEntity.ATTR_ORDINAL);
+	protected Predicate getValuePredicate(Project project, Join<?, ?> field, CriteriaBuilder builder, User user) {
+		Path<Integer> attribute = field.get(IssueField.ATTR_ORDINAL);
 		if (operator == IssueQueryLexer.Is)
-			return context.getBuilder().equal(attribute, value);
+			return builder.equal(attribute, value);
 		else if (operator == IssueQueryLexer.IsGreaterThan)
-			return context.getBuilder().greaterThan(attribute, value);
+			return builder.greaterThan(attribute, value);
 		else
-			return context.getBuilder().lessThan(attribute, value);
+			return builder.lessThan(attribute, value);
 	}
 
 	@Override

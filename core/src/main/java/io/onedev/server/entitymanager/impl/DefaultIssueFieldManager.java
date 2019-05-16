@@ -13,9 +13,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Root;
 
-import io.onedev.server.entitymanager.IssueFieldEntityManager;
+import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueFieldEntity;
+import io.onedev.server.model.IssueField;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -23,10 +23,10 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.inputspec.InputSpec;
 
 @Singleton
-public class DefaultIssueFieldEntityManager extends AbstractEntityManager<IssueFieldEntity> implements IssueFieldEntityManager {
+public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> implements IssueFieldManager {
 
 	@Inject
-	public DefaultIssueFieldEntityManager(Dao dao) {
+	public DefaultIssueFieldManager(Dao dao) {
 		super(dao);
 	}
 
@@ -34,22 +34,22 @@ public class DefaultIssueFieldEntityManager extends AbstractEntityManager<IssueF
 	@Override
 	public void saveFields(Issue issue) {
 		Collection<Long> ids = new HashSet<>();
-		for (IssueFieldEntity entity: issue.getFieldEntities()) {
+		for (IssueField entity: issue.getFields()) {
 			if (entity.getId() != null)
 				ids.add(entity.getId());
 		}
 		if (!ids.isEmpty()) {
-			Query query = getSession().createQuery("delete from IssueFieldEntity where issue = :issue and id not in (:ids)");
+			Query query = getSession().createQuery("delete from IssueField where issue = :issue and id not in (:ids)");
 			query.setParameter("issue", issue);
 			query.setParameter("ids", ids);
 			query.executeUpdate();
 		} else {
-			Query query = getSession().createQuery("delete from IssueFieldEntity where issue = :issue");
+			Query query = getSession().createQuery("delete from IssueField where issue = :issue");
 			query.setParameter("issue", issue);
 			query.executeUpdate();
 		}
 		
-		for (IssueFieldEntity entity: issue.getFieldEntities()) {
+		for (IssueField entity: issue.getFields()) {
 			if (entity.isNew())
 				save(entity);
 		}
@@ -58,7 +58,7 @@ public class DefaultIssueFieldEntityManager extends AbstractEntityManager<IssueF
 	@Transactional
 	@Override
 	public void onRenameGroup(String oldName, String newName) {
-		Query query = getSession().createQuery("update IssueFieldEntity set value=:newName where type=:groupChoice and value=:oldName");
+		Query query = getSession().createQuery("update IssueField set value=:newName where type=:groupChoice and value=:oldName");
 		query.setParameter("groupChoice", InputSpec.GROUP);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
@@ -68,7 +68,7 @@ public class DefaultIssueFieldEntityManager extends AbstractEntityManager<IssueF
 	@Transactional
 	@Override
 	public void onRenameUser(String oldName, String newName) {
-		Query query = getSession().createQuery("update IssueFieldEntity set value=:newName where type=:userChoice and value=:oldName");
+		Query query = getSession().createQuery("update IssueField set value=:newName where type=:userChoice and value=:oldName");
 		query.setParameter("userChoice", InputSpec.USER);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
@@ -79,9 +79,9 @@ public class DefaultIssueFieldEntityManager extends AbstractEntityManager<IssueF
 	@Override
 	public void populateFields(List<Issue> issues) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
-		CriteriaQuery<IssueFieldEntity> query = builder.createQuery(IssueFieldEntity.class);
+		CriteriaQuery<IssueField> query = builder.createQuery(IssueField.class);
 		
-		Root<IssueFieldEntity> root = query.from(IssueFieldEntity.class);
+		Root<IssueField> root = query.from(IssueField.class);
 		query.select(root);
 		root.join("issue");
 		
@@ -89,10 +89,10 @@ public class DefaultIssueFieldEntityManager extends AbstractEntityManager<IssueF
 		query.where(issueExpr.in(issues));
 		
 		for (Issue issue: issues)
-			issue.setFieldEntities(new ArrayList<>());
+			issue.setFields(new ArrayList<>());
 		
-		for (IssueFieldEntity field: getSession().createQuery(query).getResultList())
-			field.getIssue().getFieldEntities().add(field);
+		for (IssueField field: getSession().createQuery(query).getResultList())
+			field.getIssue().getFields().add(field);
 	}
 	
 }

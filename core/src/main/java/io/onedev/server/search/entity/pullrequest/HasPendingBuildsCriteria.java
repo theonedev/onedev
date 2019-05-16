@@ -1,15 +1,17 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
+import io.onedev.server.model.BuildRequirement;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.BuildRequirement;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.PullRequestConstants;
 
 public class HasPendingBuildsCriteria extends PullRequestCriteria {
@@ -17,15 +19,18 @@ public class HasPendingBuildsCriteria extends PullRequestCriteria {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context, User user) {
-		From<?, ?> join = context.getJoin(PullRequestConstants.ATTR_BUILDS + "." + BuildRequirement.ATTR_BUILD);
+	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
+		From<?, ?> join = root
+				.join(PullRequestConstants.ATTR_BUILDS, JoinType.LEFT)
+				.join(BuildRequirement.ATTR_BUILD, JoinType.LEFT);
+		
 		Path<?> status = join.get(Build.STATUS);
 		
-		return context.getBuilder().or(
-				context.getBuilder().isNull(status), 
-				context.getBuilder().equal(status, Build.Status.RUNNING), 
-				context.getBuilder().equal(status, Build.Status.QUEUEING), 
-				context.getBuilder().equal(status, Build.Status.WAITING));
+		return builder.or(
+				builder.isNull(status), 
+				builder.equal(status, Build.Status.RUNNING), 
+				builder.equal(status, Build.Status.QUEUEING), 
+				builder.equal(status, Build.Status.WAITING));
 	}
 
 	@Override

@@ -57,7 +57,7 @@ import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
@@ -569,10 +569,10 @@ public abstract class IssueListPanel extends Panel {
 						}
 
 						@Override
-						protected IssueField getField() {
+						protected Input getField() {
 							Issue issue = rowModel.getObject();
 							if (issue.isFieldVisible(field))
-								return issue.getFields().get(field);
+								return issue.getFieldInputs().get(field);
 							else
 								return null;
 						}

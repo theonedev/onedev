@@ -91,7 +91,7 @@ public class NumberInput extends InputSpec {
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		if (value != null)
+		if (value instanceof Integer)
 			return Lists.newArrayList(String.valueOf(value));
 		else
 			return new ArrayList<>();

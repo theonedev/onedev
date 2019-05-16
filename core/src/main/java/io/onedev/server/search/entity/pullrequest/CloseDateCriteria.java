@@ -2,13 +2,14 @@ package io.onedev.server.search.entity.pullrequest;
 
 import java.util.Date;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.PullRequestConstants;
 
 public class CloseDateCriteria extends PullRequestCriteria {
@@ -28,12 +29,12 @@ public class CloseDateCriteria extends PullRequestCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context, User user) {
-		Path<Date> attribute = PullRequestQuery.getPath(context.getRoot(), PullRequestConstants.ATTR_CLOSE_DATE);
+	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
+		Path<Date> attribute = PullRequestQuery.getPath(root, PullRequestConstants.ATTR_CLOSE_DATE);
 		if (operator == PullRequestQueryLexer.IsBefore)
-			return context.getBuilder().lessThan(attribute, value);
+			return builder.lessThan(attribute, value);
 		else
-			return context.getBuilder().greaterThan(attribute, value);
+			return builder.greaterThan(attribute, value);
 	}
 
 	@Override

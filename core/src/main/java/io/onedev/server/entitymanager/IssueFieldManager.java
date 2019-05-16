@@ -3,10 +3,10 @@ package io.onedev.server.entitymanager;
 import java.util.List;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.IssueFieldEntity;
+import io.onedev.server.model.IssueField;
 import io.onedev.server.persistence.dao.EntityManager;
 
-public interface IssueFieldEntityManager extends EntityManager<IssueFieldEntity> {
+public interface IssueFieldManager extends EntityManager<IssueField> {
 	
 	void saveFields(Issue issue);
 	

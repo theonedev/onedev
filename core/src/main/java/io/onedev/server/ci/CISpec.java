@@ -102,7 +102,7 @@ public class CISpec implements Serializable, Validatable {
 			for (JobTrigger trigger: job.getTriggers()) {
 				try {
 					JobParam.validateParams(job.getParamSpecs(), trigger.getParams());
-				} catch (ValidationException e) {
+				} catch (Exception e) {
 					String message = "Error validating job parameters: " + e.getMessage();
 					context.buildConstraintViolationWithTemplate(message)
 							.addPropertyNode("jobs").addPropertyNode("triggers")

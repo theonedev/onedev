@@ -10,6 +10,7 @@ import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.textinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=100, name=InputSpec.TEXT)
 public class TextInput extends InputSpec {
@@ -86,10 +87,10 @@ public class TextInput extends InputSpec {
 
 	@Override
 	public List<String> convertToStrings(Object value) {
-		List<String> strings = new ArrayList<>();
-		if (value != null)
-			strings.add((String) value);
-		return strings;
+		if (value instanceof String)
+			return Lists.newArrayList((String)value);
+		else
+			return new ArrayList<>();
 	}
 	
 }

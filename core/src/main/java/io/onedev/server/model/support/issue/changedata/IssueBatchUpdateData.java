@@ -12,7 +12,7 @@ import com.google.common.base.Objects;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.util.CommentSupport;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.diff.DiffSupport;
 import io.onedev.server.web.component.issue.activities.activity.DiffAndCommentAwarePanel;
 
@@ -31,7 +31,7 @@ public class IssueBatchUpdateData extends IssueFieldChangeData {
 	private String comment;
 	
 	public IssueBatchUpdateData(String oldState, String newState, @Nullable Milestone oldMilestone, @Nullable Milestone newMilestone, 
-			Map<String, IssueField> oldFields, Map<String, IssueField> newFields, @Nullable String comment) {
+			Map<String, Input> oldFields, Map<String, Input> newFields, @Nullable String comment) {
 		super(oldFields, newFields);
 		this.oldState = oldState;
 		this.newState = newState;

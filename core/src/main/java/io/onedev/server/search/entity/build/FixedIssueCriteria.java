@@ -3,8 +3,10 @@ package io.onedev.server.search.entity.build;
 import java.util.Collection;
 import java.util.HashSet;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -17,7 +19,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.BuildConstants;
 
 public class FixedIssueCriteria extends EntityCriteria<Build> {
@@ -35,15 +36,15 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 	}
 	
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Build> context, User user) {
-		Path<Long> attribute = context.getRoot().get(BuildConstants.ATTR_ID);
+	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
+		Path<Long> attribute = root.get(BuildConstants.ATTR_ID);
 		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(project, value.getNumber());
 		Collection<String> descendents = new HashSet<>();
 		for (ObjectId each: getCommitInfoManager().getDescendants(project, fixCommits))
 			descendents.add(each.name());
 		CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
 		Collection<Long> inBuildIds = cacheManager.filterBuildIds(project.getId(), descendents);
-		return inManyValues(context.getBuilder(), attribute, inBuildIds, cacheManager.getBuildIdsByProject(project.getId()));
+		return inManyValues(builder, attribute, inBuildIds, cacheManager.getBuildIdsByProject(project.getId()));
 	}
 
 	@Override

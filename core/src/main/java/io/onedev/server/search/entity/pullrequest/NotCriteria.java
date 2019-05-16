@@ -1,12 +1,13 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.NotCriteriaHelper;
-import io.onedev.server.search.entity.QueryBuildContext;
 
 public class NotCriteria extends PullRequestCriteria {
 	
@@ -19,8 +20,8 @@ public class NotCriteria extends PullRequestCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<PullRequest> context, User user) {
-		return new NotCriteriaHelper<PullRequest>(criteria).getPredicate(project, context, user);
+	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
+		return new NotCriteriaHelper<PullRequest>(criteria).getPredicate(project, root, builder, user);
 	}
 
 	@Override

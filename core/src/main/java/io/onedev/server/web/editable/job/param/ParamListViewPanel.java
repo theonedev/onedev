@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -44,12 +43,12 @@ class ParamListViewPanel extends Panel {
 				Fragment fragment = new Fragment("values", "specifiedValuesFrag", this);
 				RepeatingView valuesView = new RepeatingView("values");
 				SpecifiedValues specifiedValues = (SpecifiedValues) param.getValuesProvider();
-				for (String value: specifiedValues.getValues()) {
+				for (List<String> value: specifiedValues.getValues()) {
 					WebMarkupContainer valueItem = new WebMarkupContainer(valuesView.newChildId());
-					if (StringUtils.isNotBlank(value))
-						valueItem.add(new Label("value", value));
+					if (!value.isEmpty())
+						valueItem.add(new Label("value", value.toString()));
 					else
-						valueItem.add(new Label("value", "<i>Empty value</i>").setEscapeModelStrings(false));
+						valueItem.add(new Label("value", "<i>Empty</i>").setEscapeModelStrings(false));
 					valuesView.add(valueItem);
 				}
 				fragment.add(valuesView);

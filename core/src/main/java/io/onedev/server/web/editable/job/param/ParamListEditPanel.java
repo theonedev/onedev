@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.validation.ValidationException;
 
 import org.apache.wicket.Component;
@@ -29,7 +30,6 @@ import org.apache.wicket.validation.IValidatable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
@@ -216,15 +216,17 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	
 	private SpecifiedValues newSpecifiedValueProvider(PropertyDescriptor property) {
 		SpecifiedValues specifiedValues = new SpecifiedValues();
-		Object propertyValue = property.getPropertyValue(getDefaultParamBean());
+		Object typedValue = property.getPropertyValue(getDefaultParamBean());
 		InputSpec paramSpec = getParamSpecs().get(property.getDisplayName());
 		Preconditions.checkNotNull(paramSpec);
-		List<String> strings = paramSpec.convertToStrings(propertyValue);
-		specifiedValues.setValues(Lists.newArrayList(JobParam.toValue(strings)));
+		List<String> strings = paramSpec.convertToStrings(typedValue);
+		List<List<String>> values = new ArrayList<>();
+		values.add(strings);
+		specifiedValues.setValues(values);
 		return specifiedValues;
 	}
 	
-	private Component newSpecifiedValueEditor(String componentId, PropertyDescriptor property, Optional<String> value) {
+	private Component newSpecifiedValueEditor(String componentId, PropertyDescriptor property, @Nullable List<String> value) {
 		WebMarkupContainer item = new WebMarkupContainer(componentId);
 		InputSpec paramSpec = Preconditions.checkNotNull(getParamSpecs().get(property.getDisplayName()));
 		Serializable paramBean;
@@ -234,10 +236,8 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 			throw new RuntimeException(e);
 		}
 		try {
-			if (value.isPresent()) {
-				List<String> strings = JobParam.fromValue(value.orNull());
-				property.setPropertyValue(paramBean, paramSpec.convertToObject(strings));
-			}
+			if (value != null) 
+				property.setPropertyValue(paramBean, paramSpec.convertToObject(value));
 		} catch (Exception e) {
 			logger.error("Error setting property value", e);
 		}
@@ -267,8 +267,12 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 			RepeatingView valuesView = new RepeatingView("values");
 			fragment.add(valuesView);
 
-			for (String value: specifiedValues.getValues())
-				valuesView.add(newSpecifiedValueEditor(valuesView.newChildId(), property, Optional.fromNullable(value)));
+			try {
+				for (List<String> value: specifiedValues.getValues())
+					valuesView.add(newSpecifiedValueEditor(valuesView.newChildId(), property, value));
+			} catch (Exception e) {
+				logger.error("Error creating value editors", e);
+			}
 			
 			fragment.add(new FencedFeedbackPanel("feedback", fragment));
 
@@ -277,7 +281,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 				@Override
 				public void onClick(AjaxRequestTarget target) {
 					Component newSpecifiedValueEditor = newSpecifiedValueEditor(valuesView.newChildId(), 
-							property, Optional.absent());
+							property, null);
 					valuesView.add(newSpecifiedValueEditor);
 					String script = String.format("$('#%s').before('<li id=\"%s\"></li>')", 
 							getMarkupId(), newSpecifiedValueEditor.getMarkupId());
@@ -320,7 +324,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 				for (Component valueItem: (WebMarkupContainer)valuesEditor.get("values")) {
 					Object propertyValue = ((PropertyEditor<Serializable>) valueItem.get("value")).getConvertedInput(); 
 					InputSpec paramSpec = Preconditions.checkNotNull(getParamSpecs().get(param.getName()));
-					specifiedValues.getValues().add(JobParam.toValue(paramSpec.convertToStrings(propertyValue)));
+					specifiedValues.getValues().add(paramSpec.convertToStrings(propertyValue));
 				}
 				param.setValuesProvider(specifiedValues);
 			}

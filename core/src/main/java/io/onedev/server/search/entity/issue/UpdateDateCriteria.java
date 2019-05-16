@@ -2,13 +2,14 @@ package io.onedev.server.search.entity.issue;
 
 import java.util.Date;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.IssueConstants;
 
 public class UpdateDateCriteria extends IssueCriteria {
@@ -28,12 +29,12 @@ public class UpdateDateCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		Path<Date> attribute = IssueQuery.getPath(context.getRoot(), IssueConstants.ATTR_UPDATE_DATE);
+	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+		Path<Date> attribute = IssueQuery.getPath(root, IssueConstants.ATTR_UPDATE_DATE);
 		if (operator == IssueQueryLexer.IsBefore)
-			return context.getBuilder().lessThan(attribute, value);
+			return builder.lessThan(attribute, value);
 		else
-			return context.getBuilder().greaterThan(attribute, value);
+			return builder.greaterThan(attribute, value);
 	}
 
 	@Override

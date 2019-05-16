@@ -5,6 +5,6 @@ import java.util.List;
 
 public interface ValuesProvider extends Serializable {
 	
-	List<String> getValues();
+	List<List<String>> getValues();
 	
 }

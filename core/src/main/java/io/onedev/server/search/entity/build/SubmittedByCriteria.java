@@ -2,14 +2,15 @@ package io.onedev.server.search.entity.build;
 
 import java.util.Objects;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.BuildConstants;
 
 public class SubmittedByCriteria extends EntityCriteria<Build> {
@@ -26,9 +27,9 @@ public class SubmittedByCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Build> context, User user) {
-		Path<User> attribute = context.getRoot().get(BuildConstants.ATTR_SUBMITTER);
-		return context.getBuilder().equal(attribute, value);
+	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
+		Path<User> attribute = root.get(BuildConstants.ATTR_SUBMITTER);
+		return builder.equal(attribute, value);
 	}
 
 	@Override

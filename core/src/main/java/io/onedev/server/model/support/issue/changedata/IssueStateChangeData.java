@@ -9,7 +9,7 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.util.CommentSupport;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.diff.DiffSupport;
 import io.onedev.server.web.component.issue.activities.activity.DiffAndCommentAwarePanel;
 
@@ -23,8 +23,8 @@ public class IssueStateChangeData extends IssueFieldChangeData {
 	
 	private String comment;
 	
-	public IssueStateChangeData(String oldState, String newState, Map<String, IssueField> oldFields, 
-			Map<String, IssueField> newFields, @Nullable String comment) {
+	public IssueStateChangeData(String oldState, String newState, Map<String, Input> oldFields, 
+			Map<String, Input> newFields, @Nullable String comment) {
 		super(oldFields, newFields);
 		this.oldState = oldState;
 		this.newState = newState;

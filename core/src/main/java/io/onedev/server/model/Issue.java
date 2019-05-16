@@ -44,7 +44,7 @@ import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageSupport;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -118,7 +118,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	private Date updateDate = new Date();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
-	private Collection<IssueFieldEntity> fieldEntities = new ArrayList<>();
+	private Collection<IssueField> fields = new ArrayList<>();
 	
 	@OneToMany(mappedBy="issue", cascade=CascadeType.REMOVE)
 	private Collection<IssueComment> comments = new ArrayList<>();
@@ -282,12 +282,12 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		this.commentCount = commentCount;
 	}
 
-	public Collection<IssueFieldEntity> getFieldEntities() {
-		return fieldEntities;
+	public Collection<IssueField> getFields() {
+		return fields;
 	}
 
-	public void setFieldEntities(Collection<IssueFieldEntity> fieldEntities) {
-		this.fieldEntities = fieldEntities;
+	public void setFields(Collection<IssueField> fields) {
+		this.fields = fields;
 	}
 	
 	public Date getUpdateDate() {
@@ -309,38 +309,38 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	}
 	
 	public Collection<String> getFieldNames() {
-		return getFieldEntities().stream().map(it->it.getName()).collect(Collectors.toSet());
+		return getFields().stream().map(it->it.getName()).collect(Collectors.toSet());
 	}
 	
-	public Map<String, IssueField> getFields() {
-		Map<String, IssueField> fields = new LinkedHashMap<>();
+	public Map<String, Input> getFieldInputs() {
+		Map<String, Input> inputs = new LinkedHashMap<>();
 
-		Map<String, List<IssueFieldEntity>> entityMap = new HashMap<>(); 
-		for (IssueFieldEntity entity: getFieldEntities()) {
-			List<IssueFieldEntity> fieldsOfName = entityMap.get(entity.getName());
+		Map<String, List<IssueField>> fieldMap = new HashMap<>(); 
+		for (IssueField field: getFields()) {
+			List<IssueField> fieldsOfName = fieldMap.get(field.getName());
 			if (fieldsOfName == null) {
 				fieldsOfName = new ArrayList<>();
-				entityMap.put(entity.getName(), fieldsOfName);
+				fieldMap.put(field.getName(), fieldsOfName);
 			}
-			fieldsOfName.add(entity);
+			fieldsOfName.add(field);
 		}
 		for (InputSpec fieldSpec: getIssueSetting().getFieldSpecs()) {
 			String fieldName = fieldSpec.getName();
-			List<IssueFieldEntity> unaries = entityMap.get(fieldName);
-			if (unaries != null) {
-				String type = unaries.iterator().next().getType();
+			List<IssueField> fields = fieldMap.get(fieldName);
+			if (fields != null) {
+				String type = fields.iterator().next().getType();
 				List<String> values = new ArrayList<>();
-				for (IssueFieldEntity entity: unaries) {
+				for (IssueField entity: fields) {
 					if (entity.getValue() != null)
 						values.add(entity.getValue());
 				}
 				Collections.sort(values);
 				if (!fieldSpec.isAllowMultiple() && values.size() > 1) 
 					values = Lists.newArrayList(values.iterator().next());
-				fields.put(fieldName, new IssueField(fieldName, type, values));
+				inputs.put(fieldName, new Input(fieldName, type, values));
 			}
 		}
-		return fields;
+		return inputs;
 	}
 	
 	public static String getWebSocketObservable(Long issueId) {
@@ -354,10 +354,10 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 	@Nullable
 	public Object getFieldValue(String fieldName) {
-		IssueField field = getFields().get(fieldName);
+		Input input = getFieldInputs().get(fieldName);
 		
-		if (field != null) 
-			return field.getValue(getProject());
+		if (input != null) 
+			return input.getTypedValue(getIssueSetting().getFieldSpec(fieldName));
 		else
 			return null;
 	}
@@ -381,18 +381,20 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 
 		for (List<PropertyDescriptor> groupProperties: beanDescriptor.getPropertyDescriptors().values()) {
 			for (PropertyDescriptor property: groupProperties) {
-				IssueField field = getFields().get(property.getDisplayName());
-				if (field != null)
-					property.setPropertyValue(fieldBean, field.getValue(getProject()));
-				else if (!withDefaultValue)
+				Input input = getFieldInputs().get(property.getDisplayName());
+				if (input != null) {
+					InputSpec fieldSpec = getIssueSetting().getFieldSpec(input.getName());
+					property.setPropertyValue(fieldBean, input.getTypedValue(fieldSpec));
+				} else if (!withDefaultValue) {
 					property.setPropertyValue(fieldBean, null);
+				}
 			}
 		}
 		return fieldBean;
 	}
 	
 	public void removeFields(Collection<String> fieldNames) {
-		for (Iterator<IssueFieldEntity> it = getFieldEntities().iterator(); it.hasNext();) {
+		for (Iterator<IssueField> it = getFields().iterator(); it.hasNext();) {
 			if (fieldNames.contains(it.next().getName()))
 				it.remove();
 		}
@@ -404,7 +406,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	}
 	
 	public void setFieldValue(String fieldName, @Nullable Object fieldValue) {
-		for (Iterator<IssueFieldEntity> it = getFieldEntities().iterator(); it.hasNext();) {
+		for (Iterator<IssueField> it = getFields().iterator(); it.hasNext();) {
 			if (fieldName.equals(it.next().getName()))
 				it.remove();
 		}
@@ -413,7 +415,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		if (fieldSpec != null) {
 			long ordinal = getFieldOrdinal(fieldName, fieldValue);
 
-			IssueFieldEntity field = new IssueFieldEntity();
+			IssueField field = new IssueField();
 			field.setIssue(this);
 			field.setName(fieldName);
 			field.setOrdinal(ordinal);
@@ -422,13 +424,13 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			List<String> strings = fieldSpec.convertToStrings(fieldValue);
 			if (!strings.isEmpty()) {
 				for (String string: strings) {
-					IssueFieldEntity cloned = (IssueFieldEntity) SerializationUtils.clone(field);
+					IssueField cloned = (IssueField) SerializationUtils.clone(field);
 					cloned.setIssue(this);
 					cloned.setValue(string);
-					getFieldEntities().add(cloned);
+					getFields().add(cloned);
 				}
 			} else {
-				getFieldEntities().add(field);
+				getFields().add(field);
 			}
 		}
 	}
@@ -437,7 +439,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec != null) {
 			if (fieldSpec.getShowCondition() != null) {
-				IssueField dependentField = getFields().get(fieldSpec.getShowCondition().getInputName());
+				Input dependentField = getFieldInputs().get(fieldSpec.getShowCondition().getInputName());
 				if (dependentField != null) {
 					String value;
 					if (!dependentField.getValues().isEmpty())

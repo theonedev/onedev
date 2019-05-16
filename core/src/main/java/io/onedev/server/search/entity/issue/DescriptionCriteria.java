@@ -1,13 +1,14 @@
 package io.onedev.server.search.entity.issue;
 
 import javax.annotation.Nullable;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.search.entity.QueryBuildContext;
 import io.onedev.server.util.IssueConstants;
 
 public class DescriptionCriteria extends IssueCriteria {
@@ -21,12 +22,12 @@ public class DescriptionCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, QueryBuildContext<Issue> context, User user) {
-		Expression<String> attribute = context.getRoot().get(IssueConstants.ATTR_DESCRIPTION);
+	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+		Expression<String> attribute = root.get(IssueConstants.ATTR_DESCRIPTION);
 		if (value != null)
-			return context.getBuilder().like(context.getBuilder().lower(attribute), "%" + value.toLowerCase() + "%");
+			return builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
 		else
-			return context.getBuilder().isNull(attribute);
+			return builder.isNull(attribute);
 	}
 
 	@Override

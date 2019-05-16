@@ -8,14 +8,15 @@ import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
 @Table(
 		indexes={
-				@Index(columnList="o_issue_id"), @Index(columnList="name"), 
-				@Index(columnList="value"), @Index(columnList="type"), 
-				@Index(columnList="ordinal")})
-public class IssueFieldEntity extends AbstractEntity {
+				@Index(columnList="o_issue_id"), @Index(columnList="name"), @Index(columnList="value"), 
+				@Index(columnList="type"), @Index(columnList="ordinal")}, 
+		uniqueConstraints={@UniqueConstraint(columnNames={"o_issue_id", "name", "value"})})
+public class IssueField extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 

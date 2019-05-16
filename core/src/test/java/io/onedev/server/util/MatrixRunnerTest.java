@@ -20,7 +20,7 @@ public class MatrixRunnerTest {
 		Map<String, List<String>> matrix = new LinkedHashMap<>();
 		
 		List<Map<String, String>> usedParams = new ArrayList<>();
-		new MatrixRunner(matrix) {
+		new MatrixRunner<String>(matrix) {
 			
 			@Override
 			public void run(Map<String, String> params) {
@@ -37,7 +37,7 @@ public class MatrixRunnerTest {
 		
 		usedParams.clear();
 		
-		new MatrixRunner(matrix) {
+		new MatrixRunner<String>(matrix) {
 			
 			@Override
 			public void run(Map<String, String> params) {

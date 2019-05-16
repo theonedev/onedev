@@ -10,7 +10,7 @@ import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
-import io.onedev.server.util.IssueField;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.inputspec.InputSpec;
 
 public class IssueOpened extends IssueEvent implements MarkdownAware {
@@ -33,7 +33,7 @@ public class IssueOpened extends IssueEvent implements MarkdownAware {
 	public Map<String, User> getNewUsers() {
 		Map<String, User> newUsers = new HashMap<>();
 		UserManager userManager = OneDev.getInstance(UserManager.class);
-		for (IssueField field: getIssue().getFields().values()) {
+		for (Input field: getIssue().getFieldInputs().values()) {
 			if (field.getType().equals(InputSpec.USER)) {
 				if (!field.getValues().isEmpty()) {
 					User newUser = userManager.findByName(field.getValues().iterator().next());
@@ -49,7 +49,7 @@ public class IssueOpened extends IssueEvent implements MarkdownAware {
 	public Map<String, Group> getNewGroups() {
 		Map<String, Group> newGroups = new HashMap<>();
 		GroupManager groupManager = OneDev.getInstance(GroupManager.class);
-		for (IssueField field: getIssue().getFields().values()) {
+		for (Input field: getIssue().getFieldInputs().values()) {
 			if (field.getType().equals(InputSpec.GROUP)) {
 				if (!field.getValues().isEmpty()) {
 					Group newGroup = groupManager.find(field.getValues().iterator().next());

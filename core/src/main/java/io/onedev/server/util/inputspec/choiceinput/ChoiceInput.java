@@ -8,8 +8,7 @@ import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
-import com.google.common.collect.Lists;
-
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -129,12 +128,15 @@ public class ChoiceInput extends InputSpec {
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> convertToStrings(Object value) {
-		if (isAllowMultiple())
-			return (List<String>) value;
-		else if (value != null)
-			return Lists.newArrayList((String) value);
-		else
-			return new ArrayList<>();
+		List<String> strings = new ArrayList<>();
+		if (isAllowMultiple()) {
+			if (checkListElements(value, String.class))
+				strings.addAll((List<String>) value);
+			Collections.sort(strings);
+		} else if (value instanceof String) {
+			strings.add((String) value);
+		} 
+		return strings;
 	}
 
 	@Override
