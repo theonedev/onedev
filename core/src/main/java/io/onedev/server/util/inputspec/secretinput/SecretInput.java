@@ -1,4 +1,4 @@
-package io.onedev.server.util.inputspec.passwordinput;
+package io.onedev.server.util.inputspec.secretinput;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,13 +7,13 @@ import java.util.Map;
 import javax.validation.ValidationException;
 
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.passwordinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.util.inputspec.secretinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import jersey.repackaged.com.google.common.collect.Lists;
 
-@Editable(order=500, name=InputSpec.PASSWORD)
-public class PasswordInput extends InputSpec {
+@Editable(order=500, name=InputSpec.SECRET)
+public class SecretInput extends InputSpec {
 
 	private static final long serialVersionUID = 1L;
 

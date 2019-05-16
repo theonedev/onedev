@@ -41,7 +41,7 @@ public class UndefinedFieldResolution implements Serializable {
 		this.fixType = fixType;
 	}
 
-	@Editable(order=100, name="Change to Field")
+	@Editable(order=100, name="new field")
 	@ChoiceProvider("getFieldChoices")
 	@ShowCondition("isNewFieldVisible")
 	@NotEmpty

@@ -232,10 +232,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						cmd.clearArgs();
 						String jobInstance = UUID.randomUUID().toString();
 						cmd.addArgs("run", "--rm", "--name", jobInstance);
-						for (Map.Entry<String, String> entry: envVars.entrySet()) {
-							if (StringUtils.isNotBlank(entry.getValue()))
-								cmd.addArgs("--env", entry.getKey() + "=" + entry.getValue());
-						}
+						for (Map.Entry<String, String> entry: envVars.entrySet())
+							cmd.addArgs("--env", entry.getKey() + "=" + entry.getValue());
 						if (getRunOptions() != null)
 							cmd.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 						

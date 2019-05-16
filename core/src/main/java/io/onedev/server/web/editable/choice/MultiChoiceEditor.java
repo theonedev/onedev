@@ -54,7 +54,6 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 				
 				OneContext.push(oneContext);
 				try {
-					getDescriptor().getDependencyPropertyNames().clear();
 					io.onedev.server.web.editable.annotation.ChoiceProvider choiceProvider = 
 							descriptor.getPropertyGetter().getAnnotation(
 									io.onedev.server.web.editable.annotation.ChoiceProvider.class);

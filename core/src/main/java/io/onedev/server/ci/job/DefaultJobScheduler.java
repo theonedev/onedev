@@ -21,6 +21,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.validation.ValidationException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
@@ -314,8 +315,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 												envVars.put("ONEDEV_COMMIT", commitId.name());
 												envVars.put("ONEDEV_JOB", job.getName());
 												envVars.put("ONEDEV_BUILD_NUMBER", String.valueOf(build.getNumber()));
-												for (BuildParam param: build.getParams()) 
-													envVars.put("ONEDEV_PARAM_" + param.getName().toUpperCase(), param.getValue());
+												for (BuildParam param: build.getParams()) {
+													if (StringUtils.isNotBlank(param.getValue()))
+														envVars.put(param.getName(), param.getValue());
+												}
 												
 												for (JobOutcome outcome: job.getOutcomes()) {
 													PatternSet patternSet = PatternSet.fromString(outcome.getFilePatterns());

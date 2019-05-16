@@ -43,7 +43,7 @@ public abstract class InputSpec implements Serializable {
 	
 	public static final String DATE = "Date";
 	
-	public static final String PASSWORD = "Password";
+	public static final String SECRET = "Secret";
 	
 	public static final String NUMBER = "Number";
 	

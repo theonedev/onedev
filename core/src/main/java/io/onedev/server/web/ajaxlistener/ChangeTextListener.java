@@ -46,10 +46,14 @@ public class ChangeTextListener implements IAjaxCallListener {
 
 	@Override
 	public CharSequence getSuccessHandler(Component component) {
+		/*
+		 * Should check empty of prev data as the component itself might be re-rendered to lose 
+		 * previously saved data
+		 */
 		return String.format(""
 				+ "var $element = $('#%s');"
-				+ "$element.val($element.data('prevValue'));"
-				+ "$element.html($element.data('prevHtml'));", 
+				+ "if ($element.data('prevValue')) $element.val($element.data('prevValue'));"
+				+ "if ($element.data('prevHtml')) $element.html($element.data('prevHtml'));", 
 				component.getMarkupId(true));
 	}
 

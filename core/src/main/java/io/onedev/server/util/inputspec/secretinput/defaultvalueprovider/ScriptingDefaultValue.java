@@ -1,4 +1,4 @@
-package io.onedev.server.util.inputspec.passwordinput.defaultvalueprovider;
+package io.onedev.server.util.inputspec.secretinput.defaultvalueprovider;
 
 import org.hibernate.validator.constraints.NotEmpty;
 

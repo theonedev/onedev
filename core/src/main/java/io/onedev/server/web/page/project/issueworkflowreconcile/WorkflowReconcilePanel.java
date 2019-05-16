@@ -213,7 +213,6 @@ public abstract class WorkflowReconcilePanel extends Panel {
 						@Override
 						protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 							super.onSubmit(target, form);
-							
 							getIssueManager().fixUndefinedFields(resolutions);
 							
 							Component content = checkFieldValues(CONTENT_ID);
