@@ -290,18 +290,22 @@ onedev.server = {
 			setTimeout(function() {
 				var focusibleSelector = "input[type=text]:visible, input:not([type]):visible, textarea:visible, .CodeMirror:visible";
 				
-				var inErrorSelector = ".feedbackPanelERROR:visible:first";
+				var inErrorSelector = ".has-error:visible:first";
                 var $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
+                if ($inError.length == 0) {
+				    inErrorSelector = ".feedbackPanelERROR:visible:first";
+                    $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);
+                }
 				if ($inError.length != 0) {
 					var $focusable = $inError.find(focusibleSelector).addBack(focusibleSelector);
-					if ($focusable.hasClass("CodeMirror") && $focusable[0].CodeMirror.options.readOnly == false) {
+					if ($focusable.hasClass("CodeMirror") && $this[0].CodeMirror.options.readOnly == false) {
 						$focusable[0].CodeMirror.focus();					
                     } else if ($focusable.length != 0 
                             && $focusable.closest(".select2-container").length == 0 
                             && !$focusable.hasClass("input-assist")) {
 						$focusable.focus();
 					} else {
-						$inError.scrollIntoView();
+						$inError[0].scrollIntoView({behavior: "smooth", block: "center"});
 					}
 				} else {
 					$containers.find(focusibleSelector).addBack(focusibleSelector).each(function() {
