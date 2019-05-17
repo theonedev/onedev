@@ -38,7 +38,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.secretinput.SecretInput;
+import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;

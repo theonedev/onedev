@@ -1,4 +1,4 @@
-package io.onedev.server.util.inputspec.secretinput;
+package io.onedev.server.util.inputspec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,10 +6,7 @@ import java.util.Map;
 
 import javax.validation.ValidationException;
 
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.secretinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=500, name=InputSpec.SECRET)
@@ -19,18 +16,6 @@ public class SecretInput extends InputSpec {
 
 	public static final String MASK = "*****";
 	
-	private DefaultValueProvider defaultValueProvider;
-	
-	@Editable(order=1000, name="Default Value")
-	@NameOfEmptyValue("No default value")
-	public DefaultValueProvider getDefaultValueProvider() {
-		return defaultValueProvider;
-	}
-
-	public void setDefaultValueProvider(DefaultValueProvider defaultValueProvider) {
-		this.defaultValueProvider = defaultValueProvider;
-	}
-
 	@Editable
 	@Override
 	public boolean isAllowMultiple() {
@@ -46,7 +31,7 @@ public class SecretInput extends InputSpec {
 		if (!isAllowEmpty())
 			buffer.append("    @NotEmpty\n");
 		buffer.append("    @Password\n");
-		appendMethods(buffer, index, "String", null, defaultValueProvider);
+		appendMethods(buffer, index, "String", null, null);
 		
 		return buffer.toString();
 	}

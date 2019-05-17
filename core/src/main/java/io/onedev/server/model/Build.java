@@ -41,7 +41,7 @@ import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.secretinput.SecretInput;
+import io.onedev.server.util.inputspec.SecretInput;
 
 @Entity
 @Table(

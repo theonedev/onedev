@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.secretinput.SecretInput;
+import io.onedev.server.util.inputspec.SecretInput;
 
 public class Input implements Serializable {
 

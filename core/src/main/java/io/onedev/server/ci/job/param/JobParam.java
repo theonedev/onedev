@@ -17,7 +17,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Joiner;
 
 import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.secretinput.SecretInput;
+import io.onedev.server.util.inputspec.SecretInput;
 
 public class JobParam implements Serializable {
 

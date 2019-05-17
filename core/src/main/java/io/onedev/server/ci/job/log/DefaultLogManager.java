@@ -50,7 +50,7 @@ import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.inputspec.secretinput.SecretInput;
+import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @Singleton
