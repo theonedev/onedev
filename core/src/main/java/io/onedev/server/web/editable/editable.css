@@ -115,3 +115,7 @@
 .bean-editor .select2-container {
 	width: 100%;
 }
+
+.form-group>.editable>.list>.head {
+	margin-top: 8px;
+}

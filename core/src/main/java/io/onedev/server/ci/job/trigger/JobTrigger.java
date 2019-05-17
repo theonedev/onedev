@@ -24,7 +24,7 @@ public abstract class JobTrigger implements Serializable {
 
 	private List<JobParam> params = new ArrayList<>();
 
-	@Editable(name="Trigger Parameters", order=1000, description="Specify parameters to trigger the job")
+	@Editable(name="Trigger Parameters", order=1000)
 	@ParamSpecProvider("getParamSpecs")
 	@OmitName
 	public List<JobParam> getParams() {
