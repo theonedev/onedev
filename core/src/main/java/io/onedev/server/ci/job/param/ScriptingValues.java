@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -33,6 +35,25 @@ public class ScriptingValues implements ValuesProvider {
 		this.script = script;
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof ScriptingValues)) 
+			return false;
+		if (this == other)
+			return true;
+		ScriptingValues otherScriptingValues = (ScriptingValues) other;
+		return new EqualsBuilder()
+			.append(script, otherScriptingValues.getValues())
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(script)
+			.toHashCode();
+	}		
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<List<String>> getValues() {

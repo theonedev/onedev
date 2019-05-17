@@ -41,7 +41,7 @@ public class DateInput extends InputSpec {
 		appendField(buffer, index, "Date");
 		appendCommonAnnotations(buffer, index);
 		if (!isAllowEmpty())
-			buffer.append("    @NotNull\n");
+			buffer.append("    @NotNull(message=\"May not be empty\")\n");
 		appendMethods(buffer, index, "Date", null, defaultValueProvider);
 		
 		return buffer.toString();

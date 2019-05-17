@@ -59,7 +59,7 @@ public class NumberInput extends InputSpec {
 		appendField(buffer, index, "Integer");
 		appendCommonAnnotations(buffer, index);
 		if (!isAllowEmpty())
-			buffer.append("    @NotNull\n");
+			buffer.append("    @NotNull(message=\"May not be empty\")\n");
 		if (minValue != null) {
 			if (maxValue != null) {
 				buffer.append("    @Range(min=" + minValue.toString() + "L,max=" + maxValue.toString() +"L)\n");

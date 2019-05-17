@@ -17,6 +17,7 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.DropDownChoice;
@@ -212,6 +213,8 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 			
 		});
+		
+		setOutputMarkupId(true);
 	}
 	
 	private SpecifiedValues newSpecifiedValueProvider(PropertyDescriptor property) {
@@ -247,7 +250,11 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				item.remove();
-				String script = String.format("$('#%s').remove();", item.getMarkupId());
+				String script = String.format(""
+						+ "var $item=$('#%s');"
+						+ "onedev.server.form.markDirty($item.closest('form'));" 
+						+ "$item.remove();",
+						item.getMarkupId());
 				target.appendJavaScript(script);
 				onPropertyUpdating(target);
 			}
@@ -283,7 +290,10 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 					Component newSpecifiedValueEditor = newSpecifiedValueEditor(valuesView.newChildId(), 
 							property, null);
 					valuesView.add(newSpecifiedValueEditor);
-					String script = String.format("$('#%s').before('<li id=\"%s\"></li>')", 
+					String script = String.format(""
+							+ "var $editor = $('#%s');"
+							+ "$editor.before('<li id=\"%s\"></li>');"
+							+ "onedev.server.form.markDirty($editor.closest('form'));", 
 							getMarkupId(), newSpecifiedValueEditor.getMarkupId());
 					target.prependJavaScript(script);
 					target.add(newSpecifiedValueEditor);
@@ -337,6 +347,11 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new ParamListCssResourceReference()));
+		validate();
+		if (!getModelObject().equals(getConvertedInput())) {
+			String script = String.format("onedev.server.form.markDirty($('#%s').closest('form'));", getMarkupId());
+			response.render(OnDomReadyHeaderItem.forScript(script));
+		}
 	}
 	
 }

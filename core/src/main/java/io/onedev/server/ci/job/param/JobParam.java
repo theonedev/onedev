@@ -12,6 +12,8 @@ import javax.annotation.Nullable;
 import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.base.Joiner;
@@ -47,6 +49,27 @@ public class JobParam implements Serializable {
 		this.valuesProvider = valuesProvider;
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		if (!(other instanceof JobParam)) 
+			return false;
+		if (this == other)
+			return true;
+		JobParam otherJobParam = (JobParam) other;
+		return new EqualsBuilder()
+			.append(name, otherJobParam.name)
+			.append(valuesProvider, otherJobParam.valuesProvider)
+			.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		return new HashCodeBuilder(17, 37)
+			.append(name)
+			.append(valuesProvider)
+			.toHashCode();
+	}		
+	
 	@Nullable
 	public static String toString(List<String> strings) {
 		if (!strings.isEmpty())
