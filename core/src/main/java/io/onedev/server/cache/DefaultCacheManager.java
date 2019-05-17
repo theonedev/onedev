@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -149,7 +150,7 @@ public class DefaultCacheManager implements CacheManager {
 		for (UserAuthorization userAuthorization: dao.query(UserAuthorization.class))
 			userAuthorizations.put(userAuthorization.getId(), userAuthorization.getFacade());
 		
-		query = dao.getSessionManager().getSession().createQuery("select distinct name, type, value from BuildParam");
+		query = dao.getSessionManager().getSession().createQuery("select distinct name, type, value, id from BuildParam order by id");
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			if (!fields[1].equals(InputSpec.SECRET))
 				addBuildParam((String) fields[0], (String) fields[2]);
@@ -275,11 +276,12 @@ public class DefaultCacheManager implements CacheManager {
 	private void addBuildParam(String name, String value) {
 		Set<String> values = buildParams.get(name);
 		if (values == null) {
-			values = new HashSet<>();
+			values = new LinkedHashSet<>();
 			buildParams.put(name, values);
 		}
-		if (values.size() < MAX_PARAM_VALUES)
-			values.add(value);
+		values.add(value);
+		if (values.size() > MAX_PARAM_VALUES)
+			values.iterator().remove();
 	}
 	
 	@Transactional

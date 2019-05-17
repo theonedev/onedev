@@ -32,7 +32,7 @@ public class OutcomeListEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
-									return new OutcomeListViewPanel(id, elementClass, model.getObject());
+									return new OutcomeListViewPanel(id, model.getObject());
 								} else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 								}

@@ -36,7 +36,7 @@ class DependencyListViewPanel extends Panel {
 
 	private final List<JobDependency> dependencies = new ArrayList<>();
 	
-	public DependencyListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
+	public DependencyListViewPanel(String id, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)

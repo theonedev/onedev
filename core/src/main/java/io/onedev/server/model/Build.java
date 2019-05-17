@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -334,6 +335,29 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public Map<String, Input> getParamInputs() {
 		Map<String, Input> inputs = new LinkedHashMap<>();
+		List<BuildParam> params = new ArrayList<>(getParams());
+		Collections.sort(params, new Comparator<BuildParam>() {
+
+			@Override
+			public int compare(BuildParam o1, BuildParam o2) {
+				if (o1.getName().equals(o2.getName())) {
+					if (o1.getValue() != null) {
+						if (o2.getValue() != null) 
+							return o1.getValue().compareTo(o2.getValue());
+						else
+							return -1;
+					} else {
+						if (o2.getValue() != null) 
+							return 1;
+						else
+							return 0;
+					}
+				} else {
+					return o1.getName().compareTo(o2.getName());
+				}
+			}
+			
+		});
 		for (BuildParam param: getParams()) {
 			Input input = inputs.get(param.getName());
 			if (input == null) {

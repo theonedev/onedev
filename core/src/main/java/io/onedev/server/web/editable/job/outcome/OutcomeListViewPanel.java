@@ -33,7 +33,7 @@ class OutcomeListViewPanel extends Panel {
 
 	private final List<JobOutcome> outcomes = new ArrayList<>();
 	
-	public OutcomeListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
+	public OutcomeListViewPanel(String id, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)

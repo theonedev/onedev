@@ -32,7 +32,7 @@ public class DependencyListEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) 
-									return new DependencyListViewPanel(id, elementClass, model.getObject());
+									return new DependencyListViewPanel(id, model.getObject());
 								else 
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 							}

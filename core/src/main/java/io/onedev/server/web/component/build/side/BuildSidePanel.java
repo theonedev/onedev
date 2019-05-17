@@ -1,8 +1,8 @@
 package io.onedev.server.web.component.build.side;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -35,7 +35,10 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.secretinput.SecretInput;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -188,8 +191,26 @@ public abstract class BuildSidePanel extends Panel {
 
 			@Override
 			protected List<BuildParam> load() {
-				List<BuildParam> params = new ArrayList<>(getBuild().getParams());
-				params.sort(Comparator.comparing(BuildParam::getName));
+				List<BuildParam> params = new ArrayList<>();
+				for (Map.Entry<String, Input> entry: getBuild().getParamInputs().entrySet()) {
+					if (entry.getValue().getValues().size() > 1) {
+						int i = 1;
+						for (String value: entry.getValue().getValues()) {
+							BuildParam param = new BuildParam();
+							param.setName(entry.getKey() + "_" + (i++));
+							param.setType(entry.getValue().getType());
+							param.setValue(value);
+							params.add(param);
+						}
+					} else {
+						BuildParam param = new BuildParam();
+						param.setName(entry.getKey());
+						param.setType(entry.getValue().getType());
+						if (entry.getValue().getValues().size() == 1)
+							param.setValue(entry.getValue().getValues().iterator().next());
+						params.add(param);
+					}
+				}
 				return params;
 			}
 			
@@ -199,7 +220,10 @@ public abstract class BuildSidePanel extends Panel {
 			protected void populateItem(ListItem<BuildParam> item) {
 				BuildParam param = item.getModelObject();
 				item.add(new Label("name", param.getName()));
-				item.add(new Label("value", param.getValue()));
+				if (param.getType().equals(InputSpec.SECRET))
+					item.add(new Label("value", SecretInput.MASK));
+				else
+					item.add(new Label("value", param.getValue()));
 			}
 
 			@Override

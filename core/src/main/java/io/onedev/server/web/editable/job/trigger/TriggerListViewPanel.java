@@ -35,7 +35,7 @@ class TriggerListViewPanel extends Panel {
 
 	private final List<JobTrigger> triggers = new ArrayList<>();
 	
-	public TriggerListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
+	public TriggerListViewPanel(String id, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)

@@ -227,7 +227,6 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				property.getDescriptor().getDependencyPropertyNames().clear();
 				setVisible(!property.getDescriptor().isPropertyExcluded() 
 						&& property.getDescriptor().isPropertyVisible(new OneContext(this), descriptor));
 			}

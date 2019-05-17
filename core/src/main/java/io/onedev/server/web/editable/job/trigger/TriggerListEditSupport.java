@@ -32,7 +32,7 @@ public class TriggerListEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
-									return new TriggerListViewPanel(id, elementClass, model.getObject());
+									return new TriggerListViewPanel(id, model.getObject());
 								} else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 								}

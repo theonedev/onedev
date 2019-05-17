@@ -27,13 +27,13 @@ public class ParamListEditSupport implements EditSupport {
 				return new PropertyContext<List<Serializable>>(descriptor) {
 
 					@Override
-					public PropertyViewer renderForView(String componentId, final IModel<List<Serializable>> model) {
+					public PropertyViewer renderForView(String componentId, IModel<List<Serializable>> model) {
 						return new PropertyViewer(componentId, descriptor) {
 
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null && !model.getObject().isEmpty()) 
-									return new ParamListViewPanel(id, elementClass, model.getObject());
+									return new ParamListViewPanel(id, model.getObject());
 								else 
 									return new WebMarkupContainer(id);
 							}

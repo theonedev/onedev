@@ -22,7 +22,7 @@ class ParamListViewPanel extends Panel {
 
 	private final List<JobParam> params = new ArrayList<>();
 	
-	public ParamListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
+	public ParamListViewPanel(String id, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
@@ -45,10 +45,12 @@ class ParamListViewPanel extends Panel {
 				SpecifiedValues specifiedValues = (SpecifiedValues) param.getValuesProvider();
 				for (List<String> value: specifiedValues.getValues()) {
 					WebMarkupContainer valueItem = new WebMarkupContainer(valuesView.newChildId());
-					if (!value.isEmpty())
-						valueItem.add(new Label("value", value.toString()));
-					else
+					if (value.size() == 0) 
 						valueItem.add(new Label("value", "<i>Empty</i>").setEscapeModelStrings(false));
+					else if (value.size() == 1)
+						valueItem.add(new Label("value", value.iterator().next()));
+					else 
+						valueItem.add(new Label("value", value.toString()));
 					valuesView.add(valueItem);
 				}
 				fragment.add(valuesView);
