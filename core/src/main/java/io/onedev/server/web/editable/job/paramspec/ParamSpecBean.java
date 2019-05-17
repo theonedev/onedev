@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull;
 
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.ExcludedProperties;
 
 @Editable
 public class ParamSpecBean implements Serializable {
@@ -16,6 +17,7 @@ public class ParamSpecBean implements Serializable {
 
 	@Editable(name="Type", order=100)
 	@NotNull(message="may not be empty")
+	@ExcludedProperties({"canBeChangedBy", "nameOfEmptyValue"})
 	public InputSpec getParamSpec() {
 		return paramSpec;
 	}

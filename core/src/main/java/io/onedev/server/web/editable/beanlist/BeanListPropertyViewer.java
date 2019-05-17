@@ -2,7 +2,9 @@ package io.onedev.server.web.editable.beanlist;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -17,21 +19,30 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
 public class BeanListPropertyViewer extends Panel {
 
-	private final List<PropertyContext<Serializable>> elementPropertyContexts;
+	private final List<PropertyContext<Serializable>> propertyContexts;
 	
 	private final List<Serializable> elements;
 	
-	public BeanListPropertyViewer(String id, Class<?> elementClass, List<Serializable> elements) {
+	public BeanListPropertyViewer(String id, PropertyDescriptor descriptor, Class<?> elementClass, List<Serializable> elements) {
 		super(id);
 		
-		elementPropertyContexts = new ArrayList<>();
+		Set<String> excludedProperties = new HashSet<>();
+		ExcludedProperties excludedPropertiesAnnotation = 
+				descriptor.getPropertyGetter().getAnnotation(ExcludedProperties.class);
+		if (excludedPropertiesAnnotation != null) {
+			for (String each: excludedPropertiesAnnotation.value())
+				excludedProperties.add(each);
+		}
+		
+		propertyContexts = new ArrayList<>();
 		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(elementClass).getPropertyDescriptors().values()) {
 			for (PropertyDescriptor property: groupProperties)
-				elementPropertyContexts.add(PropertyContext.of(property));
+				propertyContexts.add(PropertyContext.of(property));
 		}
 		
 		this.elements = elements;
@@ -41,7 +52,7 @@ public class BeanListPropertyViewer extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ListView<PropertyContext<Serializable>>("headers", elementPropertyContexts) {
+		add(new ListView<PropertyContext<Serializable>>("headers", propertyContexts) {
 
 			@Override
 			protected void populateItem(ListItem<PropertyContext<Serializable>> item) {
@@ -55,7 +66,7 @@ public class BeanListPropertyViewer extends Panel {
 
 			@Override
 			protected void populateItem(final ListItem<Serializable> rowItem) {
-				rowItem.add(new ListView<PropertyContext<Serializable>>("columns", elementPropertyContexts) {
+				rowItem.add(new ListView<PropertyContext<Serializable>>("columns", propertyContexts) {
 
 					@Override
 					protected void populateItem(ListItem<PropertyContext<Serializable>> columnItem) {
@@ -71,7 +82,7 @@ public class BeanListPropertyViewer extends Panel {
 		});
 		WebMarkupContainer noElements = new WebMarkupContainer("noElements");
 		noElements.setVisible(elements.isEmpty());
-		noElements.add(AttributeModifier.append("colspan", elementPropertyContexts.size()));
+		noElements.add(AttributeModifier.append("colspan", propertyContexts.size()));
 		add(noElements);
 	}
 

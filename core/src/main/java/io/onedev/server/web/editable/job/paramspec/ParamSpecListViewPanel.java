@@ -3,6 +3,7 @@ package io.onedev.server.web.editable.job.paramspec;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -179,7 +180,8 @@ class ParamSpecListViewPanel extends Panel {
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.view(id, paramSpecs.get(index), Sets.newHashSet("name"), true);
+							Set<String> excludedProperties = Sets.newHashSet("name", "canBeChangedBy", "nameOfEmptyValue");
+							return BeanContext.view(id, paramSpecs.get(index), excludedProperties, true);
 						}
 
 					};

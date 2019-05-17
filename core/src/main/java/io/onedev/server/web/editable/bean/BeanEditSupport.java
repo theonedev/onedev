@@ -1,6 +1,8 @@
 package io.onedev.server.web.editable.bean;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
@@ -14,6 +16,7 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
 public class BeanEditSupport implements EditSupport {
@@ -31,7 +34,14 @@ public class BeanEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 							if (model.getObject() != null) {
-								return BeanContext.view(id, model.getObject());
+								Set<String> excludedProperties = new HashSet<>();
+								ExcludedProperties excludedPropertiesAnnotation = 
+										descriptor.getPropertyGetter().getAnnotation(ExcludedProperties.class);
+								if (excludedPropertiesAnnotation != null) {
+									for (String each: excludedPropertiesAnnotation.value())
+										excludedProperties.add(each);
+								}
+								return BeanContext.view(id, model.getObject(), excludedProperties, true);
 							} else {
 								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 							}

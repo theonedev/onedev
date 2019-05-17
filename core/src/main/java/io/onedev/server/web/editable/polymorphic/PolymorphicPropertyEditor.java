@@ -2,7 +2,9 @@ package io.onedev.server.web.editable.polymorphic;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
@@ -32,6 +34,7 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.ExcludedProperties;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @SuppressWarnings("serial")
@@ -40,6 +43,8 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	private static final String BEAN_EDITOR_ID = "beanEditor";
 	
 	private final List<Class<?>> implementations = new ArrayList<>();
+	
+	private final Set<String> excludedProperties = new HashSet<>();
 
 	public PolymorphicPropertyEditor(String id, PropertyDescriptor descriptor, IModel<Serializable> propertyModel) {
 		super(id, descriptor, propertyModel);
@@ -53,6 +58,13 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 				"Can not find implementations for '" + baseClass + "'.");
 		
 		EditableUtils.sortAnnotatedElements(implementations);
+		
+		ExcludedProperties excludedPropertiesAnnotation = 
+				descriptor.getPropertyGetter().getAnnotation(ExcludedProperties.class);
+		if (excludedPropertiesAnnotation != null) {
+			for (String each: excludedPropertiesAnnotation.value())
+				excludedProperties.add(each);
+		}
 	}
 
 	private String getDisplayName(Class<?> clazz) {
@@ -203,7 +215,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	private Component newBeanEditor(Serializable propertyValue) {
 		Component beanEditor;
 		if (propertyValue != null) {
-			beanEditor = BeanContext.edit(BEAN_EDITOR_ID, propertyValue);
+			beanEditor = BeanContext.edit(BEAN_EDITOR_ID, propertyValue, excludedProperties, true);
 		} else {
 			beanEditor = new WebMarkupContainer(BEAN_EDITOR_ID);
 		}

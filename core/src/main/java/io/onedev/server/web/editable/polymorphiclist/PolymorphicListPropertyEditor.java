@@ -4,8 +4,10 @@ import static de.agilecoders.wicket.jquery.JQuery.$;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.Application;
 import org.apache.wicket.Component;
@@ -37,6 +39,7 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
 public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializable>> {
@@ -44,6 +47,8 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	private final Class<?> baseClass;
 	
 	private final List<Class<?>> implementations;
+	
+	private final Set<String> excludedProperties = new HashSet<>();
 	
 	private RepeatingView rows;
 	
@@ -64,6 +69,13 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 				"Can not find implementations for '" + baseClass + "'.");
 		
 		EditableUtils.sortAnnotatedElements(implementations);
+		
+		ExcludedProperties excludedPropertiesAnnotation = 
+				descriptor.getPropertyGetter().getAnnotation(ExcludedProperties.class);
+		if (excludedPropertiesAnnotation != null) {
+			for (String each: excludedPropertiesAnnotation.value())
+				excludedProperties.add(each);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -273,7 +285,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	private Component newElementEditor(Serializable element) {
 		Component elementEditor;
 		if (element != null) {
-			elementEditor = BeanContext.edit("elementEditor", element);
+			elementEditor = BeanContext.edit("elementEditor", element, excludedProperties, true);
 		} else {
 			elementEditor = new WebMarkupContainer("elementEditor").setVisible(false);
 		}

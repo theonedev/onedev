@@ -22,7 +22,7 @@ public class BeanListEditSupport implements EditSupport {
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
-			final Class<?> elementClass = ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType());
+			Class<?> elementClass = ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType());
 			if (elementClass != null && ClassUtils.isConcrete(elementClass) 
 					&& elementClass.getAnnotation(Editable.class) != null) {
 				return new PropertyContext<List<Serializable>>(descriptor) {
@@ -34,7 +34,7 @@ public class BeanListEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) {
-									return new BeanListPropertyViewer(id, elementClass, model.getObject());
+									return new BeanListPropertyViewer(id, propertyDescriptor, elementClass, model.getObject());
 								} else {
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 								}

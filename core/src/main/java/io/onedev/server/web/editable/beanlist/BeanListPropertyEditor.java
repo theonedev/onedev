@@ -4,8 +4,10 @@ import static de.agilecoders.wicket.jquery.JQuery.$;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -33,6 +35,7 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PathElement.Named;
+import io.onedev.server.web.editable.annotation.ExcludedProperties;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -56,9 +59,18 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 
 		propertyContexts = new ArrayList<>();
 		
+		Set<String> excludedProperties = new HashSet<>();
+		ExcludedProperties excludedPropertiesAnnotation = 
+				descriptor.getPropertyGetter().getAnnotation(ExcludedProperties.class);
+		if (excludedPropertiesAnnotation != null) {
+			for (String each: excludedPropertiesAnnotation.value())
+				excludedProperties.add(each);
+		}
 		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(elementClass).getPropertyDescriptors().values()) {
-			for (PropertyDescriptor property: groupProperties)
-				propertyContexts.add(PropertyContext.of(property));
+			for (PropertyDescriptor property: groupProperties) {
+				if (!excludedProperties.contains(property.getPropertyName()))
+					propertyContexts.add(PropertyContext.of(property));
+			}
 		}
 
 	}

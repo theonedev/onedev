@@ -1,6 +1,8 @@
 package io.onedev.server.web.editable.bean;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -18,14 +20,24 @@ import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
 public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 
 	private final String BEAN_EDITOR_ID = "beanEditor";
 	
+	private final Set<String> excludedProperties = new HashSet<>();
+	
 	public BeanPropertyEditor(String id, PropertyDescriptor descriptor, IModel<Serializable> propertyModel) {
 		super(id, descriptor, propertyModel);
+		
+		ExcludedProperties excludedPropertiesAnnotation = 
+				descriptor.getPropertyGetter().getAnnotation(ExcludedProperties.class);
+		if (excludedPropertiesAnnotation != null) {
+			for (String each: excludedPropertiesAnnotation.value())
+				excludedProperties.add(each);
+		}
 	}
 	
 	@Override
@@ -99,7 +111,7 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 	private Component newBeanEditor(Serializable propertyValue) {
 		Component beanEditor;
 		if (propertyValue != null) {
-			beanEditor = BeanContext.edit(BEAN_EDITOR_ID, propertyValue);
+			beanEditor = BeanContext.edit(BEAN_EDITOR_ID, propertyValue, excludedProperties, true);
 		} else {
 			beanEditor = new WebMarkupContainer(BEAN_EDITOR_ID).setVisible(false);
 		}
