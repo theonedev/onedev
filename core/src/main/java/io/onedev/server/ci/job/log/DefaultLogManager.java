@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +50,7 @@ import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.inputspec.secretinput.SecretInput;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @Singleton
@@ -95,6 +97,7 @@ public class DefaultLogManager implements LogManager {
 		Long projectId = build.getProject().getId();
 		Long buildId = build.getId();
 		Long buildNumber = build.getNumber();
+		Collection<String> maskSecrets = build.getMaskSecrets();
 		return new JobLogger(loggerLevel) {
 			
 			private static final long serialVersionUID = 1L;
@@ -108,6 +111,10 @@ public class DefaultLogManager implements LogManager {
 						break;
 					}
 				}
+				
+				for (String maskSecret: maskSecrets)
+					message = StringUtils.replace(message, maskSecret, SecretInput.MASK);
+				
  				if (logLevel.ordinal() <= loggerLevel.ordinal()) {
 					Lock lock = LockUtils.getReadWriteLock(getLockKey(buildId)).writeLock();
 					lock.lock();

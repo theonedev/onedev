@@ -311,7 +311,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									cmd.execute(newInfoLogger(logger), newErrorLogger(logger));
 								}
 								
-							}).checkReturnCode();
+							}, logger).checkReturnCode();
 							
 							return null;
 						} finally {

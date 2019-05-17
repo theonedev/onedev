@@ -40,6 +40,8 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
+import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.secretinput.SecretInput;
 
 @Entity
 @Table(
@@ -277,8 +279,11 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 
 	public void setStatusMessage(String statusMessage) {
-		if (statusMessage != null)
+		if (statusMessage != null) {
 			statusMessage = StringUtils.abbreviate(statusMessage, MAX_STATUS_MESSAGE);
+			for (String maskSecret: getMaskSecrets())
+				statusMessage = StringUtils.replace(statusMessage, maskSecret, SecretInput.MASK);
+		}
 		this.statusMessage = statusMessage;
 	}
 
@@ -374,6 +379,17 @@ public class Build extends AbstractEntity implements Referenceable {
 		return new BuildFacade(getId(), getProject().getId(), getCommitHash());
 	}
 	
+	public Collection<String> getMaskSecrets() {
+		Collection<String> secrets = new HashSet<>();
+		for (BuildParam param: getParams()) {
+			if (param.getType().equals(InputSpec.SECRET)) {
+				if (param.getValue() != null && param.getValue().length() >= SecretInput.MASK.length())
+					secrets.add(param.getValue());
+			}
+		}
+		return secrets;
+	}
+	
 	public static String getLogWebSocketObservable(Long buildId) {
 		return "build-log:" + buildId;
 	}
@@ -381,5 +397,5 @@ public class Build extends AbstractEntity implements Referenceable {
 	public static String getWebSocketObservable(Long buildId) {
 		return Build.class.getName() + ":" + buildId;
 	}
-	
+
 }

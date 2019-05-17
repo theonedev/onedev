@@ -17,7 +17,7 @@ public class SecretInput extends InputSpec {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String MASK = "******";
+	public static final String MASK = "*****";
 	
 	private DefaultValueProvider defaultValueProvider;
 	
