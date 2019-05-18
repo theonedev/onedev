@@ -1,7 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.Iterator;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -19,6 +17,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.Usage;
 
 @Singleton
 public class DefaultGroupManager extends AbstractEntityManager<Group> implements GroupManager {
@@ -68,23 +67,23 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 	@Transactional
 	@Override
 	public void delete(Group group) {
+    	Usage usage = new Usage();
 		for (Project project: projectManager.query()) {
-			for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) { 
-				if (it.next().onDeleteGroup(group.getName()))
-					it.remove();
-			}
-			for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) {
-				if (it.next().onDeleteGroup(group.getName()))
-					it.remove();
-			}
-			project.getIssueSetting().onDeleteGroup(group.getName());
+			for (BranchProtection protection: project.getBranchProtections()) 
+				usage.add(protection.onDeleteGroup(group.getName()));
+			for (TagProtection protection: project.getTagProtections()) 
+				usage.add(protection.onDeleteGroup(group.getName()));
+			usage.add(project.getIssueSetting().onDeleteGroup(group.getName()));
+			usage.prefix("project '" + project.getName() + "': setting");
 		}
+
+		usage.add(settingManager.getIssueSetting().onDeleteGroup(group.getName()).prefix("administration"));
+
 		Authenticator authenticator = settingManager.getAuthenticator();
-		if (authenticator != null) { 
-			authenticator.onDeleteGroup(group.getName());
-			settingManager.saveAuthenticator(authenticator);
-		}
-		settingManager.getIssueSetting().onDeleteGroup(group.getName());
+		if (authenticator != null && authenticator.getDefaultGroupNames().contains(group.getName())) 
+			usage.add("administration: authenticator");
+		
+		usage.checkInUse("Group '" + group.getName() + "'");
 		
 		dao.remove(group);
 	}

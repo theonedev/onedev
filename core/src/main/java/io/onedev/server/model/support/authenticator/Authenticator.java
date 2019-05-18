@@ -44,10 +44,6 @@ public abstract class Authenticator implements Serializable {
 			defaultGroupNames.set(index, newName);
 	}
 	
-	public void onDeleteGroup(String groupName) {
-		defaultGroupNames.remove(groupName);
-	}
-	
 	public abstract Authenticated authenticate(UsernamePasswordToken token) throws AuthenticationException;
 	
 }

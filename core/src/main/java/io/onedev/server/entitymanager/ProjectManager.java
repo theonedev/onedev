@@ -34,6 +34,14 @@ public interface ProjectManager extends EntityManager<Project> {
 	 */
 	void save(Project project, @Nullable String oldName);
 	
+	void onDeleteBranch(Project project, String branchName);
+	
+	void deleteBranch(Project project, String branchName);
+	
+	void onDeleteTag(Project project, String tagName);
+	
+	void deleteTag(Project project, String tagName);
+	
 	Repository getRepository(Project project);
 	
 	Collection<ProjectFacade> getAccessibleProjects(@Nullable User user);

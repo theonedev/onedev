@@ -4,6 +4,9 @@
 .editable>.group {
 	margin-bottom: 12px;
 }
+.editable>.group:last-child {
+    margin-bottom: 0;
+}
 .editable>.group>a {
     display: block;
     text-decoration: none;
@@ -37,6 +40,9 @@
 .editable>.bean-properties>table>tbody>tr>td {
 	vertical-align: top;
 	padding: 0 8px 16px 0;
+}
+.editable>.bean-properties>table>tbody>tr:last-child>td {
+    padding-bottom: 0;
 }
 .editable td.value>div:last-child>div:last-child>table>tbody>tr:last-child>td.value, 
 .editable td.value>div:last-child>div:last-child>div:last-child>div:last-child>table>tbody>tr:last-child>td.value {
@@ -108,10 +114,12 @@
 	font-style: italic;
 } 
 
+.editable ul.feedbackPanel {
+    margin: 10px 0;
+}
 .bean-editor .bean-list>table>tbody>tr>td {
     border-top: none;
 } 
-
 .bean-editor .select2-container {
 	width: 100%;
 }

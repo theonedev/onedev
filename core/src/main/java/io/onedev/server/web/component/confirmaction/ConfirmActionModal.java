@@ -20,8 +20,8 @@ public abstract class ConfirmActionModal extends ModalPanel {
 			
 			@Override
 			protected void onConfirm(AjaxRequestTarget target) {
-				close();
 				ConfirmActionModal.this.onConfirm(target);
+				close();
 			}
 			
 			@Override

@@ -11,6 +11,7 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -35,7 +36,11 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTag;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -271,6 +276,8 @@ public class ProjectTagsPage extends ProjectPage {
 		});
 		tagsContainer.setOutputMarkupPlaceholderTag(true);
 		
+		tagsContainer.add(new FencedFeedbackPanel("feedback", tagsContainer).setEscapeModelStrings(false));
+		
 		tagsContainer.add(tagsView = new PageableListView<RefInfo>("tags", tagsModel, 
 				io.onedev.server.web.WebConstants.PAGE_SIZE) {
 
@@ -357,9 +364,13 @@ public class ProjectTagsPage extends ProjectPage {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						getProject().deleteTag(tagName);
+						try {
+							OneDev.getInstance(ProjectManager.class).deleteTag(getProject(), tagName);
+							newPagingNavigation(target);
+						} catch (OneException e) {
+							tagsContainer.error(HtmlUtils.formatAsHtml(e.getMessage()));
+						}
 						target.add(tagsContainer);
-						newPagingNavigation(target);
 					}
 
 					@Override

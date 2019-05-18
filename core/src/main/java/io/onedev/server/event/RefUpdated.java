@@ -1,14 +1,10 @@
 package io.onedev.server.event;
 
-import java.util.Collection;
-
 import org.eclipse.jgit.lib.ObjectId;
-
-import com.google.common.collect.Sets;
 
 import io.onedev.server.model.Project;
 
-public class RefUpdated extends ProjectEvent implements BuildCommitsAware {
+public class RefUpdated extends ProjectEvent implements BuildCommitAware {
 	
 	private final String refName;
 	
@@ -36,11 +32,8 @@ public class RefUpdated extends ProjectEvent implements BuildCommitsAware {
 	}
 
 	@Override
-	public Collection<ObjectId> getBuildCommits() {
-		if (!newCommitId.equals(ObjectId.zeroId()))
-			return Sets.newHashSet(newCommitId);
-		else
-			return Sets.newHashSet();
+	public ObjectId getBuildCommit() {
+		return newCommitId;
 	}
 	
 }

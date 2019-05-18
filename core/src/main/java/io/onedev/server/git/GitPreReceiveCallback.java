@@ -2,6 +2,7 @@ package io.onedev.server.git;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -20,8 +21,11 @@ import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
@@ -50,7 +54,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 		this.userManager = userManager;
 	}
 	
-	private void error(Output output, @Nullable String refName, String... messages) {
+	private void error(Output output, @Nullable String refName, List<String> messages) {
 		output.markError();
 		output.writeLine();
 		output.writeLine("*******************************************************");
@@ -134,46 +138,59 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    		if (refName.startsWith(PullRequestConstants.REFS_PREFIX) || refName.startsWith(PullRequestUpdate.REFS_PREFIX)) {
 	    			if (!user.asSubject().isPermitted(
 	    					new ProjectPermission(project.getFacade(), ProjectPrivilege.ADMINISTRATION))) {
-	    				error(output, refName, "Only project administrators can update onedev refs.");
+	    				error(output, refName, Lists.newArrayList("Only project administrators can update onedev refs."));
 	    				break;
 	    			}
 	    		} else if (refName.startsWith(Constants.R_HEADS)) {
 	    			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(refName));
-	    			String errorMessage = null;
+	    			List<String> errorMessages = new ArrayList<>();
 	    			BranchProtection protection = project.getBranchProtection(branchName, user);
 	    			if (protection != null) {
     					if (oldObjectId.equals(ObjectId.zeroId())) {
     						if (protection.isNoCreation())
-    							errorMessage = "Can not create this branch according to branch protection setting";
+    							errorMessages.add("Can not create this branch according to branch protection setting");
     					} else if (newObjectId.equals(ObjectId.zeroId())) {
-    						if (protection.isNoDeletion())
-    							errorMessage = "Can not delete this branch according to branch protection setting";
+    						if (protection.isNoDeletion()) 
+    							errorMessages.add("Can not delete this branch according to branch protection setting");
     					} else if (!GitUtils.isMergedInto(project.getRepository(), gitEnvs, oldObjectId, newObjectId)) {
-							errorMessage = "Can not force-push to this branch according to branch protection setting";
+							errorMessages.add("Can not force-push to this branch according to branch protection setting");
     					} else if (projectManager.isPushNeedsQualityCheck(user, project, branchName, oldObjectId, newObjectId, gitEnvs)) {
-	    					error(output, refName, 
-	    							"Your changes need to be reviewed/verified. Please submit pull request instead");
+	    					errorMessages.add("Your changes need to be reviewed/verified. Please submit pull request instead");
     					}
 	    			}
-					if (errorMessage != null)
-						error(output, refName, errorMessage);
+	    			if (errorMessages.isEmpty()) {
+	    				try {
+	    					projectManager.onDeleteBranch(project, branchName);
+	    				} catch (OneException e) {
+	    					errorMessages.addAll(Splitter.on("\n").splitToList(e.getMessage()));
+	    				}
+	    			}
+					if (!errorMessages.isEmpty())
+						error(output, refName, errorMessages);
 	    		} else if (refName.startsWith(Constants.R_TAGS)) {
 	    			String tagName = Preconditions.checkNotNull(GitUtils.ref2tag(refName));
-	    			String errorMessage = null;
+	    			List<String> errorMessages = new ArrayList<>();
 	    			TagProtection protection = project.getTagProtection(tagName, user);
 	    			if (protection != null) {
     					if (oldObjectId.equals(ObjectId.zeroId())) {
     						if (protection.isNoCreation())
-    							errorMessage = "Can not create this tag according to tag protection setting";
+    							errorMessages.add("Can not create this tag according to tag protection setting");
     					} else if (newObjectId.equals(ObjectId.zeroId())) {
     						if (protection.isNoDeletion())
-    							errorMessage = "Can not delete this tag according to tag protection setting";
+    							errorMessages.add("Can not delete this tag according to tag protection setting");
     					} else if (protection.isNoUpdate()) {
-							errorMessage = "Can not update this tag according to tag protection setting";
+							errorMessages.add("Can not update this tag according to tag protection setting");
     					}
 	    			}
-					if (errorMessage != null)
-						error(output, refName, errorMessage);
+	    			if (errorMessages.isEmpty()) {
+	    				try {
+	    					projectManager.onDeleteTag(project, tagName);
+	    				} catch (OneException e) {
+	    					errorMessages.addAll(Splitter.on("\n").splitToList(e.getMessage()));
+	    				}
+	    			}
+					if (!errorMessages.isEmpty())
+						error(output, refName, errorMessages);
 	    		}
 	    		
 	        	field = field.substring(40);

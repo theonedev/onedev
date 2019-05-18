@@ -35,11 +35,11 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PathElement.Named;
-import io.onedev.server.web.editable.annotation.ExcludedProperties;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
+import io.onedev.server.web.editable.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
 public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
@@ -144,7 +144,8 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-
+				markFormDirty(target);
+				
 				Component lastRow;
 				if (rows.size() != 0)
 					lastRow = rows.get(rows.size() - 1);
@@ -189,6 +190,8 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 			@SuppressWarnings("deprecation")
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
+				markFormDirty(target);
+				
  				/*
 				List<Component> children = new ArrayList<>();
 				for (Component child: rows)
@@ -255,9 +258,8 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-
+				markFormDirty(target);
 				target.appendJavaScript($(row).chain("remove").get());
-				target.appendJavaScript(String.format("onedev.server.form.markDirty($('#%s'));", form.getMarkupId(true)));
 				rows.remove(row);
 				target.add(noElements);
 				onPropertyUpdating(target);

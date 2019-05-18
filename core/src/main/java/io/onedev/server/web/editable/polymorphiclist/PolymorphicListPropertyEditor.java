@@ -119,6 +119,8 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 			public void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
+				markFormDirty(target);
+				
 				Component lastRow;
 				if (rows.size() != 0)
 					lastRow = rows.get(rows.size() - 1);
@@ -179,6 +181,8 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 
 				// Do not use code above as removing components outside of a container and add again 
 				// can cause the fenced feedback panel not functioning properly
+				markFormDirty(target);
+				
 				int fromIndex = from.getItemIndex();
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
@@ -259,7 +263,8 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				target.appendJavaScript(String.format("onedev.server.form.markDirty($('#%s'));", form.getMarkupId(true)));
+				markFormDirty(target);
+				
 				target.appendJavaScript($(row).chain("remove").get());
 				rows.remove(row);
 				target.add(noElements);

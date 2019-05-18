@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
@@ -66,6 +67,16 @@ public abstract class PropertyEditor<T> extends ValueEditor<T> {
 			
 		}));
 		
+		setOutputMarkupId(true);
+	}
+	
+	protected void markFormDirty(AjaxRequestTarget target) {
+		String script = String.format(""
+				+ "var $form = $('#%s').closest('form');"
+				+ "if ($form.closest('.blob-edit').length == 0)"
+				+ "  onedev.server.form.markDirty($form);", 
+				getMarkupId());
+		target.prependJavaScript(script);
 	}
 	
 	protected void onPropertyUpdating(IPartialPageRequestHandler target) {

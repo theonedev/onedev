@@ -61,15 +61,17 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.ListenerRegistry;
-import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
+import io.onedev.commons.utils.stringmatch.Matcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.detector.CISpecDetector;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
@@ -851,40 +853,6 @@ public class Project extends AbstractEntity {
 		
 		return submodules;
 	}
-
-    public void deleteBranch(String branch) {
-    	String refName = GitUtils.branch2ref(branch);
-    	ObjectId commitId = getObjectId(refName, true);
-    	try {
-			git().branchDelete().setForce(true).setBranchNames(branch).call();
-		} catch (Exception e) {
-			throw ExceptionUtils.unchecked(e);
-		}
-    	
-    	Subject subject = SecurityUtils.getSubject();
-    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-		    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						ThreadContext.bind(subject);
-						try {
-							Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-							OneDev.getInstance(ListenerRegistry.class).post(
-									new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
-						} finally {
-							ThreadContext.unbindSubject();
-						}
-					}
-		    		
-		    	});
-			}
-    		
-    	});
-    }
     
     public void createBranch(String branchName, String branchRevision) {
 		try {
@@ -965,40 +933,6 @@ public class Project extends AbstractEntity {
 		} catch (GitAPIException e) {
 			throw new RuntimeException(e);
 		}
-    }
-    
-    public void deleteTag(String tag) {
-    	String refName = GitUtils.tag2ref(tag);
-    	ObjectId commitId = getRevCommit(refName, true).getId();
-    	try {
-			git().tagDelete().setTags(tag).call();
-		} catch (GitAPIException e) {
-			throw new RuntimeException(e);
-		}
-
-    	Subject subject = SecurityUtils.getSubject();
-    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-		    	OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						ThreadContext.bind(subject);
-						try {
-							Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-							OneDev.getInstance(ListenerRegistry.class).post(
-									new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
-						} finally {
-							ThreadContext.unbindSubject();
-						}
-					}
-		    		
-		    	});
-			}
-    		
-    	});
     }
     
 	public Collection<CodeComment> getCodeComments() {
@@ -1393,4 +1327,31 @@ public class Project extends AbstractEntity {
 		return null;
 	}
 
+	public boolean isCommitOnBranches(ObjectId commitId, String branches) {
+		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
+		Collection<ObjectId> descendants = commitInfoManager.getDescendants(this, Sets.newHashSet(commitId));
+		descendants.add(commitId);
+	
+		Matcher matcher = new ChildAwareMatcher();
+		PatternSet branchPatterns = PatternSet.fromString(branches);
+		for (RefInfo ref: getBranches()) {
+			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
+			if (descendants.contains(ref.getPeeledObj()) && branchPatterns.matches(matcher, branchName))
+				return true;
+		}
+		return false;
+	}
+
+	public boolean isCommitOnTags(ObjectId commitId, String tags) {
+		Matcher matcher = new ChildAwareMatcher();
+		PatternSet tagPatterns = PatternSet.fromString(tags);
+		for (RefInfo ref: getTags()) {
+			String tagName = Preconditions.checkNotNull(GitUtils.ref2tag(ref.getRef().getName()));
+			if (commitId.equals(ref.getPeeledObj()) && tagPatterns.matches(matcher, tagName))
+				return true;
+		}
+		return false;
+	}
+	
+	
 }

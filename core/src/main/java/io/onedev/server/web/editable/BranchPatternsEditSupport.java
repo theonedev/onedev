@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.model.IModel;
@@ -44,8 +45,12 @@ public class BranchPatternsEditSupport implements EditSupport {
 
 									@Override
 									protected List<InputSuggestion> suggest(String matchWith) {
-										Project project = ((ProjectPage)getPage()).getProject();
-										return SuggestionUtils.suggestBranches(project, matchWith);
+										if (getPage() instanceof ProjectPage) {
+											Project project = ((ProjectPage)getPage()).getProject();
+											return SuggestionUtils.suggestBranches(project, matchWith);
+										} else {
+											return new ArrayList<>();
+										}
 									}
 
 									@Override

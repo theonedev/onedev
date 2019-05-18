@@ -65,6 +65,7 @@ import io.onedev.server.ci.job.JobScheduler;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildRequirementManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
@@ -142,6 +143,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final PullRequestUpdateManager pullRequestUpdateManager;
 	
+	private final ProjectManager projectManager;
+	
 	private final UserManager userManager;
 	
 	private final SessionManager sessionManager;
@@ -169,7 +172,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			ListenerRegistry listenerRegistry, SessionManager sessionManager,
 			PullRequestChangeManager pullRequestChangeManager, BuildManager buildManager,
 			BuildRequirementManager buildRequirementManager, TransactionManager transactionManager, 
-			JobScheduler jobScheduler) {
+			JobScheduler jobScheduler, ProjectManager projectManager) {
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
@@ -183,6 +186,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		this.pullRequestChangeManager = pullRequestChangeManager;
 		this.buildRequirementManager = buildRequirementManager;
 		this.jobScheduler = jobScheduler;
+		this.projectManager = projectManager;
 	}
 	
 	@Transactional
@@ -229,8 +233,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		Preconditions.checkState(!request.isOpen() && request.getSourceProject() != null); 
 		
 		if (request.getSource().getObjectName(false) != null) {
-			request.getSource().delete();
-			
+			projectManager.deleteBranch(request.getSourceProject(), request.getSourceBranch());
 			PullRequestChange change = new PullRequestChange();
 			change.setDate(new Date());
 			change.setData(new PullRequestSourceBranchDeleteData(note));

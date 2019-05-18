@@ -23,6 +23,7 @@ import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -53,7 +54,10 @@ import org.eclipse.jgit.revwalk.filter.RevFilter;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -634,6 +638,7 @@ public class ProjectBranchesPage extends ProjectPage {
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
 						Fragment fragment = new Fragment(id, "confirmDeleteBranchFrag", ProjectBranchesPage.this);
+						fragment.add(new FencedFeedbackPanel("feedback", fragment).setEscapeModelStrings(false));
 						PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
 						if (!pullRequestManager.queryOpen(new ProjectAndBranch(getProject(), branch)).isEmpty()) {
 							Fragment bodyFrag = new Fragment("body", "openRequestsFrag", ProjectBranchesPage.this);
@@ -652,14 +657,19 @@ public class ProjectBranchesPage extends ProjectPage {
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								getProject().deleteBranch(branch);
-								if (branch.equals(baseBranch)) {
-									baseBranch = getProject().getDefaultBranch();
-									target.add(baseChoice);
+								try {
+									OneDev.getInstance(ProjectManager.class).deleteBranch(getProject(), branch);
+									if (branch.equals(baseBranch)) {
+										baseBranch = getProject().getDefaultBranch();
+										target.add(baseChoice);
+									}
+									target.add(branchesContainer);
+									newPagingNavigation(target);
+									modal.close();
+								} catch (OneException e) {
+									error(HtmlUtils.formatAsHtml(e.getMessage()));
+									target.add(fragment);
 								}
-								target.add(branchesContainer);
-								newPagingNavigation(target);
-								modal.close();
 							}
 							
 						});
@@ -679,6 +689,7 @@ public class ProjectBranchesPage extends ProjectPage {
 							}
 							
 						});
+						fragment.setOutputMarkupId(true);
 						return fragment;
 					}
 					

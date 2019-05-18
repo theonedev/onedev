@@ -87,15 +87,18 @@
 		</form>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="confirmDeleteBranchFrag">
-		<div class="modal-header">
-			<button wicket:id="close" type="button" class="close">&times;</button>
-			<h4 class="modal-title">Please confirm</h4>
-		</div>
-		<div wicket:id="body" class="modal-body"></div>
-		<div class="modal-footer">
-			<a wicket:id="delete" class="btn btn-danger">Delete</a>
-			<a wicket:id="cancel" class="btn btn-default">Cancel</a>
-		</div>
+        <div class="confirm-delete-branch">
+            <div class="modal-header">
+                <button wicket:id="close" type="button" class="close">&times;</button>
+                <h4 class="modal-title">Please confirm</h4>
+            </div>
+            <div wicket:id="body" class="modal-body"></div>
+            <div wicket:id="feedback" class="feedback"></div>
+            <div class="modal-footer">
+                <a wicket:id="delete" class="btn btn-danger">Delete</a>
+                <a wicket:id="cancel" class="btn btn-default">Cancel</a>
+            </div>
+        </div>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="openRequestsFrag">
 		There are <a wicket:id="openRequests">open pull requests</a> against branch <span wicket:id="branch"></span>. 

@@ -2,7 +2,6 @@ package io.onedev.server.util.usermatcher;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -182,24 +181,6 @@ public class UserMatcher implements Serializable {
 		return userMatcher.toString();
 	}
 
-	private static void onDeleteGroup(List<UserMatcherCriteria> criterias, String groupName) {
-		for (Iterator<UserMatcherCriteria> it = criterias.iterator(); it.hasNext();) {
-			UserMatcherCriteria criteria = it.next();
-			if (criteria instanceof SpecifiedGroup) {  
-				SpecifiedGroup specifiedGroup = (SpecifiedGroup) criteria;
-				if (specifiedGroup.getGroupName().equals(groupName))
-					it.remove();
-			}
-		}
-	}
-	
-	public static String onDeleteGroup(String userMatcherString, String groupName) {
-		UserMatcher userMatcher = fromString(userMatcherString);
-		onDeleteGroup(userMatcher.getCriterias(), groupName);
-		onDeleteGroup(userMatcher.getExceptCriterias(), groupName);
-		return userMatcher.toString();
-	}
-
 	private static void onRenameUser(List<UserMatcherCriteria> criterias, String oldName, String newName) {
 		for (UserMatcherCriteria criteria: criterias) {
 			if (criteria instanceof SpecifiedUser) {  
@@ -217,22 +198,38 @@ public class UserMatcher implements Serializable {
 		return userMatcher.toString();
 	}
 
-	private static void onDeleteUser(List<UserMatcherCriteria> criterias, String userName) {
-		for (Iterator<UserMatcherCriteria> it = criterias.iterator(); it.hasNext();) {
-			UserMatcherCriteria criteria = it.next();
+	private static boolean isUsingUser(List<UserMatcherCriteria> criterias, String userName) {
+		for (UserMatcherCriteria criteria: criterias) {
 			if (criteria instanceof SpecifiedUser) {  
 				SpecifiedUser specifiedUser = (SpecifiedUser) criteria;
 				if (specifiedUser.getUserName().equals(userName))
-					it.remove();
+					return true;
 			}
 		}
+		return false;
 	}
 	
-	public static String onDeleteUser(String userMatcherString, String userName) {
+	public static boolean isUsingUser(String userMatcherString, String userName) {
 		UserMatcher userMatcher = fromString(userMatcherString);
-		onDeleteUser(userMatcher.getCriterias(), userName);
-		onDeleteUser(userMatcher.getExceptCriterias(), userName);
-		return userMatcher.toString();
+		return isUsingUser(userMatcher.getCriterias(), userName) 
+				|| isUsingUser(userMatcher.getExceptCriterias(), userName);
+	}
+	
+	private static boolean isUsingGroup(List<UserMatcherCriteria> criterias, String groupName) {
+		for (UserMatcherCriteria criteria: criterias) {
+			if (criteria instanceof SpecifiedGroup) {  
+				SpecifiedGroup specifiedGroup = (SpecifiedGroup) criteria;
+				if (specifiedGroup.getGroupName().equals(groupName))
+					return true;
+			}
+		}
+		return false;
+	}
+	
+	public static boolean isUsingGroup(String userMatcherString, String groupName) {
+		UserMatcher userMatcher = fromString(userMatcherString);
+		return isUsingGroup(userMatcher.getCriterias(), groupName) 
+				|| isUsingGroup(userMatcher.getExceptCriterias(), groupName);
 	}
 	
 }

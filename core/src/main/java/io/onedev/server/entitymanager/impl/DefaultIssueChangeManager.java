@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.wicket.util.lang.Objects;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Optional;
 
@@ -31,6 +32,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Milestone;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.TransitionSpec;
@@ -205,11 +207,17 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	@Transactional
 	@Listen
 	public void on(BuildEvent event) {
-		for (TransitionSpec transition: event.getBuild().getProject().getIssueSetting().getTransitionSpecs(true)) {
+		Project project = event.getBuild().getProject();
+		for (TransitionSpec transition: project.getIssueSetting().getTransitionSpecs(true)) {
 			if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
 				BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
+				String branches = trigger.getBranches();
+				String tags = trigger.getTags();
+				ObjectId commitId = ObjectId.fromString(event.getBuild().getCommitHash());
 				if (trigger.getJobName().equals(event.getBuild().getJobName()) 
-						&& event.getBuild().getStatus() == Build.Status.SUCCESSFUL) {
+						&& event.getBuild().getStatus() == Build.Status.SUCCESSFUL
+						&& (branches == null || project.isCommitOnBranches(commitId, branches))
+						&& (tags == null || project.isCommitOnTags(commitId, tags))) {
 					Long buildId = event.getBuild().getId();
 					
 					/* 

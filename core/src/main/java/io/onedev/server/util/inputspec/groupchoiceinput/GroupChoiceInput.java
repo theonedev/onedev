@@ -9,6 +9,7 @@ import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.groupchoiceinput.choiceprovider.AllGroups;
@@ -106,15 +107,13 @@ public class GroupChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public boolean onDeleteGroup(String groupName) {
-		if (super.onDeleteGroup(groupName))
-			return true;
+	public Usage onDeleteGroup(String groupName) {
 		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
 			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
 			if (specifiedDefaultValue.getValue().equals(groupName))
-				defaultValueProvider = null; 
+				defaultValueProvider = null;
 		}
-		return false;
+		return new Usage();
 	}
 	
 }

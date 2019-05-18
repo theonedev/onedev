@@ -27,6 +27,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.OrCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.IssueChoiceInput;
@@ -435,16 +436,8 @@ public class GlobalIssueSetting implements Serializable {
 			}
 		}
 		
-		Set<String> deletedFields = new HashSet<>();
-		for (Iterator<InputSpec> it = getFieldSpecs().iterator(); it.hasNext();) {
-			InputSpec field = it.next();
-			if (field.onDeleteInput(fieldName)) {
-				it.remove();
-				deletedFields.add(field.getName());
-			}
-		}
-		for (String deletedField: deletedFields)
-			onDeleteField(deletedField);
+		for (InputSpec field: getFieldSpecs())
+			field.onDeleteInput(fieldName);
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
@@ -456,27 +449,21 @@ public class GlobalIssueSetting implements Serializable {
 			board.onRenameUser(this, oldName, newName);
 	}
 	
-	public void onDeleteUser(String userName) {
-		for (Iterator<TransitionSpec> it = getDefaultTransitionSpecs().iterator(); it.hasNext();) {
-			TransitionSpec transition = it.next();
-			if (transition.onDeleteUser(userName))
+	public Usage onDeleteUser(String userName) {
+		Usage usage = new Usage();
+		for (TransitionSpec transition: getDefaultTransitionSpecs())
+			usage.add(transition.onDeleteUser(userName));
+		for (Iterator<BoardSpec> it = getDefaultBoardSpecs().iterator(); it.hasNext();) { 
+			Usage usageInBoard = it.next().onDeleteUser(this, userName);
+			if (usageInBoard != null)
+				usage.add(usageInBoard);
+			else
 				it.remove();
 		}
-		for (Iterator<BoardSpec> it = getDefaultBoardSpecs().iterator(); it.hasNext();) {
-			if (it.next().onDeleteUser(this, userName))
-				it.remove();
-		}
+		for (InputSpec field: getFieldSpecs())
+			usage.add(field.onDeleteUser(userName));
 		
-		Set<String> deletedFields = new HashSet<>();
-		for (Iterator<InputSpec> it = getFieldSpecs().iterator(); it.hasNext();) {
-			InputSpec field = it.next();
-			if (field.onDeleteUser(userName)) {
-				it.remove();
-				deletedFields.add(field.getName());
-			}
-		}
-		for (String deletedField: deletedFields)
-			onDeleteField(deletedField);
+		return usage.prefix("issue setting");
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
@@ -486,22 +473,15 @@ public class GlobalIssueSetting implements Serializable {
 			field.onRenameGroup(oldName, newName);
 	}
 	
-	public void onDeleteGroup(String groupName) {
-		for (Iterator<TransitionSpec> it = getDefaultTransitionSpecs().iterator(); it.hasNext();) {
-			TransitionSpec transition = it.next();
-			if (transition.onDeleteGroup(groupName))
-				it.remove();
-		}
-		Set<String> deletedFields = new HashSet<>();
-		for (Iterator<InputSpec> it = getFieldSpecs().iterator(); it.hasNext();) {
-			InputSpec field = it.next();
-			if (field.onDeleteGroup(groupName)) {
-				it.remove();
-				deletedFields.add(field.getName());
-			}
-		}
-		for (String deletedField: deletedFields)
-			onDeleteField(deletedField);
+	public Usage onDeleteGroup(String groupName) {
+		Usage usage = new Usage();
+		for (TransitionSpec transition: getDefaultTransitionSpecs())
+			usage.add(transition.onDeleteGroup(groupName));
+		
+		for (InputSpec field: getFieldSpecs())
+			usage.add(field.onDeleteGroup(groupName));
+		
+		return usage.prefix("issue setting");
 	}
 	
 	public StateSpec getInitialStateSpec() {

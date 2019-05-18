@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatcher.Anyone;
 import io.onedev.server.util.usermatcher.UserMatcher;
@@ -91,26 +92,30 @@ public class TagProtection implements Serializable {
 		submitter = UserMatcher.onRenameGroup(submitter, oldName, newName);
 	}
 	
-	public boolean onDeleteGroup(String groupName) {
-		submitter = UserMatcher.onDeleteGroup(submitter, groupName);
-		return false;
+	public Usage onDeleteGroup(String groupName) {
+		Usage usage = new Usage();
+		if (UserMatcher.isUsingGroup(submitter, groupName))
+			usage.add("if performed by");
+		return usage.prefix("tag protection '" + getTags() + "'");
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
 		submitter = UserMatcher.onRenameUser(submitter, oldName, newName);
 	}
 	
-	public boolean onDeleteUser(String userName) {
-		submitter = UserMatcher.onDeleteUser(submitter, userName);
-		return false;
+	public Usage onDeleteUser(String userName) {
+		Usage usage = new Usage();
+		if (UserMatcher.isUsingUser(submitter, userName))
+			usage.add("if performed by");
+		return usage.prefix("tag protection '" + getTags() + "'");
 	}
 
-	public boolean onTagDeleted(String tagName) {
+	public Usage getTagUsage(String tagName) {
+		Usage usage = new Usage();
 		PatternSet patternSet = PatternSet.fromString(getTags());
-		patternSet.getIncludes().remove(tagName);
-		patternSet.getExcludes().remove(tagName);
-		setTags(patternSet.toString());
-		return getTags().length() == 0;
+		if (patternSet.getIncludes().contains(tagName) || patternSet.getExcludes().contains(tagName))
+			usage.add("tag protection '" + getTags() + "'");
+		return usage;
 	}
 	
 }

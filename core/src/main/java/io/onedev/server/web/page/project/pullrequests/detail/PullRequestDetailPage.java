@@ -65,6 +65,7 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -969,8 +970,15 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 					target.add(hint);
 					target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
 				} else {
-					operation.operate(request, noteInput.getModelObject());
-					setResponsePage(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest(), position));
+					try {
+						operation.operate(request, noteInput.getModelObject());
+						setResponsePage(PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(getPullRequest(), position));
+					} catch (OneException e) {
+						error(e.getMessage());
+						target.add(feedback);
+						target.add(hint);
+						target.appendJavaScript("setTimeout(function() {$(window).resize();}, 0);");
+					}
 				}
 			}
 

@@ -21,10 +21,13 @@ import io.onedev.server.model.support.issue.transitionprerequisite.TransitionPre
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsNotAnyOf;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsOneOf;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueMatcher;
+import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
+import io.onedev.server.model.support.issue.transitiontrigger.PullRequestTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.TransitionTrigger;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
@@ -136,13 +139,39 @@ public class TransitionSpec implements Serializable {
 		}
 	}
 	
-	public boolean onDeleteUser(String userName) {
+	public Usage onDeleteBranch(String branchName) {
+		Usage usage = new Usage();
+		TransitionTrigger trigger = getTrigger();
+		if (trigger instanceof BuildSuccessfulTrigger) {
+			BuildSuccessfulTrigger buildSuccessful = (BuildSuccessfulTrigger) trigger;
+			usage.add(buildSuccessful.onDeleteBranch(branchName).prefix("build successful trigger"));
+		} else if (trigger instanceof PullRequestTrigger) {
+			PullRequestTrigger pullRequestTrigger = (PullRequestTrigger) trigger;
+			if (pullRequestTrigger.getBranch().equals(branchName))
+				usage.add("pull request trigger: target branch");
+		}
+		return usage.prefix("transitions: " + fromStates + "->" + toState);
+	}
+	
+	public Usage onDeleteTag(String tagName) {
+		Usage usage = new Usage();
+		TransitionTrigger trigger = getTrigger();
+		if (trigger instanceof BuildSuccessfulTrigger) {
+			BuildSuccessfulTrigger buildSuccessful = (BuildSuccessfulTrigger) trigger;
+			usage.add(buildSuccessful.onDeleteTag(tagName).prefix("build successful trigger"));
+		}
+		return usage.prefix("transitions: " + fromStates + "->" + toState);
+	}
+	
+	public Usage onDeleteUser(String userName) {
+		Usage usage = new Usage();
 		TransitionTrigger trigger = getTrigger();
 		if (trigger instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			pressButton.setAuthorized(UserMatcher.onDeleteUser(pressButton.getAuthorized(), userName));
+			if (UserMatcher.isUsingUser(pressButton.getAuthorized(), userName))
+				usage.add("press button trigger: authorization");
 		}
-		return false;
+		return usage.prefix("transitions: " + fromStates + "->" + toState);
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
@@ -153,13 +182,15 @@ public class TransitionSpec implements Serializable {
 		}
 	}
 	
-	public boolean onDeleteGroup(String groupName) {
+	public Usage onDeleteGroup(String groupName) {
+		Usage usage = new Usage();
 		TransitionTrigger trigger = getTrigger();
 		if (trigger instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			pressButton.setAuthorized(UserMatcher.onDeleteGroup(pressButton.getAuthorized(), groupName));
+			if (UserMatcher.isUsingGroup(pressButton.getAuthorized(), groupName))
+				usage.add("press button trigger: authorization");
 		}
-		return false;
+		return usage.prefix("transitions: " + fromStates + "->" + toState);
 	}
 	
 	public void onRenameState(String oldName, String newName) {

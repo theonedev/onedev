@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -13,6 +14,8 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.unbescape.javascript.JavaScriptEscape;
 
+import io.onedev.commons.utils.HtmlUtils;
+import io.onedev.server.OneException;
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
@@ -42,13 +45,21 @@ abstract class ConfirmActionPanel extends Panel {
 			}
 			
 		}));
+
+		add(new FencedFeedbackPanel("feedback", this).setEscapeModelStrings(false));
+		
 		add(new WebMarkupContainer("input").setVisible(getConfirmInput() != null));
 		
 		add(new PreventDefaultAjaxLink<Void>("ok") {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				onConfirm(target);
+				try {
+					onConfirm(target);
+				} catch (OneException e) {
+					error(HtmlUtils.formatAsHtml(e.getMessage()));
+					target.add(ConfirmActionPanel.this);
+				}
 			}
 			
 		});

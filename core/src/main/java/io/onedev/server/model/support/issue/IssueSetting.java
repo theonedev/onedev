@@ -16,6 +16,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution.FixType;
@@ -124,19 +125,40 @@ public class IssueSetting implements Serializable {
 		}
 	}
 
-	public void onDeleteUser(String userName) {
+	public Usage onDeleteBranch(String branchName) {
+		Usage usage = new Usage();
 		if (transitionSpecs != null) {
-			for (Iterator<TransitionSpec> it = transitionSpecs.iterator(); it.hasNext();) {
-				if (it.next().onDeleteUser(userName))
-					it.remove();
-			}
+			for (TransitionSpec transitionSpec: transitionSpecs)
+				usage.add(transitionSpec.onDeleteBranch(branchName));
+		}
+		return usage.prefix("issue setting");
+	}
+	
+	public Usage onDeleteTag(String tagName) {
+		Usage usage = new Usage();
+		if (transitionSpecs != null) {
+			for (TransitionSpec transitionSpec: transitionSpecs)
+				usage.add(transitionSpec.onDeleteTag(tagName));
+		}
+		return usage.prefix("issue setting");
+	}
+	
+	public Usage onDeleteUser(String userName) {
+		Usage usage = new Usage();
+		if (transitionSpecs != null) {
+			for (TransitionSpec transition: transitionSpecs) 
+				usage.add(transition.onDeleteUser(userName));
 		}
 		if (boardSpecs != null) {
-			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) {
-				if (it.next().onDeleteUser(getGlobalSetting(), userName))
+			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) { 
+				Usage usageInBoard = it.next().onDeleteUser(getGlobalSetting(), userName);
+				if (usageInBoard != null)
+					usage.add(usageInBoard);
+				else
 					it.remove();
 			}
 		}
+		return usage.prefix("issue setting");
 	}
 
 	public void onRenameGroup(String oldName, String newName) {
@@ -146,13 +168,13 @@ public class IssueSetting implements Serializable {
 		}
 	}
 
-	public void onDeleteGroup(String groupName) {
+	public Usage onDeleteGroup(String groupName) {
+		Usage usage = new Usage();
 		if (transitionSpecs != null) {
-			for (Iterator<TransitionSpec> it = transitionSpecs.iterator(); it.hasNext();) {
-				if (it.next().onDeleteGroup(groupName))
-					it.remove();
-			}
+			for (TransitionSpec transition: transitionSpecs) 
+				usage.add(transition.onDeleteGroup(groupName));
 		}
+		return usage.prefix("issue setting");
 	}
 
 	public Collection<String> getUndefinedFields(Project project) {

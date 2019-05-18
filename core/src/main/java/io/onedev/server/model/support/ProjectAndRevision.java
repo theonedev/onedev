@@ -101,10 +101,6 @@ public class ProjectAndRevision implements Serializable {
 		return getRevision().equals(getProject().getDefaultBranch());
 	}
 
-	public void delete() {
-		getProject().deleteBranch(getRevision());
-	}
-	
 	public Project getProject() {
 		return OneDev.getInstance(ProjectManager.class).load(projectId);
 	}

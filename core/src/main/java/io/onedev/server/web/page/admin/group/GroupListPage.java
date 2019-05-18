@@ -11,6 +11,7 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColu
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
@@ -26,7 +27,9 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -95,6 +98,8 @@ public class GroupListPage extends AdministrationPage {
 			
 		});
 		
+		add(new FencedFeedbackPanel("feedback", this).setEscapeModelStrings(false));
+		
 		List<IColumn<Group, Void>> columns = new ArrayList<>();
 		
 		columns.add(new AbstractColumn<Group, Void>(Model.of("Name")) {
@@ -154,8 +159,12 @@ public class GroupListPage extends AdministrationPage {
 
 					@Override
 					public void onClick() {
-						OneDev.getInstance(GroupManager.class).delete(rowModel.getObject());
-						setResponsePage(GroupListPage.class);
+						try {
+							OneDev.getInstance(GroupManager.class).delete(rowModel.getObject());
+							setResponsePage(GroupListPage.class);
+						} catch (OneException e) {
+							getPage().error(HtmlUtils.formatAsHtml(e.getMessage()));
+						}
 					}
 
 					@Override

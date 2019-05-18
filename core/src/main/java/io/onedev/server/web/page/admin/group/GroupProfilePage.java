@@ -8,6 +8,7 @@ import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
@@ -15,7 +16,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.security.SecurityUtils;
@@ -130,11 +133,17 @@ public class GroupProfilePage extends GroupPage {
 
 				@Override
 				public void onClick() {
-					OneDev.getInstance(GroupManager.class).delete(getGroup());
-					setResponsePage(GroupListPage.class);
+					try {
+						OneDev.getInstance(GroupManager.class).delete(getGroup());
+						setResponsePage(GroupListPage.class);
+					} catch (OneException e) {
+						error(HtmlUtils.formatAsHtml(e.getMessage()));
+					}
 				}
 				
 			}.add(new ConfirmOnClick("Do you really want to delete group '" + getGroup().getName() + "'?")));
+			
+			form.add(new FeedbackPanel("feedback").setEscapeModelStrings(false));
 			
 			fragment.add(form);
 			add(fragment);

@@ -1,7 +1,5 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.Iterator;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -28,6 +26,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.Usage;
 
 @Singleton
 public class DefaultUserManager extends AbstractEntityManager<User> implements UserManager {
@@ -96,6 +95,20 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     @Transactional
     @Override
 	public void delete(User user) {
+    	Usage usage = new Usage();
+		for (Project project: projectManager.query()) {
+			for (BranchProtection protection: project.getBranchProtections()) 
+				usage.add(protection.onDeleteUser(user.getName()));
+			for (TagProtection protection: project.getTagProtections()) 
+				usage.add(protection.onDeleteUser(user.getName()));
+			usage.add(project.getIssueSetting().onDeleteUser(user.getName()));
+			usage.prefix("project '" + project.getName() + "': setting");
+		}
+
+		usage.add(settingManager.getIssueSetting().onDeleteUser(user.getName()).prefix("administration"));
+		
+		usage.checkInUse("User '" + user.getName() + "'");
+    	
     	Query<?> query = getSession().createQuery("update PullRequest set submitter=null, submitterName=:submitterName "
     			+ "where submitter=:submitter");
     	query.setParameter("submitter", user);
@@ -157,20 +170,6 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.executeUpdate();
     	
 		dao.remove(user);
-
-		for (Project project: projectManager.query()) {
-			for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) { 
-				if (it.next().onDeleteUser(project, user.getName()))
-					it.remove();
-			}
-			for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) { 
-				if (it.next().onDeleteUser(user.getName()))
-					it.remove();
-			}
-			project.getIssueSetting().onDeleteUser(user.getName());
-		}
-
-		settingManager.getIssueSetting().onDeleteUser(user.getName());
     }
 
 	@Sessional

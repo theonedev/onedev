@@ -61,16 +61,10 @@
 	background: #ccc;
 	border-radius: 2px 0 0 2px;
 }
-
-
 #searching-branches {
 	position: absolute; 
 	left: 50%; 
 	top: 250px; 
 	z-index: 100; 
 	display: none;
-}
-
-.confirm-delete-branch>.modal-body {
-	font-size: 16px;
 }

@@ -18,6 +18,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.inputspec.showcondition.ValueIsNotAnyOf;
@@ -266,10 +267,9 @@ public abstract class InputSpec implements Serializable {
 		}
 	}
 	
-	public boolean onDeleteInput(String inputName) {
+	public void onDeleteInput(String inputName) {
 		if (showCondition != null && showCondition.getInputName().equals(inputName))
 			showCondition = null;
-		return false;
 	}
 	
 	public static Class<?> defineClass(String className, Collection<InputSpec> inputs) {
@@ -312,12 +312,12 @@ public abstract class InputSpec implements Serializable {
 		
 	}
 
-	public boolean onDeleteUser(String userName) {
-		return false;
+	public Usage onDeleteUser(String userName) {
+		return new Usage();
 	}
 	
-	public boolean onDeleteGroup(String groupName) {
-		return false;
+	public Usage onDeleteGroup(String groupName) {
+		return new Usage();
 	}
 	
 	public abstract List<String> convertToStrings(@Nullable Object object);

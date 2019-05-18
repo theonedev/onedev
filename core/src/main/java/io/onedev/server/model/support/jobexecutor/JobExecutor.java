@@ -12,23 +12,19 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.Sets;
-
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.commons.utils.stringmatch.Matcher;
-import io.onedev.server.OneDev;
-import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.job.cache.JobCache;
-import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.annotation.ExecutorName;
+import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.annotation.ProjectPatterns;
+import io.onedev.server.web.editable.annotation.TagPatterns;
 
 @Editable
 public abstract class JobExecutor implements Serializable {
@@ -44,6 +40,8 @@ public abstract class JobExecutor implements Serializable {
 	private String projects;
 	
 	private String branches;
+	
+	private String tags;
 	
 	private String jobs;
 	
@@ -70,11 +68,11 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=10000, name="Applicable Projects", group="Job Match Settings",
-			description="Optionally specify space-separated projects applicable for this executor. Use * or ? for wildcard match. "
-					+ "Leave empty to match all projects")
+	@Editable(order=10000, name="Restricted Projects", group="Job Restrictions",
+			description="Optionally specify projects applicable for this executor. Use space to "
+					+ "separate multiple projects, and use * or ? for wildcard match")
 	@ProjectPatterns
-	@NameOfEmptyValue("All")
+	@NameOfEmptyValue("No restrictions")
 	public String getProjects() {
 		return projects;
 	}
@@ -83,12 +81,11 @@ public abstract class JobExecutor implements Serializable {
 		this.projects = projects;
 	}
 
-	@Editable(order=10100, name="Applicable Branches", group="Job Match Settings",
-			description="Optionally specify space-separated branches applicable for this executor. When run a job "
-					+ "against a particular commit, all branches able to reaching the commit will be checked. "
-					+ "Use * or ? for wildcard match. Leave empty to match all branches.")
-	@Patterns
-	@NameOfEmptyValue("All")
+	@Editable(order=10100, name="Restricted Branches", group="Job Restrictions",
+			description="Optionally specify branches the job should be running on in order to use this executor. "
+					+ "Use space to separate multiple projects, and use * or ? for wildcard match")
+	@BranchPatterns
+	@NameOfEmptyValue("No restrictions")
 	public String getBranches() {
 		return branches;
 	}
@@ -97,11 +94,24 @@ public abstract class JobExecutor implements Serializable {
 		this.branches = branches;
 	}
 
-	@Editable(order=10200, name="Applicable Jobs", group="Job Match Settings",
-			description="Optionally specify space-separated jobs applicable for this executor. Use * or ? for wildcard match. "
-					+ "Leave empty to match all jobs")
+	@Editable(order=10110, name="Restricted Tags", group="Job Restrictions",
+			description="Optionally specify tags the job should be running on in order to use this executor. "
+					+ "Use space to separate multiple projects, and use * or ? for wildcard match")
+	@TagPatterns
+	@NameOfEmptyValue("No restrictions")
+	public String getTags() {
+		return tags;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
+
+	@Editable(order=10200, name="Restricted Jobs", group="Job Restrictions",
+			description="Optionally specify jobs applicable for this executor. Use space to separate "
+					+ "multiple jobs, and use * or ? for wildcard match")
 	@Patterns
-	@NameOfEmptyValue("All")
+	@NameOfEmptyValue("No restrictions")
 	public String getJobs() {
 		return jobs;
 	}
@@ -110,11 +120,11 @@ public abstract class JobExecutor implements Serializable {
 		this.jobs = jobs;
 	}
 
-	@Editable(order=10300, name="Applicable Environments", group="Job Match Settings",
-			description="Optionally specify space-separated environments applicable for this executor. Use * or ? for wildcard match. "
-					+ "Leave empty to match all images")
+	@Editable(order=10300, name="Restricted Environments", group="Job Restrictions",
+			description="Optionally specify job environments applicable for this executor. Use space to "
+					+ "separate multiple environments, and use * or ? for wildcard match")
 	@Patterns
-	@NameOfEmptyValue("All")
+	@NameOfEmptyValue("No restrictions")
 	public String getEnvironments() {
 		return environments;
 	}
@@ -142,25 +152,31 @@ public abstract class JobExecutor implements Serializable {
 	public final boolean isApplicable(Project project, ObjectId commitId, String jobName, String environment) {
 		Matcher matcher = new ChildAwareMatcher();
 
-		if (isEnabled() 
+		return isEnabled() 
 				&& (getProjects() == null || PatternSet.fromString(getProjects()).matches(matcher, project.getName()))
 				&& (getJobs() == null || PatternSet.fromString(getJobs()).matches(matcher, jobName))
-				&& (getEnvironments() == null || PatternSet.fromString(getEnvironments()).matches(matcher, environment))) {
-			if (getBranches() == null)
-				return true;
-			
-			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-			Collection<ObjectId> descendants = commitInfoManager.getDescendants(project, Sets.newHashSet(commitId));
-			descendants.add(commitId);
-		
-			PatternSet branchPatterns = PatternSet.fromString(getBranches());
-			for (RefInfo ref: project.getBranches()) {
-				String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
-				if (descendants.contains(ref.getPeeledObj()) && branchPatterns.matches(matcher, branchName))
-					return true;
-			}
-		}
-		return false;
+				&& (getEnvironments() == null || PatternSet.fromString(getEnvironments()).matches(matcher, environment))
+				&& (getBranches() == null || project.isCommitOnBranches(commitId, getBranches())
+				&& (getTags() == null || project.isCommitOnTags(commitId, getTags())));
+	}
+	
+	public Usage getProjectUsage(String projectName) {
+		Usage usage = new Usage();
+		if (getProjects() != null) {
+			PatternSet patternSet = PatternSet.fromString(getProjects());
+			if (patternSet.getIncludes().contains(projectName) || patternSet.getExcludes().contains(projectName))
+				usage.add("restricted projects");
+		} 
+		return usage.prefix(getName()).prefix("job executor '" + getName() + "'");
+	}
+	
+	public void onProjectRenamed(String oldName, String newName) {
+		PatternSet patternSet = PatternSet.fromString(getProjects());
+		if (patternSet.getIncludes().remove(oldName))
+			patternSet.getIncludes().add(newName);
+		if (patternSet.getExcludes().remove(oldName))
+			patternSet.getExcludes().add(newName);
+		setProjects(patternSet.toString());
 	}
 	
 	public boolean hasCapacity() {

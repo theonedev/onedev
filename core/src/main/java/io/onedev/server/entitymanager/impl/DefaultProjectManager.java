@@ -18,7 +18,10 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.ConfigConstants;
@@ -32,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
@@ -41,6 +45,7 @@ import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.system.SystemStarted;
@@ -55,6 +60,9 @@ import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
 import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.support.jobexecutor.JobExecutor;
+import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -62,10 +70,12 @@ import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.MatrixRunner;
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.facade.GroupAuthorizationFacade;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserAuthorizationFacade;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.web.avatar.AvatarManager;
 
@@ -84,6 +94,14 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     
     private final AvatarManager avatarManager;
     
+    private final SettingManager settingManager;
+    
+    private final SessionManager sessionManager;
+    
+    private final TransactionManager transactionManager;
+    
+    private final ListenerRegistry listenerRegistry;
+    
     private final String gitReceiveHook;
     
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
@@ -91,7 +109,9 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     @Inject
     public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager,  
     		UserAuthorizationManager userAuthorizationManager, BuildManager buildManager, 
-    		CacheManager cacheManager, AvatarManager avatarManager) {
+    		CacheManager cacheManager, AvatarManager avatarManager, SettingManager settingManager, 
+    		TransactionManager transactionManager, SessionManager sessionManager, 
+    		ListenerRegistry listenerRegistry) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -99,6 +119,10 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
         this.buildManager = buildManager;
         this.cacheManager = cacheManager;
         this.avatarManager = avatarManager;
+        this.settingManager = settingManager;
+        this.transactionManager = transactionManager;
+        this.sessionManager = sessionManager;
+        this.listenerRegistry = listenerRegistry;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
@@ -147,12 +171,24 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     		authorization.setUser(SecurityUtils.getUser());
     		userAuthorizationManager.save(authorization);
            	checkSanity(project);
+    	} 
+       	
+    	if (oldName != null && !oldName.equals(project.getName())) {
+        	for (JobExecutor jobExecutor: settingManager.getJobExecutors())
+        		jobExecutor.onProjectRenamed(oldName, project.getName());
     	}
+    	
     }
     
     @Transactional
     @Override
     public void delete(Project project) {
+    	Usage usage = new Usage();
+    	for (JobExecutor jobExecutor: settingManager.getJobExecutors())
+    		usage.add(jobExecutor.getProjectUsage(project.getName()).prefix("administration"));
+    	
+    	usage.checkInUse("Project '" + project.getName() + "'");
+
     	for (Build build: project.getBuilds()) 
     		buildManager.delete(build);
     	
@@ -161,7 +197,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     	query.executeUpdate();
 
     	dao.remove(project);
-
+    	
     	synchronized (repositoryCache) {
 			Repository repository = repositoryCache.remove(project.getId());
 			if (repository != null) 
@@ -273,27 +309,121 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	}
 
 	@Transactional
-	@Listen
-	public void on(RefUpdated event) {
-		if (event.getNewCommitId().equals(ObjectId.zeroId())) {
-			Project project = event.getProject();
-			String branch = GitUtils.ref2branch(event.getRefName());
-			if (branch != null) {
-				for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) {
-					if (it.next().onBranchDeleted(branch))	
-						it.remove();
-				}
-			}
-			String tag = GitUtils.ref2tag(event.getRefName());
-			if (tag != null) {
-				for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) {
-					if (it.next().onTagDeleted(tag))	
-						it.remove();
-				}
-			}
+	@Override
+	public void onDeleteBranch(Project project, String branchName) {
+		Usage usage = new Usage();
+
+		for (Iterator<BranchProtection> it = project.getBranchProtections().iterator(); it.hasNext();) { 
+			BranchProtection protection = it.next();
+			PatternSet patternSet = PatternSet.fromString(protection.getBranches());
+			patternSet.getIncludes().remove(branchName);
+			patternSet.getExcludes().remove(branchName);
+			protection.setBranches(patternSet.toString());
+			if (protection.getBranches().length() == 0)
+				it.remove();
 		}
+		
+		usage.add(project.getIssueSetting().onDeleteBranch(branchName));
+		
+		usage.prefix("project setting").checkInUse("Branch '" + branchName + "'");
+	}
+	
+	@Transactional
+	@Override
+	public void deleteBranch(Project project, String branchName) {
+		onDeleteBranch(project, branchName);
+
+		String refName = GitUtils.branch2ref(branchName);
+    	ObjectId commitId = project.getObjectId(refName, true);
+    	try {
+			project.git().branchDelete().setForce(true).setBranchNames(branchName).call();
+		} catch (Exception e) {
+			throw ExceptionUtils.unchecked(e);
+		}
+    	
+    	Subject subject = SecurityUtils.getSubject();
+    	Long projectId = project.getId();
+    	transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+		    	sessionManager.runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						ThreadContext.bind(subject);
+						try {
+							Project project = load(projectId);
+							listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
+						} finally {
+							ThreadContext.unbindSubject();
+						}
+					}
+		    		
+		    	});
+			}
+    		
+    	});
+		
 	}
 
+	@Transactional
+	@Override
+	public void onDeleteTag(Project project, String tagName) {
+		Usage usage = new Usage();
+		for (Iterator<TagProtection> it = project.getTagProtections().iterator(); it.hasNext();) { 
+			TagProtection protection = it.next();
+			PatternSet patternSet = PatternSet.fromString(protection.getTags());
+			patternSet.getIncludes().remove(tagName);
+			patternSet.getExcludes().remove(tagName);
+			protection.setTags(patternSet.toString());
+			if (protection.getTags().length() == 0)
+				it.remove();
+		}
+		
+		usage.add(project.getIssueSetting().onDeleteTag(tagName));
+		
+		usage.prefix("project setting").checkInUse("Tag '" + tagName + "'");
+	}
+	
+	@Transactional
+	@Override
+	public void deleteTag(Project project, String tagName) {
+    	onDeleteTag(project, tagName);
+    	
+    	String refName = GitUtils.tag2ref(tagName);
+    	ObjectId commitId = project.getRevCommit(refName, true).getId();
+    	try {
+			project.git().tagDelete().setTags(tagName).call();
+		} catch (GitAPIException e) {
+			throw new RuntimeException(e);
+		}
+
+    	Subject subject = SecurityUtils.getSubject();
+    	Long projectId = project.getId();
+    	transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+		    	sessionManager.runAsync(new Runnable() {
+
+					@Override
+					public void run() {
+						ThreadContext.bind(subject);
+						try {
+							Project project = load(projectId);
+							listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
+						} finally {
+							ThreadContext.unbindSubject();
+						}
+					}
+		    		
+		    	});
+			}
+    		
+    	});
+	}
+	
 	@Override
 	public Collection<ProjectFacade> getAccessibleProjects(User user) {
 		Collection<ProjectFacade> projects = new HashSet<>();

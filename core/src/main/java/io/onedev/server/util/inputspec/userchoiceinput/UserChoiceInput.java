@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.GroupUsers;
@@ -84,15 +85,13 @@ public class UserChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public boolean onDeleteUser(String userName) {
-		if (super.onDeleteUser(userName))
-			return true;
+	public Usage onDeleteUser(String userName) {
 		if (defaultValueProvider instanceof SpecifiedDefaultValue) {
 			SpecifiedDefaultValue specifiedDefaultValue = (SpecifiedDefaultValue) defaultValueProvider;
 			if (specifiedDefaultValue.getValue().equals(userName))
 				defaultValueProvider = null;
 		}
-		return false;
+		return new Usage();
 	}
 
 	@Override
@@ -105,15 +104,14 @@ public class UserChoiceInput extends InputSpec {
 	}
 
 	@Override
-	public boolean onDeleteGroup(String groupName) {
-		if (super.onDeleteGroup(groupName))
-			return true;
+	public Usage onDeleteGroup(String groupName) {
+		Usage usage = new Usage();
 		if (choiceProvider instanceof GroupUsers) {
 			GroupUsers groupUsers = (GroupUsers) choiceProvider;
 			if (groupUsers.getGroupName().equals(groupName))
-				return true;
+				usage.add("available choices");
 		}
-		return false;
+		return usage.prefix("field '" + getName() + "'");
 	}
 	
 	@Override

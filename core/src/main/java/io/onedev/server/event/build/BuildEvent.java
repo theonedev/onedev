@@ -1,18 +1,15 @@
 package io.onedev.server.event.build;
 
-import java.util.Collection;
 import java.util.Date;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.server.event.BuildCommitsAware;
+import io.onedev.server.event.BuildCommitAware;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 
-public class BuildEvent extends ProjectEvent implements BuildCommitsAware {
+public class BuildEvent extends ProjectEvent implements BuildCommitAware {
 
 	private Build build;
 	
@@ -30,8 +27,8 @@ public class BuildEvent extends ProjectEvent implements BuildCommitsAware {
 	}
 
 	@Override
-	public Collection<ObjectId> getBuildCommits() {
-		return Sets.newHashSet(ObjectId.fromString(build.getCommitHash()));
+	public ObjectId getBuildCommit() {
+		return ObjectId.fromString(build.getCommitHash());
 	}
 
 }

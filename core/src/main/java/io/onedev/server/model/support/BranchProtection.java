@@ -2,7 +2,6 @@ package io.onedev.server.model.support;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -13,6 +12,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.server.ci.JobDependency;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usermatcher.Anyone;
@@ -126,8 +126,8 @@ public class BranchProtection implements Serializable {
 		this.jobDependencies = jobDependencies;
 	}
 
-	@Editable(order=700, description="Optionally specify additional users to review particular paths. For each changed file, "
-			+ "the first matched file protection setting will be used")
+	@Editable(order=700, description="Optionally specify additional users to review "
+			+ "particular paths. For each changed file, the first matched file protection setting will be used")
 	@NotNull(message="may not be empty")
 	public List<FileProtection> getFileProtections() {
 		return fileProtections;
@@ -156,20 +156,20 @@ public class BranchProtection implements Serializable {
 		}
 	}
 	
-	public boolean onDeleteGroup(String groupName) {
-		submitter = UserMatcher.onDeleteGroup(submitter, groupName);
-		reviewRequirement = ReviewRequirement.onDeleteGroup(reviewRequirement, groupName);
+	public Usage onDeleteGroup(String groupName) {
+		Usage usage = new Usage();
+		if (UserMatcher.isUsingGroup(submitter, groupName))
+			usage.add("if submitted by");
+		if (ReviewRequirement.isUsingGroup(reviewRequirement, groupName))
+			usage.add("required reviewers");
 
-		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
-			FileProtection protection = it.next();
-			String reviewRequirement = ReviewRequirement.onDeleteGroup(protection.getReviewRequirement(), groupName);
-			if (reviewRequirement != null)
-				protection.setReviewRequirement(reviewRequirement);
-			else
-				it.remove();
+		for (FileProtection protection: getFileProtections()) {
+			if (ReviewRequirement.isUsingGroup(protection.getReviewRequirement(), groupName)) {
+				usage.add("file protections");
+				break;
+			}
 		}
-		
-		return false;
+		return usage.prefix("branch protection '" + getBranches() + "'");
 	}
 	
 	public void onRenameUser(Project project, String oldName, String newName) {
@@ -182,27 +182,20 @@ public class BranchProtection implements Serializable {
 		}	
 	}
 	
-	public boolean onDeleteUser(Project project, String userName) {
-		submitter = UserMatcher.onDeleteUser(submitter, userName);
-		reviewRequirement = ReviewRequirement.onDeleteUser(reviewRequirement, userName);
+	public Usage onDeleteUser(String userName) {
+		Usage usage = new Usage();
+		if (UserMatcher.isUsingUser(submitter, userName))
+			usage.add("if submitted by");
+		if (ReviewRequirement.isUsingUser(reviewRequirement, userName))
+			usage.add("required reviewers");
 
-		for (Iterator<FileProtection> it = getFileProtections().iterator(); it.hasNext();) {
-			FileProtection protection = it.next();
-			String reviewRequirement = ReviewRequirement.onDeleteUser(protection.getReviewRequirement(), userName);
-			if (reviewRequirement != null)
-				protection.setReviewRequirement(reviewRequirement);
-			else
-				it.remove();
+		for (FileProtection protection: getFileProtections()) {
+			if (ReviewRequirement.isUsingUser(protection.getReviewRequirement(), userName)) {
+				usage.add("file protections");
+				break;
+			}
 		}
-		return false;
+		return usage.prefix("branch protection '" + getBranches() + "'");
 	}
 	
-	public boolean onBranchDeleted(String branchName) {
-		PatternSet patternSet = PatternSet.fromString(getBranches());
-		patternSet.getIncludes().remove(branchName);
-		patternSet.getExcludes().remove(branchName);
-		setBranches(patternSet.toString());
-		return getBranches().length() == 0;
-	}
-
 }

@@ -15,7 +15,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 public class FileProtection implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	private String paths;
 	
 	private String reviewRequirement;

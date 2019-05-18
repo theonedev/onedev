@@ -66,7 +66,7 @@ class OutcomeListEditPanel extends PropertyEditor<List<Serializable>> {
 
 					@Override
 					protected void onSave(AjaxRequestTarget target) {
-						markDirty(target);
+						markFormDirty(target);
 						modal.close();
 						onPropertyUpdating(target);
 						target.add(OutcomeListEditPanel.this);
@@ -97,7 +97,7 @@ class OutcomeListEditPanel extends PropertyEditor<List<Serializable>> {
 
 							@Override
 							protected void onSave(AjaxRequestTarget target) {
-								markDirty(target);
+								markFormDirty(target);
 								modal.close();
 								onPropertyUpdating(target);
 								target.add(OutcomeListEditPanel.this);
@@ -131,7 +131,7 @@ class OutcomeListEditPanel extends PropertyEditor<List<Serializable>> {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						markDirty(target);
+						markFormDirty(target);
 						outcomes.remove(rowModel.getObject());
 						onPropertyUpdating(target);
 						target.add(OutcomeListEditPanel.this);
@@ -180,19 +180,8 @@ class OutcomeListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 			
 		}.sortable("tbody"));
-		
-		setOutputMarkupId(true);		
 	}
 
-	private void markDirty(AjaxRequestTarget target) {
-		String script = String.format(""
-				+ "var $form = $('#%s').closest('form');"
-				+ "if ($form.closest('.blob-edit').length == 0)"
-				+ "  onedev.server.form.markDirty($form);", 
-				getMarkupId());
-		target.prependJavaScript(script);
-	}
-	
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);

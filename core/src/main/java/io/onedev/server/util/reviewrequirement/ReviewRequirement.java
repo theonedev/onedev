@@ -1,7 +1,6 @@
 package io.onedev.server.util.reviewrequirement;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -145,16 +144,6 @@ public class ReviewRequirement {
 		return reviewRequirement.toString();
 	}
 
-	@Nullable
-	public static String onDeleteGroup(String reviewRequirementString, String groupName) {
-		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
-		for (Iterator<Map.Entry<Group, Integer>> it = reviewRequirement.getGroups().entrySet().iterator(); it.hasNext();) {
-			if (it.next().getKey().getName().equals(groupName))
-				it.remove();
-		}
-		return reviewRequirement.toString();
-	}
-	
 	public static String onRenameUser(String reviewRequirementString, String oldName, String newName) {
 		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
 		for (User user: reviewRequirement.getUsers()) {
@@ -164,13 +153,22 @@ public class ReviewRequirement {
 		return reviewRequirement.toString();
 	}
 	
-	public static String onDeleteUser(String reviewRequirementString, String userName) {
+	public static boolean isUsingUser(String reviewRequirementString, String userName) {
 		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
-		for (Iterator<User> it = reviewRequirement.getUsers().iterator(); it.hasNext();) {
-			if (it.next().getName().equals(userName))
-				it.remove();
+		for (User user: reviewRequirement.getUsers()) {
+			if (user.getName().equals(userName))
+				return true;
 		}
-		return reviewRequirement.toString();
+		return false;
+	}
+	
+	public static boolean isUsingGroup(String reviewRequirementString, String groupName) {
+		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
+		for (Group group: reviewRequirement.getGroups().keySet()) {
+			if (group.getName().equals(groupName))
+				return true;
+		}
+		return false;
 	}
 	
 	@Nullable

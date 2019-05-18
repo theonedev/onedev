@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
@@ -80,7 +82,7 @@ public class PatternSet implements Serializable {
 		return files;
 	}
 	
-	public static PatternSet fromString(String patternSetString) {
+	public static PatternSet fromString(@Nullable String patternSetString) {
 		Set<String> includes = new HashSet<>();
 		Set<String> excludes = new HashSet<>();
 		

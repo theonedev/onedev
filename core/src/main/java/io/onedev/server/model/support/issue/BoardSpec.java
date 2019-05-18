@@ -23,6 +23,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
@@ -319,7 +320,8 @@ public class BoardSpec implements Serializable {
 		}
 	}
 
-	public boolean onDeleteUser(GlobalIssueSetting issueSetting, String userName) {
+	@Nullable
+	public Usage onDeleteUser(GlobalIssueSetting issueSetting, String userName) {
 		InputSpec fieldSpec = issueSetting.getFieldSpec(getIdentifyField());
 		if (fieldSpec instanceof UserChoiceInput) {
 			for (Iterator<String> it = getColumns().iterator(); it.hasNext();) {
@@ -327,7 +329,10 @@ public class BoardSpec implements Serializable {
 					it.remove();
 			}
 		}
-		return getColumns().size() < 2;
+		if (getColumns().size() < 2)
+			return null;
+		else
+			return new Usage();
 	}
 	
 	public void onRenameField(GlobalIssueSetting issueSetting, String oldName, String newName) {

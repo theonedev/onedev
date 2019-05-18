@@ -8,7 +8,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 public abstract class PullRequestTrigger implements TransitionTrigger {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	private String branch;
 	
 	@Editable(name="Target Branch")
