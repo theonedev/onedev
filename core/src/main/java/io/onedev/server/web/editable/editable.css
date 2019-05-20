@@ -66,6 +66,10 @@
     margin-bottom: 0;
 }
 
+.property-editor>.bean-list>table>tbody>tr>td.actions {
+    font-size: 18px;
+}
+
 .property-editor>.polymorphic-list>table>tbody>tr>td {
     border-top: 2px solid #BBB;
     padding-top: 20px;

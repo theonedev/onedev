@@ -43,7 +43,9 @@ public class StringChoiceProvider extends ChoiceProvider<String> {
 
 	@Override
 	public Collection<String> toChoices(Collection<String> ids) {
-		return ids;
+		Collection<String> choices = new ArrayList<>(ids);
+		choices.retainAll(choicesModel.getObject().keySet());
+		return choices;
 	}
 
 	@Override

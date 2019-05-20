@@ -12,6 +12,7 @@
  */
 package io.onedev.server.web.component.select2;
 
+import java.util.Collection;
 import java.util.Collections;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -60,24 +61,22 @@ public class Select2Choice<T> extends AbstractSelect2Choice<T, T> {
 	public void convertInput() {
 
 		String input = getWebRequest().getRequestParameters().getParameterValue(getInputName()).toString();
+		
 		if (Strings.isEmpty(input)) {
 			setConvertedInput(null);
 		} else {
-			setConvertedInput(getProvider().toChoices(Collections.singleton(input)).iterator().next());
+			Collection<T> choices = getProvider().toChoices(Collections.singleton(input));
+			if (choices.isEmpty())
+				setConvertedInput(null);
+			else
+				setConvertedInput(choices.iterator().next());
 		}
 	}
 
 	@Override
 	protected void renderInitializationScript(IHeaderResponse response) {
-
-		T value;
-		if (getWebRequest().getRequestParameters().getParameterNames().contains(getInputName())) {
-			convertInput();
-			value = getConvertedInput();
-		} else {
-			value = getModelObject();
-		}
-
+		T value = getModelObject();
+		
 		if (value != null) {
 
 			JsonBuilder selection = new JsonBuilder();
@@ -91,6 +90,8 @@ public class Select2Choice<T> extends AbstractSelect2Choice<T, T> {
 			}
 			response.render(OnLoadHeaderItem.forScript(
 					JQuery.execute("$('#%s').select2('data', %s);", getJquerySafeMarkupId(), selection.toJson())));
+		} else {
+			clearInput();
 		}
 	}
 }

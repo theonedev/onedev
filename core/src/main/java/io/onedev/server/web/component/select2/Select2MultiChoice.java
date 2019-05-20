@@ -105,13 +105,7 @@ public class Select2MultiChoice<T> extends AbstractSelect2Choice<T, Collection<T
 	@Override
 	protected void renderInitializationScript(IHeaderResponse response) {
 		response.render(JavaScriptHeaderItem.forReference(new DragSortResourceReference()));
-		Collection<? extends T> choices;
-		if (getWebRequest().getRequestParameters().getParameterNames().contains(getInputName())) {
-			convertInput();
-			choices = getConvertedInput();
-		} else {
-			choices = getModelObject();
-		}
+		Collection<? extends T> choices = getModelObject();
 
 		if (choices != null && !choices.isEmpty()) {
 
@@ -131,6 +125,8 @@ public class Select2MultiChoice<T> extends AbstractSelect2Choice<T, Collection<T
 
 			response.render(OnLoadHeaderItem.forScript(
 					JQuery.execute("$('#%s').select2('data', %s);", getJquerySafeMarkupId(), selection.toJson())));
+		} else {
+			clearInput();
 		}
 		String script = String.format("onedev.server.select2DragSort.onWindowLoad('%s');", getMarkupId());
 		response.render(OnLoadHeaderItem.forScript(script));
