@@ -24,7 +24,6 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.annotation.ProjectPatterns;
-import io.onedev.server.web.editable.annotation.TagPatterns;
 
 @Editable
 public abstract class JobExecutor implements Serializable {
@@ -40,8 +39,6 @@ public abstract class JobExecutor implements Serializable {
 	private String projects;
 	
 	private String branches;
-	
-	private String tags;
 	
 	private String jobs;
 	
@@ -68,11 +65,10 @@ public abstract class JobExecutor implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=10000, name="Restricted Projects", group="Job Restrictions",
-			description="Optionally specify projects applicable for this executor. Use space to "
-					+ "separate multiple projects, and use * or ? for wildcard match")
+	@Editable(order=10000, name="Applicable Projects", group="Job Applicability",
+			description="Optionally specify space-separated projects applicable for this executor. Use * or ? for wildcard match")
 	@ProjectPatterns
-	@NameOfEmptyValue("No restrictions")
+	@NameOfEmptyValue("All")
 	public String getProjects() {
 		return projects;
 	}
@@ -81,11 +77,10 @@ public abstract class JobExecutor implements Serializable {
 		this.projects = projects;
 	}
 
-	@Editable(order=10100, name="Restricted Branches", group="Job Restrictions",
-			description="Optionally specify branches the job should be running on in order to use this executor. "
-					+ "Use space to separate multiple projects, and use * or ? for wildcard match")
+	@Editable(order=10100, name="Applicable Branches", group="Job Applicability",
+			description="Optionally specify space-separated branches applicable for this executor. Use * or ? for wildcard match")
 	@BranchPatterns
-	@NameOfEmptyValue("No restrictions")
+	@NameOfEmptyValue("All")
 	public String getBranches() {
 		return branches;
 	}
@@ -94,24 +89,10 @@ public abstract class JobExecutor implements Serializable {
 		this.branches = branches;
 	}
 
-	@Editable(order=10110, name="Restricted Tags", group="Job Restrictions",
-			description="Optionally specify tags the job should be running on in order to use this executor. "
-					+ "Use space to separate multiple projects, and use * or ? for wildcard match")
-	@TagPatterns
-	@NameOfEmptyValue("No restrictions")
-	public String getTags() {
-		return tags;
-	}
-
-	public void setTags(String tags) {
-		this.tags = tags;
-	}
-
-	@Editable(order=10200, name="Restricted Jobs", group="Job Restrictions",
-			description="Optionally specify jobs applicable for this executor. Use space to separate "
-					+ "multiple jobs, and use * or ? for wildcard match")
+	@Editable(order=10200, name="Applicable Jobs", group="Job Applicability",
+			description="Optionally specify space-separated jobs applicable for this executor. Use * or ? for wildcard match")
 	@Patterns
-	@NameOfEmptyValue("No restrictions")
+	@NameOfEmptyValue("All")
 	public String getJobs() {
 		return jobs;
 	}
@@ -120,11 +101,10 @@ public abstract class JobExecutor implements Serializable {
 		this.jobs = jobs;
 	}
 
-	@Editable(order=10300, name="Restricted Environments", group="Job Restrictions",
-			description="Optionally specify job environments applicable for this executor. Use space to "
-					+ "separate multiple environments, and use * or ? for wildcard match")
+	@Editable(order=10300, name="Applicable Environments", group="Job Applicability",
+			description="Optionally specify space-separated job environments applicable for this executor. Use * or ? for wildcard match")
 	@Patterns
-	@NameOfEmptyValue("No restrictions")
+	@NameOfEmptyValue("All")
 	public String getEnvironments() {
 		return environments;
 	}
@@ -156,21 +136,20 @@ public abstract class JobExecutor implements Serializable {
 				&& (getProjects() == null || PatternSet.fromString(getProjects()).matches(matcher, project.getName()))
 				&& (getJobs() == null || PatternSet.fromString(getJobs()).matches(matcher, jobName))
 				&& (getEnvironments() == null || PatternSet.fromString(getEnvironments()).matches(matcher, environment))
-				&& (getBranches() == null || project.isCommitOnBranches(commitId, getBranches())
-				&& (getTags() == null || project.isCommitOnTags(commitId, getTags())));
+				&& (getBranches() == null || project.isCommitOnBranches(commitId, getBranches()));
 	}
 	
-	public Usage getProjectUsage(String projectName) {
+	public Usage onDeleteProject(String projectName) {
 		Usage usage = new Usage();
 		if (getProjects() != null) {
 			PatternSet patternSet = PatternSet.fromString(getProjects());
 			if (patternSet.getIncludes().contains(projectName) || patternSet.getExcludes().contains(projectName))
-				usage.add("restricted projects");
+				usage.add("applicable projects");
 		} 
 		return usage.prefix(getName()).prefix("job executor '" + getName() + "'");
 	}
 	
-	public void onProjectRenamed(String oldName, String newName) {
+	public void onRenameProject(String oldName, String newName) {
 		PatternSet patternSet = PatternSet.fromString(getProjects());
 		if (patternSet.getIncludes().remove(oldName))
 			patternSet.getIncludes().add(newName);

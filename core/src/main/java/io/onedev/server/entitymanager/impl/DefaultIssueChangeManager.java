@@ -212,12 +212,10 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 			if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
 				BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
 				String branches = trigger.getBranches();
-				String tags = trigger.getTags();
 				ObjectId commitId = ObjectId.fromString(event.getBuild().getCommitHash());
 				if (trigger.getJobName().equals(event.getBuild().getJobName()) 
 						&& event.getBuild().getStatus() == Build.Status.SUCCESSFUL
-						&& (branches == null || project.isCommitOnBranches(commitId, branches))
-						&& (tags == null || project.isCommitOnTags(commitId, tags))) {
+						&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
 					Long buildId = event.getBuild().getId();
 					
 					/* 

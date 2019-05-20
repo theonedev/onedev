@@ -8,7 +8,6 @@ import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.JobChoice;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.editable.annotation.TagPatterns;
 
 @Editable(order=400, name="Build fixing the issue is successful")
 public class BuildSuccessfulTrigger implements TransitionTrigger {
@@ -18,8 +17,6 @@ public class BuildSuccessfulTrigger implements TransitionTrigger {
 	private String jobName;
 	
 	private String branches;
-	
-	private String tags;
 	
 	@Editable(order=100, description="Specify job of the build")
 	@JobChoice
@@ -32,10 +29,10 @@ public class BuildSuccessfulTrigger implements TransitionTrigger {
 		this.jobName = jobName;
 	}
 
-	@Editable(order=200, name="Restricted Branches", description="Optionally specify branches the build should be "
-			+ "running on. Use space to separate multipe branches, and use * or ? for wildcard match")
+	@Editable(order=200, name="Applicable Branches", description="Optionally specify space-separated branches "
+			+ "applicable for this trigger. Use * or ? for wildcard match")
 	@BranchPatterns
-	@NameOfEmptyValue("No restriction")
+	@NameOfEmptyValue("All")
 	public String getBranches() {
 		return branches;
 	}
@@ -44,31 +41,11 @@ public class BuildSuccessfulTrigger implements TransitionTrigger {
 		this.branches = branches;
 	}
 	
-	@Editable(order=300, name="Restricted Tags", description="Optionally specify tags the build should be running on. "
-			+ "Use space to separate multipe tags, and use * or ? for wildcard match")
-	@TagPatterns
-	@NameOfEmptyValue("No restriction")
-	public String getTags() {
-		return tags;
-	}
-
-	public void setTags(String tags) {
-		this.tags = tags;
-	}
-	
 	public Usage onDeleteBranch(String branchName) {
 		Usage usage = new Usage();
 		PatternSet patternSet = PatternSet.fromString(getBranches());
 		if (patternSet.getIncludes().contains(branchName) || patternSet.getExcludes().contains(branchName))
-			usage.add("restricted branches");
-		return usage;
-	}
-	
-	public Usage onDeleteTag(String tagName) {
-		Usage usage = new Usage();
-		PatternSet patternSet = PatternSet.fromString(getTags());
-		if (patternSet.getIncludes().contains(tagName) || patternSet.getExcludes().contains(tagName))
-			usage.add("restricted tags");
+			usage.add("applicable branches");
 		return usage;
 	}
 	

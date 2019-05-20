@@ -347,7 +347,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 			@Override
 			public void component(PropertyEditor<Serializable> object, IVisit<PropertyEditor<Serializable>> visit) {
-				if (!object.getDescriptor().isPropertyExcluded())
+				if (!object.getDescriptor().isPropertyExcluded()) 
 					object.getDescriptor().setPropertyValue(bean, object.getConvertedInput());
 				visit.dontGoDeeper();
 			}

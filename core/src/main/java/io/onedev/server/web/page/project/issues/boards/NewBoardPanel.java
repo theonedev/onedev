@@ -49,6 +49,10 @@ abstract class NewBoardPanel extends Panel {
 							.addError("This name has already been used by another issue board in the project");
 				} 
 				if (!editor.hasErrors(true)){
+					board.getColumns().clear();
+					for (String column: board.getEditColumns()) 
+						board.getColumns().add(column.equals(BoardSpec.NULL_COLUMN)?null:column);
+					
 					boards.add(board);
 					getProject().getIssueSetting().setBoardSpecs(boards);
 					OneDev.getInstance(ProjectManager.class).save(getProject());

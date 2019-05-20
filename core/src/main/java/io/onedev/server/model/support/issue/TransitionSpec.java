@@ -153,16 +153,6 @@ public class TransitionSpec implements Serializable {
 		return usage.prefix("transitions: " + fromStates + "->" + toState);
 	}
 	
-	public Usage onDeleteTag(String tagName) {
-		Usage usage = new Usage();
-		TransitionTrigger trigger = getTrigger();
-		if (trigger instanceof BuildSuccessfulTrigger) {
-			BuildSuccessfulTrigger buildSuccessful = (BuildSuccessfulTrigger) trigger;
-			usage.add(buildSuccessful.onDeleteTag(tagName).prefix("build successful trigger"));
-		}
-		return usage.prefix("transitions: " + fromStates + "->" + toState);
-	}
-	
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
 		TransitionTrigger trigger = getTrigger();

@@ -36,7 +36,7 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		input = new StringSingleChoice("input", Model.of(getModelObject()), new LoadableDetachableModel<Map<String, String>>() {
+		IModel<Map<String, String>> choicesModel = new LoadableDetachableModel<Map<String, String>>() {
 
 			@Override
 			protected Map<String, String> load() {
@@ -64,7 +64,20 @@ public class SingleChoiceEditor extends PropertyEditor<String> {
 				return choices;
 			}
 			
-		}) {
+		};
+		
+		input = new StringSingleChoice("input", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				String selection = SingleChoiceEditor.this.getModelObject();
+				if (choicesModel.getObject().containsKey(selection))
+					return selection;
+				else
+					return null;
+			}
+			
+		}, choicesModel) {
 
 			@Override
 			protected void onInitialize() {

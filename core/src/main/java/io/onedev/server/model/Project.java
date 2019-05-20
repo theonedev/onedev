@@ -1156,7 +1156,7 @@ public class Project extends AbstractEntity {
 	public TagProtection getTagProtection(String tagName, User user) {
 		for (TagProtection protection: tagProtections) {
 			if (protection.isEnabled() 
-					&& UserMatcher.fromString(protection.getSubmitter()).matches(this, user)
+					&& UserMatcher.fromString(protection.getUser()).matches(this, user)
 					&& PatternSet.fromString(protection.getTags()).matches(new ChildAwareMatcher(), tagName)) {
 				return protection;
 			}
@@ -1168,7 +1168,7 @@ public class Project extends AbstractEntity {
 	public BranchProtection getBranchProtection(String branchName, @Nullable User user) {
 		for (BranchProtection protection: branchProtections) {
 			if (protection.isEnabled() 
-					&& UserMatcher.fromString(protection.getSubmitter()).matches(this, user) 
+					&& UserMatcher.fromString(protection.getUser()).matches(this, user) 
 					&& PatternSet.fromString(protection.getBranches()).matches(new ChildAwareMatcher(), branchName)) {
 				return protection;
 			}
@@ -1342,16 +1342,4 @@ public class Project extends AbstractEntity {
 		return false;
 	}
 
-	public boolean isCommitOnTags(ObjectId commitId, String tags) {
-		Matcher matcher = new ChildAwareMatcher();
-		PatternSet tagPatterns = PatternSet.fromString(tags);
-		for (RefInfo ref: getTags()) {
-			String tagName = Preconditions.checkNotNull(GitUtils.ref2tag(ref.getRef().getName()));
-			if (commitId.equals(ref.getPeeledObj()) && tagPatterns.matches(matcher, tagName))
-				return true;
-		}
-		return false;
-	}
-	
-	
 }

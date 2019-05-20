@@ -32,7 +32,7 @@ public class BranchProtection implements Serializable {
 	
 	private String branches;
 	
-	private String submitter = new Anyone().toString();
+	private String user = new Anyone().toString();
 	
 	private boolean noForcedPush = true;
 	
@@ -65,16 +65,15 @@ public class BranchProtection implements Serializable {
 		this.branches = branches;
 	}
 
-	@Editable(order=150, name="If Submitted By", description="This protection rule will apply "
-			+ "only if the change is submitted by specified users here")
+	@Editable(order=150, name="Applicable Users", description="Rule will apply only if the user changing the branch matches criteria specified here")
 	@io.onedev.server.web.editable.annotation.UserMatcher
 	@NotEmpty(message="may not be empty")
-	public String getSubmitter() {
-		return submitter;
+	public String getUser() {
+		return user;
 	}
 
-	public void setSubmitter(String submitter) {
-		this.submitter = submitter;
+	public void setUser(String user) {
+		this.user = user;
 	}
 
 	@Editable(order=200, description="Check this to not allow forced push")
@@ -147,7 +146,7 @@ public class BranchProtection implements Serializable {
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
-		submitter = UserMatcher.onRenameGroup(submitter, oldName, newName);
+		user = UserMatcher.onRenameGroup(user, oldName, newName);
 		reviewRequirement = ReviewRequirement.onRenameGroup(reviewRequirement, oldName, newName);
 		
 		for (FileProtection fileProtection: getFileProtections()) {
@@ -158,8 +157,8 @@ public class BranchProtection implements Serializable {
 	
 	public Usage onDeleteGroup(String groupName) {
 		Usage usage = new Usage();
-		if (UserMatcher.isUsingGroup(submitter, groupName))
-			usage.add("if submitted by");
+		if (UserMatcher.isUsingGroup(user, groupName))
+			usage.add("applicable users");
 		if (ReviewRequirement.isUsingGroup(reviewRequirement, groupName))
 			usage.add("required reviewers");
 
@@ -173,7 +172,7 @@ public class BranchProtection implements Serializable {
 	}
 	
 	public void onRenameUser(Project project, String oldName, String newName) {
-		submitter = UserMatcher.onRenameUser(submitter, oldName, newName);
+		user = UserMatcher.onRenameUser(user, oldName, newName);
 		reviewRequirement = ReviewRequirement.onRenameUser(reviewRequirement, oldName, newName);
 		
 		for (FileProtection fileProtection: getFileProtections()) {
@@ -184,8 +183,8 @@ public class BranchProtection implements Serializable {
 	
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (UserMatcher.isUsingUser(submitter, userName))
-			usage.add("if submitted by");
+		if (UserMatcher.isUsingUser(user, userName))
+			usage.add("applicable users");
 		if (ReviewRequirement.isUsingUser(reviewRequirement, userName))
 			usage.add("required reviewers");
 

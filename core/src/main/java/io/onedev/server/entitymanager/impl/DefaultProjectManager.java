@@ -175,7 +175,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
        	
     	if (oldName != null && !oldName.equals(project.getName())) {
         	for (JobExecutor jobExecutor: settingManager.getJobExecutors())
-        		jobExecutor.onProjectRenamed(oldName, project.getName());
+        		jobExecutor.onRenameProject(oldName, project.getName());
     	}
     	
     }
@@ -185,7 +185,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     public void delete(Project project) {
     	Usage usage = new Usage();
     	for (JobExecutor jobExecutor: settingManager.getJobExecutors())
-    		usage.add(jobExecutor.getProjectUsage(project.getName()).prefix("administration"));
+    		usage.add(jobExecutor.onDeleteProject(project.getName()).prefix("administration"));
     	
     	usage.checkInUse("Project '" + project.getName() + "'");
 
@@ -380,8 +380,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			if (protection.getTags().length() == 0)
 				it.remove();
 		}
-		
-		usage.add(project.getIssueSetting().onDeleteTag(tagName));
 		
 		usage.prefix("project setting").checkInUse("Tag '" + tagName + "'");
 	}

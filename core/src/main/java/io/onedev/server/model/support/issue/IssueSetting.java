@@ -134,15 +134,6 @@ public class IssueSetting implements Serializable {
 		return usage.prefix("issue setting");
 	}
 	
-	public Usage onDeleteTag(String tagName) {
-		Usage usage = new Usage();
-		if (transitionSpecs != null) {
-			for (TransitionSpec transitionSpec: transitionSpecs)
-				usage.add(transitionSpec.onDeleteTag(tagName));
-		}
-		return usage.prefix("issue setting");
-	}
-	
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
 		if (transitionSpecs != null) {
