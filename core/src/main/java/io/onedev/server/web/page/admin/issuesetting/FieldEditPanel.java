@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.ValidationException;
+
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -206,11 +208,9 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	}
 	
 	@Override
-	public String validateName(String inputName) {
+	public void validateName(String inputName) {
 		if (IssueConstants.ALL_FIELDS.contains(inputName))
-			return "'" + inputName + "' is reserved";
-		else
-			return null;
+			throw new ValidationException("'" + inputName + "' is reserved");
 	}
 	
 }

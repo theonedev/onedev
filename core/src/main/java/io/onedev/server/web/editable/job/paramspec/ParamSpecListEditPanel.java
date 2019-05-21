@@ -82,6 +82,20 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 		
 		List<IColumn<InputSpec, Void>> columns = new ArrayList<>();
 		
+		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+				cellItem.add(new Label(componentId, "<span class=\"drag-indicator fa fa-reorder\"></span>").setEscapeModelStrings(false));
+			}
+			
+			@Override
+			public String getCssClass() {
+				return "minimum actions";
+			}
+			
+		});		
+		
 		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Name")) {
 
 			@Override

@@ -68,6 +68,7 @@ import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMe
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
 import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
+import io.onedev.server.web.page.project.setting.secret.SecretListPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
@@ -269,7 +270,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), ""));
+						return new ViewStateAwarePageLink<Void>(linkId, ProjectBuildsPage.class, 
+								ProjectBuildsPage.paramsOf(getProject(), "", 0));
 					}
 				};
 			}
@@ -358,6 +360,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		tabs.add(new ProjectSettingTab("Authorizations", "fa fa-fw fa-user", ProjectAuthorizationsPage.class));
 		tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
 		tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));
+		tabs.add(new ProjectSettingTab("Secrets", "fa fa-fw fa-key", SecretListPage.class));
 		tabs.add(new ProjectSettingTab("Issue Setting", "fa fa-fw fa-bug", StateTransitionsPage.class, PromptFieldsUponIssueOpenSettingPage.class));
 		tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-comments", CommitMessageTransformPage.class));
 		tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", WebHooksPage.class));

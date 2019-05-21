@@ -1,6 +1,9 @@
 package io.onedev.server.web.component.beaneditmodal;
 
 import java.io.Serializable;
+import java.util.Collection;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -16,11 +19,8 @@ import io.onedev.server.web.editable.EditableUtils;
 @SuppressWarnings("serial")
 abstract class BeanEditContentPanel extends Panel {
 
-	private final Serializable bean;
-	
-	public BeanEditContentPanel(String id, Serializable bean) {
+	public BeanEditContentPanel(String id) {
 		super(id);
-		this.bean = bean;
 	}
 
 	@Override
@@ -38,16 +38,19 @@ abstract class BeanEditContentPanel extends Panel {
 		};
 		form.setOutputMarkupId(true);
 		
-		form.add(new Label("title", EditableUtils.getDisplayName(bean.getClass())));
+		if (getTitle() != null)
+			form.add(new Label("title", getTitle()));
+		else
+			form.add(new Label("title", EditableUtils.getDisplayName(getBean().getClass())));
 		
-		form.add(BeanContext.edit("editor", bean));
+		form.add(BeanContext.edit("editor", getBean(), getPropertyNames(), isExclude()));
 		
 		form.add(new AjaxButton("ok") {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				onSave(target, bean);
+				onSave(target, getBean());
 			}
 			
 		});
@@ -70,6 +73,15 @@ abstract class BeanEditContentPanel extends Panel {
 		add(form);
 	}
 
+	protected abstract Serializable getBean();
+	
+	protected abstract Collection<String> getPropertyNames();
+	
+	protected abstract boolean isExclude(); 
+	
+	@Nullable
+	protected abstract String getTitle();
+	
 	protected abstract void onSave(AjaxRequestTarget target, Serializable bean);
 	
 	protected abstract void onCancel(AjaxRequestTarget target);

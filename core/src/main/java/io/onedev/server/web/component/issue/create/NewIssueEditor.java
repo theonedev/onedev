@@ -148,7 +148,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 	}
 
 	@Override
-	public String validateName(String inputName) {
+	public void validateName(String inputName) {
 		throw new UnsupportedOperationException();
 	}
 	

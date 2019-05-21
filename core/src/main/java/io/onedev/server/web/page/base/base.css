@@ -416,6 +416,9 @@ input.search {
 	margin-bottom: 8px;
 }
 
+table>thead>tr>th.minimum, table>tbody>tr>td.minimum {
+    width: 1px;
+}
 table>tbody>tr>td.actions a {
 	color: #666;
 	margin-right: 8px;

@@ -10,7 +10,6 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.CacheManager;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
@@ -105,13 +104,11 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canModify(Project project, String branch, String file) {
-		return canWriteCode(project.getFacade()) && !OneDev.getInstance(ProjectManager.class)
-				.isModificationNeedsQualityCheck(getUser(), project, branch, file); 
+		return canWriteCode(project.getFacade()) && project.isModificationAllowed(getUser(), branch, file); 
 	}
 	
-	public static boolean canPush(Project project, String branchName, ObjectId oldObjectId, ObjectId newObjectId) {
-		return canWriteCode(project.getFacade()) && !OneDev.getInstance(ProjectManager.class)
-				.isPushNeedsQualityCheck(getUser(), project, branchName, oldObjectId, newObjectId, null); 
+	public static boolean canPush(Project project, String branch, ObjectId oldObjectId, ObjectId newObjectId) {
+		return canWriteCode(project.getFacade()) && project.isPushAllowed(getUser(), branch, oldObjectId, newObjectId, null); 
 	}
 	
 	public static boolean canAdministrate(UserFacade user) {

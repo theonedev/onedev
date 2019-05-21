@@ -90,7 +90,8 @@ public class ProjectBuildsPage extends ProjectPage {
 
 			@Override
 			protected Link<Void> newQueryLink(String componentId, NamedBuildQuery namedQuery) {
-				return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, ProjectBuildsPage.paramsOf(getProject(), namedQuery.getQuery()));
+				return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
+						ProjectBuildsPage.paramsOf(getProject(), namedQuery.getQuery(), 0));
 			}
 
 			@Override
@@ -120,7 +121,7 @@ public class ProjectBuildsPage extends ProjectPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getProject(), query);
+				PageParameters params = paramsOf(getProject(), query, 0);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -146,7 +147,7 @@ public class ProjectBuildsPage extends ProjectPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(ProjectBuildsPage.class, paramsOf(getProject(), query));
+				setResponsePage(ProjectBuildsPage.class, paramsOf(getProject(), query, 0));
 			}
 
 			@Override
@@ -214,10 +215,12 @@ public class ProjectBuildsPage extends ProjectPage {
 		
 	}
 	
-	public static PageParameters paramsOf(Project project, @Nullable String query) {
+	public static PageParameters paramsOf(Project project, @Nullable String query, int page) {
 		PageParameters params = paramsOf(project);
 		if (query != null)
 			params.add(PARAM_QUERY, query);
+		if (page != 0)
+			params.add(PARAM_CURRENT_PAGE, page);
 		return params;
 	}
 	

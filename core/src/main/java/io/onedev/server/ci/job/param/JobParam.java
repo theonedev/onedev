@@ -2,6 +2,7 @@ package io.onedev.server.ci.job.param;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,22 +13,30 @@ import javax.annotation.Nullable;
 import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.google.common.base.Joiner;
+import com.google.common.base.Preconditions;
 
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.SecretInput;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.PropertyDescriptor;
 
 public class JobParam implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String VALUE_SEPARATOR = "@@";
+	private static final String PARAM_BEAN_PREFIX = "JobParamBean";
 	
 	private String name;
+	
+	private boolean secret;
 	
 	private ValuesProvider valuesProvider = new SpecifiedValues();
 
@@ -47,6 +56,14 @@ public class JobParam implements Serializable {
 
 	public void setValuesProvider(ValuesProvider valuesProvider) {
 		this.valuesProvider = valuesProvider;
+	}
+
+	public boolean isSecret() {
+		return secret;
+	}
+
+	public void setSecret(boolean secret) {
+		this.secret = secret;
 	}
 
 	@Override
@@ -69,14 +86,6 @@ public class JobParam implements Serializable {
 			.append(valuesProvider)
 			.toHashCode();
 	}		
-	
-	@Nullable
-	public static String toString(List<String> strings) {
-		if (!strings.isEmpty())
-			return Joiner.on(VALUE_SEPARATOR).join(strings);
-		else
-			return null;
-	}
 	
 	public static void validateValues(List<List<String>> values) {
 		if (values.isEmpty())
@@ -150,6 +159,66 @@ public class JobParam implements Serializable {
 			paramMatrix.put(entry.getKey(), values);
 		}
 		return paramMatrix;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Class<? extends Serializable> defineBeanClass(Collection<InputSpec> paramSpecs) {
+		byte[] bytes = SerializationUtils.serialize((Serializable) paramSpecs);
+		String className = PARAM_BEAN_PREFIX + "_" + Hex.encodeHexString(bytes);
+		
+		List<InputSpec> paramSpecsCopy = new ArrayList<>(paramSpecs);
+		for (int i=0; i<paramSpecsCopy.size(); i++) {
+			InputSpec paramSpec = paramSpecsCopy.get(i);
+			if (paramSpec instanceof SecretInput) {
+				InputSpec paramSpecClone = (InputSpec) SerializationUtils.clone(paramSpec);
+				String description = paramSpecClone.getDescription();
+				if (description == null)
+					description = "";
+				description += String.format("<div style='margin-top: 12px;'><b>Note:</b> Secret less than %d characters "
+						+ "will not be masked in build log</div>", SecretInput.MASK.length());
+				paramSpecClone.setDescription(description);
+				paramSpecsCopy.set(i, paramSpecClone);
+			}
+		}
+		return (Class<? extends Serializable>) InputSpec.defineClass(className, "Build Parameters", paramSpecsCopy);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Nullable
+	public static Class<? extends Serializable> loadBeanClass(String className) {
+		if (className.startsWith(PARAM_BEAN_PREFIX)) {
+			byte[] bytes;
+			try {
+				bytes = Hex.decodeHex(className.substring(PARAM_BEAN_PREFIX.length()+1).toCharArray());
+			} catch (DecoderException e) {
+				throw new RuntimeException(e);
+			}
+			List<InputSpec> paramSpecs = (List<InputSpec>) SerializationUtils.deserialize(bytes);
+			return defineBeanClass(paramSpecs);
+		} else {
+			return null;
+		}
+	}
+
+	public static Map<String, List<String>> getParamMap(Job job, Object paramBean, Collection<String> paramNames) {
+		Map<String, List<String>> paramMap = new HashMap<>();
+		BeanDescriptor descriptor = new BeanDescriptor(paramBean.getClass());
+		for (List<PropertyDescriptor> groupProperties: descriptor.getProperties().values()) {
+			for (PropertyDescriptor property: groupProperties) {
+				if (paramNames.contains(property.getDisplayName()))	{
+					Object typedValue = property.getPropertyValue(paramBean);
+					InputSpec paramSpec = Preconditions.checkNotNull(job.getParamSpecMap().get(property.getDisplayName()));
+					List<String> values = new ArrayList<>();
+					for (String value: paramSpec.convertToStrings(typedValue)) {
+						if (paramSpec instanceof SecretInput)
+							value = SecretInput.LITERAL_VALUE_PREFIX + value;
+						values.add(value);
+					}
+					paramMap.put(paramSpec.getName(), values);
+				}
+			}
+		}
+		return paramMap;
 	}
 	
 }

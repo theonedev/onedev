@@ -85,16 +85,18 @@ public abstract class BuildSidePanel extends Panel {
 		});
 		
 		WebMarkupContainer general = new WebMarkupContainer("general");
-		general.add(new AjaxSelfUpdatingTimerBehavior(Duration.ONE_SECOND) {
+		if (!getBuild().isFinished()) {
+			general.add(new AjaxSelfUpdatingTimerBehavior(Duration.ONE_SECOND) {
 
-			@Override
-			protected void onPostProcessTarget(AjaxRequestTarget target) {
-				super.onPostProcessTarget(target);
-				if (getBuild().isFinished())
-					stop(target);
-			}
-			
-		});
+				@Override
+				protected void onPostProcessTarget(AjaxRequestTarget target) {
+					super.onPostProcessTarget(target);
+					if (getBuild().isFinished())
+						stop(target);
+				}
+				
+			});
+		}
 		general.setOutputMarkupId(true);
 		add(general);
 		
@@ -160,7 +162,8 @@ public abstract class BuildSidePanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getBuild().getQueueingDate() != null);
+				setVisible(getBuild().getQueueingDate() != null 
+						&& (!getBuild().isFinished() || getBuild().getRunningDate() != null));
 			}
 			
 		});
@@ -193,22 +196,24 @@ public abstract class BuildSidePanel extends Panel {
 			protected List<BuildParam> load() {
 				List<BuildParam> params = new ArrayList<>();
 				for (Map.Entry<String, Input> entry: getBuild().getParamInputs().entrySet()) {
-					if (entry.getValue().getValues().size() > 1) {
-						int i = 1;
-						for (String value: entry.getValue().getValues()) {
+					if (getBuild().isParamVisible(entry.getKey())) {
+						if (entry.getValue().getValues().size() > 1) {
+							int i = 1;
+							for (String value: entry.getValue().getValues()) {
+								BuildParam param = new BuildParam();
+								param.setName(entry.getKey() + "_" + (i++));
+								param.setType(entry.getValue().getType());
+								param.setValue(value);
+								params.add(param);
+							}
+						} else {
 							BuildParam param = new BuildParam();
-							param.setName(entry.getKey() + "_" + (i++));
+							param.setName(entry.getKey());
 							param.setType(entry.getValue().getType());
-							param.setValue(value);
+							if (entry.getValue().getValues().size() == 1)
+								param.setValue(entry.getValue().getValues().iterator().next());
 							params.add(param);
 						}
-					} else {
-						BuildParam param = new BuildParam();
-						param.setName(entry.getKey());
-						param.setType(entry.getValue().getType());
-						if (entry.getValue().getValues().size() == 1)
-							param.setValue(entry.getValue().getValues().iterator().next());
-						params.add(param);
 					}
 				}
 				return params;
@@ -238,7 +243,7 @@ public abstract class BuildSidePanel extends Panel {
 		add(dependencesContainer);
 		
 		Link<Void> dependentsLink = new BookmarkablePageLink<Void>("dependents", ProjectBuildsPage.class, 
-				ProjectBuildsPage.paramsOf(getProject(), "depends on " + BuildQuery.quote("#" + getBuild().getNumber())));
+				ProjectBuildsPage.paramsOf(getProject(), "depends on " + BuildQuery.quote("#" + getBuild().getNumber()), 0));
 		dependentsLink.setVisible(!getBuild().getDependents().isEmpty());
 		
 		if (getBuild().getDependents().size() > 1)
@@ -249,7 +254,7 @@ public abstract class BuildSidePanel extends Panel {
 		dependencesContainer.add(dependentsLink);
 		
 		Link<Void> dependenciesLink = new BookmarkablePageLink<Void>("dependencies", ProjectBuildsPage.class, 
-				ProjectBuildsPage.paramsOf(getProject(), "dependencies of " + BuildQuery.quote("#" + getBuild().getNumber())));
+				ProjectBuildsPage.paramsOf(getProject(), "dependencies of " + BuildQuery.quote("#" + getBuild().getNumber()), 0));
 		dependenciesLink.setVisible(!getBuild().getDependencies().isEmpty());
 		if (getBuild().getDependencies().size() > 1)
 			dependenciesLink.add(new Label("label", getBuild().getDependencies().size() + " builds"));

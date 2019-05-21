@@ -272,7 +272,7 @@ public abstract class InputSpec implements Serializable {
 			showCondition = null;
 	}
 	
-	public static Class<?> defineClass(String className, Collection<InputSpec> inputs) {
+	public static Class<?> defineClass(String className, String description, Collection<InputSpec> inputs) {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append("import org.apache.commons.lang3.SerializationUtils;\n");
 		buffer.append("import com.google.common.base.Optional;\n");
@@ -284,7 +284,7 @@ public abstract class InputSpec implements Serializable {
 		buffer.append("import javax.validation.constraints.*;\n");
 		buffer.append("import org.hibernate.validator.constraints.*;\n");
 		buffer.append("\n");
-		buffer.append("@Editable\n");
+		buffer.append("@Editable(name=").append("\"").append(description).append("\")\n");
 		buffer.append("class " + className + " implements java.io.Serializable {\n");
 		buffer.append("\n");
 		buffer.append("    private static final long serialVersionUID = 1L;\n");

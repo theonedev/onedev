@@ -46,7 +46,7 @@ public class Input implements Serializable {
 	public List<String> getValues() {
 		return values;
 	}
-
+	
 	@Override
 	public boolean equals(Object other) {
 		if (this == other) {

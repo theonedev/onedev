@@ -66,7 +66,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 			for (String each: excludedPropertiesAnnotation.value())
 				excludedProperties.add(each);
 		}
-		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(elementClass).getPropertyDescriptors().values()) {
+		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(elementClass).getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) {
 				if (!excludedProperties.contains(property.getPropertyName()))
 					propertyContexts.add(PropertyContext.of(property));
@@ -173,7 +173,7 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
-				add(new WebMarkupContainer("td").add(AttributeAppender.append("colspan", propertyContexts.size())));
+				add(new WebMarkupContainer("td").add(AttributeAppender.append("colspan", propertyContexts.size()+2)));
 				setOutputMarkupPlaceholderTag(true);
 			}
 

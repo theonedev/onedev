@@ -25,7 +25,6 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -73,10 +72,9 @@ public abstract class BlobViewPanel extends Panel {
 
 		Project project = context.getProject();
 		if (SecurityUtils.canWriteCode(project.getFacade()) && context.isOnBranch()) {
-			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 			User user = OneDev.getInstance(UserManager.class).getCurrent();
-			boolean needsQualityCheck = projectManager.isModificationNeedsQualityCheck(
-					user, project, context.getBlobIdent().revision, context.getBlobIdent().path);
+			boolean modificationAllowed = project.isModificationAllowed(
+					user, context.getBlobIdent().revision, context.getBlobIdent().path);
 
 			if (isEditSupported()) {
 				AjaxLink<Void> editLink = new ViewStateAwareAjaxLink<Void>("edit", true) {
@@ -100,10 +98,10 @@ public abstract class BlobViewPanel extends Panel {
 					}
 					
 				};
-				if (needsQualityCheck)
-					editLink.setEnabled(false);
-				else
+				if (modificationAllowed)
 					editLink.add(AttributeAppender.append("title", "Edit on branch " + context.getBlobIdent().revision));
+				else
+					editLink.setEnabled(false);
 				
 				changeActions.add(editLink);
 			} else {
@@ -132,10 +130,10 @@ public abstract class BlobViewPanel extends Panel {
 
 			};
 
-			if (needsQualityCheck)
-				deleteLink.setEnabled(false);
-			else
+			if (modificationAllowed)
 				deleteLink.add(AttributeAppender.append("title", "Delete from branch " + context.getBlobIdent().revision));
+			else
+				deleteLink.setEnabled(false);
 			
 			changeActions.add(deleteLink);
 			

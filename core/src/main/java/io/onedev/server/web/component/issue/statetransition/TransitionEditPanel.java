@@ -120,7 +120,7 @@ abstract class TransitionEditPanel extends Panel implements InputContext {
 	}
 	
 	@Override
-	public String validateName(String inputName) {
+	public void validateName(String inputName) {
 		throw new UnsupportedOperationException();
 	}
 	

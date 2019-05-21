@@ -1,5 +1,6 @@
 package io.onedev.server.ci.job.param;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -11,8 +12,10 @@ public class SpecifiedValues implements ValuesProvider {
 
 	public static final String DISPLAY_NAME = "Use specified values";
 	
-	private List<List<String>> values;
+	public static final String SECRET_DISPLAY_NAME = "Use specified secrets";
 
+	private List<List<String>> values = new ArrayList<>();
+	
 	@Override
 	public List<List<String>> getValues() {
 		return values;
@@ -39,6 +42,6 @@ public class SpecifiedValues implements ValuesProvider {
 		return new HashCodeBuilder(17, 37)
 			.append(values)
 			.toHashCode();
-	}		
-	
+	}
+
 }

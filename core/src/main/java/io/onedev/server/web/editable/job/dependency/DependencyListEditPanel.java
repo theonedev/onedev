@@ -110,6 +110,20 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 		
 		List<IColumn<JobDependency, Void>> columns = new ArrayList<>();
 		
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
+				cellItem.add(new Label(componentId, "<span class=\"drag-indicator fa fa-reorder\"></span>").setEscapeModelStrings(false));
+			}
+			
+			@Override
+			public String getCssClass() {
+				return "minimum actions";
+			}
+			
+		});		
+		
 		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Name")) {
 
 			@Override

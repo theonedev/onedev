@@ -728,8 +728,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		
 		for (JobDependency dependency: jobDependencies) {
 			Map<String, List<List<String>>> paramMatrix = new HashMap<>();
-			for (JobParam param: dependency.getJobParams())
+			Set<String> secretParamNames = new HashSet<>();
+			for (JobParam param: dependency.getJobParams()) {
 				paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
+				if (param.isSecret())
+					secretParamNames.add(param.getName());
+			}
 			
 			new MatrixRunner<List<String>>(paramMatrix) {
 				
@@ -747,7 +751,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					
 					Build build = null;
 					for (Build each: builds) {
-						if (each.getJobName().equals(dependency.getJobName()) && each.getParamMap().equals(params)) {
+						Map<String, List<String>> paramsWithoutSecrets = new HashMap<>(params);
+						Map<String, List<String>> buildParamsWithoutSecrets = new HashMap<>(each.getParamMap());
+						paramsWithoutSecrets.keySet().removeAll(secretParamNames);
+						buildParamsWithoutSecrets.keySet().removeAll(secretParamNames);
+						if (each.getJobName().equals(dependency.getJobName()) && buildParamsWithoutSecrets.equals(paramsWithoutSecrets)) {
 							build = each;
 							break;
 						}

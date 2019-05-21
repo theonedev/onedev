@@ -95,6 +95,20 @@ class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 		
 		List<IColumn<JobTrigger, Void>> columns = new ArrayList<>();
 		
+		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
+				cellItem.add(new Label(componentId, "<span class=\"drag-indicator fa fa-reorder\"></span>").setEscapeModelStrings(false));
+			}
+			
+			@Override
+			public String getCssClass() {
+				return "minimum actions";
+			}
+			
+		});		
+		
 		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("Description")) {
 
 			@Override

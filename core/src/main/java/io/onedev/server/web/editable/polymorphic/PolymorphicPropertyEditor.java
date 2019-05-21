@@ -122,7 +122,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 							Serializable prevPropertyValue = PolymorphicPropertyEditor.this.getConvertedInput();
 							if (prevPropertyValue != null) {
 								BeanDescriptor prevDescriptor = new BeanDescriptor(prevPropertyValue.getClass());
-								for (List<PropertyDescriptor> prevGroupProperties: prevDescriptor.getPropertyDescriptors().values()) {
+								for (List<PropertyDescriptor> prevGroupProperties: prevDescriptor.getProperties().values()) {
 									for (PropertyDescriptor prevProperty: prevGroupProperties) {
 										Class<?> declaringClass = prevProperty.getPropertyGetter().getDeclaringClass();
 										Class<?> baseClass = descriptor.getPropertyClass();

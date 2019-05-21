@@ -417,9 +417,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 				if ((state.mode == Mode.VIEW || state.mode == Mode.VIEW_PLAIN || state.mode == Mode.BLAME) 
 						&& isOnBranch() && state.blobIdent.isTree() 
 						&& SecurityUtils.canWriteCode(project.getFacade())) {
-					ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-					setEnabled(!projectManager.isModificationNeedsQualityCheck(
-							getLoginUser(), project, state.blobIdent.revision, null));
+					setEnabled(project.isModificationAllowed(getLoginUser(), state.blobIdent.revision, null));
 				} else {
 					setVisible(false);
 				}
@@ -1139,7 +1137,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 	@Override
 	public RefUpdated uploadFiles(Collection<FileUpload> uploads, String directory, String commitMessage) {
-		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 		Map<String, BlobContent> newBlobs = new HashMap<>();
 		
 		String parentPath;
@@ -1167,8 +1164,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			if (parentPath != null)
 				blobPath = parentPath + "/" + blobPath;
 			
-			if (projectManager.isModificationNeedsQualityCheck(SecurityUtils.getUser(), getProject(), 
-					blobIdent.revision, blobPath)) {
+			if (!getProject().isModificationAllowed(SecurityUtils.getUser(), blobIdent.revision, blobPath)) {
 				throw new BlobUploadException("Adding of file '" + blobPath + "' need to be reviewed/verified. "
 						+ "Please submit pull request instead");
 			}

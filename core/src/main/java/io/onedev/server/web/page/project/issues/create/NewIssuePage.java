@@ -119,7 +119,7 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 	}
 
 	@Override
-	public String validateName(String inputName) {
+	public void validateName(String inputName) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,13 +28,13 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
-import org.apache.commons.lang.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
@@ -379,7 +380,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBeanClass);
 		Serializable fieldBean = (Serializable) beanDescriptor.newBeanInstance();
 
-		for (List<PropertyDescriptor> groupProperties: beanDescriptor.getPropertyDescriptors().values()) {
+		for (List<PropertyDescriptor> groupProperties: beanDescriptor.getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) {
 				Input input = getFieldInputs().get(property.getDisplayName());
 				if (input != null) {
@@ -415,38 +416,50 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		if (fieldSpec != null) {
 			long ordinal = getFieldOrdinal(fieldName, fieldValue);
 
-			IssueField field = new IssueField();
-			field.setIssue(this);
-			field.setName(fieldName);
-			field.setOrdinal(ordinal);
-			field.setType(fieldSpec.getType());
-			
 			List<String> strings = fieldSpec.convertToStrings(fieldValue);
 			if (!strings.isEmpty()) {
 				for (String string: strings) {
-					IssueField cloned = (IssueField) SerializationUtils.clone(field);
-					cloned.setIssue(this);
-					cloned.setValue(string);
-					getFields().add(cloned);
+					IssueField field = new IssueField();
+					field.setIssue(this);
+					field.setName(fieldName);
+					field.setOrdinal(ordinal);
+					field.setType(fieldSpec.getType());
+					field.setValue(string);
+					getFields().add(field);
 				}
 			} else {
+				IssueField field = new IssueField();
+				field.setIssue(this);
+				field.setName(fieldName);
+				field.setOrdinal(ordinal);
+				field.setType(fieldSpec.getType());
 				getFields().add(field);
 			}
 		}
 	}
 
 	public boolean isFieldVisible(String fieldName) {
+		return isFieldVisible(fieldName, Sets.newHashSet());
+	}
+
+	private boolean isFieldVisible(String fieldName, Set<String> checkedFieldNames) {
+		if (!checkedFieldNames.add(fieldName))
+			return false;
+		
 		InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec != null) {
 			if (fieldSpec.getShowCondition() != null) {
-				Input dependentField = getFieldInputs().get(fieldSpec.getShowCondition().getInputName());
-				if (dependentField != null) {
+				Input dependentInput = getFieldInputs().get(fieldSpec.getShowCondition().getInputName());
+				if (dependentInput != null) {
 					String value;
-					if (!dependentField.getValues().isEmpty())
-						value = dependentField.getValues().iterator().next();
+					if (!dependentInput.getValues().isEmpty())
+						value = dependentInput.getValues().iterator().next();
 					else
 						value = null;
-					return fieldSpec.getShowCondition().getValueMatcher().matches(value);
+					if (fieldSpec.getShowCondition().getValueMatcher().matches(value))
+						return isFieldVisible(dependentInput.getName(), checkedFieldNames);
+					else
+						return false;
 				} else {
 					return false;
 				}
@@ -457,7 +470,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			return false;
 		}
 	}
-
+	
 	public IssueFacade getFacade() {
 		return new IssueFacade(getId(), getProject().getId(), getNumber());
 	}

@@ -38,7 +38,7 @@ public class IssueUtils {
 	private static final String FIELD_BEAN_PREFIX = "IssueFieldBean";
 	
 	public static void clearFields(Serializable fieldBean) {
-		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(fieldBean.getClass()).getPropertyDescriptors().values()) {
+		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(fieldBean.getClass()).getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) 
 				property.setPropertyValue(fieldBean, null);
 		}
@@ -48,7 +48,7 @@ public class IssueUtils {
 	public static Class<? extends Serializable> defineFieldBeanClass(Project project) {
 		String className = FIELD_BEAN_PREFIX + project.getId();
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		return (Class<? extends Serializable>) InputSpec.defineClass(className, issueSetting.getFieldSpecs());
+		return (Class<? extends Serializable>) InputSpec.defineClass(className, "Issue Fields", issueSetting.getFieldSpecs());
 	}
 	
 	@Nullable
@@ -66,7 +66,7 @@ public class IssueUtils {
 		Collection<String> propertyNames = new HashSet<>();
 		SettingManager settingManager = OneDev.getInstance(SettingManager.class); 
 		User user = SecurityUtils.getUser();
-		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(fieldBeanClass).getPropertyDescriptors().values()) {
+		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(fieldBeanClass).getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) {
 				if (fieldNames.contains(property.getDisplayName())) {
 					InputSpec field = settingManager.getIssueSetting().getFieldSpec(property.getDisplayName());
@@ -83,7 +83,7 @@ public class IssueUtils {
 		try {
 			Map<String, Object> fieldValues = new HashMap<>();
 			BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
-			for (List<PropertyDescriptor> groupProperties: beanDescriptor.getPropertyDescriptors().values()) {
+			for (List<PropertyDescriptor> groupProperties: beanDescriptor.getProperties().values()) {
 				for (PropertyDescriptor property: groupProperties) {
 					if (fieldNames.contains(property.getDisplayName()))
 						fieldValues.put(property.getDisplayName(), property.getPropertyValue(fieldBean));

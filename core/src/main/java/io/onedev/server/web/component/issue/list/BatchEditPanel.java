@@ -76,11 +76,11 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				for (List<PropertyDescriptor> values: builtInFieldsEditor.getDescriptor().getPropertyDescriptors().values()) {
+				for (List<PropertyDescriptor> values: builtInFieldsEditor.getDescriptor().getProperties().values()) {
 					for (PropertyDescriptor value: values) 
 						value.setPropertyExcluded(!selectedFields.contains(value.getDisplayName()));
 				}
-				for (List<PropertyDescriptor> values: customFieldsEditor.getDescriptor().getPropertyDescriptors().values()) { 
+				for (List<PropertyDescriptor> values: customFieldsEditor.getDescriptor().getProperties().values()) { 
 					for (PropertyDescriptor value: values)
 						value.setPropertyExcluded(!selectedFields.contains(value.getDisplayName()));
 				}
@@ -205,7 +205,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		form.add(builtInFieldsEditor);
 
 		excludedProperties = new HashSet<>();
-		for (List<PropertyDescriptor> values: new BeanDescriptor(customFieldsBean.getClass()).getPropertyDescriptors().values()) {
+		for (List<PropertyDescriptor> values: new BeanDescriptor(customFieldsBean.getClass()).getProperties().values()) {
 			for (PropertyDescriptor value: values) {
 				if (!selectedFields.contains(value.getDisplayName()))
 					excludedProperties.add(value.getPropertyName());
@@ -322,7 +322,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 	}
 	
 	@Override
-	public String validateName(String inputName) {
+	public void validateName(String inputName) {
 		throw new UnsupportedOperationException();
 	}
 

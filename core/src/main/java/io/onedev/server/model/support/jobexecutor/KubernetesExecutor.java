@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -20,17 +21,19 @@ public class KubernetesExecutor extends JobExecutor {
 	public void execute(String environment, File workspace, Map<String, String> envVars, 
 			List<String> commands, SourceSnapshot snapshot, Collection<JobCache> caches, 
 			PatternSet collectFiles, Logger logger) {
-		throw new UnsupportedOperationException();
+		logger.info("run_type: " + envVars.get("run_type"));
+		logger.info("deploy_to_production_environment: " + envVars.get("deploy_to_production_environment"));
+		String token = envVars.get("production_token");
+		logger.info("production_token: " + token);
 	}
 
 	@Override
 	public void checkCaches() {
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void cleanDir(File dir) {
-		throw new UnsupportedOperationException();
+		FileUtils.cleanDir(dir);
 	}
 
 }

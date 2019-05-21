@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -31,17 +33,28 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.cache.BuildInfoManager;
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.model.support.Secret;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.SecretInput;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.PropertyDescriptor;
 
 @Entity
 @Table(
@@ -56,6 +69,8 @@ import io.onedev.server.util.inputspec.SecretInput;
 public class Build extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Logger logger = LoggerFactory.getLogger(Build.class);
 	
 	public static final String STATUS = "status";
 	
@@ -110,17 +125,24 @@ public class Build extends AbstractEntity implements Referenceable {
 	private String statusMessage;
 
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<BuildParam> params = new ArrayList<>();
 	
 	@OneToMany(mappedBy="dependent", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<BuildDependence> dependencies = new ArrayList<>();
 	
 	@OneToMany(mappedBy="dependency", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<BuildDependence> dependents= new ArrayList<>();
 	
 	private transient Map<String, List<String>> paramMap;
 	
 	private transient Optional<Collection<Long>> fixedIssueNumbers;
+	
+	private transient CISpec ciSpec;
+	
+	private transient Job job;
 	
 	public Project getProject() {
 		return project;
@@ -281,8 +303,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	public void setStatusMessage(String statusMessage) {
 		if (statusMessage != null) {
 			statusMessage = StringUtils.abbreviate(statusMessage, MAX_STATUS_MESSAGE);
-			for (String maskSecret: getMaskSecrets())
-				statusMessage = StringUtils.replace(statusMessage, maskSecret, SecretInput.MASK);
+			for (String secretValue: getSecretValuesToMask())
+				statusMessage = StringUtils.replace(statusMessage, secretValue, SecretInput.MASK);
 		}
 		this.statusMessage = statusMessage;
 	}
@@ -341,29 +363,27 @@ public class Build extends AbstractEntity implements Referenceable {
 	public Map<String, Input> getParamInputs() {
 		Map<String, Input> inputs = new LinkedHashMap<>();
 		List<BuildParam> params = new ArrayList<>(getParams());
+		Map<String, Integer> paramOrders = new HashMap<>();
+		
+		int index = 1;
+		for (InputSpec paramSpec: getJob().getParamSpecs())
+			paramOrders.put(paramSpec.getName(), index++);
+			
 		Collections.sort(params, new Comparator<BuildParam>() {
 
 			@Override
 			public int compare(BuildParam o1, BuildParam o2) {
-				if (o1.getName().equals(o2.getName())) {
-					if (o1.getValue() != null) {
-						if (o2.getValue() != null) 
-							return o1.getValue().compareTo(o2.getValue());
-						else
-							return -1;
-					} else {
-						if (o2.getValue() != null) 
-							return 1;
-						else
-							return 0;
-					}
-				} else {
-					return o1.getName().compareTo(o2.getName());
-				}
+				Integer order1 = paramOrders.get(o1.getName());
+				Integer order2 = paramOrders.get(o2.getName());
+				if (order1 == null)
+					order1 = Integer.MAX_VALUE;
+				if (order2 == null)
+					order2 = Integer.MAX_VALUE;
+				return order1 - order2;
 			}
 			
 		});
-		for (BuildParam param: getParams()) {
+		for (BuildParam param: params) {
 			Input input = inputs.get(param.getName());
 			if (input == null) {
 				input = new Input(param.getName(), param.getType(), new ArrayList<>());
@@ -379,15 +399,97 @@ public class Build extends AbstractEntity implements Referenceable {
 		return new BuildFacade(getId(), getProject().getId(), getCommitHash());
 	}
 	
-	public Collection<String> getMaskSecrets() {
-		Collection<String> secrets = new HashSet<>();
+	public Collection<String> getSecretValuesToMask() {
+		Collection<String> secretValuesToMask = new HashSet<>();
 		for (BuildParam param: getParams()) {
-			if (param.getType().equals(InputSpec.SECRET)) {
-				if (param.getValue() != null && param.getValue().length() >= SecretInput.MASK.length())
-					secrets.add(param.getValue());
+			if (param.getType().equals(InputSpec.SECRET) && param.getValue() != null) {		
+				try {
+					String value = getSecretValue(param.getValue());
+					if (value.length() >= SecretInput.MASK.length())
+						secretValuesToMask.add(value);
+				} catch (OneException e) {
+					logger.error("Error retrieving secret value", e);
+				}
 			}
 		}
-		return secrets;
+		return secretValuesToMask;
+	}
+	
+	public boolean isParamVisible(String paramName) {
+		return isParamVisible(paramName, Sets.newHashSet());
+	}
+	
+	private boolean isParamVisible(String paramName, Set<String> checkedParamNames) {
+		if (!checkedParamNames.add(paramName))
+			return false;
+		
+		InputSpec paramSpec = Preconditions.checkNotNull(getJob().getParamSpecMap().get(paramName));
+		if (paramSpec.getShowCondition() != null) {
+			Input dependentInput = getParamInputs().get(paramSpec.getShowCondition().getInputName());
+			Preconditions.checkNotNull(dependentInput);
+			String value;
+			if (!dependentInput.getValues().isEmpty())
+				value = dependentInput.getValues().iterator().next();
+			else
+				value = null;
+			if (paramSpec.getShowCondition().getValueMatcher().matches(value)) 
+				return isParamVisible(dependentInput.getName(), checkedParamNames);
+			else 
+				return false;
+		} else {
+			return true;
+		}
+	}
+	
+	public String getSecretValue(String secretKey) {
+		if (secretKey.startsWith(SecretInput.LITERAL_VALUE_PREFIX)) {
+			return secretKey.substring(SecretInput.LITERAL_VALUE_PREFIX.length());
+		} else {
+			Project project = getProject();
+			Secret secret = project.getSecretMap().get(secretKey);
+			if (secret == null) 
+				throw new OneException("Can not find project secret: " + secretKey);
+			ObjectId commitId = ObjectId.fromString(getCommitHash());
+			if (secret.getBranches() != null && !project.isCommitOnBranches(commitId, secret.getBranches())) {
+				String message = String.format("Project secret '%s' can only be accessed by builds on branches '%s'", 
+						secretKey, secret.getBranches());
+				throw new OneException(message);
+			} 
+			return secret.getValue();
+		}
+	}
+	
+	public CISpec getCISpec() {
+		if (ciSpec == null) {
+			ObjectId commitId = ObjectId.fromString(getCommitHash());
+			ciSpec = Preconditions.checkNotNull(getProject().getCISpec(commitId));
+		}
+		return ciSpec;
+	}
+	
+	public Job getJob() {
+		if (job == null) 
+			job = Preconditions.checkNotNull(getCISpec().getJobMap().get(getJobName()));
+		return job;
+	}
+
+	public Serializable getParamBean() {
+		Serializable paramBean;
+		try {
+			paramBean = (Serializable) JobParam.defineBeanClass(getJob().getParamSpecs()).newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} 
+		BeanDescriptor descriptor = new BeanDescriptor(paramBean.getClass());
+		for (List<PropertyDescriptor> groupProperties: descriptor.getProperties().values()) {
+			for (PropertyDescriptor property: groupProperties) {
+				InputSpec paramSpec = getJob().getParamSpecMap().get(property.getDisplayName());
+				Preconditions.checkNotNull(paramSpec);
+				Input input = Preconditions.checkNotNull(getParamInputs().get(paramSpec.getName()));
+				property.setPropertyValue(paramBean, paramSpec.convertToObject(input.getValues()));
+			}
+		}
+		return paramBean;
 	}
 	
 	public static String getLogWebSocketObservable(Long buildId) {

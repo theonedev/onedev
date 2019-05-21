@@ -1,8 +1,9 @@
 package io.onedev.server.web.editable.string;
 
 import org.apache.wicket.Component;
+import org.apache.wicket.markup.html.basic.Label;
 
-import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyViewer;
@@ -19,11 +20,10 @@ public class StringPropertyViewer extends PropertyViewer {
 
 	@Override
 	protected Component newContent(String id, PropertyDescriptor descriptor) {
-		if (value != null) {
-			return new MultilineLabel(id, value);
-		} else {
+		if (value != null) 
+			return new Label(id, HtmlUtils.formatAsHtml(value)).setEscapeModelStrings(false);
+		else 
 			return new EmptyValueLabel(id, descriptor.getPropertyGetter());
-		}
 	}
 
 }

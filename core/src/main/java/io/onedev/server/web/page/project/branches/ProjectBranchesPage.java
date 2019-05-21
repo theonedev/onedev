@@ -359,6 +359,8 @@ public class ProjectBranchesPage extends ProjectPage {
 				Form<?> form = new Form<Void>("form");
 				form.setOutputMarkupId(true);
 				form.add(new NotificationPanel("feedback", form));
+				
+				branchRevision = getProject().getDefaultBranch();
 				branchName = null;
 				
 				final TextField<String> nameInput;

@@ -1,9 +1,11 @@
 package io.onedev.server.web.page.project.builds.detail;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
@@ -28,20 +30,26 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.job.JobScheduler;
+import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.inputspec.InputContext;
+import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
+import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
+import io.onedev.server.web.component.confirmaction.ConfirmActionModal;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sideinfo.SideInfoClosed;
@@ -50,16 +58,18 @@ import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
+import io.onedev.server.web.editable.BeanDescriptor;
+import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.issues.list.IssueListPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
 
 @SuppressWarnings("serial")
-public abstract class BuildDetailPage extends ProjectPage {
+public abstract class BuildDetailPage extends ProjectPage implements InputContext {
 
 	public static final String PARAM_BUILD = "build";
 	
@@ -152,12 +162,62 @@ public abstract class BuildDetailPage extends ProjectPage {
 			
 		}));
 		
-		summary.add(new Link<Void>("rebuild") {
+		summary.add(new AjaxLink<Void>("rebuild") {
 
-			@Override
-			public void onClick() {
-				OneDev.getInstance(JobScheduler.class).resubmit(getBuild());
+			private void resubmit(Serializable paramBean) {
+				Map<String, List<String>> paramMap = JobParam.getParamMap(getBuild().getJob(), paramBean, 
+						getBuild().getJob().getParamSpecMap().keySet());
+				OneDev.getInstance(JobScheduler.class).resubmit(getBuild(), paramMap);
+				setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(getBuild(), position));
 				getSession().success("Rebuild request submitted");
+			}
+			
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				Build build = getBuild();
+
+				Serializable paramBean = build.getParamBean();
+
+				Collection<String> secretParamNames = new ArrayList<>();
+				BeanDescriptor descriptor = new BeanDescriptor(paramBean.getClass());
+				for (List<PropertyDescriptor> groupProperties: descriptor.getProperties().values()) {
+					for (PropertyDescriptor property: groupProperties) {
+						if (property.getPropertyGetter().getAnnotation(Password.class) != null 
+								&& build.isParamVisible(property.getDisplayName())) {
+							secretParamNames.add(property.getPropertyName());
+						}
+					}
+				}
+				
+				if (!secretParamNames.isEmpty()) {
+					new BeanEditModalPanel(target, paramBean, secretParamNames, false, "Rebuild #" + build.getNumber()) {
+						
+						@Override
+						protected void onSave(AjaxRequestTarget target, Serializable bean) {
+							resubmit(paramBean);
+						}
+						
+					};
+				} else {
+					new ConfirmActionModal(target) {
+						
+						@Override
+						protected void onConfirm(AjaxRequestTarget target) {
+							resubmit(paramBean);
+						}
+						
+						@Override
+						protected String getConfirmMessage() {
+							return "Do you really want to rerun this build?";
+						}
+						
+						@Override
+						protected String getConfirmInput() {
+							return null;
+						}
+						
+					};
+				}
 			}
 
 			@Override
@@ -166,7 +226,7 @@ public abstract class BuildDetailPage extends ProjectPage {
 				setVisible(getBuild().isFinished());
 			}
 			
-		}.add(new ConfirmOnClick("Do you really want to rebuild?")));
+		});
 		
 		summary.add(new Link<Void>("cancel") {
 
@@ -355,7 +415,7 @@ public abstract class BuildDetailPage extends ProjectPage {
 							@Override
 							public void onClick() {
 								OneDev.getInstance(BuildManager.class).delete(getBuild());
-								PageParameters params = IssueListPage.paramsOf(
+								PageParameters params = ProjectBuildsPage.paramsOf(
 										getProject(), 
 										QueryPosition.getQuery(position), 
 										QueryPosition.getPage(position) + 1); 
@@ -402,6 +462,21 @@ public abstract class BuildDetailPage extends ProjectPage {
 	protected void navTo(AjaxRequestTarget target, Build entity, QueryPosition position) {
 		PageParameters params = BuildDetailPage.paramsOf(entity, position);
 		setResponsePage(getPageClass(), params);
+	}
+
+	@Override
+	public List<String> getInputNames() {
+		return new ArrayList<>(getBuild().getJob().getParamSpecMap().keySet());
+	}
+
+	@Override
+	public InputSpec getInputSpec(String inputName) {
+		return Preconditions.checkNotNull(getBuild().getJob().getParamSpecMap().get(inputName));
+	}
+
+	@Override
+	public void validateName(String inputName) {
+		throw new UnsupportedOperationException();
 	}
 	
 }

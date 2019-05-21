@@ -32,16 +32,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.param.ScriptingValues;
 import io.onedev.server.ci.job.param.SpecifiedValues;
 import io.onedev.server.ci.job.param.ValuesProvider;
-import io.onedev.server.util.JobUtils;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
@@ -49,6 +48,7 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
+import io.onedev.server.web.editable.annotation.Password;
 
 @SuppressWarnings("serial")
 class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
@@ -96,7 +96,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	private Serializable getDefaultParamBean() {
 		if (defaultParamBean == null) {
 			try {
-				defaultParamBean = JobUtils.defineParamBeanClass(new ArrayList<>(getParamSpecs().values())).newInstance();
+				defaultParamBean = JobParam.defineBeanClass(new ArrayList<>(getParamSpecs().values())).newInstance();
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new RuntimeException(e);
 			}
@@ -108,7 +108,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 		RepeatingView paramsView = new RepeatingView("params");
 		paramsView.setDefaultModel(Model.of(paramBeanClass.getName()));
 		BeanDescriptor beanDescriptor = new BeanDescriptor(paramBeanClass);
-		for (List<PropertyDescriptor> groupProperties: beanDescriptor.getPropertyDescriptors().values()) {
+		for (List<PropertyDescriptor> groupProperties: beanDescriptor.getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) {
 				WebMarkupContainer item = new WebMarkupContainer(paramsView.newChildId());
 				item.add(new Label("name", property.getDisplayName()));
@@ -124,6 +124,16 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 				
 				item.add(new Label("required", required).setEscapeModelStrings(false));
 				
+				boolean isSecret = property.getPropertyGetter().getAnnotation(Password.class) != null;
+
+				List<String> choices = new ArrayList<>();
+				if (isSecret) {
+					choices.add(SpecifiedValues.SECRET_DISPLAY_NAME);
+					choices.add(ScriptingValues.SECRET_DISPLAY_NAME);
+				} else {
+					choices.add(SpecifiedValues.DISPLAY_NAME);
+					choices.add(ScriptingValues.DISPLAY_NAME);
+				}
 				DropDownChoice<String> valuesProviderChoice = new DropDownChoice<String>("valuesProvider", new IModel<String>() {
 					
 					@Override
@@ -132,23 +142,23 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 
 					@Override
 					public String getObject() {
-						if (item.get("values") instanceof Fragment)
-							return SpecifiedValues.DISPLAY_NAME;
-						else
-							return ScriptingValues.DISPLAY_NAME;
+						if (item.get("values") instanceof Fragment) 
+							return isSecret?SpecifiedValues.SECRET_DISPLAY_NAME:SpecifiedValues.DISPLAY_NAME;
+						else 
+							return isSecret?ScriptingValues.SECRET_DISPLAY_NAME:ScriptingValues.DISPLAY_NAME;
 					}
 
 					@Override
 					public void setObject(String object) {
 						ValuesProvider valuesProvider;
-						if (object.equals(SpecifiedValues.DISPLAY_NAME)) 
+						if (object.equals(SpecifiedValues.DISPLAY_NAME) || object.endsWith(SpecifiedValues.SECRET_DISPLAY_NAME)) 
 							valuesProvider = newSpecifiedValueProvider(property);
 						else  
 							valuesProvider = new ScriptingValues();
 						item.replace(newValuesEditor(property, valuesProvider));
 					}
 					
-				}, Lists.newArrayList(SpecifiedValues.DISPLAY_NAME, ScriptingValues.DISPLAY_NAME));
+				}, choices);
 				
 				valuesProviderChoice.setNullValid(false);
 				
@@ -244,7 +254,17 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 		} catch (Exception e) {
 			logger.error("Error setting property value", e);
 		}
-		item.add(PropertyContext.edit("value", paramBean, property.getPropertyName()));
+		
+		if (property.getPropertyGetter().getAnnotation(Password.class) == null) {
+			item.add(PropertyContext.edit("value", paramBean, property.getPropertyName()));
+			item.add(new WebMarkupContainer("description").setVisible(false));
+		} else { 
+			SecretEditBean bean = new SecretEditBean();
+			bean.setSecret((String) property.getPropertyValue(paramBean));
+			item.add(PropertyContext.edit("value", bean, "secret"));
+			item.add(new Label("description", "Secrets can be defined in project setting"));
+		}
+		
 		item.add(new AjaxLink<Void>("delete") {
 
 			@Override
@@ -323,6 +343,8 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 			Label label = (Label) paramItem.get("name");
 			JobParam param = new JobParam();
 			param.setName((String) label.getDefaultModelObject());
+			InputSpec paramSpec = Preconditions.checkNotNull(getParamSpecs().get(param.getName()));
+			param.setSecret(paramSpec instanceof SecretInput);
 			Component valuesEditor = paramItem.get("values");
 			if (valuesEditor instanceof PropertyEditor) {
 				ScriptingValues scriptingValues = new ScriptingValues();
@@ -330,10 +352,8 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 				param.setValuesProvider(scriptingValues);
 			} else {
 				SpecifiedValues specifiedValues = new SpecifiedValues();
-				specifiedValues.setValues(new ArrayList<>());
 				for (Component valueItem: (WebMarkupContainer)valuesEditor.get("values")) {
 					Object propertyValue = ((PropertyEditor<Serializable>) valueItem.get("value")).getConvertedInput(); 
-					InputSpec paramSpec = Preconditions.checkNotNull(getParamSpecs().get(param.getName()));
 					specifiedValues.getValues().add(paramSpec.convertToStrings(propertyValue));
 				}
 				param.setValuesProvider(specifiedValues);

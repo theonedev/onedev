@@ -84,6 +84,7 @@ import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMe
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
 import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
+import io.onedev.server.web.page.project.setting.secret.SecretListPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
@@ -245,6 +246,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/settings/avatar-edit", AvatarEditPage.class));
 		add(new OnePageMapper("projects/${project}/settings/branch-protection", BranchProtectionPage.class));
 		add(new OnePageMapper("projects/${project}/settings/tag-protection", TagProtectionPage.class));
+		add(new OnePageMapper("projects/${project}/settings/secrets", SecretListPage.class));
 		add(new OnePageMapper("projects/${project}/settings/issue/state-transitions", StateTransitionsPage.class));
 		add(new OnePageMapper("projects/${project}/settings/issue/prompt-fields-upon-issue-open", 
 				PromptFieldsUponIssueOpenSettingPage.class));

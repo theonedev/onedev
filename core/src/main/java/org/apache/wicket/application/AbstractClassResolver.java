@@ -29,8 +29,8 @@ import org.apache.wicket.Application;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.util.collections.UrlExternalFormComparator;
 
+import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.util.IssueUtils;
-import io.onedev.server.util.JobUtils;
 
 /**
  * An abstract implementation of a {@link IClassResolver} which uses a {@link ClassLoader} for
@@ -64,7 +64,7 @@ public abstract class AbstractClassResolver implements IClassResolver
 		if (clazz != null)
 			return clazz;
 		
-		clazz = JobUtils.loadParamBeanClass(className);
+		clazz = JobParam.loadBeanClass(className);
 		
 		if (clazz != null)
 			return clazz;

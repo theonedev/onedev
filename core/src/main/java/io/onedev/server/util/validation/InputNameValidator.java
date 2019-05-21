@@ -2,6 +2,7 @@ package io.onedev.server.util.validation;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.ValidationException;
 
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.validation.annotation.InputName;
@@ -17,13 +18,13 @@ public class InputNameValidator implements ConstraintValidator<InputName, String
 		if (value == null) {
 			return true;
 		} else {
-			String errorMessage = OneContext.get().getInputContext().validateName(value);			
-			if (errorMessage != null) {
-				constraintContext.disableDefaultConstraintViolation();
-				constraintContext.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
-				return false;
-			} else {
+			try {
+				OneContext.get().getInputContext().validateName(value);			
 				return true;
+			} catch (ValidationException e) {
+				constraintContext.disableDefaultConstraintViolation();
+				constraintContext.buildConstraintViolationWithTemplate(e.getMessage()).addConstraintViolation();
+				return false;
 			}
 		} 
 	}

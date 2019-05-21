@@ -21,6 +21,8 @@ public abstract class ModalPanel extends Panel {
 
 	private static final String CONTENT_ID = "content";
 	
+	private boolean inited;
+	
 	public ModalPanel(AjaxRequestTarget target) {
 		this(target, null);
 	}
@@ -35,17 +37,25 @@ public abstract class ModalPanel extends Panel {
 	}
 	
 	@Override
+	protected void onBeforeRender() {
+		if (!inited) {
+			WebMarkupContainer dialog = new WebMarkupContainer("dialog");
+			add(dialog);
+			
+			dialog.add(newContent(CONTENT_ID));
+
+			String cssClass = getCssClass();
+			if (cssClass != null)
+				dialog.add(AttributeAppender.append("class", cssClass));
+			
+			inited = true;
+		}
+		super.onBeforeRender();
+	}
+
+	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		WebMarkupContainer dialog = new WebMarkupContainer("dialog");
-		add(dialog);
-		
-		dialog.add(newContent(CONTENT_ID));
-
-		String cssClass = getCssClass();
-		if (cssClass != null)
-			dialog.add(AttributeAppender.append("class", cssClass));
 		
 		add(new AbstractPostAjaxBehavior() {
 			

@@ -97,7 +97,7 @@ public class DefaultLogManager implements LogManager {
 		Long projectId = build.getProject().getId();
 		Long buildId = build.getId();
 		Long buildNumber = build.getNumber();
-		Collection<String> maskSecrets = build.getMaskSecrets();
+		Collection<String> secretValuesToMask = build.getSecretValuesToMask();
 		return new JobLogger(loggerLevel) {
 			
 			private static final long serialVersionUID = 1L;
@@ -112,7 +112,7 @@ public class DefaultLogManager implements LogManager {
 					}
 				}
 				
-				for (String maskSecret: maskSecrets)
+				for (String maskSecret: secretValuesToMask)
 					message = StringUtils.replace(message, maskSecret, SecretInput.MASK);
 				
  				if (logLevel.ordinal() <= loggerLevel.ordinal()) {

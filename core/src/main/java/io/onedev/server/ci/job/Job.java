@@ -2,8 +2,8 @@ package io.onedev.server.ci.job;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -230,7 +230,7 @@ public class Job implements Serializable, Validatable {
 
 	public Map<String, InputSpec> getParamSpecMap() {
 		if (paramSpecMap == null) {
-			paramSpecMap = new HashMap<>();
+			paramSpecMap = new LinkedHashMap<>();
 			for (InputSpec paramSpec: getParamSpecs()) 
 				paramSpecMap.put(paramSpec.getName(), paramSpec);
 		}

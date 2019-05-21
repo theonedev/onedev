@@ -58,7 +58,6 @@ public class ProjectResource {
 		}
 		
 		return Response.ok(projects, RestConstants.JSON_UTF8).build();
-		
     }
     
 	@Path("/{projectId}")

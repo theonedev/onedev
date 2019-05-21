@@ -39,7 +39,10 @@ class ParamListViewPanel extends Panel {
 			paramItem.add(new Label("name", param.getName()));
 			
 			if (param.getValuesProvider() instanceof SpecifiedValues) {
-				paramItem.add(new Label("valuesProvider", SpecifiedValues.DISPLAY_NAME));
+				if (param.isSecret())
+					paramItem.add(new Label("valuesProvider", SpecifiedValues.SECRET_DISPLAY_NAME));
+				else
+					paramItem.add(new Label("valuesProvider", SpecifiedValues.DISPLAY_NAME));
 				Fragment fragment = new Fragment("values", "specifiedValuesFrag", this);
 				RepeatingView valuesView = new RepeatingView("values");
 				SpecifiedValues specifiedValues = (SpecifiedValues) param.getValuesProvider();
@@ -56,7 +59,10 @@ class ParamListViewPanel extends Panel {
 				fragment.add(valuesView);
 				paramItem.add(fragment);
 			} else {
-				paramItem.add(new Label("valuesProvider", ScriptingValues.DISPLAY_NAME));
+				if (param.isSecret())
+					paramItem.add(new Label("valuesProvider", ScriptingValues.SECRET_DISPLAY_NAME));
+				else
+					paramItem.add(new Label("valuesProvider", ScriptingValues.DISPLAY_NAME));
 				paramItem.add(PropertyContext.view("values", param.getValuesProvider(), "script"));
 			}
 			paramsView.add(paramItem);

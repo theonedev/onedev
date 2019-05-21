@@ -1,9 +1,6 @@
-.confirm-action .message {
-	font-size: 13px;
-}
-.confirm-action .feedback {
+.confirm-action .feedbackPanel {
     margin-top: 16px;
 }
 .confirm-action input.confirm {
-	margin-top: 20px;
+	margin-top: 16px;
 }

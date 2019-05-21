@@ -16,6 +16,14 @@ public class SecretInput extends InputSpec {
 
 	public static final String MASK = "*****";
 	
+	public static final String LITERAL_VALUE_PREFIX = "$OneDev-Secret-Literal$";
+	
+	@Editable
+	@Override
+	public boolean isAllowEmpty() {
+		return false;
+	}
+	
 	@Editable
 	@Override
 	public boolean isAllowMultiple() {
@@ -28,8 +36,7 @@ public class SecretInput extends InputSpec {
 		StringBuffer buffer = new StringBuffer();
 		appendField(buffer, index, "String");
 		appendCommonAnnotations(buffer, index);
-		if (!isAllowEmpty())
-			buffer.append("    @NotEmpty\n");
+		buffer.append("    @NotEmpty\n");
 		buffer.append("    @Password\n");
 		appendMethods(buffer, index, "String", null, null);
 		

@@ -26,6 +26,9 @@
     margin-left: 8px;
     vertical-align: middle;
 }
+.job-params-edit>.job-param .help-block {
+    margin-bottom: 0;
+}
 .job-params-view>tbody>tr>td {
     padding: 0 8px 16px 0;
     vertical-align: top;    

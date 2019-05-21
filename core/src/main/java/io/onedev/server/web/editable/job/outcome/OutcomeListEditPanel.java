@@ -79,6 +79,20 @@ class OutcomeListEditPanel extends PropertyEditor<List<Serializable>> {
 		
 		List<IColumn<JobOutcome, Void>> columns = new ArrayList<>();
 		
+		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
+				cellItem.add(new Label(componentId, "<span class=\"drag-indicator fa fa-reorder\"></span>").setEscapeModelStrings(false));
+			}
+			
+			@Override
+			public String getCssClass() {
+				return "minimum actions";
+			}
+			
+		});		
+		
 		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("Type")) {
 
 			@Override

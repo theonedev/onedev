@@ -11,8 +11,7 @@ public interface InputContext {
 	@Nullable
 	InputSpec getInputSpec(String inputName);
 	
-	@Nullable
-	String validateName(String inputName);
+	void validateName(String inputName);
 	
 }
  

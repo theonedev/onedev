@@ -29,7 +29,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
+import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.shiro.subject.Subject;
@@ -91,6 +93,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.git.Submodule;
 import io.onedev.server.git.command.BlameCommand;
+import io.onedev.server.git.command.ListChangedFilesCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.support.BranchProtection;
@@ -98,6 +101,7 @@ import io.onedev.server.model.support.CommitMessageTransform;
 import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
+import io.onedev.server.model.support.Secret;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.issue.IssueSetting;
@@ -111,6 +115,8 @@ import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatcher.UserMatcher;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
@@ -120,8 +126,9 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 @Table(indexes={@Index(columnList="o_forkedFrom_id"), @Index(columnList="name")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @DynamicUpdate
+@ClassValidating
 @Editable
-public class Project extends AbstractEntity {
+public class Project extends AbstractEntity implements Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -166,6 +173,11 @@ public class Project extends AbstractEntity {
 	@Column(nullable=false, length=65535)
 	@JsonView(DefaultView.class)
 	private ArrayList<TagProtection> tagProtections = new ArrayList<>();
+	
+	@Lob
+	@Column(nullable=false, length=65535)
+	@JsonView(DefaultView.class)
+	private ArrayList<Secret> secrets = new ArrayList<>();
 	
 	@Column(nullable=false)
 	private Date createdAt = new Date();
@@ -303,6 +315,8 @@ public class Project extends AbstractEntity {
     private transient Optional<CommitQuerySetting> commitQuerySettingOfCurrentUserHolder;
     
 	private transient List<Milestone> sortedMilestones;
+	
+	private transient Map<String, Secret> secretMap;
 	
 	@Editable(order=100)
 	@ProjectName
@@ -1152,6 +1166,24 @@ public class Project extends AbstractEntity {
 		this.webHooks = webHooks;
 	}
 
+	@Editable
+	public ArrayList<Secret> getSecrets() {
+		return secrets;
+	}
+
+	public void setSecrets(ArrayList<Secret> secrets) {
+		this.secrets = secrets;
+	}
+	
+	public Map<String, Secret> getSecretMap() {
+		if (secretMap == null) {
+			secretMap = new HashMap<>();
+			for (Secret secret: getSecrets())
+				secretMap.put(secret.getName(), secret);
+		}
+		return secretMap;
+	}
+
 	@Nullable
 	public TagProtection getTagProtection(String tagName, User user) {
 		for (TagProtection protection: tagProtections) {
@@ -1340,6 +1372,50 @@ public class Project extends AbstractEntity {
 				return true;
 		}
 		return false;
+	}
+
+	public Collection<String> getChangedFiles(ObjectId oldObjectId, ObjectId newObjectId, 
+			Map<String, String> gitEnvs) {
+		if (gitEnvs != null && !gitEnvs.isEmpty()) {
+			ListChangedFilesCommand cmd = new ListChangedFilesCommand(getGitDir(), gitEnvs);
+			cmd.fromRev(oldObjectId.name()).toRev(newObjectId.name());
+			return cmd.call();
+		} else {
+			return GitUtils.getChangedFiles(getRepository(), oldObjectId, newObjectId);
+		}
+	}
+	
+	public boolean isModificationAllowed(User user, String branch, @Nullable String file) {
+		BranchProtection branchProtection = getBranchProtection(branch, user);
+		if (branchProtection != null) 
+			return branchProtection.isModificationAllowed(user, this, branch, file);
+		else
+			return true;
+	}
+
+	public boolean isPushAllowed(User user, String branch, ObjectId oldObjectId, 
+			ObjectId newObjectId, Map<String, String> gitEnvs) {
+		BranchProtection branchProtection = getBranchProtection(branch, user);
+		if (branchProtection != null) 		
+			return branchProtection.isPushAllowed(user, this, branch, oldObjectId, newObjectId, gitEnvs);
+		else
+			return true;
+	}
+	
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		boolean isValid = true;
+		try {
+			Secret.validateSecrets(getSecrets());
+		} catch (ValidationException e) {
+			isValid = false;
+			context.buildConstraintViolationWithTemplate(e.getMessage()).addPropertyNode("secrets").addConstraintViolation();
+		}
+
+		if (!isValid)
+			context.disableDefaultConstraintViolation();
+		
+		return isValid;
 	}
 
 }

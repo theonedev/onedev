@@ -3,6 +3,9 @@ package io.onedev.server.web.editable.job.paramspec;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.lang.model.SourceVersion;
+import javax.validation.ValidationException;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -147,11 +150,13 @@ abstract class ParamSpecEditPanel extends Panel implements InputContext {
 	}
 	
 	@Override
-	public String validateName(String inputName) {
-		if (BuildConstants.ALL_FIELDS.contains(inputName))
-			return "'" + inputName + "' is reserved";
-		else
-			return null;
+	public void validateName(String inputName) {
+		if (!SourceVersion.isIdentifier(inputName)) { // param name will be passed to build as environment variable name 
+			throw new ValidationException("param name should start with letter and can only consist of "
+					+ "alphanumeric and underscore characters");
+		} else if (BuildConstants.ALL_FIELDS.contains(inputName)) {
+			throw new ValidationException("'" + inputName + "' is reserved");
+		}
 	}
 	
 }

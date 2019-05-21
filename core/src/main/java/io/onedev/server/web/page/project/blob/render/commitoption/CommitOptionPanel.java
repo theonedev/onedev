@@ -44,7 +44,6 @@ import com.google.common.base.Preconditions;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.Provider;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.Blob;
@@ -318,8 +317,8 @@ public class CommitOptionPanel extends Panel {
 
 			Map<String, BlobContent> newBlobs = new HashMap<>();
 			if (newContentProvider != null) {
-				if (OneDev.getInstance(ProjectManager.class).isModificationNeedsQualityCheck(SecurityUtils.getUser(), 
-						context.getProject(), context.getBlobIdent().revision, context.getNewPath())) {
+				if (!context.getProject().isModificationAllowed(SecurityUtils.getUser(), 
+						context.getBlobIdent().revision, context.getNewPath())) {
 					CommitOptionPanel.this.error("Adding of file '" + context.getNewPath() + "' need to be reviewed/verified. "
 							+ "Please submit pull request instead");
 					target.add(feedback);

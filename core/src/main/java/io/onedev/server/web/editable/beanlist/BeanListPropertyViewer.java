@@ -40,7 +40,7 @@ public class BeanListPropertyViewer extends Panel {
 		}
 		
 		propertyContexts = new ArrayList<>();
-		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(elementClass).getPropertyDescriptors().values()) {
+		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(elementClass).getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties)
 				propertyContexts.add(PropertyContext.of(property));
 		}

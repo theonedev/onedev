@@ -152,13 +152,14 @@ public class GitPreReceiveCallback extends HttpServlet {
     					} else if (newObjectId.equals(ObjectId.zeroId())) {
     						if (protection.isNoDeletion()) 
     							errorMessages.add("Can not delete this branch according to branch protection setting");
-    					} else if (!GitUtils.isMergedInto(project.getRepository(), gitEnvs, oldObjectId, newObjectId)) {
+    					} else if (protection.isNoForcedPush() 
+    							&& !GitUtils.isMergedInto(project.getRepository(), gitEnvs, oldObjectId, newObjectId)) {
 							errorMessages.add("Can not force-push to this branch according to branch protection setting");
-    					} else if (projectManager.isPushNeedsQualityCheck(user, project, branchName, oldObjectId, newObjectId, gitEnvs)) {
+    					} else if (!protection.isPushAllowed(user, project, branchName, oldObjectId, newObjectId, gitEnvs)) {
 	    					errorMessages.add("Your changes need to be reviewed/verified. Please submit pull request instead");
     					}
 	    			}
-	    			if (errorMessages.isEmpty()) {
+	    			if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
 	    				try {
 	    					projectManager.onDeleteBranch(project, branchName);
 	    				} catch (OneException e) {
@@ -182,7 +183,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 							errorMessages.add("Can not update this tag according to tag protection setting");
     					}
 	    			}
-	    			if (errorMessages.isEmpty()) {
+	    			if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
 	    				try {
 	    					projectManager.onDeleteTag(project, tagName);
 	    				} catch (OneException e) {

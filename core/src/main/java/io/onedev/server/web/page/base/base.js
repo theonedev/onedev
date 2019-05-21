@@ -288,7 +288,7 @@ onedev.server = {
 			 * via Wicket
 			 */
 			setTimeout(function() {
-				var focusibleSelector = "input[type=text]:visible, input:not([type]):visible, textarea:visible, .CodeMirror:visible";
+				var focusibleSelector = "input[type=text]:visible, input[type=password]:visible, input:not([type]):visible, textarea:visible, .CodeMirror:visible";
 				
 				var inErrorSelector = ".has-error:visible:first";
                 var $inError = $containers.find(inErrorSelector).addBack(inErrorSelector);

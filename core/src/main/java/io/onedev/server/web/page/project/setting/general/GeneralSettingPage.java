@@ -99,10 +99,6 @@ public class GeneralSettingPage extends ProjectSettingPage {
 						return GeneralSettingPage.this.getProject();
 					}
 
-					@Override
-					protected void onCancel(AjaxRequestTarget target) {
-					}
-
 				};
 			}
 			

@@ -22,16 +22,16 @@ public class BeanDescriptor implements Serializable {
 
 	private final Class<?> beanClass;
 	
-	protected final Map<String, List<PropertyDescriptor>> propertyDescriptors;
+	protected final Map<String, List<PropertyDescriptor>> properties;
 	
 	public BeanDescriptor(Class<?> beanClass) {
 		this(beanClass, Sets.newHashSet(), true);
 	}
 	
-	public BeanDescriptor(Class<?> beanClass, Collection<String> properties, boolean excluded) {
+	public BeanDescriptor(Class<?> beanClass, Collection<String> propertyNames, boolean excluded) {
 		this.beanClass = beanClass;
 		
-		propertyDescriptors = new LinkedHashMap<>();
+		properties = new LinkedHashMap<>();
 
 		List<Method> propertyGetters = BeanUtils.findGetters(getBeanClass());
 		EditableUtils.sortAnnotatedElements(propertyGetters);
@@ -40,45 +40,45 @@ public class BeanDescriptor implements Serializable {
 			Editable editable = propertyGetter.getAnnotation(Editable.class);
 			if (editable != null) {
 				String group = editable.group();
-				List<PropertyDescriptor> groupPropertyDescriptors = propertyDescriptors.get(group);
-				if (groupPropertyDescriptors == null) {
-					groupPropertyDescriptors = new ArrayList<>();
-					propertyDescriptors.put(group, groupPropertyDescriptors);
+				List<PropertyDescriptor> groupProperties = properties.get(group);
+				if (groupProperties == null) {
+					groupProperties = new ArrayList<>();
+					properties.put(group, groupProperties);
 				}
-				PropertyDescriptor propertyDescriptor = new PropertyDescriptor(propertyGetter); 
-				groupPropertyDescriptors.add(propertyDescriptor);
+				PropertyDescriptor property = new PropertyDescriptor(propertyGetter); 
+				groupProperties.add(property);
 				String propertyName = BeanUtils.getPropertyName(propertyGetter);
-				propertyDescriptor.setPropertyExcluded(BeanUtils.findSetter(propertyGetter) == null 
-						|| properties.contains(propertyName) && excluded 
-						|| !properties.contains(propertyName) && !excluded);
+				property.setPropertyExcluded(BeanUtils.findSetter(propertyGetter) == null 
+						|| propertyNames.contains(propertyName) && excluded 
+						|| !propertyNames.contains(propertyName) && !excluded);
 			}
 		}
 	}
 	
-	public BeanDescriptor(BeanDescriptor beanDescriptor) {
-		this.beanClass = beanDescriptor.getBeanClass();
-		this.propertyDescriptors = beanDescriptor.getPropertyDescriptors();
+	public BeanDescriptor(BeanDescriptor descriptor) {
+		this.beanClass = descriptor.getBeanClass();
+		this.properties = descriptor.getProperties();
 	}
 	
 	public Class<?> getBeanClass() {
 		return beanClass;
 	}
 
-	public Map<String, List<PropertyDescriptor>> getPropertyDescriptors() {
-		return propertyDescriptors;
+	public Map<String, List<PropertyDescriptor>> getProperties() {
+		return properties;
 	}
 	
-	public Map<String, PropertyDescriptor> getMapOfDisplayNameToPropertyDescriptor() {
-		Map<String, PropertyDescriptor> propertyDescriptors = new HashMap<>();
-		for (List<PropertyDescriptor> groupProperties: getPropertyDescriptors().values()) {
+	public Map<String, PropertyDescriptor> getMapOfDisplayNameToProperty() {
+		Map<String, PropertyDescriptor> properties = new HashMap<>();
+		for (List<PropertyDescriptor> groupProperties: getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties)
-				propertyDescriptors.put(EditableUtils.getDisplayName(property.getPropertyGetter()), property);
+				properties.put(EditableUtils.getDisplayName(property.getPropertyGetter()), property);
 		}
-		return propertyDescriptors;
+		return properties;
 	}
 
 	public void copyProperties(Object from, Object to) {
-		for (List<PropertyDescriptor> groupProperties: getPropertyDescriptors().values()) {
+		for (List<PropertyDescriptor> groupProperties: getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) {
 				if (!property.isPropertyExcluded())
 					property.copyProperty(from, to);
@@ -87,8 +87,8 @@ public class BeanDescriptor implements Serializable {
 	}
 	
 	@Nullable
-	public PropertyDescriptor getPropertyDescriptor(String propertyName) {
-		for (List<PropertyDescriptor> groupProperties: getPropertyDescriptors().values()) {
+	public PropertyDescriptor getProperty(String propertyName) {
+		for (List<PropertyDescriptor> groupProperties: getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) {
 				if (property.getPropertyName().equals(propertyName))
 					return property;
@@ -106,7 +106,7 @@ public class BeanDescriptor implements Serializable {
 	}
 
 	public String getPropertyName(String propertyNameOrDisplayName) {
-		for (List<PropertyDescriptor> groupProperties: propertyDescriptors.values()) {
+		for (List<PropertyDescriptor> groupProperties: properties.values()) {
 			for (PropertyDescriptor property: groupProperties) {
 				String displayName = property.getDisplayName();
 				if (property.getPropertyName().equals(propertyNameOrDisplayName) || displayName.equals(propertyNameOrDisplayName))

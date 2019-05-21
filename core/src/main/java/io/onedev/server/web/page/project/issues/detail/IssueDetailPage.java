@@ -282,7 +282,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	}
 	
 	@Override
-	public String validateName(String inputName) {
+	public void validateName(String inputName) {
 		throw new UnsupportedOperationException();
 	}
 	

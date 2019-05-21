@@ -66,7 +66,7 @@
     margin-bottom: 0;
 }
 
-.property-editor>.bean-list>table>tbody>tr>td.actions {
+.property-editor>.bean-list>table>*>tr>.actions {
     font-size: 18px;
 }
 

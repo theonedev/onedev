@@ -1,6 +1,11 @@
 .ci-spec {
     padding: 20px;
 }
+.ci-spec.not-defined {
+    font-style: italic;
+    font-size: 16px;
+    text-align: center;
+}
 .ci-spec>.invalid>.title {
     font-size: 20px;
     color: red;
@@ -22,6 +27,10 @@
 }
 .ci-spec>.valid>div>.body {
     position: relative;
+}
+.ci-spec>.valid>div>.not-defined {
+    font-size: 16px;
+    font-style: italic;
 }
 
 .ci-spec>.valid>div>.body>:first-child {

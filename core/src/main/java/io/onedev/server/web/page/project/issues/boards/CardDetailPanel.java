@@ -277,7 +277,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 	}
 
 	@Override
-	public String validateName(String inputName) {
+	public void validateName(String inputName) {
 		throw new UnsupportedOperationException();
 	}
 	

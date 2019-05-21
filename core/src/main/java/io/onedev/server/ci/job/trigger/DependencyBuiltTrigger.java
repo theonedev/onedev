@@ -25,9 +25,11 @@ public class DependencyBuiltTrigger extends JobTrigger {
 				for (JobDependency dependency: job.getDependencies()) {
 					if (dependency.getJobName().equals(build.getJobName())) {
 						for (JobParam param: dependency.getJobParams()) {
-							List<String> paramValue = build.getParamMap().get(param.getName());
-							if (!param.getValuesProvider().getValues().contains(paramValue))
-								return false;
+							if (!param.isSecret()) {
+								List<String> paramValue = build.getParamMap().get(param.getName());
+								if (!param.getValuesProvider().getValues().contains(paramValue))
+									return false;
+							}
 						}
 						return true;
 					}

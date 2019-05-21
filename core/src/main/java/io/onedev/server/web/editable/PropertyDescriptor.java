@@ -14,6 +14,8 @@ import org.apache.wicket.Application;
 import org.apache.wicket.Component;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.commons.utils.BeanUtils;
 import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.ReflectionUtils;
@@ -124,10 +126,24 @@ public class PropertyDescriptor implements Serializable {
 	}
 
 	public boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor) {
+		return isPropertyVisible(oneContext, beanDescriptor, Sets.newHashSet());
+	}
+	
+	private boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
+		if (!checkedPropertyNames.add(getPropertyName()))
+			return false;
+		
 		OneContext.push(oneContext);
 		try {
 			ShowCondition showCondition = getPropertyGetter().getAnnotation(ShowCondition.class);
-			return showCondition == null || (boolean)ReflectionUtils.invokeStaticMethod(getBeanClass(), showCondition.value());
+			if (showCondition != null && !(boolean)ReflectionUtils.invokeStaticMethod(getBeanClass(), showCondition.value()))
+				return false;
+			for (String dependencyPropertyName: getDependencyPropertyNames()) {
+				Set<String> copyOfCheckedPropertyNames = new HashSet<>(checkedPropertyNames);
+				if (!beanDescriptor.getProperty(dependencyPropertyName).isPropertyVisible(oneContext, beanDescriptor, copyOfCheckedPropertyNames))
+					return false;
+			}
+			return true;
 		} finally {
 			OneContext.pop();
 		}

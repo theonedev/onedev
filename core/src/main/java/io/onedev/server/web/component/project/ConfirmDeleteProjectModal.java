@@ -37,10 +37,6 @@ public abstract class ConfirmDeleteProjectModal extends ConfirmActionModal {
 		return getProject().getName();
 	}
 
-	@Override
-	protected void onCancel(AjaxRequestTarget target) {
-	}
-
 	protected abstract Project getProject();
 	
 }

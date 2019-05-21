@@ -5,15 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -41,8 +37,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.cache.CacheManager;
 import io.onedev.server.cache.CommitInfoManager;
-import io.onedev.server.ci.JobDependency;
-import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -52,31 +46,26 @@ import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.CloneCommand;
-import io.onedev.server.git.command.ListChangedFilesCommand;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
-import io.onedev.server.model.support.FileProtection;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
-import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.facade.GroupAuthorizationFacade;
 import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.web.avatar.AvatarManager;
 
 @Singleton
@@ -451,83 +440,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		}
 		
 		return projects;
-	}
-
-	private Collection<String> getChangedFiles(Project project, ObjectId oldObjectId, ObjectId newObjectId, 
-			Map<String, String> gitEnvs) {
-		if (gitEnvs != null && !gitEnvs.isEmpty()) {
-			ListChangedFilesCommand cmd = new ListChangedFilesCommand(project.getGitDir(), gitEnvs);
-			cmd.fromRev(oldObjectId.name()).toRev(newObjectId.name());
-			return cmd.call();
-		} else {
-			return GitUtils.getChangedFiles(project.getRepository(), oldObjectId, newObjectId);
-		}
-	}
-	
-	@Sessional
-	@Override
-	public boolean isModificationNeedsQualityCheck(User user, Project project, String branch, @Nullable String file) {
-		BranchProtection branchProtection = project.getBranchProtection(branch, user);
-		if (branchProtection != null) {
-			if (!ReviewRequirement.fromString(branchProtection.getReviewRequirement()).satisfied(user)) 
-				return true;
-			if (!branchProtection.getJobDependencies().isEmpty())
-				return true;
-			
-			if (file != null) {
-				FileProtection fileProtection = branchProtection.getFileProtection(file);
-				if (fileProtection != null 
-						&& !ReviewRequirement.fromString(fileProtection.getReviewRequirement()).satisfied(user)) {
-					return true;
-				}
-			}
-		}			
-		return false;
-	}
-
-	@Sessional
-	@Override
-	public boolean isPushNeedsQualityCheck(User user, Project project, String branch, ObjectId oldObjectId, 
-			ObjectId newObjectId, Map<String, String> gitEnvs) {
-		BranchProtection branchProtection = project.getBranchProtection(branch, user);
-		if (branchProtection != null) {
-			if (!ReviewRequirement.fromString(branchProtection.getReviewRequirement()).satisfied(user)) 
-				return true;
-
-			List<Build> builds = buildManager.query(project, newObjectId.name());
-
-			for (JobDependency dependency: branchProtection.getJobDependencies()) {
-				Map<String, List<List<String>>> paramMatrix = new HashMap<>();
-				for (JobParam param: dependency.getJobParams()) 
-					paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
-				
-				AtomicBoolean buildRequirementUnsatisfied = new AtomicBoolean(false);
-				new MatrixRunner<List<String>>(paramMatrix) {
-					
-					@Override
-					public void run(Map<String, List<String>> params) {
-						for (Build build: builds) {
-							if (build.getJobName().equals(dependency.getJobName()) && build.getParamMap().equals(params))
-								return;
-						}
-						buildRequirementUnsatisfied.set(true);
-					}
-					
-				}.run();
-				
-				if (buildRequirementUnsatisfied.get())
-					return true;
-			}
-			
-			for (String changedFile: getChangedFiles(project, oldObjectId, newObjectId, gitEnvs)) {
-				FileProtection fileProtection = branchProtection.getFileProtection(changedFile);
-				if (fileProtection != null  
-						&& !ReviewRequirement.fromString(fileProtection.getReviewRequirement()).satisfied(user)) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 }

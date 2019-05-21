@@ -10,6 +10,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 /**
  * @author robin
  *
@@ -18,6 +21,7 @@ import javax.persistence.UniqueConstraint;
 @Table(
 		indexes={@Index(columnList="o_build_id"), @Index(columnList="name"), @Index(columnList="value")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_build_id", "name", "value"})})
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class BuildParam extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

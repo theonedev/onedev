@@ -20,10 +20,12 @@ public class ScriptingValues implements ValuesProvider {
 
 	private static final long serialVersionUID = 1L;
 	
-	public static final String DISPLAY_NAME = "Use return values of a script";
+	public static final String DISPLAY_NAME = "Evaluate script to get values";
+	
+	public static final String SECRET_DISPLAY_NAME = "Evaluate script to get secrets";
 	
 	private String script;
-
+	
 	@Editable
 	@NotEmpty
 	@Script

@@ -58,7 +58,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		
 		this.descriptor = descriptor;
 		
-		for (Map.Entry<String, List<PropertyDescriptor>> entry: descriptor.getPropertyDescriptors().entrySet()) {
+		for (Map.Entry<String, List<PropertyDescriptor>> entry: descriptor.getProperties().entrySet()) {
 			propertyContexts.put(entry.getKey(), 
 					entry.getValue().stream().map(it->PropertyContext.of(it)).collect(Collectors.toList()));
 		}

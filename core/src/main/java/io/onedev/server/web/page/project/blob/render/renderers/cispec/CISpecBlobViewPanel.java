@@ -60,11 +60,11 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 					
 					validFrag.add(hasJobsFrag);
 				} else {
-					validFrag.add(new Label("body", "No jobs defined"));
+					validFrag.add(new Label("body", "No jobs defined").add(AttributeAppender.append("class", "not-defined")));
 				}
 				add(validFrag);
 			} else {
-				add(new Label("content", "CI spec not defined"));
+				add(new Label("content", "CI spec not defined").add(AttributeAppender.append("class", "not-defined")));
 			}
 		} catch (Exception e) {
 			Fragment invalidFrag = new Fragment("content", "invalidFrag", this);

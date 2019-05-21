@@ -184,7 +184,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		query.setParameter("project", build.getProject());
 		build.setNumber(getNextNumber(build.getProject(), query));
 		save(build);
-
 		for (BuildParam param: build.getParams())
 			buildParamManager.save(param);
 		for (BuildDependence dependence: build.getDependencies())

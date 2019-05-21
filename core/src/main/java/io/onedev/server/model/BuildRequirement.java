@@ -23,7 +23,7 @@ public class BuildRequirement extends AbstractEntity {
 	@Column(nullable=false)
 	private String jobName;
 	
-	@Column(nullable=false)
+	@Column(nullable=false, length=65535)
 	@Lob
 	private LinkedHashMap<String, List<String>> buildParams = new LinkedHashMap<>();
 	
