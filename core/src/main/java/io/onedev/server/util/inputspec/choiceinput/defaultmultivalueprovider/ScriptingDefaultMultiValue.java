@@ -20,7 +20,7 @@ public class ScriptingDefaultMultiValue implements DefaultMultiValueProvider {
 	@Editable(description="Groovy script to be evaluated. It should return list of string. "
 			+ "Check <a href='$docRoot/Scripting' target='_blank'>scripting help</a> for details")
 	@NotEmpty
-	@Script
+	@Script(Script.GROOVY)
 	@OmitName
 	@Multiline
 	public String getScript() {

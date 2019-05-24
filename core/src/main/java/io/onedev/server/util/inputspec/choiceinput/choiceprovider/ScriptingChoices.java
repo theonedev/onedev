@@ -26,7 +26,7 @@ public class ScriptingChoices extends ChoiceProvider {
 			+ "<code>return [\"Successful\":\"#00ff00\", \"Failed\":\"#ff0000\"]</code>, "
 			+ "Use <tt>null</tt> if the value does not have a color. Check <a href='$docRoot/Scripting' target='_blank'>scripting help</a> for details")
 	@NotEmpty
-	@Script
+	@Script(Script.GROOVY)
 	@OmitName
 	public String getScript() {
 		return script;

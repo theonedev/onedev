@@ -12,11 +12,14 @@ public class ScriptPropertyViewer extends Panel {
 
 	private final String script;
 	
+	private final String modeName;
+	
 	private TextArea<String> input;
 	
-	public ScriptPropertyViewer(String id, String script) {
+	public ScriptPropertyViewer(String id, String script, String modeName) {
 		super(id);
 		
+		this.modeName = modeName;
 		this.script = script;
 	}
 
@@ -35,7 +38,8 @@ public class ScriptPropertyViewer extends Panel {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new ScriptSupportResourceReference()));
 		
-		String script = String.format("onedev.server.scriptSupport.onViewerDomReady('%s');", input.getMarkupId());
+		String script = String.format("onedev.server.scriptSupport.onViewerDomReady('%s', '%s');", 
+				input.getMarkupId(), modeName);
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 

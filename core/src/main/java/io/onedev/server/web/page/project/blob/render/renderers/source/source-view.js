@@ -23,7 +23,7 @@ onedev.server.sourceView = {
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"]
 		});
 
-		onedev.server.codemirror.setMode(cm, filePath);
+		onedev.server.codemirror.setModeByFileName(cm, filePath);
 
 		$sourceView.data("callback", callback);
 		$sourceView.data("blameMessageCallback", blameMessageCallback);

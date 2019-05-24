@@ -16,4 +16,10 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Script {
+	
+	String GROOVY = "Groovy";
+	
+	String SHELL = "Shell";
+	
+	String value();
 }

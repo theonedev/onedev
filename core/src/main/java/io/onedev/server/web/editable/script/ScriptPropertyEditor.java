@@ -19,10 +19,13 @@ import io.onedev.server.web.editable.PropertyEditor;
 @SuppressWarnings("serial")
 public class ScriptPropertyEditor extends PropertyEditor<String> {
 
+	private final String modeName;
+	
 	private TextArea<String> input;
 	
-	public ScriptPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
+	public ScriptPropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel, String modeName) {
 		super(id, propertyDescriptor, propertyModel);
+		this.modeName = modeName;
 	}
 
 	@Override
@@ -61,7 +64,8 @@ public class ScriptPropertyEditor extends PropertyEditor<String> {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new ScriptSupportResourceReference()));
 		
-		String script = String.format("onedev.server.scriptSupport.onEditorDomReady('%s');", input.getMarkupId());
+		String script = String.format("onedev.server.scriptSupport.onEditorDomReady('%s', '%s');", 
+				input.getMarkupId(), modeName);
 		response.render(OnLoadHeaderItem.forScript(script));
 	}
 

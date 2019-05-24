@@ -19,7 +19,8 @@ public class ScriptEditSupport implements EditSupport {
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Class<?> propertyClass = descriptor.getPropertyGetter().getReturnType();
-		if (descriptor.getPropertyGetter().getAnnotation(Script.class) != null) {
+		Script annotation = descriptor.getPropertyGetter().getAnnotation(Script.class);
+		if (annotation != null) {
 			Preconditions.checkState(propertyClass == String.class, 
 					"@Code annotation should only be applied to a string property");
 			return new PropertyContext<String>(descriptor) {
@@ -31,7 +32,7 @@ public class ScriptEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 							if (model.getObject() != null) {
-								return new ScriptPropertyViewer(id, model.getObject());
+								return new ScriptPropertyViewer(id, model.getObject(), annotation.value());
 							} else {
 								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 							}
@@ -42,7 +43,7 @@ public class ScriptEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-					return new ScriptPropertyEditor(componentId, descriptor, model);
+					return new ScriptPropertyEditor(componentId, descriptor, model, annotation.value());
 				}
 				
 			};

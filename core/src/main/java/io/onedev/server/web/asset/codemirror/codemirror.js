@@ -27,16 +27,23 @@ onedev.server.codemirror = {
 			cm.scrollTo(null, (top+bottom-clientHeight)/2); 			
 		}
 	},
-	setMode: function(cm, filePath) {
+	setModeByName: function(cm, modeName) {
+	    var modeInfo = CodeMirror.findModeByName(modeName);
+        if (modeInfo) 
+            onedev.server.codemirror.setMode(cm, modeInfo);
+	},
+	setModeByFileName: function(cm, fileName) {
 	    var modeInfo = CodeMirror.findModeByFileName(filePath);
-	    if (modeInfo) {
-	    	// specify mode via mime does not work for gfm (github flavored markdown)
-	    	if (modeInfo.mode === "gfm")
-	    		cm.setOption("mode", "gfm");
-	    	else
-	    		cm.setOption("mode", modeInfo.mime);
-			CodeMirror.autoLoadMode(cm, modeInfo.mode);
-	    }
+        if (modeInfo) 
+            onedev.server.codemirror.setMode(cm, modeInfo);
+	},
+	setMode: function(cm, modeInfo) {
+        // specify mode via mime does not work for gfm (github flavored markdown)
+        if (modeInfo.mode === "gfm")
+            cm.setOption("mode", "gfm");
+        else
+            cm.setOption("mode", modeInfo.mime);
+        CodeMirror.autoLoadMode(cm, modeInfo.mode);
 	},
 	getViewState: function(cm) {
 		var cursor = cm.getCursor();

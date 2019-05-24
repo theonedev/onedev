@@ -1,5 +1,5 @@
 onedev.server.scriptSupport = {
-	onEditorDomReady: function(inputId) {
+	onEditorDomReady: function(inputId, modeName) {
 		var cm = CodeMirror.fromTextArea(document.getElementById(inputId), {
 			indentWithTabs: true,
 			indentUnit: 4,
@@ -14,7 +14,7 @@ onedev.server.scriptSupport = {
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 			highlightIdentifiers: {delay: 500}
 		});
-		onedev.server.codemirror.setMode(cm, ".groovy");
+		onedev.server.codemirror.setModeByName(cm, modeName);
 		
 		var $input = $("#" + inputId);
 		cm.on("change", function() {
@@ -22,7 +22,7 @@ onedev.server.scriptSupport = {
 			onedev.server.form.markDirty($input.closest("form"));
 		});
 	},
-	onViewerDomReady: function(inputId) {
+	onViewerDomReady: function(inputId, modeName) {
 		var cm = CodeMirror.fromTextArea(document.getElementById(inputId), {
 			readOnly: true,
 			indentWithTabs: true,
@@ -37,6 +37,6 @@ onedev.server.scriptSupport = {
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 			highlightIdentifiers: {delay: 500}
 		});
-		onedev.server.codemirror.setMode(cm, ".groovy");
+		onedev.server.codemirror.setModeByName(cm, modeName);
 	}
 }

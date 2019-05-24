@@ -20,7 +20,7 @@ public class ScriptingDefaultValue implements DefaultValueProvider {
 	@Editable(description="Groovy script to be evaluated. It should return a <i>Date</i> value. "
 			+ "Check <a href='$docRoot/Scripting' target='_blank'>scripting help</a> for details")
 	@NotEmpty
-	@Script
+	@Script(Script.GROOVY)
 	@OmitName
 	@Multiline
 	public String getScript() {

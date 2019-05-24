@@ -20,7 +20,7 @@ onedev.server.plainEdit = {
 			highlightIdentifiers: {delay: 500}
 		});
 		
-		onedev.server.codemirror.setMode(cm, fileName);
+		onedev.server.codemirror.setModeByFileName(cm, fileName);
 		
 		/*
 		 * AreYouSure can not track dirty correctly for CodeMirror generated

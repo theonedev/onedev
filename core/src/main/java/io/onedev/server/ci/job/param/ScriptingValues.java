@@ -28,7 +28,7 @@ public class ScriptingValues implements ValuesProvider {
 	
 	@Editable
 	@NotEmpty
-	@Script
+	@Script(Script.GROOVY)
 	public String getScript() {
 		return script;
 	}
@@ -45,7 +45,7 @@ public class ScriptingValues implements ValuesProvider {
 			return true;
 		ScriptingValues otherScriptingValues = (ScriptingValues) other;
 		return new EqualsBuilder()
-			.append(script, otherScriptingValues.getValues())
+			.append(script, otherScriptingValues.script)
 			.isEquals();
 	}
 

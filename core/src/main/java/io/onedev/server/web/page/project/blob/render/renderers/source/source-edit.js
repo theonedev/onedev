@@ -23,7 +23,7 @@ onedev.server.sourceEdit = {
 			highlightIdentifiers: {delay: 500}
 		});
 		
-		onedev.server.codemirror.setMode(cm, filePath);
+		onedev.server.codemirror.setModeByFileName(cm, filePath);
 		
 		/*
 		 * AreYouSure can not track dirty correctly for CodeMirror generated
