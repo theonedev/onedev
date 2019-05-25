@@ -20,8 +20,22 @@ onedev.server.scriptSupport = {
 		cm.on("change", function() {
 			cm.save();
 			onedev.server.form.markDirty($input.closest("form"));
-		});
-	},
+        });
+        onedev.server.scriptSupport.trackWidth(inputId);
+    },
+    trackWidth: function(inputId) {
+        var $cm = $("#" + inputId).next();
+        var cm = $cm[0].CodeMirror;
+        function setWidth() {
+            var $cm = $("#"+inputId).next();
+            $cm.hide(); // hide temporarily in order to get original width
+            cm.setSize($cm.parent().width(), null);
+            $cm.show();
+            cm.refresh();
+        }
+        setWidth();
+        $(window).resize(setWidth);
+    },
 	onViewerDomReady: function(inputId, modeName) {
 		var cm = CodeMirror.fromTextArea(document.getElementById(inputId), {
 			readOnly: true,
@@ -36,7 +50,10 @@ onedev.server.scriptSupport = {
 			matchBrackets: true,
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 			highlightIdentifiers: {delay: 500}
-		});
-		onedev.server.codemirror.setModeByName(cm, modeName);
+        });
+
+        onedev.server.codemirror.setModeByName(cm, modeName);
+
+        onedev.server.scriptSupport.trackWidth(inputId);
 	}
 }
