@@ -23,8 +23,7 @@ public class KubernetesExecutor extends JobExecutor {
 			PatternSet collectFiles, Logger logger) {
 		logger.info("run_type: " + envVars.get("run_type"));
 		logger.info("deploy_to_production_environment: " + envVars.get("deploy_to_production_environment"));
-		String token = envVars.get("production_token");
-		logger.info("production_token: " + token);
+		logger.info("production_token: " + envVars.get("production_token"));
 	}
 
 	@Override

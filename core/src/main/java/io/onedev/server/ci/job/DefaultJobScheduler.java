@@ -320,20 +320,23 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 										envVars.put("ONEDEV_JOB", job.getName());
 										envVars.put("ONEDEV_BUILD_NUMBER", String.valueOf(build.getNumber()));
 										for (Entry<String, Input> entry: build.getParamInputs().entrySet()) {
-											String type = entry.getValue().getType();
-											List<String> values = entry.getValue().getValues();
-											if (values.size() > 1) {
-												int index = 1;
-												for (String value: values) {
-													if (type.equals(InputSpec.SECRET)) 
+											String paramName = entry.getKey();
+											if (build.isParamVisible(paramName)) {
+												String paramType = entry.getValue().getType();
+												List<String> paramValues = entry.getValue().getValues();
+												if (paramValues.size() > 1) {
+													int index = 1;
+													for (String value: paramValues) {
+														if (paramType.equals(InputSpec.SECRET)) 
+															value = build.getSecretValue(value);
+														envVars.put(paramName + "_" + index++, value);
+													}
+												} else if (paramValues.size() == 1) {
+													String value = paramValues.iterator().next();
+													if (paramType.equals(InputSpec.SECRET)) 
 														value = build.getSecretValue(value);
-													envVars.put(entry.getKey() + "_" + index++, value);
+													envVars.put(paramName, value);
 												}
-											} else if (values.size() == 1) {
-												String value = values.iterator().next();
-												if (type.equals(InputSpec.SECRET)) 
-													value = build.getSecretValue(value);
-												envVars.put(entry.getKey(), value);
 											}
 										}
 										
