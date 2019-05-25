@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.booleaninput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.util.inputspec.booleaninput.defaultvalueprovider.FalseDefaultValue;
@@ -38,7 +39,7 @@ public class BooleanInput extends InputSpec {
 
 	@Override
 	public List<String> getPossibleValues() {
-		return Lists.newArrayList("true", "false");
+		return Lists.newArrayList(StringUtils.describe(true), StringUtils.describe(false));
 	}
 
 	@Editable
@@ -66,9 +67,9 @@ public class BooleanInput extends InputSpec {
 			throw new ValidationException("Invalid boolean value");
 		} else if (strings.size() == 1) {
 			String string = strings.iterator().next();
-			if (string.equalsIgnoreCase("true"))
+			if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase(StringUtils.describe(true)))
 				return true;
-			else if (string.equalsIgnoreCase("false"))
+			else if (string.equalsIgnoreCase("false") || string.equalsIgnoreCase(StringUtils.describe(false)))
 				return false;
 			else
 				throw new ValidationException("Invalid boolean value");
@@ -80,9 +81,9 @@ public class BooleanInput extends InputSpec {
 	@Override
 	public List<String> convertToStrings(Object value) {
 		if (value instanceof Boolean)
-			return Lists.newArrayList(((Boolean)value)?"true":"false");
+			return Lists.newArrayList(StringUtils.describe((Boolean)value));
 		else
-			return Lists.newArrayList("false");
+			return Lists.newArrayList(StringUtils.describe(false));
 	}
 
 }
