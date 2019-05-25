@@ -1,12 +1,14 @@
 package io.onedev.server.util.inputspec.choiceinput.choiceprovider;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.server.OneException;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -42,7 +44,17 @@ public class ScriptingChoices extends ChoiceProvider {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("allPossible", allPossible);
 		try {
-			return (Map<String, String>) GroovyUtils.evalScript(getScript(), variables);
+			Object result = GroovyUtils.evalScript(getScript(), variables);
+			if (result instanceof Map) {
+				return (Map<String, String>) result;
+			} else if (result instanceof List) {
+				Map<String, String> choices = new HashMap<>();
+				for (String item: (List<String>)result)
+					choices.put(item, null);
+				return choices;
+			} else {
+				throw new OneException("Script should return either a Map or a List");
+			}
 		} catch (RuntimeException e) {
 			if (allPossible) {
 				logger.error("Error getting all possible choices", e);

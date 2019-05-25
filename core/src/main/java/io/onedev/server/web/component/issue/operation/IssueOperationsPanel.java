@@ -184,16 +184,18 @@ public abstract class IssueOperationsPanel extends Panel {
 		if (getIssue().getMilestone() != null)
 			criterias.add(IssueQuery.quote(IssueConstants.FIELD_MILESTONE) + " is " + IssueQuery.quote(getIssue().getMilestoneName()));
 		for (Map.Entry<String, Input> entry: getIssue().getFieldInputs().entrySet()) {
-			List<String> strings = entry.getValue().getValues();
-			if (strings.isEmpty()) {
-				criterias.add(IssueQuery.quote(entry.getKey()) + " is empty");
-			} else { 
-				InputSpec field = issueSetting.getFieldSpec(entry.getKey());
-				if (field instanceof ChoiceInput && ((ChoiceInput)field).isAllowMultiple()) {
-					for (String string: strings)
-						criterias.add(IssueQuery.quote(entry.getKey()) + " contains " + IssueQuery.quote(string));
-				} else if (!(field instanceof DateInput)) { 
-					criterias.add(IssueQuery.quote(entry.getKey()) + " is " + IssueQuery.quote(strings.iterator().next()));
+			if (getIssue().isFieldVisible(entry.getKey())) {
+				List<String> strings = entry.getValue().getValues();
+				if (strings.isEmpty()) {
+					criterias.add(IssueQuery.quote(entry.getKey()) + " is empty");
+				} else { 
+					InputSpec field = issueSetting.getFieldSpec(entry.getKey());
+					if (field instanceof ChoiceInput && ((ChoiceInput)field).isAllowMultiple()) {
+						for (String string: strings)
+							criterias.add(IssueQuery.quote(entry.getKey()) + " contains " + IssueQuery.quote(string));
+					} else if (!(field instanceof DateInput)) { 
+						criterias.add(IssueQuery.quote(entry.getKey()) + " is " + IssueQuery.quote(strings.iterator().next()));
+					}
 				}
 			}
 		}

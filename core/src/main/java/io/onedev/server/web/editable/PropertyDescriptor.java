@@ -35,7 +35,7 @@ public class PropertyDescriptor implements Serializable {
 	
 	private boolean propertyExcluded;
 	
-	private final Set<String> dependencyPropertyNames = new HashSet<>();
+	private Set<String> dependencyPropertyNames = new HashSet<>();
 	
 	private transient Method propertyGetter;
 	
@@ -133,8 +133,15 @@ public class PropertyDescriptor implements Serializable {
 		if (!checkedPropertyNames.add(getPropertyName()))
 			return false;
 		
+		Set<String> prevDependencyPropertyNames = new HashSet<>(getDependencyPropertyNames());
 		OneContext.push(oneContext);
 		try {
+			/* 
+			 * Sometimes, the dependency may include properties introduced while evaluating available choices 
+			 * of a choice input. We clear it temporarily here in order to make visibility of the property 
+			 * consistent of BeanViewer, Issue.isFieldVisible, or Build.isParamVisible 
+			 */
+			getDependencyPropertyNames().clear();
 			ShowCondition showCondition = getPropertyGetter().getAnnotation(ShowCondition.class);
 			if (showCondition != null && !(boolean)ReflectionUtils.invokeStaticMethod(getBeanClass(), showCondition.value()))
 				return false;
@@ -145,12 +152,17 @@ public class PropertyDescriptor implements Serializable {
 			}
 			return true;
 		} finally {
+			getDependencyPropertyNames().addAll(prevDependencyPropertyNames);
 			OneContext.pop();
 		}
 	}
 	
 	public Set<String> getDependencyPropertyNames() {
 		return dependencyPropertyNames;
+	}
+	
+	public void setDependencyPropertyNames(Set<String> dependencyPropertyNames) {
+		this.dependencyPropertyNames = dependencyPropertyNames;
 	}
 	
 	public String getDisplayName() {
