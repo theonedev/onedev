@@ -212,7 +212,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 					if (param.getValuesProvider() instanceof SpecifiedValues) {
 						SpecifiedValues specifiedValues = (SpecifiedValues) param.getValuesProvider();
 						try {
-							JobParam.validateValues(specifiedValues.getValues());
+							JobParam.validateParamValues(specifiedValues.getValues());
 						} catch (ValidationException e) {
 							RepeatingView paramsView = (RepeatingView) get("params");
 							paramsView.get(index).get("values").error(e.getMessage());

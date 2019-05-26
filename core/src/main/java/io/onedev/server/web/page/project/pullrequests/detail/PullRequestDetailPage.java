@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
@@ -72,6 +73,7 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.model.AbstractEntity;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
@@ -88,7 +90,7 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.branch.BranchLink;
-import io.onedev.server.web.component.build.status.BuildRequirementListPanel;
+import io.onedev.server.web.component.build.status.StatusListPanel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -452,7 +454,22 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				fragment.add(newMergeStrategyContainer());
 				fragment.add(new ReviewListPanel("reviews", requestModel));
 				
-				fragment.add(new BuildRequirementListPanel("builds", requestModel));
+				fragment.add(new StatusListPanel("builds", new LoadableDetachableModel<Collection<Build>>() {
+
+					@Override
+					protected Collection<Build> load() {
+						return getPullRequest().getPullRequestBuilds().stream().map(it->it.getBuild()).collect(Collectors.toList());
+					}
+					
+				}) {
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setVisible(!getPullRequest().getPullRequestBuilds().isEmpty());
+					}
+					
+				});
 				
 				fragment.add(new EntityWatchesPanel("watches") {
 

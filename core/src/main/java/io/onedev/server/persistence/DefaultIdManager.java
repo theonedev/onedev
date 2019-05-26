@@ -35,7 +35,7 @@ public class DefaultIdManager implements IdManager {
 		CriteriaQuery<Number> query = builder.createQuery(Number.class);
 		Root<?> root = query.from(entityClass);
 		query.select(builder.max(root.get("id")));
-		Number result = dao.getSessionManager().getSession().createQuery(query).getSingleResult();
+		Number result = dao.getSession().createQuery(query).getSingleResult();
 		return result!=null?result.longValue():0;
 	}
 	

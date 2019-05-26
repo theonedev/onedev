@@ -12,6 +12,6 @@
 .script-support .CodeMirror-scroll {
     min-height: 120px;
 }
-.property.viewer .CodeMirror .CodeMirror-cursor {
+.property-viewer .CodeMirror .CodeMirror-cursor {
 	border-left: none;
 }

@@ -5,6 +5,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
+import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
@@ -19,14 +20,14 @@ public class JobLink extends BookmarkablePageLink<Void> {
 
 	private final IModel<Project> projectModel;
 	
-	private final String revision;
+	private final ObjectId commitId;
 	
 	private final String jobName;
 	
-	public JobLink(String id, IModel<Project> projectModel, String revision, String jobName) {
+	public JobLink(String id, IModel<Project> projectModel, ObjectId commitId, String jobName) {
 		super(id, ProjectBlobPage.class);
 		this.projectModel = projectModel;
-		this.revision = revision;
+		this.commitId = commitId;
 		this.jobName = jobName;
 	}
 
@@ -52,7 +53,7 @@ public class JobLink extends BookmarkablePageLink<Void> {
 	@Override
 	public PageParameters getPageParameters() {
 		ProjectBlobPage.State state = new ProjectBlobPage.State();
-		state.blobIdent = new BlobIdent(revision, CISpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits()); 
+		state.blobIdent = new BlobIdent(commitId.name(), CISpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits()); 
 		state.position = CISpecRendererProvider.getPosition(Job.SELECTION_PREFIX + jobName);
 		return ProjectBlobPage.paramsOf(projectModel.getObject(), state);
 	}

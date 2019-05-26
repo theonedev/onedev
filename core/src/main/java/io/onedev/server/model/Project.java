@@ -10,6 +10,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -435,7 +436,17 @@ public class Project extends AbstractEntity implements Validatable {
 	}
 	
 	public List<RefInfo> getBranches() {
-		return getRefInfos(Constants.R_HEADS);
+		List<RefInfo> refInfos = getRefInfos(Constants.R_HEADS);
+		for (Iterator<RefInfo> it = refInfos.iterator(); it.hasNext();) {
+			RefInfo refInfo = it.next();
+			if (refInfo.getRef().getName().equals(GitUtils.branch2ref(getDefaultBranch()))) {
+				it.remove();
+				refInfos.add(0, refInfo);
+				break;
+			}
+		}
+		
+		return refInfos;
     }
 	
 	public List<RefInfo> getTags() {

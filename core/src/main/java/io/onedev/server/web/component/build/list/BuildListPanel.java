@@ -39,6 +39,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -329,10 +330,11 @@ public abstract class BuildListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
-				Fragment fragment = new Fragment(componentId, "statusFrag", BuildListPanel.this);
-				fragment.add(new BuildStatusIcon("icon", rowModel));
-				
 				Long buildId = rowModel.getObject().getId();
+
+				Fragment fragment = new Fragment(componentId, "statusFrag", BuildListPanel.this);
+				fragment.add(new BuildStatusIcon("icon", buildId, true));
+				
 				fragment.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 					@Override
@@ -373,7 +375,7 @@ public abstract class BuildListPanel extends Panel {
 						return getProject();
 					}
 					
-				}, build.getCommitHash(), build.getJobName());
+				}, ObjectId.fromString(build.getCommitHash()), build.getJobName());
 				link.add(new Label("label", build.getJobName()));
 				fragment.add(link);
 				cellItem.add(fragment);

@@ -3,7 +3,6 @@ package io.onedev.server.ci.job;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -15,6 +14,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.ci.job.log.LogLevel;
+import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -229,11 +229,8 @@ public class Job implements Serializable, Validatable {
 	}
 
 	public Map<String, InputSpec> getParamSpecMap() {
-		if (paramSpecMap == null) {
-			paramSpecMap = new LinkedHashMap<>();
-			for (InputSpec paramSpec: getParamSpecs()) 
-				paramSpecMap.put(paramSpec.getName(), paramSpec);
-		}
+		if (paramSpecMap == null)
+			paramSpecMap = JobParam.getParamSpecMap(paramSpecs);
 		return paramSpecMap;
 	}
 	

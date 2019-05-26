@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.event.build.BuildEvent;
+import io.onedev.server.event.build.BuildSubmitted;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -20,8 +21,13 @@ public class BuildEventBroadcaster {
 
 	@Listen
 	public void on(BuildEvent event) {
-		webSocketManager.notifyObservableChange(Build.getWebSocketObservable(event.getBuild().getId()), WicketUtils.getPageKey());
-		webSocketManager.notifyObservableChange("commit-status:" + event.getBuild().getCommitHash(), WicketUtils.getPageKey());
+		PageKey pageKey = WicketUtils.getPageKey();
+		webSocketManager.notifyObservableChange(Build.getWebSocketObservable(event.getBuild().getId()), pageKey);
+		webSocketManager.notifyObservableChange("commit-status:" + event.getBuild().getCommitHash(), pageKey);
+		if (event instanceof BuildSubmitted) { 
+			String observable = "commit-builds:" + event.getProject().getId() + ":" + event.getBuild().getCommitHash();
+			webSocketManager.notifyObservableChange(observable, pageKey);
+		}
 	}
 
 }

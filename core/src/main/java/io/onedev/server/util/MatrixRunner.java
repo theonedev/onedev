@@ -6,7 +6,7 @@ import java.util.Map;
 
 public abstract class MatrixRunner<T> {
 
-	private final Map<String, T> params;
+	private final Map<String, T> paramMap;
 	
 	private final Map<String, List<T>> paramMatrix;
 	
@@ -14,8 +14,8 @@ public abstract class MatrixRunner<T> {
 		this(new LinkedHashMap<>(), paramMatrix);
 	}
 	
-	private MatrixRunner(Map<String, T> params, Map<String, List<T>> paramMatrix) {
-		this.params = params;
+	private MatrixRunner(Map<String, T> paramMap, Map<String, List<T>> paramMatrix) {
+		this.paramMap = paramMap;
 		this.paramMatrix = paramMatrix;
 	}
 	
@@ -23,7 +23,7 @@ public abstract class MatrixRunner<T> {
 		if (!paramMatrix.isEmpty()) {
 			Map.Entry<String, List<T>> entry = paramMatrix.entrySet().iterator().next();
 			for (T value: entry.getValue()) {
-				Map<String, T> paramsCopy = new LinkedHashMap<>(params);
+				Map<String, T> paramsCopy = new LinkedHashMap<>(paramMap);
 				paramsCopy.put(entry.getKey(), value);
 				Map<String, List<T>> matrixCopy = new LinkedHashMap<>(paramMatrix);
 				matrixCopy.remove(entry.getKey());
@@ -37,7 +37,7 @@ public abstract class MatrixRunner<T> {
 				}.run();
 			}
 		} else {
-			run(params);
+			run(paramMap);
 		}
 	}
 	

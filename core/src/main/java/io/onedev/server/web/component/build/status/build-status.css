@@ -1,11 +1,17 @@
+.build-status {
+    font-size: 16px;
+}
+.build-status-running {
+    font-size: 14px;
+}
 .build-status-successful:before {
-	content: "\f00c";
+	content: "\f058";
 }
 .build-status-in_error:before {
-    content: "\f071";
+    content: "\f06a";
 }
 .build-status-failed:before {
-    content: "\f00d";
+    content: "\f057";
 }
 .build-status-cancelled:before {
     content: "\f05e";
@@ -17,10 +23,10 @@
     content: "\f1ce";
 }
 .build-status-waiting:before {
-    content: "\f04c";
+    content: "\f28c";
 }
 .build-status-queueing:before {
-    content: "\f254";
+    content: "\f192";
 }
 .build-status-successful {
 	color: #06BC06 !important;
@@ -43,6 +49,15 @@
 .build-status-list {
     width: auto;
 }
-.build-status-list>tbody>tr>td {
-    padding: 4px 8px;
+.build-status-list>tbody>tr>td.status {
+    padding: 4px 4px 4px 0;
+}
+.build-status-list>tbody>tr>td.title {
+    padding: 4px 0 4px 4px;
+}
+.floating>.content>.build-status-list>tbody>tr>td.status {
+    padding-left: 8px;
+}
+.floating>.content>.build-status-list>tbody>tr>td.title {
+    padding-right: 8px;
 }

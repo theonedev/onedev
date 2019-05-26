@@ -1,7 +1,6 @@
 package io.onedev.server.web.component.build.status;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
@@ -26,14 +25,14 @@ import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
-public abstract class CommitStatusPanel extends GenericPanel<List<Build>> {
+public abstract class CommitStatusPanel extends GenericPanel<Collection<Build>> {
 
 	public CommitStatusPanel(String id) {
 		super(id);
-		setModel(new LoadableDetachableModel<List<Build>>() {
+		setModel(new LoadableDetachableModel<Collection<Build>>() {
 
 			@Override
-			protected List<Build> load() {
+			protected Collection<Build> load() {
 				return OneDev.getInstance(BuildManager.class).query(getProject(), getCommitId().name());
 			}
 			

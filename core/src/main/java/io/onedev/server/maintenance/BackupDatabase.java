@@ -18,6 +18,7 @@ import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.persistence.DefaultPersistManager;
 import io.onedev.server.persistence.HibernateProperties;
 import io.onedev.server.persistence.IdManager;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
 
@@ -31,8 +32,9 @@ public class BackupDatabase extends DefaultPersistManager {
 	@Inject
 	public BackupDatabase(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
-			IdManager idManager, Dao dao, EntityValidator validator) {
-		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);
+			IdManager idManager, Dao dao, EntityValidator validator, 
+			TransactionManager transactionManager) {
+		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator, transactionManager);
 	}
 
 	@Override

@@ -1,11 +1,11 @@
 package io.onedev.server.ci.job;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,10 +16,12 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.Lock;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.transaction.Synchronization;
 import javax.validation.ValidationException;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -31,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
@@ -49,7 +50,6 @@ import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
-import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.BuildCommitAware;
@@ -81,17 +81,15 @@ import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.patternset.PatternSet;
 
 @Singleton
-public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableTask {
+public class DefaultJobManager implements JobManager, Runnable, SchedulableTask {
 
 	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
 	
-	private static final Logger logger = LoggerFactory.getLogger(DefaultJobScheduler.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultJobManager.class);
 	
 	private enum Status {STARTED, STOPPING, STOPPED};
 	
 	private final Map<Long, JobExecution> jobExecutions = new ConcurrentHashMap<>();
-	
-	private final ProjectManager projectManager;
 	
 	private final BuildManager buildManager;
 	
@@ -122,12 +120,11 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	private volatile Status status;
 	
 	@Inject
-	public DefaultJobScheduler(ProjectManager projectManager, BuildManager buildManager, 
+	public DefaultJobManager(BuildManager buildManager, 
 			UserManager userManager, ListenerRegistry listenerRegistry, SettingManager settingManager,
 			TransactionManager transactionManager, LogManager logManager, ExecutorService executorService,
 			SessionManager sessionManager, Set<DependencyPopulator> dependencyPopulators, 
 			TaskScheduler taskScheduler, BuildParamManager buildParamManager) {
-		this.projectManager = projectManager;
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -141,54 +138,32 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 		this.buildParamManager = buildParamManager;
 	}
 
-	@Sessional
+	@Transactional
 	@Override
-	public void submit(Project project, String commitHash, String jobName, Map<String, List<List<String>>> paramMatrix) {
-		String lockKey = "job-schedule: " + project.getId() + "-" + commitHash;
-		Long projectId = project.getId();
-		Long submitterId = User.idOf(userManager.getCurrent());
-		transactionManager.runAsyncAfterCommit(new Runnable() {
-
+	public Build submit(Project project, String commitHash, String jobName, Map<String, List<String>> paramMap) {
+    	Lock lock = LockUtils.getLock("job-schedule: " + project.getId() + "-" + commitHash);
+		transactionManager.getTransaction().registerSynchronization(new Synchronization() {
+			
 			@Override
-			public void run() {
-				LockUtils.call(lockKey, new Callable<Void>() {
-
-					@Override
-					public Void call() {
-						transactionManager.run(new Runnable() {
-
-							@Override
-							public void run() {
-								Project project = projectManager.load(projectId);
-								User submitter = (submitterId != null? userManager.load(submitterId): null);
-								new MatrixRunner<List<String>>(paramMatrix) {
-									
-									@Override
-									public void run(Map<String, List<String>> params) {
-										submit(project, submitter, commitHash, jobName, params, new LinkedHashSet<>()); 
-									}
-									
-								}.run();
-							}
-							
-						});
-						return null;
-					}
-					
-				});
+			public void beforeCompletion() {
+			}
+			
+			@Override
+			public void afterCompletion(int status) {
+				lock.unlock();
 			}
 			
 		});
+    	
+    	try {
+        	lock.lockInterruptibly();
+			return submit(project, commitHash, jobName, paramMap, new LinkedHashSet<>()); 
+    	} catch (Exception e) {
+    		throw ExceptionUtils.unchecked(e);
+		}
 	}
 	
-	private Map<String, List<List<String>>> getParamMatrix(List<JobParam> params) {
-		Map<String, List<List<String>>> paramMatrix = new LinkedHashMap<>();
-		for (JobParam param: params) 
-			paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
-		return paramMatrix;
-	}
-	
-	private List<Build> submit(Project project, @Nullable User user, String commitHash, String jobName, 
+	private Build submit(Project project, String commitHash, String jobName, 
 			Map<String, List<String>> paramMap, Set<String> checkedJobNames) {
 		Build build = new Build();
 		build.setProject(project);
@@ -196,30 +171,30 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 		build.setJobName(jobName);
 		build.setSubmitDate(new Date());
 		build.setStatus(Build.Status.WAITING);
-		build.setSubmitter(user);
+		build.setSubmitter(userManager.getCurrent());
 		
 		try {
-			JobParam.validateParams(build.getJob().getParamSpecs(), JobParam.getParamMatrix(paramMap));
+			JobParam.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
 		} catch (ValidationException e) {
-			markBuildError(build, e.getMessage());
-			return Lists.newArrayList(build);
+			String message = String.format("Error validating build parameters (project: %s, commit: %s, job: %s)", 
+					project.getName(), commitHash, jobName);
+			throw new OneException(message, e);
 		}
 		
 		if (!checkedJobNames.add(jobName)) {
-			markBuildError(build, "Circular job dependencies found: " + checkedJobNames);
-			return Lists.newArrayList(build);
+			String message = String.format("Circular job dependencies found (project: %s, commit: %s, job: %s, dependency loop: %s)", 
+					project.getName(), commitHash, jobName, checkedJobNames);
+			throw new OneException(message);
 		}
 
-		Map<String, List<String>> copyOfParamMap = new HashMap<>(paramMap);
+		Map<String, List<String>> paramMapToQuery = new HashMap<>(paramMap);
 		for (InputSpec paramSpec: build.getJob().getParamSpecs()) {
 			if (paramSpec instanceof SecretInput)
-				copyOfParamMap.remove(paramSpec.getName());
+				paramMapToQuery.remove(paramSpec.getName());
 		}
 
-		List<Build> builds = buildManager.query(project, commitHash, jobName, copyOfParamMap);
+		Collection<Build> builds = buildManager.query(project, commitHash, jobName, paramMapToQuery);
 		if (builds.isEmpty()) {
-			builds.add(build);
-			
 			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 				InputSpec paramSpec = Preconditions.checkNotNull(build.getJob().getParamSpecMap().get(entry.getKey()));
 				if (!entry.getValue().isEmpty()) {
@@ -241,18 +216,16 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 			}
 			
 			for (JobDependency dependency: build.getJob().getDependencies()) {
-				new MatrixRunner<List<String>>(getParamMatrix(dependency.getJobParams())) {
+				new MatrixRunner<List<String>>(JobParam.getParamMatrix(dependency.getJobParams())) {
 					
 					@Override
 					public void run(Map<String, List<String>> params) {
-						List<Build> dependencyBuilds = submit(project, null, commitHash, dependency.getJobName(), 
+						Build dependencyBuild = submit(project, commitHash, dependency.getJobName(), 
 								params, new LinkedHashSet<>(checkedJobNames));
-						for (Build dependencyBuild: dependencyBuilds) {
-							BuildDependence dependence = new BuildDependence();
-							dependence.setDependency(dependencyBuild);
-							dependence.setDependent(build);
-							build.getDependencies().add(dependence);
-						}
+						BuildDependence dependence = new BuildDependence();
+						dependence.setDependency(dependencyBuild);
+						dependence.setDependent(build);
+						build.getDependencies().add(dependence);
 					}
 					
 				}.run();
@@ -260,8 +233,10 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 
 			buildManager.create(build);
 			listenerRegistry.post(new BuildSubmitted(build));
+			return build;
+		} else {
+			return builds.iterator().next();
 		}
-		return builds;
 	}
 	
 	@Nullable
@@ -396,8 +371,6 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	private void markBuildError(Build build, String errorMessage) {
 		build.setStatus(Build.Status.IN_ERROR, errorMessage);
 		build.setFinishDate(new Date());
-		if (build.isNew())
-			buildManager.create(build);
 		listenerRegistry.post(new BuildFinished(build));
 	}
 	
@@ -412,8 +385,16 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 					if (ciSpec != null) {
 						for (Job job: ciSpec.getJobs()) {
 							JobTrigger trigger = job.getMatchedTrigger(event);
-							if (trigger != null)
-								submit(event.getProject(), commitId.name(), job.getName(), getParamMatrix(trigger.getParams()));
+							if (trigger != null) {
+								new MatrixRunner<List<String>>(JobParam.getParamMatrix(trigger.getParams())) {
+									
+									@Override
+									public void run(Map<String, List<String>> paramMap) {
+										submit(event.getProject(), commitId.name(), job.getName(), paramMap); 
+									}
+									
+								}.run();
+							}
 						}
 					}
 				} catch (Exception e) {
@@ -618,5 +599,5 @@ public class DefaultJobScheduler implements JobScheduler, Runnable, SchedulableT
 	public ScheduleBuilder<?> getScheduleBuilder() {
 		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
-	
+
 }

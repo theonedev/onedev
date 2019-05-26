@@ -81,18 +81,22 @@ public class DefaultPersistManager implements PersistManager {
 	
 	protected final StandardServiceRegistry serviceRegistry;
 	
+	protected final TransactionManager transactionManager;
+	
 	protected volatile SessionFactory sessionFactory;
 	
 	@Inject
 	public DefaultPersistManager(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
-			IdManager idManager, Dao dao, EntityValidator validator) {
+			IdManager idManager, Dao dao, EntityValidator validator, 
+			TransactionManager transactionManager) {
 		this.physicalNamingStrategy = physicalNamingStrategy;
 		this.properties = properties;
 		this.interceptor = interceptor;
 		this.idManager = idManager;
 		this.dao = dao;
 		this.validator = validator;
+		this.transactionManager = transactionManager;
 		serviceRegistry = new StandardServiceRegistryBuilder().applySettings(properties).build();
 	}
 	
@@ -178,19 +182,16 @@ public class DefaultPersistManager implements PersistManager {
 
     		idManager.init();
 			
-			Session session = sessionFactory.openSession();
-			Transaction transaction = session.beginTransaction();
-			try {
-				ModelVersion dataVersion = new ModelVersion();
-				dataVersion.versionColumn = MigrationHelper.getVersion(DatabaseMigrator.class);
-				session.save(dataVersion);
-				session.flush();
-				transaction.commit();
-			} catch (Exception e) {
-				transaction.rollback();
-			} finally {
-				session.close();
-			}
+			transactionManager.run(new Runnable() {
+
+				@Override
+				public void run() {
+					ModelVersion dataVersion = new ModelVersion();
+					dataVersion.versionColumn = MigrationHelper.getVersion(DatabaseMigrator.class);
+					transactionManager.getSession().save(dataVersion);
+				}
+				
+			});
 		} else {
 			sessionFactory = metadata.getSessionFactoryBuilder().applyInterceptor(interceptor).build();
     		idManager.init();
@@ -437,7 +438,7 @@ public class DefaultPersistManager implements PersistManager {
 	@Sessional
 	@Override
 	public void importData(Metadata metadata, File dataDir) {
-		Session session = dao.getSessionManager().getSession();
+		Session session = dao.getSession();
 		List<Class<?>> entityTypes = getEntityTypes(sessionFactory);
 		Collections.reverse(entityTypes);
 		for (Class<?> entityType: entityTypes) {

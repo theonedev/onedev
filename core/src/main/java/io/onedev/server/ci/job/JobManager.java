@@ -6,12 +6,12 @@ import java.util.Map;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 
-public interface JobScheduler {
+public interface JobManager {
 	
-	void submit(Project project, String commitHash, String jobName, Map<String, List<List<String>>> paramMatrix);
+	Build submit(Project project, String commitHash, String jobName, Map<String, List<String>> paramMap);
 	
 	void resubmit(Build build, Map<String, List<String>> paramMap);
 	
 	void cancel(Build build);
-
+	
 }

@@ -33,8 +33,6 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	@Nullable
 	PullRequest findLatest(Project targetProject, User submitter);
 	
-	Collection<PullRequest> queryOpenByCommit(String commitHash);
-    
     void discard(PullRequest request, @Nullable String note);
     
     void reopen(PullRequest request, @Nullable String note);

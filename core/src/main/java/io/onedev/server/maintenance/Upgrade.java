@@ -32,6 +32,7 @@ import io.onedev.server.migration.MigrationHelper;
 import io.onedev.server.persistence.DefaultPersistManager;
 import io.onedev.server.persistence.HibernateProperties;
 import io.onedev.server.persistence.IdManager;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
 
@@ -49,8 +50,9 @@ public class Upgrade extends DefaultPersistManager {
 	@Inject
 	public Upgrade(PhysicalNamingStrategy physicalNamingStrategy,
 			HibernateProperties properties, Interceptor interceptor, 
-			IdManager idManager, Dao dao, EntityValidator validator, PluginManager pluginManager) {
-		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);
+			IdManager idManager, Dao dao, EntityValidator validator, PluginManager pluginManager, 
+			TransactionManager transactionManager) {
+		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator, transactionManager);
 		appName = pluginManager.getProduct().getName();
 	}
 

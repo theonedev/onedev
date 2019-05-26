@@ -24,6 +24,12 @@ public class KubernetesExecutor extends JobExecutor {
 		logger.info("run_type: " + envVars.get("run_type"));
 		logger.info("deploy_to_production_environment: " + envVars.get("deploy_to_production_environment"));
 		logger.info("production_token: " + envVars.get("production_token"));
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override

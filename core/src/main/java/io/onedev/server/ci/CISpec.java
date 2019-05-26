@@ -1,5 +1,7 @@
 package io.onedev.server.ci;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,8 +15,11 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.ValidationException;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.DependencyAware;
+import io.onedev.commons.utils.DependencyUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
@@ -35,6 +40,8 @@ public class CISpec implements Serializable, Validatable {
 	private List<Job> jobs = new ArrayList<>();
 	
 	private transient Map<String, Job> jobMap;
+	
+	private transient List<Job> sortedJobs;
 
 	@Editable
 	public List<Job> getJobs() {
@@ -52,6 +59,37 @@ public class CISpec implements Serializable, Validatable {
 				jobMap.put(job.getName(), job);
 		}
 		return jobMap;
+	}
+	
+	/**
+	 * Get jobs sorted by dependencies
+	 * 
+	 * @return
+	 */
+	public List<Job> getSortedJobs() {
+		if (sortedJobs == null) {
+			sortedJobs = new ArrayList<>();
+			
+			Map<String, DependencyAware<String>> dependencyMap = new LinkedHashMap<>();
+			for (Job job: jobs) {
+				dependencyMap.put(job.getName(), new DependencyAware<String>() {
+
+					@Override
+					public String getId() {
+						return job.getName();
+					}
+
+					@Override
+					public Set<String> getDependencies() {
+						return job.getDependencies().stream().map(it->it.getJobName()).collect(toSet());
+					}
+					
+				});
+			}
+			for (String jobName: DependencyUtils.sortDependencies(dependencyMap)) 
+				sortedJobs.add(Preconditions.checkNotNull(getJobMap().get(jobName)));
+		}
+		return sortedJobs;
 	}
 
 	@Override

@@ -133,13 +133,13 @@ public class DefaultCacheManager implements CacheManager {
 		for (Membership membership: dao.query(Membership.class))
 			memberships.put(membership.getId(), membership.getFacade());
 		
-		Query<?> query = dao.getSessionManager().getSession().createQuery("select id, project.id, commitHash from Build");
+		Query<?> query = dao.getSession().createQuery("select id, project.id, commitHash from Build");
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			Long buildId = (Long) fields[0];
 			builds.put(buildId, new BuildFacade(buildId, (Long)fields[1], (String)fields[2]));
 		}
 		
-		query = dao.getSessionManager().getSession().createQuery("select id, project.id, number from Issue");
+		query = dao.getSession().createQuery("select id, project.id, number from Issue");
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			Long issueId = (Long) fields[0];
 			issues.put(issueId, new IssueFacade(issueId, (Long)fields[1], (Long)fields[2]));
@@ -150,7 +150,7 @@ public class DefaultCacheManager implements CacheManager {
 		for (UserAuthorization userAuthorization: dao.query(UserAuthorization.class))
 			userAuthorizations.put(userAuthorization.getId(), userAuthorization.getFacade());
 		
-		query = dao.getSessionManager().getSession().createQuery("select distinct name, type, value, id from BuildParam order by id");
+		query = dao.getSession().createQuery("select distinct name, type, value, id from BuildParam order by id");
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			if (!fields[1].equals(InputSpec.SECRET))
 				addBuildParam((String) fields[0], (String) fields[2]);

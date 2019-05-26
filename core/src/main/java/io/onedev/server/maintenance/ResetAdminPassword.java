@@ -16,6 +16,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.persistence.DefaultPersistManager;
 import io.onedev.server.persistence.HibernateProperties;
 import io.onedev.server.persistence.IdManager;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.validation.EntityValidator;
 
@@ -33,8 +34,9 @@ public class ResetAdminPassword extends DefaultPersistManager {
 	@Inject
 	public ResetAdminPassword(PhysicalNamingStrategy physicalNamingStrategy, HibernateProperties properties, 
 			Interceptor interceptor, IdManager idManager, Dao dao, 
-			EntityValidator validator, UserManager userManager, PasswordService passwordService) {
-		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator);
+			EntityValidator validator, UserManager userManager, PasswordService passwordService, 
+			TransactionManager transactionManager) {
+		super(physicalNamingStrategy, properties, interceptor, idManager, dao, validator, transactionManager);
 		this.userManager = userManager;
 		this.passwordService = passwordService;
 	}

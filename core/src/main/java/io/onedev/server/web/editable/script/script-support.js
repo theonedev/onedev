@@ -48,6 +48,7 @@ onedev.server.scriptSupport = {
 			styleSelectedText: true,
 			foldGutter: true,
 			matchBrackets: true,
+			scrollbarStyle: "simple",
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 			highlightIdentifiers: {delay: 500}
         });

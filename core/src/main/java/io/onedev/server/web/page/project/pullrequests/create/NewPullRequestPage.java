@@ -65,7 +65,6 @@ import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.branch.picker.AffinalBranchPicker;
-import io.onedev.server.web.component.build.status.BuildRequirementListPanel;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
@@ -633,8 +632,6 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		form.add(newMergeStrategyContainer());
 		
 		form.add(new ReviewListPanel("reviewers", requestModel));
-
-		form.add(new BuildRequirementListPanel("builds", requestModel));
 		
 		return fragment;
 	}

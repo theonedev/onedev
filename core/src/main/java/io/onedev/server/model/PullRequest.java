@@ -8,7 +8,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -156,7 +155,7 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private Collection<PullRequestReview> reviews = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
-	private Collection<BuildRequirement> buildRequirements = new ArrayList<>();
+	private Collection<PullRequestBuild> pullRequestBuilds = new ArrayList<>();
 	
 	@OneToMany(mappedBy="request", cascade=CascadeType.REMOVE)
 	private Collection<PullRequestComment> comments = new ArrayList<>();
@@ -343,12 +342,12 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		sortedUpdates = null;
 	}
 
-	public Collection<BuildRequirement> getBuildRequirements() {
-		return buildRequirements;
+	public Collection<PullRequestBuild> getPullRequestBuilds() {
+		return pullRequestBuilds;
 	}
 
-	public void setBuildRequirements(Collection<BuildRequirement> buildRequirements) {
-		this.buildRequirements = buildRequirements;
+	public void setPullRequestBuilds(Collection<PullRequestBuild> pullRequestBuilds) {
+		this.pullRequestBuilds = pullRequestBuilds;
 	}
 
 	public Collection<PullRequestComment> getComments() {
@@ -712,15 +711,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	@Nullable
-	public BuildRequirement getBuildRequirement(String jobName, Map<String, List<String>> buildParams) {
-		for (BuildRequirement requirement: getBuildRequirements()) {
-			if (requirement.getJobName().equals(jobName) && requirement.getBuildParams().equals(buildParams))
-				return requirement;
-		}
-		return null;
-	}
-	
-	@Nullable
 	public PullRequestReview getReview(User user) {
 		for (PullRequestReview review: getReviews()) {
 			if (review.getUser().equals(user))
@@ -819,8 +809,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	}
 	
 	public boolean isAllBuildsSuccessful() {
-		for (BuildRequirement requirement: getBuildRequirements()) {
-			if (requirement.getBuild() == null || requirement.getBuild().getStatus() != Build.Status.SUCCESSFUL)
+		for (PullRequestBuild requirement: getPullRequestBuilds()) {
+			if (requirement.getBuild().getStatus() != Build.Status.SUCCESSFUL)
 				return false;
 		}
 		return true;

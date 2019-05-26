@@ -17,7 +17,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -61,10 +60,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.JobDependency;
-import io.onedev.server.ci.job.JobScheduler;
+import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.param.JobParam;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.entitymanager.BuildRequirementManager;
+import io.onedev.server.entitymanager.PullRequestBuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -83,7 +81,7 @@ import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.FileChange;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.BuildRequirement;
+import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -153,39 +151,36 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	private final PullRequestReviewManager pullRequestReviewManager;
 	
-	private final BuildRequirementManager buildRequirementManager;
+	private final PullRequestBuildManager pullRequestBuildManager;
 
 	private final BatchWorkManager batchWorkManager;
 	
 	private final PullRequestChangeManager pullRequestChangeManager;
 	
-	private final BuildManager buildManager;
-	
 	private final TransactionManager transactionManager;
 	
-	private final JobScheduler jobScheduler;
+	private final JobManager jobManager;
 	
 	@Inject
 	public DefaultPullRequestManager(Dao dao, PullRequestUpdateManager pullRequestUpdateManager,  
 			PullRequestReviewManager pullRequestReviewManager, UserManager userManager, 
 			MarkdownManager markdownManager, BatchWorkManager batchWorkManager, 
 			ListenerRegistry listenerRegistry, SessionManager sessionManager,
-			PullRequestChangeManager pullRequestChangeManager, BuildManager buildManager,
-			BuildRequirementManager buildRequirementManager, TransactionManager transactionManager, 
-			JobScheduler jobScheduler, ProjectManager projectManager) {
+			PullRequestChangeManager pullRequestChangeManager, 
+			PullRequestBuildManager pullRequestBuildManager, TransactionManager transactionManager, 
+			JobManager jobManager, ProjectManager projectManager) {
 		super(dao);
 		
 		this.pullRequestUpdateManager = pullRequestUpdateManager;
 		this.pullRequestReviewManager = pullRequestReviewManager;
 		this.transactionManager = transactionManager;
-		this.buildManager = buildManager;
 		this.userManager = userManager;
 		this.batchWorkManager = batchWorkManager;
 		this.sessionManager = sessionManager;
 		this.listenerRegistry = listenerRegistry;
 		this.pullRequestChangeManager = pullRequestChangeManager;
-		this.buildRequirementManager = buildRequirementManager;
-		this.jobScheduler = jobScheduler;
+		this.pullRequestBuildManager = pullRequestBuildManager;
+		this.jobManager = jobManager;
 		this.projectManager = projectManager;
 	}
 	
@@ -376,7 +371,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			pullRequestUpdateManager.save(update, false);
 		
 		pullRequestReviewManager.saveReviews(request);
-		buildRequirementManager.saveBuildRequirements(request);
+		pullRequestBuildManager.savePullRequestBuilds(request);
 
 		checkAsync(request);
 		
@@ -445,12 +440,12 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					checkQuality(request);
 					
 					pullRequestReviewManager.saveReviews(request);
-					buildRequirementManager.saveBuildRequirements(request);
+					pullRequestBuildManager.savePullRequestBuilds(request);
 					
-					MergePreview mergePreview = request.getMergePreview();
+					MergePreview preview = request.getMergePreview();
 					
 					if (request.isAllReviewsApproved() && request.isAllBuildsSuccessful()
-							&& mergePreview != null && mergePreview.getMerged() != null) {
+							&& preview != null && preview.getMerged() != null) {
 						merge(request);
 					}
 				}
@@ -553,7 +548,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					ofOpen(), 
 					Restrictions.or(ofSource(projectAndBranch), ofTarget(projectAndBranch)));
 			for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) {
-				check(request);
+				try {
+					check(request);
+				} catch (Exception e) {
+					String message = String.format("Error checking pull request (project: %s, number: %d)", 
+							request.getTargetProject().getName(), request.getNumber());
+					logger.error(message, e);
+				}
 			}
 		}
 	}
@@ -637,9 +638,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	public void on(BuildEvent event) {
 		Build build = event.getBuild();
-		for (PullRequest request: queryOpenByCommit(build.getCommitHash())) { 
-			listenerRegistry.post(new PullRequestBuildEvent(request, build));
-			checkAsync(request);
+		for (PullRequestBuild pullRequestBuild: build.getPullRequestBuilds()) { 
+			listenerRegistry.post(new PullRequestBuildEvent(pullRequestBuild));
+			checkAsync(pullRequestBuild.getRequest());
 		}
 	}
 	
@@ -664,7 +665,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					        ThreadContext.bind(subject);
 							check(load(requestId));
 						} catch (Exception e) {
-							logger.error("Error checking pull request status", e);
+							String message = String.format("Error checking pull request (project: %s, number: %d)", 
+									request.getTargetProject().getName(), request.getNumber());
+							logger.error(message, e);
 						} finally {
 							ThreadContext.unbindSubject();
 						}
@@ -711,68 +714,35 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 
 	private void checkBuilds(PullRequest request, List<JobDependency> jobDependencies) {
-		String commit;
+		Collection<PullRequestBuild> prevRequirements = new ArrayList<>(request.getPullRequestBuilds());
+		request.getPullRequestBuilds().clear();
 		MergePreview preview = request.getMergePreview();
-		if (preview != null && preview.getMerged() != null) 
-			commit = preview.getMerged();
-		else 
-			commit = null;
-		
-		List<Build> builds;
-		if (commit != null) 
-			builds = buildManager.query(request.getTargetProject(), commit); 
-		else
-			builds = new ArrayList<>();
-		
-		Collection<BuildRequirement> effectiveRequirements = new HashSet<>();
-		
-		for (JobDependency dependency: jobDependencies) {
-			Map<String, List<List<String>>> paramMatrix = new HashMap<>();
-			Set<String> secretParamNames = new HashSet<>();
-			for (JobParam param: dependency.getJobParams()) {
-				paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
-				if (param.isSecret())
-					secretParamNames.add(param.getName());
-			}
-			
-			new MatrixRunner<List<String>>(paramMatrix) {
-				
-				@Override
-				public void run(Map<String, List<String>> params) {
-					BuildRequirement requirement = request.getBuildRequirement(dependency.getJobName(), params);
-					if (requirement == null) {
-						requirement = new BuildRequirement();
-						requirement.setJobName(dependency.getJobName());
-						requirement.setBuildParams(new LinkedHashMap<>(params));
-						requirement.setRequest(request);
-						request.getBuildRequirements().add(requirement);
-					} 
-					effectiveRequirements.add(requirement);
+		if (preview != null && preview.getMerged() != null) {
+			for (JobDependency dependency: jobDependencies) {
+				new MatrixRunner<List<String>>(JobParam.getParamMatrix(dependency.getJobParams())) {
 					
-					Build build = null;
-					for (Build each: builds) {
-						Map<String, List<String>> paramsWithoutSecrets = new HashMap<>(params);
-						Map<String, List<String>> buildParamsWithoutSecrets = new HashMap<>(each.getParamMap());
-						paramsWithoutSecrets.keySet().removeAll(secretParamNames);
-						buildParamsWithoutSecrets.keySet().removeAll(secretParamNames);
-						if (each.getJobName().equals(dependency.getJobName()) && buildParamsWithoutSecrets.equals(paramsWithoutSecrets)) {
-							build = each;
-							break;
+					@Override
+					public void run(Map<String, List<String>> paramMap) {
+						Build build = jobManager.submit(request.getTargetProject(), preview.getMerged(), 
+								dependency.getJobName(), paramMap);
+						PullRequestBuild pullRequestBuild = null;
+						for (PullRequestBuild prevRequirement: prevRequirements) {
+							if (prevRequirement.getBuild().equals(build)) {
+								pullRequestBuild = prevRequirement;
+								break;
+							}
 						}
+						if (pullRequestBuild == null) {
+							pullRequestBuild = new PullRequestBuild();
+							pullRequestBuild.setRequest(request);
+							pullRequestBuild.setBuild(build);
+						}
+						request.getPullRequestBuilds().add(pullRequestBuild);
 					}
 					
-					requirement.setBuild(build);
-					
-					if (commit != null) {
-						jobScheduler.submit(request.getTargetProject(), commit, 
-								dependency.getJobName(), JobParam.getParamMatrix(params));
-					}
-				}
-				
-			}.run();
+				}.run();
+			}
 		}
-		
-		request.getBuildRequirements().retainAll(effectiveRequirements);
 	}
 	
 	private void checkReviews(ReviewRequirement reviewRequirement, PullRequestUpdate update) {
@@ -946,18 +916,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			addedContributions += pathEdits;
 		}
 		return addedContributions;
-	}
-	
-	@Transactional
-	@Override
-	public Collection<PullRequest> queryOpenByCommit(String commitHash) {
-		EntityCriteria<PullRequest> criteria = EntityCriteria.of(PullRequest.class);
-		criteria.add(PullRequest.CriterionHelper.ofOpen());
-		Criterion verifyCommitCriterion = Restrictions.or(
-				Restrictions.eq("headCommitHash", commitHash), 
-				Restrictions.eq("lastMergePreview.merged", commitHash));
-		criteria.add(verifyCommitCriterion);
-		return query(criteria);
 	}
 	
 	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 

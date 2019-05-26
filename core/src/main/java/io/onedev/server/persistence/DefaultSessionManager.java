@@ -3,6 +3,8 @@ package io.onedev.server.persistence;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
+import javax.inject.Provider;
+
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -19,7 +21,7 @@ public class DefaultSessionManager implements SessionManager {
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultSessionManager.class);
 	
-	private final PersistManager persistManager;
+	private final Provider<PersistManager> persistManagerProvider;
 	
 	private final ExecutorService executorService;
 	
@@ -31,7 +33,7 @@ public class DefaultSessionManager implements SessionManager {
 
 				@Override
 				protected Session openObject() {
-					Session session = persistManager.getSessionFactory().openSession();
+					Session session = persistManagerProvider.get().getSessionFactory().openSession();
 					// Session is supposed to be able to write only in transactional methods
 					session.setHibernateFlushMode(FlushMode.MANUAL);
 					
@@ -49,8 +51,8 @@ public class DefaultSessionManager implements SessionManager {
 	};
 	
 	@Inject
-	public DefaultSessionManager(PersistManager persistManager, ExecutorService executorService) {
-		this.persistManager = persistManager;
+	public DefaultSessionManager(Provider<PersistManager> persistManagerProvider, ExecutorService executorService) {
+		this.persistManagerProvider = persistManagerProvider;
 		this.executorService = executorService;
 	}
 
@@ -71,7 +73,7 @@ public class DefaultSessionManager implements SessionManager {
 	
 	@Override
 	public <T> T call(Callable<T> callable) {
-		if (persistManager.getSessionFactory() != null) {
+		if (persistManagerProvider.get().getSessionFactory() != null) {
 			openSession();
 			try {
 				return callable.call();

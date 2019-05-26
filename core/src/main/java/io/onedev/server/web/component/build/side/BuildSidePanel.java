@@ -23,6 +23,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
@@ -118,7 +119,7 @@ public abstract class BuildSidePanel extends Panel {
 				return getProject();
 			}
 			
-		}, getBuild().getCommitHash(), getBuild().getJobName());
+		}, ObjectId.fromString(getBuild().getCommitHash()), getBuild().getJobName());
 		jobLink.add(new Label("label", getBuild().getJobName()));
 		general.add(jobLink);
 		

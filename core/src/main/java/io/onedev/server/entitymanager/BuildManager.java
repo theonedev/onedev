@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -17,13 +18,13 @@ public interface BuildManager extends EntityManager<Build> {
     @Nullable
     Build find(Project project, long number);
     
-	List<Build> query(Project project, String commitHash, @Nullable String jobName, Map<String, List<String>> params); 
+	Collection<Build> query(Project project, String commitHash, @Nullable String jobName, Map<String, List<String>> params); 
 	
-	List<Build> query(Project project, String commitHash); 
+	Collection<Build> query(Project project, String commitHash); 
 	
 	void create(Build build);
 	
-	List<Build> queryUnfinished();
+	Collection<Build> queryUnfinished();
 
 	List<Build> query(Project project, String term, int count);
 	

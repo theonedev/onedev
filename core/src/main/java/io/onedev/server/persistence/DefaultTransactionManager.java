@@ -155,10 +155,20 @@ public class DefaultTransactionManager implements TransactionManager {
 			
 		});
 	}
+	
+	@Override
+	public SessionManager getSessionManager() {
+		return sessionManager;
+	}
 
 	@Override
 	public Transaction getTransaction() {
-		return sessionManager.getSession().getTransaction();
+		return getSession().getTransaction();
 	}
 
+	@Override
+	public Session getSession() {
+		return sessionManager.getSession();
+	}
+	
 }

@@ -33,7 +33,7 @@ onedev.server.codemirror = {
             onedev.server.codemirror.setMode(cm, modeInfo);
 	},
 	setModeByFileName: function(cm, fileName) {
-	    var modeInfo = CodeMirror.findModeByFileName(filePath);
+	    var modeInfo = CodeMirror.findModeByFileName(fileName);
         if (modeInfo) 
             onedev.server.codemirror.setMode(cm, modeInfo);
 	},

@@ -169,7 +169,7 @@ public class PullRequestNotificationManager implements PersistListener {
 			mailManager.sendMailAsync(Lists.newArrayList(request.getSubmitter().getEmail()), subject, body);
 			notifiedUsers.add(request.getSubmitter());
 		} else if (event instanceof PullRequestBuildEvent) {
-			Build build = ((PullRequestBuildEvent) event).getBuild();
+			Build build = ((PullRequestBuildEvent) event).getPullRequestBuild().getBuild();
 			if (build.getStatus() == Build.Status.IN_ERROR 
 					|| build.getStatus() == Build.Status.FAILED 
 					|| build.getStatus() == Build.Status.CANCELLED

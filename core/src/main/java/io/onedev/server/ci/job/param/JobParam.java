@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -87,7 +88,7 @@ public class JobParam implements Serializable {
 			.toHashCode();
 	}		
 	
-	public static void validateValues(List<List<String>> values) {
+	public static void validateParamValues(List<List<String>> values) {
 		if (values.isEmpty())
 			throw new ValidationException("At least one value needs to be specified");
 		Set<List<String>> encountered = new HashSet<>();
@@ -99,42 +100,62 @@ public class JobParam implements Serializable {
 		}
 	}
 	
-	public static void validateParams(List<InputSpec> paramSpecs, Map<String, List<List<String>>> params) {
-		Map<String, InputSpec> paramSpecMap = new HashMap<>();
-		for (InputSpec paramSpec: paramSpecs) {
-			paramSpecMap.put(paramSpec.getName(), paramSpec);
-			if (!params.containsKey(paramSpec.getName()))
-				throw new ValidationException("Missing job parameter: " + paramSpec.getName());
-		}
-		
-		for (Map.Entry<String, List<List<String>>> entry: params.entrySet()) {
-			InputSpec paramSpec = paramSpecMap.get(entry.getKey());
-			if (paramSpec == null)
-				throw new ValidationException("Unknown job parameter: " + entry.getKey());
-			
+	public static void validateParamMatrix(Map<String, InputSpec> paramSpecMap, Map<String, List<List<String>>> paramMatrix) {
+		validateParamNames(paramSpecMap.keySet(), paramMatrix.keySet());
+		for (Map.Entry<String, List<List<String>>> entry: paramMatrix.entrySet()) {
+			InputSpec paramSpec = Preconditions.checkNotNull(paramSpecMap.get(entry.getKey()));
 			if (entry.getValue() != null) {
 				try {
-					validateValues(entry.getValue());
+					validateParamValues(entry.getValue());
 				} catch (ValidationException e) {
 					throw new ValidationException("Error validating values of parameter '" 
 							+ entry.getKey() + "': " + e.getMessage());
 				}
 				
-				for (List<String> value: entry.getValue()) {
-					try {
-						paramSpec.convertToObject(value);
-					} catch (Exception e) {
-						String displayValue;
-						if (paramSpec instanceof SecretInput)
-							displayValue = SecretInput.MASK;
-						else
-							displayValue = value.toString();
-						throw new ValidationException("Error validating value '" + displayValue + "' of parameter '" 
-								+ entry.getKey() + "': " + e.getMessage());
-					}
-				}
+				for (List<String> value: entry.getValue()) 
+					validateParamValue(paramSpec, entry.getKey(), value);
 			}
 		}
+	}
+	
+	private static void validateParamValue(InputSpec paramSpec, String paramName, List<String> paramValue) {
+		try {
+			paramSpec.convertToObject(paramValue);
+		} catch (Exception e) {
+			String displayValue;
+			if (paramSpec instanceof SecretInput)
+				displayValue = SecretInput.MASK;
+			else
+				displayValue = paramValue.toString();
+			throw new ValidationException("Error validating value '" + displayValue + "' of parameter '" 
+					+ paramName + "': " + e.getMessage());
+		}
+	}
+
+	private static void validateParamNames(Collection<String> paramSpecNames, Collection<String> paramNames) {
+		for (String paramSpecName: paramSpecNames) {
+			if (!paramNames.contains(paramSpecName))
+				throw new ValidationException("Missing job parameter: " + paramSpecName);
+		}
+		for (String paramName: paramNames) {
+			if (!paramSpecNames.contains(paramName))
+				throw new ValidationException("Unknow job parameter: " + paramName);
+		}
+	}
+	
+	public static void validateParamMap(Map<String, InputSpec> paramSpecMap, Map<String, List<String>> paramMap) {
+		validateParamNames(paramSpecMap.keySet(), paramMap.keySet());
+		for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
+			InputSpec paramSpec = Preconditions.checkNotNull(paramSpecMap.get(entry.getKey()));
+			validateParamValue(paramSpec, entry.getKey(), entry.getValue());
+		}
+	}
+	
+	public static Map<String, InputSpec> getParamSpecMap(List<InputSpec> paramSpecs) {
+		Map<String, InputSpec> paramSpecMap = new LinkedHashMap<>();
+		for (InputSpec paramSpec: paramSpecs)
+			paramSpecMap.put(paramSpec.getName(), paramSpec);
+		return paramSpecMap;
 	}
 	
 	public static void validateParams(List<InputSpec> paramSpecs, List<JobParam> params) {
@@ -148,17 +169,7 @@ public class JobParam implements Serializable {
 			if (paramMap.put(param.getName(), values) != null)
 				throw new ValidationException("Duplicate param: " + param.getName());
 		}
-		validateParams(paramSpecs, paramMap);
-	}
-	
-	public static Map<String, List<List<String>>> getParamMatrix(Map<String, List<String>> paramMap) {
-		Map<String, List<List<String>>> paramMatrix = new HashMap<>();
-		for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) { 
-			List<List<String>> values = new ArrayList<>();
-			values.add(entry.getValue());
-			paramMatrix.put(entry.getKey(), values);
-		}
-		return paramMatrix;
+		validateParamMatrix(getParamSpecMap(paramSpecs), paramMap);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -219,6 +230,13 @@ public class JobParam implements Serializable {
 			}
 		}
 		return paramMap;
+	}
+
+	public static Map<String, List<List<String>>> getParamMatrix(List<JobParam> params) {
+		Map<String, List<List<String>>> paramMatrix = new LinkedHashMap<>();
+		for (JobParam param: params) 
+			paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
+		return paramMatrix;
 	}
 	
 }

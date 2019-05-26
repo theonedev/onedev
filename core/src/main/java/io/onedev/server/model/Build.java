@@ -136,6 +136,9 @@ public class Build extends AbstractEntity implements Referenceable {
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<BuildDependence> dependents= new ArrayList<>();
 	
+	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
+	private Collection<PullRequestBuild> pullRequestBuilds = new ArrayList<>();
+	
 	private transient Map<String, List<String>> paramMap;
 	
 	private transient Optional<Collection<Long>> fixedIssueNumbers;
@@ -307,6 +310,14 @@ public class Build extends AbstractEntity implements Referenceable {
 				statusMessage = StringUtils.replace(statusMessage, secretValue, SecretInput.MASK);
 		}
 		this.statusMessage = statusMessage;
+	}
+
+	public Collection<PullRequestBuild> getPullRequestBuilds() {
+		return pullRequestBuilds;
+	}
+
+	public void setPullRequestBuilds(Collection<PullRequestBuild> pullRequestBuilds) {
+		this.pullRequestBuilds = pullRequestBuilds;
 	}
 
 	public Map<String, List<String>> getParamMap() {

@@ -18,11 +18,16 @@ package io.onedev.server.persistence;
 
 import java.util.concurrent.Callable;
 
+import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 public interface TransactionManager {
 
 	Transaction getTransaction();
+	
+	SessionManager getSessionManager();
+	
+	Session getSession();
 	
 	<T> T call(Callable<T> callable);
 	

@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,10 +69,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Transactional
 	@Override
 	public void delete(Build build) {
-    	Query<?> query = getSession().createQuery("update BuildRequirement set build=null where build=:build");
-    	query.setParameter("build", build);
-    	query.executeUpdate();
-    	
 		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getNumber()));
     	super.delete(build);
 	}
@@ -88,13 +85,13 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 	@Sessional
 	@Override
-	public List<Build> query(Project project, String commitHash) {
+	public Collection<Build> query(Project project, String commitHash) {
 		return query(project, commitHash, null, new HashMap<>());
 	}
 	
 	@Sessional
 	@Override
-	public List<Build> query(Project project, String commitHash, String jobName, Map<String, List<String>> params) {
+	public Collection<Build> query(Project project, String commitHash, String jobName, Map<String, List<String>> params) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
@@ -124,7 +121,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 	@Sessional
 	@Override
-	public List<Build> queryUnfinished() {
+	public Collection<Build> queryUnfinished() {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.or(
 				Restrictions.eq("status", Status.QUEUEING), 

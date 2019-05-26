@@ -35,7 +35,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
-import io.onedev.server.ci.job.JobScheduler;
+import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
@@ -152,7 +152,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			
 		}));
 		
-		summary.add(new BuildStatusIcon("statusIcon", buildModel));
+		summary.add(new BuildStatusIcon("statusIcon", getBuild().getId(), true));
 		summary.add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
 
 			@Override
@@ -167,9 +167,8 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			private void resubmit(Serializable paramBean) {
 				Map<String, List<String>> paramMap = JobParam.getParamMap(getBuild().getJob(), paramBean, 
 						getBuild().getJob().getParamSpecMap().keySet());
-				OneDev.getInstance(JobScheduler.class).resubmit(getBuild(), paramMap);
+				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap);
 				setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(getBuild(), position));
-				getSession().success("Rebuild request submitted");
 			}
 			
 			@Override
@@ -232,7 +231,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 
 			@Override
 			public void onClick() {
-				OneDev.getInstance(JobScheduler.class).cancel(getBuild());
+				OneDev.getInstance(JobManager.class).cancel(getBuild());
 				getSession().success("Cancel request submitted");
 			}
 

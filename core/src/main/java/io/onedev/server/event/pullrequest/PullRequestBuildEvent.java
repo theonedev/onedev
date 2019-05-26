@@ -2,20 +2,19 @@ package io.onedev.server.event.pullrequest;
 
 import java.util.Date;
 
-import io.onedev.server.model.Build;
-import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestBuild;
 
 public class PullRequestBuildEvent extends PullRequestEvent {
 
-	private final Build build;
+	private final PullRequestBuild pullRequestBuild;
 	
-	public PullRequestBuildEvent(PullRequest request, Build build) {
-		super(null, new Date(), request);
-		this.build = build;
+	public PullRequestBuildEvent(PullRequestBuild pullRequestBuild) {
+		super(null, new Date(), pullRequestBuild.getRequest());
+		this.pullRequestBuild = pullRequestBuild;
 	}
 
-	public Build getBuild() {
-		return build;
+	public PullRequestBuild getPullRequestBuild() {
+		return pullRequestBuild;
 	}
 
 }

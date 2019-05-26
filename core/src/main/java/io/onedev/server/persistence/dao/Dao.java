@@ -3,6 +3,7 @@ package io.onedev.server.persistence.dao;
 import java.util.List;
 
 import org.hibernate.HibernateException;
+import org.hibernate.Session;
 import org.hibernate.criterion.DetachedCriteria;
 
 import io.onedev.server.model.AbstractEntity;
@@ -96,4 +97,5 @@ public interface Dao {
 
 	SessionManager getSessionManager();
 
+	Session getSession();
 }

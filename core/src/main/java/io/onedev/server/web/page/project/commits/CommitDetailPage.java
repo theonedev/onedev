@@ -53,11 +53,11 @@ import io.onedev.server.util.CommitMessageTransformer;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
-import io.onedev.server.web.component.build.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
+import io.onedev.server.web.component.job.commit.CommitJobsPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -218,25 +218,13 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		add(new ContributorAvatars("contributorAvatars", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 		add(new ContributorPanel("contribution", getCommit().getAuthorIdent(), getCommit().getCommitterIdent()));
 
-		add(new CommitStatusPanel("buildStatus") {
-
-			@Override
-			protected Project getProject() {
-				return CommitDetailPage.this.getProject();
-			}
-
-			@Override
-			protected ObjectId getCommitId() {
-				return CommitDetailPage.this.getCommit().copy();
-			}
-			
-		});
-		
 		add(new Label("hash", GitUtils.abbreviateSHA(getCommit().name())));
 		add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(getCommit().name()))));
 		
 		newParentsContainer(null);
 
+		add(new CommitJobsPanel("jobs", projectModel, getCommit().copy()));
+		
 		newRevisionDiff(null);
 	}
 	

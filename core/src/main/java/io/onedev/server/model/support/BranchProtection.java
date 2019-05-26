@@ -2,6 +2,7 @@ package io.onedev.server.model.support;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -258,7 +259,7 @@ public class BranchProtection implements Serializable {
 		if (!ReviewRequirement.fromString(getReviewRequirement()).satisfied(user)) 
 			return false;
 
-		List<Build> builds = OneDev.getInstance(BuildManager.class).query(project, newObjectId.name());
+		Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(project, newObjectId.name());
 
 		for (JobDependency dependency: getJobDependencies()) {
 			Map<String, List<List<String>>> paramMatrix = new HashMap<>();

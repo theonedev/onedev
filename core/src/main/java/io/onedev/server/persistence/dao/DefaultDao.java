@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 
 import io.onedev.commons.launcher.loader.ListenerRegistry;
@@ -37,34 +38,34 @@ public class DefaultDao implements Dao, Serializable {
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T get(Class<T> entityClass, Long entityId) {
-		return (T) sessionManager.getSession().get(ClassUtils.unproxy(entityClass), entityId);
+		return (T) getSession().get(ClassUtils.unproxy(entityClass), entityId);
 	}
 
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T load(Class<T> entityClass, Long entityId) {
-		return (T) sessionManager.getSession().load(ClassUtils.unproxy(entityClass), entityId);
+		return (T) getSession().load(ClassUtils.unproxy(entityClass), entityId);
 	}
 
 	@Transactional
 	@Override
 	public void persist(AbstractEntity entity) {
 		boolean isNew = entity.isNew();
-		sessionManager.getSession().saveOrUpdate(entity);
+		getSession().saveOrUpdate(entity);
 		listenerRegistry.post(new EntityPersisted(entity, isNew));
 	}
 
 	@Transactional
 	@Override
 	public void remove(AbstractEntity entity) {
-		sessionManager.getSession().delete(entity);
+		getSession().delete(entity);
 		listenerRegistry.post(new EntityRemoved(entity));
 	}
 
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> List<T> query(EntityCriteria<T> entityCriteria, int firstResult, int maxResults) {
-		Criteria criteria = entityCriteria.getExecutableCriteria(sessionManager.getSession());
+		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
 		criteria.setFirstResult(firstResult);
 		criteria.setMaxResults(maxResults);
 		return criteria.list();
@@ -79,7 +80,7 @@ public class DefaultDao implements Dao, Serializable {
 	@Transactional
 	@Override
 	public <T extends AbstractEntity> T find(EntityCriteria<T> entityCriteria) {
-		Criteria criteria = entityCriteria.getExecutableCriteria(sessionManager.getSession());
+		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
 		criteria.setFirstResult(0);
 		criteria.setMaxResults(1);
 		return (T) criteria.uniqueResult();
@@ -87,7 +88,7 @@ public class DefaultDao implements Dao, Serializable {
 
 	@Override
 	public <T extends AbstractEntity> int count(EntityCriteria<T> entityCriteria) {
-		Criteria criteria = entityCriteria.getExecutableCriteria(sessionManager.getSession());
+		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
 		criteria.setProjection(Projections.rowCount());
 		return ((Long) criteria.uniqueResult()).intValue();
 	}
@@ -107,4 +108,9 @@ public class DefaultDao implements Dao, Serializable {
 		return sessionManager;
 	}
 
+	@Override
+	public Session getSession() {
+		return sessionManager.getSession();
+	}
+	
 }
