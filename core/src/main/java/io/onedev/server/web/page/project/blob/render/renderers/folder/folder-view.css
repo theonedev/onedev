@@ -41,13 +41,13 @@
 	font-size: 18px;
 }
 .folder-view>.readme {
-	border-top: 1px solid #BBB;
+	border-top: 1px solid #E0E0E0;
 }
 .folder-view>.readme>.head {
 	padding: 6px 12px;
 	background: #F2F2F2;
 	font-weight: bold;	
-	border-bottom: 1px solid #BBB;
+	border-bottom: 1px solid #E0E0E0;
 }
 .folder-view>.readme>.body {
 	padding: 20px;
