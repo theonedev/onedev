@@ -13,6 +13,10 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
+import com.fasterxml.jackson.annotation.JsonView;
+
+import io.onedev.server.util.jackson.DefaultView;
+
 /**
  * @author robin
  *
@@ -40,6 +44,7 @@ public class BuildParam extends AbstractEntity {
 	@Column(nullable=false)
 	private String type;
 	
+	@JsonView(DefaultView.class)
 	private String value;
 
 	public Build getBuild() {

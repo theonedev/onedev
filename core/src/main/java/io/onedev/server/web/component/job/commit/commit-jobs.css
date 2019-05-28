@@ -4,7 +4,7 @@
 .commit-jobs>.job {
     display: inline-block;
     margin-right: 20px;
-    border: 4px solid #EEE;
+    border: 1px solid #D8D8D8;
     border-radius: 4px;
     width: 211px;
 }
@@ -16,7 +16,7 @@
     vertical-align: middle;
     font-size: 16px;
     border-radius: 4px 4px 0 0;
-    border-bottom: 2px solid #EEE;
+    border-bottom: 1px dotted #CCC;
     font-weight: bold;
 }
 .commit-jobs>.job>.head>.actions a {
