@@ -57,6 +57,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.BlobIdent;
@@ -134,14 +135,7 @@ public class ProjectBranchesPage extends ProjectPage {
 		@SuppressWarnings("unused")
 		@Override
 		protected Map<ObjectId, AheadBehind> load() {
-			List<ObjectId> compareIds = new ArrayList<>(); 
-			List<RefInfo> branches = branchesModel.getObject();
-			for (long i=branchesView.getFirstItemOffset(); i<branches.size(); i++) {
-				if (i-branchesView.getFirstItemOffset() >= branchesView.getItemsPerPage())
-					break;
-				RefInfo ref = branches.get((int)i); 
-				compareIds.add(ref.getRef().getObjectId());
-			}
+			List<ObjectId> compareIds = getCommitIdsToDisplay();
 
 			Ref baseRef = Preconditions.checkNotNull(getProject().getBranchRef(baseBranch));
 			Map<ObjectId, AheadBehind> aheadBehinds = new HashMap<>();
@@ -436,6 +430,13 @@ public class ProjectBranchesPage extends ProjectPage {
 		add(branchesContainer = new WebMarkupContainer("branches") {
 
 			@Override
+			protected void onBeforeRender() {
+				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+				getProject().cacheCommitStatus(buildManager.queryStatus(getProject(), getCommitIdsToDisplay()));
+				super.onBeforeRender();
+			}
+
+			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!branchesModel.getObject().isEmpty());
@@ -458,21 +459,7 @@ public class ProjectBranchesPage extends ProjectPage {
 				link.add(new Label("name", branch));
 				item.add(link);
 				
-				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId(), true);
-				String lastCommitHash = lastCommit.name();
-				item.add(new CommitStatusPanel("buildStatus") {
-
-					@Override
-					protected Project getProject() {
-						return ProjectBranchesPage.this.getProject();
-					}
-
-					@Override
-					protected ObjectId getCommitId() {
-						return ObjectId.fromString(lastCommitHash);
-					}
-					
-				});
+				item.add(new CommitStatusPanel("buildStatus", getProject(), ref.getRef().getObjectId()));
 				
 				item.add(new AjaxLink<Void>("makeDefault") {
 
@@ -501,6 +488,7 @@ public class ProjectBranchesPage extends ProjectPage {
 					
 				});
 				
+				RevCommit lastCommit = getProject().getRevCommit(ref.getRef().getObjectId(), true);
 				item.add(new ContributorPanel("contributor", lastCommit.getAuthorIdent(), lastCommit.getCommitterIdent()));
 				
 				PageParameters params = CommitDetailPage.paramsOf(getProject(), lastCommit.name());
@@ -722,6 +710,17 @@ public class ProjectBranchesPage extends ProjectPage {
 		branchesView.setCurrentPage(pagingHistorySupport.getCurrentPage());
 		
 		newPagingNavigation(null);
+	}
+	
+	private List<ObjectId> getCommitIdsToDisplay() {
+		List<ObjectId> commitIdsToDisplay = new ArrayList<>();
+		for (long i=branchesView.getFirstItemOffset(); i<branchesModel.getObject().size(); i++) {
+			if (i-branchesView.getFirstItemOffset() >= branchesView.getItemsPerPage())
+				break;
+			RefInfo ref = branchesModel.getObject().get((int)i); 
+			commitIdsToDisplay.add(ref.getRef().getObjectId());
+		}
+		return commitIdsToDisplay;
 	}
 	
 	private void newPagingNavigation(@Nullable AjaxRequestTarget target) {

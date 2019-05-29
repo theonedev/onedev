@@ -12,8 +12,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
@@ -38,8 +36,7 @@ public abstract class UserPage extends AdministrationPage {
 	public UserPage(PageParameters params) {
 		super(params);
 		
-		User user = OneDev.getInstance(UserManager.class).load(params.get(PARAM_USER).toLong());
-		userModel = new EntityModel<User>(user);
+		userModel = new EntityModel<User>(User.class, params.get(PARAM_USER).toLong());
 	}
 
 	@Override

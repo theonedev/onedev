@@ -26,8 +26,8 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 		if (typeArguments.size() == 1 && AbstractEntity.class.isAssignableFrom(typeArguments.get(0))) {
 			entityClass = (Class<T>) typeArguments.get(0);
 		} else {
-			throw new RuntimeException("Super class of entity dao implementation must "
-					+ "be AbstractEntityDao and must realize the type argument <T>");
+			throw new RuntimeException("Super class of entity manager implementation must "
+					+ "be AbstractEntityManager and must realize the type argument <T>");
 		}
 		this.dao = dao;
     }

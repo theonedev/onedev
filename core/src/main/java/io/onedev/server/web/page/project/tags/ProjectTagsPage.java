@@ -1,5 +1,6 @@
 package io.onedev.server.web.page.project.tags;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -40,6 +41,7 @@ import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -272,8 +274,24 @@ public class ProjectTagsPage extends ProjectPage {
 				super.onConfigure();
 				setVisible(!tagsModel.getObject().isEmpty());
 			}
+
+			@Override
+			protected void onBeforeRender() {
+				List<ObjectId> commitIdsToDisplay = new ArrayList<>();
+				for (long i=tagsView.getFirstItemOffset(); i<tagsModel.getObject().size(); i++) {
+					if (i-tagsView.getFirstItemOffset() >= tagsView.getItemsPerPage())
+						break;
+					RefInfo ref = tagsModel.getObject().get((int)i); 
+					commitIdsToDisplay.add(ref.getPeeledObj().copy());
+				}
+				
+				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+				getProject().cacheCommitStatus(buildManager.queryStatus(getProject(), commitIdsToDisplay));
+				super.onBeforeRender();
+			}
 			
 		});
+		
 		tagsContainer.setOutputMarkupPlaceholderTag(true);
 		
 		tagsContainer.add(new FencedFeedbackPanel("feedback", tagsContainer).setEscapeModelStrings(false));
@@ -293,20 +311,7 @@ public class ProjectTagsPage extends ProjectPage {
 				link.add(new Label("name", tagName));
 				item.add(link);
 				
-				String tagCommitHash = ref.getPeeledObj().name();
-				item.add(new CommitStatusPanel("buildStatus") {
-
-					@Override
-					protected Project getProject() {
-						return ProjectTagsPage.this.getProject();
-					}
-
-					@Override
-					protected ObjectId getCommitId() {
-						return ObjectId.fromString(tagCommitHash);
-					}
-					
-				});
+				item.add(new CommitStatusPanel("buildStatus", getProject(), ref.getPeeledObj().copy()));
 
 				if (ref.getObj() instanceof RevTag) {
 					RevTag revTag = (RevTag) ref.getObj();

@@ -15,7 +15,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.security.SecurityUtils;
@@ -117,12 +116,7 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 			
 		};
 				
-		add(new IssueListPanel("issues", query) {
-
-			@Override
-			protected Project getProject() {
-				return MilestoneDetailPage.this.getProject();
-			}
+		add(new IssueListPanel("issues", getProject(), query) {
 
 			@Override
 			protected IssueQuery getBaseQuery() {

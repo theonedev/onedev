@@ -62,7 +62,8 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 				@Index(columnList="submitterName"), @Index(columnList="cancellerName"), @Index(columnList="commitHash"), 
 				@Index(columnList="number"), @Index(columnList="jobName"), @Index(columnList="status"), 
 				@Index(columnList="submitDate"), @Index(columnList="queueingDate"), @Index(columnList="runningDate"), 
-				@Index(columnList="finishDate"), @Index(columnList="version")},
+				@Index(columnList="finishDate"), @Index(columnList="version"), 
+				@Index(columnList="o_project_id, commitHash")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})}
 )
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -77,10 +78,20 @@ public class Build extends AbstractEntity implements Referenceable {
 	private static final int MAX_STATUS_MESSAGE = 1024;
 	
 	public enum Status {
-		IN_ERROR, FAILED, CANCELLED, TIMED_OUT, WAITING, QUEUEING, RUNNING, SUCCESSFUL;
+		// Most significant status comes first, refer to getOverallStatus
+		WAITING, QUEUEING, RUNNING, IN_ERROR, FAILED, CANCELLED, TIMED_OUT, SUCCESSFUL;
 		
 		public String getDisplayName() {
 			return StringUtils.capitalize(name().replace('_', ' ').toLowerCase());
+		}
+		
+		@Nullable
+		public static Status getOverallStatus(Collection<Status> statuses) {
+			for (Status status: Status.values()) {
+				if (statuses.contains(status))
+					return status;
+			}
+			return null;
 		}
 		
 	};
@@ -222,6 +233,10 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public void setCommitHash(String commitHash) {
 		this.commitHash = commitHash;
+	}
+	
+	public ObjectId getCommitId() {
+		return ObjectId.fromString(getCommitHash());
 	}
 
 	public Status getStatus() {
@@ -471,10 +486,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public CISpec getCISpec() {
-		if (ciSpec == null) {
-			ObjectId commitId = ObjectId.fromString(getCommitHash());
-			ciSpec = Preconditions.checkNotNull(getProject().getCISpec(commitId));
-		}
+		if (ciSpec == null) 
+			ciSpec = Preconditions.checkNotNull(getProject().getCISpec(getCommitId()));
 		return ciSpec;
 	}
 	

@@ -134,12 +134,7 @@ public class IssueListPage extends ProjectIssuesPage {
 			
 		};
 		
-		add(new IssueListPanel("main", query) {
-
-			@Override
-			protected Project getProject() {
-				return IssueListPage.this.getProject();
-			}
+		add(new IssueListPanel("main", getProject(), query) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {

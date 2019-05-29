@@ -8,36 +8,26 @@ import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.behavior.WebSocketObserver;
+import io.onedev.server.web.model.EntityModel;
 
 @SuppressWarnings("serial")
-public class BuildStatusIcon extends GenericPanel<Build> {
+public class BuildStatusIcon extends Panel {
 
-	private final Long buildId;
+	private final IModel<Build> buildModel;
 	
 	private final boolean withTooltip;
 	
-	public BuildStatusIcon(String id, Long buildId, boolean withTooltip) {
+	public BuildStatusIcon(String id, Build build, boolean withTooltip) {
 		super(id);
-		
-		this.buildId = buildId;
-		setModel(new LoadableDetachableModel<Build>() {
-
-			@Override
-			protected Build load() {
-				return OneDev.getInstance(BuildManager.class).load(buildId);
-			}
-			
-		});
+		this.buildModel = new EntityModel<Build>(build);
 		this.withTooltip = withTooltip;
 	}
 
@@ -51,9 +41,7 @@ public class BuildStatusIcon extends GenericPanel<Build> {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 
-				Build build = getModelObject();
-
-				Build.Status status = build.getStatus();
+				Build.Status status = getBuild().getStatus();
 				String cssClass = "fa fa-fw build-status build-status-" + status.name().toLowerCase();
 				if (status == Status.RUNNING)
 					cssClass += " fa-spin";
@@ -90,7 +78,7 @@ public class BuildStatusIcon extends GenericPanel<Build> {
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(Build.getWebSocketObservable(buildId));
+				return Sets.newHashSet(Build.getWebSocketObservable(getBuild().getId()));
 			}
 			
 		});
@@ -98,6 +86,16 @@ public class BuildStatusIcon extends GenericPanel<Build> {
 		setOutputMarkupPlaceholderTag(true);
 	}
 	
+	protected Build getBuild() {
+		return buildModel.getObject();
+	}
+	
+	@Override
+	protected void onDetach() {
+		buildModel.detach();
+		super.onDetach();
+	}
+
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -9,7 +11,6 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.GenericPanel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -18,6 +19,8 @@ import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
@@ -70,38 +73,28 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 		}) {
 
 			@Override
+			protected void onBeforeRender() {
+				Collection<ObjectId> commitIds = getModelObject().stream().map(it->it.copy()).collect(Collectors.toSet());
+				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+				Project project = PullRequestUpdatedPanel.this.getModelObject().getRequest().getTargetProject();
+				project.cacheCommitStatus(buildManager.queryStatus(project, commitIds));
+				super.onBeforeRender();
+			}
+
+			@Override
 			protected void populateItem(final ListItem<RevCommit> item) {
 				RevCommit commit = item.getModelObject();
 				
 				item.add(new UserIdentPanel("author", UserIdent.of(commit.getAuthorIdent()), Mode.AVATAR));
 
-				IModel<Project> projectModel = new AbstractReadOnlyModel<Project>() {
+				Project project = getUpdate().getRequest().getTarget().getProject();
+				item.add(new CommitMessagePanel("message", project, item.getModel()));
 
-					@Override
-					public Project getObject() {
-						return getUpdate().getRequest().getTarget().getProject();
-					}
-					
-				};
-				item.add(new CommitMessagePanel("message", projectModel, item.getModel()));
-
-				item.add(new CommitStatusPanel("buildStatus") {
-
-					@Override
-					protected Project getProject() {
-						return projectModel.getObject();
-					}
-
-					@Override
-					protected ObjectId getCommitId() {
-						return commit.copy();
-					}
-					
-				});
+				item.add(new CommitStatusPanel("buildStatus", project, commit.copy()));
 				
 				CommitDetailPage.State commitState = new CommitDetailPage.State();
 				commitState.revision = commit.name();
-				PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
+				PageParameters params = CommitDetailPage.paramsOf(project, commitState);
 				Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 				item.add(hashLink);
 				hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
@@ -110,7 +103,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				BlobIdent blobIdent = new BlobIdent(commit.name(), null, FileMode.TYPE_TREE);
 				ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
 				browseState.requestId = getUpdate().getRequest().getId();
-				params = ProjectBlobPage.paramsOf(projectModel.getObject(), browseState);
+				params = ProjectBlobPage.paramsOf(project, browseState);
 				item.add(new ViewStateAwarePageLink<Void>("browseCode", ProjectBlobPage.class, params));
 				
 				if (getUpdate().getRequest().getTarget().getObjectId(false) != null) {

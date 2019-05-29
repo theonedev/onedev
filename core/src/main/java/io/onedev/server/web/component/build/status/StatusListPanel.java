@@ -40,7 +40,7 @@ public class StatusListPanel extends GenericPanel<Collection<Build>> {
 			protected void populateItem(ListItem<Build> item) {
 				Build build = item.getModelObject();
 				
-				item.add(new BuildStatusIcon("icon", build.getId(), true));
+				item.add(new BuildStatusIcon("icon", build, true));
 
 				Link<Void> buildLink = new BookmarkablePageLink<Void>("title", 
 						BuildLogPage.class, BuildLogPage.paramsOf(build, null));

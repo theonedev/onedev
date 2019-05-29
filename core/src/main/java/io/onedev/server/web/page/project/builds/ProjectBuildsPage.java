@@ -133,12 +133,7 @@ public class ProjectBuildsPage extends ProjectPage {
 			
 		};
 		
-		add(new BuildListPanel("main", query) {
-
-			@Override
-			protected Project getProject() {
-				return ProjectBuildsPage.this.getProject();
-			}
+		add(new BuildListPanel("main", getProject(), query) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {

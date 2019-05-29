@@ -58,7 +58,6 @@ import io.onedev.server.web.component.milestone.closelink.MilestoneCloseLink;
 import io.onedev.server.web.component.milestone.deletelink.MilestoneDeleteLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 
@@ -195,8 +194,19 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				}
 			}
 		}
-		
-		milestoneModel = new EntityModel<Milestone>(milestone);
+
+		Long milestoneId = Milestone.idOf(milestone);
+		milestoneModel = new LoadableDetachableModel<Milestone>() {
+
+			@Override
+			protected Milestone load() {
+				if (milestoneId != null)
+					return OneDev.getInstance(MilestoneManager.class).load(milestoneId);
+				else
+					return null;
+			}
+			
+		};
 		
 		backlog = params.get(PARAM_BACKLOG).toBoolean() && getMilestone() != null;
 		query = params.get(PARAM_QUERY).toString();

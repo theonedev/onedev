@@ -18,12 +18,10 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
@@ -112,14 +110,7 @@ public abstract class BuildSidePanel extends Panel {
 		
 		general.add(new WebMarkupContainer("copyCommitHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 		
-		Link<Void> jobLink = new JobLink("job", new AbstractReadOnlyModel<Project>() {
-
-			@Override
-			public Project getObject() {
-				return getProject();
-			}
-			
-		}, ObjectId.fromString(getBuild().getCommitHash()), getBuild().getJobName());
+		Link<Void> jobLink = new JobLink("job", getProject(), getBuild().getCommitId(), getBuild().getJobName());
 		jobLink.add(new Label("label", getBuild().getJobName()));
 		general.add(jobLink);
 		

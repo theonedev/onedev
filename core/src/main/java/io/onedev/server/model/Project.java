@@ -77,6 +77,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.detector.CISpecDetector;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
 import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
 import io.onedev.server.entitymanager.CommitQuerySettingManager;
@@ -97,6 +98,7 @@ import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.git.command.ListChangedFilesCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.CommitMessageTransform;
 import io.onedev.server.model.support.NamedBuildQuery;
@@ -296,6 +298,8 @@ public class Project extends AbstractEntity implements Validatable {
     private transient Map<String, Optional<ObjectId>> objectIdCache;
     
     private transient Map<ObjectId, Optional<CISpec>> ciSpecCache;
+    
+    private transient Map<ObjectId, Map<String, Status>> commitStatusCache;
     
     private transient Map<ObjectId, Optional<RevCommit>> commitCache;
     
@@ -661,6 +665,26 @@ public class Project extends AbstractEntity implements Validatable {
 		objectIdCache.put(revision, Optional.fromNullable(objectId));
 	}
 
+	public Map<String, Status> getCommitStatus(ObjectId commitId) {
+		Map<String, Status> commitStatus = getCommitStatusCache().get(commitId);
+		if (commitStatus == null) {
+			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+			commitStatus = buildManager.queryStatus(this, Sets.newHashSet(commitId)).get(commitId);
+			getCommitStatusCache().put(commitId, Preconditions.checkNotNull(commitStatus));
+		}
+		return commitStatus;
+	}
+	
+	private Map<ObjectId, Map<String, Status>> getCommitStatusCache() {
+		if (commitStatusCache == null)
+			commitStatusCache = new HashMap<>();
+		return commitStatusCache;
+	}
+	
+	public void cacheCommitStatus(Map<ObjectId, Map<String, Status>> commitStatuses) {
+		getCommitStatusCache().putAll(commitStatuses);
+	}
+	
 	/**
 	 * Get CI spec of specified commit
 	 * @param commitId

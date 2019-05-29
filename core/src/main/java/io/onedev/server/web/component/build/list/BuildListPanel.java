@@ -39,7 +39,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,6 +64,7 @@ import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.job.JobLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
@@ -79,7 +79,9 @@ public abstract class BuildListPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(BuildListPanel.class);
 	
-	private String query;
+	private final IModel<Project> projectModel;
+	
+	private final String query;
 	
 	private IModel<BuildQuery> parsedQueryModel = new LoadableDetachableModel<BuildQuery>() {
 
@@ -106,8 +108,9 @@ public abstract class BuildListPanel extends Panel {
 	
 	private DataTable<Build, Void> buildsTable;
 	
-	public BuildListPanel(String id, @Nullable String query) {
+	public BuildListPanel(String id, Project project, @Nullable String query) {
 		super(id);
+		this.projectModel = new EntityModel<Project>(project);
 		this.query = query;
 	}
 	
@@ -117,11 +120,14 @@ public abstract class BuildListPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
+		projectModel.detach();
 		parsedQueryModel.detach();
 		super.onDetach();
 	}
 	
-	protected abstract Project getProject();
+	private Project getProject() {
+		return projectModel.getObject();
+	}
 
 	protected BuildQuery getBaseQuery() {
 		return new BuildQuery();
@@ -333,7 +339,7 @@ public abstract class BuildListPanel extends Panel {
 				Long buildId = rowModel.getObject().getId();
 
 				Fragment fragment = new Fragment(componentId, "statusFrag", BuildListPanel.this);
-				fragment.add(new BuildStatusIcon("icon", buildId, true));
+				fragment.add(new BuildStatusIcon("icon", rowModel.getObject(), true));
 				
 				fragment.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
@@ -368,14 +374,7 @@ public abstract class BuildListPanel extends Panel {
 					IModel<Build> rowModel) {
 				Build build = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
-				Link<Void> link = new JobLink("link", new AbstractReadOnlyModel<Project>() {
-
-					@Override
-					public Project getObject() {
-						return getProject();
-					}
-					
-				}, ObjectId.fromString(build.getCommitHash()), build.getJobName());
+				Link<Void> link = new JobLink("link", getProject(), build.getCommitId(), build.getJobName());
 				link.add(new Label("label", build.getJobName()));
 				fragment.add(link);
 				cellItem.add(fragment);

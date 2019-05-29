@@ -152,7 +152,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			
 		}));
 		
-		summary.add(new BuildStatusIcon("statusIcon", getBuild().getId(), true));
+		summary.add(new BuildStatusIcon("statusIcon", getBuild(), true));
 		summary.add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
 
 			@Override
@@ -322,7 +322,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 		commitState.revision = getBuild().getCommitHash();
 		PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
 		
-		add(new CommitMessagePanel("commitMessage", projectModel, new AbstractReadOnlyModel<RevCommit>() {
+		add(new CommitMessagePanel("commitMessage", getProject(), new AbstractReadOnlyModel<RevCommit>() {
 
 			@Override
 			public RevCommit getObject() {

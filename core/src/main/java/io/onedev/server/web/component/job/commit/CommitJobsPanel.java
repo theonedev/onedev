@@ -55,6 +55,7 @@ import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.job.JobLink;
+import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
@@ -72,16 +73,16 @@ public class CommitJobsPanel extends Panel {
 
 		@Override
 		protected List<Build> load() {
-			List<Build> builds = new ArrayList<>(OneDev.getInstance(BuildManager.class).query(getProject(), commitId.name()));
+			List<Build> builds = new ArrayList<>(OneDev.getInstance(BuildManager.class).query(getProject(), commitId));
 			Collections.sort(builds);
 			return builds;
 		}
 		
 	};
 	
-	public CommitJobsPanel(String id, IModel<Project> projectModel, ObjectId commitId) {
+	public CommitJobsPanel(String id, Project project, ObjectId commitId) {
 		super(id);
-		this.projectModel = projectModel;
+		projectModel = new EntityModel<Project>(project);
 		this.commitId = commitId;
 	}
 
@@ -105,7 +106,7 @@ public class CommitJobsPanel extends Panel {
 				WebMarkupContainer jobContainer = new WebMarkupContainer(jobsView.newChildId());
 				jobsView.add(jobContainer);
 				
-				Link<Void> jobLink = new JobLink("name", projectModel, commitId, job.getName());
+				Link<Void> jobLink = new JobLink("name", getProject(), commitId, job.getName());
 				jobLink.add(new Label("label", job.getName()));
 				jobContainer.add(jobLink);
 				
@@ -131,7 +132,7 @@ public class CommitJobsPanel extends Panel {
 									Map<String, List<String>> paramMap = JobParam.getParamMap(
 											job, bean, job.getParamSpecMap().keySet());
 									Build build = OneDev.getInstance(JobManager.class).submit(getProject(), 
-											commitId.name(), job.getName(), paramMap);
+											commitId, job.getName(), paramMap);
 									setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(build, null));
 								}
 
@@ -152,7 +153,7 @@ public class CommitJobsPanel extends Panel {
 								
 							};
 						} else {
-							Build build = OneDev.getInstance(JobManager.class).submit(getProject(), commitId.name(), 
+							Build build = OneDev.getInstance(JobManager.class).submit(getProject(), commitId, 
 									job.getName(), new HashMap<>());
 							setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(build, null));
 						}
@@ -182,12 +183,10 @@ public class CommitJobsPanel extends Panel {
 
 					@Override
 					protected void populateItem(ListItem<Build> item) {
-						Build build = item.getModelObject();
-
 						QueryPosition position = new QueryPosition(query, getList().size(), item.getIndex());
 						Link<Void> link = new BookmarkablePageLink<Void>("build", BuildLogPage.class, 
-								BuildLogPage.paramsOf(build, position));
-						link.add(new BuildStatusIcon("status", build.getId(), false) {
+								BuildLogPage.paramsOf(item.getModelObject(), position));
+						link.add(new BuildStatusIcon("status", item.getModelObject(), false) {
 
 							@Override
 							protected void onInitialize() {
@@ -196,7 +195,7 @@ public class CommitJobsPanel extends Panel {
 
 									@Override
 									public String getObject() {
-										Build build = getModelObject();
+										Build build = getBuild();
 										StringBuilder title = new StringBuilder("Build #" + build.getNumber());
 										if (build.getVersion() != null)
 											title.append(" (").append(build.getVersion()).append(")");

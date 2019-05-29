@@ -140,8 +140,8 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 
 	@Transactional
 	@Override
-	public Build submit(Project project, String commitHash, String jobName, Map<String, List<String>> paramMap) {
-    	Lock lock = LockUtils.getLock("job-schedule: " + project.getId() + "-" + commitHash);
+	public Build submit(Project project, ObjectId commitId, String jobName, Map<String, List<String>> paramMap) {
+    	Lock lock = LockUtils.getLock("job-schedule: " + project.getId() + "-" + commitId.name());
 		transactionManager.getTransaction().registerSynchronization(new Synchronization() {
 			
 			@Override
@@ -157,17 +157,17 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
     	
     	try {
         	lock.lockInterruptibly();
-			return submit(project, commitHash, jobName, paramMap, new LinkedHashSet<>()); 
+			return submit(project, commitId, jobName, paramMap, new LinkedHashSet<>()); 
     	} catch (Exception e) {
     		throw ExceptionUtils.unchecked(e);
 		}
 	}
 	
-	private Build submit(Project project, String commitHash, String jobName, 
+	private Build submit(Project project, ObjectId commitId, String jobName, 
 			Map<String, List<String>> paramMap, Set<String> checkedJobNames) {
 		Build build = new Build();
 		build.setProject(project);
-		build.setCommitHash(commitHash);
+		build.setCommitHash(commitId.name());
 		build.setJobName(jobName);
 		build.setSubmitDate(new Date());
 		build.setStatus(Build.Status.WAITING);
@@ -177,13 +177,13 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 			JobParam.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
 		} catch (ValidationException e) {
 			String message = String.format("Error validating build parameters (project: %s, commit: %s, job: %s)", 
-					project.getName(), commitHash, jobName);
+					project.getName(), commitId.name(), jobName);
 			throw new OneException(message, e);
 		}
 		
 		if (!checkedJobNames.add(jobName)) {
 			String message = String.format("Circular job dependencies found (project: %s, commit: %s, job: %s, dependency loop: %s)", 
-					project.getName(), commitHash, jobName, checkedJobNames);
+					project.getName(), commitId.name(), jobName, checkedJobNames);
 			throw new OneException(message);
 		}
 
@@ -193,7 +193,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 				paramMapToQuery.remove(paramSpec.getName());
 		}
 
-		Collection<Build> builds = buildManager.query(project, commitHash, jobName, paramMapToQuery);
+		Collection<Build> builds = buildManager.query(project, commitId, jobName, paramMapToQuery);
 		if (builds.isEmpty()) {
 			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 				InputSpec paramSpec = Preconditions.checkNotNull(build.getJob().getParamSpecMap().get(entry.getKey()));
@@ -220,7 +220,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 					
 					@Override
 					public void run(Map<String, List<String>> params) {
-						Build dependencyBuild = submit(project, commitHash, dependency.getJobName(), 
+						Build dependencyBuild = submit(project, commitId, dependency.getJobName(), 
 								params, new LinkedHashSet<>(checkedJobNames));
 						BuildDependence dependence = new BuildDependence();
 						dependence.setDependency(dependencyBuild);
@@ -390,7 +390,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 									
 									@Override
 									public void run(Map<String, List<String>> paramMap) {
-										submit(event.getProject(), commitId.name(), job.getName(), paramMap); 
+										submit(event.getProject(), commitId, job.getName(), paramMap); 
 									}
 									
 								}.run();

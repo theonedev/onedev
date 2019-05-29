@@ -13,8 +13,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -39,8 +37,7 @@ public abstract class GroupPage extends AdministrationPage {
 		
 		Long groupId = params.get(PARAM_GROUP).toLong();
 		
-		Group group = OneDev.getInstance(GroupManager.class).load(groupId);
-		groupModel = new EntityModel<Group>(group);
+		groupModel = new EntityModel<Group>(Group.class, groupId);
 	}
 
 	@Override

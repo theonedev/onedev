@@ -17,7 +17,6 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.BuildInfoManager;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
@@ -45,12 +44,7 @@ public class BuildChangesPage extends BuildDetailPage {
 		if (prevCommitIds != null) {
 			Fragment fragment = new Fragment("content", "availableFrag", this);
 			fragment.add(new Label("jobName", getBuild().getJobName()));
-			fragment.add(new CommitListPanel("commits", query) {
-
-				@Override
-				protected Project getProject() {
-					return BuildChangesPage.this.getProject();
-				}
+			fragment.add(new CommitListPanel("commits", getProject(), query) {
 
 				@Override
 				protected void onQueryUpdated(AjaxRequestTarget target, String query) {

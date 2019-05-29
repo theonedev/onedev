@@ -575,12 +575,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this);
 			break;
 		default:
-			tabPanel = new CommitListPanel(TAB_PANEL_ID, null) {
-
-				@Override
-				protected Project getProject() {
-					return RevisionComparePage.this.getProject();
-				}
+			tabPanel = new CommitListPanel(TAB_PANEL_ID, getProject(), null) {
 
 				@Override
 				protected CommitQuery getBaseQuery() {

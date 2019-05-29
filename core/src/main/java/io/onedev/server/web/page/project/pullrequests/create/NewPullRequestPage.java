@@ -349,17 +349,12 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	}
 	
 	private Component newCommitsPanel() {
-		return new CommitListPanel(TAB_PANEL_ID, null) {
+		return new CommitListPanel(TAB_PANEL_ID, getProject(), null) {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!getPullRequest().isMerged());
-			}
-
-			@Override
-			protected Project getProject() {
-				return NewPullRequestPage.this.getProject();
 			}
 
 			@Override

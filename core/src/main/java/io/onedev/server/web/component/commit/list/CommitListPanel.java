@@ -2,7 +2,9 @@ package io.onedev.server.web.component.commit.list;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -49,7 +51,9 @@ import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -72,6 +76,7 @@ import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
+import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
@@ -81,7 +86,7 @@ import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.VisibleVisitor;
 
 @SuppressWarnings("serial")
-public abstract class CommitListPanel extends Panel {
+public class CommitListPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitListPanel.class);
 	
@@ -89,9 +94,11 @@ public abstract class CommitListPanel extends Panel {
 	
 	private static final int MAX_PAGES = 50;
 	
-	private int currentPage = 1;
+	private final IModel<Project> projectModel;
 	
-	private String query;
+	private final String query;
+	
+	private int currentPage = 1;
 	
 	private final IModel<CommitQuery> parsedQueryModel = new LoadableDetachableModel<CommitQuery>() {
 
@@ -218,14 +225,17 @@ public abstract class CommitListPanel extends Panel {
 		}
 	};
 	
+	private transient Collection<ObjectId> commitIdsToQueryStatus;
+	
 	private WebMarkupContainer body;
 	
 	private WebMarkupContainer foot;
 	
 	private RepeatingView commitsView;
 	
-	public CommitListPanel(String id, @Nullable String query) {
+	public CommitListPanel(String id, Project project, @Nullable String query) {
 		super(id);
+		this.projectModel = new EntityModel<Project>(project);
 		this.query = query;
 	}
 	
@@ -234,10 +244,13 @@ public abstract class CommitListPanel extends Panel {
 		parsedQueryModel.detach();
 		commitsModel.detach();
 		labelsModel.detach();
+		projectModel.detach();
 		super.onDetach();
 	}
 	
-	protected abstract Project getProject();
+	private Project getProject() {
+		return projectModel.getObject();
+	}
 	
 	@Nullable
 	protected String getCompareWith() {
@@ -360,7 +373,7 @@ public abstract class CommitListPanel extends Panel {
 			
 			@Override
 			protected void onBeforeRender() {
-				replace(commitsView = newCommitsView());
+				addOrReplace(commitsView = newCommitsView());
 				super.onBeforeRender();
 			}
 
@@ -370,8 +383,6 @@ public abstract class CommitListPanel extends Panel {
 		
 		NotificationPanel feedback;
 		body.add(feedback = new NotificationPanel("feedback", this));
-		
-		body.add(commitsView = newCommitsView());
 		
 		body.add(new WebMarkupContainer("noCommits") {
 
@@ -433,6 +444,8 @@ public abstract class CommitListPanel extends Panel {
 				target.prependJavaScript(builder);
 				target.add(foot);
 				target.appendJavaScript(renderCommitGraph());
+				
+				getProject().cacheCommitStatus(getBuildManager().queryStatus(getProject(), getCommitIdsToQueryStatus()));
 			}
 
 			@Override
@@ -454,6 +467,16 @@ public abstract class CommitListPanel extends Panel {
 		});
 	}
 	
+	private BuildManager getBuildManager() {
+		return OneDev.getInstance(BuildManager.class);
+	}
+	
+	private Collection<ObjectId> getCommitIdsToQueryStatus() {
+		if (commitIdsToQueryStatus == null)
+			commitIdsToQueryStatus = new HashSet<>();
+		return commitIdsToQueryStatus;
+	}
+	
 	private RepeatingView newCommitsView() {
 		RepeatingView commitsView = new RepeatingView("commits");
 		commitsView.setOutputMarkupId(true);
@@ -466,6 +489,7 @@ public abstract class CommitListPanel extends Panel {
 				addCommitClass(item, commitIndex++);
 			commitsView.add(item);
 		}
+		getProject().cacheCommitStatus(getBuildManager().queryStatus(getProject(), getCommitIdsToQueryStatus()));
 		return commitsView;
 	}
 
@@ -491,14 +515,7 @@ public abstract class CommitListPanel extends Panel {
 			item = new Fragment(itemId, "commitFrag", this);
 			item.add(new ContributorAvatars("avatar", commit.getAuthorIdent(), commit.getCommitterIdent()));
 
-			item.add(new CommitMessagePanel("message", new AbstractReadOnlyModel<Project>() {
-
-				@Override
-				public Project getObject() {
-					return getProject();
-				}
-				
-			}, new LoadableDetachableModel<RevCommit>() {
+			item.add(new CommitMessagePanel("message", getProject(), new LoadableDetachableModel<RevCommit>() {
 
 				@Override
 				protected RevCommit load() {
@@ -583,19 +600,8 @@ public abstract class CommitListPanel extends Panel {
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(commit.name())));
 			item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 			
-			item.add(new CommitStatusPanel("buildStatus") {
-
-				@Override
-				protected Project getProject() {
-					return CommitListPanel.this.getProject();
-				}
-
-				@Override
-				protected ObjectId getCommitId() {
-					return commit.copy();
-				}
-				
-			});
+			getCommitIdsToQueryStatus().add(commit.copy());
+			item.add(new CommitStatusPanel("buildStatus", getProject(), commit.copy()));
 
 			item.add(AttributeAppender.append("class", "commit clearfix"));
 		} else {

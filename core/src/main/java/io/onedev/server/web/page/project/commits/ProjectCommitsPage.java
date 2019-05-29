@@ -117,12 +117,7 @@ public class ProjectCommitsPage extends ProjectPage {
 
 		});
 		
-		add(new CommitListPanel("main", query) {
-
-			@Override
-			protected Project getProject() {
-				return ProjectCommitsPage.this.getProject();
-			}
+		add(new CommitListPanel("main", getProject(), query) {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {

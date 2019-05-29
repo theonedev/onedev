@@ -23,9 +23,10 @@ public class BuildEventBroadcaster {
 	public void on(BuildEvent event) {
 		PageKey pageKey = WicketUtils.getPageKey();
 		webSocketManager.notifyObservableChange(Build.getWebSocketObservable(event.getBuild().getId()), pageKey);
-		webSocketManager.notifyObservableChange("commit-status:" + event.getBuild().getCommitHash(), pageKey);
+		String observable = "commit-status:" + event.getProject().getId() + ":" + event.getBuild().getCommitHash();
+		webSocketManager.notifyObservableChange(observable, pageKey);
 		if (event instanceof BuildSubmitted) { 
-			String observable = "commit-builds:" + event.getProject().getId() + ":" + event.getBuild().getCommitHash();
+			observable = "commit-builds:" + event.getProject().getId() + ":" + event.getBuild().getCommitHash();
 			webSocketManager.notifyObservableChange(observable, pageKey);
 		}
 	}

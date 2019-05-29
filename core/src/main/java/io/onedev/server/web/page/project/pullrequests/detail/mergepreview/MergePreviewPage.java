@@ -24,7 +24,6 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.search.code.CommitIndexed;
@@ -113,19 +112,7 @@ public class MergePreviewPage extends PullRequestDetailPage {
 			fragment.add(hashLink);
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getMerged())));
 			fragment.add(new WebMarkupContainer("copyMergedCommit").add(new CopyClipboardBehavior(Model.of(preview.getMerged()))));
-			fragment.add(new CommitStatusPanel("buildStatus") {
-
-				@Override
-				protected Project getProject() {
-					return MergePreviewPage.this.getProject();
-				}
-
-				@Override
-				protected ObjectId getCommitId() {
-					return ObjectId.fromString(preview.getMerged());
-				}
-				
-			});
+			fragment.add(new CommitStatusPanel("buildStatus", getProject(), ObjectId.fromString(preview.getMerged())));
 			fragment.add(new WebMarkupContainer("outDated") {
 
 				@Override

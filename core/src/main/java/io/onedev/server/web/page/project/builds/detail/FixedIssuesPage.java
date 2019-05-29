@@ -10,7 +10,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.FixedInCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
@@ -38,12 +37,7 @@ public class FixedIssuesPage extends BuildDetailPage {
 		if (getBuild().getFixedIssueNumbers() != null) {
 			Fragment fragment = new Fragment("content", "availableFrag", this);
 			fragment.add(new Label("jobName", getBuild().getJobName()));
-			fragment.add(new IssueListPanel("issues", query) {
-
-				@Override
-				protected Project getProject() {
-					return FixedIssuesPage.this.getProject();
-				}
+			fragment.add(new IssueListPanel("issues", getProject(), query) {
 
 				@Override
 				protected IssueQuery getBaseQuery() {

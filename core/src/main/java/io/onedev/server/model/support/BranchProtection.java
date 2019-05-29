@@ -259,7 +259,7 @@ public class BranchProtection implements Serializable {
 		if (!ReviewRequirement.fromString(getReviewRequirement()).satisfied(user)) 
 			return false;
 
-		Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(project, newObjectId.name());
+		Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(project, newObjectId);
 
 		for (JobDependency dependency: getJobDependencies()) {
 			Map<String, List<List<String>>> paramMatrix = new HashMap<>();

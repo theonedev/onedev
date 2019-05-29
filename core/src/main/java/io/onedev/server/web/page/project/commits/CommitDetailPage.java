@@ -223,7 +223,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		
 		newParentsContainer(null);
 
-		add(new CommitJobsPanel("jobs", projectModel, getCommit().copy()));
+		add(new CommitJobsPanel("jobs", getProject(), getCommit().copy()));
 		
 		newRevisionDiff(null);
 	}

@@ -4,14 +4,15 @@ import java.util.Collection;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
-import org.apache.wicket.event.IEvent;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.panel.GenericPanel;
+import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
@@ -22,39 +23,39 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.websocket.PageDataChanged;
+import io.onedev.server.web.model.EntityModel;
 
 @SuppressWarnings("serial")
-public abstract class CommitStatusPanel extends GenericPanel<Collection<Build>> {
+public class CommitStatusPanel extends Panel {
 
-	public CommitStatusPanel(String id) {
+	private final IModel<Project> projectModel;
+	
+	private final ObjectId commitId;
+	
+	private final IModel<Status> statusModel;
+	
+	public CommitStatusPanel(String id, Project project, ObjectId commitId) {
 		super(id);
-		setModel(new LoadableDetachableModel<Collection<Build>>() {
+		
+		this.projectModel = new EntityModel<Project>(project);
+		this.commitId = commitId;
+		
+		statusModel = new LoadableDetachableModel<Status>() {
 
 			@Override
-			protected Collection<Build> load() {
-				return OneDev.getInstance(BuildManager.class).query(getProject(), getCommitId().name());
+			protected Status load() {
+				return Status.getOverallStatus(getProject().getCommitStatus(commitId).values());
 			}
 			
-		});		
-	}
-
-	private boolean hasStatus(Collection<Build> builds, Build.Status status) {
-		for (Build build: builds) {
-			if (build.getStatus() == status)
-				return true;
-		}
-		return false;
+		};		
 	}
 	
-	@Override
-	public void onEvent(IEvent<?> event) {
-		super.onEvent(event);
+	private Project getProject() {
+		return projectModel.getObject();
+	}
 
-		if (event.getPayload() instanceof PageDataChanged && isVisibleInHierarchy()) {
-			PageDataChanged pageDataChanged = (PageDataChanged) event.getPayload();
-			pageDataChanged.getHandler().add(this);
-		}
+	private BuildManager getBuildManager() {
+		return OneDev.getInstance(BuildManager.class);
 	}
 	
 	@Override
@@ -65,30 +66,32 @@ public abstract class CommitStatusPanel extends GenericPanel<Collection<Build>> 
 
 			@Override
 			protected Component newContent(String id, FloatingPanel floating) {
-				return new StatusListPanel(id, CommitStatusPanel.this.getModel());
+				return new StatusListPanel(id, new LoadableDetachableModel<Collection<Build>>() {
+
+					@Override
+					protected Collection<Build> load() {
+						return getBuildManager().query(getProject(), commitId);
+					}
+					
+				});
 			}
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 
-				Collection<Build> builds = CommitStatusPanel.this.getModelObject();
 				String cssClass = "fa fa-fw overall-build-status build-status build-status-";
 				String title = "";
-				
-				for (Build.Status status: Build.Status.values()) {
-					if (hasStatus(builds, status)) {
-						cssClass += status.name().toLowerCase();
-						if (status == Status.RUNNING)
-							cssClass += " fa-spin";
-						if (status != Status.SUCCESSFUL)
-							title = "Some builds are "; 
-						else
-							title = "Builds are "; 
-						title += status.getDisplayName().toLowerCase() + ", click for details";
-						break;
-					}
-				}
+
+				Status status = Preconditions.checkNotNull(statusModel.getObject());
+				cssClass += status.name().toLowerCase();
+				if (status == Status.RUNNING)
+					cssClass += " fa-spin";
+				if (status != Status.SUCCESSFUL)
+					title = "Some builds are "; 
+				else
+					title = "Builds are "; 
+				title += status.getDisplayName().toLowerCase() + ", click for details";
 				tag.put("class", cssClass);
 				tag.put("title", title);
 			}
@@ -104,12 +107,16 @@ public abstract class CommitStatusPanel extends GenericPanel<Collection<Build>> 
 			
 			@Override
 			public void onConnectionOpened(IPartialPageRequestHandler handler) {
-				handler.add(component);
+				/*
+				 *  Do not refresh on connection as otherwise project commit status cache will not take
+				 *  effect on commit list page 
+				 */
+				// handler.add(component);
 			}
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Lists.newArrayList("commit-status:" + getCommitId().name());
+				return Lists.newArrayList("commit-status:" + getProject().getId() + ":" + commitId.name());
 			}
 			
 		});
@@ -120,7 +127,14 @@ public abstract class CommitStatusPanel extends GenericPanel<Collection<Build>> 
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(!getModelObject().isEmpty());
+		setVisible(statusModel.getObject() != null);
+	}
+
+	@Override
+	protected void onDetach() {
+		projectModel.detach();
+		statusModel.detach();
+		super.onDetach();
 	}
 
 	@Override
@@ -128,9 +142,5 @@ public abstract class CommitStatusPanel extends GenericPanel<Collection<Build>> 
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new BuildStatusCssResourceReference()));
 	}
-	
-	protected abstract Project getProject();
-	
-	protected abstract ObjectId getCommitId();
 	
 }

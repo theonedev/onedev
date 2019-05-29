@@ -12,6 +12,7 @@ import io.onedev.server.ci.job.Job;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecRendererProvider;
 
@@ -24,9 +25,9 @@ public class JobLink extends BookmarkablePageLink<Void> {
 	
 	private final String jobName;
 	
-	public JobLink(String id, IModel<Project> projectModel, ObjectId commitId, String jobName) {
+	public JobLink(String id, Project project, ObjectId commitId, String jobName) {
 		super(id, ProjectBlobPage.class);
-		this.projectModel = projectModel;
+		this.projectModel = new EntityModel<Project>(project);
 		this.commitId = commitId;
 		this.jobName = jobName;
 	}

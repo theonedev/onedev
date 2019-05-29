@@ -3,8 +3,10 @@ package io.onedev.server.entitymanager.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -16,6 +18,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -51,6 +54,8 @@ import io.onedev.server.util.BuildConstants;
 @Singleton
 public class DefaultBuildManager extends AbstractEntityManager<Build> implements BuildManager {
 
+	private static final int STATUS_QUERY_BATCH = 500;
+	
 	private final BuildParamManager buildParamManager;
 	
 	private final BuildDependenceManager buildDependenceManager;
@@ -85,20 +90,20 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 	@Sessional
 	@Override
-	public Collection<Build> query(Project project, String commitHash) {
-		return query(project, commitHash, null, new HashMap<>());
+	public Collection<Build> query(Project project, ObjectId commitId) {
+		return query(project, commitId, null, new HashMap<>());
 	}
 	
 	@Sessional
 	@Override
-	public Collection<Build> query(Project project, String commitHash, String jobName, Map<String, List<String>> params) {
+	public Collection<Build> query(Project project, ObjectId commitId, String jobName, Map<String, List<String>> params) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
 		
 		List<Predicate> restrictions = new ArrayList<>();
 		restrictions.add(builder.equal(root.get("project"), project));
-		restrictions.add(builder.equal(root.get("commitHash"), commitHash));
+		restrictions.add(builder.equal(root.get("commitHash"), commitId.name()));
 		if (jobName != null)
 			restrictions.add(builder.equal(root.get("jobName"), jobName));
 		
@@ -248,4 +253,59 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		Build build = event.getBuild();
 		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getNumber()));
 	}
+
+	@Sessional
+	@Override
+	public Map<ObjectId, Map<String, Status>> queryStatus(Project project, Collection<ObjectId> commitIds) {
+		Map<ObjectId, Map<String, Collection<Status>>> commitStatuses = new HashMap<>();
+		
+		Collection<ObjectId> batch = new HashSet<>();
+		for (ObjectId commitId: commitIds) {
+			batch.add(commitId);
+			if (batch.size() == STATUS_QUERY_BATCH) {
+				fillStatus(project, batch, commitStatuses);
+				batch.clear();
+			}
+		}
+		if (!batch.isEmpty())
+			fillStatus(project, batch, commitStatuses);
+		Map<ObjectId, Map<String, Status>> overallCommitStatuses = new HashMap<>();
+		for (Map.Entry<ObjectId, Map<String, Collection<Status>>> entry: commitStatuses.entrySet()) {
+			Map<String, Status> jobOverallStatuses = new HashMap<>();
+			for (Map.Entry<String, Collection<Status>> entry2: entry.getValue().entrySet()) 
+				jobOverallStatuses.put(entry2.getKey(), Status.getOverallStatus(entry2.getValue()));
+			overallCommitStatuses.put(entry.getKey(), jobOverallStatuses);
+		}
+		for (ObjectId commitId: commitIds) {
+			if (!overallCommitStatuses.containsKey(commitId))
+				overallCommitStatuses.put(commitId, new HashMap<>());
+		}
+		return overallCommitStatuses;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void fillStatus(Project project, Collection<ObjectId> commitIds, 
+			Map<ObjectId, Map<String, Collection<Status>>> commitStatuses) {
+		Query<?> query = getSession().createQuery("select commitHash, jobName, status from Build "
+				+ "where project=:project and commitHash in :commitHashes");
+		query.setParameter("project", project);
+		query.setParameter("commitHashes", commitIds.stream().map(it->it.name()).collect(Collectors.toList()));
+		for (Object[] row: (List<Object[]>)query.list()) {
+			ObjectId commitId = ObjectId.fromString((String) row[0]);
+			String jobName = (String) row[1];
+			Status status = (Status) row[2];
+			Map<String, Collection<Status>> commitStatus = commitStatuses.get(commitId);
+			if (commitStatus == null) {
+				commitStatus = new HashMap<>();
+				commitStatuses.put(commitId, commitStatus);
+			}
+			Collection<Status> jobStatus = commitStatus.get(jobName);
+			if (jobStatus == null) {
+				jobStatus = new HashSet<>();
+				commitStatus.put(jobName, jobStatus);
+			}
+			jobStatus.add(status);
+		}
+	}
+	
 }
