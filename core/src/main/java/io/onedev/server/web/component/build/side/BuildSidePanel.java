@@ -41,7 +41,7 @@ import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
-import io.onedev.server.web.component.job.JobLink;
+import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
@@ -110,7 +110,7 @@ public abstract class BuildSidePanel extends Panel {
 		
 		general.add(new WebMarkupContainer("copyCommitHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 		
-		Link<Void> jobLink = new JobLink("job", getProject(), getBuild().getCommitId(), getBuild().getJobName());
+		Link<Void> jobLink = new JobDefLink("job", getProject(), getBuild().getCommitId(), getBuild().getJobName());
 		jobLink.add(new Label("label", getBuild().getJobName()));
 		general.add(jobLink);
 		
@@ -146,6 +146,8 @@ public abstract class BuildSidePanel extends Panel {
 					duration = getBuild().getRunningDate().getTime() - getBuild().getQueueingDate().getTime();
 				else
 					duration = System.currentTimeMillis() - getBuild().getQueueingDate().getTime(); 
+				if (duration < 0)
+					duration = 0;
 				return DateUtils.formatDuration(duration);
 			}
 			
@@ -169,6 +171,8 @@ public abstract class BuildSidePanel extends Panel {
 					duration = getBuild().getFinishDate().getTime() - getBuild().getRunningDate().getTime();
 				else
 					duration = System.currentTimeMillis() - getBuild().getRunningDate().getTime(); 
+				if (duration < 0)
+					duration = 0;
 				return DateUtils.formatDuration(duration);
 			}
 			

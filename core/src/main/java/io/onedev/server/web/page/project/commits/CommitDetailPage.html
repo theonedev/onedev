@@ -25,7 +25,15 @@
 				<div wicket:id="parents" class="parents pull-left"></div>
 			</div>
         </div>
-        <div wicket:id="jobs"></div>
+        <wicket:enclosure child="jobs">
+        <div class="jobs">
+            <div wicket:id="jobs" class="job">
+                <span wicket:id="status" class="status"></span>
+                <a wicket:id="name" class="name"><span wicket:id="label"></span></a>
+                <a wicket:id="run" class="run" title="Run this job"><i class="fa fa-play"></i></a>
+            </div>
+        </div>
+        </wicket:enclosure>
 		<div wicket:id="revisionDiff"></div>
 	</div>
 	<wicket:fragment wicket:id="refsFrag">
@@ -47,5 +55,5 @@
 			<span>1 parent</span>  
 			<a wicket:id="parent" class="parent hash"><span wicket:id="label"></span></a>
 		</div>
-	</wicket:fragment>
+    </wicket:fragment>
 </wicket:extend>

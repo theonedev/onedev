@@ -47,8 +47,11 @@
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status {
 	width: 160px;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status>div {
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status>span {
 	margin-left: 8px;
+}
+#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status>span.hash {
+	margin-left: 4px;
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content a.commit {
 	color: #444;

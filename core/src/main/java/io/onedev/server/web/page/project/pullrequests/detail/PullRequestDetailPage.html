@@ -101,11 +101,14 @@
 			<div wicket:id="reviews" class="body"></div>
 		</div>
 		</wicket:enclosure>
-		<wicket:enclosure child="builds">
-		<div class="builds">
+		<wicket:enclosure child="jobs">
+		<div class="jobs">
 			<div class="head">Builds</div> 
 			<div class="body">
-				<div wicket:id="builds"></div>
+				<div wicket:id="jobs" class="job clearfix">
+                    <a wicket:id="status" class="status pull-left"><span wicket:id="icon"></span></a>
+                    <a wicket:id="name" class="name pull-left"><span wicket:id="label"></span></a>
+                </div>
 			</div>
 		</div>
 		</wicket:enclosure>
@@ -124,5 +127,5 @@
 			repository, you may synchronize them manually here</p>
 			<a wicket:id="delete" class="delete btn btn-danger">Delete</a>
 		</div>
-	</wicket:fragment>
+    </wicket:fragment>
 </wicket:extend>

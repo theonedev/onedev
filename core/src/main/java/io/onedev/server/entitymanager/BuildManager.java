@@ -23,6 +23,8 @@ public interface BuildManager extends EntityManager<Build> {
     
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, Map<String, List<String>> params); 
 	
+	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName); 
+	
 	Collection<Build> query(Project project, ObjectId commitId); 
 	
 	Map<ObjectId, Map<String, Status>> queryStatus(Project project, Collection<ObjectId> commitIds);

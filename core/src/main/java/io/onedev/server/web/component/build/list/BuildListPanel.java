@@ -50,6 +50,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.SecurityUtils;
@@ -62,7 +63,7 @@ import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
-import io.onedev.server.web.component.job.JobLink;
+import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
@@ -339,7 +340,21 @@ public abstract class BuildListPanel extends Panel {
 				Long buildId = rowModel.getObject().getId();
 
 				Fragment fragment = new Fragment(componentId, "statusFrag", BuildListPanel.this);
-				fragment.add(new BuildStatusIcon("icon", rowModel.getObject(), true));
+				fragment.add(new BuildStatusIcon("icon", new LoadableDetachableModel<Status>() {
+
+					@Override
+					protected Status load() {
+						return getBuildManager().load(buildId).getStatus();
+					}
+					
+				}) {
+					
+					@Override
+					protected Collection<String> getWebSocketObservables() {
+						return Sets.newHashSet(Build.getWebSocketObservable(buildId));
+					}
+					
+				});
 				
 				fragment.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
@@ -374,7 +389,7 @@ public abstract class BuildListPanel extends Panel {
 					IModel<Build> rowModel) {
 				Build build = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
-				Link<Void> link = new JobLink("link", getProject(), build.getCommitId(), build.getJobName());
+				Link<Void> link = new JobDefLink("link", getProject(), build.getCommitId(), build.getJobName());
 				link.add(new Label("label", build.getJobName()));
 				fragment.add(link);
 				cellItem.add(fragment);

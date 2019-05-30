@@ -75,7 +75,7 @@ import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.branch.choice.BranchChoiceProvider;
 import io.onedev.server.web.component.branch.choice.BranchSingleChoice;
-import io.onedev.server.web.component.build.status.CommitStatusPanel;
+import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;

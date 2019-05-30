@@ -1,8 +1,6 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities.activity;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -16,11 +14,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
@@ -29,8 +24,8 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.build.status.CommitStatusPanel;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
+import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
@@ -71,15 +66,6 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 			}
 			
 		}) {
-
-			@Override
-			protected void onBeforeRender() {
-				Collection<ObjectId> commitIds = getModelObject().stream().map(it->it.copy()).collect(Collectors.toSet());
-				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-				Project project = PullRequestUpdatedPanel.this.getModelObject().getRequest().getTargetProject();
-				project.cacheCommitStatus(buildManager.queryStatus(project, commitIds));
-				super.onBeforeRender();
-			}
 
 			@Override
 			protected void populateItem(final ListItem<RevCommit> item) {

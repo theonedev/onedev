@@ -133,6 +133,15 @@ ul>li>a.code-comments.new .fa-circle {
 	border-top: none;
 	padding-top: 0;
 }
+#request-detail>.side-info>.content>.jobs>.body>.job {
+    margin-bottom: 4px;
+}
+#request-detail>.side-info>.content>.jobs>.body>.job:last-child {
+    margin-bottom: 0;
+}
+#request-detail>.side-info>.content>.jobs>.body>.job>.name {
+    margin: -3px 0 0 4px;
+}
 
 .floating>.content>.instruction {
 	padding: 12px 12px 12px 24px; 

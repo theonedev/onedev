@@ -28,6 +28,9 @@
 .build-status-queueing:before {
     content: "\f192";
 }
+.build-status-none:before {
+    content: "\f111";
+}
 .build-status-successful {
 	color: #06BC06 !important;
 }
@@ -37,27 +40,6 @@
 .build-status-running, .build-status-waiting, .build-status-queueing {
 	color: #D2A906 !important;
 }
-
-/* The pending status is for not generated pull request build */
-.build-status-pending {
-	color: #D2A906 !important;
-}
-.build-status-pending:before { 
-    content: "\f017";
-}
-
-.build-status-list {
-    width: auto;
-}
-.build-status-list>tbody>tr>td.status {
-    padding: 4px 4px 4px 0;
-}
-.build-status-list>tbody>tr>td.title {
-    padding: 4px 0 4px 4px;
-}
-.floating>.content>.build-status-list>tbody>tr>td.status {
-    padding-left: 8px;
-}
-.floating>.content>.build-status-list>tbody>tr>td.title {
-    padding-right: 8px;
+.build-status-none {
+    color: #CCC !important;
 }

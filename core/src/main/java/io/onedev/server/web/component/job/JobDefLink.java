@@ -17,7 +17,7 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecRendererProvider;
 
 @SuppressWarnings("serial")
-public class JobLink extends BookmarkablePageLink<Void> {
+public class JobDefLink extends BookmarkablePageLink<Void> {
 
 	private final IModel<Project> projectModel;
 	
@@ -25,7 +25,7 @@ public class JobLink extends BookmarkablePageLink<Void> {
 	
 	private final String jobName;
 	
-	public JobLink(String id, Project project, ObjectId commitId, String jobName) {
+	public JobDefLink(String id, Project project, ObjectId commitId, String jobName) {
 		super(id, ProjectBlobPage.class);
 		this.projectModel = new EntityModel<Project>(project);
 		this.commitId = commitId;

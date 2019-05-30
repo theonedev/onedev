@@ -91,7 +91,13 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Sessional
 	@Override
 	public Collection<Build> query(Project project, ObjectId commitId) {
-		return query(project, commitId, null, new HashMap<>());
+		return query(project, commitId, null);
+	}
+	
+	@Sessional
+	@Override
+	public Collection<Build> query(Project project, ObjectId commitId, String jobName) {
+		return query(project, commitId, jobName, new HashMap<>());
 	}
 	
 	@Sessional

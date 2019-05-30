@@ -2,33 +2,27 @@ package io.onedev.server.web.component.build.status;
 
 import java.util.Collection;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
-import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.model.EntityModel;
 
 @SuppressWarnings("serial")
-public class BuildStatusIcon extends Panel {
+public class BuildStatusIcon extends GenericPanel<Status> {
 
-	private final IModel<Build> buildModel;
-	
-	private final boolean withTooltip;
-	
-	public BuildStatusIcon(String id, Build build, boolean withTooltip) {
-		super(id);
-		this.buildModel = new EntityModel<Build>(build);
-		this.withTooltip = withTooltip;
+	public BuildStatusIcon(String id, IModel<Status> model) {
+		super(id, model);
 	}
 
 	@Override
@@ -41,25 +35,19 @@ public class BuildStatusIcon extends Panel {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 
-				Build.Status status = getBuild().getStatus();
-				String cssClass = "fa fa-fw build-status build-status-" + status.name().toLowerCase();
+				Status status = getModelObject();
+				String cssClass = "fa fa-fw build-status build-status-";
+				if (status != null)
+					cssClass += status.name().toLowerCase();
+				else
+					cssClass += "none";
 				if (status == Status.RUNNING)
 					cssClass += " fa-spin";
-
-				if (withTooltip) {
-					String title;
-					
-					if (status == Status.WAITING) 
-						title = "Waiting for completion of dependency builds";
-					else if (status == Status.QUEUEING) 
-						title = "Queued due to limited capacity";
-					else
-						title = StringUtils.capitalize(status.getDisplayName().toLowerCase());
-					
-					tag.put("title", title);
-				}
-				
 				tag.put("class", cssClass);
+				
+				String title = getTooltip(status);
+				if (title != null)
+					tag.put("title", title);
 			}
 			
 		});
@@ -73,29 +61,41 @@ public class BuildStatusIcon extends Panel {
 			
 			@Override
 			public void onConnectionOpened(IPartialPageRequestHandler handler) {
-				handler.add(component);
+				/*
+				 *  Do not refresh on connection as otherwise project commit status cache will not take
+				 *  effect on commit list page 
+				 */
+				// handler.add(component);
 			}
 			
 			@Override
 			public Collection<String> getObservables() {
-				return Sets.newHashSet(Build.getWebSocketObservable(getBuild().getId()));
+				return getWebSocketObservables();
 			}
 			
 		});
 		
-		setOutputMarkupPlaceholderTag(true);
+		setOutputMarkupId(true);
 	}
 	
-	protected Build getBuild() {
-		return buildModel.getObject();
+	protected Collection<String> getWebSocketObservables() {
+		return Sets.newHashSet();
 	}
 	
-	@Override
-	protected void onDetach() {
-		buildModel.detach();
-		super.onDetach();
+	@Nullable
+	protected String getTooltip(@Nullable Status status) {
+		String title;
+		if (status == Status.WAITING) 
+			title = "Waiting for completion of dependency builds";
+		else if (status == Status.QUEUEING) 
+			title = "Queued due to limited capacity";
+		else if (status != null)
+			title = StringUtils.capitalize(status.getDisplayName().toLowerCase());
+		else
+			title = null;
+		return title;
 	}
-
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

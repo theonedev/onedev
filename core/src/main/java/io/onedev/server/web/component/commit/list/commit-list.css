@@ -62,8 +62,14 @@
 .commit-list>.body .message-and-labels .commit-message .ellipsis-expander {
 	margin-bottom: 2px;
 }
-.commit-list>.body .actions>* {
-	margin: 6px 0 0 8px;
+.commit-list>.body .commit>.pull-right {
+    margin: 6px 0 0 8px;
+}
+.commit-list>.body .commit>.pull-right.hash {
+    margin-left: 4px;
+}
+.commit-list>.body .commit>.pull-right.build-status {
+    margin-top: 10px;
 }
 .commit-list>.body>.list {
 	margin-bottom: 0;

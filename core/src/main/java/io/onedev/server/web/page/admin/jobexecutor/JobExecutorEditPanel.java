@@ -191,6 +191,7 @@ abstract class JobExecutorEditPanel extends Panel {
 
 							@Override
 							protected void onSave(AjaxRequestTarget target, Serializable bean) {
+								close();
 								target.add(editor);
 								target.focusComponent(null);
 								testBehavior.requestTest(target);

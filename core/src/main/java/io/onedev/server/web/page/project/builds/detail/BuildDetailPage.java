@@ -40,6 +40,7 @@ import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -152,7 +153,21 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			
 		}));
 		
-		summary.add(new BuildStatusIcon("statusIcon", getBuild(), true));
+		summary.add(new BuildStatusIcon("statusIcon", new AbstractReadOnlyModel<Status>() {
+
+			@Override
+			public Status getObject() {
+				return getBuild().getStatus();
+			}
+			
+		}) {
+			
+			@Override
+			protected Collection<String> getWebSocketObservables() {
+				return Sets.newHashSet(Build.getWebSocketObservable(getBuild().getId()));
+			}
+			
+		});
 		summary.add(new Label("statusLabel", new AbstractReadOnlyModel<String>() {
 
 			@Override

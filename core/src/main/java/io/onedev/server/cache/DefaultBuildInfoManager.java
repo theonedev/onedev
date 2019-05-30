@@ -139,6 +139,10 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 				public void execute(Transaction txn) {
 					ByteIterable jobKey = new StringByteIterable(build.getProject().getId() + ":" + build.getJobName());
 					Collection<ObjectId> lastCommits = readCommits(lastCommitsStore, txn, jobKey);
+					for (Iterator<ObjectId> it = lastCommits.iterator(); it.hasNext();) {
+						if (project.getRevCommit(it.next(), false) == null)
+							it.remove();
+					}					
 					writeCommits(prevCommitsStore, txn, new LongByteIterable(build.getId()), lastCommits);
 					
 					ObjectId buildCommit = ObjectId.fromString(build.getCommitHash());

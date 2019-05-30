@@ -15,7 +15,7 @@ import io.onedev.server.web.asset.hotkeys.HotkeysResourceReference;
 import io.onedev.server.web.asset.hover.HoverResourceReference;
 import io.onedev.server.web.asset.jqueryui.JQueryUIResourceReference;
 import io.onedev.server.web.asset.textareacaretposition.TextareaCaretPositionResourceReference;
-import io.onedev.server.web.component.build.status.BuildStatusCssResourceReference;
+import io.onedev.server.web.component.commit.status.CommitStatusCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 import io.onedev.server.web.page.base.BaseDependentResourceReference;
 
@@ -38,7 +38,7 @@ public class MarkdownResourceReference extends BaseDependentResourceReference {
 		dependencies.add(JavaScriptHeaderItem.forReference(new HotkeysResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new JQueryUIResourceReference()));
 		dependencies.add(JavaScriptHeaderItem.forReference(new HoverResourceReference()));
-		dependencies.add(CssHeaderItem.forReference(new BuildStatusCssResourceReference()));
+		dependencies.add(CssHeaderItem.forReference(new CommitStatusCssResourceReference()));
 
 		dependencies.add(CssHeaderItem.forReference(
 				new BaseDependentCssResourceReference(MarkdownResourceReference.class, "markdown.css")));

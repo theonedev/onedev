@@ -1,8 +1,11 @@
 package io.onedev.server.web.page.project.pullrequests.detail.activities;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.servlet.http.Cookie;
 
@@ -23,16 +26,21 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.IRequestHandler;
+import org.apache.wicket.request.Url;
+import org.apache.wicket.request.cycle.IRequestCycleListener;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.eclipse.jgit.lib.ObjectId;
 import org.joda.time.DateTime;
 
 import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
@@ -58,6 +66,7 @@ import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.util.DeleteCallback;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.websocket.PageDataChanged;
+import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
 public class PullRequestActivitiesPage extends PullRequestDetailPage {
@@ -211,6 +220,8 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				partialPageRequestHandler.add(sinceChangesRow);
 				prevActivityRow = sinceChangesRow;
 			}
+						
+			Collection<ObjectId> commitIds = new HashSet<>();
 			
 			for (PullRequestActivity activity: newActivities) {
 				Component newActivityRow = newActivityRow(activitiesView.newChildId(), activity); 
@@ -224,10 +235,65 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				
 				if (activity instanceof PullRequestUpdatedActivity) {
 					partialPageRequestHandler.appendJavaScript("$('tr.since-changes').addClass('visible');");
+					PullRequestUpdatedActivity updatedActivity = (PullRequestUpdatedActivity) activity;
+					commitIds.addAll(updatedActivity.getUpdate().getCommits()
+							.stream().map(it->it.copy()).collect(Collectors.toSet()));
 				}
 				prevActivityRow = newActivityRow;
 			}
+			
+			PullRequest request = getPullRequest();
+			Project project = request.getTargetProject();
+			project.cacheCommitStatus(getBuildManager().queryStatus(project, commitIds));
+			
+			if (!commitIds.isEmpty()) {
+				RequestCycle.get().getListeners().add(new IRequestCycleListener() {
+					
+					@Override
+					public void onUrlMapped(RequestCycle cycle, IRequestHandler handler, Url url) {
+					}
+					
+					@Override
+					public void onRequestHandlerScheduled(RequestCycle cycle, IRequestHandler handler) {
+					}
+					
+					@Override
+					public void onRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler) {
+					}
+					
+					@Override
+					public void onRequestHandlerExecuted(RequestCycle cycle, IRequestHandler handler) {
+					}
+					
+					@Override
+					public void onExceptionRequestHandlerResolved(RequestCycle cycle, IRequestHandler handler, Exception exception) {
+					}
+					
+					@Override
+					public IRequestHandler onException(RequestCycle cycle, Exception ex) {
+						return null;
+					}
+					
+					@Override
+					public void onEndRequest(RequestCycle cycle) {
+						notifyWebSocketObserverChange();
+					}
+					
+					@Override
+					public void onDetach(RequestCycle cycle) {
+					}
+					
+					@Override
+					public void onBeginRequest(RequestCycle cycle) {
+					}
+					
+				});				
+			}
 		}
+	}
+	
+	private void notifyWebSocketObserverChange() {
+		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 	}
 
 	private Component newSinceChangesRow(String id, Date sinceDate) {
@@ -244,6 +310,10 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		
 		return row;
 	}
+
+	private BuildManager getBuildManager() {
+		return 	OneDev.getInstance(BuildManager.class);
+	}
 	
 	@Override
 	protected void onInitialize() {
@@ -256,8 +326,20 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 				addOrReplace(activitiesView = new RepeatingView("activities"));
 				
 				List<PullRequestActivity> activities = getActivities();
-
+				
+				Collection<ObjectId> commitIds = new HashSet<>();
+				for (PullRequestActivity activity: activities) {
+					if (activity instanceof PullRequestUpdatedActivity) {
+						PullRequestUpdatedActivity updatedActivity = (PullRequestUpdatedActivity) activity;
+						commitIds.addAll(updatedActivity.getUpdate().getCommits()
+								.stream().map(it->it.copy()).collect(Collectors.toSet()));
+					}
+				}
+				
 				PullRequest request = getPullRequest();
+				Project project = request.getTargetProject();
+				project.cacheCommitStatus(getBuildManager().queryStatus(project, commitIds));
+					
 				List<PullRequestActivity> oldActivities = new ArrayList<>();
 				List<PullRequestActivity> newActivities = new ArrayList<>();
 				for (PullRequestActivity activity: activities) {

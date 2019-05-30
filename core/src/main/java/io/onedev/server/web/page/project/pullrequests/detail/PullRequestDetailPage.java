@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -47,6 +48,8 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.list.ListItem;
+import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
@@ -60,20 +63,24 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.UserInfoManager;
+import io.onedev.server.ci.CISpec;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
@@ -90,10 +97,12 @@ import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.branch.BranchLink;
-import io.onedev.server.web.component.build.status.StatusListPanel;
+import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
+import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -412,7 +421,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 						}
 						
 					}
-					
+
 				};
 				fragment.add(new EntityNavPanel<PullRequest>("requestNav") {
 
@@ -454,19 +463,104 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				fragment.add(newMergeStrategyContainer());
 				fragment.add(new ReviewListPanel("reviews", requestModel));
 				
-				fragment.add(new StatusListPanel("builds", new LoadableDetachableModel<Collection<Build>>() {
+				fragment.add(new ListView<String>("jobs", new LoadableDetachableModel<List<String>>() {
 
 					@Override
-					protected Collection<Build> load() {
-						return getPullRequest().getPullRequestBuilds().stream().map(it->it.getBuild()).collect(Collectors.toList());
+					protected List<String> load() {
+						PullRequest request = getPullRequest();
+						MergePreview preview = request.getMergePreview();
+						if (preview != null && preview.getMerged() != null) {
+							CISpec ciSpec = request.getTargetProject().getCISpec(ObjectId.fromString(preview.getMerged()));
+							if (ciSpec != null) {
+								Set<String> pullRequestJobNames = request.getPullRequestBuilds()
+										.stream()
+										.map(it->it.getBuild().getJobName())
+										.collect(Collectors.toSet());
+								return ciSpec.getSortedJobs()
+										.stream()
+										.map(it->it.getName())
+										.filter(it->pullRequestJobNames.contains(it))
+										.collect(Collectors.toList());
+							}
+						} 
+						return new ArrayList<>();
 					}
 					
 				}) {
 
 					@Override
+					protected void populateItem(ListItem<String> item) {
+						PullRequest request = getPullRequest();
+						MergePreview preview = request.getMergePreview();
+						Preconditions.checkState(preview != null && preview.getMerged() != null);
+						ObjectId commitId = ObjectId.fromString(preview.getMerged());
+						Project project = request.getTargetProject();
+						String jobName = item.getModelObject();
+
+						WebMarkupContainer link = new DropdownLink("status") {
+
+							@Override
+							protected Component newContent(String id, FloatingPanel dropdown) {
+								return new SimpleBuildListPanel(id, new LoadableDetachableModel<List<Build>>() {
+
+									@Override
+									protected List<Build> load() {
+										List<Build> builds = getPullRequest().getPullRequestBuilds()
+												.stream()
+												.map(it->it.getBuild())
+												.filter(it->it.getJobName().equals(jobName))
+												.collect(Collectors.toList());
+										Collections.sort(builds);
+										return builds;
+									}
+									
+								}) {
+									
+									@Override
+									protected Component newListLink(String componentId) {
+										return new WebMarkupContainer(componentId);
+									}
+									
+								};
+							}
+							
+						};
+						
+						Status status = Status.getOverallStatus(request.getPullRequestBuilds()
+								.stream()
+								.filter(it->it.getBuild().getJobName().equals(jobName))
+								.map(it->it.getBuild().getStatus())
+								.collect(Collectors.toSet()));
+						
+						link.add(new BuildStatusIcon("icon", Model.of(status)) {
+
+							@Override
+							protected String getTooltip(Status status) {
+								String title;
+								if (status != null) {
+									if (status != Status.SUCCESSFUL)
+										title = "Some builds are "; 
+									else
+										title = "Builds are "; 
+									title += status.getDisplayName().toLowerCase() + ", click for details";
+								} else {
+									title = "No builds";
+								}
+								return title;
+							}
+
+						});
+						item.add(link);
+						
+						link = new JobDefLink("name", project, commitId, jobName);
+						link.add(new Label("label", jobName));
+						item.add(link);
+					}
+
+					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(!getPullRequest().getPullRequestBuilds().isEmpty());
+						setVisible(!getModelObject().isEmpty());
 					}
 					
 				});

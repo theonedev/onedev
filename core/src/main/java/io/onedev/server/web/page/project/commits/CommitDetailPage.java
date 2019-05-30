@@ -39,6 +39,8 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
@@ -57,7 +59,9 @@ import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
-import io.onedev.server.web.component.job.commit.CommitJobsPanel;
+import io.onedev.server.web.component.job.JobDefLink;
+import io.onedev.server.web.component.job.JobStatusPanel;
+import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -223,7 +227,37 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		
 		newParentsContainer(null);
 
-		add(new CommitJobsPanel("jobs", getProject(), getCommit().copy()));
+		add(new ListView<Job>("jobs", new LoadableDetachableModel<List<Job>>() {
+
+			@Override
+			protected List<Job> load() {
+				CISpec ciSpec = getProject().getCISpec(getCommit().copy());
+				if (ciSpec != null)
+					return ciSpec.getSortedJobs();
+				else
+					return new ArrayList<>();
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<Job> item) {
+				ObjectId commitId = getCommit().copy();
+				Job job = item.getModelObject();
+				Link<Void> jobLink = new JobDefLink("name", getProject(), commitId, job.getName());
+				jobLink.add(new Label("label", job.getName()));
+				item.add(jobLink);
+				item.add(new JobStatusPanel("status", getProject(), commitId, job.getName()));
+				item.add(new RunJobLink("run", getProject(), commitId, job.getName()));
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(!getModelObject().isEmpty());
+			}
+			
+		});
 		
 		newRevisionDiff(null);
 	}
