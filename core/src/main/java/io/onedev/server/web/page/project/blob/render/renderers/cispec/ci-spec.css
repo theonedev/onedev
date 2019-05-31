@@ -83,7 +83,8 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-.ci-spec>.valid>div>.body>.side>.navs>.nav>.delete {
+.ci-spec>.valid>div>.body>.side>.navs>.nav>.delete, 
+.ci-spec>.valid>div>.body>.side>.navs>.nav>.run {
     right: 0;
     top: 0;
     position: absolute;

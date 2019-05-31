@@ -21,6 +21,7 @@ import io.onedev.server.ci.job.Job;
 import io.onedev.server.git.Blob;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
@@ -52,6 +53,7 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 						WebMarkupContainer nav = new WebMarkupContainer(navsView.newChildId());
 						nav.add(new Label("jobName", job.getName()));
 						nav.add(AttributeAppender.append("data-name", job.getName()));
+						nav.add(new RunJobLink("run", context.getProject(), context.getCommit().copy(), job.getName()));
 						navsView.add(nav);
 						jobsView.add(BeanContext.view(jobsView.newChildId(), job));
 					}
