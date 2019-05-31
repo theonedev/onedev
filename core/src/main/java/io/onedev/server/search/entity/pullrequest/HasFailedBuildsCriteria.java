@@ -21,8 +21,8 @@ public class HasFailedBuildsCriteria extends PullRequestCriteria {
 	@Override
 	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
 		From<?, ?> join = root
-				.join(PullRequestConstants.ATTR_BUILDS, JoinType.LEFT)
-				.join(PullRequestBuild.ATTR_BUILD, JoinType.LEFT);
+				.join(PullRequestConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT)
+				.join(PullRequestBuild.ATTR_BUILD, JoinType.INNER);
 		Path<?> status = join.get(Build.STATUS);
 		
 		return builder.or(
@@ -35,11 +35,10 @@ public class HasFailedBuildsCriteria extends PullRequestCriteria {
 	@Override
 	public boolean matches(PullRequest request, User user) {
 		for (PullRequestBuild build: request.getPullRequestBuilds()) {
-			if (build.getBuild() != null && 
-					(build.getBuild().getStatus() == Build.Status.IN_ERROR 
+			if (build.getBuild().getStatus() == Build.Status.IN_ERROR 
 					|| build.getBuild().getStatus() == Build.Status.FAILED
 					|| build.getBuild().getStatus() == Build.Status.CANCELLED
-					|| build.getBuild().getStatus() == Build.Status.TIMED_OUT)) {
+					|| build.getBuild().getStatus() == Build.Status.TIMED_OUT) {
 				return true;
 			}
 		}

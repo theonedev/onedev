@@ -138,6 +138,8 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new DependsOnCriteria(getBuild(project, value));
 						} else if (ctx.DependenciesOf() != null) {
 							return new DependenciesOfCriteria(getBuild(project, value));
+						} else if (ctx.RequiredByPullRequest() != null) {
+							return new RequiredByPullRequestCriteria(getPullRequest(project, value));
 						} else {
 							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
 						}

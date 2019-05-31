@@ -97,8 +97,10 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 									suggestions.addAll(escape(SuggestionUtils.suggestUsers(unfencedLowerCaseMatchWith)));
 								else if (operator == BuildQueryLexer.DependsOn || operator == BuildQueryLexer.DependenciesOf)
 									suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedLowerCaseMatchWith)));
-								else
+								else if (operator == BuildQueryLexer.FixedIssue)
 									suggestions.addAll(escape(SuggestionUtils.suggestIssues(project, unfencedLowerCaseMatchWith)));
+								else 
+									suggestions.addAll(escape(SuggestionUtils.suggestPullRequests(project, unfencedLowerCaseMatchWith)));
 							} else {
 								String fieldName = BuildQuery.getValue(fieldElements.get(0).getMatchedText());
  								try {

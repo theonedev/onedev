@@ -18,11 +18,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
 
@@ -97,6 +99,16 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			return issue;
 		else
 			throw new OneException("Unable to find issue: #" + number);
+	}
+	
+	public static PullRequest getPullRequest(Project project, String number) {
+		if (number.startsWith("#"))
+			number = number.substring(1);
+		PullRequest request = OneDev.getInstance(PullRequestManager.class).find(project, getLongValue(number));
+		if (request != null)
+			return request;
+		else
+			throw new OneException("Unable to find pull request: #" + number);
 	}
 	
 	public static Build getBuild(Project project, String number) {

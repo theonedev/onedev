@@ -1,5 +1,12 @@
 package io.onedev.server.ci.job;
 
+import static io.onedev.server.search.entity.EntityQuery.quote;
+import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
+import static io.onedev.server.util.BuildConstants.FIELD_COMMIT;
+import static io.onedev.server.util.BuildConstants.FIELD_JOB;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -9,6 +16,7 @@ import java.util.Set;
 
 import javax.validation.ConstraintValidatorContext;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.ci.JobDependency;
@@ -232,6 +240,13 @@ public class Job implements Serializable, Validatable {
 		if (paramSpecMap == null)
 			paramSpecMap = JobParam.getParamSpecMap(paramSpecs);
 		return paramSpecMap;
+	}
+	
+	public static String getBuildQuery(ObjectId commitId, String jobName) {
+		return "" 
+				+ quote(FIELD_COMMIT) + " " + getRuleName(Is) + " " + quote(commitId.name()) 
+				+ " " + getRuleName(And) + " "
+				+ quote(FIELD_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
 	}
 	
 }

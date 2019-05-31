@@ -76,7 +76,7 @@ public class PullRequestConstants {
 	
 	public static final String ATTR_REVIEWS = "reviews";
 	
-	public static final String ATTR_BUILDS = "builds";
+	public static final String ATTR_PULL_REQUEST_BUILDS = "pullRequestBuilds";
 
 	public static final String STATE_OPEN = "Open";
 

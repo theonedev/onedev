@@ -1,12 +1,5 @@
 package io.onedev.server.web.component.commit.status;
 
-import static io.onedev.server.search.entity.EntityQuery.quote;
-import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
-import static io.onedev.server.util.BuildConstants.FIELD_COMMIT;
-import static io.onedev.server.util.BuildConstants.FIELD_JOB;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -35,8 +28,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
@@ -140,13 +133,8 @@ public class CommitStatusPanel extends Panel {
 						
 					});
 					
-					String query = "" 
-							+ quote(FIELD_COMMIT) + " " + getRuleName(Is) + " " + quote(commitId.name()) 
-							+ " " + getRuleName(And) + " "
-							+ quote(FIELD_JOB) + " " + getRuleName(Is) + " " + quote(job.getName());
-					
 					jobItem.add(new BookmarkablePageLink<Void>("showInList", ProjectBuildsPage.class, 
-							ProjectBuildsPage.paramsOf(getProject(), query, 0)) {
+							ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName()), 0)) {
 						
 						@Override
 						protected void onConfigure() {

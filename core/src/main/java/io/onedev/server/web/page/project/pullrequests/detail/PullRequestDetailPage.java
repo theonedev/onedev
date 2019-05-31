@@ -4,6 +4,12 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_ME
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.CREATE_MERGE_COMMIT_IF_NECESSARY;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.REBASE_SOURCE_BRANCH_COMMITS;
 import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SOURCE_BRANCH_COMMITS;
+import static io.onedev.server.search.entity.EntityQuery.quote;
+import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.RequiredByPullRequest;
+import static io.onedev.server.util.BuildConstants.FIELD_JOB;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.APPROVE;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.DELETE_SOURCE_BRANCH;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.DISCARD;
@@ -47,6 +53,7 @@ import org.apache.wicket.markup.html.form.DropDownChoice;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponent;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -119,6 +126,7 @@ import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
@@ -518,7 +526,12 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 									
 									@Override
 									protected Component newListLink(String componentId) {
-										return new WebMarkupContainer(componentId);
+										String query = "" 
+												+ getRuleName(RequiredByPullRequest) + " " + quote("#" + getPullRequest().getNumber()) 
+												+ " " + getRuleName(And) + " "
+												+ quote(FIELD_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
+										return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
+												ProjectBuildsPage.paramsOf(getPullRequest().getTargetProject(), query, 0));
 									}
 									
 								};

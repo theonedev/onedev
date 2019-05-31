@@ -21,12 +21,14 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
@@ -108,6 +110,14 @@ public class SuggestionUtils {
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (Issue issue: OneDev.getInstance(IssueManager.class).query(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS))
 			suggestions.add(new InputSuggestion("#" + issue.getNumber(), issue.getTitle(), null));
+		return suggestions;
+	}
+	
+	public static List<InputSuggestion> suggestPullRequests(Project project, String matchWith) {
+		matchWith = matchWith.toLowerCase();
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		for (PullRequest request: OneDev.getInstance(PullRequestManager.class).query(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS))
+			suggestions.add(new InputSuggestion("#" + request.getNumber(), request.getTitle(), null));
 		return suggestions;
 	}
 	

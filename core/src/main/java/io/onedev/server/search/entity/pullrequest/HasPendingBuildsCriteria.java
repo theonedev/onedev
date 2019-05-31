@@ -21,13 +21,12 @@ public class HasPendingBuildsCriteria extends PullRequestCriteria {
 	@Override
 	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
 		From<?, ?> join = root
-				.join(PullRequestConstants.ATTR_BUILDS, JoinType.LEFT)
-				.join(PullRequestBuild.ATTR_BUILD, JoinType.LEFT);
+				.join(PullRequestConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT)
+				.join(PullRequestBuild.ATTR_BUILD, JoinType.INNER);
 		
 		Path<?> status = join.get(Build.STATUS);
 		
 		return builder.or(
-				builder.isNull(status), 
 				builder.equal(status, Build.Status.RUNNING), 
 				builder.equal(status, Build.Status.QUEUEING), 
 				builder.equal(status, Build.Status.WAITING));
@@ -36,8 +35,7 @@ public class HasPendingBuildsCriteria extends PullRequestCriteria {
 	@Override
 	public boolean matches(PullRequest request, User user) {
 		for (PullRequestBuild build: request.getPullRequestBuilds()) {
-			if (build.getBuild() == null 
-					|| build.getBuild().getStatus() == Build.Status.RUNNING 
+			if (build.getBuild().getStatus() == Build.Status.RUNNING 
 					|| build.getBuild().getStatus() == Build.Status.QUEUEING 
 					|| build.getBuild().getStatus() == Build.Status.WAITING) {
 				return true;

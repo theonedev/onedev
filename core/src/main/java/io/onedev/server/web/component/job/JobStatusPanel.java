@@ -1,12 +1,5 @@
 package io.onedev.server.web.component.job;
 
-import static io.onedev.server.search.entity.EntityQuery.quote;
-import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
-import static io.onedev.server.util.BuildConstants.FIELD_COMMIT;
-import static io.onedev.server.util.BuildConstants.FIELD_JOB;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -24,6 +17,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
@@ -84,13 +78,8 @@ public class JobStatusPanel extends Panel {
 
 					@Override
 					protected Component newListLink(String componentId) {
-						String query = "" 
-								+ quote(FIELD_COMMIT) + " " + getRuleName(Is) + " " + quote(commitId.name()) 
-								+ " " + getRuleName(And) + " "
-								+ quote(FIELD_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
-						
 						return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
-								ProjectBuildsPage.paramsOf(getProject(), query, 0)) {
+								ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, jobName), 0)) {
 							
 							@Override
 							protected void onConfigure() {
