@@ -280,5 +280,5 @@ public class PullRequestNotificationManager implements PersistListener {
 	public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
 			throws CallbackException {
 	}
-	
+
 }

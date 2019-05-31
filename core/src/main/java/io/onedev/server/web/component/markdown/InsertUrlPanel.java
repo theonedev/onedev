@@ -47,6 +47,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.UrlUtils;
+import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.model.Project;
@@ -442,7 +443,8 @@ abstract class InsertUrlPanel extends Panel {
 
 					try {
 						String directory = WebSession.get().getMetaData(UPLOAD_DIRECTORY);
-						context.uploadFiles(uploads, directory, commitMessage);
+						RefUpdated refUpdated = context.uploadFiles(uploads, directory, commitMessage);
+						context.onCommitted(target, refUpdated);
 						String fileName = uploads.iterator().next().getClientFileName();
 						String url;
 						if (directory != null) {

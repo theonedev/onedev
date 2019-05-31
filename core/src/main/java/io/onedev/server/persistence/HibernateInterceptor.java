@@ -64,5 +64,5 @@ public class HibernateInterceptor extends EmptyInterceptor {
 		for (PersistListener listener: listeners)
 			listener.onDelete(entity, id, state, propertyNames, types);
 	}
-	
+
 }

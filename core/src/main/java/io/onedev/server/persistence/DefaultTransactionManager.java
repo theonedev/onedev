@@ -16,7 +16,11 @@
 
 package io.onedev.server.persistence;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import javax.inject.Singleton;
@@ -29,6 +33,7 @@ import org.hibernate.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import io.onedev.commons.utils.ExceptionUtils;
@@ -42,6 +47,8 @@ public class DefaultTransactionManager implements TransactionManager {
 	private final SessionManager sessionManager;
 	
 	private final ExecutorService executorService;
+	
+	private final Map<Transaction, Collection<Runnable>> completionRunnables = new ConcurrentHashMap<>();
 	
 	@Inject
 	public DefaultTransactionManager(SessionManager sessionManager, ExecutorService executorService) {
@@ -70,6 +77,16 @@ public class DefaultTransactionManager implements TransactionManager {
 						tx.rollback();
 						throw ExceptionUtils.unchecked(t);
 					} finally {
+						Collection<Runnable> runnables = completionRunnables.remove(tx);
+						if (runnables != null) {
+							for (Runnable runnable: runnables) {
+								try {
+									runnable.run();
+								} catch (Exception e) {
+									logger.error("Error running completion callback", e);
+								}
+							}
+						}
 						session.setFlushMode(prevFlushModeType);
 					}
 				}
@@ -86,22 +103,6 @@ public class DefaultTransactionManager implements TransactionManager {
 			public Void call() throws Exception {
 				runnable.run();
 				return null;
-			}
-			
-		});
-	}
-
-	@Override
-	public void runAsync(Runnable runnable) {
-		executorService.execute(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					DefaultTransactionManager.this.run(runnable);
-				} catch (Exception e) {
-					logger.error("Error running", e);
-				}
 			}
 			
 		});
@@ -169,6 +170,18 @@ public class DefaultTransactionManager implements TransactionManager {
 	@Override
 	public Session getSession() {
 		return sessionManager.getSession();
+	}
+
+	@Override
+	public void mustRunAfterTransaction(Runnable runnable) {
+		Transaction transaction = getTransaction();
+		Preconditions.checkState(transaction.isActive());
+		Collection<Runnable> runnables = completionRunnables.get(transaction);
+		if (runnables == null) {
+			runnables = new ArrayList<>();
+			completionRunnables.put(transaction, runnables);
+		}
+		runnables.add(runnable);
 	}
 	
 }

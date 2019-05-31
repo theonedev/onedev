@@ -33,8 +33,6 @@ public interface TransactionManager {
 	
 	void run(Runnable runnable);
 	
-	void runAsync(Runnable runnable);
-	
 	/**
 	 * Do some work after commit if there is an active transaction, or do the work immediately if there is no active 
 	 * transaction. Note that the work should not involve any other database operations in current thread 
@@ -45,4 +43,5 @@ public interface TransactionManager {
 
 	void runAsyncAfterCommit(Runnable runnable);
 	
+	void mustRunAfterTransaction(Runnable runnable);
 }

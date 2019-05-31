@@ -574,6 +574,7 @@ public class CoreModule extends AbstractPluginModule {
 			public void onDelete(Object entity, Serializable id, Object[] state, String[] propertyNames, Type[] types)
 					throws CallbackException {
 			}
+
 		});
 	    
 		bind(XStream.class).toProvider(new com.google.inject.Provider<XStream>() {

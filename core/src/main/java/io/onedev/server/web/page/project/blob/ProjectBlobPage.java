@@ -71,6 +71,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.code.IndexManager;
 import io.onedev.server.search.code.SearchManager;
@@ -1026,19 +1027,26 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		String refName = refUpdated.getRefName();
 		ObjectId oldCommitId = refUpdated.getOldCommitId();
 		ObjectId newCommitId = refUpdated.getNewCommitId();
-		OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
+		OneDev.getInstance(TransactionManager.class).runAsyncAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				ThreadContext.bind(subject);
-				try {
-					Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-					project.cacheObjectId(branch, refUpdated.getNewCommitId());
-					RefUpdated refUpdated = new RefUpdated(project, refName, oldCommitId, newCommitId);
-					OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
-				} finally {
-					ThreadContext.unbindSubject();
-				}
+				OneDev.getInstance(SessionManager.class).run(new Runnable() {
+
+					@Override
+					public void run() {
+						ThreadContext.bind(subject);
+						try {
+							Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+							project.cacheObjectId(branch, refUpdated.getNewCommitId());
+							RefUpdated refUpdated = new RefUpdated(project, refName, oldCommitId, newCommitId);
+							OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
+						} finally {
+							ThreadContext.unbindSubject();
+						}
+					}
+					
+				});
 			}
 			
 		});

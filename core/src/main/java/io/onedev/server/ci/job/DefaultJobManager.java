@@ -21,7 +21,6 @@ import java.util.concurrent.locks.Lock;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.transaction.Synchronization;
 import javax.validation.ValidationException;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -142,18 +141,14 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 	@Override
 	public Build submit(Project project, ObjectId commitId, String jobName, Map<String, List<String>> paramMap) {
     	Lock lock = LockUtils.getLock("job-schedule: " + project.getId() + "-" + commitId.name());
-		transactionManager.getTransaction().registerSynchronization(new Synchronization() {
-			
+    	transactionManager.mustRunAfterTransaction(new Runnable() {
+
 			@Override
-			public void beforeCompletion() {
-			}
-			
-			@Override
-			public void afterCompletion(int status) {
+			public void run() {
 				lock.unlock();
 			}
-			
-		});
+    		
+    	});
     	
     	try {
         	lock.lockInterruptibly();

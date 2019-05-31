@@ -77,7 +77,7 @@ public class DefaultDao implements Dao, Serializable {
 		return query(entityCriteria, 0, Integer.MAX_VALUE);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public <T extends AbstractEntity> T find(EntityCriteria<T> entityCriteria) {
 		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
@@ -86,6 +86,7 @@ public class DefaultDao implements Dao, Serializable {
 		return (T) criteria.uniqueResult();
 	}
 
+	@Sessional
 	@Override
 	public <T extends AbstractEntity> int count(EntityCriteria<T> entityCriteria) {
 		Criteria criteria = entityCriteria.getExecutableCriteria(getSession());
@@ -97,7 +98,7 @@ public class DefaultDao implements Dao, Serializable {
 		return new ManagedSerializedForm(Dao.class);
 	}
 
-	@Transactional
+	@Sessional
 	@Override
 	public <T extends AbstractEntity> List<T> query(Class<T> entityClass) {
 		return query(EntityCriteria.of(entityClass), 0, Integer.MAX_VALUE);

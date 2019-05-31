@@ -40,5 +40,5 @@ public interface BuildManager extends EntityManager<Build> {
 	List<Build> query(Project project, User user, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
 	
 	int count(Project project, User user, EntityCriteria<Build> buildCriteria);
-	
+
 }
