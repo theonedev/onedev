@@ -150,6 +150,9 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
     		
     	});
     	
+		/*
+		 * Lock to guarantee uniqueness of build (by project, commit, job and parameters)
+		 */
     	try {
         	lock.lockInterruptibly();
 			return submit(project, commitId, jobName, paramMap, new LinkedHashSet<>()); 
@@ -189,6 +192,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 		}
 
 		Collection<Build> builds = buildManager.query(project, commitId, jobName, paramMapToQuery);
+		
 		if (builds.isEmpty()) {
 			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 				InputSpec paramSpec = Preconditions.checkNotNull(build.getJob().getParamSpecMap().get(entry.getKey()));
