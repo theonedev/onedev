@@ -993,35 +993,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	}
 
 	@Override
-	public void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated) {
+	public void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated) {
 		Project project = getProject();
 		String branch = state.blobIdent.revision;
-		BlobIdent newBlobIdent;
 		getProject().cacheObjectId(branch, refUpdated.getNewCommitId());
 
-		if (state.mode == Mode.DELETE) {
-			try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
-				RevTree revTree = getProject().getRevCommit(refUpdated.getNewCommitId(), true).getTree();
-				String parentPath = StringUtils.substringBeforeLast(state.blobIdent.path, "/");
-				while (TreeWalk.forPath(getProject().getRepository(), parentPath, revTree) == null) {
-					if (parentPath.contains("/")) {
-						parentPath = StringUtils.substringBeforeLast(parentPath, "/");
-					} else {
-						parentPath = null;
-						break;
-					}
-				}
-				newBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}	
-		} else if (state.mode == Mode.EDIT) {
-			newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
-		} else { 
-			// We've uploaded some files
-			newBlobIdent = null;
-		}
-		
 		Subject subject = SecurityUtils.getSubject();
 		Long projectId = project.getId();
 		String refName = refUpdated.getRefName();
@@ -1038,7 +1014,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 						ThreadContext.bind(subject);
 						try {
 							Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-							project.cacheObjectId(branch, refUpdated.getNewCommitId());
+							project.cacheObjectId(branch, newCommitId);
 							RefUpdated refUpdated = new RefUpdated(project, refName, oldCommitId, newCommitId);
 							OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
 						} finally {
@@ -1051,20 +1027,46 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			
 		});
 		
-		if (newBlobIdent != null) {
-			state.blobIdent = newBlobIdent;
-			state.position = null;
-			state.commentId = null;
-			state.mode = Mode.VIEW;
-			onResolvedRevisionChange(target);
-			pushState(target);
-		} else {
-			state.mode = Mode.VIEW;
-			onResolvedRevisionChange(target);
+		if (target != null) {
+			BlobIdent newBlobIdent;
+			if (state.mode == Mode.DELETE) {
+				try (RevWalk revWalk = new RevWalk(getProject().getRepository())) {
+					RevTree revTree = getProject().getRevCommit(refUpdated.getNewCommitId(), true).getTree();
+					String parentPath = StringUtils.substringBeforeLast(state.blobIdent.path, "/");
+					while (TreeWalk.forPath(getProject().getRepository(), parentPath, revTree) == null) {
+						if (parentPath.contains("/")) {
+							parentPath = StringUtils.substringBeforeLast(parentPath, "/");
+						} else {
+							parentPath = null;
+							break;
+						}
+					}
+					newBlobIdent = new BlobIdent(branch, parentPath, FileMode.TREE.getBits());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}	
+			} else if (state.mode == Mode.EDIT) {
+				newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
+			} else { 
+				// We've uploaded some files
+				newBlobIdent = null;
+			}
+			
+			if (newBlobIdent != null) {
+				state.blobIdent = newBlobIdent;
+				state.position = null;
+				state.commentId = null;
+				state.mode = Mode.VIEW;
+				onResolvedRevisionChange(target);
+				pushState(target);
+			} else {
+				state.mode = Mode.VIEW;
+				onResolvedRevisionChange(target);
+			}
+	
+			// fix the issue that sometimes indexing indicator of new commit does not disappear 
+			target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 		}
-
-		// fix the issue that sometimes indexing indicator of new commit does not disappear 
-		target.appendJavaScript("Wicket.WebSocket.send('RenderCallback');");	    			
 	}
 	
 	@Override
