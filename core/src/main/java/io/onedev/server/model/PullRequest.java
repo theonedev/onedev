@@ -81,6 +81,8 @@ import io.onedev.server.util.jackson.RestView;
 public class PullRequest extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final int MAX_CHECK_ERROR_LEN = 1024;
 
 	@Embedded
 	private CloseInfo closeInfo;
@@ -182,6 +184,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	private transient Boolean valid;
 	
 	private transient Collection<Issue> fixedIssues;
+	
+	@Column(length=MAX_CHECK_ERROR_LEN)
+	private String checkError;
 	
 	/**
 	 * Get title of this merge request.
@@ -655,6 +660,17 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
+	}
+
+	@Nullable
+	public String getCheckError() {
+		return checkError;
+	}
+
+	public void setCheckError(@Nullable String checkError) {
+		if (checkError != null) 
+			checkError = StringUtils.abbreviate(checkError, MAX_CHECK_ERROR_LEN);
+		this.checkError = checkError;
 	}
 
 	public Date getLastCodeCommentActivityDate() {

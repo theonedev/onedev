@@ -21,7 +21,6 @@ import java.util.concurrent.locks.Lock;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.validation.ValidationException;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.quartz.CronScheduleBuilder;
@@ -171,17 +170,10 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 		build.setStatus(Build.Status.WAITING);
 		build.setSubmitter(userManager.getCurrent());
 		
-		try {
-			JobParam.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
-		} catch (ValidationException e) {
-			String message = String.format("Error validating build parameters (project: %s, commit: %s, job: %s)", 
-					project.getName(), commitId.name(), jobName);
-			throw new OneException(message, e);
-		}
+		JobParam.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
 		
 		if (!checkedJobNames.add(jobName)) {
-			String message = String.format("Circular job dependencies found (project: %s, commit: %s, job: %s, dependency loop: %s)", 
-					project.getName(), commitId.name(), jobName, checkedJobNames);
+			String message = String.format("Circular job dependencies found (%s)", checkedJobNames);
 			throw new OneException(message);
 		}
 

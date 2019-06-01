@@ -27,6 +27,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.Permission;
@@ -59,11 +60,12 @@ import io.onedev.commons.utils.concurrent.Prioritized;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.CommitInfoManager;
+import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.param.JobParam;
-import io.onedev.server.entitymanager.PullRequestBuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.PullRequestBuildManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
@@ -81,10 +83,10 @@ import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.FileChange;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.PullRequestUpdate;
@@ -425,31 +427,44 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void check(PullRequest request) {
-		if (request.isOpen() && request.isValid()) {
-			if (request.getSourceProject() == null) {
-				discard(request, "Source project no longer exists");
-			} else if (request.getSource().getObjectId(false) == null) {
-				discard(request, "Source branch no longer exists");
-			} else if (request.getTarget().getObjectId(false) == null) {
-				discard(request, "Target branch no longer exists");
-			} else {
-				checkUpdate(request);
-				if (request.isMergeIntoTarget()) {
-					closeAsMerged(request, true);
+		try {
+			request.setCheckError(null);
+			if (request.isOpen() && request.isValid()) {
+				if (request.getSourceProject() == null) {
+					discard(request, "Source project no longer exists");
+				} else if (request.getSource().getObjectId(false) == null) {
+					discard(request, "Source branch no longer exists");
+				} else if (request.getTarget().getObjectId(false) == null) {
+					discard(request, "Target branch no longer exists");
 				} else {
-					checkQuality(request);
-					
-					pullRequestReviewManager.saveReviews(request);
-					pullRequestBuildManager.savePullRequestBuilds(request);
-					
-					MergePreview preview = request.getMergePreview();
-					
-					if (request.isAllReviewsApproved() && request.isAllBuildsSuccessful()
-							&& preview != null && preview.getMerged() != null) {
-						merge(request);
+					checkUpdate(request);
+					if (request.isMergeIntoTarget()) {
+						closeAsMerged(request, true);
+					} else {
+						checkQuality(request);
+						
+						pullRequestReviewManager.saveReviews(request);
+						pullRequestBuildManager.savePullRequestBuilds(request);
+						
+						MergePreview preview = request.getMergePreview();
+						
+						if (request.isAllReviewsApproved() 
+								&& request.isAllBuildsSuccessful()
+								&& request.getCheckError() == null 
+								&& preview != null 
+								&& preview.getMerged() != null) {
+							merge(request);
+						}
 					}
 				}
 			}
+		} catch (ValidationException|OneException e) {
+			request.setCheckError(e.getMessage());
+		} catch (Exception e) {
+			request.setCheckError("Error checking pull request, check server log for details");
+			String message = String.format("Error checking pull request (project: %s, number: %d)", 
+					request.getTargetProject().getName(), request.getNumber());
+			logger.error(message, e);
 		}
 	}
 
@@ -547,15 +562,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			Criterion criterion = Restrictions.and(
 					ofOpen(), 
 					Restrictions.or(ofSource(projectAndBranch), ofTarget(projectAndBranch)));
-			for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion))) {
-				try {
+			for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion)))
 					check(request);
-				} catch (Exception e) {
-					String message = String.format("Error checking pull request (project: %s, number: %d)", 
-							request.getTargetProject().getName(), request.getNumber());
-					logger.error(message, e);
-				}
-			}
 		}
 	}
 
@@ -664,10 +672,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 						try {
 					        ThreadContext.bind(subject);
 							check(load(requestId));
-						} catch (Exception e) {
-							String message = String.format("Error checking pull request (project: %s, number: %d)", 
-									request.getTargetProject().getName(), request.getNumber());
-							logger.error(message, e);
 						} finally {
 							ThreadContext.unbindSubject();
 						}
@@ -718,14 +722,20 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		request.getPullRequestBuilds().clear();
 		MergePreview preview = request.getMergePreview();
 		if (preview != null && preview.getMerged() != null) {
+			Project project = request.getTargetProject();
+			ObjectId commitId = ObjectId.fromString(preview.getMerged());
+			CISpec ciSpec = project.getCISpec(commitId);
+			if (ciSpec == null)
+				throw new OneException("No CI spec defined in merge preview commit");
 			for (JobDependency dependency: jobDependencies) {
+				if (!ciSpec.getJobMap().containsKey(dependency.getJobName()))
+					throw new OneException("Job '" + dependency.getJobName() + "' is not defined in merge preview commit");
 				new MatrixRunner<List<String>>(JobParam.getParamMatrix(dependency.getJobParams())) {
 					
 					@Override
 					public void run(Map<String, List<String>> paramMap) {
 						Build build = jobManager.submit(request.getTargetProject(), 
-								ObjectId.fromString(preview.getMerged()), 
-								dependency.getJobName(), paramMap);
+								commitId, dependency.getJobName(), paramMap);
 						PullRequestBuild pullRequestBuild = null;
 						for (PullRequestBuild prevRequirement: prevRequirements) {
 							if (prevRequirement.getBuild().equals(build)) {

@@ -75,7 +75,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static final String STATUS = "status";
 	
-	private static final int MAX_STATUS_MESSAGE = 1024;
+	private static final int MAX_STATUS_MESSAGE_LEN = 1024;
 	
 	public enum Status {
 		// Most significant status comes first, refer to getOverallStatus
@@ -132,7 +132,7 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	private Date finishDate;
 	
-	@Column(length=MAX_STATUS_MESSAGE)
+	@Column(length=MAX_STATUS_MESSAGE_LEN)
 	private String statusMessage;
 
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
@@ -320,7 +320,7 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public void setStatusMessage(String statusMessage) {
 		if (statusMessage != null) {
-			statusMessage = StringUtils.abbreviate(statusMessage, MAX_STATUS_MESSAGE);
+			statusMessage = StringUtils.abbreviate(statusMessage, MAX_STATUS_MESSAGE_LEN);
 			for (String secretValue: getSecretValuesToMask())
 				statusMessage = StringUtils.replace(statusMessage, secretValue, SecretInput.MASK);
 		}

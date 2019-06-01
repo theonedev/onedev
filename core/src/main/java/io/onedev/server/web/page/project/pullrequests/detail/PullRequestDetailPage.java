@@ -334,7 +334,33 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		summaryContainer.setOutputMarkupPlaceholderTag(true);
 		add(summaryContainer);
 
-		summaryContainer.add(newDiscardedNoteContainer());
+		summaryContainer.add(new Label("checkError", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getPullRequest().getCheckError();
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().getCheckError() != null);
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
+
+		summaryContainer.add(new WebMarkupContainer("discardedNote") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getPullRequest().isDiscarded());
+			}
+			
+		}.setOutputMarkupPlaceholderTag(true));
+		
 		summaryContainer.add(newMergedNoteContainer());
 		summaryContainer.add(newMergeStatusContainer());
 		summaryContainer.add(new WebMarkupContainer("doNotMerge") {
@@ -620,7 +646,8 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			@Override
 			public void onClick() {
 				getPullRequestManager().check(getPullRequest());
-				Session.get().success("Pull request is synchronized");
+				if (getPullRequest().getCheckError() == null)
+					Session.get().success("Pull request is synchronized");
 			}
 			
 		});
@@ -1142,20 +1169,6 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		});		
 		
 		return fragment;
-	}
-	
-	private WebMarkupContainer newDiscardedNoteContainer() {
-		WebMarkupContainer discardedNoteContainer = new WebMarkupContainer("discardedNote") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().isDiscarded());
-			}
-			
-		};
-		discardedNoteContainer.setOutputMarkupPlaceholderTag(true);
-		return discardedNoteContainer;
 	}
 	
 	private String getOperationName(PullRequestOperation operation) {
