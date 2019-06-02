@@ -28,9 +28,8 @@ onedev.server.scriptSupport = {
         var cm = $cm[0].CodeMirror;
         function setWidth() {
             var $cm = $("#"+inputId).next();
-            $cm.hide(); // hide temporarily in order to get original width
+            cm.setSize(1, null);  // shrink temporarily in order to get original parent width
             cm.setSize($cm.parent().width(), null);
-            $cm.show();
             cm.refresh();
         }
         setWidth();
@@ -43,7 +42,7 @@ onedev.server.scriptSupport = {
 			indentUnit: 4,
 			tabSize: 4,
 			theme: "eclipse",
-			lineNumbers: true,
+            lineNumbers: true,
 			styleActiveLine: true,
 			styleSelectedText: true,
 			foldGutter: true,

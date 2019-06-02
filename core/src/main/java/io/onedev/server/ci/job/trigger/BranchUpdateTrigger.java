@@ -7,19 +7,21 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.PathUtils;
+import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
-@Editable(order=100, name="When pushes to branches")
-public class BranchPushedTrigger extends JobTrigger {
+@Editable(order=100, name="When update branches")
+public class BranchUpdateTrigger extends JobTrigger {
 
 	private static final long serialVersionUID = 1L;
 
@@ -27,7 +29,9 @@ public class BranchPushedTrigger extends JobTrigger {
 	
 	private String paths;
 	
-	@Editable(name="Pushed Branches", order=100, 
+	private boolean rejectIfNotSuccessful;
+	
+	@Editable(name="Branches", order=100, 
 			description="Optionally specify space-separated branches to check. Use * or ? for wildcard match. "
 					+ "Leave empty to match all branches")
 	@BranchPatterns
@@ -52,7 +56,17 @@ public class BranchPushedTrigger extends JobTrigger {
 	public void setPaths(String paths) {
 		this.paths = paths;
 	}
-	
+
+	@Editable(order=300, description="If checked, branch updating will be rejected if the triggering is not successful. "
+			+ "It also tells pull requests to require successful triggering of the job before merging")
+	public boolean isRejectIfNotSuccessful() {
+		return rejectIfNotSuccessful;
+	}
+
+	public void setRejectIfNotSuccessful(boolean rejectIfNotSuccessful) {
+		this.rejectIfNotSuccessful = rejectIfNotSuccessful;
+	}
+
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> getPathSuggestions(String matchWith) {
 		return SuggestionUtils.suggestBlobs(OneContext.get().getProject(), matchWith);
@@ -82,9 +96,9 @@ public class BranchPushedTrigger extends JobTrigger {
 	public boolean matches(ProjectEvent event, Job job) {
 		if (event instanceof RefUpdated) {
 			RefUpdated refUpdated = (RefUpdated) event;
-			String pushedBranch = GitUtils.ref2branch(refUpdated.getRefName());
-			if (pushedBranch != null) {
-				if ((getBranches() == null || PathUtils.matchChildAware(getBranches(), pushedBranch)) 
+			String branch = GitUtils.ref2branch(refUpdated.getRefName());
+			if (branch != null) {
+				if ((getBranches() == null || PatternSet.fromString(getBranches()).matches(new ChildAwareMatcher(), branch)) 
 						&& touchedFile(refUpdated)) {
 					return true;
 				}
@@ -95,14 +109,18 @@ public class BranchPushedTrigger extends JobTrigger {
 
 	@Override
 	public String getDescription() {
+		String description;
 		if (getBranches() != null && getPaths() != null)
-			return String.format("When push to branches '%s' and touch files '%s'", getBranches(), getPaths());
+			description = String.format("When update branches '%s' and touch files '%s'", getBranches(), getPaths());
 		else if (getBranches() != null)
-			return String.format("When push to branches '%s'", getBranches());
+			description = String.format("When update branches '%s'", getBranches());
 		else if (getPaths() != null)
-			return String.format("When touch files '%s'", getBranches());
+			description = String.format("When touch files '%s'", getBranches());
 		else
-			return "When push to branches";
+			description = "When update branches";
+		if (rejectIfNotSuccessful)
+			description += " (reject if not successful)";
+		return description;
 	}
 
 }

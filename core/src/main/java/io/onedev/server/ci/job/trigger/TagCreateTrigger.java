@@ -2,23 +2,24 @@ package io.onedev.server.ci.job.trigger;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.utils.PathUtils;
+import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.TagPatterns;
 
-@Editable(order=200, name="When tags are created")
-public class TagCreatedTrigger extends JobTrigger {
+@Editable(order=200, name="When create tags")
+public class TagCreateTrigger extends JobTrigger {
 
 	private static final long serialVersionUID = 1L;
 
 	private String tags;
 	
-	@Editable(name="Created Tags", order=100, 
+	@Editable(name="Tags", order=100, 
 			description="Optionally specify space-separated tags to check. Use * or ? for wildcard match. "
 					+ "Leave empty to match all tags")
 	@TagPatterns
@@ -37,7 +38,7 @@ public class TagCreatedTrigger extends JobTrigger {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String pushedTag = GitUtils.ref2tag(refUpdated.getRefName());
 			if (pushedTag != null && !refUpdated.getNewCommitId().equals(ObjectId.zeroId()) 
-					&& (getTags() == null || PathUtils.matchChildAware(getTags(), pushedTag))) {
+					&& (getTags() == null || PatternSet.fromString(getTags()).matches(new ChildAwareMatcher(), pushedTag))) {
 				return true;
 			}
 		}
@@ -47,9 +48,9 @@ public class TagCreatedTrigger extends JobTrigger {
 	@Override
 	public String getDescription() {
 		if (getTags() != null)
-			return String.format("When tags '%s' are created", getTags());
+			return String.format("When create tags '%s'", getTags());
 		else
-			return "When tags are created";
+			return "When create tags";
 	}
 
 }

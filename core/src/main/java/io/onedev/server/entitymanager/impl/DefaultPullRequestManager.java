@@ -61,9 +61,11 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.JobDependency;
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.trigger.BranchUpdateTrigger;
+import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestBuildManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
@@ -690,8 +692,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		if (branchProtection != null) {
 			checkReviews(ReviewRequirement.fromString(branchProtection.getReviewRequirement()), request.getLatestUpdate());
 
-			checkBuilds(request, branchProtection.getJobDependencies());
-			
 			Set<FileProtection> checkedFileProtections = new HashSet<>();
 			for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
 				if (checkedFileProtections.containsAll(branchProtection.getFileProtections()))
@@ -707,6 +707,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				}
 			}
 		}
+
+		checkBuilds(request);
+		
 		ProjectFacade project = request.getTargetProject().getFacade();
 		Permission writeCode = new ProjectPermission(project, ProjectPrivilege.CODE_WRITE); 
 		if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(writeCode)) {
@@ -717,7 +720,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 	}
 
-	private void checkBuilds(PullRequest request, List<JobDependency> jobDependencies) {
+	private void checkBuilds(PullRequest request) {
 		Collection<PullRequestBuild> prevRequirements = new ArrayList<>(request.getPullRequestBuilds());
 		request.getPullRequestBuilds().clear();
 		MergePreview preview = request.getMergePreview();
@@ -727,31 +730,40 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			CISpec ciSpec = project.getCISpec(commitId);
 			if (ciSpec == null)
 				throw new OneException("No CI spec defined in merge preview commit");
-			for (JobDependency dependency: jobDependencies) {
-				if (!ciSpec.getJobMap().containsKey(dependency.getJobName()))
-					throw new OneException("Job '" + dependency.getJobName() + "' is not defined in merge preview commit");
-				new MatrixRunner<List<String>>(JobParam.getParamMatrix(dependency.getJobParams())) {
-					
-					@Override
-					public void run(Map<String, List<String>> paramMap) {
-						Build build = jobManager.submit(request.getTargetProject(), 
-								commitId, dependency.getJobName(), paramMap);
-						PullRequestBuild pullRequestBuild = null;
-						for (PullRequestBuild prevRequirement: prevRequirements) {
-							if (prevRequirement.getBuild().equals(build)) {
-								pullRequestBuild = prevRequirement;
-								break;
+			for (Job job: ciSpec.getJobs()) {
+				for (JobTrigger trigger: job.getTriggers()) {
+					if (trigger instanceof BranchUpdateTrigger) {
+						BranchUpdateTrigger branchUpdateTrigger = (BranchUpdateTrigger) trigger;
+						if (branchUpdateTrigger.isRejectIfNotSuccessful()) {
+							RefUpdated updated = new RefUpdated(project, GitUtils.branch2ref(request.getTargetBranch()), 
+									request.getTarget().getObjectId(), commitId);
+							if (branchUpdateTrigger.matches(updated, job)) {
+								new MatrixRunner<List<String>>(JobParam.getParamMatrix(trigger.getParams())) {
+									
+									@Override
+									public void run(Map<String, List<String>> paramMap) {
+										Build build = jobManager.submit(request.getTargetProject(), 
+												commitId, job.getName(), paramMap);
+										PullRequestBuild pullRequestBuild = null;
+										for (PullRequestBuild prevRequirement: prevRequirements) {
+											if (prevRequirement.getBuild().equals(build)) {
+												pullRequestBuild = prevRequirement;
+												break;
+											}
+										}
+										if (pullRequestBuild == null) {
+											pullRequestBuild = new PullRequestBuild();
+											pullRequestBuild.setRequest(request);
+											pullRequestBuild.setBuild(build);
+										}
+										request.getPullRequestBuilds().add(pullRequestBuild);
+									}
+									
+								}.run();
 							}
 						}
-						if (pullRequestBuild == null) {
-							pullRequestBuild = new PullRequestBuild();
-							pullRequestBuild.setRequest(request);
-							pullRequestBuild.setBuild(build);
-						}
-						request.getPullRequestBuilds().add(pullRequestBuild);
 					}
-					
-				}.run();
+				}
 			}
 		}
 	}

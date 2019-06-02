@@ -317,10 +317,14 @@ public class CommitOptionPanel extends Panel {
 
 			Map<String, BlobContent> newBlobs = new HashMap<>();
 			if (newContentProvider != null) {
-				if (!context.getProject().isModificationAllowed(SecurityUtils.getUser(), 
-						context.getBlobIdent().revision, context.getNewPath())) {
-					CommitOptionPanel.this.error("Adding of file '" + context.getNewPath() + "' need to be reviewed/verified. "
-							+ "Please submit pull request instead");
+				String revision = context.getBlobIdent().revision;
+				String newPath = context.getNewPath();
+				if (context.getProject().isReviewRequiredForModification(SecurityUtils.getUser(), revision, newPath)) {
+					CommitOptionPanel.this.error("Review required for this change. Please submit pull request instead");
+					target.add(feedback);
+					return false;
+				} else if (context.getProject().isBuildRequiredForModification(revision, newPath)) {
+					CommitOptionPanel.this.error("Build required for this change. Please submit pull request instead");
 					target.add(feedback);
 					return false;
 				}

@@ -155,9 +155,15 @@ public class GitPreReceiveCallback extends HttpServlet {
     					} else if (protection.isNoForcedPush() 
     							&& !GitUtils.isMergedInto(project.getRepository(), gitEnvs, oldObjectId, newObjectId)) {
 							errorMessages.add("Can not force-push to this branch according to branch protection setting");
-    					} else if (!protection.isPushAllowed(user, project, branchName, oldObjectId, newObjectId, gitEnvs)) {
-	    					errorMessages.add("Your changes need to be reviewed/verified. Please submit pull request instead");
+    					} else if (protection.isReviewRequiredForPush(user, project, branchName, oldObjectId, newObjectId, gitEnvs)) {
+	    					errorMessages.add("Review required for your change. Please submit pull request instead");
     					}
+	    			}
+	    			if (errorMessages.isEmpty() 
+	    					&& !oldObjectId.equals(ObjectId.zeroId()) 
+	    					&& !newObjectId.equals(ObjectId.zeroId()) 
+	    					&& project.isBuildRequiredForPush(branchName, oldObjectId, newObjectId, gitEnvs)) {
+	    				errorMessages.add("Build required for your change. Please submit pull request instead");
 	    			}
 	    			if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {
 	    				try {

@@ -2,13 +2,8 @@ package io.onedev.server.model.support;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -17,14 +12,8 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
-import io.onedev.server.OneDev;
-import io.onedev.server.ci.JobDependency;
-import io.onedev.server.ci.job.param.JobParam;
-import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
@@ -54,8 +43,6 @@ public class BranchProtection implements Serializable {
 	private boolean noCreation = true;
 	
 	private String reviewRequirement;
-	
-	private List<JobDependency> jobDependencies = new ArrayList<>();
 	
 	private List<FileProtection> fileProtections = new ArrayList<>();
 
@@ -126,16 +113,6 @@ public class BranchProtection implements Serializable {
 
 	public void setReviewRequirement(String reviewRequirement) {
 		this.reviewRequirement = reviewRequirement;
-	}
-
-	@Editable(order=500, name="Required Builds", description="Optionally specify required builds")
-	@NameOfEmptyValue("No any")
-	public List<JobDependency> getJobDependencies() {
-		return jobDependencies;
-	}
-
-	public void setJobDependencies(List<JobDependency> jobDependencies) {
-		this.jobDependencies = jobDependencies;
 	}
 
 	@Editable(order=700, description="Optionally specify additional users to review "
@@ -222,20 +199,17 @@ public class BranchProtection implements Serializable {
 	 * @return
 	 * 			result of the check. 
 	 */
-	public boolean isModificationAllowed(User user, Project project, String branch, @Nullable String file) {
+	public boolean isReviewRequiredForModification(User user, Project project, String branch, @Nullable String file) {
 		if (!ReviewRequirement.fromString(getReviewRequirement()).satisfied(user)) 
-			return false;
-		if (!getJobDependencies().isEmpty())
-			return false;
-		
+			return true;
 		if (file != null) {
 			FileProtection fileProtection = getFileProtection(file);
 			if (fileProtection != null 
 					&& !ReviewRequirement.fromString(fileProtection.getReviewRequirement()).satisfied(user)) {
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	/**
@@ -254,55 +228,19 @@ public class BranchProtection implements Serializable {
 	 * @return
 	 * 			result of the check
 	 */
-	public boolean isPushAllowed(User user, Project project, String branch, ObjectId oldObjectId, 
+	public boolean isReviewRequiredForPush(User user, Project project, String branch, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
 		if (!ReviewRequirement.fromString(getReviewRequirement()).satisfied(user)) 
-			return false;
+			return true;
 
-		Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(project, newObjectId);
-
-		for (JobDependency dependency: getJobDependencies()) {
-			Map<String, List<List<String>>> paramMatrix = new HashMap<>();
-			Set<String> secretParamNames = new HashSet<>();
-			for (JobParam param: dependency.getJobParams()) { 
-				paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
-				if (param.isSecret())
-					secretParamNames.add(param.getName());
-			}
-			
-			AtomicReference<Build> buildRef = new AtomicReference<>(null);
-			new MatrixRunner<List<String>>(paramMatrix) {
-				
-				@Override
-				public void run(Map<String, List<String>> params) {
-					for (Build build: builds) {
-						Map<String, List<String>> paramsWithoutSecrets = new HashMap<>(params);
-						Map<String, List<String>> buildParamsWithoutSecrets = new HashMap<>(build.getParamMap());
-						paramsWithoutSecrets.keySet().removeAll(secretParamNames);
-						buildParamsWithoutSecrets.keySet().removeAll(secretParamNames);
-						if (build.getJobName().equals(dependency.getJobName()) 
-								&& buildParamsWithoutSecrets.equals(paramsWithoutSecrets)) {
-							buildRef.set(build);
-							break;
-						}
-					}
-				}
-				
-			}.run();
-			
-			Build build = buildRef.get();
-			if (build == null || build.getStatus() != Build.Status.SUCCESSFUL)
-				return false;
-		}
-		
 		for (String changedFile: project.getChangedFiles(oldObjectId, newObjectId, gitEnvs)) {
 			FileProtection fileProtection = getFileProtection(changedFile);
 			if (fileProtection != null  
 					&& !ReviewRequirement.fromString(fileProtection.getReviewRequirement()).satisfied(user)) {
-				return false;
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 	
 }

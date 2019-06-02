@@ -11,7 +11,8 @@ onedev.server.editable = {
 		var $container = $("#" + containerId);
         var $group = $container.children(".group");
         $group.children("a").click(function() {
-            $(this).parent().toggleClass("expanded");       
+            $(this).parent().toggleClass("expanded");   
+            $(window).resize();  
         });
     },
 	onBeanEditorPropertyContainerDomReady: function(containerId) {

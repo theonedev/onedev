@@ -7,7 +7,6 @@ import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes.Method;
 import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -73,8 +72,10 @@ public abstract class BlobViewPanel extends Panel {
 		Project project = context.getProject();
 		if (SecurityUtils.canWriteCode(project.getFacade()) && context.isOnBranch()) {
 			User user = OneDev.getInstance(UserManager.class).getCurrent();
-			boolean modificationAllowed = project.isModificationAllowed(
-					user, context.getBlobIdent().revision, context.getBlobIdent().path);
+			String revision = context.getBlobIdent().revision;
+			String path = context.getBlobIdent().path;
+			boolean reviewRequired = project.isReviewRequiredForModification(user, revision, path);
+			boolean buildRequired = project.isBuildRequiredForModification(revision, path);
 
 			if (isEditSupported()) {
 				AjaxLink<Void> editLink = new ViewStateAwareAjaxLink<Void>("edit", true) {
@@ -82,8 +83,7 @@ public abstract class BlobViewPanel extends Panel {
 					@Override
 					protected void disableLink(ComponentTag tag) {
 						super.disableLink(tag);
-						tag.append("class", "disabled", " ");
-						tag.put("title", "Direct edit not allowed. Submit pull request for review instead");
+						
 					}
 					
 					@Override
@@ -93,15 +93,26 @@ public abstract class BlobViewPanel extends Panel {
 					}
 					
 					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						if (reviewRequired) {
+							tag.append("class", "disabled", " ");
+							tag.put("title", "Review required for this change. Submit pull request instead");
+						} else if (buildRequired) {
+							tag.append("class", "disabled", " ");
+							tag.put("title", "Build required for this change. Submit pull request instead");
+						} else {
+							tag.put("title", "Edit on branch " + context.getBlobIdent().revision);
+						}
+					}
+
+					@Override
 					public void onClick(AjaxRequestTarget target) {
 						context.onModeChange(target, Mode.EDIT);
 					}
 					
 				};
-				if (modificationAllowed)
-					editLink.add(AttributeAppender.append("title", "Edit on branch " + context.getBlobIdent().revision));
-				else
-					editLink.setEnabled(false);
+				editLink.setEnabled(!reviewRequired && !buildRequired);
 				
 				changeActions.add(editLink);
 			} else {
@@ -111,12 +122,19 @@ public abstract class BlobViewPanel extends Panel {
 			AjaxLink<Void> deleteLink = new ViewStateAwareAjaxLink<Void>("delete") {
 
 				@Override
-				protected void disableLink(ComponentTag tag) {
-					super.disableLink(tag);
-					tag.append("class", "disabled", " ");
-					tag.put("title", "Direct deletion not allowed. Submit pull request for review instead");
+				protected void onComponentTag(ComponentTag tag) {
+					super.onComponentTag(tag);
+					if (reviewRequired) {
+						tag.append("class", "disabled", " ");
+						tag.put("title", "Review required for this change. Submit pull request instead");
+					} else if (buildRequired) {
+						tag.append("class", "disabled", " ");
+						tag.put("title", "Build required for this change. Submit pull request instead");
+					} else {
+						tag.put("title", "Delete from branch " + context.getBlobIdent().revision);
+					}
 				}
-
+				
 				@Override
 				protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 					super.updateAjaxAttributes(attributes);
@@ -130,10 +148,7 @@ public abstract class BlobViewPanel extends Panel {
 
 			};
 
-			if (modificationAllowed)
-				deleteLink.add(AttributeAppender.append("title", "Delete from branch " + context.getBlobIdent().revision));
-			else
-				deleteLink.setEnabled(false);
+			deleteLink.setEnabled(!reviewRequired && !buildRequired);
 			
 			changeActions.add(deleteLink);
 			

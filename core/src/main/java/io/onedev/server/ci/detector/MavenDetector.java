@@ -6,7 +6,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.cache.JobCache;
-import io.onedev.server.ci.job.trigger.BranchPushedTrigger;
+import io.onedev.server.ci.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
@@ -30,7 +30,7 @@ public class MavenDetector implements CISpecDetector {
 					+ "echo\n" 
 					+ "mvn clean test");
 
-			BranchPushedTrigger trigger = new BranchPushedTrigger();
+			BranchUpdateTrigger trigger = new BranchUpdateTrigger();
 			job.getTriggers().add(trigger);
 			
 			JobCache cache = new JobCache();

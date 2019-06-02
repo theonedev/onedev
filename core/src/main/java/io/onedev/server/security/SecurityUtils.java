@@ -104,11 +104,15 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canModify(Project project, String branch, String file) {
-		return canWriteCode(project.getFacade()) && project.isModificationAllowed(getUser(), branch, file); 
+		return canWriteCode(project.getFacade()) 
+				&& !project.isReviewRequiredForModification(getUser(), branch, file)
+				&& !project.isBuildRequiredForModification(branch, file); 
 	}
 	
 	public static boolean canPush(Project project, String branch, ObjectId oldObjectId, ObjectId newObjectId) {
-		return canWriteCode(project.getFacade()) && project.isPushAllowed(getUser(), branch, oldObjectId, newObjectId, null); 
+		return canWriteCode(project.getFacade()) 
+				&& !project.isReviewRequiredForPush(getUser(), branch, oldObjectId, newObjectId, null)
+				&& !project.isBuildRequiredForPush(branch, oldObjectId, newObjectId, null); 
 	}
 	
 	public static boolean canAdministrate(UserFacade user) {

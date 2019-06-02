@@ -334,6 +334,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		WebMarkupContainer blobOperations = new WebMarkupContainer("blobOperations");
 		blobOperations.setOutputMarkupId(true);
 		
+		String revision = state.blobIdent.revision;
+		boolean reviewRequired = getProject().isReviewRequiredForModification(getLoginUser(), revision, null); 
+		boolean buildRequired = getProject().isBuildRequiredForModification(revision, null);
+
 		blobOperations.add(new MenuLink("add") {
 
 			@Override
@@ -404,10 +408,18 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			}
 			
 			@Override
-			protected void disableLink(ComponentTag tag) {
-				super.disableLink(tag);
-				tag.append("class", "disabled", " ");
-				tag.put("title", "Add files not allowed. Submit pull request for review instead");
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				if (reviewRequired) {
+					tag.append("class", "disabled", " ");
+					tag.put("title", "Review required for this change. Submit pull request instead");
+				} else if (buildRequired) {
+					tag.append("class", "disabled", " ");
+					tag.put("title", "Build required for this change. Submit pull request instead");
+				} else {
+					tag.put("title", "Add on branch " + state.blobIdent.revision);
+				}
 			}
 
 			@Override
@@ -418,7 +430,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 				if ((state.mode == Mode.VIEW || state.mode == Mode.VIEW_PLAIN || state.mode == Mode.BLAME) 
 						&& isOnBranch() && state.blobIdent.isTree() 
 						&& SecurityUtils.canWriteCode(project.getFacade())) {
-					setEnabled(project.isModificationAllowed(getLoginUser(), state.blobIdent.revision, null));
+					setVisible(true);
+					setEnabled(!reviewRequired && !buildRequired);
 				} else {
 					setVisible(false);
 				}
@@ -1174,10 +1187,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			if (parentPath != null)
 				blobPath = parentPath + "/" + blobPath;
 			
-			if (!getProject().isModificationAllowed(SecurityUtils.getUser(), blobIdent.revision, blobPath)) {
-				throw new BlobUploadException("Adding of file '" + blobPath + "' need to be reviewed/verified. "
-						+ "Please submit pull request instead");
-			}
+			if (getProject().isReviewRequiredForModification(SecurityUtils.getUser(), blobIdent.revision, blobPath)) 
+				throw new BlobUploadException("Review required for this change. Please submit pull request instead");
+			else if (getProject().isBuildRequiredForModification(blobIdent.revision, blobPath)) 
+				throw new BlobUploadException("Build required for this change. Please submit pull request instead");
 			
 			BlobContent blobContent = new BlobContent.Immutable(upload.getBytes(), FileMode.REGULAR_FILE);
 			newBlobs.put(blobPath, blobContent);
