@@ -91,8 +91,6 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 	
 	private final BuildManager buildManager;
 	
-	private final UserManager userManager;
-	
 	private final ListenerRegistry listenerRegistry;
 	
 	private final TransactionManager transactionManager;
@@ -100,6 +98,8 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 	private final SessionManager sessionManager;
 	
 	private final LogManager logManager;
+	
+	private final UserManager userManager;
 	
 	private final SettingManager settingManager;
 	
@@ -118,8 +118,8 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 	private volatile Status status;
 	
 	@Inject
-	public DefaultJobManager(BuildManager buildManager, 
-			UserManager userManager, ListenerRegistry listenerRegistry, SettingManager settingManager,
+	public DefaultJobManager(BuildManager buildManager, UserManager userManager,
+			ListenerRegistry listenerRegistry, SettingManager settingManager,
 			TransactionManager transactionManager, LogManager logManager, ExecutorService executorService,
 			SessionManager sessionManager, Set<DependencyPopulator> dependencyPopulators, 
 			TaskScheduler taskScheduler, BuildParamManager buildParamManager) {
@@ -138,7 +138,8 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 
 	@Transactional
 	@Override
-	public Build submit(Project project, ObjectId commitId, String jobName, Map<String, List<String>> paramMap) {
+	public Build submit(Project project, ObjectId commitId, String jobName, 
+			Map<String, List<String>> paramMap, @Nullable User submitter) {
     	Lock lock = LockUtils.getLock("job-schedule: " + project.getId() + "-" + commitId.name());
     	transactionManager.mustRunAfterTransaction(new Runnable() {
 
@@ -154,21 +155,22 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 		 */
     	try {
         	lock.lockInterruptibly();
-			return submit(project, commitId, jobName, paramMap, new LinkedHashSet<>()); 
+			return submit(project, commitId, jobName, paramMap, submitter, new LinkedHashSet<>()); 
     	} catch (Exception e) {
     		throw ExceptionUtils.unchecked(e);
 		}
 	}
 	
 	private Build submit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, Set<String> checkedJobNames) {
+			Map<String, List<String>> paramMap, @Nullable User submitter, 
+			Set<String> checkedJobNames) {
 		Build build = new Build();
 		build.setProject(project);
 		build.setCommitHash(commitId.name());
 		build.setJobName(jobName);
 		build.setSubmitDate(new Date());
 		build.setStatus(Build.Status.WAITING);
-		build.setSubmitter(userManager.getCurrent());
+		build.setSubmitter(submitter);
 		
 		JobParam.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
 		
@@ -212,7 +214,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 					@Override
 					public void run(Map<String, List<String>> params) {
 						Build dependencyBuild = submit(project, commitId, dependency.getJobName(), 
-								params, new LinkedHashSet<>(checkedJobNames));
+								params, submitter, new LinkedHashSet<>(checkedJobNames));
 						BuildDependence dependence = new BuildDependence();
 						dependence.setDependency(dependencyBuild);
 						dependence.setDependent(build);
@@ -381,7 +383,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 									
 									@Override
 									public void run(Map<String, List<String>> paramMap) {
-										submit(event.getProject(), commitId, job.getName(), paramMap); 
+										submit(event.getProject(), commitId, job.getName(), paramMap, null); 
 									}
 									
 								}.run();
@@ -399,14 +401,14 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 	
 	@Transactional
 	@Override
-	public void resubmit(Build build, Map<String, List<String>> paramMap) {
+	public void resubmit(Build build, Map<String, List<String>> paramMap, User submitter) {
 		if (build.isFinished()) {
 			build.setStatus(Build.Status.WAITING);
 			build.setFinishDate(null);
 			build.setQueueingDate(null);
 			build.setRunningDate(null);
 			build.setSubmitDate(new Date());
-			build.setSubmitter(userManager.getCurrent());
+			build.setSubmitter(submitter);
 			buildParamManager.deleteParams(build);
 			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 				InputSpec paramSpec = build.getJob().getParamSpecMap().get(entry.getKey());
@@ -441,10 +443,10 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 
 	@Sessional
 	@Override
-	public void cancel(Build build) {
+	public void cancel(Build build, User canceller) {
 		JobExecution execution = jobExecutions.get(build.getId());
 		if (execution != null)
-			execution.cancel(User.getCurrentId());
+			execution.cancel(User.idOf(canceller));
 	}
 	
 	@SuppressWarnings("unchecked")

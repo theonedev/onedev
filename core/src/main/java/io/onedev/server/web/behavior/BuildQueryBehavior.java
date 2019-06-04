@@ -34,17 +34,20 @@ import io.onedev.server.web.util.SuggestionUtils;
 @SuppressWarnings("serial")
 public class BuildQueryBehavior extends ANTLRAssistBehavior {
 
-	private final IModel<Project> projectModel;
-	
 	private static final String VALUE_OPEN = "\"";
 	
 	private static final String VALUE_CLOSE = "\"";
 	
 	private static final String ESCAPE_CHARS = "\"\\";
 	
-	public BuildQueryBehavior(IModel<Project> projectModel) {
+	private final IModel<Project> projectModel;
+	
+	private final boolean noLoginSupport;
+	
+	public BuildQueryBehavior(IModel<Project> projectModel, boolean noLoginSupport) {
 		super(BuildQueryParser.class, "query", false);
 		this.projectModel = projectModel;
+		this.noLoginSupport = noLoginSupport;
 	}
 
 	@Override
@@ -152,6 +155,10 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 				} catch (OneException e) {
 					return null;
 				}
+			} 
+			if (noLoginSupport && (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.SubmittedByMe))
+							|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.CancelledByMe)))) {
+				return null;
 			}
 		}
 		return super.describe(parseExpect, suggestedLiteral);

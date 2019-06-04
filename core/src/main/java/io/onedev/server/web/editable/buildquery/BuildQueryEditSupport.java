@@ -20,7 +20,8 @@ public class BuildQueryEditSupport implements EditSupport {
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Method propertyGetter = descriptor.getPropertyGetter();
-        if (propertyGetter.getAnnotation(BuildQuery.class) != null) {
+		BuildQuery buildQuery = propertyGetter.getAnnotation(BuildQuery.class);
+        if (buildQuery != null) {
         	if (propertyGetter.getReturnType() != String.class) {
 	    		throw new RuntimeException("Annotation 'BuildQuery' should be applied to property "
 	    				+ "with type 'String'");
@@ -46,7 +47,7 @@ public class BuildQueryEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new BuildQueryEditor(componentId, descriptor, model);
+		        	return new BuildQueryEditor(componentId, descriptor, model, buildQuery.noLoginSupport());
 				}
     			
     		};

@@ -112,6 +112,7 @@ import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.Secret;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
+import io.onedev.server.model.support.build.BuildSetting;
 import io.onedev.server.model.support.issue.IssueSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.SessionManager;
@@ -234,6 +235,11 @@ public class Project extends AbstractEntity implements Validatable {
 	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
 	private IssueSetting issueSetting = new IssueSetting();
+	
+	@Lob
+	@Column(length=65535, nullable=false)
+	@JsonView(DefaultView.class)
+	private BuildSetting buildSetting = new BuildSetting();
 	
 	@Lob
 	@Column(length=65535, nullable=false)
@@ -1004,6 +1010,14 @@ public class Project extends AbstractEntity implements Validatable {
 
 	public void setIssueSetting(IssueSetting issueSetting) {
 		this.issueSetting = issueSetting;
+	}
+
+	public BuildSetting getBuildSetting() {
+		return buildSetting;
+	}
+
+	public void setBuildSetting(BuildSetting buildSetting) {
+		this.buildSetting = buildSetting;
 	}
 
 	public ArrayList<NamedCommitQuery> getSavedCommitQueries() {

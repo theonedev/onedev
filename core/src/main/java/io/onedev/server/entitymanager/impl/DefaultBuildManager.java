@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -24,21 +26,32 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.quartz.CronScheduleBuilder;
+import org.quartz.ScheduleBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.schedule.SchedulableTask;
+import io.onedev.commons.utils.schedule.TaskScheduler;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.event.build.BuildSubmitted;
+import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -52,9 +65,13 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.BuildConstants;
 
 @Singleton
-public class DefaultBuildManager extends AbstractEntityManager<Build> implements BuildManager {
+public class DefaultBuildManager extends AbstractEntityManager<Build> implements BuildManager, SchedulableTask {
 
 	private static final int STATUS_QUERY_BATCH = 500;
+	
+	private static final int CLEANUP_BATCH = 5000;
+	
+	private static final Logger logger = LoggerFactory.getLogger(DefaultBuildManager.class);
 	
 	private final BuildParamManager buildParamManager;
 	
@@ -62,13 +79,22 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	private final StorageManager storageManager;
 	
+	private final TaskScheduler taskScheduler;
+	
+	private final TransactionManager transactionManager;
+	
+	private String taskId;
+	
 	@Inject
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
-			BuildDependenceManager buildDependenceManager, StorageManager storageManager) {
+			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager, 
+			StorageManager storageManager, TransactionManager transactionManager) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
 		this.storageManager = storageManager;
+		this.taskScheduler = taskScheduler;
+		this.transactionManager = transactionManager;
 	}
 
 	@Transactional
@@ -312,6 +338,66 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			}
 			jobStatus.add(status);
 		}
+	}
+
+	@Override
+	public void execute() {
+		EntityCriteria<Build> criteria = newCriteria();
+		
+		AtomicInteger firstResult = new AtomicInteger(0);
+		Map<Long, Optional<BuildQuery>> preserveConditions = new HashMap<>(); 
+		
+		while (transactionManager.call(new Callable<Boolean>() {
+
+			@Override
+			public Boolean call() {
+				List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
+				if (!builds.isEmpty()) {
+					logger.debug("Checking build preserve condition: {}->{}", 
+							firstResult.get()+1, firstResult.get()+builds.size());
+				}
+				for (Build build: builds) {
+					Project project = build.getProject();
+					Optional<BuildQuery> query = preserveConditions.get(project.getId());
+					if (query == null) {
+						try {
+							String queryString = project.getBuildSetting().getBuildsToPreserve();
+							query = Optional.of(BuildQuery.parse(project, queryString, true));
+							if (query.get().needsLogin())
+								throw new OneException("This query needs login which is not supported here");
+						} catch (Exception e) {
+							logger.error("Error parsing build preserve condition of project '{}'", project.getName(), e);
+							query = Optional.absent();
+						}
+						preserveConditions.put(project.getId(), query);
+					}
+					if (query.isPresent()) {
+						if (!query.get().matches(build, null)) {
+							logger.debug("Preserve condition not satisfied, deleting build {}...", build.getId());
+							delete(build);
+						}
+					}
+				}
+				firstResult.set(firstResult.get() + CLEANUP_BATCH);
+				return builds.size() == CLEANUP_BATCH;
+			}
+			
+		})) {}
+	}
+
+	@Override
+	public ScheduleBuilder<?> getScheduleBuilder() {
+		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
+	}
+	
+	@Listen
+	public void on(SystemStarted event) {
+		taskId = taskScheduler.schedule(this);
+	}
+
+	@Listen
+	public void on(SystemStopping event) {
+		taskScheduler.unschedule(taskId);
 	}
 	
 }

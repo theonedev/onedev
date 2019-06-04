@@ -743,7 +743,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 									@Override
 									public void run(Map<String, List<String>> paramMap) {
 										Build build = jobManager.submit(request.getTargetProject(), 
-												commitId, job.getName(), paramMap);
+												commitId, job.getName(), paramMap, null);
 										PullRequestBuild pullRequestBuild = null;
 										for (PullRequestBuild prevRequirement: prevRequirements) {
 											if (prevRequirement.getBuild().equals(build)) {

@@ -182,7 +182,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			private void resubmit(Serializable paramBean) {
 				Map<String, List<String>> paramMap = JobParam.getParamMap(getBuild().getJob(), paramBean, 
 						getBuild().getJob().getParamSpecMap().keySet());
-				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap);
+				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap, SecurityUtils.getUser());
 				setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(getBuild(), position));
 			}
 			
@@ -246,7 +246,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 
 			@Override
 			public void onClick() {
-				OneDev.getInstance(JobManager.class).cancel(getBuild());
+				OneDev.getInstance(JobManager.class).cancel(getBuild(), SecurityUtils.getUser());
 				getSession().success("Cancel request submitted");
 			}
 

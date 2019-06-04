@@ -19,10 +19,14 @@ import io.onedev.server.web.page.project.ProjectPage;
 @SuppressWarnings("serial")
 public class BuildQueryEditor extends PropertyEditor<String> {
 	
+	private final boolean noLoginSupport;
+	
 	private TextField<String> input;
 	
-	public BuildQueryEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel) {
+	public BuildQueryEditor(String id, PropertyDescriptor propertyDescriptor, IModel<String> propertyModel, 
+			boolean noLoginSupport) {
 		super(id, propertyDescriptor, propertyModel);
+		this.noLoginSupport = noLoginSupport;
 	}
 
 	@Override
@@ -37,7 +41,7 @@ public class BuildQueryEditor extends PropertyEditor<String> {
 				return ((ProjectPage) getPage()).getProject();
 			}
     		
-    	}));
+    	}, noLoginSupport));
         
 		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
         

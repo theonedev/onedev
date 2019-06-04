@@ -67,7 +67,7 @@ public class RunJobLink extends AjaxLink<Void> {
 					Map<String, List<String>> paramMap = JobParam.getParamMap(
 							job, bean, job.getParamSpecMap().keySet());
 					Build build = OneDev.getInstance(JobManager.class).submit(getProject(), 
-							commitId, job.getName(), paramMap);
+							commitId, job.getName(), paramMap, SecurityUtils.getUser());
 					setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(build, null));
 				}
 
@@ -89,7 +89,7 @@ public class RunJobLink extends AjaxLink<Void> {
 			};
 		} else {
 			Build build = OneDev.getInstance(JobManager.class).submit(getProject(), commitId, 
-					job.getName(), new HashMap<>());
+					job.getName(), new HashMap<>(), SecurityUtils.getUser());
 			setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(build, null));
 		}
 	}
