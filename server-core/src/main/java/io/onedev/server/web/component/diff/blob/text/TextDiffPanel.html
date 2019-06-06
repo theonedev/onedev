@@ -1,0 +1,15 @@
+<wicket:panel>
+	<div class="text-diff cm-s-eclipse">
+		<div class="head clearfix">
+			<div wicket:id="diffStat" class="pull-left"></div>
+			<div wicket:id="title" class="pull-left"></div>
+			<div wicket:id="actions" class="actions btn-group pull-right">
+				<a wicket:id="blameFile" class="btn btn-xs btn-default">Blame</a>
+				<a wicket:id="viewFile" class="btn btn-xs btn-default">View</a>
+				<a wicket:id="editFile" class="btn btn-xs btn-default">Edit</a>
+			</div>
+		</div>
+		<table class="body diff"><wicket:container wicket:id="diffLines"></wicket:container></table>
+	</div>
+	<div wicket:id="symbolTooltip"></div>
+</wicket:panel>

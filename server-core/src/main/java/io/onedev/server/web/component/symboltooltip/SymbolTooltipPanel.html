@@ -1,0 +1,23 @@
+<wicket:panel>
+	<div wicket:id="content">
+		<wicket:enclosure child="declarations">
+		<div>Possible declarations</div>
+		<ul class="declarations list-unstyled">
+			<li wicket:id="declarations">
+				<img wicket:id="icon">
+				<a wicket:id="link">
+					<span wicket:id="label"></span>
+					<wicket:enclosure child="scope">
+						<span class="scope">
+						-- <span wicket:id="scope"></span> 
+						</span>
+					</wicket:enclosure>
+				</a>
+			</li>
+		</ul>
+		</wicket:enclosure>
+		<div>
+			<a wicket:id="findOccurrences" class="find-occurrences">All occurrences</a>
+		</div>
+	</div>
+</wicket:panel>

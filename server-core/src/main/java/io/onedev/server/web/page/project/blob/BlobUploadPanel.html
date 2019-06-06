@@ -1,0 +1,32 @@
+<wicket:panel>
+	<form wicket:id="form" class="upload-blobs">
+		<div class="modal-header">
+			<button wicket:id="close" type="button" class="close">&times;</button>
+			<h4 class="modal-title">Upload Files</h4>
+		</div>
+		<div class="modal-body">
+			<div wicket:id="feedback"></div>
+			<div class="form-group">
+				<div wicket:id="files" class="files"></div>
+			</div>
+			<div class="form-group">
+  				<label>Directory</label>
+				<input wicket:id="directory" class="form-control"></input>
+				<p class="help-block">Optionally specify the directory to put uploaded files. This value 
+				is considered to be relative to current repository directory</p>
+			</div>			
+			<div class="form-group">
+  				<label>Summary Commit Message</label>
+				<input wicket:id="summaryCommitMessage" class="form-control" placeholder="Add files via upload"></input>
+			</div>			
+			<div class="form-group">
+  				<label>Detail Commit Message</label>
+				<textarea wicket:id="detailCommitMessage" class="form-control" rows="5"></textarea>
+			</div>			
+		</div>
+		<div class="modal-footer">
+			<button wicket:id="upload" class="btn btn-primary">Upload</button>
+			<button wicket:id="cancel" class="btn btn-default">Cancel</button>
+		</div>
+	</form>
+</wicket:panel>

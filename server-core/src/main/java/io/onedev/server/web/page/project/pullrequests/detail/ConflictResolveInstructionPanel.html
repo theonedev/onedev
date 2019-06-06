@@ -1,0 +1,53 @@
+<wicket:panel>
+	<wicket:container wicket:id="content"></wicket:container>
+	
+	<wicket:fragment wicket:id="mergeFrag">
+		<ul class="conflict-resolve instruction">
+			<li>
+				<div class="text">From working directory of project <em wicket:id="srcRepoName"></em>,
+				check out source branch and merge with target branch</div>
+				<div class="code">
+					<div>git checkout <span wicket:id="srcBranchNameForCheckout"></span></div>	
+					<div wicket:id="sameRepo">
+						<div>git fetch origin</div>
+						<div>git merge <span wicket:id="ffOption"></span> origin/<span wicket:id="destBranchName"></span></div>
+					</div>
+					<div wicket:id="differentRepo">
+						<div>git pull <span wicket:id="ffOption"></span> <span wicket:id="destRepoUrl"></span> <span wicket:id="destBranchName"></span></div> 
+					</div>
+				</div>
+			</li>
+			<li>
+				<div class="text">Resolve merge conflicts, test changes and push result commit to OneDev</div>
+				<div class="code">  
+					git push origin <span wicket:id="srcBranchNameForPush"></span>
+				</div>
+			</li>
+		</ul>
+	</wicket:fragment>
+	
+	<wicket:fragment wicket:id="rebaseFrag">
+		<ul class="conflict-resolve instruction">
+			<li>
+				<div class="text">From working directory of project <em wicket:id="srcRepoName"></em>, 
+				check out source branch and rebase to destination branch</div>
+				<div class="code">
+					<div>git checkout <span wicket:id="srcBranchNameForCheckout"></span></div>
+					<div wicket:id="sameRepo">
+						<div>git fetch origin</div>
+						<div>git rebase origin/<span wicket:id="destBranchName"></span></div>
+					</div>
+					<div wicket:id="differentRepo">
+						git pull --rebase <span wicket:id="destRepoUrl"></span> <span wicket:id="destBranchName"></span> 
+					</div>
+				</div>
+			</li>
+			<li>
+				<div class="text">Resolve rebase conflicts, test changes and force push result commit to OneDev</div>
+				<div class="code">  
+					git push -f origin <span wicket:id="srcBranchNameForPush"></span>
+				</div>
+			</li>
+		</ul>
+	</wicket:fragment>
+</wicket:panel>

@@ -1,0 +1,17 @@
+.project-and-branch {
+	width: 100%;
+}
+.project-and-branch td {
+	padding: 12px; 
+	white-space: nowrap;
+}
+.project-and-branch td.name {
+	text-align: right; 
+	padding-right: 0; 
+	font-size: 16px; 
+	width: 1%; 
+	padding-top: 16px;
+}
+.project-and-branch .select2-choice {
+	width: 100%;
+}

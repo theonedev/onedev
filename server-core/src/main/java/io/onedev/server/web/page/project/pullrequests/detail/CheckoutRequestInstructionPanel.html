@@ -1,0 +1,20 @@
+<wicket:panel>
+	<ul class="checkout-request instruction">
+		<li>
+			<div class="text">
+				From working directory of project <em wicket:id="targetProjectName"></em>, fetch pull 
+				request merge preview into a <b>new</b> branch, say <em wicket:id="localBranch"></em>
+			</div>
+			<div class="code">
+				<div wicket:id="fetchCommand"></div>
+				(or fetch <em wicket:id="headRef"></em> if you want to verify pull request head)
+			</div>
+		</li>
+		<li>
+			<div class="text">
+				Checkout the branch created above and verify the pull request code locally
+			</div>
+			<div class="code" wicket:id="checkoutCommand"></div>
+		</li>
+	</ul>
+</wicket:panel>

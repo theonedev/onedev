@@ -1,0 +1,39 @@
+.auto-backup {
+	margin-bottom: 20px;
+}
+
+#administration>.server-information>.page-title {
+	border-bottom: none;
+	margin-bottom: 0;
+} 
+.server-information table td {
+	padding: 8px;
+	font-size: 13px;
+}
+.server-information table td.name {
+	width: 200px;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.server-log>.head {
+	margin-bottom: 20px;
+}
+.server-log>.body>pre {
+	background: black;
+	border: 1px solid black;
+	color: white;
+}
+
+.license-detail .properties td {
+	padding: 0 16px 16px 0;
+}
+.license-detail .properties tr:last-child td {
+	padding-bottom: 0;
+}
+.license-detail .properties td.name {
+	width: 200px;
+}
+.license-management .actions a {
+	margin-right: 16px;
+}

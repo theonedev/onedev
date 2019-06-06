@@ -1,0 +1,39 @@
+<wicket:extend>
+	<div wicket:id="activities" class="activities">
+		<table>
+			<tr wicket:id="activities" class="activity">
+				<td class="avatar"><a wicket:id="avatar"></a></td>
+				<td wicket:id="content" class="content"></td>
+			</tr>
+		</table>
+		<div wicket:id="addComment"></div>
+	</div>
+	<wicket:fragment wicket:id="loginToCommentFrag">
+		<div class="login-to-comment">
+			<a wicket:id="login">Login to comment</a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="addCommentFrag">
+		<form wicket:id="form" class="add-comment leave-confirm no-autofocus">
+			<div wicket:id="feedback"></div>
+			<div wicket:id="input" placeholder="Leave a comment"></div>
+			<div class="actions">
+				<a wicket:id="save" class="btn btn-primary dirty-aware">Comment</a>
+			</div>
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="sinceChangesRowContentFrag">
+		<div>
+			<span class="icon fa fa-ext fa-file-diff"></span> <a wicket:id="sinceChanges">Changes since last visit</a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="optionsFrag">
+		<div class="request-activity-options">
+			<span class="btn-group">
+				<a wicket:id="showComments" class="btn btn-sm btn-default" title="Show comments"><i class="fa fa-comments"></i></a>
+				<a wicket:id="showCommits" class="btn btn-sm btn-default" title="Show commits"><i class="fa fa-ext fa-commit"></i></a>
+				<a wicket:id="showChangeHistory" class="btn btn-sm btn-default" title="Show change history"><i class="fa fa-history"></i></a>
+			</span>
+		</div>
+	</wicket:fragment>
+</wicket:extend>

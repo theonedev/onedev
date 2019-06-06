@@ -1,0 +1,15 @@
+<wicket:panel>
+	<div class="entity-watches">
+		<div class="head"><span wicket:id="title"></span></div>
+		<div class="body">
+			<wicket:enclosure child="watchers">
+				<div class="watchers">
+					<span wicket:id="watchers"><a wicket:id="watcher" class="avatar"></a></span> <a wicket:id="more">and more</a>
+				</div>
+			</wicket:enclosure>
+			<div class="actions">
+				<a wicket:id="watch" class="watch-status btn btn-sm btn-default"></a>
+			</div>
+		</div>
+	</div>
+</wicket:panel>

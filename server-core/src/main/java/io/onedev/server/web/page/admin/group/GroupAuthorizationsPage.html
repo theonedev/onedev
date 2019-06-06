@@ -1,0 +1,23 @@
+<wicket:extend>
+	<div class="page-title">Group Authorizations</div>
+	<div class="authorization list">
+		<div class="head clearfix">
+			<div class="pull-left clearable-wrapper">
+				<input wicket:id="filterProjects" class="form-control search" placeholder="Filter by project name">
+			</div>
+			<div class="pull-left">
+				<input wicket:id="addNew" type="hidden" class="form-control">
+			</div>
+			<div class="pull-left">
+				<a wicket:id="deleteSelected" class="btn btn-default"><i class="fa fa-trash"></i> Delete Selected</a>
+			</div>
+		</div>
+		<table wicket:id="authorizations" class="authorizations table table-hover table-condensed"></table>
+	</div>
+	<wicket:fragment wicket:id="projectFrag">
+		<a wicket:id="project"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="privilegeFrag">
+		<a wicket:id="dropdown" class="btn btn-xs btn-default"><span wicket:id="label"></span> <i class="fa fa-caret-down"></i></a>
+	</wicket:fragment>
+</wicket:extend>

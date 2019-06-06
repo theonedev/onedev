@@ -1,0 +1,9 @@
+.milestone-progress {
+	border: 1px solid #5cb85c;
+	box-shadow: 0;
+	margin-bottom: 0;
+	background: white;
+}
+.milestone-progress .progress-bar {
+	background: #5cb85c;
+}

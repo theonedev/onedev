@@ -1,0 +1,35 @@
+<wicket:panel>
+    <div class="polymorphic-list list">
+        <div class="head">
+            <a wicket:id="addElement" title="Add new" class="btn btn-default btn-xs add-element"><span class="fa fa-plus"></span></a>
+        </div>
+        <table class="table table-condensed">
+            <tbody>
+                <tr wicket:id="elements">
+                    <td>
+                        <div class="head clearfix">
+                            <div class="actions pull-left">
+                                <span class="drag-indicator fa fa-reorder"></span>
+                            </div>
+                            <div class="type-selector pull-left">
+                                <select wicket:id="elementTypeSelector" class="form-control"></select>
+                            </div>
+                            <div class="actions pull-left">
+                                <a wicket:id="deleteElement" title="Delete this"><i class="fa fa-trash"></i></a>
+                            </div>
+                        </div>
+                        <div class="body">
+                            <div wicket:id="elementEditor"></div>
+                            <div wicket:id="feedback"></div>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+            <tfoot wicket:id="noElements">
+                <tr>
+                    <td class="no-elements">No elements defined</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</wicket:panel>

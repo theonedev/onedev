@@ -4,10 +4,10 @@
     <parent>
     	<groupId>io.onedev</groupId>
     	<artifactId>parent</artifactId>
-    	<version>1.0.2</version>
+    	<version>1.0.3</version>
     </parent>
     <artifactId>server</artifactId>  
-    <version>2.1.4</version>  
+    <version>3.0.0</version>  
     <packaging>pom</packaging>  
     <build> 
         <finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>  
@@ -41,13 +41,9 @@
                                     <pluginExecutionFilter> 
                                         <groupId>io.onedev</groupId>  
                                         <artifactId>plugin-maven</artifactId>  
-                                        <versionRange>[1.0.3,]</versionRange>  
+                                        <versionRange>[2.0.0,]</versionRange>  
                                         <goals> 
-                                            <goal>generate-artifact-descriptor</goal>  
-                                            <goal>generate-plugin-descriptor</goal>  
-                                            <goal>generate-product-descriptor</goal>  
-                                            <goal>copy-product-resources</goal> 
-                                            <goal>create-product-sandbox</goal>  
+                                            <goal>populate-resources</goal>  
                                         </goals> 
                                     </pluginExecutionFilter>  
                                     <action> 
@@ -104,43 +100,31 @@
                         </execution> 
                     </executions> 
                 </plugin>  
-                <plugin> 
-                    <groupId>io.onedev</groupId>  
-                    <artifactId>plugin-maven</artifactId>  
-                    <version>1.0.3</version>  
-                    <executions> 
-                        <execution> 
-                            <id>generate-artifact-descriptor</id>  
-                            <phase>compile</phase>  
-                            <goals> 
-                                <goal>generate-artifact-descriptor</goal> 
-                            </goals> 
-                        </execution>  
-                        <execution> 
-                            <id>generate-plugin-descriptor</id>  
-                            <phase>compile</phase>  
-                            <goals> 
-                                <goal>generate-plugin-descriptor</goal> 
-                            </goals> 
-                        </execution>  
-                        <execution> 
-                            <id>create-product-sandbox</id>  
-                            <phase>compile</phase>  
-                            <goals> 
-                                <goal>create-product-sandbox</goal> 
-                            </goals> 
-                        </execution> 
-                        <execution> 
-                            <id>package-artifact</id>  
-                            <phase>package</phase>  
-                            <goals> 
-                                <goal>package-artifact</goal> 
-                            </goals> 
-                        </execution>  
-                    </executions> 
-                </plugin>  
             </plugins> 
         </pluginManagement>  
+        <plugins>
+	        <plugin> 
+	            <groupId>io.onedev</groupId>  
+	            <artifactId>plugin-maven</artifactId>  
+	            <version>2.0.0</version>  
+	            <executions> 
+	                <execution> 
+	                    <id>populate-resources</id>  
+	                    <phase>compile</phase>  
+	                    <goals> 
+	                        <goal>populate-resources</goal> 
+	                    </goals> 
+	                </execution>  
+	                <execution> 
+	                    <id>package-artifacts</id>  
+	                    <phase>package</phase>  
+	                    <goals> 
+	                        <goal>package-artifacts</goal> 
+	                    </goals> 
+	                </execution>  
+	            </executions> 
+	        </plugin>  
+        </plugins>
 		<resources>
 			<resource>
 				<directory>src/main/java</directory>
@@ -160,9 +144,9 @@
 		</resources>
     </build>  	
     <modules> 
-        <module>core</module>
-		<module>plugin</module>
-        <module>product</module>
+        <module>server-core</module>
+		<module>server-plugin</module>
+        <module>server-product</module>
     </modules>  
 	<dependencyManagement>
 		<dependencies>
@@ -211,7 +195,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>1.0.14</commons.version>
+		<commons.version>1.1.0</commons.version>
 		<antlr.version>4.7.2</antlr.version>
 	</properties>
 </project>

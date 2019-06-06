@@ -1,0 +1,26 @@
+<wicket:panel>
+    <wicket:container wicket:id="content"></wicket:container>
+    <wicket:fragment wicket:id="gitUserFrag">
+    <div class="user-detail git-user">
+        <div class="avatar">
+            <img wicket:id="avatar">
+        </div>
+        <div class="other">
+            <div wicket:id="gitName" class="git-name"></div>
+            <div wicket:id="onedevName" class="onedev-name"></div>
+            <div class="email"><a wicket:id="email"></a></div>
+        </div>
+    </div>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="nonGitUserFrag">
+    <div class="user-detail non-git-user">
+        <div class="avatar">
+            <img wicket:id="avatar">
+        </div>
+        <div class="other">
+            <div wicket:id="name" class="name"></div>
+            <div class="email"><a wicket:id="email"></a></div>
+        </div>
+    </div>
+    </wicket:fragment>
+</wicket:panel>

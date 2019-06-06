@@ -1,0 +1,24 @@
+.build-side>* {
+	margin-bottom: 20px;
+	border-top: 1px solid #E8E8E8;
+	padding-top: 20px;
+}
+.build-side>div:first-child {
+	border-top: none;
+	padding-top: 0;
+}
+.build-side>.table {
+    width: 100%;
+    display: table;
+}
+.build-side>.table>div {
+    display: table-row;
+}
+.build-side>.table>div>div {
+    display: table-cell;
+    padding: 8px 0;
+}
+.build-side>.table>div>div.name {
+    padding-right: 12px;
+    width: 50%;
+}

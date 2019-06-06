@@ -1,0 +1,37 @@
+<wicket:panel>
+    <div wicket:id="content" class="ci-spec ci-spec-edit"></div>
+    <wicket:fragment wicket:id="validFrag">
+        <div class="valid">
+            <div class="jobs">
+                <div class="head">
+                    Jobs
+                </div>
+                <div class="body">
+                    <div class="side">
+                        <!-- do not leave white space between navs and nav element as we are using .navs:not(:empty)
+                        in css -->
+                        <div class="navs"><div wicket:id="navs" class="nav">
+                            <a class="select">
+                                <span class="drag-indicator"><i class="fa fa-reorder"></i></span>
+                                <span class="name"></span>
+                            </a>
+                            <a wicket:id="delete" title="Delete job" class="delete"><i class="fa fa-trash"></i></a>
+                        </div></div>
+                        <a wicket:id="add" class="add btn btn-success btn-block">
+                            <i class="fa fa-plus"></i> Add New
+                        </a>
+                    </div>
+                    <div class="contents">
+                        <div wicket:id="contents" class="content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="invalidFrag">
+        <div class="invalid">
+            <div class="title">Error rendering CI spec</div>
+            <div wicket:id="errorMessage" class="error-message"></div>
+        </div>
+    </wicket:fragment>
+</wicket:panel>

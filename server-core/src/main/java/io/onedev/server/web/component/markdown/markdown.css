@@ -1,0 +1,381 @@
+@media(max-width: 991px) {
+	.markdown-editor .normal-mode {
+		display: none;
+	}
+}
+@media(min-width: 992px) {
+	.markdown-editor.compact-mode .normal-mode, 
+	.markdown-editor.normal-mode .compact-mode {
+		display: none;
+	}
+}
+body.fullscreen {
+	overflow: hidden;
+}
+.markdown-editor.fullscreen {
+	position: fixed;
+	left: 0;
+	top: 0;
+	width: 100%;
+	z-index: 1060;
+	padding: 20px;
+	background: white;
+}
+.markdown-editor.compact-mode>.head .split .fa {
+	transform: rotate(270deg);
+} 
+
+.markdown-editor>.head>.warning {
+	margin-bottom: 0;
+	padding-top: 8px;
+	padding-bottom: 8px;
+	display: none;
+}
+.markdown-editor>.head>.warning, .markdown-editor>.head>.help, .markdown-editor>.head>.emojis {
+	margin: 4px;
+}
+.markdown-editor>.head {
+	background: white;
+	border: 1px solid #E0E0E0;	
+	border-bottom: none;
+	border-radius: 4px 4px 0 0;
+	padding: 4px;
+}
+.markdown-editor>.head>.actions>div>a {
+	color: #777;
+	padding: 2px;
+	border: 1px solid white;
+	border-radius: 2px;
+	display: block;
+	width: 24px;
+	text-align: center;
+	margin-right: 4px;
+}
+.markdown-editor>.head>.actions .separator {
+	display: block;
+	border-left: 1px solid #E0E0E0;
+	margin-right: 4px;
+	height: 24px;
+}
+.markdown-editor>.head>.actions>div>a:hover, .markdown-editor>.head>.actions>div>a.active {
+	background: #EEE;
+	border: 1px solid #E0E0E0;
+}
+
+.markdown-editor>.head>.actions .dropdown .active:BEFORE {
+	font-family: "FontAwesome";
+	content: "\f00c";
+	position: absolute;
+	left: 4px;
+}
+.markdown-editor .ui-resizable-handle {
+	background: #EEE url(hgrabber.png) no-repeat scroll center center;
+    cursor: s-resize;
+    height: 8px;
+    bottom: -8px;
+}
+
+.markdown-editor>.head>.emojis {
+	display: none;
+}
+.markdown-editor>.head>.emojis.loaded {
+	font-size: 12px; 
+	line-height: 24px; 
+	height: 200px; 
+	overflow: auto;
+}
+.markdown-editor>.head>.emojis.loading {
+	font-size: 16px;
+	color: #888;
+}
+.markdown-editor>.head>.emojis .emoji {
+	margin-right: 12px;
+}
+.markdown-editor>.head>.emojis .emoji img {
+	width: 16px; 
+	height: 16px;
+}
+.markdown-editor.preview>.emojis .emoji img {
+	opacity: 0.5;
+}
+
+.markdown-editor>.head>.help {
+	display: none;
+}
+
+.markdown-editor>.body>.preview>.markdown-rendered {
+	border: 1px solid #E0E0E0;
+	padding: 8px;
+	border-radius: 0 0 4px 4px;
+	background: white;
+}
+
+/* 
+ * Do not display header link in preview mode as otherwise we need to reserve a big margin 
+ * at left side 
+ */ 
+.markdown-editor>.body>.preview>.markdown-rendered .header-link {
+	display: none;
+}
+
+.markdown-editor.normal-mode.edit-mode>.body>.edit {
+	width: 100%;
+}
+.markdown-editor.normal-mode.edit-mode>.body>.preview {
+	display: none;
+}
+.markdown-editor.normal-mode.preview-mode>.body>.edit {
+	display: none;
+}
+.markdown-editor.normal-mode.preview-mode>.body>.preview {
+	width: 100%;
+}
+.markdown-editor.normal-mode.split-mode>.body>.edit {
+	float: left;
+	width: 50%;
+}
+.markdown-editor.normal-mode.split-mode>.body>.preview {
+	float: left;
+	width: 50%;
+}
+
+.markdown-editor.compact-mode.edit-mode>.body>.edit {
+	width: 100%;
+}
+.markdown-editor.compact-mode.edit-mode>.body>.preview {
+	display: none;
+}
+.markdown-editor.compact-mode.preview-mode>.body>.edit {
+	display: none;
+}
+.markdown-editor.compact-mode.preview-mode>.body>.preview {
+	width: 100%;
+}
+.markdown-editor.compact-mode.split-mode>.body>.edit {
+	width: 100%;
+}
+.markdown-editor.compact-mode.split-mode>.body>.preview {
+	width: 100%;
+}
+
+.markdown-editor>.body>.edit>textarea {
+	border: 1px solid #E0E0E0;
+	border-radius: 0 0 4px 4px;
+	overflow: auto;
+	width: 100%;
+	display: block;
+	resize: none;
+	padding: 8px;
+}
+.markdown-editor>.body>.preview>.markdown-rendered {
+	overflow: auto;
+}
+.markdown-editor>.body>.preview>.markdown-rendered>.message {
+	color: #999;
+}
+.markdown-editor.normal-mode.split-mode>.body>.edit>textarea {
+	border-radius: 0 0 0 4px;
+}
+.markdown-editor.normal-mode.split-mode>.body>.preview>.markdown-rendered {
+	border-left: none;
+	border-radius: 0 0 4px 0;
+}
+.markdown-editor.compact-mode.split-mode>.body>.preview {
+	margin-top: 8px;
+	border-left: none;
+	border-radius: 0 0 4px 0;
+}
+.compact-mode.dropdown a {
+	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+
+.atwho-view .emoji {
+	display: inline-block; 
+	height: 20px; 
+	width: 20px; 
+	vertical-align: middle; 
+	background-repeat: no-repeat; 
+	background-size: 20px 20px;
+}
+.atwho-view .avatar img {
+	display: inline-block; 
+	width: 20px; 
+	height: 20px; 
+	vertical-align: middle;
+}
+.atwho-view .cur .text-muted {
+	color: inherit;	
+}
+
+.insert-url .attachment {
+	margin-bottom: 20px;
+}
+.insert-url .attachment:LAST-CHILD {
+	margin-bottom: 0;
+}
+
+.insert-url .attachment.image img {
+	max-width: 100%;
+	border-radius: 4px 4px 0 0 ;
+}
+.insert-url .attachment.image .btn {
+	border-radius: 0 0 4px 4px;
+}
+
+.insert-url .alert-info {
+	margin-top: 20px;
+}
+
+.markdown-editor>.body>.edit>textarea>.drag-over {
+	border: 2px solid #69B7F7;
+}
+
+.markdown-rendered {
+	font-size: 16px;
+	line-height: 1.5;
+}
+.markdown-rendered li {
+	margin-bottom: 6px;
+}
+.markdown-rendered .emoji {
+	width: 20px; 
+	height: 20px;
+}
+.markdown-rendered table {
+	width: auto; 
+	margin-bottom: 10px;
+}
+.markdown-rendered table th, .markdown-rendered table td {
+	padding: 4px 8px; 
+	border: 1px solid #C8C8C8;
+}
+.markdown-rendered table tr:nth-child(even) td {
+	background: #F5F5F5;
+}
+.markdown-rendered h1, .markdown-rendered h2, .markdown-rendered h3, 
+.markdown-rendered h4, .markdown-rendered h5, .markdown-rendered h6 {
+	font-weight: bold;
+}
+.markdown-rendered blockquote {
+	font-size: 15px; 
+	border-left: 4px solid #ddd; 
+	color: #777; 
+	padding: 0 16px;
+}
+.markdown-rendered code {
+	color: #333;
+	background: rgba(0, 0, 0, 0.04);
+}
+.markdown-rendered img {
+	max-width: 100%;
+}
+.markdown-rendered .task-list-item {
+	list-style: none;
+	margin-left: -21px;
+}
+.markdown-rendered .task-list-item input {
+	margin-right: 8px;
+}
+
+.markdown-rendered .header-link {
+	display: none;
+	position: absolute;
+	font-size: 24px;
+	margin-left: -24px;
+}
+.markdown-rendered h1:hover .header-link, 
+.markdown-rendered h2:hover .header-link,
+.markdown-rendered h3:hover .header-link,
+.markdown-rendered h4:hover .header-link, 
+.markdown-rendered h5:hover .header-link,
+.markdown-rendered h6:hover .header-link {
+	display: inline;
+}
+
+.markdown-rendered h1,
+.markdown-rendered h2,
+.markdown-rendered h3,
+.markdown-rendered h4,
+.markdown-rendered h5,
+.markdown-rendered h6 {
+	margin-left: -24px;
+	padding-left: 24px;
+	position: relative;
+}
+.markdown-rendered h1 .header-link {
+	margin-top: 10px;
+}
+.markdown-rendered h2 .header-link {
+	margin-top: 6px;
+}
+.markdown-rendered h3 .header-link {
+	margin-top: 2px;
+}
+.markdown-rendered h4 .header-link {
+	margin-top: -2px;
+}
+.markdown-rendered h5 .header-link {
+	margin-top: -4px;
+}
+.markdown-rendered h6 .header-link {
+	margin-top: -6px;
+}
+.markdown-rendered a.header-link {
+	color: #333;
+	text-decoration: none;
+}
+#reference-tooltip {
+	z-index: 1000;
+}
+#reference-tooltip .content {
+	background-color: #FBFCC5; 
+	border: 1px solid black;
+	border-radius: 4px; 
+	padding: 12px; 
+}
+#reference-tooltip .content .label { 
+	margin-right: 4px;
+}
+#reference-tooltip .content.user {
+	position: relative;
+	padding-left: 60px;
+}
+#reference-tooltip .content.user .avatar {
+	width: 36px;
+	height: 36px;
+	position: absolute;
+	left: 16px;
+	top: 16px;
+}
+#reference-tooltip .content.user .name {
+	padding: 0 !important;
+	margin: 0 !important;
+	font-weight: bold;
+}
+#reference-tooltip .content.commit .head {
+	font-weight: bold;
+	margin-bottom: 12px;
+}
+#reference-tooltip .content.commit .author {
+	margin-right: 4px;
+}
+#reference-tooltip .content.commit .body {
+	background: none;
+	border: none;
+	padding: 0;
+	margin: 0;
+}
+#reference-tooltip .content.build .status:before {
+    margin-right: 4px;
+}
+#reference-tooltip .content.build .title {
+    margin-left: 10px;
+}
+
+.markdown-image-loading {
+	position: absolute;
+	left: 0;
+	top: 0;
+	background: url("/img/ajax-indicator-big.gif") center no-repeat;
+}
+

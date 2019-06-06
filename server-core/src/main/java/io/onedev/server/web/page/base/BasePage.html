@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html class="no-js" xmlns:wicket="http://wicket.apache.org">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<title wicket:id="pageTitle">OneDev</title>
+	<meta wicket:id="pageRefresh" http-equiv="refresh"/>
+	<meta name="Author" content="OneDev Pty." />
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
+ 	<meta wicket:id="robots" name="robots">	
+	<link rel="icon" href="/img/favicon.ico" type="image/x-icon"/>
+	<link rel="apple-touch-icon" href="/img/apple-touch-icon.png"/>	
+	<link rel="apple-touch-icon-precomposed" href="/img/apple-touch-icon.png"/>	
+</head>
+<body>
+	<script wicket:id="script" type="application/javascript"></script>
+	<wicket:child></wicket:child>
+	
+	<div wicket:id="sessionFeedback" id="session-feedback"></div>
+	<div id="ajax-loading-indicator"><div>Please wait...</div></div>
+	
+	<!-- Two divs are used here in order to make overlay works in IE. -->
+	<div id="ajax-loading-overlay"><div></div></div>
+	<div wicket:id="keepSessionAlive" style="display:none;"></div>
+	<a id="websocket-error" href="javascript: location.reload();">
+		<span class="fa fa-warning"></span> Page is in error, refresh to recover
+	</a>
+	<div wicket:id="rootComponents"></div>
+</body>
+</html>

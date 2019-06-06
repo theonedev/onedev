@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true">
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${logback.consoleLogPattern}</pattern>
+		</encoder>
+	</appender>
+	
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${logback.logFile}</file>
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>${logback.fileLogPattern}</pattern>
+		</encoder>
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<maxIndex>3</maxIndex>
+			<FileNamePattern>${logback.logFile}.%i</FileNamePattern>
+		</rollingPolicy>
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<maxFileSize>1MB</maxFileSize>
+		</triggeringPolicy>
+	</appender>
+	
+	<logger name="org.apache.wicket" level="WARN"/>
+	<logger name="org.apache.wicket.page.XmlPartialPageUpdate" level="ERROR"/>
+	<logger name="org.eclipse" level="WARN"/>
+	<logger name="org.hibernate" level="WARN"/>
+	<logger name="java.sql.DatabaseMetaData" level="WARN"/>
+	<logger name="org.hibernate.cache.ehcache.AbstractEhcacheRegionFactory" level="ERROR"/>
+	<logger name="org.hibernate.engine.jdbc.spi.SqlExceptionHelper" level="ERROR"/>
+	<logger name="com.jolbox.bonecp.BoneCPConfig" level="WARN"/>
+	<logger name="com.sun.jersey" level="WARN"/>
+	<logger name="org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl" level="ERROR"/>
+	<logger name="org.reflections" level="WARN"/>
+	<logger name="org.apache.shiro.realm.AuthorizingRealm" level="WARN"/>
+	<logger name="com.joestelmach.natty" level="WARN"/>	
+	<logger name="jetbrains.exodus" level="WARN"/>
+	<logger name="jetbrains.exodus.io.FileDataWriter" level="ERROR"/>
+	<logger name="com.zaxxer.hikari.HikariDataSource" level="ERROR"/>
+	<logger name="org.apache.shiro.mgt" level="ERROR"/>
+	<logger name="io.onedev" level="INFO"/>	
+	
+	<root level="WARN">
+		<appender-ref ref="FILE"/>
+		<appender-ref ref="CONSOLE"/>
+	</root>
+	
+</configuration>

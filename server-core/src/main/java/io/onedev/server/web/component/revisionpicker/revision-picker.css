@@ -1,0 +1,11 @@
+.project-and-revision {
+	white-space: nowrap;
+}
+.project-and-revision>a {
+	color: #444;
+	text-decoration: none;
+	font-size: 16px;
+}
+.project-and-revision>a.btn {
+	font-size: inherit;
+}

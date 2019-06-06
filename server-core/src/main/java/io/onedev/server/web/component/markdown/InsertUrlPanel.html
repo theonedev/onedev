@@ -1,0 +1,88 @@
+<wicket:panel>
+	<div class="modal-header">
+		<button wicket:id="close" type="button" class="close">&times;</button>
+		<h4 wicket:id="title" class="modal-title"></h4>
+	</div>
+	<div wicket:id="content" class="modal-body insert-url"></div>
+	
+	<wicket:fragment wicket:id="tabbedFrag">
+		<ul wicket:id="tabs" class="tabs nav nav-tabs"></ul>
+		<div wicket:id="content"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="inputUrlFrag">
+		<form wicket:id="form" class="input-url">
+			<div wicket:id="feedback" class="feedback"></div>
+			<div class="form-group">
+				<label wicket:id="urlLabel" class="control-label"></label>
+				<input wicket:id="url" class="form-control url"></input>
+				<p wicket:id="urlHelp" class="help-block"></p>
+			</div>		
+			<div class="form-group">
+				<label wicket:id="textLabel" class="control-label"></label>
+				<input wicket:id="text" class="form-control text"></input>
+			</div>	
+			<div class="actions clearfix">
+				<button wicket:id="insert" type="submit" class="dirty-aware btn btn-primary pull-right">Insert</button>	
+			</div>
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="pickBlobFrag">
+		<div wicket:id="files" class="files"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="pickAttachedImageFrag">
+		<ul class="attachments list-unstyled">
+			<li wicket:id="attachments" class="attachment image">
+				<a wicket:id="select" title="Insert this image" class="insert"><img wicket:id="image"></img></a>
+				<a wicket:id="delete" title="Remove this image" class="delete btn btn-default btn-block"><i class="fa fa-trash"></i> Remove</a>
+			</li>
+		</ul>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="pickAttachedFileFrag">
+		<ul class="attachments list-unstyled">
+			<li wicket:id="attachments" class="attachment file">
+				<div class="row">
+					<div class="col-md-9">
+						<a wicket:id="select" title="Insert link to this file" class="insert btn btn-block btn-default"><span wicket:id="file"></span></a>
+					</div>
+					<div class="col-md-3">
+						<a wicket:id="delete" title="Remove this file" class="delete btn btn-block btn-default"><i class="fa fa-trash"></i> Remove</a>
+					</div>
+				</div>
+			</li>
+		</ul>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="uploadAttachmentFrag">
+		<form wicket:id="form" class="upload-attachment">
+			<div wicket:id="feedback" class="feedback"></div>
+			<div wicket:id="file"></div>
+			<div class="actions clearfix">
+				<button wicket:id="insert" type="submit" class="dirty-aware btn btn-primary pull-right">Insert</button>
+			</div>
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="uploadBlobFrag">
+		<form wicket:id="form" class="upload-blob">
+			<div wicket:id="feedback" class="feedback"></div>
+			<div class="form-group">
+				<div wicket:id="file"></div>
+			</div>
+			<div class="form-group">
+  				<label>Directory</label>
+				<input wicket:id="directory" class="form-control"></input>
+				<p class="help-block">Optionally specify the directory to put uploaded files. This value 
+				is considered to be relative to current repository directory</p>
+			</div>			
+			<div class="form-group">
+  				<label>Summary Commit Message</label>
+				<input wicket:id="summaryCommitMessage" class="form-control" placeholder="Add files via upload"></input>
+			</div>			
+			<div class="form-group">
+  				<label>Detail Commit Message</label>
+				<textarea wicket:id="detailCommitMessage" class="form-control" rows="5"></textarea>
+			</div>	
+			<div class="actions clearfix">
+				<button wicket:id="insert" class="btn btn-primary pull-right">Commit &amp; Insert</button>		    
+			</div>		
+		</form>
+	</wicket:fragment>
+</wicket:panel>

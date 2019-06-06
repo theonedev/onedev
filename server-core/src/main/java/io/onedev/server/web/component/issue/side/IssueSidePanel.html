@@ -1,0 +1,73 @@
+<wicket:panel>
+	<div class="issue-side">
+		<div wicket:id="issueNav" class="nav"></div>
+		<div wicket:id="fields" class="fields"></div>
+		<div class="milestone">
+			<div class="head">Milestone</div>
+			<div wicket:id="milestone" class="body"></div>
+		</div>
+		<div wicket:id="votes" class="votes">
+			<div class="head">
+				Issue Votes (<span wicket:id="count"></span>) 
+			</div>
+			<div class="body">
+				<wicket:enclosure child="voters">
+				<div class="voters">
+					<span wicket:id="voters"><a wicket:id="voter" class="avatar"></a></span> <a wicket:id="more">and more</a>
+				</div>
+				</wicket:enclosure>
+				<div class="actions">
+					<a wicket:id="vote" class="btn btn-default btn-sm vote"><i class="fa fa-thumbs-o-up"></i> <span wicket:id="label"></span></a>
+				</div>
+			</div>
+		</div>
+		<div wicket:id="watches" class="watches"></div>
+		<wicket:enclosure child="delete">
+		<div class="actions">
+			<a wicket:id="delete" class="delete btn btn-danger btn-sm"><i class="fa fa-trash"></i> Delete</a>
+		</div>
+		</wicket:enclosure>
+	</div>
+	<wicket:fragment wicket:id="userFrag">
+		<a wicket:id="avatar"></a> <a wicket:id="name"></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="nonEmptyValuesFrag">
+		<div wicket:id="values" class="value"><span wicket:id="value"></span></div>	
+	</wicket:fragment>
+	<wicket:fragment wicket:id="fieldsViewFrag">
+		<div class="body">
+			<table>
+				<tr wicket:id="fields">
+					<td class="name"><span wicket:id="name"></span></td>
+					<td class="values"><div wicket:id="values"></div></td>
+				</tr>
+			</table>
+		</div>
+		<div class="actions">
+			<a wicket:id="edit" class="btn btn-default btn-sm edit"><i class="fa fa-pencil"></i> Edit</a>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="fieldsEditFrag">
+		<form wicket:id="form" class="fields-edit leave-confirm">
+			<div wicket:id="editor"></div>
+			<div class="actions">
+				<input wicket:id="save" type="submit" class="dirty-aware btn btn-primary" value="Save">
+				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+			</div>
+		</form>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="milestoneViewFrag">
+		<a wicket:id="link"><span wicket:id="label"></span></a> 
+		<a wicket:id="edit" title="Change milestone" class="edit action"><i class="fa fa-pencil"></i></a>
+		<div wicket:id="progress" class="progress"></div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="milestoneEditFrag">
+		<form wicket:id="form">
+			<input wicket:id="milestone" type="hidden" class="form-control">
+			<div class="actions">
+				<a wicket:id="save" class="dirty-aware btn btn-primary btn-sm">Save</a>
+				<a wicket:id="cancel" class="btn btn-default btn-sm">Cancel</a>
+			</div>
+		</form>
+	</wicket:fragment>
+</wicket:panel>

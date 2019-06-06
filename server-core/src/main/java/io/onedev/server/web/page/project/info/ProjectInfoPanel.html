@@ -1,0 +1,26 @@
+<wicket:panel>
+	<div class="project-info">
+		<div class="general">
+			<wicket:enclosure child="forkedFromLink">
+			<span>forked from: <a wicket:id="forkedFromLink"><span wicket:id="name"></span></a></span>
+			</wicket:enclosure> 
+			<span>Name: <span wicket:id="name"></span></span>
+			<span>Id: <span wicket:id="id"></span></span>
+		</div>
+		<div class="metrics">
+			<a wicket:id="commitsLink"><span wicket:id="count"></span></a>
+			<a wicket:id="branchesLink"><span wicket:id="count"></span></a>
+			<a wicket:id="tagsLink"><span wicket:id="count"></span></a>
+			<a wicket:id="forks"><span wicket:id="label"></span></a>
+			<a wicket:id="forkNow">fork now</a>
+		</div>
+		<div wicket:id="description" class="description"></div>
+		<div class="clone form-inline">
+			<div class="input-group">
+		    	<div class="input-group-addon">Clone URL</div>
+				<input wicket:id="cloneUrl" readonly="readonly" class="form-control"/>
+				<a wicket:id="copyUrl" class="input-group-addon"><i class="fa fa-clipboard"></i></a>
+		    </div>		
+		</div>
+	</div>
+</wicket:panel>

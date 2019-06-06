@@ -1,0 +1,18 @@
+.issue-pull-requests {
+    border: 2px dotted #BBB;
+    border-radius: 4px;
+    padding: 12px;
+}
+.issue-pull-requests>.head {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+.issue-pull-requests>.body .pull-request {
+    margin-bottom: 6px;
+}
+.issue-pull-requests>.body .pull-request a {
+    color: #444;
+}
+.issue-pull-requests>.body .pull-request:hover {
+    background: #F2F2F2;
+}

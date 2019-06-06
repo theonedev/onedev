@@ -1,0 +1,84 @@
+@media(max-width: 991px) {
+	.issue-list thead,
+	.issue-list a.list-fields, 
+	.issue-list td.custom-field {
+		display: none;
+	}
+}
+
+.issue-list>.head {
+	position: relative;
+}
+.issue-list>.head>* {
+	margin-bottom: 20px;
+}
+.issue-list>.head>form {
+	margin-right: 100px;
+}
+.issue-list>.head>.open-new {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.issue-list>.head>.others>* {
+	margin-right: 16px;
+	color: #666;
+}
+.issue-list>.head>.others>*:last-child {
+	margin-right: 0;
+}
+.issue-list>.body td a {
+	color: #444;
+}
+.issue-list>.body td.summary .first-line {
+	margin-bottom: 8px;
+	font-size: 16px;
+	font-weight: bold;
+}
+.issue-list>.body td.summary .title {
+	margin-right: 8px;
+}
+.issue-list>.body td.summary .number {
+	margin-right: 4px;
+}
+.issue-list>.body td.summary .copy {
+	font-size: 14px;
+}
+
+.issue-list>.body td.summary .second-line>* {
+	margin-right: 12px;
+}
+.issue-list>.body td.summary .second-line>*:last-child {
+	margin-right: 0;
+}
+.issue-list>.body td.summary .state {
+	width: 120px;
+	padding: 6px 8px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+.issue-list>.body td.summary .second-line {
+	color: #888;
+}
+
+.issue-list>.body th.custom-field, 
+.issue-list>.body td.custom-field {
+	white-space: nowrap;
+}
+.issue-list>.body .new-indicator {
+	width: 4px;
+	padding: 0;
+}
+.issue-list>.body tr.issue.new td.new-indicator {
+	background: #4667EE;
+}
+.issue-batch-edit form .modal-body>div {
+	margin-bottom: 20px;
+}
+.issue-batch-edit .alert {
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+.issue-batch-edit .select-fields>.checkboxes>* {
+	margin-right: 10px;
+}

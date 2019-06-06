@@ -1,0 +1,12 @@
+.dropzone.dropzone-field {
+	min-height: 100px; 
+	border: 2px dashed #BBB;
+}
+.dropzone-field .dz-message {
+	font-size: 20px;
+	color: #444;
+}
+
+.dropzone .dz-preview .dz-error-message {
+    top: 150px !important;
+}

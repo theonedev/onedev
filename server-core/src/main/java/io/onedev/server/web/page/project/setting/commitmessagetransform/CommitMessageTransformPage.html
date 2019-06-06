@@ -1,0 +1,16 @@
+<wicket:extend>
+	<div class="page-title">Commit Message Transform</div>
+	<form wicket:id="commitMessageTransforms" class="commit-message-transforms leave-confirm">
+		<div wicket:id="editor"></div>
+		<div class="help-block">
+			<i class="fa fa-info-circle"></i> Thi setting tells OneDev how to transform commit message for displaying.
+			<tt>Search For</tt> expects a <a href="https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html">Java pattern</a>
+			to match in the commit message, for instance, you may match JIRA issue key with <tt>([A-Z]{2,}-\d+)</tt>, and specify 
+			<tt>Replace With</tt> as <tt>&lt;a href=&quot;http://track.example.com/browse/$1&quot;&gt;$1&lt;/a&gt;</tt> to replace JIRA issue 
+			keys with issue links. Here <tt>$n</tt> represents nth capturing group in the pattern
+		</div>
+		<div class="actions">
+			<input type="submit" class="btn btn-primary dirty-aware" value="Save setting">
+		</div>
+	</form>
+</wicket:extend>

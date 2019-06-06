@@ -1,0 +1,18 @@
+.ui-draggable-dragging {
+	width: auto;
+	white-space: nowrap;
+	color: black;
+	padding: 4px 8px;
+	background: #F2F2F2;
+	font-weight: bold;
+	border: 2px solid #BBB;
+}
+.ui-droppable.drag-over>.gate-keeper, .ui-droppable.drag-over.gate-keeper-add {
+	background: #FBFCC5;
+	border-color: #997905;
+}
+.ui-droppable.drag-over>.gate-keeper>.panel-heading, .ui-droppable.drag-over.gate-keeper-add {
+	border-color: #997905;
+	color: #8E7004;
+	background: #FBDE77;
+}

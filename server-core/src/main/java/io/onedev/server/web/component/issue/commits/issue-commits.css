@@ -1,0 +1,18 @@
+.issue-commits {
+    border: 2px dotted #BBB;
+    padding: 12px;
+    border-radius: 4px;
+}
+.issue-commits>.head {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+.issue-commits>.body .commit {
+    margin-bottom: 6px;
+}
+.issue-commits>.body .commit .hash {
+    color: #444;
+}
+.issue-commits>.body .commit:hover {
+    background: #F2F2F2;
+}

@@ -1,0 +1,28 @@
+<wicket:extend>
+    <div wicket:id="content" class="ci-spec ci-spec-view"></div>
+    <wicket:fragment wicket:id="validFrag">
+        <div class="valid">
+            <div class="jobs">
+                <div class="head">
+                    Jobs
+                </div>
+                <div wicket:id="body" class="body"></div>
+            </div>
+        </div>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="invalidFrag">
+        <div class="invalid">
+            <div class="title">Error rendering CI spec</div>
+            <div wicket:id="errorMessage" class="error-message"></div>
+        </div>
+    </wicket:fragment>
+    <wicket:fragment wicket:id="hasJobsFrag">
+        <div class="side"><div class="navs"><div wicket:id="navs" class="nav">
+            <a class="select"><span wicket:id="jobName"></span></a>
+            <a wicket:id="run" class="run" title="Run this job"><i class="fa fa-play"></i></a>
+        </div></div></div>
+        <div class="contents">
+            <div wicket:id="contents" class="content"></div>
+        </div>
+    </wicket:fragment>
+</wicket:extend>

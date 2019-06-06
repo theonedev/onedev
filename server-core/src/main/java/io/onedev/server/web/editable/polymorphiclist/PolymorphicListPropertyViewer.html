@@ -1,0 +1,19 @@
+<wicket:panel>
+	<table class="polymorphic-list table table-condensed">
+		<tbody>
+			<tr wicket:id="elements">
+				<td>
+                    <div wicket:id="elementType" class="type-selector"></div>
+                    <div wicket:id="element"></div>
+                </td>
+			</tr>
+        </tbody>
+        <wicket:enclosure child="noElements">
+		<tfoot>
+			<tr>
+				<td wicket:id="noElements" class="no-elements">No elements defined</td>
+			</tr>
+		</tfoot>
+        </wicket:enclosure>
+	</table>
+</wicket:panel>
