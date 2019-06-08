@@ -80,14 +80,14 @@ import io.onedev.server.cache.DefaultCodeCommentRelationInfoManager;
 import io.onedev.server.cache.DefaultCommitInfoManager;
 import io.onedev.server.cache.DefaultUserInfoManager;
 import io.onedev.server.cache.UserInfoManager;
-import io.onedev.server.ci.detector.CISpecDetector;
+import io.onedev.server.ci.DefaultCISpecProvider;
 import io.onedev.server.ci.job.DefaultJobManager;
 import io.onedev.server.ci.job.DependencyPopulator;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.log.DefaultLogManager;
 import io.onedev.server.ci.job.log.LogManager;
+import io.onedev.server.ci.job.log.LogNormalizer;
 import io.onedev.server.ci.job.log.instruction.LogInstruction;
-import io.onedev.server.ci.job.log.normalizer.LogNormalizer;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -386,7 +386,7 @@ public class CoreModule extends AbstractPluginModule {
         });
         contributeFromPackage(Authenticator.class, Authenticator.class);
         
-        contributeFromPackage(CISpecDetector.class, CISpecDetector.class);
+        contributeFromPackage(DefaultCISpecProvider.class, DefaultCISpecProvider.class);
         contributeFromPackage(LogNormalizer.class, LogNormalizer.class);
         
 		bind(IndexManager.class).to(DefaultIndexManager.class);

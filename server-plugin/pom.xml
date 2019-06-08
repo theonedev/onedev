@@ -19,5 +19,6 @@
 		<module>server-plugin-archetype</module>
 		<module>server-plugin-artifact</module>
 		<module>server-plugin-htmlreport</module>
-	</modules>
+    <module>server-plugin-maven</module>
+  </modules>
 </project>

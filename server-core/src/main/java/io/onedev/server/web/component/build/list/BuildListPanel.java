@@ -147,6 +147,12 @@ public abstract class BuildListPanel extends Panel {
 		return null;
 	}
 	
+	private QueryPosition getQueryPosition(Item<ICellPopulator<Build>> cellItem) {
+		OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
+		return new QueryPosition(parsedQueryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
+				(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -298,11 +304,8 @@ public abstract class BuildListPanel extends Panel {
 				Build build = rowModel.getObject();
 				Long buildId = build.getId();
 				
-				OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
-				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
-						(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
-				
-				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildLogPage.class, BuildLogPage.paramsOf(build, position));
+				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildLogPage.class, 
+						BuildLogPage.paramsOf(build, getQueryPosition(cellItem)));
 				link.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 					@Override
@@ -338,7 +341,8 @@ public abstract class BuildListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
-				Long buildId = rowModel.getObject().getId();
+				Build build = rowModel.getObject();
+				Long buildId = build.getId();
 
 				Fragment fragment = new Fragment(componentId, "statusFrag", BuildListPanel.this);
 				fragment.add(new BuildStatusIcon("icon", new LoadableDetachableModel<Status>() {
@@ -357,7 +361,10 @@ public abstract class BuildListPanel extends Panel {
 					
 				});
 				
-				fragment.add(new Label("label", new AbstractReadOnlyModel<String>() {
+				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildLogPage.class, 
+						BuildLogPage.paramsOf(build, getQueryPosition(cellItem)));
+				
+				link.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 					@Override
 					public String getObject() {
@@ -374,6 +381,7 @@ public abstract class BuildListPanel extends Panel {
 					}
 					
 				});
+				fragment.add(link);
 				cellItem.add(fragment);
 			}
 		});

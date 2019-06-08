@@ -1,9 +1,8 @@
-package io.onedev.server.ci.job.log.normalizer;
+package io.onedev.server.ci.job.log;
 
 import javax.annotation.Nullable;
 
 import io.onedev.commons.launcher.loader.ExtensionPoint;
-import io.onedev.server.ci.job.log.LogLevel;
 
 @ExtensionPoint
 public interface LogNormalizer {

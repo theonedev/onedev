@@ -1,11 +1,12 @@
-package io.onedev.server.ci.job.log.normalizer;
+package io.onedev.server.plugin.maven;
 
 import javax.inject.Singleton;
 
 import io.onedev.server.ci.job.log.LogLevel;
+import io.onedev.server.ci.job.log.LogNormalizer;
 
 @Singleton
-public class MavenNormalizer implements LogNormalizer {
+public class MavenLogNormalizer implements LogNormalizer {
 
 	@Override
 	public Result normalize(String message) {

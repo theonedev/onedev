@@ -44,7 +44,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.ci.job.log.instruction.LogInstruction;
 import io.onedev.server.ci.job.log.instruction.LogInstructionParser.InstructionContext;
 import io.onedev.server.ci.job.log.instruction.LogInstructionParser.ParamContext;
-import io.onedev.server.ci.job.log.normalizer.LogNormalizer;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;

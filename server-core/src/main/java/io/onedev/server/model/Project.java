@@ -77,7 +77,7 @@ import io.onedev.commons.utils.stringmatch.Matcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.detector.CISpecDetector;
+import io.onedev.server.ci.DefaultCISpecProvider;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.BranchUpdateTrigger;
@@ -717,11 +717,11 @@ public class Project extends AbstractEntity implements Validatable {
 			if (blob != null) {
 				ciSpecOpt = Optional.fromNullable(CISpec.parse(blob.getBytes()));
 			} else {				
-				List<CISpecDetector> detectors = new ArrayList<>(OneDev.getExtensions(CISpecDetector.class));
-				detectors.sort(Comparator.comparing(CISpecDetector::getPriority));
+				List<DefaultCISpecProvider> providers = new ArrayList<>(OneDev.getExtensions(DefaultCISpecProvider.class));
+				providers.sort(Comparator.comparing(DefaultCISpecProvider::getPriority));
 				CISpec ciSpec = null;
-				for (CISpecDetector detector: detectors) {
-					ciSpec = detector.detect(this, commitId);
+				for (DefaultCISpecProvider provider: providers) {
+					ciSpec = provider.getDefaultCISpec(this, commitId);
 					if (ciSpec != null) 
 						break;
 				}
