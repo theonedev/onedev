@@ -5,9 +5,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 
@@ -43,7 +46,6 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Password;
-import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=100, description="This executor interpretates job environments as docker images, "
@@ -58,64 +60,16 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private static final Logger logger = LoggerFactory.getLogger(ServerDockerExecutor.class);
 
-	private String dockerRegistry;
-	
-	private boolean authenticateToRegistry;
-	
-	private String userName;
-	
-	private String password;
-	
 	private String dockerExecutable;
 	
 	private String runOptions;
 	
 	private int capacity = Runtime.getRuntime().availableProcessors();
 	
+	private List<RegistryLogin> registryLogins = new ArrayList<>();
+	
 	private transient ConstrainedRunner constrainedRunner;
 
-	@Editable(order=1100, description="Optionally specify a docker registry to use. Leave empty to use the default registry")
-	@NameOfEmptyValue("Use default")
-	public String getDockerRegistry() {
-		return dockerRegistry;
-	}
-
-	public void setDockerRegistry(String dockerRegistry) {
-		this.dockerRegistry = dockerRegistry;
-	}
-
-	@Editable(order=1150)
-	public boolean isAuthenticateToRegistry() {
-		return authenticateToRegistry;
-	}
-
-	public void setAuthenticateToRegistry(boolean authenticateToRegistry) {
-		this.authenticateToRegistry = authenticateToRegistry;
-	}
-
-	@Editable(order=1200, description="Specify user name to access docker registry")
-	@NotEmpty
-	@ShowCondition("isRegistryAuthenticationRequired")
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	@Editable(order=1300, description="Specify password to access docker registry")
-	@Password
-	@NotEmpty
-	@ShowCondition("isRegistryAuthenticationRequired")
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	
 	@Editable(order=20000, group="More Settings", description="Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
 			+ "Leave empty to use docker executable in PATH")
 	public String getDockerExecutable() {
@@ -150,22 +104,20 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.capacity = capacity;
 	}
 
+	@Editable(order=20300, group="More Settings", description="Specify login information for docker registries if necessary")
+	public List<RegistryLogin> getRegistryLogins() {
+		return registryLogins;
+	}
+
+	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
+		this.registryLogins = registryLogins;
+	}
+
 	private Commandline getDockerCmd() {
 		if (getDockerExecutable() != null)
 			return new Commandline(getDockerExecutable());
 		else
 			return new Commandline("docker");
-	}
-	
-	private String getPullImage(String image) {
-		if (getDockerRegistry() != null) {
-			if (image.contains("/"))
-				return getDockerRegistry() + "/" + image;
-			else
-				return getDockerRegistry() + "/library/" + image;
-		} else {
-			return image;
-		}
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -226,7 +178,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						
 						logger.info("Pulling image...") ;
 						Commandline cmd = getDockerCmd();
-						cmd.addArgs("pull", getPullImage(environment));
+						cmd.addArgs("pull", environment);
 						cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 						
 						cmd.clearArgs();
@@ -357,15 +309,18 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 	
 	private void login(Logger logger) {
-		if (isAuthenticateToRegistry()) {
-			logger.info("Login to docker registry...");
+		for (RegistryLogin login: getRegistryLogins()) {
+			if (login.getRegistryUrl() != null)
+				logger.info("Login to docker registry '{}'...", login.getRegistryUrl());
+			else
+				logger.info("Login to official docker registry...");
 			Commandline cmd = getDockerCmd();
-			cmd.addArgs("login", "-u", getUserName(), "--password-stdin");
-			if (getDockerRegistry() != null)
-				cmd.addArgs(getDockerRegistry());
+			cmd.addArgs("login", "-u", login.getUserName(), "--password-stdin");
+			if (login.getRegistryUrl() != null)
+				cmd.addArgs(login.getRegistryUrl());
 			ByteArrayInputStream input;
 			try {
-				input = new ByteArrayInputStream(getPassword().getBytes(Charsets.UTF_8.name()));
+				input = new ByteArrayInputStream(login.getPassword().getBytes(Charsets.UTF_8.name()));
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);
 			}
@@ -422,20 +377,36 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
+		boolean isValid = true;
+		Set<String> registryUrls = new HashSet<>();
+		for (RegistryLogin login: getRegistryLogins()) {
+			if (!registryUrls.add(login.getRegistryUrl())) {
+				isValid = false;
+				String message;
+				if (login.getRegistryUrl() != null)
+					message = "Duplicate login entry for registry '" + login.getRegistryUrl() + "'";
+				else
+					message = "Duplicate login entry for official registry";
+				context.buildConstraintViolationWithTemplate(message)
+						.addPropertyNode("registryLogins").addConstraintViolation();
+				break;
+			}
+		}
 		if (getRunOptions() != null) {
 			String[] arguments = StringUtils.parseQuoteTokens(getRunOptions());
 			String invalidOptions[] = new String[] {"-w", "--workdir", "-d", "--detach", "-a", "--attach", "-t", "--tty", 
 					"-i", "--interactive", "--rm", "--restart", "--name"}; 
 			if (hasOptions(arguments, invalidOptions)) {
-				context.disableDefaultConstraintViolation();
 				StringBuilder errorMessage = new StringBuilder("Can not use options: "
 						+ Joiner.on(", ").join(invalidOptions));
 				context.buildConstraintViolationWithTemplate(errorMessage.toString())
 						.addPropertyNode("runOptions").addConstraintViolation();
-				return false;
+				isValid = false;
 			} 
 		}
-		return true;
+		if (!isValid)
+			context.disableDefaultConstraintViolation();
+		return isValid;
 	}
 	
 	@Override
@@ -447,7 +418,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		logger.info("Pulling image...");
 		
 		Commandline cmd = getDockerCmd();
-		cmd.addArgs("pull", getPullImage(testData.getDockerImage()));
+		cmd.addArgs("pull", testData.getDockerImage());
 		cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 		
 		boolean windows = getImageOS(logger, testData.getDockerImage()).equals("windows");
@@ -479,7 +450,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			cmd.addArgs("-v", cacheDir.getAbsolutePath() + ":" + containerCachePath);
 			
 			cmd.addArgs("-w", containerWorkspacePath);
-			cmd.addArgs(getPullImage(testData.getDockerImage()));
+			cmd.addArgs(testData.getDockerImage());
 			
 			if (windows) 
 				cmd.addArgs("cmd", "/c", "echo hello from container");
@@ -515,6 +486,50 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 					"busybox", "sh", "-c", "rm -rf " + containerPath + "/*");			
 			cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 		}
+	}
+	
+	@Editable
+	public static class RegistryLogin implements Serializable {
+		
+		private static final long serialVersionUID = 1L;
+
+		private String registryUrl;
+		
+		private String userName;
+		
+		private String password;
+
+		@Editable(order=100, description="Specify registry url. Leave empty for official registry")
+		@NameOfEmptyValue("Default Registry")
+		public String getRegistryUrl() {
+			return registryUrl;
+		}
+
+		public void setRegistryUrl(String registryUrl) {
+			this.registryUrl = registryUrl;
+		}
+
+		@Editable(order=200)
+		@NotEmpty
+		public String getUserName() {
+			return userName;
+		}
+
+		public void setUserName(String userName) {
+			this.userName = userName;
+		}
+
+		@Editable(order=300)
+		@NotEmpty
+		@Password
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
+		
 	}
 
 	@Editable(name="Specify a Docker Image to Test Against")
