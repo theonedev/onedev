@@ -103,10 +103,11 @@ public class DefaultLogManager implements LogManager {
 
 			private void log(LogLevel logLevel, String message) {
 				for (LogNormalizer logNormalizer: logNormalizers) {
-					LogNormalizer.Result result = logNormalizer.normalize(message);
-					if (result != null) {
-						logLevel = result.getLevel();
-						message = result.getMessage();
+					LogNormalizer.Normalized normalized = logNormalizer.normalize(message);
+					if (normalized != null) {
+						if (normalized.getLevel() != null)
+							logLevel = normalized.getLevel();
+						message = normalized.getMessage();
 						break;
 					}
 				}

@@ -63,6 +63,7 @@ public class DefaultMavenCISpecProvider implements DefaultCISpecProvider {
 			Job job = new Job();
 
 			job.setName("ci");
+			
 			switch (javaVersion) {
 			case "13":
 				job.setEnvironment("maven:3.6.1-jdk-13");
@@ -76,15 +77,25 @@ public class DefaultMavenCISpecProvider implements DefaultCISpecProvider {
 			default:
 				job.setEnvironment("maven:3.6.1-jdk-8");
 			}
+
+			/*
+			 * Before running maven test, we extract version of the project and use LogInstruction to tell 
+			 * OneDev using extracted version for current build
+			 */
 			job.setCommands(""
 					+ "buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)\n"
 					+ "echo \"##onedev[SetBuildVersion '$buildVersion']\"\n"
 					+ "echo\n" 
 					+ "mvn clean test");
 
+			// Trigger the job automatically when there is a push to the branch			
 			BranchUpdateTrigger trigger = new BranchUpdateTrigger();
 			job.getTriggers().add(trigger);
 			
+			/*
+			 * Cache Maven local repository in order not to download Maven dependencies all over again for 
+			 * subsequent builds
+			 */
 			JobCache cache = new JobCache();
 			cache.setKey("maven-local-repository");
 			cache.setPath("/root/.m2");

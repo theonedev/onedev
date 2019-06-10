@@ -97,7 +97,7 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=120, description="Specify commands to execute in above environment, with one command per line. "
-			+ "For Windows based environments, commands will be interpretated by PowerShell, and for Unix/Linux "
+			+ "For Windows based environments, commands will be interpretated by cmd.exe, and for Unix/Linux "
 			+ "based environments, commands will be interpretated by shell")
 	@Script(Script.SHELL)
 	@NotEmpty
