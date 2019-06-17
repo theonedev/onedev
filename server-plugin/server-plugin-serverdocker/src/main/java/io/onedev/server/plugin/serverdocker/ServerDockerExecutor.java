@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.jobexecutor;
+package io.onedev.server.plugin.serverdocker;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -37,7 +37,9 @@ import io.onedev.server.ci.job.cache.CacheAllocation;
 import io.onedev.server.ci.job.cache.CacheCallable;
 import io.onedev.server.ci.job.cache.CacheRunner;
 import io.onedev.server.ci.job.cache.JobCache;
-import io.onedev.server.model.support.jobexecutor.ServerDockerExecutor.TestData;
+import io.onedev.server.model.support.JobExecutor;
+import io.onedev.server.model.support.SourceSnapshot;
+import io.onedev.server.plugin.serverdocker.ServerDockerExecutor.TestData;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.Validatable;
@@ -113,7 +115,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		this.registryLogins = registryLogins;
 	}
 
-	private Commandline getDockerCmd() {
+	private Commandline getDocker() {
 		if (getDockerExecutable() != null)
 			return new Commandline(getDockerExecutable());
 		else
@@ -123,11 +125,11 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	@SuppressWarnings("unchecked")
 	private String getImageOS(Logger logger, String image) {
 		logger.info("Checking image OS...");
-		Commandline cmd = getDockerCmd();
-		cmd.addArgs("inspect", image);
+		Commandline docker = getDocker();
+		docker.addArgs("inspect", image);
 		
 		StringBuilder output = new StringBuilder();
-		cmd.execute(new LineConsumer(Charsets.UTF_8.name()) {
+		docker.execute(new LineConsumer(Charsets.UTF_8.name()) {
 
 			@Override
 			public void consume(String line) {
@@ -177,17 +179,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						login(logger);
 						
 						logger.info("Pulling image...") ;
-						Commandline cmd = getDockerCmd();
-						cmd.addArgs("pull", environment);
-						cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
+						Commandline docker = getDocker();
+						docker.addArgs("pull", environment);
+						docker.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 						
-						cmd.clearArgs();
+						docker.clearArgs();
 						String jobInstance = UUID.randomUUID().toString();
-						cmd.addArgs("run", "--rm", "--name", jobInstance);
+						docker.addArgs("run", "--rm", "--name", jobInstance);
 						for (Map.Entry<String, String> entry: envVars.entrySet())
-							cmd.addArgs("--env", entry.getKey() + "=" + entry.getValue());
+							docker.addArgs("--env", entry.getKey() + "=" + entry.getValue());
 						if (getRunOptions() != null)
-							cmd.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
+							docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 						
 						String imageOS = getImageOS(logger, environment);
 						logger.info("Detected image OS: " + imageOS);
@@ -223,12 +225,12 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							}
 						}
 						
-						cmd.addArgs("-v", effectiveWorkspace.getAbsolutePath() + ":" + dockerWorkspacePath);
+						docker.addArgs("-v", effectiveWorkspace.getAbsolutePath() + ":" + dockerWorkspacePath);
 						for (CacheAllocation allocation: allocations) {
 							if (!allocation.isWorkspace())
-								cmd.addArgs("-v", allocation.getInstance().getAbsolutePath() + ":" + allocation.resolvePath(dockerWorkspacePath));
+								docker.addArgs("-v", allocation.getInstance().getAbsolutePath() + ":" + allocation.resolvePath(dockerWorkspacePath));
 						}
-						cmd.addArgs("-w", dockerWorkspacePath);
+						docker.addArgs("-w", dockerWorkspacePath);
 						
 						if (windows) {
 							File scriptFile = new File(effectiveWorkspace, "onedev-job-commands.bat");
@@ -237,8 +239,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							}
-							cmd.addArgs(environment);
-							cmd.addArgs("cmd", "/c", dockerWorkspacePath + "\\onedev-job-commands.bat");
+							docker.addArgs(environment);
+							docker.addArgs("cmd", "/c", dockerWorkspacePath + "\\onedev-job-commands.bat");
 						} else {
 							File scriptFile = new File(effectiveWorkspace, "onedev-job-commands.sh");
 							try {
@@ -246,19 +248,19 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							}
-							cmd.addArgs(environment);
-							cmd.addArgs("sh", dockerWorkspacePath + "/onedev-job-commands.sh");
+							docker.addArgs(environment);
+							docker.addArgs("sh", dockerWorkspacePath + "/onedev-job-commands.sh");
 						}
 						
 						logger.info("Running container to execute job...");
 						
 						try {
-							cmd.execute(newInfoLogger(logger), newErrorLogger(logger), null, new ProcessKiller() {
+							docker.execute(newInfoLogger(logger), newErrorLogger(logger), null, new ProcessKiller() {
 	
 								@Override
 								public void kill(Process process) {
 									logger.info("Stopping container...");
-									Commandline cmd = getDockerCmd();
+									Commandline cmd = getDocker();
 									cmd.addArgs("stop", jobInstance);
 									cmd.execute(newInfoLogger(logger), newErrorLogger(logger));
 								}
@@ -314,7 +316,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 				logger.info("Login to docker registry '{}'...", login.getRegistryUrl());
 			else
 				logger.info("Login to official docker registry...");
-			Commandline cmd = getDockerCmd();
+			Commandline cmd = getDocker();
 			cmd.addArgs("login", "-u", login.getUserName(), "--password-stdin");
 			if (login.getRegistryUrl() != null)
 				cmd.addArgs(login.getRegistryUrl());
@@ -417,7 +419,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		
 		logger.info("Pulling image...");
 		
-		Commandline cmd = getDockerCmd();
+		Commandline cmd = getDocker();
 		cmd.addArgs("pull", testData.getDockerImage());
 		cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 		
@@ -469,7 +471,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		
 		if (!SystemUtils.IS_OS_WINDOWS) {
 			logger.info("Checking busybox...");
-			cmd = getDockerCmd();
+			cmd = getDocker();
 			cmd.addArgs("run", "--rm", "busybox", "sh", "-c", "echo hello from busybox");			
 			cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 		}
@@ -480,7 +482,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		if (SystemUtils.IS_OS_WINDOWS) {
 			FileUtils.cleanDir(dir);
 		} else {
-			Commandline cmd = getDockerCmd();
+			Commandline cmd = getDocker();
 			String containerPath = "/onedev_dir_to_clean";
 			cmd.addArgs("run", "-v", dir.getAbsolutePath() + ":" + containerPath, "--rm", 
 					"busybox", "sh", "-c", "rm -rf " + containerPath + "/*");			

@@ -28,6 +28,16 @@
             <artifactId>server-plugin-maven</artifactId>  
             <version>${project.version}</version> 
         </dependency>  
+        <dependency> 
+            <groupId>io.onedev</groupId>  
+            <artifactId>server-plugin-kubernetes</artifactId>  
+            <version>${project.version}</version> 
+        </dependency>  
+        <dependency> 
+            <groupId>io.onedev</groupId>  
+            <artifactId>server-plugin-serverdocker</artifactId>  
+            <version>${project.version}</version> 
+        </dependency>  
     </dependencies>  
     <properties> 
         <executables>bin/*.sh, boot/wrapper-*</executables>  

@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.model.support.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.web.behavior.testform.TestFormBehavior;
 import io.onedev.server.web.behavior.testform.TestResult;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;

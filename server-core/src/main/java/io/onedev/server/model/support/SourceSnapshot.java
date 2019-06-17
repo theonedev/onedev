@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.jobexecutor;
+package io.onedev.server.model.support;
 
 import java.io.File;
 import java.io.IOException;

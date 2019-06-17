@@ -5,8 +5,8 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import io.onedev.server.model.Setting;
+import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.model.support.authenticator.Authenticator;
-import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.setting.BackupSetting;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.model.support.setting.MailSetting;

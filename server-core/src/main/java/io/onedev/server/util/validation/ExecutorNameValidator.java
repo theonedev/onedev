@@ -9,7 +9,7 @@ import io.onedev.server.util.validation.annotation.ExecutorName;
 
 public class ExecutorNameValidator implements ConstraintValidator<ExecutorName, String> {
 
-	private static final Pattern PATTERN = Pattern.compile("[\\w-\\s\\.]+");
+	private static final Pattern PATTERN = Pattern.compile("[\\w-\\.]+");
 	
 	@Override
 	public void initialize(ExecutorName constaintAnnotation) {

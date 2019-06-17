@@ -29,7 +29,7 @@ public class JobCache implements Serializable {
 	
 	private String path;
 
-	@Editable(order=100, description="Specify key of the cache. Caches with same key can be shared")
+	@Editable(order=100, description="Specify key of the cache. Caches with same key can be reused by different builds")
 	@PathSegment
 	@NotEmpty
 	public String getKey() {

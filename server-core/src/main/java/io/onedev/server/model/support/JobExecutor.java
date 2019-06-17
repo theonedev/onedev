@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.jobexecutor;
+package io.onedev.server.model.support;
 
 import java.io.File;
 import java.io.Serializable;
@@ -12,6 +12,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 
+import io.onedev.commons.launcher.loader.ExtensionPoint;
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.commons.utils.stringmatch.Matcher;
 import io.onedev.server.ci.job.cache.JobCache;
@@ -25,6 +26,7 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.annotation.ProjectPatterns;
 
+@ExtensionPoint
 @Editable
 public abstract class JobExecutor implements Serializable {
 
