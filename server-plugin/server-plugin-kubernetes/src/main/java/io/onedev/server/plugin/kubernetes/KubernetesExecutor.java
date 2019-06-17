@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -26,7 +27,9 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.OneException;
 import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.model.support.SourceSnapshot;
@@ -271,14 +274,54 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return data;
 	}
 	
-	private String getPodNodeOS(String podImage, Logger logger) {
+	private String getOS(Logger logger) {
+		logger.info("Checking OS...");
+		Commandline kubectl = newKubeCtl();
+		kubectl.addArgs("get", "nodes", "-o=jsonpath={..nodeInfo.operatingSystem}");
+		for (NodeSelectorEntry entry: getNodeSelector()) 
+			kubectl.addArgs("-l", entry.getLabelName() + "=" + entry.getLabelValue());
+		
+		AtomicReference<String> osRef = new AtomicReference<>(null);
+		kubectl.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				osRef.set(line);
+			}
+			
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.error(line);
+			}
+			
+		}).checkReturnCode();
+		
+		return Preconditions.checkNotNull(osRef.get(), "No applicable working nodes for this executor");
+	}
+	
+	@Override
+	public void test(TestData testData) {
 		createNamespaceIfNotExist(logger);
 
+		String os = getOS(logger);
+		
 		Map<String, Object> podSpec = new LinkedHashMap<>();
-		podSpec.put("containers", Lists.<Object>newArrayList(
-						Maps.newLinkedHashMap(
-								"name", "test",
-								"image", podImage)));
+		Map<Object, Object> containerSpec = Maps.newHashMap(
+				"name", "test", 
+				"image", testData.getDockerImage());
+
+		if (os.equalsIgnoreCase("linux")) {
+			containerSpec.put("command", Lists.newArrayList("sh"));
+			containerSpec.put("args", Lists.newArrayList("-c", "echo hello from container"));
+		} else {
+			containerSpec.put("command", Lists.newArrayList("cmd"));
+			containerSpec.put("args", Lists.newArrayList("/c", "echo hello from container"));
+		}
+		
+		podSpec.put("containers", Lists.<Object>newArrayList(containerSpec));
+		
 		Map<String, String> nodeSelectorData = getNodeSelectorData();
 		if (!nodeSelectorData.isEmpty())
 			podSpec.put("nodeSelector", nodeSelectorData);
@@ -297,59 +340,101 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				"spec", podSpec);
 		
 		String podName = createResource(podData, logger);
-		
 		try {
-			AtomicReference<String> nodeNameRef = new AtomicReference<>(null);
-			Commandline kubectl = newKubeCtl();
-			kubectl.addArgs("get", "pods/" + podName, "-n", getNamespace(), "-o=jsonpath={..spec.nodeName}");
-			kubectl.execute(new LineConsumer() {
-	
-				@Override
-				public void consume(String line) {
-					nodeNameRef.set(line);
-				}
-				
-			}, new LineConsumer() {
-	
-				@Override
-				public void consume(String line) {
-					logger.error(line);
-				}
-				
-			}).checkReturnCode();
-			
-			Preconditions.checkNotNull(nodeNameRef.get());
-	
-			AtomicReference<String> nodeOSRef = new AtomicReference<String>(null);
-			
-			kubectl = newKubeCtl();
-			kubectl.addArgs("get", "nodes/" + nodeNameRef.get(), "-o=jsonpath={..nodeInfo.operatingSystem}");
-			kubectl.execute(new LineConsumer() {
-	
-				@Override
-				public void consume(String line) {
-					nodeOSRef.set(line);
-				}
-				
-			}, new LineConsumer() {
-	
-				@Override
-				public void consume(String line) {
-					logger.error(line);
-				}
-				
-			}).checkReturnCode();
-			
-			return nodeOSRef.get();
+			waitForPod(podName, logger);
 		} finally {
 			deleteResource("pod", podName, logger);
 		}
 	}
 	
-	@Override
-	public void test(TestData data) {
-		String podNodeOS = getPodNodeOS(data.getDockerImage(), logger);
-		logger.info("OS of the node running test pod is " + podNodeOS);
+	private void waitForPod(String podName, Logger logger) {
+		Thread thread = Thread.currentThread();
+
+		AtomicBoolean podStartedRef = new AtomicBoolean(false);
+		AtomicReference<String> podErrorRef = new AtomicReference<String>(null);
+		
+		Commandline kubectl = newKubeCtl();
+		kubectl.addArgs("get", "event", "-n", getNamespace(), "--no-headers",
+				"--field-selector", "involvedObject.name=" + podName, "--watch");
+		try {
+			kubectl.execute(new LineConsumer() {
+	
+				@Override
+				public void consume(String line) {
+					StringTokenizer tokenizer = new StringTokenizer(line);
+					tokenizer.nextToken();
+					String type = tokenizer.nextToken();
+					tokenizer.nextToken();
+					tokenizer.nextToken();
+					String message = tokenizer.nextToken("\n").trim();
+					if (type.equals("Normal"))
+						logger.info(message);
+					else
+						logger.error(message);
+					
+					if (!type.equals("Normal") && !message.contains("Insufficient cpu")) {
+						podErrorRef.set(message);
+						thread.interrupt();
+					} else if (message.startsWith("Started container")) {
+						podStartedRef.set(true);
+						thread.interrupt();
+					}
+				}
+				
+			}, new LineConsumer() {
+	
+				@Override
+				public void consume(String line) {
+					logger.error(line);
+				}
+				
+			});
+			
+			throw new OneException("Unexpected end of pod event watching");
+		} catch (Exception e) {
+			if (e.getCause() instanceof InterruptedException) {
+				if (podStartedRef.get()) {
+					kubectl = newKubeCtl();
+					kubectl.addArgs("logs", podName, "-n", getNamespace(), "--follow");
+					while (true) {
+						AtomicReference<Boolean> containerCreatingRef = new AtomicReference<Boolean>(false);
+						ExecuteResult result = kubectl.execute(new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								logger.info(line);
+							}
+							
+						}, new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								if (line.contains("is waiting to start: ContainerCreating"))
+									containerCreatingRef.set(true);
+								else
+									logger.error(line);
+							}
+							
+						});
+						if (containerCreatingRef.get()) {
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e2) {
+							}
+						} else {
+							result.checkReturnCode();
+							break;
+						}
+					}
+				} else if (podErrorRef.get() != null) {
+					throw new OneException(podErrorRef.get());
+				} else {
+					throw e;
+				}
+			} else {
+				throw e;
+			}
+		}
 	}
 	
 	@Editable
