@@ -15,15 +15,11 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.model.support.JobExecutor;
-import io.onedev.server.web.behavior.testform.TestFormBehavior;
-import io.onedev.server.web.behavior.testform.TestResult;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
+import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
@@ -33,8 +29,6 @@ import io.onedev.server.web.util.Testable;
 @SuppressWarnings("serial")
 abstract class JobExecutorEditPanel extends Panel {
 
-	private static final Logger logger = LoggerFactory.getLogger(JobExecutorEditPanel.class);
-	
 	private final List<JobExecutor> executors;
 	
 	private final int executorIndex;
@@ -70,7 +64,6 @@ abstract class JobExecutorEditPanel extends Panel {
 			bean.setExecutor(executors.get(executorIndex));
 
 		BeanEditor editor = BeanContext.edit("editor", bean);
-		editor.setOutputMarkupId(true);
 		
 		AjaxButton saveButton = new AjaxButton("save") {
 
@@ -109,36 +102,9 @@ abstract class JobExecutorEditPanel extends Panel {
 			
 		};
 		
-		AjaxButton testButton = new AjaxButton("test") {
+		TaskButton testButton = new TaskButton("testingExecutor") {
 
-			private TestFormBehavior testBehavior;
-			
 			private Serializable testData;
-			
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-
-				add(testBehavior = new TestFormBehavior() {
-
-					@SuppressWarnings({ "unchecked", "rawtypes" })
-					@Override
-					protected TestResult test() {
-						try {
-							((Testable)bean.getExecutor()).test(testData);
-							return new TestResult.Successful("Job executor tested successfully");
-						} catch (Exception e) {
-							logger.error("Error testing job executor", e);
-							String suggestedSolution = ExceptionUtils.suggestSolution(e);
-							if (suggestedSolution != null)
-								logger.warn("!!! " + suggestedSolution);
-							return new TestResult.Failed("Error testing job executor: " + e.getMessage() + ", check server log for details");
-						}
-					}
-					
-				});
-				setOutputMarkupPlaceholderTag(true);
-			}
 
 			@SuppressWarnings("unchecked")
 			@Override
@@ -182,8 +148,6 @@ abstract class JobExecutorEditPanel extends Panel {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				super.onSubmit(target, form);
-				
 				checkNameDuplication(editor, bean.getExecutor());
 				if (!editor.hasErrors(true)) {
 					if (testData != null) {
@@ -194,23 +158,25 @@ abstract class JobExecutorEditPanel extends Panel {
 								close();
 								target.add(editor);
 								target.focusComponent(null);
-								testBehavior.requestTest(target);
+								submitTask(target);
 							}
 							
 						};
 					} else {
 						target.add(editor);
 						target.focusComponent(null);
-						testBehavior.requestTest(target);
+						submitTask(target);
 					}
 				} else {
 					target.add(form);
 				}
 			}
 
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
-			protected void onError(AjaxRequestTarget target, Form<?> form) {
-				target.add(editor);
+			protected String runTask() {
+				((Testable)bean.getExecutor()).test(testData);
+				return "Job executor tested successfully";
 			}
 
 		};		

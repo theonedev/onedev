@@ -244,6 +244,7 @@ import io.onedev.server.web.avatar.DefaultAvatarManager;
 import io.onedev.server.web.component.diff.DiffRenderer;
 import io.onedev.server.web.component.markdown.SourcePositionTrackExtension;
 import io.onedev.server.web.component.markdown.emoji.EmojiExtension;
+import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.DefaultEditSupportRegistry;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
@@ -482,6 +483,8 @@ public class CoreModule extends AbstractPluginModule {
 		bind(PullRequestEventBroadcaster.class);
 		bind(IssueEventBroadcaster.class);
 		bind(BuildEventBroadcaster.class);
+		
+		bind(TaskButton.TaskFutureManager.class);
 		
 		contribute(MainNavContribution.class, new MainNavContribution() {
 			

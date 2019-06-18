@@ -105,10 +105,6 @@ form .required {
 	color: #B94A48;
 }
 
-form>.test-feedback {
-	margin-top: 16px;
-}
-
 .noselect {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;  

@@ -1,0 +1,13 @@
+.task-wait .modal-body {
+	padding: 20px;
+	font-size: 18px;
+	font-weight: bold;
+	text-align: center;
+}
+.task-wait .modal-footer {
+	text-align: center;
+}
+form>.task-feedback {
+	margin-top: 20px;
+	margin-bottom: 0;
+}
