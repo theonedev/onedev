@@ -32,16 +32,15 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.commons.utils.command.ProcessKiller;
-import io.onedev.commons.utils.concurrent.ConstrainedRunner;
+import io.onedev.commons.utils.concurrent.CapacityRunner;
 import io.onedev.server.ci.job.cache.CacheAllocation;
 import io.onedev.server.ci.job.cache.CacheCallable;
 import io.onedev.server.ci.job.cache.CacheRunner;
 import io.onedev.server.ci.job.cache.JobCache;
+import io.onedev.server.model.support.JobExecutionContext;
 import io.onedev.server.model.support.JobExecutor;
-import io.onedev.server.model.support.SourceSnapshot;
 import io.onedev.server.plugin.serverdocker.ServerDockerExecutor.TestData;
 import io.onedev.server.util.OneContext;
-import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -70,7 +69,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
-	private transient ConstrainedRunner constrainedRunner;
+	private transient CapacityRunner capacityRunner;
 
 	@Editable(order=20000, group="More Settings", description="Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
 			+ "Leave empty to use docker executable in PATH")
@@ -149,15 +148,10 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		}
 	}
 	
-	private synchronized ConstrainedRunner getConstrainedRunner() {
-		if (constrainedRunner == null)
-			constrainedRunner = new ConstrainedRunner(capacity);
-		return constrainedRunner;
-	}
-	
-	@Override
-	public boolean hasCapacity() {
-		return getConstrainedRunner().hasCapacity();
+	private synchronized CapacityRunner getCapacityRunner() {
+		if (capacityRunner == null)
+			capacityRunner = new CapacityRunner(capacity);
+		return capacityRunner;
 	}
 	
 	private File getCacheHome() {
@@ -165,33 +159,33 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 
 	@Override
-	public void execute(String environment, File workspace, Map<String, String> envVars, 
-			List<String> commands, SourceSnapshot snapshot, Collection<JobCache> caches, 
-			PatternSet collectFiles, Logger logger) {
-		getConstrainedRunner().call(new Callable<Void>() {
+	public void execute(JobExecutionContext context) {
+		getCapacityRunner().call(new Callable<Void>() {
 
 			@Override
 			public Void call() {
-				return new CacheRunner(getCacheHome(), caches).call(new CacheCallable<Void>() {
+				return new CacheRunner(getCacheHome(), context.getCaches()).call(new CacheCallable<Void>() {
 
 					@Override
 					public Void call(Collection<CacheAllocation> allocations) {
+						context.notifyJobRunning();
+						
 						login(logger);
 						
 						logger.info("Pulling image...") ;
 						Commandline docker = getDocker();
-						docker.addArgs("pull", environment);
+						docker.addArgs("pull", context.getEnvironment());
 						docker.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
 						
 						docker.clearArgs();
 						String jobInstance = UUID.randomUUID().toString();
 						docker.addArgs("run", "--rm", "--name", jobInstance);
-						for (Map.Entry<String, String> entry: envVars.entrySet())
+						for (Map.Entry<String, String> entry: context.getEnvVars().entrySet())
 							docker.addArgs("--env", entry.getKey() + "=" + entry.getValue());
 						if (getRunOptions() != null)
 							docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 						
-						String imageOS = getImageOS(logger, environment);
+						String imageOS = getImageOS(logger, context.getEnvironment());
 						logger.info("Detected image OS: " + imageOS);
 
 						boolean windows = imageOS.equals("windows");
@@ -210,16 +204,16 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							}
 						}
 						
-						File effectiveWorkspace = workspaceCache != null? workspaceCache: workspace;
+						File effectiveWorkspace = workspaceCache != null? workspaceCache: context.getWorkspace();
 						
-						if (snapshot != null) {
+						if (context.getSnapshot() != null) {
 							logger.info("Cloning source code...");
-							snapshot.checkout(effectiveWorkspace);
+							context.getSnapshot().checkout(effectiveWorkspace);
 						}
 						
 						if (workspaceCache != null) {
 							try {
-								FileUtils.copyDirectory(workspace, workspaceCache);
+								FileUtils.copyDirectory(context.getWorkspace(), workspaceCache);
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							}
@@ -235,20 +229,20 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						if (windows) {
 							File scriptFile = new File(effectiveWorkspace, "onedev-job-commands.bat");
 							try {
-								FileUtils.writeLines(scriptFile, commands, "\r\n");
+								FileUtils.writeLines(scriptFile, context.getCommands(), "\r\n");
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							}
-							docker.addArgs(environment);
+							docker.addArgs(context.getEnvironment());
 							docker.addArgs("cmd", "/c", dockerWorkspacePath + "\\onedev-job-commands.bat");
 						} else {
 							File scriptFile = new File(effectiveWorkspace, "onedev-job-commands.sh");
 							try {
-								FileUtils.writeLines(scriptFile, commands, "\n");
+								FileUtils.writeLines(scriptFile, context.getCommands(), "\n");
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							}
-							docker.addArgs(environment);
+							docker.addArgs(context.getEnvironment());
 							docker.addArgs("sh", dockerWorkspacePath + "/onedev-job-commands.sh");
 						}
 						
@@ -271,9 +265,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						} finally {
 							if (workspaceCache != null) {
 								int baseLen = workspaceCache.getAbsolutePath().length()+1;
-								for (File file: collectFiles.listFiles(workspaceCache)) {
+								for (File file: context.getCollectFiles().listFiles(workspaceCache)) {
 									try {
-										FileUtils.copyFile(file, new File(workspace, file.getAbsolutePath().substring(baseLen)));
+										FileUtils.copyFile(file, new File(context.getWorkspace(), file.getAbsolutePath().substring(baseLen)));
 									} catch (IOException e) {
 										throw new RuntimeException(e);
 									}

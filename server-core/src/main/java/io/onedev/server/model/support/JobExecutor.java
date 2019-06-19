@@ -2,20 +2,13 @@ package io.onedev.server.model.support;
 
 import java.io.File;
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.slf4j.Logger;
 
 import io.onedev.commons.launcher.loader.ExtensionPoint;
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.commons.utils.stringmatch.Matcher;
-import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
@@ -127,9 +120,7 @@ public abstract class JobExecutor implements Serializable {
 		this.cacheTTL = cacheTTL;
 	}
 
-	public abstract void execute(String environment, File workspace, Map<String, String> envVars, 
-			List<String> commands, @Nullable SourceSnapshot snapshot, Collection<JobCache> caches, 
-			PatternSet collectFiles, Logger logger);
+	public abstract void execute(JobExecutionContext context);
 
 	public final boolean isApplicable(Project project, ObjectId commitId, String jobName, String environment) {
 		Matcher matcher = new ChildAwareMatcher();
@@ -158,10 +149,6 @@ public abstract class JobExecutor implements Serializable {
 		if (patternSet.getExcludes().remove(oldName))
 			patternSet.getExcludes().add(newName);
 		setProjects(patternSet.toString());
-	}
-	
-	public boolean hasCapacity() {
-		return true;
 	}
 	
 	public abstract void checkCaches();

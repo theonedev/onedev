@@ -6,7 +6,6 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,18 +23,17 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.Maps;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.OneException;
-import io.onedev.server.ci.job.cache.JobCache;
+import io.onedev.server.model.support.JobExecutionContext;
 import io.onedev.server.model.support.JobExecutor;
-import io.onedev.server.model.support.SourceSnapshot;
 import io.onedev.server.plugin.kubernetes.KubernetesExecutor.TestData;
-import io.onedev.server.util.Maps;
-import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
@@ -127,9 +125,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 
 	@Override
-	public void execute(String environment, File workspace, Map<String, String> envVars, 
-			List<String> commands, SourceSnapshot snapshot, Collection<JobCache> caches, 
-			PatternSet collectFiles, Logger logger) {
+	public void execute(JobExecutionContext context) {
 	}
 
 	@Override
@@ -392,7 +388,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			
 			throw new OneException("Unexpected end of pod event watching");
 		} catch (Exception e) {
-			if (e.getCause() instanceof InterruptedException) {
+			if (ExceptionUtils.find(e, InterruptedException.class) != null) {
 				if (podStartedRef.get()) {
 					kubectl = newKubeCtl();
 					kubectl.addArgs("logs", podName, "-n", getNamespace(), "--follow");
@@ -420,6 +416,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							try {
 								Thread.sleep(1000);
 							} catch (InterruptedException e2) {
+								throw new RuntimeException(e2);
 							}
 						} else {
 							result.checkReturnCode();

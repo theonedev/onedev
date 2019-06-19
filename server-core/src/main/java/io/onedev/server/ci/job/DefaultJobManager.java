@@ -37,6 +37,7 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.MatrixRunner;
 import io.onedev.commons.utils.schedule.SchedulableTask;
 import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.OneException;
@@ -53,7 +54,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.BuildCommitAware;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.build.BuildFinished;
-import io.onedev.server.event.build.BuildQueueing;
+import io.onedev.server.event.build.BuildPending;
 import io.onedev.server.event.build.BuildRunning;
 import io.onedev.server.event.build.BuildSubmitted;
 import io.onedev.server.event.entity.EntityPersisted;
@@ -65,15 +66,15 @@ import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
+import io.onedev.server.model.User;
+import io.onedev.server.model.support.JobExecutionContext;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.model.support.SourceSnapshot;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.patternset.PatternSet;
@@ -150,9 +151,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
     		
     	});
     	
-		/*
-		 * Lock to guarantee uniqueness of build (by project, commit, job and parameters)
-		 */
+		// Lock to guarantee uniqueness of build (by project, commit, job and parameters)
     	try {
         	lock.lockInterruptibly();
 			return submit(project, commitId, jobName, paramMap, submitter, new LinkedHashSet<>()); 
@@ -241,118 +240,130 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 		return null;
 	}
 
-	private void run(Build build) {
+	private void execute(Build build) {
 		try {
 			Job job = build.getJob();
 			ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 			JobExecutor executor = getJobExecutor(build.getProject(), commitId, job.getName(), job.getEnvironment());
 			if (executor != null) {
-				if (executor.hasCapacity()) {
-					build.setStatus(Build.Status.RUNNING);
-					build.setRunningDate(new Date());
-					buildManager.save(build);
-					listenerRegistry.post(new BuildRunning(build));
-					
-					SourceSnapshot snapshot;
-					if (job.isCloneSource()) 
-						snapshot = new SourceSnapshot(build.getProject(), commitId);
-					else 
-						snapshot = null;
-					
-					Logger logger = logManager.getLogger(build, job.getLogLevel()); 
-					
-					Long buildId = build.getId();
-					JobExecution execution = new JobExecution(executorService.submit(new Runnable() {
+				SourceSnapshot snapshot;
+				if (job.isCloneSource()) 
+					snapshot = new SourceSnapshot(build.getProject(), commitId);
+				else 
+					snapshot = null;
+				
+				Logger logger = logManager.getLogger(build, job.getLogLevel()); 
+				
+				Long buildId = build.getId();
+				JobExecution execution = new JobExecution(executorService.submit(new Runnable() {
 
-						@Override
-						public void run() {
-							logger.info("Creating workspace...");
-							File workspace = FileUtils.createTempDir("workspace");
-							try {
-								Map<String, String> envVars = new HashMap<>();
-								Set<String> includeFiles = new HashSet<>();
-								Set<String> excludeFiles = new HashSet<>();
-								
-								sessionManager.run(new Runnable() {
+					@Override
+					public void run() {
+						logger.info("Creating workspace...");
+						File workspace = FileUtils.createTempDir("workspace");
+						try {
+							Map<String, String> envVars = new HashMap<>();
+							Set<String> includeFiles = new HashSet<>();
+							Set<String> excludeFiles = new HashSet<>();
+							
+							sessionManager.run(new Runnable() {
 
-									@Override
-									public void run() {
-										Build build = buildManager.load(buildId);
-										logger.info("Populating dependencies...");
-										for (BuildDependence dependence: build.getDependencies()) {
-											for (DependencyPopulator populator: dependencyPopulators)
-												populator.populate(dependence.getDependency(), workspace, logger);
-										}
-										envVars.put("ONEDEV_PROJECT", build.getProject().getName());
-										envVars.put("ONEDEV_COMMIT", commitId.name());
-										envVars.put("ONEDEV_JOB", job.getName());
-										envVars.put("ONEDEV_BUILD_NUMBER", String.valueOf(build.getNumber()));
-										for (Entry<String, Input> entry: build.getParamInputs().entrySet()) {
-											String paramName = entry.getKey();
-											if (build.isParamVisible(paramName)) {
-												String paramType = entry.getValue().getType();
-												List<String> paramValues = entry.getValue().getValues();
-												if (paramValues.size() > 1) {
-													int index = 1;
-													for (String value: paramValues) {
-														if (paramType.equals(InputSpec.SECRET)) 
-															value = build.getSecretValue(value);
-														envVars.put(paramName + "_" + index++, value);
-													}
-												} else if (paramValues.size() == 1) {
-													String value = paramValues.iterator().next();
+								@Override
+								public void run() {
+									Build build = buildManager.load(buildId);
+									logger.info("Populating dependencies...");
+									for (BuildDependence dependence: build.getDependencies()) {
+										for (DependencyPopulator populator: dependencyPopulators)
+											populator.populate(dependence.getDependency(), workspace, logger);
+									}
+									envVars.put("ONEDEV_PROJECT", build.getProject().getName());
+									envVars.put("ONEDEV_COMMIT", commitId.name());
+									envVars.put("ONEDEV_JOB", job.getName());
+									envVars.put("ONEDEV_BUILD_NUMBER", String.valueOf(build.getNumber()));
+									for (Entry<String, Input> entry: build.getParamInputs().entrySet()) {
+										String paramName = entry.getKey();
+										if (build.isParamVisible(paramName)) {
+											String paramType = entry.getValue().getType();
+											List<String> paramValues = entry.getValue().getValues();
+											if (paramValues.size() > 1) {
+												int index = 1;
+												for (String value: paramValues) {
 													if (paramType.equals(InputSpec.SECRET)) 
 														value = build.getSecretValue(value);
-													envVars.put(paramName, value);
+													envVars.put(paramName + "_" + index++, value);
 												}
+											} else if (paramValues.size() == 1) {
+												String value = paramValues.iterator().next();
+												if (paramType.equals(InputSpec.SECRET)) 
+													value = build.getSecretValue(value);
+												envVars.put(paramName, value);
 											}
 										}
-										
-										for (JobOutcome outcome: job.getOutcomes()) {
-											PatternSet patternSet = PatternSet.fromString(outcome.getFilePatterns());
-											includeFiles.addAll(patternSet.getIncludes());
-											excludeFiles.addAll(patternSet.getExcludes());
+									}
+									
+									for (JobOutcome outcome: job.getOutcomes()) {
+										PatternSet patternSet = PatternSet.fromString(outcome.getFilePatterns());
+										includeFiles.addAll(patternSet.getIncludes());
+										excludeFiles.addAll(patternSet.getExcludes());
+									}
+								}
+								
+							});
+
+							logger.info("Executing job with executor '" + executor.getName() + "'...");
+							
+							List<String> commands = Splitter.on("\n").trimResults(CharMatcher.is('\r')).splitToList(job.getCommands());
+							executor.execute(new JobExecutionContext(job.getEnvironment(), workspace, envVars, commands, 
+									snapshot, job.getCaches(), new PatternSet(includeFiles, excludeFiles), logger) {
+
+								@Override
+								public void notifyJobRunning() {
+									transactionManager.run(new Runnable() {
+
+										@Override
+										public void run() {
+											logger.info("Collecting job outcomes...");
+											Build build = buildManager.load(buildId);
+											build.setStatus(Build.Status.RUNNING);
+											build.setRunningDate(new Date());
+											buildManager.save(build);
+											listenerRegistry.post(new BuildRunning(build));
 										}
-									}
-									
-								});
-
-								logger.info("Executing job with executor '" + executor.getName() + "'...");
+										
+									});
+								}
 								
-								List<String> commands = Splitter.on("\n").trimResults(CharMatcher.is('\r')).splitToList(job.getCommands());
-								executor.execute(job.getEnvironment(), workspace, envVars, commands, snapshot, 
-										job.getCaches(), new PatternSet(includeFiles, excludeFiles), logger);
-								
-								sessionManager.run(new Runnable() {
+							});
+							
+							sessionManager.run(new Runnable() {
 
-									@Override
-									public void run() {
-										logger.info("Collecting job outcomes...");
-										Build build = buildManager.load(buildId);
-										for (JobOutcome outcome: job.getOutcomes())
-											outcome.process(build, workspace, logger);
-									}
-									
-								});
-							} catch (Exception e) {
-								if (ExceptionUtils.find(e, InterruptedException.class) == null)
-									logger.error("Error running build", e);
-								throw e;
-							} finally {
-								logger.info("Deleting workspace...");
-								executor.cleanDir(workspace);
-								FileUtils.deleteDir(workspace);
-								logger.info("Workspace deleted");
-							}
+								@Override
+								public void run() {
+									logger.info("Collecting job outcomes...");
+									Build build = buildManager.load(buildId);
+									for (JobOutcome outcome: job.getOutcomes())
+										outcome.process(build, workspace, logger);
+								}
+								
+							});
+						} catch (Exception e) {
+							if (ExceptionUtils.find(e, InterruptedException.class) == null)
+								logger.error("Error running build", e);
+							throw e;
+						} finally {
+							logger.info("Deleting workspace...");
+							executor.cleanDir(workspace);
+							FileUtils.deleteDir(workspace);
+							logger.info("Workspace deleted");
 						}
-						
-					}), job.getTimeout() * 1000L);
+					}
 					
-					JobExecution prevExecution = jobExecutions.put(build.getId(), execution);
-					
-					if (prevExecution != null)
-						prevExecution.cancel(null);
-				}
+				}), job.getTimeout() * 1000L);
+				
+				JobExecution prevExecution = jobExecutions.put(build.getId(), execution);
+				
+				if (prevExecution != null)
+					prevExecution.cancel(null);
 			} else {
 				markBuildError(build, "No applicable job executor");
 			}
@@ -405,7 +416,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 		if (build.isFinished()) {
 			build.setStatus(Build.Status.WAITING);
 			build.setFinishDate(null);
-			build.setQueueingDate(null);
+			build.setPendingDate(null);
 			build.setRunningDate(null);
 			build.setSubmitDate(new Date());
 			build.setSubmitter(submitter);
@@ -497,10 +508,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 					@Override
 					public Boolean call() {
 						for (Build build: buildManager.queryUnfinished()) {
-							if (build.getStatus() == Build.Status.QUEUEING) {
-								if (status == Status.STARTED) 
-									run(build);									
-							} else if (build.getStatus() == Build.Status.RUNNING) {
+							if (build.getStatus() == Build.Status.PENDING || build.getStatus() == Build.Status.RUNNING) {
 								JobExecution execution = jobExecutions.get(build.getId());
 								if (execution != null) {
 									if (execution.isTimedout())
@@ -526,9 +534,12 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 								if (hasUnsuccessful) {
 									markBuildError(build, "There are failed dependency jobs");
 								} else if (!hasUnfinished) {
-									build.setStatus(Build.Status.QUEUEING);
-									build.setQueueingDate(new Date());
-									listenerRegistry.post(new BuildQueueing(build));
+									build.setStatus(Build.Status.PENDING);
+									build.setPendingDate(new Date());
+									listenerRegistry.post(new BuildPending(build));
+									
+									if (status == Status.STARTED) 
+										execute(build);									
 								}
 							}
 						}
@@ -536,7 +547,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 							Map.Entry<Long, JobExecution> entry = it.next();
 							Build build = buildManager.get(entry.getKey());
 							JobExecution execution = entry.getValue();
-							if (build == null || build.getStatus() != Build.Status.RUNNING) {
+							if (build == null || build.getStatus() != Build.Status.PENDING && build.getStatus() != Build.Status.RUNNING) {
 								it.remove();
 								execution.cancel(null);
 							} else if (execution.isDone()) {

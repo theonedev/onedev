@@ -161,7 +161,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	public Collection<Build> queryUnfinished() {
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.or(
-				Restrictions.eq("status", Status.QUEUEING), 
+				Restrictions.eq("status", Status.PENDING), 
 				Restrictions.eq("status", Status.RUNNING), 
 				Restrictions.eq("status", Status.WAITING)));
 		criteria.setCacheable(true);

@@ -25,7 +25,7 @@
 .build-status-waiting:before {
     content: "\f28c";
 }
-.build-status-queueing:before {
+.build-status-pending:before {
     content: "\f192";
 }
 .build-status-none:before {
@@ -37,7 +37,7 @@
 .build-status-failed, .build-status-in_error, .build-status-cancelled, .build-status-timed_out {
 	color: red !important;
 }
-.build-status-running, .build-status-waiting, .build-status-queueing {
+.build-status-running, .build-status-waiting, .build-status-pending {
 	color: #D2A906 !important;
 }
 .build-status-none {

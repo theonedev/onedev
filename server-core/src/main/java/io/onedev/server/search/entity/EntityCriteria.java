@@ -11,10 +11,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.utils.RangeBuilder;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.util.RangeBuilder;
 
 public abstract class EntityCriteria<T extends AbstractEntity> implements Serializable {
 	

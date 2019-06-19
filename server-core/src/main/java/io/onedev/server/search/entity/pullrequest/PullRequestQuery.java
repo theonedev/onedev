@@ -109,8 +109,8 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							return new HasFailedBuildsCriteria();
 						case PullRequestQueryLexer.HasMergeConflicts:
 							return new HasMergeConflictsCriteria();
-						case PullRequestQueryLexer.HasPendingBuilds:
-							return new HasPendingBuildsCriteria();
+						case PullRequestQueryLexer.ToBeVerifiedByBuilds:
+							return new ToBeVerifiedByBuildsCriteria();
 						case PullRequestQueryLexer.HasPendingReviews:
 							return new HasPendingReviewsCriteria();
 						default:

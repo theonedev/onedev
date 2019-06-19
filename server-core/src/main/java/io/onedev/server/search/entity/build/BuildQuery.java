@@ -112,8 +112,8 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new InErrorCriteria();
 						case BuildQueryLexer.Waiting:
 							return new WaitingCriteria();
-						case BuildQueryLexer.Queueing:
-							return new QueueingCriteria();
+						case BuildQueryLexer.Pending:
+							return new PendingCriteria();
 						case BuildQueryLexer.Running:
 							return new RunningCriteria();
 						case BuildQueryLexer.SubmittedByMe:

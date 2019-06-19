@@ -76,7 +76,7 @@ public abstract class TaskButton extends AjaxButton {
 			}
 			
 		})));
-		if (future != null)
+		if (future != null && !future.isDone())
 			future.cancel(true);
 		
 		new ModalPanel(target) {
@@ -127,7 +127,7 @@ public abstract class TaskButton extends AjaxButton {
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
 						Future<?> future = getTaskFutures().remove(path);
-						if (future != null)
+						if (future != null && !future.isDone())
 							future.cancel(true);
 					}
 
@@ -180,8 +180,12 @@ public abstract class TaskButton extends AjaxButton {
 		@Override
 		public void execute() {
 			for (Iterator<Map.Entry<String, TaskFuture>> it = taskFutures.entrySet().iterator(); it.hasNext();) {
-				if (it.next().getValue().isExpired())
+				TaskFuture taskFuture = it.next().getValue();
+				if (taskFuture.isTimedout()) {
+					if (!taskFuture.isDone())
+						taskFuture.cancel(true);
 					it.remove();
+				}
 			}
 		}
 
@@ -217,7 +221,7 @@ public abstract class TaskButton extends AjaxButton {
 			return wrapped.isDone();
 		}
 		
-		public boolean isExpired() {
+		public boolean isTimedout() {
 			return timestamp.before(new DateTime().minusHours(1).toDate());
 		}
 

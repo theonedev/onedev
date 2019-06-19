@@ -36,7 +36,7 @@ public class BuildStatusIcon extends GenericPanel<Status> {
 				super.onComponentTag(tag);
 
 				Status status = getModelObject();
-				String cssClass = "fa fa-fw build-status build-status-";
+				String cssClass = "fa build-status build-status-";
 				if (status != null)
 					cssClass += status.name().toLowerCase();
 				else
@@ -87,8 +87,8 @@ public class BuildStatusIcon extends GenericPanel<Status> {
 		String title;
 		if (status == Status.WAITING) 
 			title = "Waiting for completion of dependency builds";
-		else if (status == Status.QUEUEING) 
-			title = "Queued due to limited capacity";
+		else if (status == Status.PENDING) 
+			title = "Pending (preparing environments and/or waiting for resources)";
 		else if (status != null)
 			title = StringUtils.capitalize(status.getDisplayName().toLowerCase());
 		else

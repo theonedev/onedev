@@ -306,7 +306,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 						case SUCCESSFUL:
 							return "alert-success";
 						case WAITING:
-						case QUEUEING:
+						case PENDING:
 						case RUNNING:
 							return "alert-warning";
 						default:

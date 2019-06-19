@@ -41,9 +41,9 @@ public class QueueingDateCriteria extends EntityCriteria<Build> {
 	@Override
 	public boolean matches(Build build, User user) {
 		if (operator == BuildQueryLexer.IsBefore)
-			return build.getQueueingDate().before(value);
+			return build.getPendingDate().before(value);
 		else
-			return build.getQueueingDate().after(value);
+			return build.getPendingDate().after(value);
 	}
 
 	@Override

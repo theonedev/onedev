@@ -61,7 +61,7 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_submitter_id"), @Index(columnList="o_canceller_id"),
 				@Index(columnList="submitterName"), @Index(columnList="cancellerName"), @Index(columnList="commitHash"), 
 				@Index(columnList="number"), @Index(columnList="jobName"), @Index(columnList="status"), 
-				@Index(columnList="submitDate"), @Index(columnList="queueingDate"), @Index(columnList="runningDate"), 
+				@Index(columnList="submitDate"), @Index(columnList="pendingDate"), @Index(columnList="runningDate"), 
 				@Index(columnList="finishDate"), @Index(columnList="version"), 
 				@Index(columnList="o_project_id, commitHash")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})}
@@ -79,7 +79,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public enum Status {
 		// Most significant status comes first, refer to getOverallStatus
-		WAITING, QUEUEING, RUNNING, IN_ERROR, FAILED, CANCELLED, TIMED_OUT, SUCCESSFUL;
+		WAITING, PENDING, RUNNING, IN_ERROR, FAILED, CANCELLED, TIMED_OUT, SUCCESSFUL;
 		
 		public String getDisplayName() {
 			return StringUtils.capitalize(name().replace('_', ' ').toLowerCase());
@@ -126,7 +126,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	@Column(nullable=false)
 	private Date submitDate;
 	
-	private Date queueingDate;
+	private Date pendingDate;
 	
 	private Date runningDate;
 
@@ -266,12 +266,12 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.submitDate = submitDate;
 	}
 
-	public Date getQueueingDate() {
-		return queueingDate;
+	public Date getPendingDate() {
+		return pendingDate;
 	}
 
-	public void setQueueingDate(Date queueingDate) {
-		this.queueingDate = queueingDate;
+	public void setPendingDate(Date pendingDate) {
+		this.pendingDate = pendingDate;
 	}
 
 	public Date getRunningDate() {

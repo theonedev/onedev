@@ -143,9 +143,9 @@ public abstract class BuildSidePanel extends Panel {
 			protected String load() {
 				long duration;
 				if (getBuild().getRunningDate() != null)
-					duration = getBuild().getRunningDate().getTime() - getBuild().getQueueingDate().getTime();
+					duration = getBuild().getRunningDate().getTime() - getBuild().getPendingDate().getTime();
 				else
-					duration = System.currentTimeMillis() - getBuild().getQueueingDate().getTime(); 
+					duration = System.currentTimeMillis() - getBuild().getPendingDate().getTime(); 
 				if (duration < 0)
 					duration = 0;
 				return DateUtils.formatDuration(duration);
@@ -156,7 +156,7 @@ public abstract class BuildSidePanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getBuild().getQueueingDate() != null 
+				setVisible(getBuild().getPendingDate() != null 
 						&& (!getBuild().isFinished() || getBuild().getRunningDate() != null));
 			}
 			

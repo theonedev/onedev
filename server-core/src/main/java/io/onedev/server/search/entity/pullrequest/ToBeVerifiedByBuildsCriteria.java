@@ -14,7 +14,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.PullRequestConstants;
 
-public class HasPendingBuildsCriteria extends PullRequestCriteria {
+public class ToBeVerifiedByBuildsCriteria extends PullRequestCriteria {
 
 	private static final long serialVersionUID = 1L;
 
@@ -28,7 +28,7 @@ public class HasPendingBuildsCriteria extends PullRequestCriteria {
 		
 		return builder.or(
 				builder.equal(status, Build.Status.RUNNING), 
-				builder.equal(status, Build.Status.QUEUEING), 
+				builder.equal(status, Build.Status.PENDING), 
 				builder.equal(status, Build.Status.WAITING));
 	}
 
@@ -36,7 +36,7 @@ public class HasPendingBuildsCriteria extends PullRequestCriteria {
 	public boolean matches(PullRequest request, User user) {
 		for (PullRequestBuild build: request.getPullRequestBuilds()) {
 			if (build.getBuild().getStatus() == Build.Status.RUNNING 
-					|| build.getBuild().getStatus() == Build.Status.QUEUEING 
+					|| build.getBuild().getStatus() == Build.Status.PENDING 
 					|| build.getBuild().getStatus() == Build.Status.WAITING) {
 				return true;
 			}
@@ -51,7 +51,7 @@ public class HasPendingBuildsCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.HasPendingBuilds);
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ToBeVerifiedByBuilds);
 	}
 
 }

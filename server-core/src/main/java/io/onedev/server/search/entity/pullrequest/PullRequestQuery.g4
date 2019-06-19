@@ -7,7 +7,7 @@ query
     ;
 
 criteria
-	: operator=(Open|Merged|Discarded|SubmittedByMe|ToBeReviewedByMe|RequestedForChangesByMe|ApprovedByMe|DiscardedByMe|SomeoneRequestedForChanges|HasPendingReviews|HasFailedBuilds|HasPendingBuilds|HasMergeConflicts) #OperatorCriteria
+	: operator=(Open|Merged|Discarded|SubmittedByMe|ToBeReviewedByMe|RequestedForChangesByMe|ApprovedByMe|DiscardedByMe|SomeoneRequestedForChanges|HasPendingReviews|HasFailedBuilds|ToBeVerifiedByBuilds|HasMergeConflicts) #OperatorCriteria
     | operator=(ToBeReviewedBy|ApprovedBy|RequestedForChangesBy|SubmittedBy|DiscardedBy|IncludesCommit|IncludesIssue) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
@@ -68,8 +68,8 @@ HasFailedBuilds
     : 'has' WS+ 'failed' WS+ 'builds'
     ;
 
-HasPendingBuilds
-    : 'has' WS+ 'pending' WS+ 'builds'
+ToBeVerifiedByBuilds
+    : 'to' WS+ 'be' WS+ 'verified' WS+ 'by' WS+ 'builds'
     ;
 
 HasMergeConflicts

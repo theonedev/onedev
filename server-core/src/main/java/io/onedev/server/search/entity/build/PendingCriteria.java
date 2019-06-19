@@ -11,19 +11,19 @@ import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.BuildConstants;
 
-public class QueueingCriteria extends EntityCriteria<Build> {
+public class PendingCriteria extends EntityCriteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
 		Path<?> attribute = root.get(BuildConstants.ATTR_STATUS);
-		return builder.equal(attribute, Build.Status.QUEUEING);
+		return builder.equal(attribute, Build.Status.PENDING);
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return build.getStatus() == Build.Status.QUEUEING;
+		return build.getStatus() == Build.Status.PENDING;
 	}
 
 	@Override
@@ -33,7 +33,7 @@ public class QueueingCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.getRuleName(BuildQueryLexer.Queueing);
+		return BuildQuery.getRuleName(BuildQueryLexer.Pending);
 	}
 
 }
