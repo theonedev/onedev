@@ -7,7 +7,7 @@
     	<version>1.0.3</version>
     </parent>
     <artifactId>server</artifactId>  
-    <version>3.0.0</version>  
+    <version>3.0.1</version>  
     <packaging>pom</packaging>  
     <build> 
         <finalName>${project.groupId}.${project.artifactId}-${project.version}</finalName>  
@@ -195,7 +195,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>1.1.0</commons.version>
+		<commons.version>1.1.1</commons.version>
 		<antlr.version>4.7.2</antlr.version>
 	</properties>
 </project>

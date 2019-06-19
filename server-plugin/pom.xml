@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.onedev</groupId>
 		<artifactId>server</artifactId>
-		<version>3.0.0</version>
+		<version>3.0.1</version>
 	</parent>
 	<dependencies>
 		<dependency>
@@ -23,7 +23,6 @@
 		<module>server-plugin-htmlreport</module>
 		<module>server-plugin-maven</module>
 		<module>server-plugin-kubernetes</module>
-		<module>server-plugin-localdocker</module>
 		<module>server-plugin-serverdocker</module>
 	</modules>
 </project>
