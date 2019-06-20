@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.util.Usage;
@@ -19,7 +21,6 @@ import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.Defa
 import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=150, name=InputSpec.USER)
 public class UserChoiceInput extends InputSpec {

@@ -46,11 +46,6 @@
 			<version>1.7</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-compress</artifactId>
-			<version>1.18</version>
-		</dependency>
-		<dependency>
 			<groupId>org.jetbrains.xodus</groupId>
 			<artifactId>xodus-entity-store</artifactId>
 			<version>1.2.3</version>

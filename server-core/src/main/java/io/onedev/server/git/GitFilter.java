@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.inject.Inject;
@@ -40,6 +41,7 @@ import io.onedev.server.git.exception.GitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.serverconfig.ServerConfig;
@@ -66,15 +68,19 @@ public class GitFilter implements Filter {
 	
 	private final SettingManager configManager;
 	
+	private final Set<CodePullAuthorizationSource> codePullAuthorizationSources;
+	
 	@Inject
 	public GitFilter(OneDev oneDev, StorageManager storageManager, ProjectManager projectManager, 
-			WorkExecutor workManager, ServerConfig serverConfig, SettingManager configManager) {
+			WorkExecutor workManager, ServerConfig serverConfig, SettingManager configManager, 
+			Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
 		this.oneDev = oneDev;
 		this.storageManager = storageManager;
 		this.projectManager = projectManager;
 		this.workExecutor = workManager;
 		this.serverConfig = serverConfig;
 		this.configManager = configManager;
+		this.codePullAuthorizationSources = codePullAuthorizationSources;
 	}
 	
 	private String getPathInfo(HttpServletRequest request) {
@@ -143,8 +149,7 @@ public class GitFilter implements Filter {
 		File gitDir = storageManager.getProjectGitDir(project.getId());
 
 		if (GitSmartHttpTools.isUploadPack(request)) {
-			if (!SecurityUtils.canReadCode(project.getFacade()))
-				throw new UnauthorizedException("You do not have permission to pull from this project.");
+			checkPullPermission(request, project);
 			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 				
 				@Override
@@ -160,9 +165,8 @@ public class GitFilter implements Filter {
 				
 			}).get();
 		} else {
-			if (!SecurityUtils.canWriteCode(project.getFacade())) {
+			if (!SecurityUtils.canWriteCode(project.getFacade()))
 				throw new UnauthorizedException("You do not have permission to push to this project.");
-			}
 			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 				
 				@Override
@@ -190,6 +194,20 @@ public class GitFilter implements Filter {
 		pack.end();
 	}
 	
+	private void checkPullPermission(HttpServletRequest request, Project project) {
+		if (!SecurityUtils.canReadCode(project.getFacade())) {
+			boolean isAuthorized = false;
+			for (CodePullAuthorizationSource source: codePullAuthorizationSources) {
+				if (source.canPullCode(request, project)) {
+					isAuthorized = true;
+					break;
+				}
+			}
+			if (!isAuthorized)
+				throw new UnauthorizedException("You do not have permission to pull from this project.");
+		}
+	}
+	
 	protected void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String pathInfo = request.getRequestURI().substring(request.getContextPath().length());
 		pathInfo = StringUtils.stripStart(pathInfo, "/");
@@ -201,8 +219,7 @@ public class GitFilter implements Filter {
 		File gitDir = storageManager.getProjectGitDir(project.getId());
 
 		if (service.contains("upload")) {
-			if (!SecurityUtils.canReadCode(project.getFacade())) 
-				throw new UnauthorizedException("You do not have permission to pull from this project.");
+			checkPullPermission(request, project);
 			writeInitial(response, service);
 			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
 		} else {

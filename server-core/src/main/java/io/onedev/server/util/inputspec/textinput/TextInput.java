@@ -6,11 +6,12 @@ import java.util.Map;
 
 import javax.validation.ValidationException;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.textinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=100, name=InputSpec.TEXT)
 public class TextInput extends InputSpec {

@@ -37,7 +37,7 @@ import io.onedev.server.ci.job.cache.CacheAllocation;
 import io.onedev.server.ci.job.cache.CacheCallable;
 import io.onedev.server.ci.job.cache.CacheRunner;
 import io.onedev.server.ci.job.cache.JobCache;
-import io.onedev.server.model.support.JobExecutionContext;
+import io.onedev.server.model.support.JobContext;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.plugin.serverdocker.ServerDockerExecutor.TestData;
 import io.onedev.server.util.OneContext;
@@ -159,7 +159,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 
 	@Override
-	public void execute(JobExecutionContext context) {
+	public void execute(String jobId, JobContext context) {
 		getCapacityRunner().call(new Callable<Void>() {
 
 			@Override
@@ -204,16 +204,16 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							}
 						}
 						
-						File effectiveWorkspace = workspaceCache != null? workspaceCache: context.getWorkspace();
+						File effectiveWorkspace = workspaceCache != null? workspaceCache: context.getServerWorkspace();
 						
-						if (context.getSnapshot() != null) {
+						if (context.isCloneSource()) {
 							logger.info("Cloning source code...");
-							context.getSnapshot().checkout(effectiveWorkspace);
+							context.checkoutSource(effectiveWorkspace);
 						}
 						
 						if (workspaceCache != null) {
 							try {
-								FileUtils.copyDirectory(context.getWorkspace(), workspaceCache);
+								FileUtils.copyDirectory(context.getServerWorkspace(), workspaceCache);
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							}
@@ -267,7 +267,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 								int baseLen = workspaceCache.getAbsolutePath().length()+1;
 								for (File file: context.getCollectFiles().listFiles(workspaceCache)) {
 									try {
-										FileUtils.copyFile(file, new File(context.getWorkspace(), file.getAbsolutePath().substring(baseLen)));
+										FileUtils.copyFile(file, new File(context.getServerWorkspace(), file.getAbsolutePath().substring(baseLen)));
 									} catch (IOException e) {
 										throw new RuntimeException(e);
 									}

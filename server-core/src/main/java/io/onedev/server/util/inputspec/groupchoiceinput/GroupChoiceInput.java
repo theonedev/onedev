@@ -8,6 +8,8 @@ import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.constraints.NotNull;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.facade.GroupFacade;
@@ -18,7 +20,6 @@ import io.onedev.server.util.inputspec.groupchoiceinput.defaultvalueprovider.Def
 import io.onedev.server.util.inputspec.groupchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=160, name=InputSpec.GROUP)
 public class GroupChoiceInput extends InputSpec {

@@ -30,6 +30,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.support.issue.TransitionSpec;
@@ -42,7 +43,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.util.ConfirmOnClick;
-import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 public abstract class StateTransitionListPanel extends Panel {

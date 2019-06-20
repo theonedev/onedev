@@ -40,7 +40,7 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
-import jersey.repackaged.com.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 public class IssueStateListPage extends GlobalIssueSettingPage {

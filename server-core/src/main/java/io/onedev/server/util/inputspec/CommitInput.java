@@ -8,8 +8,9 @@ import javax.validation.ValidationException;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.web.editable.annotation.Editable;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=1400, name=InputSpec.COMMIT)
 public class CommitInput extends InputSpec {

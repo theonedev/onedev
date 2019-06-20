@@ -39,6 +39,8 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.jsymbol.SymbolExtractorRegistry;
 import io.onedev.commons.launcher.loader.Listen;
@@ -50,7 +52,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.storage.StorageManager;
-import jersey.repackaged.com.google.common.base.Preconditions;
 
 @Singleton
 public class DefaultSearchManager implements SearchManager {

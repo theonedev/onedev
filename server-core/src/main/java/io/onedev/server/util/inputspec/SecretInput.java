@@ -6,8 +6,9 @@ import java.util.Map;
 
 import javax.validation.ValidationException;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.web.editable.annotation.Editable;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 @Editable(order=500, name=InputSpec.SECRET)
 public class SecretInput extends InputSpec {

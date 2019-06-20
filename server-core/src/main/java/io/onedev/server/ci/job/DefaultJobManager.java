@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,6 +22,7 @@ import java.util.concurrent.locks.Lock;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.quartz.CronScheduleBuilder;
@@ -67,26 +69,28 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.JobExecutionContext;
+import io.onedev.server.model.support.JobContext;
 import io.onedev.server.model.support.JobExecutor;
-import io.onedev.server.model.support.SourceSnapshot;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.patternset.PatternSet;
 
 @Singleton
-public class DefaultJobManager implements JobManager, Runnable, SchedulableTask {
+public class DefaultJobManager implements JobManager, Runnable, SchedulableTask, CodePullAuthorizationSource {
 
 	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
 	
 	private static final Logger logger = LoggerFactory.getLogger(DefaultJobManager.class);
 	
 	private enum Status {STARTED, STOPPING, STOPPED};
+	
+	private final Map<String, JobContext> jobContexts = new ConcurrentHashMap<>();
 	
 	private final Map<Long, JobExecution> jobExecutions = new ConcurrentHashMap<>();
 	
@@ -246,21 +250,16 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 			ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 			JobExecutor executor = getJobExecutor(build.getProject(), commitId, job.getName(), job.getEnvironment());
 			if (executor != null) {
-				SourceSnapshot snapshot;
-				if (job.isCloneSource()) 
-					snapshot = new SourceSnapshot(build.getProject(), commitId);
-				else 
-					snapshot = null;
-				
 				Logger logger = logManager.getLogger(build, job.getLogLevel()); 
 				
 				Long buildId = build.getId();
+				String projectName = build.getProject().getName();
 				JobExecution execution = new JobExecution(executorService.submit(new Runnable() {
 
 					@Override
 					public void run() {
-						logger.info("Creating workspace...");
-						File workspace = FileUtils.createTempDir("workspace");
+						logger.info("Creating server workspace...");
+						File serverWorkspace = FileUtils.createTempDir("server-workspace");
 						try {
 							Map<String, String> envVars = new HashMap<>();
 							Set<String> includeFiles = new HashSet<>();
@@ -274,7 +273,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 									logger.info("Populating dependencies...");
 									for (BuildDependence dependence: build.getDependencies()) {
 										for (DependencyPopulator populator: dependencyPopulators)
-											populator.populate(dependence.getDependency(), workspace, logger);
+											populator.populate(dependence.getDependency(), serverWorkspace, logger);
 									}
 									envVars.put("ONEDEV_PROJECT", build.getProject().getName());
 									envVars.put("ONEDEV_COMMIT", commitId.name());
@@ -313,8 +312,9 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 							logger.info("Executing job with executor '" + executor.getName() + "'...");
 							
 							List<String> commands = Splitter.on("\n").trimResults(CharMatcher.is('\r')).splitToList(job.getCommands());
-							executor.execute(new JobExecutionContext(job.getEnvironment(), workspace, envVars, commands, 
-									snapshot, job.getCaches(), new PatternSet(includeFiles, excludeFiles), logger) {
+							
+							JobContext jobContext = new JobContext(projectName, job.getEnvironment(), serverWorkspace, envVars, commands, 
+									job.isCloneSource(), commitId, job.getCaches(), new PatternSet(includeFiles, excludeFiles), logger) {
 
 								@Override
 								public void notifyJobRunning() {
@@ -322,7 +322,6 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 
 										@Override
 										public void run() {
-											logger.info("Collecting job outcomes...");
 											Build build = buildManager.load(buildId);
 											build.setStatus(Build.Status.RUNNING);
 											build.setRunningDate(new Date());
@@ -332,8 +331,16 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 										
 									});
 								}
-								
-							});
+
+							};
+							
+							String jobId = UUID.randomUUID().toString();
+							jobContexts.put(jobId, jobContext);
+							try {
+								executor.execute(jobId, jobContext);
+							} finally {
+								jobContexts.remove(jobId);
+							}
 							
 							sessionManager.run(new Runnable() {
 
@@ -342,7 +349,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 									logger.info("Collecting job outcomes...");
 									Build build = buildManager.load(buildId);
 									for (JobOutcome outcome: job.getOutcomes())
-										outcome.process(build, workspace, logger);
+										outcome.process(build, serverWorkspace, logger);
 								}
 								
 							});
@@ -351,10 +358,10 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 								logger.error("Error running build", e);
 							throw e;
 						} finally {
-							logger.info("Deleting workspace...");
-							executor.cleanDir(workspace);
-							FileUtils.deleteDir(workspace);
-							logger.info("Workspace deleted");
+							logger.info("Deleting server workspace...");
+							executor.cleanDir(serverWorkspace);
+							FileUtils.deleteDir(serverWorkspace);
+							logger.info("Server workspace deleted");
 						}
 					}
 					
@@ -370,6 +377,11 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 		} catch (InvalidCISpecException e) {
 			markBuildError(build, e.getMessage());
 		}
+	}
+	
+	@Override
+	public JobContext getJobContext(String jobId) {
+		return jobContexts.get(jobId);
 	}
 	
 	private void markBuildError(Build build, String errorMessage) {
@@ -602,6 +614,17 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask 
 	@Override
 	public ScheduleBuilder<?> getScheduleBuilder() {
 		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
+	}
+
+	@Override
+	public boolean canPullCode(HttpServletRequest request, Project project) {
+		String jobId = request.getHeader(JOB_ID_HTTP_HEADER);
+		if (jobId != null) {
+			JobContext context = getJobContext(jobId);					
+			if (context != null)
+				return context.getProjectName().equals(project.getName());
+		}
+		return false;
 	}
 
 }

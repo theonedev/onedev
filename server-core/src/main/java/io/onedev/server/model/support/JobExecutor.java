@@ -120,7 +120,7 @@ public abstract class JobExecutor implements Serializable {
 		this.cacheTTL = cacheTTL;
 	}
 
-	public abstract void execute(JobExecutionContext context);
+	public abstract void execute(String jobId, JobContext context);
 
 	public final boolean isApplicable(Project project, ObjectId commitId, String jobName, String environment) {
 		Matcher matcher = new ChildAwareMatcher();

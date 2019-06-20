@@ -205,6 +205,7 @@ import io.onedev.server.search.code.DefaultSearchManager;
 import io.onedev.server.search.code.IndexManager;
 import io.onedev.server.search.code.SearchManager;
 import io.onedev.server.security.BasicAuthenticationFilter;
+import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.FilterChainConfigurator;
 import io.onedev.server.security.OneAuthorizingRealm;
 import io.onedev.server.security.OneFilterChainResolver;
@@ -389,6 +390,8 @@ public class CoreModule extends AbstractPluginModule {
         
         contributeFromPackage(DefaultCISpecProvider.class, DefaultCISpecProvider.class);
         contributeFromPackage(LogNormalizer.class, LogNormalizer.class);
+        
+		contribute(CodePullAuthorizationSource.class, DefaultJobManager.class);
         
 		bind(IndexManager.class).to(DefaultIndexManager.class);
 		bind(SearchManager.class).to(DefaultSearchManager.class);

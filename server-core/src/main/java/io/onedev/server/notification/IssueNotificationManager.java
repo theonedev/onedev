@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
@@ -30,7 +32,6 @@ import io.onedev.server.search.entity.QueryWatchBuilder;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.markdown.MentionParser;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 @Singleton
 public class IssueNotificationManager {

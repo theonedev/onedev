@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,8 +35,7 @@ import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.authenticator.Authenticated;
 import io.onedev.server.model.support.authenticator.Authenticator;
-import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.permission.CreateProjects;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.SystemAdministration;
@@ -61,10 +61,12 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     private final MembershipManager membershipManager;
     
     private final GroupManager groupManager;
+    
+    private final TransactionManager transactionManager;
         
 	@Inject
     public OneAuthorizingRealm(UserManager userManager, CacheManager cacheManager, SettingManager configManager, 
-    		MembershipManager membershipManager, GroupManager groupManager) {
+    		MembershipManager membershipManager, GroupManager groupManager, TransactionManager transactionManager) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(AppLoader.getInstance(PasswordService.class));
 		setCredentialsMatcher(passwordMatcher);
@@ -74,6 +76,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     	this.configManager = configManager;
     	this.membershipManager = membershipManager;
     	this.groupManager = groupManager;
+    	this.transactionManager = transactionManager;
     }
 
 	private Collection<Permission> getDefaultPermissions() {
@@ -83,48 +86,6 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 				defaultPermissions.add(new ProjectPermission(project, project.getDefaultPrivilege().getProjectPrivilege()));
 		}
 		return defaultPermissions;
-	}
-	
-	@Sessional
-	protected Collection<Permission> getObjectPermissionsInSession(Long userId) {
-		Collection<Permission> permissions = new ArrayList<>();
-
-		UserFacade user = null;
-        if (userId != 0L) 
-            user = cacheManager.getUser(userId);
-        if (user != null) {
-			permissions.addAll(getDefaultPermissions());
-        	if (user.isRoot()) 
-        		permissions.add(new SystemAdministration());
-        	permissions.add(new UserAdministration(user));
-           	for (MembershipFacade membership: cacheManager.getMemberships().values()) {
-        		if (membership.getUserId().equals(userId)) {
-        			GroupFacade group = cacheManager.getGroup(membership.getGroupId());
-            		if (group.isAdministrator())
-            			permissions.add(new SystemAdministration());
-            		if (group.isCanCreateProjects())
-            			permissions.add(new CreateProjects());
-            		for (GroupAuthorizationFacade authorization: 
-            				cacheManager.getGroupAuthorizations().values()) {
-            			if (authorization.getGroupId().equals(group.getId())) {
-                			permissions.add(new ProjectPermission(
-                					cacheManager.getProject(authorization.getProjectId()), 
-                					authorization.getPrivilege()));
-            			}
-            		}
-        		}
-        	}
-        	for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
-        		if (authorization.getUserId().equals(userId)) {
-            		permissions.add(new ProjectPermission(
-            				cacheManager.getProject(authorization.getProjectId()), 
-            				authorization.getPrivilege()));
-        		}
-        	}
-        } else if (configManager.getSecuritySetting().isEnableAnonymousAccess()) {
-			permissions.addAll(getDefaultPermissions());
-        }
-		return permissions;
 	}
 	
 	@Override
@@ -145,106 +106,150 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 			
 			@Override
 			public Collection<Permission> getObjectPermissions() {
-				return getObjectPermissionsInSession((Long) principals.getPrimaryPrincipal());
+				return transactionManager.getSessionManager().call(new Callable<Collection<Permission>>() {
+
+					@Override
+					public Collection<Permission> call() throws Exception {
+						Long userId = (Long) principals.getPrimaryPrincipal();						
+						Collection<Permission> permissions = new ArrayList<>();
+
+						UserFacade user = null;
+				        if (userId != 0L) 
+				            user = cacheManager.getUser(userId);
+				        if (user != null) {
+							permissions.addAll(getDefaultPermissions());
+				        	if (user.isRoot()) 
+				        		permissions.add(new SystemAdministration());
+				        	permissions.add(new UserAdministration(user));
+				           	for (MembershipFacade membership: cacheManager.getMemberships().values()) {
+				        		if (membership.getUserId().equals(userId)) {
+				        			GroupFacade group = cacheManager.getGroup(membership.getGroupId());
+				            		if (group.isAdministrator())
+				            			permissions.add(new SystemAdministration());
+				            		if (group.isCanCreateProjects())
+				            			permissions.add(new CreateProjects());
+				            		for (GroupAuthorizationFacade authorization: 
+				            				cacheManager.getGroupAuthorizations().values()) {
+				            			if (authorization.getGroupId().equals(group.getId())) {
+				                			permissions.add(new ProjectPermission(
+				                					cacheManager.getProject(authorization.getProjectId()), 
+				                					authorization.getPrivilege()));
+				            			}
+				            		}
+				        		}
+				        	}
+				        	for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
+				        		if (authorization.getUserId().equals(userId)) {
+				            		permissions.add(new ProjectPermission(
+				            				cacheManager.getProject(authorization.getProjectId()), 
+				            				authorization.getPrivilege()));
+				        		}
+				        	}
+				        } else if (configManager.getSecuritySetting().isEnableAnonymousAccess()) {
+							permissions.addAll(getDefaultPermissions());
+				        }
+						return permissions;
+					}
+					
+				});
 			}
 		};
 	}
 	
-	@Transactional
-	protected AuthenticationInfo doGetAuthenticationInfoInTransaction(AuthenticationToken token) 
-			throws AuthenticationException {
-    	User user = userManager.findByName(((UsernamePasswordToken) token).getUsername());
-    	if (user != null && user.isRoot())
-    		return user;
-
-    	if (user == null || StringUtils.isBlank(user.getPassword())) {
-        	Authenticator authenticator = configManager.getAuthenticator();
-        	if (authenticator != null) {
-        		Authenticated authenticated;
-        		try {
-        			authenticated = authenticator.authenticate((UsernamePasswordToken) token);
-        		} catch (Exception e) {
-        			if (e instanceof AuthenticationException) {
-        				logger.debug("Authentication not passed", e);
-            			throw ExceptionUtils.unchecked(e);
-        			} else {
-        				logger.error("Error authenticating user", e);
-            			throw new AuthenticationException("Error authenticating user", e);
-        			}
-        		}
-    			if (user != null) {
-    				if (authenticated.getEmail() != null)
-    					user.setEmail(authenticated.getEmail());
-    				if (authenticated.getFullName() != null)
-    					user.setFullName(authenticated.getFullName());
-
-    				Collection<String> existingGroupNames = new HashSet<>();
-    				for (Membership membership: user.getMemberships()) 
-    					existingGroupNames.add(membership.getGroup().getName());
-    				if (!authenticated.getGroupNames().isEmpty()) {
-    					Collection<String> retrievedGroupNames = new HashSet<>();
-    					for (String groupName: authenticated.getGroupNames()) {
-    						Group group = groupManager.find(groupName);
-    						if (group != null) {
-    							if (!existingGroupNames.contains(groupName)) {
-    								Membership membership = new Membership();
-    								membership.setGroup(group);
-    								membership.setUser(user);
-    								membershipManager.save(membership);
-    								user.getMemberships().add(membership);
-    								existingGroupNames.add(groupName);
-    							}
-    							retrievedGroupNames.add(groupName);
-    						} else {
-    							logger.debug("Group '{}' from external authenticator is not defined", groupName);
-    						}
-    					}
-        				for (Iterator<Membership> it = user.getMemberships().iterator(); it.hasNext();) {
-        					Membership membership = it.next();
-        					if (!retrievedGroupNames.contains(membership.getGroup().getName())) {
-        						it.remove();
-        						membershipManager.delete(membership);
-        					}
-        				}
-    				}
-    				userManager.save(user);
-    			} else {
-    				user = new User();
-    				user.setName(((UsernamePasswordToken) token).getUsername());
-    				user.setPassword("");
-    				if (authenticated.getEmail() != null)
-    					user.setEmail(authenticated.getEmail());
-    				if (authenticated.getFullName() != null)
-    					user.setFullName(authenticated.getFullName());
-    				userManager.save(user);
-    				if (authenticated.getGroupNames().isEmpty()) {
-    					for (String groupName: authenticator.getDefaultGroupNames()) {
-    						Group group = groupManager.find(groupName);
-    						if (group != null) {
-    							Membership membership = new Membership();
-    							membership.setGroup(group);
-    							membership.setUser(user);
-    							user.getMemberships().add(membership);
-    							membershipManager.save(membership);
-    						} else {
-    							logger.warn("Default group '{}' of external authenticator is not defined", groupName);
-    						}
-    					}
-    				}
-    			}
-        	} else {
-        		user = null;
-        	}
-    	}
-    	
-    	return user;		
-	}
-	
 	@Override
-	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) 
-			throws AuthenticationException {
-		// transaction annotation can not be applied to final method, so we relay to another method
-		return doGetAuthenticationInfoInTransaction(token);
+	protected final AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken token) throws AuthenticationException {
+		return transactionManager.call(new Callable<AuthenticationInfo>() {
+
+			@Override
+			public AuthenticationInfo call() throws Exception {
+		    	User user = userManager.findByName(((UsernamePasswordToken) token).getUsername());
+		    	if (user != null && user.isRoot())
+		    		return user;
+
+		    	if (user == null || StringUtils.isBlank(user.getPassword())) {
+		        	Authenticator authenticator = configManager.getAuthenticator();
+		        	if (authenticator != null) {
+		        		Authenticated authenticated;
+		        		try {
+		        			authenticated = authenticator.authenticate((UsernamePasswordToken) token);
+		        		} catch (Exception e) {
+		        			if (e instanceof AuthenticationException) {
+		        				logger.debug("Authentication not passed", e);
+		            			throw ExceptionUtils.unchecked(e);
+		        			} else {
+		        				logger.error("Error authenticating user", e);
+		            			throw new AuthenticationException("Error authenticating user", e);
+		        			}
+		        		}
+		    			if (user != null) {
+		    				if (authenticated.getEmail() != null)
+		    					user.setEmail(authenticated.getEmail());
+		    				if (authenticated.getFullName() != null)
+		    					user.setFullName(authenticated.getFullName());
+
+		    				Collection<String> existingGroupNames = new HashSet<>();
+		    				for (Membership membership: user.getMemberships()) 
+		    					existingGroupNames.add(membership.getGroup().getName());
+		    				if (!authenticated.getGroupNames().isEmpty()) {
+		    					Collection<String> retrievedGroupNames = new HashSet<>();
+		    					for (String groupName: authenticated.getGroupNames()) {
+		    						Group group = groupManager.find(groupName);
+		    						if (group != null) {
+		    							if (!existingGroupNames.contains(groupName)) {
+		    								Membership membership = new Membership();
+		    								membership.setGroup(group);
+		    								membership.setUser(user);
+		    								membershipManager.save(membership);
+		    								user.getMemberships().add(membership);
+		    								existingGroupNames.add(groupName);
+		    							}
+		    							retrievedGroupNames.add(groupName);
+		    						} else {
+		    							logger.debug("Group '{}' from external authenticator is not defined", groupName);
+		    						}
+		    					}
+		        				for (Iterator<Membership> it = user.getMemberships().iterator(); it.hasNext();) {
+		        					Membership membership = it.next();
+		        					if (!retrievedGroupNames.contains(membership.getGroup().getName())) {
+		        						it.remove();
+		        						membershipManager.delete(membership);
+		        					}
+		        				}
+		    				}
+		    				userManager.save(user);
+		    			} else {
+		    				user = new User();
+		    				user.setName(((UsernamePasswordToken) token).getUsername());
+		    				user.setPassword("");
+		    				if (authenticated.getEmail() != null)
+		    					user.setEmail(authenticated.getEmail());
+		    				if (authenticated.getFullName() != null)
+		    					user.setFullName(authenticated.getFullName());
+		    				userManager.save(user);
+		    				if (authenticated.getGroupNames().isEmpty()) {
+		    					for (String groupName: authenticator.getDefaultGroupNames()) {
+		    						Group group = groupManager.find(groupName);
+		    						if (group != null) {
+		    							Membership membership = new Membership();
+		    							membership.setGroup(group);
+		    							membership.setUser(user);
+		    							user.getMemberships().add(membership);
+		    							membershipManager.save(membership);
+		    						} else {
+		    							logger.warn("Default group '{}' of external authenticator is not defined", groupName);
+		    						}
+		    					}
+		    				}
+		    			}
+		        	} else {
+		        		user = null;
+		        	}
+		    	}
+		    	
+		    	return user;		
+			}
+			
+		});
 	}
 	
 }

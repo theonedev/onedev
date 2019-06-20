@@ -32,6 +32,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
@@ -155,7 +156,7 @@ public class DefaultLogManager implements LogManager {
 				try {
 					if (throwable != null) {
 						for (String line: Splitter.on(EOL_PATTERN).split(Throwables.getStackTraceAsString(throwable)))
-							message += "\n    " + line;
+							message += "\n    " + HtmlEscape.escapeHtml5(line);
 					}
 							
 					if (message.startsWith(LogInstruction.PREFIX)) {

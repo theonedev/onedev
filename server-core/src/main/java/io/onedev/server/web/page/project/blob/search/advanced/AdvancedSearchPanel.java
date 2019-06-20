@@ -35,6 +35,7 @@ import org.apache.wicket.validation.IValidationError;
 import org.eclipse.jgit.lib.ObjectId;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.git.BlobIdent;
@@ -52,7 +53,6 @@ import io.onedev.server.web.component.tabbable.AjaxActionTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.blob.search.result.SearchResultPanel;
-import jersey.repackaged.com.google.common.base.Throwables;
 
 @SuppressWarnings("serial")
 public abstract class AdvancedSearchPanel extends Panel {
@@ -82,7 +82,7 @@ public abstract class AdvancedSearchPanel extends Panel {
 			try {
 				option = activeTab.newInstance();
 			} catch (Exception e) {
-				Throwables.propagate(e);
+				throw ExceptionUtils.unchecked(e);
 			}
 		}
 	}

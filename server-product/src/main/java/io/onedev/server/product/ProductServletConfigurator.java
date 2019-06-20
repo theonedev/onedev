@@ -118,7 +118,6 @@ public class ProductServletConfigurator implements ServletConfigurator {
 		
 		ServletHolder jerseyServletHolder = new ServletHolder(jerseyServlet);
 		context.addServlet(jerseyServletHolder, "/rest/*");
-		context.addServlet(jerseyServletHolder, "/api/v3/*"); // GitHub api compatible
 	}
 
 }

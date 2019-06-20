@@ -31,7 +31,7 @@ import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.OneException;
-import io.onedev.server.model.support.JobExecutionContext;
+import io.onedev.server.model.support.JobContext;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.plugin.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -125,9 +125,9 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 
 	@Override
-	public void execute(JobExecutionContext context) {
+	public void execute(String jobId, JobContext context) {
 	}
-
+	
 	@Override
 	public void checkCaches() {
 	}
