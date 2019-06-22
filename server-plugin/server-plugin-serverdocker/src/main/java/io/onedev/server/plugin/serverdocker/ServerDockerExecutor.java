@@ -136,7 +136,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 				output.append(line).append("\n");
 			}
 			
-		}, newErrorLogger(logger)).checkReturnCode();
+		}, newErrorLogger(logger), logger).checkReturnCode();
 
 		Map<String, Object> map;
 		try {
@@ -160,6 +160,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 	@Override
 	public void execute(String jobId, JobContext context) {
+		Logger logger = context.getLogger();
+		
 		getCapacityRunner().call(new Callable<Void>() {
 
 			@Override
@@ -175,7 +177,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						logger.info("Pulling image...") ;
 						Commandline docker = getDocker();
 						docker.addArgs("pull", context.getEnvironment());
-						docker.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
+						docker.execute(newInfoLogger(logger), newErrorLogger(logger), logger).checkReturnCode();
 						
 						docker.clearArgs();
 						String jobInstance = UUID.randomUUID().toString();
@@ -256,7 +258,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 									logger.info("Stopping container...");
 									Commandline cmd = getDocker();
 									cmd.addArgs("stop", jobInstance);
-									cmd.execute(newInfoLogger(logger), newErrorLogger(logger));
+									cmd.execute(newInfoLogger(logger), newErrorLogger(logger), logger);
 								}
 								
 							}, logger).checkReturnCode();
@@ -320,7 +322,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);
 			}
-			cmd.execute(newInfoLogger(logger), newErrorLogger(logger), input).checkReturnCode();
+			cmd.execute(newInfoLogger(logger), newErrorLogger(logger), input, logger).checkReturnCode();
 		}
 	}
 	
@@ -415,7 +417,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		
 		Commandline cmd = getDocker();
 		cmd.addArgs("pull", testData.getDockerImage());
-		cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
+		cmd.execute(newInfoLogger(logger), newErrorLogger(logger), logger).checkReturnCode();
 		
 		boolean windows = getImageOS(logger, testData.getDockerImage()).equals("windows");
 		
@@ -453,7 +455,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			else 
 				cmd.addArgs("sh", "-c", "echo hello from container");
 			
-			cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
+			cmd.execute(newInfoLogger(logger), newErrorLogger(logger), logger).checkReturnCode();
 		} finally {
 			if (workspaceDir != null)
 				FileUtils.deleteDir(workspaceDir);
@@ -467,7 +469,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			logger.info("Checking busybox...");
 			cmd = getDocker();
 			cmd.addArgs("run", "--rm", "busybox", "sh", "-c", "echo hello from busybox");			
-			cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
+			cmd.execute(newInfoLogger(logger), newErrorLogger(logger), logger).checkReturnCode();
 		}
 	}
 	
@@ -480,7 +482,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			String containerPath = "/onedev_dir_to_clean";
 			cmd.addArgs("run", "-v", dir.getAbsolutePath() + ":" + containerPath, "--rm", 
 					"busybox", "sh", "-c", "rm -rf " + containerPath + "/*");			
-			cmd.execute(newInfoLogger(logger), newErrorLogger(logger)).checkReturnCode();
+			cmd.execute(newInfoLogger(logger), newErrorLogger(logger), logger).checkReturnCode();
 		}
 	}
 	

@@ -839,7 +839,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			
 			BlameCommand cmd = new BlameCommand(context.getProject().getGitDir());
 			cmd.commitHash(commitHash).file(context.getBlobIdent().path);
-			for (BlameBlock blame: cmd.call()) {
+			for (BlameBlock blame: cmd.call(null)) {
 				BlameInfo blameInfo = new BlameInfo();
 				blameInfo.commitDate = DateUtils.formatDate(blame.getCommit().getCommitter().getWhen());
 				blameInfo.authorName = HtmlEscape.escapeHtml5(blame.getCommit().getAuthor().getName());

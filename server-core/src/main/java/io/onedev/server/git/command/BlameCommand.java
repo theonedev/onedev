@@ -78,7 +78,7 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 	}
 	
 	@Override
-	public Collection<BlameBlock> call() {
+	public Collection<BlameBlock> call(Logger logger) {
 		Preconditions.checkArgument(commitHash!=null && ObjectId.isId(commitHash), "commit hash has to be specified.");
 		Preconditions.checkNotNull(file, "file parameter has to be specified.");
 
@@ -111,6 +111,7 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 		
 		long time = System.currentTimeMillis();
 		
+		Logger effectiveLogger = logger!=null?logger:BlameCommand.logger;
 		ExecuteResult result = cmd.execute(new LineConsumer() {
 
 			@Override
@@ -159,13 +160,13 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 			public void consume(String line) {
 				if (line.startsWith("fatal: file ") && line.contains("has only ")) {
 					endOfFile.set(true);
-					logger.trace(line.substring("fatal: ".length()));
+					effectiveLogger.trace(line.substring("fatal: ".length()));
 				} else {
-					logger.error(line);
+					effectiveLogger.error(line);
 				}
 			}
 			
-		});
+		}, logger);
 		
 		if (!endOfFile.get())
 			result.checkReturnCode();

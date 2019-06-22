@@ -33,7 +33,7 @@ public class InitCommand extends GitCommand<Void> {
 	}
 	
 	@Override
-	public Void call() {
+	public Void call(Logger logger) {
 	    Preconditions.checkNotNull(from, "from param has to be specified.");
 	    
 		Commandline cmd = cmd().addArgs("fetch");
@@ -43,11 +43,12 @@ public class InitCommand extends GitCommand<Void> {
 		for (String each: refspec)
 			cmd.addArgs(each);
 		
+		Logger effectiveLogger = logger!=null?logger:InitCommand.logger;
 		cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.trace(line);
+				effectiveLogger.trace(line);
 			}
 			
 		}, new LineConsumer() {
@@ -58,13 +59,13 @@ public class InitCommand extends GitCommand<Void> {
 						|| line.startsWith(" * branch") 
 						|| line.startsWith(" * [new ref]") 
 						|| line.contains("..") && line.contains("->")) {
-					logger.info(line);
+					effectiveLogger.info(line);
 				} else {
-					logger.error(line);
+					effectiveLogger.error(line);
 				}
 			}
 			
-		}).checkReturnCode();
+		}, logger).checkReturnCode();
 		
 		return null;
 	}

@@ -27,19 +27,20 @@ public class AdvertiseUploadRefsCommand extends GitCommand<Void> {
 	}
 	
 	@Override
-	public Void call() {
+	public Void call(Logger logger) {
 		Preconditions.checkNotNull(output);
 		
+		Logger effectiveLogger = logger!=null?logger:AdvertiseUploadRefsCommand.logger;
 		Commandline cmd = cmd();
 		cmd.addArgs("upload-pack", "--stateless-rpc", "--advertise-refs", ".");
 		cmd.execute(output, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				effectiveLogger.error(line);
 			}
 			
-		}).checkReturnCode();
+		}, logger).checkReturnCode();
 		return null;
 	}
 

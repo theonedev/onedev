@@ -96,8 +96,8 @@ public abstract class JobContext {
 	}
 	
 	private void fetchAndCheckout(File gitDir) {
-		new FetchCommand(gitDir).depth(1).from(gitDir.getAbsolutePath()).refspec(commitId.name()).call();
-		new CheckoutCommand(gitDir).refspec(commitId.name()).call();
+		new FetchCommand(gitDir).depth(1).from(gitDir.getAbsolutePath()).refspec(commitId.name()).call(logger);
+		new CheckoutCommand(gitDir).refspec(commitId.name()).call(logger);
 	}
 	
 	public void checkoutSource(File dir) {

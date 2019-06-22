@@ -160,7 +160,7 @@ public class CommitListPanel extends Panel {
 					if (command.revisions().isEmpty() && getCompareWith() != null)
 						command.revisions(Lists.newArrayList(getCompareWith()));
 					
-					commitHashes = command.call();
+					commitHashes = command.call(null);
 				} catch (Exception e) {
 					if (e.getMessage() != null)
 						error(e.getMessage());

@@ -26,26 +26,27 @@ public class CheckoutCommand extends GitCommand<Void> {
 	}
 
 	@Override
-	public Void call() {
+	public Void call(Logger logger) {
 	    Preconditions.checkNotNull(refspec, "refspec param has to be specified.");
 	    
 		Commandline cmd = cmd().addArgs("checkout", "--quiet", refspec);
 		
+		Logger effectiveLogger = logger!=null?logger:CheckoutCommand.logger;
 		cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.trace(line);
+				effectiveLogger.trace(line);
 			}
 			
 		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				effectiveLogger.error(line);
 			}
 			
-		}).checkReturnCode();
+		}, logger).checkReturnCode();
 		
 		return null;
 	}

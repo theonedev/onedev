@@ -24,6 +24,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.quartz.CronScheduleBuilder;
 import org.quartz.ScheduleBuilder;
@@ -80,6 +81,7 @@ import io.onedev.server.util.Input;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.patternset.PatternSet;
+import jersey.repackaged.com.google.common.collect.Sets;
 
 @Singleton
 public class DefaultJobManager implements JobManager, Runnable, SchedulableTask, CodePullAuthorizationSource {
@@ -246,11 +248,13 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 
 	private void execute(Build build) {
 		try {
+			String jobId = UUID.randomUUID().toString();
+			Collection<String> jobSecretsToMask = Sets.newHashSet(jobId);
 			Job job = build.getJob();
 			ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 			JobExecutor executor = getJobExecutor(build.getProject(), commitId, job.getName(), job.getEnvironment());
 			if (executor != null) {
-				Logger logger = logManager.getLogger(build, job.getLogLevel()); 
+				Logger logger = logManager.getLogger(build, job.getLogLevel(), jobSecretsToMask); 
 				
 				Long buildId = build.getId();
 				String projectName = build.getProject().getName();
@@ -334,7 +338,6 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 
 							};
 							
-							String jobId = UUID.randomUUID().toString();
 							jobContexts.put(jobId, jobContext);
 							try {
 								executor.execute(jobId, jobContext);
@@ -356,7 +359,14 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 						} catch (Exception e) {
 							if (ExceptionUtils.find(e, InterruptedException.class) == null)
 								logger.error("Error running build", e);
-							throw e;
+							String errorMessage = e.getMessage();
+							if (errorMessage != null) {
+								for (String secret: jobSecretsToMask)
+									errorMessage = StringUtils.replace(errorMessage, secret, SecretInput.MASK);
+								throw new RuntimeException(errorMessage);
+							} else {
+								throw e;
+							}
 						} finally {
 							logger.info("Deleting server workspace...");
 							executor.cleanDir(serverWorkspace);

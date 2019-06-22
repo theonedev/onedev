@@ -2,7 +2,6 @@ package io.onedev.server.git.command;
 
 import java.io.File;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 
@@ -17,7 +16,7 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.git.GitVersion;
 import io.onedev.server.git.config.GitConfig;
 
-public abstract class GitCommand<V> implements Callable<V> {
+public abstract class GitCommand<V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(GitCommand.class);
 	
@@ -38,7 +37,7 @@ public abstract class GitCommand<V> implements Callable<V> {
 	public GitCommand(File gitDir) {
 		this(gitDir, null);
 	}
-
+	
 	/**
 	 * Check if there are any errors with git command line. 
 	 *
@@ -101,7 +100,6 @@ public abstract class GitCommand<V> implements Callable<V> {
 		return AppLoader.getInstance(GitConfig.class).getExecutable();
 	}
 	
-	@Override
-	public abstract V call();
-
+	public abstract V call(@Nullable Logger logger);
+	
 }

@@ -51,7 +51,7 @@ public abstract class LogCommand extends GitCommand<Void> {
 	}
 
 	@Override
-    public Void call() {
+    public Void call(Logger logger) {
 		Preconditions.checkArgument(!revisions.isEmpty(), "Log revisions have to be specified");
 		
         Commandline cmd = cmd();
@@ -83,6 +83,8 @@ public abstract class LogCommand extends GitCommand<Void> {
         
     	for (String revision: revisions)
     		cmd.addArgs(revision);
+
+    	Logger effectiveLogger = logger!=null?logger:LogCommand.logger;
         
         AtomicReference<GitCommit.Builder> commitBuilderRef = new AtomicReference<>(null);
         cmd.execute(new LineConsumer() {
@@ -157,13 +159,13 @@ public abstract class LogCommand extends GitCommand<Void> {
 			public void consume(String line) {
 				if (line.contains("inexact rename detection was skipped") 
 						|| line.contains("you may want to set your diff.renameLimit variable")) {
-					logger.trace(line);
+					effectiveLogger.trace(line);
 				} else {
-					logger.error(line);
+					effectiveLogger.error(line);
 				}
 			}
         	
-        }).checkReturnCode();
+        }, logger).checkReturnCode();
 
         if (commitBuilderRef.get() != null)
         	consume(commitBuilderRef.get().build());

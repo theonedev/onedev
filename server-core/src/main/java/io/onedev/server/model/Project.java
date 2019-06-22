@@ -1303,7 +1303,7 @@ public class Project extends AbstractEntity implements Validatable {
 
 		List<User> authors = new ArrayList<>();
 		UserManager userManager = OneDev.getInstance(UserManager.class);
-		for (BlameBlock block: cmd.call()) {
+		for (BlameBlock block: cmd.call(null)) {
 			User author = userManager.find(block.getCommit().getAuthor());
 			if (author != null && !authors.contains(author))
 				authors.add(author);
@@ -1434,7 +1434,7 @@ public class Project extends AbstractEntity implements Validatable {
 		if (gitEnvs != null && !gitEnvs.isEmpty()) {
 			ListChangedFilesCommand cmd = new ListChangedFilesCommand(getGitDir(), gitEnvs);
 			cmd.fromRev(oldObjectId.name()).toRev(newObjectId.name());
-			return cmd.call();
+			return cmd.call(null);
 		} else {
 			return GitUtils.getChangedFiles(getRepository(), oldObjectId, newObjectId);
 		}

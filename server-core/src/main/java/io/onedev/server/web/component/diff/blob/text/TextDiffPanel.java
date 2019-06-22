@@ -155,7 +155,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		String oldPath = change.getOldBlobIdent().path;
 		if (oldPath != null) {
 			cmd.commitHash(getOldCommit().name()).file(oldPath);
-			for (BlameBlock blame: cmd.call()) {
+			for (BlameBlock blame: cmd.call(null)) {
 				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.oldBlame.put(i, blame.getCommit());
@@ -165,7 +165,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 		String newPath = change.getNewBlobIdent().path;
 		if (newPath != null) {
 			cmd.commitHash(getNewCommit().name()).file(newPath);
-			for (BlameBlock blame: cmd.call()) {
+			for (BlameBlock blame: cmd.call(null)) {
 				for (LinearRange range: blame.getRanges()) {
 					for (int i=range.getFrom(); i<=range.getTo(); i++) 
 						blameInfo.newBlame.put(i, blame.getCommit());

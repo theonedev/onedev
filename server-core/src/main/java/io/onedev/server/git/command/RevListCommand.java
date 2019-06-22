@@ -165,7 +165,7 @@ public class RevListCommand extends GitCommand<List<String>> {
 	}
 	
 	@Override
-    public List<String> call() {
+    public List<String> call(Logger logger) {
         Commandline cmd = cmd();
         cmd.addArgs("rev-list");
 
@@ -218,6 +218,8 @@ public class RevListCommand extends GitCommand<List<String>> {
         for (String path: paths)
         	cmd.addArgs(path);
 
+    	Logger effectiveLogger = logger!=null?logger:RevListCommand.logger;
+    	
         List<String> commitHashes = new ArrayList<>();
         cmd.execute(new LineConsumer() {
 
@@ -230,10 +232,10 @@ public class RevListCommand extends GitCommand<List<String>> {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				effectiveLogger.error(line);
 			}
         	
-        }).checkReturnCode();
+        }, logger).checkReturnCode();
         
         return commitHashes;
 	}

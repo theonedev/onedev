@@ -92,11 +92,12 @@ public class DefaultLogManager implements LogManager {
 	}
 	
 	@Override
-	public Logger getLogger(Build build, LogLevel loggerLevel) {
+	public Logger getLogger(Build build, LogLevel loggerLevel, Collection<String> jobSecretsToMask) {
 		Long projectId = build.getProject().getId();
 		Long buildId = build.getId();
 		Long buildNumber = build.getNumber();
 		Collection<String> secretValuesToMask = build.getSecretValuesToMask();
+		secretValuesToMask.addAll(jobSecretsToMask);
 		return new JobLogger(loggerLevel) {
 			
 			private static final long serialVersionUID = 1L;

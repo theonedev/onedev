@@ -40,7 +40,7 @@ public class FetchCommand extends GitCommand<Void> {
 	}
 	
 	@Override
-	public Void call() {
+	public Void call(Logger logger) {
 	    Preconditions.checkNotNull(from, "from param has to be specified.");
 	    
 		Commandline cmd = cmd().addArgs("fetch");
@@ -52,21 +52,22 @@ public class FetchCommand extends GitCommand<Void> {
 		for (String each: refspec)
 			cmd.addArgs(each);
 		
+		Logger effectiveLogger = logger!=null?logger:FetchCommand.logger;
 		cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.trace(line);
+				effectiveLogger.trace(line);
 			}
 			
 		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				effectiveLogger.error(line);
 			}
 			
-		}).checkReturnCode();
+		}, logger).checkReturnCode();
 		
 		return null;
 	}

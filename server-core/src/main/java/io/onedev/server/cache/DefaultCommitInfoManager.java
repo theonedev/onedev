@@ -448,14 +448,14 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				revList.revisions(revisions).order(Order.TOPO);
 				
 				List<ObjectId> historyIds = new ArrayList<>();
-				for (String commitHash: revList.call()) 
+				for (String commitHash: revList.call(null)) 
 					historyIds.add(ObjectId.fromString(commitHash));
 				
 				revList = new RevListCommand(project.getGitDir());
 				revList.order(null).firstParent(true);
 				
 				Set<ObjectId> firstParentIds = new HashSet<>();
-				for (String commitHash: revList.call()) 
+				for (String commitHash: revList.call(null)) 
 					firstParentIds.add(ObjectId.fromString(commitHash));
 
 				/*
@@ -565,7 +565,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 								@Override
 								public void run() {
 									try {
-										log.call();
+										log.call(null);
 									} catch (Exception e) {
 										logException.set(e);
 									} finally {

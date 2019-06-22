@@ -36,21 +36,22 @@ public class ReceiveCommand extends GitCommand<Void> {
 	}
 	
 	@Override
-	public Void call() {
+	public Void call(Logger logger) {
 		Preconditions.checkNotNull(input);
 		Preconditions.checkNotNull(output);
 		
 		Commandline cmd = cmd();
 		cmd.addArgs("receive-pack", "--stateless-rpc", ".");
 		
-		cmd.execute(output, new LineConsumer() {
+    	Logger effectiveLogger = logger!=null?logger:ReceiveCommand.logger;
+    	cmd.execute(output, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				effectiveLogger.error(line);
 			}
 			
-		}, input).checkReturnCode();
+		}, input, logger).checkReturnCode();
 		
 		return null;
 	}
