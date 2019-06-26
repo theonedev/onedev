@@ -8,9 +8,8 @@ onedev.server.buildLog = {
         onedev.server.buildLog.appendLogEntries(containerId, logEntries, maxNumOfLogEntries);
     },
     renderLogEntry: function(logEntry) {
-		var $logEntry = $("<div class='log-entry " + logEntry.level + "'></div>");
+		var $logEntry = $("<div class='log-entry'></div>");
 		$logEntry.append("<span class='date'>" + moment(logEntry.date).format("HH:mm:ss") + "</span>");
-		$logEntry.append("<span class='log-level'>" + logEntry.level + "</span>");
 		var $message = $("<span class='message'></span>");
 		$message.text(logEntry.message);
 		$logEntry.append($message); 

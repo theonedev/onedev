@@ -36,22 +36,21 @@ public class UploadCommand extends GitCommand<Void> {
 	}
 	
 	@Override
-	public Void call(Logger logger) {
+	public Void call() {
 		Preconditions.checkNotNull(input);
 		Preconditions.checkNotNull(output);
 		
 		Commandline cmd = cmd();
 		cmd.addArgs("upload-pack", "--stateless-rpc", ".");
 		
-    	Logger effectiveLogger = logger!=null?logger:UploadCommand.logger;
 		cmd.execute(output, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				effectiveLogger.error(line);
+				logger.error(line);
 			}
 			
-		}, input, logger).checkReturnCode();
+		}, input).checkReturnCode();
 		
 		return null;
 	}

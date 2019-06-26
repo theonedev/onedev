@@ -37,6 +37,7 @@ import io.onedev.server.ci.job.cache.CacheAllocation;
 import io.onedev.server.ci.job.cache.CacheCallable;
 import io.onedev.server.ci.job.cache.CacheRunner;
 import io.onedev.server.ci.job.cache.JobCache;
+import io.onedev.server.ci.job.log.JobLogger;
 import io.onedev.server.model.support.JobContext;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.plugin.serverdocker.ServerDockerExecutor.TestData;
@@ -122,8 +123,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 	
 	@SuppressWarnings("unchecked")
-	private String getImageOS(Logger logger, String image) {
-		logger.info("Checking image OS...");
+	private String getImageOS(JobLogger logger, String image) {
+		logger.log("Checking image OS...");
 		Commandline docker = getDocker();
 		docker.addArgs("inspect", image);
 		
@@ -132,11 +133,11 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 			@Override
 			public void consume(String line) {
-				logger.debug(line);
+				logger.log(line);
 				output.append(line).append("\n");
 			}
 			
-		}, newErrorLogger(logger), logger).checkReturnCode();
+		}, newCommandLogger(logger)).checkReturnCode();
 
 		Map<String, Object> map;
 		try {
@@ -159,36 +160,36 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 
 	@Override
-	public void execute(String jobId, JobContext context) {
-		Logger logger = context.getLogger();
+	public void execute(String jobToken, JobContext jobContext) {
+		JobLogger logger = jobContext.getLogger();
 		
 		getCapacityRunner().call(new Callable<Void>() {
 
 			@Override
 			public Void call() {
-				return new CacheRunner(getCacheHome(), context.getCaches()).call(new CacheCallable<Void>() {
+				return new CacheRunner(getCacheHome(), jobContext.getCaches()).call(new CacheCallable<Void>() {
 
 					@Override
 					public Void call(Collection<CacheAllocation> allocations) {
-						context.notifyJobRunning();
+						jobContext.notifyJobRunning();
 						
 						login(logger);
 						
-						logger.info("Pulling image...") ;
+						logger.log("Pulling image...") ;
 						Commandline docker = getDocker();
-						docker.addArgs("pull", context.getEnvironment());
-						docker.execute(newInfoLogger(logger), newErrorLogger(logger), logger).checkReturnCode();
+						docker.addArgs("pull", jobContext.getEnvironment());
+						docker.execute(newCommandLogger(logger), newCommandLogger(logger)).checkReturnCode();
 						
 						docker.clearArgs();
 						String jobInstance = UUID.randomUUID().toString();
 						docker.addArgs("run", "--rm", "--name", jobInstance);
-						for (Map.Entry<String, String> entry: context.getEnvVars().entrySet())
+						for (Map.Entry<String, String> entry: jobContext.getEnvVars().entrySet())
 							docker.addArgs("--env", entry.getKey() + "=" + entry.getValue());
 						if (getRunOptions() != null)
 							docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 						
-						String imageOS = getImageOS(logger, context.getEnvironment());
-						logger.info("Detected image OS: " + imageOS);
+						String imageOS = getImageOS(logger, jobContext.getEnvironment());
+						logger.log("Detected image OS: " + imageOS);
 
 						boolean windows = imageOS.equals("windows");
 						
@@ -206,16 +207,16 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							}
 						}
 						
-						File effectiveWorkspace = workspaceCache != null? workspaceCache: context.getServerWorkspace();
+						File effectiveWorkspace = workspaceCache != null? workspaceCache: jobContext.getServerWorkspace();
 						
-						if (context.isCloneSource()) {
-							logger.info("Cloning source code...");
-							context.checkoutSource(effectiveWorkspace);
+						if (jobContext.isCloneSource()) {
+							logger.log("Cloning source code...");
+							jobContext.checkoutSource(effectiveWorkspace);
 						}
 						
 						if (workspaceCache != null) {
 							try {
-								FileUtils.copyDirectory(context.getServerWorkspace(), workspaceCache);
+								FileUtils.copyDirectory(jobContext.getServerWorkspace(), workspaceCache);
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							}
@@ -231,45 +232,45 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						if (windows) {
 							File scriptFile = new File(effectiveWorkspace, "onedev-job-commands.bat");
 							try {
-								FileUtils.writeLines(scriptFile, context.getCommands(), "\r\n");
+								FileUtils.writeLines(scriptFile, jobContext.getCommands(), "\r\n");
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							}
-							docker.addArgs(context.getEnvironment());
+							docker.addArgs(jobContext.getEnvironment());
 							docker.addArgs("cmd", "/c", dockerWorkspacePath + "\\onedev-job-commands.bat");
 						} else {
 							File scriptFile = new File(effectiveWorkspace, "onedev-job-commands.sh");
 							try {
-								FileUtils.writeLines(scriptFile, context.getCommands(), "\n");
+								FileUtils.writeLines(scriptFile, jobContext.getCommands(), "\n");
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							}
-							docker.addArgs(context.getEnvironment());
+							docker.addArgs(jobContext.getEnvironment());
 							docker.addArgs("sh", dockerWorkspacePath + "/onedev-job-commands.sh");
 						}
 						
-						logger.info("Running container to execute job...");
+						logger.log("Running container to execute job...");
 						
 						try {
-							docker.execute(newInfoLogger(logger), newErrorLogger(logger), null, new ProcessKiller() {
+							docker.execute(newCommandLogger(logger), newCommandLogger(logger), null, new ProcessKiller() {
 	
 								@Override
 								public void kill(Process process) {
-									logger.info("Stopping container...");
+									logger.log("Stopping container...");
 									Commandline cmd = getDocker();
 									cmd.addArgs("stop", jobInstance);
-									cmd.execute(newInfoLogger(logger), newErrorLogger(logger), logger);
+									cmd.execute(newCommandLogger(logger), newCommandLogger(logger)).checkReturnCode();
 								}
 								
-							}, logger).checkReturnCode();
+							}).checkReturnCode();
 							
 							return null;
 						} finally {
 							if (workspaceCache != null) {
 								int baseLen = workspaceCache.getAbsolutePath().length()+1;
-								for (File file: context.getCollectFiles().listFiles(workspaceCache)) {
+								for (File file: jobContext.getCollectFiles().listFiles(workspaceCache)) {
 									try {
-										FileUtils.copyFile(file, new File(context.getServerWorkspace(), file.getAbsolutePath().substring(baseLen)));
+										FileUtils.copyFile(file, new File(jobContext.getServerWorkspace(), file.getAbsolutePath().substring(baseLen)));
 									} catch (IOException e) {
 										throw new RuntimeException(e);
 									}
@@ -278,40 +279,29 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						}
 					}
 					
-				}, logger);
+				});
 			}
 			
 		});
 	}
 
-	private LineConsumer newInfoLogger(Logger logger) {
+	private LineConsumer newCommandLogger(JobLogger logger) {
 		return new LineConsumer(Charsets.UTF_8.name()) {
 
 			@Override
 			public void consume(String line) {
-				logger.info(line);
+				logger.log(line);
 			}
 			
 		};
 	}
 
-	private LineConsumer newErrorLogger(Logger logger) {
-		return new LineConsumer(Charsets.UTF_8.name()) {
-
-			@Override
-			public void consume(String line) {
-				logger.error(line);
-			}
-			
-		};
-	}
-	
-	private void login(Logger logger) {
+	private void login(JobLogger logger) {
 		for (RegistryLogin login: getRegistryLogins()) {
 			if (login.getRegistryUrl() != null)
-				logger.info("Login to docker registry '{}'...", login.getRegistryUrl());
+				logger.log(String.format("Login to docker registry '%s'...", login.getRegistryUrl()));
 			else
-				logger.info("Login to official docker registry...");
+				logger.log("Login to official docker registry...");
 			Commandline cmd = getDocker();
 			cmd.addArgs("login", "-u", login.getUserName(), "--password-stdin");
 			if (login.getRegistryUrl() != null)
@@ -322,7 +312,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);
 			}
-			cmd.execute(newInfoLogger(logger), newErrorLogger(logger), input, logger).checkReturnCode();
+			cmd.execute(newCommandLogger(logger), newCommandLogger(logger), input).checkReturnCode();
 		}
 	}
 	
@@ -409,19 +399,27 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	@Override
 	public void test(TestData testData) {
-		logger.info("Testing local docker executor...");
+		JobLogger logger = new JobLogger() {
+
+			@Override
+			public void log(String message, Throwable t) {
+				ServerDockerExecutor.logger.info(message, t);
+			}
+			
+		};
+		logger.log("Testing local docker executor...");
 		
 		login(logger);
 		
-		logger.info("Pulling image...");
+		logger.log("Pulling image...");
 		
 		Commandline cmd = getDocker();
 		cmd.addArgs("pull", testData.getDockerImage());
-		cmd.execute(newInfoLogger(logger), newErrorLogger(logger), logger).checkReturnCode();
+		cmd.execute(newCommandLogger(logger), newCommandLogger(logger)).checkReturnCode();
 		
 		boolean windows = getImageOS(logger, testData.getDockerImage()).equals("windows");
 		
-		logger.info("Running container...");
+		logger.log("Running container...");
 		File cacheHome = getCacheHome();
 		boolean cacheHomeExists = cacheHome.exists();
 		File workspaceDir = null;
@@ -455,7 +453,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			else 
 				cmd.addArgs("sh", "-c", "echo hello from container");
 			
-			cmd.execute(newInfoLogger(logger), newErrorLogger(logger), logger).checkReturnCode();
+			cmd.execute(newCommandLogger(logger), newCommandLogger(logger)).checkReturnCode();
 		} finally {
 			if (workspaceDir != null)
 				FileUtils.deleteDir(workspaceDir);
@@ -466,10 +464,10 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		}
 		
 		if (!SystemUtils.IS_OS_WINDOWS) {
-			logger.info("Checking busybox...");
+			logger.log("Checking busybox...");
 			cmd = getDocker();
 			cmd.addArgs("run", "--rm", "busybox", "sh", "-c", "echo hello from busybox");			
-			cmd.execute(newInfoLogger(logger), newErrorLogger(logger), logger).checkReturnCode();
+			cmd.execute(newCommandLogger(logger), newCommandLogger(logger)).checkReturnCode();
 		}
 	}
 	
@@ -482,7 +480,21 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			String containerPath = "/onedev_dir_to_clean";
 			cmd.addArgs("run", "-v", dir.getAbsolutePath() + ":" + containerPath, "--rm", 
 					"busybox", "sh", "-c", "rm -rf " + containerPath + "/*");			
-			cmd.execute(newInfoLogger(logger), newErrorLogger(logger), logger).checkReturnCode();
+			cmd.execute(new LineConsumer() {
+
+				@Override
+				public void consume(String line) {
+					logger.info(line);
+				}
+				
+			}, new LineConsumer() {
+
+				@Override
+				public void consume(String line) {
+					logger.error(line);
+				}
+				
+			}).checkReturnCode();
 		}
 	}
 	

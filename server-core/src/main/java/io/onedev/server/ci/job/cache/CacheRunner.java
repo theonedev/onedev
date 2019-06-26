@@ -5,12 +5,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 
 public class CacheRunner {
 
+	private static final Logger logger = LoggerFactory.getLogger(CacheRunner.class);
+	
 	private final File cacheHome;
 	
 	private final Collection<JobCache> caches;
@@ -20,7 +23,7 @@ public class CacheRunner {
 		this.caches = caches;
 	}
 	
-	public <T> T call(CacheCallable<T> callable, Logger logger) {
+	public <T> T call(CacheCallable<T> callable) {
 		Collection<CacheAllocation> allocations = new ArrayList<>();
 		try {
 			if (!cacheHome.exists())

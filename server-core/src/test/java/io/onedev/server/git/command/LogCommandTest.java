@@ -78,7 +78,7 @@ public class LogCommandTest extends AbstractGitTest {
 				commits.add(commit);
 			}
 			
-		}.revisions(Lists.newArrayList("master")).call(null);
+		}.revisions(Lists.newArrayList("master")).call();
 		
 		assertEquals(2, commits.size());
 

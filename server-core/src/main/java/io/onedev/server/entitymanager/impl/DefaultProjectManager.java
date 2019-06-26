@@ -208,7 +208,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	public void fork(Project from, Project to) {
     	save(to);
         FileUtils.cleanDir(to.getGitDir());
-        new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call(null);
+        new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
         commitInfoManager.cloneInfo(from, to);
         avatarManager.copyAvatar(from.getFacade(), to.getFacade());
 	}

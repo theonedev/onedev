@@ -35,7 +35,7 @@ public class IsAncestorCommand extends GitCommand<Boolean> {
 	}
 	
 	@Override
-	public Boolean call(Logger logger) {
+	public Boolean call() {
 		Preconditions.checkNotNull(ancestor, "ancestor has to be specified.");
 		Preconditions.checkNotNull(descendant, "descendant has to be specified.");
 		
@@ -43,7 +43,6 @@ public class IsAncestorCommand extends GitCommand<Boolean> {
 		
 		cmd.addArgs("merge-base", "--is-ancestor", ancestor, descendant);
 		
-		Logger effectiveLogger = logger!=null?logger:IsAncestorCommand.logger;
 		ExecuteResult result = cmd.execute(new LineConsumer() {
 
 			@Override
@@ -54,10 +53,10 @@ public class IsAncestorCommand extends GitCommand<Boolean> {
 
 			@Override
 			public void consume(String line) {
-				effectiveLogger.error(line);
+				logger.error(line);
 			}
 			
-		}, logger);
+		});
 		
 		if (result.getReturnCode() == 0)
 			return true;

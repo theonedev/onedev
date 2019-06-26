@@ -78,7 +78,7 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 	}
 	
 	@Override
-	public Collection<BlameBlock> call(Logger logger) {
+	public Collection<BlameBlock> call() {
 		Preconditions.checkArgument(commitHash!=null && ObjectId.isId(commitHash), "commit hash has to be specified.");
 		Preconditions.checkNotNull(file, "file parameter has to be specified.");
 
@@ -166,7 +166,7 @@ public class BlameCommand extends GitCommand<Collection<BlameBlock>> {
 				}
 			}
 			
-		}, logger);
+		});
 		
 		if (!endOfFile.get())
 			result.checkReturnCode();

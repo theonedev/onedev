@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
@@ -47,7 +48,8 @@ import io.onedev.server.OneException;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.InvalidCISpecException;
 import io.onedev.server.ci.JobDependency;
-import io.onedev.server.ci.job.log.LogManager;
+import io.onedev.server.ci.job.log.JobLogManager;
+import io.onedev.server.ci.job.log.JobLogger;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.BuildManager;
@@ -104,7 +106,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 	
 	private final SessionManager sessionManager;
 	
-	private final LogManager logManager;
+	private final JobLogManager logManager;
 	
 	private final UserManager userManager;
 	
@@ -127,7 +129,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 	@Inject
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager,
 			ListenerRegistry listenerRegistry, SettingManager settingManager,
-			TransactionManager transactionManager, LogManager logManager, ExecutorService executorService,
+			TransactionManager transactionManager, JobLogManager logManager, ExecutorService executorService,
 			SessionManager sessionManager, Set<DependencyPopulator> dependencyPopulators, 
 			TaskScheduler taskScheduler, BuildParamManager buildParamManager) {
 		this.settingManager = settingManager;
@@ -248,21 +250,22 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 
 	private void execute(Build build) {
 		try {
-			String jobId = UUID.randomUUID().toString();
-			Collection<String> jobSecretsToMask = Sets.newHashSet(jobId);
+			String jobToken = UUID.randomUUID().toString();
+			Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken);
 			Job job = build.getJob();
 			ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 			JobExecutor executor = getJobExecutor(build.getProject(), commitId, job.getName(), job.getEnvironment());
 			if (executor != null) {
-				Logger logger = logManager.getLogger(build, job.getLogLevel(), jobSecretsToMask); 
+				JobLogger logger = logManager.getLogger(build, jobSecretsToMask); 
 				
 				Long buildId = build.getId();
 				String projectName = build.getProject().getName();
+				File projectGitDir = build.getProject().getGitDir();
 				JobExecution execution = new JobExecution(executorService.submit(new Runnable() {
 
 					@Override
 					public void run() {
-						logger.info("Creating server workspace...");
+						logger.log("Creating server workspace...");
 						File serverWorkspace = FileUtils.createTempDir("server-workspace");
 						try {
 							Map<String, String> envVars = new HashMap<>();
@@ -274,7 +277,7 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 								@Override
 								public void run() {
 									Build build = buildManager.load(buildId);
-									logger.info("Populating dependencies...");
+									logger.log("Populating job dependencies...");
 									for (BuildDependence dependence: build.getDependencies()) {
 										for (DependencyPopulator populator: dependencyPopulators)
 											populator.populate(dependence.getDependency(), serverWorkspace, logger);
@@ -313,12 +316,13 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 								
 							});
 
-							logger.info("Executing job with executor '" + executor.getName() + "'...");
+							logger.log("Executing job with executor '" + executor.getName() + "'...");
 							
 							List<String> commands = Splitter.on("\n").trimResults(CharMatcher.is('\r')).splitToList(job.getCommands());
 							
-							JobContext jobContext = new JobContext(projectName, job.getEnvironment(), serverWorkspace, envVars, commands, 
-									job.isCloneSource(), commitId, job.getCaches(), new PatternSet(includeFiles, excludeFiles), logger) {
+							JobContext jobContext = new JobContext(projectName, projectGitDir, job.getEnvironment(), 
+									serverWorkspace, envVars, commands, job.isCloneSource(), commitId, job.getCaches(), 
+									new PatternSet(includeFiles, excludeFiles), logger) {
 
 								@Override
 								public void notifyJobRunning() {
@@ -338,18 +342,18 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 
 							};
 							
-							jobContexts.put(jobId, jobContext);
+							jobContexts.put(jobToken, jobContext);
 							try {
-								executor.execute(jobId, jobContext);
+								executor.execute(jobToken, jobContext);
 							} finally {
-								jobContexts.remove(jobId);
+								jobContexts.remove(jobToken);
 							}
 							
 							sessionManager.run(new Runnable() {
 
 								@Override
 								public void run() {
-									logger.info("Collecting job outcomes...");
+									logger.log("Processing job outcomes...");
 									Build build = buildManager.load(buildId);
 									for (JobOutcome outcome: job.getOutcomes())
 										outcome.process(build, serverWorkspace, logger);
@@ -357,8 +361,11 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 								
 							});
 						} catch (Exception e) {
-							if (ExceptionUtils.find(e, InterruptedException.class) == null)
-								logger.error("Error running build", e);
+							if (ExceptionUtils.find(e, InterruptedException.class) == null) {
+								DefaultJobManager.logger.debug("Error running build", e);
+								if (e.getMessage() != null)
+									logger.log(e.getMessage());
+							}
 							String errorMessage = e.getMessage();
 							if (errorMessage != null) {
 								for (String secret: jobSecretsToMask)
@@ -368,10 +375,10 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 								throw e;
 							}
 						} finally {
-							logger.info("Deleting server workspace...");
+							logger.log("Deleting server workspace...");
 							executor.cleanDir(serverWorkspace);
 							FileUtils.deleteDir(serverWorkspace);
-							logger.info("Server workspace deleted");
+							logger.log("Job finished");
 						}
 					}
 					
@@ -390,8 +397,8 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 	}
 	
 	@Override
-	public JobContext getJobContext(String jobId) {
-		return jobContexts.get(jobId);
+	public JobContext getJobContext(String jobToken) {
+		return jobContexts.get(jobToken);
 	}
 	
 	private void markBuildError(Build build, String errorMessage) {
@@ -586,8 +593,12 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 											build.setCanceller(userManager.load(cancellerId));
 									}
 									build.setStatus(Build.Status.CANCELLED);
-								} catch (Exception e) {
-									build.setStatus(Build.Status.FAILED, e.getMessage());
+								} catch (ExecutionException e) {
+									if (e.getCause() != null)
+										build.setStatus(Build.Status.FAILED, e.getCause().getMessage());
+									else
+										build.setStatus(Build.Status.FAILED, e.getMessage());
+								} catch (InterruptedException e) {
 								} finally {
 									build.setFinishDate(new Date());
 									listenerRegistry.post(new BuildFinished(build));
@@ -628,9 +639,9 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 
 	@Override
 	public boolean canPullCode(HttpServletRequest request, Project project) {
-		String jobId = request.getHeader(JOB_ID_HTTP_HEADER);
-		if (jobId != null) {
-			JobContext context = getJobContext(jobId);					
+		String jobToken = request.getHeader(JOB_TOKEN_HTTP_HEADER);
+		if (jobToken != null) {
+			JobContext context = getJobContext(jobToken);					
 			if (context != null)
 				return context.getProjectName().equals(project.getName());
 		}

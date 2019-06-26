@@ -3,15 +3,16 @@ package io.onedev.server.plugin.kubernetes;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.codec.Charsets;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -19,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
@@ -26,11 +29,13 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.Maps;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
-import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
+import io.onedev.server.ci.job.log.JobLogger;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.JobContext;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.plugin.kubernetes.KubernetesExecutor.TestData;
@@ -42,7 +47,7 @@ import io.onedev.server.web.util.Testable;
 public class KubernetesExecutor extends JobExecutor implements Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	private static final Logger logger = LoggerFactory.getLogger(KubernetesExecutor.class);
 	
 	private String configFile;
@@ -125,7 +130,20 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 
 	@Override
-	public void execute(String jobId, JobContext context) {
+	public void execute(String jobToken, JobContext jobContext) {
+		execute(jobContext.getEnvironment(), jobToken, jobContext.getLogger(), jobContext);
+	}
+	
+	@Override
+	public void test(TestData testData) {
+		execute(testData.getDockerImage(), KubernetesResource.TEST_JOB_TOKEN, new JobLogger() {
+
+			@Override
+			public void log(String message, Throwable t) {
+				logger.info(message, t);
+			}
+			
+		}, null);
 	}
 	
 	@Override
@@ -147,28 +165,30 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return cmdline;
 	}
 	
-	private String createResource(Map<Object, Object> resourceData, Logger logger) {
+	private String createResource(Map<Object, Object> resourceDef, JobLogger logger) {
 		Commandline kubectl = newKubeCtl();
 		File file = null;
 		try {
 			AtomicReference<String> resourceNameRef = new AtomicReference<String>(null);
 			file = File.createTempFile("k8s", ".yaml");
-			FileUtils.writeFile(file, new Yaml().dump(resourceData), Charsets.UTF_8.name());
-			kubectl.addArgs("create", "-f", file.getAbsolutePath());
+			
+			String resourceYaml = new Yaml().dump(resourceDef);
+			KubernetesExecutor.logger.trace("Kubernetes: creating resource with yaml:\n" + resourceYaml);
+			
+			FileUtils.writeFile(file, resourceYaml, Charsets.UTF_8.name());
+			kubectl.addArgs("create", "-f", file.getAbsolutePath(), "-o", "jsonpath={.metadata.name}");
 			kubectl.execute(new LineConsumer() {
 
 				@Override
 				public void consume(String line) {
-					logger.info(line);
-					line = StringUtils.substringAfter(line, "/");
-					resourceNameRef.set(StringUtils.substringBefore(line, " "));
+					resourceNameRef.set(line);
 				}
 				
 			}, new LineConsumer() {
 
 				@Override
 				public void consume(String line) {
-					logger.error(line);
+					logger.log("Kubernetes: " + line);
 				}
 				
 			}).checkReturnCode();
@@ -182,45 +202,44 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private void deleteResource(String resourceType, String resourceName, Logger logger) {
+	private void deleteResource(String resourceType, String resourceName, JobLogger logger) {
 		Commandline cmd = newKubeCtl();
 		cmd.addArgs("delete", resourceType, resourceName, "--namespace=" + getNamespace());
 		cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.info(line);
+				KubernetesExecutor.logger.debug(line);
 			}
 			
 		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				logger.log("Kubernetes: " + line);
 			}
 			
 		}).checkReturnCode();
 	}
 	
-	private void createNamespaceIfNotExist(Logger logger) {
+	private void createNamespaceIfNotExist(JobLogger logger) {
 		Commandline cmd = newKubeCtl();
-		cmd.addArgs("get", "namespaces");
+		String query = String.format("{.items[?(@.metadata.name=='%s')]}", getNamespace());
+		cmd.addArgs("get", "namespaces", "-o", "jsonpath=" + query);
 		
 		AtomicBoolean hasNamespace = new AtomicBoolean(false);
 		cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.debug(line);
-				if (line.startsWith(getNamespace() + " "))
-					hasNamespace.set(true);
+				hasNamespace.set(true);
 			}
 			
 		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				logger.log("Kubernetes: " + line);
 			}
 			
 		}).checkReturnCode();
@@ -232,28 +251,20 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 				@Override
 				public void consume(String line) {
-					logger.debug(line);
+					KubernetesExecutor.logger.debug(line);
 				}
 				
 			}, new LineConsumer() {
 
 				@Override
 				public void consume(String line) {
-					logger.error(line);
+					logger.log("Kubernetes: " + line);
 				}
 				
 			}).checkReturnCode();
 		}
 	}
 	
-	private String getResourceNamePrefix() {
-		try {
-			return "onedev-ci-" + InetAddress.getLocalHost().getHostName() + "-" + getName() + "-";
-		} catch (UnknownHostException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	private List<Object> getImagePullSecretsData() {
 		List<Object> data = new ArrayList<>();
 		if (getImagePullSecrets() != null) {
@@ -270,168 +281,424 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return data;
 	}
 	
-	private String getOS(Logger logger) {
-		logger.info("Checking OS...");
+	private String getOSName(JobLogger logger) {
+		logger.log("Checking working node OS...");
 		Commandline kubectl = newKubeCtl();
-		kubectl.addArgs("get", "nodes", "-o=jsonpath={..nodeInfo.operatingSystem}");
+		kubectl.addArgs("get", "nodes", "-o", "jsonpath={..nodeInfo.operatingSystem}");
 		for (NodeSelectorEntry entry: getNodeSelector()) 
 			kubectl.addArgs("-l", entry.getLabelName() + "=" + entry.getLabelValue());
 		
-		AtomicReference<String> osRef = new AtomicReference<>(null);
+		AtomicReference<String> osNameRef = new AtomicReference<>(null);
 		kubectl.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				osRef.set(line);
+				osNameRef.set(line);
 			}
 			
 		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				logger.error(line);
+				logger.log("Kubernetes: " + line);
 			}
 			
 		}).checkReturnCode();
 		
-		return Preconditions.checkNotNull(osRef.get(), "No applicable working nodes for this executor");
+		String osName = osNameRef.get();
+		if (osName != null) {
+			logger.log(String.format("OS of working node is '%s'", osName));
+			return osName;
+		} else {
+			throw new OneException("No applicable working nodes found for executor '" + getName() + "'");
+		}
 	}
 	
-	@Override
-	public void test(TestData testData) {
+	private String getServerUrl() {
+		return OneDev.getInstance(SettingManager.class).getSystemSetting().getServerUrl();
+	}
+	
+	private List<Map<Object, Object>> getSecretEnvs(String secretName, Collection<String> secretKeys) {
+		List<Map<Object, Object>> secretEnvs = new ArrayList<>();
+		for (String secretKey: secretKeys) {
+			Map<Object, Object> secretEnv = new LinkedHashMap<>();
+			secretEnv.put("name", secretKey);
+			secretEnv.put("valueFrom", Maps.newLinkedHashMap("secretKeyRef", Maps.newLinkedHashMap(
+							"name", secretName, 
+							"key", secretKey)));
+			secretEnvs.add(secretEnv);
+		}
+		return secretEnvs;
+	}
+	
+	private void execute(String dockerImage, String jobToken, JobLogger logger, @Nullable JobContext jobContext) {
 		createNamespaceIfNotExist(logger);
 
-		String os = getOS(logger);
-		
-		Map<String, Object> podSpec = new LinkedHashMap<>();
-		Map<Object, Object> containerSpec = Maps.newHashMap(
-				"name", "test", 
-				"image", testData.getDockerImage());
-
-		if (os.equalsIgnoreCase("linux")) {
-			containerSpec.put("command", Lists.newArrayList("sh"));
-			containerSpec.put("args", Lists.newArrayList("-c", "echo hello from container"));
-		} else {
-			containerSpec.put("command", Lists.newArrayList("cmd"));
-			containerSpec.put("args", Lists.newArrayList("/c", "echo hello from container"));
-		}
-		
-		podSpec.put("containers", Lists.<Object>newArrayList(containerSpec));
-		
-		Map<String, String> nodeSelectorData = getNodeSelectorData();
-		if (!nodeSelectorData.isEmpty())
-			podSpec.put("nodeSelector", nodeSelectorData);
-		List<Object> imagePullSecretsData = getImagePullSecretsData();
-		if (!imagePullSecretsData.isEmpty())
-			podSpec.put("imagePullSecrets", imagePullSecretsData);
-		if (getServiceAccount() != null)
-			podSpec.put("serviceAccountName", getServiceAccount());
-		podSpec.put("restartPolicy", "Never");		
-		Map<Object, Object> podData = Maps.newLinkedHashMap(
-				"apiVersion", "v1", 
-				"kind", "Pod", 
-				"metadata", Maps.newLinkedHashMap(
-						"generateName", getResourceNamePrefix() + "test-", 
-						"namespace", getNamespace()), 
-				"spec", podSpec);
-		
-		String podName = createResource(podData, logger);
+		Map<String, String> secrets = Maps.newLinkedHashMap(KubernetesHelper.ENV_JOB_TOKEN, jobToken);
+		String secretName = createSecret(secrets, logger);
 		try {
-			waitForPod(podName, logger);
+			String osName = getOSName(logger);
+			
+			Map<String, Object> podSpec = new LinkedHashMap<>();
+			
+			Map<Object, Object> mainContainerSpec = Maps.newHashMap(
+					"name", "main", 
+					"image", dockerImage);
+	
+			Map<String, String> emptyDirMount = new LinkedHashMap<>();
+			String classPath;
+			if (osName.equalsIgnoreCase("linux")) {
+				mainContainerSpec.put("command", Lists.newArrayList("sh"));
+				mainContainerSpec.put("args", Lists.newArrayList(".onedev/job-commands-wrapper.sh"));
+				emptyDirMount.put("mountPath", "/onedev-workspace");
+				classPath = "/k8s-helper/*";
+			} else {
+				mainContainerSpec.put("command", Lists.newArrayList("cmd"));
+				mainContainerSpec.put("args", Lists.newArrayList("/c", ".onedev\\job-commands-wrapper.bat"));
+				emptyDirMount.put("mountPath", "C:\\onedev-workspace");
+				classPath = "C:\\k8s-helper\\*";
+			}
+			mainContainerSpec.put("workingDir", emptyDirMount.get("mountPath"));
+			emptyDirMount.put("name", "workspace");
+			mainContainerSpec.put("volumeMounts", Lists.<Object>newArrayList(emptyDirMount));
+			Map<Object, Object> resources = Maps.newLinkedHashMap("requests", Maps.newLinkedHashMap("cpu", "1"));
+			mainContainerSpec.put("resources", resources);
+	
+			List<Map<Object, Object>> envs = new ArrayList<>();
+			Map<Object, Object> serverUrlEnv = Maps.newLinkedHashMap(
+					"name", KubernetesHelper.ENV_SERVER_URL, 
+					"value", getServerUrl());
+			envs.add(serverUrlEnv);
+			envs.addAll(getSecretEnvs(secretName, secrets.keySet()));
+			
+			List<String> sidecarArgs = Lists.newArrayList("-classpath", classPath, "io.onedev.k8shelper.SideCar");
+			List<String> initArgs = Lists.newArrayList("-classpath", classPath, "io.onedev.k8shelper.Init");
+			if (jobContext == null) {
+				sidecarArgs.add("test");
+				initArgs.add("test");
+			}
+			Map<Object, Object> sidecarContainerSpec = Maps.newHashMap(
+					"name", "sidecar", 
+					"image", "1dev/k8s-helper", 
+					"command", Lists.newArrayList("java"), 
+					"args", sidecarArgs, 
+					"env", envs, 
+					"volumeMounts", Lists.<Object>newArrayList(emptyDirMount));
+			
+			Map<Object, Object> initContainerSpec = Maps.newHashMap(
+					"name", "init", 
+					"image", "1dev/k8s-helper", 
+					"command", Lists.newArrayList("java"), 
+					"args", initArgs, 
+					"env", envs,
+					"resources", resources,
+					"volumeMounts", Lists.<Object>newArrayList(emptyDirMount));
+			
+			podSpec.put("containers", Lists.<Object>newArrayList(mainContainerSpec, sidecarContainerSpec));
+			podSpec.put("initContainers", Lists.<Object>newArrayList(initContainerSpec));
+			
+			Map<String, String> nodeSelectorData = getNodeSelectorData();
+			if (!nodeSelectorData.isEmpty())
+				podSpec.put("nodeSelector", nodeSelectorData);
+			List<Object> imagePullSecretsData = getImagePullSecretsData();
+			if (!imagePullSecretsData.isEmpty())
+				podSpec.put("imagePullSecrets", imagePullSecretsData);
+			if (getServiceAccount() != null)
+				podSpec.put("serviceAccountName", getServiceAccount());
+			podSpec.put("restartPolicy", "Never");		
+			podSpec.put("volumes", Lists.<Object>newArrayList(Maps.newLinkedHashMap(
+					"name", "workspace", 
+					"emptyDir", Maps.newLinkedHashMap())));
+			
+			Map<Object, Object> podDef = Maps.newLinkedHashMap(
+					"apiVersion", "v1", 
+					"kind", "Pod", 
+					"metadata", Maps.newLinkedHashMap(
+							"generateName", "job-", 
+							"namespace", getNamespace()), 
+					"spec", podSpec);
+			
+			String podName = createResource(podDef, logger);
+			try {
+				logger.log("Preparing job environment...");
+				watchPod(podName, new StatusChecker() {
+
+					@Override
+					public StopWatch check(JsonNode statusNode) {
+						JsonNode initContainerStatusesNode = statusNode.get("initContainerStatuses");
+						if (initContainerStatusesNode != null) {
+							for (JsonNode initContainerStatusNode: initContainerStatusesNode) {
+								JsonNode stateNode = initContainerStatusNode.get("state");
+								if (initContainerStatusNode.get("name").asText().equals("init") 
+										&& (stateNode.get("running") != null || stateNode.get("terminated") != null)) {
+									return new StopWatch(null);
+								}
+							}
+						}
+						return null;
+					}
+					
+				}, logger);
+				
+				if (jobContext != null)
+					jobContext.notifyJobRunning();
+				
+				waitForContainerStop(podName, "init", logger);
+				
+				watchPod(podName, new StatusChecker() {
+
+					@Override
+					public StopWatch check(JsonNode statusNode) {
+						JsonNode initContainerStatusesNode = statusNode.get("initContainerStatuses");
+						String errorMessage = getContainerError(initContainerStatusesNode, "init");
+						if (errorMessage != null)
+							return new StopWatch(new OneException("Error executing init logic: " + errorMessage));
+						
+						JsonNode containerStatusesNode = statusNode.get("containerStatuses");
+						if (isContainerStarted(containerStatusesNode, "main"))
+							return new StopWatch(null);
+						else
+							return null;
+					}
+					
+				}, logger);
+				
+				waitForContainerStop(podName, "main", logger);
+				
+				watchPod(podName, new StatusChecker() {
+
+					@Override
+					public StopWatch check(JsonNode statusNode) {
+						JsonNode containerStatusesNode = statusNode.get("containerStatuses");
+						String errorMessage = getContainerError(containerStatusesNode, "main");
+						if (errorMessage != null)
+							return new StopWatch(new OneException(errorMessage));
+						
+						if (isContainerStarted(containerStatusesNode, "sidecar"))
+							return new StopWatch(null);
+						else
+							return null;
+					}
+					
+				}, logger);
+				
+				waitForContainerStop(podName, "sidecar", logger);
+				
+				watchPod(podName, new StatusChecker() {
+
+					@Override
+					public StopWatch check(JsonNode statusNode) {
+						JsonNode containerStatusesNode = statusNode.get("containerStatuses");
+						String errorMessage = getContainerError(containerStatusesNode, "sidecar");
+						if (errorMessage != null)
+							return new StopWatch(new OneException("Error executing sidecar logic: " + errorMessage));
+						else if (isContainerStopped(containerStatusesNode, "sidecar"))
+							return new StopWatch(null);
+						else
+							return null;
+					}
+					
+				}, logger);
+				
+			} finally {
+				deleteResource("pod", podName, logger);
+			}
 		} finally {
-			deleteResource("pod", podName, logger);
+			deleteResource("secret", secretName, logger);
 		}
 	}
 	
-	private void waitForPod(String podName, Logger logger) {
-		Thread thread = Thread.currentThread();
-
-		AtomicBoolean podStartedRef = new AtomicBoolean(false);
-		AtomicReference<String> podErrorRef = new AtomicReference<String>(null);
-		
+	@Nullable
+	private String getContainerError(@Nullable JsonNode containerStatusesNode, String containerName) {
+		if (containerStatusesNode != null) {
+			for (JsonNode containerStatusNode: containerStatusesNode) {
+				JsonNode stateNode = containerStatusNode.get("state");
+				if (containerStatusNode.get("name").asText().equals(containerName)) {
+					JsonNode terminatedNode = stateNode.get("terminated");
+					if (terminatedNode != null) {
+						String reason = terminatedNode.get("reason").asText();
+						if (!reason.equals("Completed")) {
+							JsonNode messageNode = terminatedNode.get("message");
+							if (messageNode != null) {
+								return messageNode.asText();
+							} else {
+								JsonNode exitCodeNode = terminatedNode.get("exitCode");
+								if (exitCodeNode != null && exitCodeNode.asInt() != 0)
+									return "exit code: " + exitCodeNode.asText();
+								else
+									return reason;
+							}
+						}
+					}
+					break;
+				}
+			}
+		}
+		return null;
+	}
+	
+	private boolean isContainerStarted(@Nullable JsonNode containerStatusesNode, String containerName) {
+		if (containerStatusesNode != null) {
+			for (JsonNode containerStatusNode: containerStatusesNode) {
+				if (containerStatusNode.get("name").asText().equals(containerName)) {
+					JsonNode stateNode = containerStatusNode.get("state");
+					if (stateNode.get("running") != null || stateNode.get("terminated") != null)
+						return true;
+					break;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean isContainerStopped(@Nullable JsonNode containerStatusesNode, String containerName) {
+		if (containerStatusesNode != null) {
+			for (JsonNode containerStatusNode: containerStatusesNode) {
+				if (containerStatusNode.get("name").asText().equals(containerName)) {
+					JsonNode stateNode = containerStatusNode.get("state");
+					if (stateNode.get("terminated") != null)
+						return true;
+					break;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private String createSecret(Map<String, String> secrets, JobLogger logger) {
+		Map<String, String> encodedSecrets = new LinkedHashMap<>();
+		for (Map.Entry<String, String> entry: secrets.entrySet())
+			encodedSecrets.put(entry.getKey(), Base64.getEncoder().encodeToString(entry.getValue().getBytes(Charsets.UTF_8)));
+		Map<Object, Object> secretDef = Maps.newLinkedHashMap(
+				"apiVersion", "v1", 
+				"kind", "Secret", 
+				"metadata", Maps.newLinkedHashMap(
+						"generateName", "secret-", 
+						"namespace", getNamespace()), 
+				"data", encodedSecrets);
+		return createResource(secretDef, logger);
+	}
+	
+	private void watchPod(String podName, StatusChecker statusChecker, JobLogger logger) {
 		Commandline kubectl = newKubeCtl();
-		kubectl.addArgs("get", "event", "-n", getNamespace(), "--no-headers",
-				"--field-selector", "involvedObject.name=" + podName, "--watch");
+		
+		ObjectMapper mapper = new ObjectMapper();
+		
+		AtomicReference<StopWatch> stopWatchRef = new AtomicReference<>(null); 
+		
+		StringBuilder json = new StringBuilder();
+		kubectl.addArgs("get", "pod", podName, "-n", getNamespace(), "--watch", "-o", "json");
+		Thread thread = Thread.currentThread();
 		try {
 			kubectl.execute(new LineConsumer() {
 	
 				@Override
 				public void consume(String line) {
-					StringTokenizer tokenizer = new StringTokenizer(line);
-					tokenizer.nextToken();
-					String type = tokenizer.nextToken();
-					tokenizer.nextToken();
-					tokenizer.nextToken();
-					String message = tokenizer.nextToken("\n").trim();
-					if (type.equals("Normal"))
-						logger.info(message);
-					else
-						logger.error(message);
-					
-					if (!type.equals("Normal") && !message.contains("Insufficient cpu")) {
-						podErrorRef.set(message);
-						thread.interrupt();
-					} else if (message.startsWith("Started container")) {
-						podStartedRef.set(true);
-						thread.interrupt();
+					if (line.startsWith("{")) {
+						json.append("{").append("\n");
+					} else if (line.startsWith("}")) {
+						json.append("}");
+						try {
+							process(mapper.readTree(json.toString()));
+						} catch (IOException e) {
+							KubernetesExecutor.logger.error("Error reading json", e);
+						}
+						json.setLength(0);
+					} else {
+						json.append(line).append("\n");
 					}
+				}
+
+				private void process(JsonNode podNode) {
+					String errorMessage = null;
+					JsonNode statusNode = podNode.get("status");
+					JsonNode conditionsNode = statusNode.get("conditions");
+					if (conditionsNode != null) {
+						for (JsonNode conditionNode: conditionsNode) {
+							if (conditionNode.get("type").asText().equals("PodScheduled") 
+									&& conditionNode.get("status").asText().equals("False")
+									&& conditionNode.get("reason").asText().equals("Unschedulable")) {
+								logger.log(conditionNode.get("message").asText());
+							}
+						}
+					}
+					
+					Collection<JsonNode> containerStatusNodes = new ArrayList<>();
+					JsonNode initContainerStatusesNode = statusNode.get("initContainerStatuses");
+					if (initContainerStatusesNode != null) {
+						for (JsonNode containerStatusNode: initContainerStatusesNode)
+							containerStatusNodes.add(containerStatusNode);
+					}
+					JsonNode containerStatusesNode = statusNode.get("containerStatuses");
+					if (containerStatusesNode != null) {
+						for (JsonNode containerStatusNode: containerStatusesNode)
+							containerStatusNodes.add(containerStatusNode);
+					}
+					
+					for (JsonNode containerStatusNode: containerStatusNodes) {
+						JsonNode stateNode = containerStatusNode.get("state");
+						JsonNode waitingNode = stateNode.get("waiting");
+						if (waitingNode != null) {
+							String reason = waitingNode.get("reason").asText();
+							if (reason.equals("ErrImagePull") || reason.equals("InvalidImageName") 
+									|| reason.equals("ImageInspectError") || reason.equals("ErrImageNeverPull")
+									|| reason.equals("RegistryUnavailable")) {
+								JsonNode messageNode = waitingNode.get("message");
+								if (messageNode != null)
+									errorMessage = messageNode.asText();
+								else
+									errorMessage = reason;
+								break;
+							}
+						} 
+					}
+					if (errorMessage != null) 
+						stopWatchRef.set(new StopWatch(new OneException(errorMessage)));
+					else 
+						stopWatchRef.set(statusChecker.check(statusNode));
+					if (stopWatchRef.get() != null) 
+						thread.interrupt();
 				}
 				
 			}, new LineConsumer() {
 	
 				@Override
 				public void consume(String line) {
-					logger.error(line);
+					logger.log("Kubernetes: " + line);
 				}
 				
-			});
+			}).checkReturnCode();
 			
-			throw new OneException("Unexpected end of pod event watching");
+			throw new OneException("Unexpected end of pod watching");
 		} catch (Exception e) {
-			if (ExceptionUtils.find(e, InterruptedException.class) != null) {
-				if (podStartedRef.get()) {
-					kubectl = newKubeCtl();
-					kubectl.addArgs("logs", podName, "-n", getNamespace(), "--follow");
-					while (true) {
-						AtomicReference<Boolean> containerCreatingRef = new AtomicReference<Boolean>(false);
-						ExecuteResult result = kubectl.execute(new LineConsumer() {
-
-							@Override
-							public void consume(String line) {
-								logger.info(line);
-							}
-							
-						}, new LineConsumer() {
-
-							@Override
-							public void consume(String line) {
-								if (line.contains("is waiting to start: ContainerCreating"))
-									containerCreatingRef.set(true);
-								else
-									logger.error(line);
-							}
-							
-						});
-						if (containerCreatingRef.get()) {
-							try {
-								Thread.sleep(1000);
-							} catch (InterruptedException e2) {
-								throw new RuntimeException(e2);
-							}
-						} else {
-							result.checkReturnCode();
-							break;
-						}
-					}
-				} else if (podErrorRef.get() != null) {
-					throw new OneException(podErrorRef.get());
-				} else {
-					throw e;
-				}
-			} else {
-				throw e;
+			StopWatch stopWatch = stopWatchRef.get();
+			if (stopWatch != null) {
+				if (stopWatch.getException() != null)
+					throw stopWatch.getException();
+			} else { 
+				throw ExceptionUtils.unchecked(e);
 			}
-		}
+		}		
+	}
+	
+	private void waitForContainerStop(String podName, String containerName, JobLogger logger) {
+		Commandline kubectl = newKubeCtl();
+		kubectl.addArgs("logs", podName, "-c", containerName, "-n", getNamespace(), "--follow");
+		kubectl.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.log(line);
+			}
+			
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.log(line);
+			}
+			
+		}).checkReturnCode();
 	}
 	
 	@Editable
@@ -459,6 +726,27 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 		public void setLabelValue(String labelValue) {
 			this.labelValue = labelValue;
+		}
+		
+	}
+	
+	private static interface StatusChecker {
+		
+		StopWatch check(JsonNode statusNode);
+		
+	}
+	
+	private static class StopWatch {
+		
+		private final RuntimeException exception;
+		
+		public StopWatch(@Nullable RuntimeException exception) {
+			this.exception = exception;
+		}
+		
+		@Nullable
+		public RuntimeException getException() {
+			return exception;
 		}
 		
 	}

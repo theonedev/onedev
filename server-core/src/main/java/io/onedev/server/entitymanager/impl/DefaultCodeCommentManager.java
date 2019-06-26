@@ -193,7 +193,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 				command.after(DateUtils.addDays(oldestDate, -1));
 				command.revisions(Lists.newArrayList(commitId.name()));
 				command.count(MAX_HISTORY_COMMITS_TO_CHECK);
-				Set<String> revisions = new HashSet<>(command.call(null));
+				Set<String> revisions = new HashSet<>(command.call());
 				
 				RevCommit commit = revWalk.parseCommit(commitId);
 				List<String> newLines = GitUtils.readLines(project.getRepository(), commit, path, 

@@ -31,7 +31,7 @@ public class BlameCommandTest extends AbstractGitTest {
 		Collection<BlameBlock> blames = new BlameCommand(git.getRepository().getDirectory())
 				.commitHash(commitHash)
 				.file("file")
-				.call(null);
+				.call();
 		assertEquals(1, blames.size());
 		assertEquals(commitHash + ": 0-8", blames.iterator().next().toString());
 		
@@ -53,7 +53,7 @@ public class BlameCommandTest extends AbstractGitTest {
 				.commitHash(commitHash)
 				.file("file")
 				.range(new LinearRange(5, 8))
-				.call(null);
+				.call();
 		assertEquals(2, blames.size());
 		
 		assertEquals(commitHash + ": 8-8", getBlock(blames, commitHash).toString());
@@ -69,7 +69,7 @@ public class BlameCommandTest extends AbstractGitTest {
 		blames = new BlameCommand(git.getRepository().getDirectory())
 				.commitHash(commitHash)
 				.file("file")
-				.call(null);
+				.call();
 		
 		commitHash = git.getRepository().resolve("master~1").name();
 		

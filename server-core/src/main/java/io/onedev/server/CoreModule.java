@@ -84,9 +84,8 @@ import io.onedev.server.ci.DefaultCISpecProvider;
 import io.onedev.server.ci.job.DefaultJobManager;
 import io.onedev.server.ci.job.DependencyPopulator;
 import io.onedev.server.ci.job.JobManager;
-import io.onedev.server.ci.job.log.DefaultLogManager;
-import io.onedev.server.ci.job.log.LogManager;
-import io.onedev.server.ci.job.log.LogNormalizer;
+import io.onedev.server.ci.job.log.DefaultJobLogManager;
+import io.onedev.server.ci.job.log.JobLogManager;
 import io.onedev.server.ci.job.log.instruction.LogInstruction;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
@@ -318,7 +317,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(BuildManager.class).to(DefaultBuildManager.class);
 		bind(BuildDependenceManager.class).to(DefaultBuildDependenceManager.class);
 		bind(JobManager.class).to(DefaultJobManager.class);
-		bind(LogManager.class).to(DefaultLogManager.class);
+		bind(JobLogManager.class).to(DefaultJobLogManager.class);
 		bind(PullRequestBuildManager.class).to(DefaultPullRequestBuildManager.class);
 		bind(MailManager.class).to(DefaultMailManager.class);
 		bind(IssueManager.class).to(DefaultIssueManager.class);
@@ -389,7 +388,6 @@ public class CoreModule extends AbstractPluginModule {
         contributeFromPackage(Authenticator.class, Authenticator.class);
         
         contributeFromPackage(DefaultCISpecProvider.class, DefaultCISpecProvider.class);
-        contributeFromPackage(LogNormalizer.class, LogNormalizer.class);
         
 		contribute(CodePullAuthorizationSource.class, DefaultJobManager.class);
         

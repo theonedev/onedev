@@ -232,6 +232,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 						
 					};
 				}
+				target.focusComponent(null);
 			}
 
 			@Override

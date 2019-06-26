@@ -83,6 +83,7 @@ public class DefaultMavenCISpecProvider implements DefaultCISpecProvider {
 			 * OneDev using extracted version for current build
 			 */
 			job.setCommands(""
+					+ "echo \"Detecting project version (may require some time while downloading maven dependencies)...\"\n"
 					+ "buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)\n"
 					+ "echo \"##onedev[SetBuildVersion '$buildVersion']\"\n"
 					+ "echo\n" 

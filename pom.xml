@@ -175,7 +175,7 @@
 				<groupId>io.onedev</groupId>
 				<artifactId>commons-jsyntax</artifactId>
 				<version>${commons.version}</version>
-			</dependency>		
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<repositories>
@@ -195,7 +195,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>1.1.2</commons.version>
+		<commons.version>1.1.3</commons.version>
 		<antlr.version>4.7.2</antlr.version>
 	</properties>
 </project>

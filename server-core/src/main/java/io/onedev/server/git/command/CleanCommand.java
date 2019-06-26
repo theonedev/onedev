@@ -24,28 +24,27 @@ public class CleanCommand extends GitCommand<Void> {
 	}
 
 	@Override
-	public Void call(Logger logger) {
+	public Void call() {
 		Commandline cmd = cmd().addArgs("clean");
 
 		if (options != null)
 			cmd.addArgs(options);
 		
-		Logger effectiveLogger = logger!=null?logger:CleanCommand.logger;
 		cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				effectiveLogger.trace(line);
+				logger.trace(line);
 			}
 			
 		}, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				effectiveLogger.error(line);
+				logger.error(line);
 			}
 			
-		}, logger).checkReturnCode();
+		}).checkReturnCode();
 		
 		return null;
 	}

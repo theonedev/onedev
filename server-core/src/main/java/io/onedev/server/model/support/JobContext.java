@@ -9,10 +9,10 @@ import java.util.Map;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.ci.job.cache.JobCache;
+import io.onedev.server.ci.job.log.JobLogger;
 import io.onedev.server.git.command.CheckoutCommand;
 import io.onedev.server.git.command.FetchCommand;
 import io.onedev.server.util.patternset.PatternSet;
@@ -20,6 +20,8 @@ import io.onedev.server.util.patternset.PatternSet;
 public abstract class JobContext {
 	
 	private final String projectName;
+	
+	private final File gitDir;
 	
 	private final String environment;
 	
@@ -37,13 +39,14 @@ public abstract class JobContext {
 	
 	private final PatternSet collectFiles;
 	
-	private final Logger logger;	
+	private final JobLogger logger;	
 	
-	public JobContext(String projectName, String environment, File workspace, 
+	public JobContext(String projectName, File gitDir, String environment, File workspace, 
 			Map<String, String> envVars, List<String> commands, boolean cloneSource, 
 			ObjectId commitId,  Collection<JobCache> caches, PatternSet collectFiles, 
-			Logger logger) {
+			JobLogger logger) {
 		this.projectName = projectName;
+		this.gitDir = gitDir;
 		this.environment = environment;
 		this.serverWorkspace = workspace;
 		this.envVars = envVars;
@@ -91,13 +94,13 @@ public abstract class JobContext {
 		return collectFiles;
 	}
 
-	public Logger getLogger() {
+	public JobLogger getLogger() {
 		return logger;
 	}
 	
-	private void fetchAndCheckout(File gitDir) {
-		new FetchCommand(gitDir).depth(1).from(gitDir.getAbsolutePath()).refspec(commitId.name()).call(logger);
-		new CheckoutCommand(gitDir).refspec(commitId.name()).call(logger);
+	private void fetchAndCheckout(File checkoutDir) {	
+		new FetchCommand(checkoutDir).depth(1).from(gitDir.getAbsolutePath()).refspec(commitId.name()).call();
+		new CheckoutCommand(checkoutDir).refspec(commitId.name()).call();
 	}
 	
 	public void checkoutSource(File dir) {

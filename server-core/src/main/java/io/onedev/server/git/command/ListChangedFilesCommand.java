@@ -45,7 +45,7 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 	}
 	
 	@Override
-	public Collection<String> call(Logger logger) {
+	public Collection<String> call() {
 		Preconditions.checkNotNull(toRev, "toRev has to be specified.");
 		Preconditions.checkNotNull(fromRev, "fromRev has to be specified.");
 		
@@ -58,7 +58,6 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 		if (path != null)
 			cmd.addArgs("--", path);
 		
-		Logger effectiveLogger = logger!=null?logger:ListChangedFilesCommand.logger;
 		cmd.execute(new LineConsumer() {
 
 			@Override
@@ -71,10 +70,10 @@ public class ListChangedFilesCommand extends GitCommand<Collection<String>> {
 
 			@Override
 			public void consume(String line) {
-				effectiveLogger.error(line);
+				logger.error(line);
 			}
 			
-		}, logger).checkReturnCode();
+		}).checkReturnCode();
 		
 		return changedFiles;
 	}

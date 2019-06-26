@@ -6,7 +6,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.server.model.support.JobExecutor;
@@ -32,10 +31,7 @@ public class KubernetesModule extends AbstractPluginModule {
 
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				Collection<Class<?>> implementations = Sets.newHashSet(KubernetesExecutor.class);
-				if (Bootstrap.sandboxMode)
-					implementations.add(KubernetesHelperTester.class);
-				return implementations;
+				return Sets.newHashSet(KubernetesExecutor.class);
 			}
 			
 		});

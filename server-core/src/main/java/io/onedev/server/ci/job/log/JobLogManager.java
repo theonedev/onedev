@@ -4,13 +4,11 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-
 import io.onedev.server.model.Build;
 
-public interface LogManager {
+public interface JobLogManager {
 	
-	Logger getLogger(Build build, LogLevel logLevel, Collection<String> jobSecrets);
+	JobLogger getLogger(Build build, Collection<String> jobSecrets);
 	
 	/**
 	 * Read specified number of log entries from specified build, starting from specified index 
@@ -26,7 +24,7 @@ public interface LogManager {
 	 * 			log entries. Number of entries may be less than required count if there is no 
 	 * 			enough log entries
 	 */
-	List<LogEntry> readLogEntries(Build build, int offset, int count);
+	List<JobLogEntry> readLogEntries(Build build, int offset, int count);
 	
 	/**
 	 * Read specified number of log entries starting from end of the log

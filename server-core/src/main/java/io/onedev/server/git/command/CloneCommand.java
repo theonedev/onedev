@@ -61,7 +61,7 @@ public class CloneCommand extends GitCommand<Void> {
 	}
 	
 	@Override
-	public Void call(Logger logger) {
+	public Void call() {
 		Preconditions.checkNotNull(from, "from has to be specified.");
 		
 		Commandline cmd = cmd().addArgs("clone");
@@ -79,12 +79,11 @@ public class CloneCommand extends GitCommand<Void> {
 		cmd.addArgs(from);
 		cmd.addArgs(".");
 		
-		Logger effectiveLogger = logger!=null?logger:CloneCommand.logger;
 		cmd.execute(new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
-				effectiveLogger.trace(line);
+				logger.trace(line);
 			}
 			
 		}, new LineConsumer(){
@@ -92,14 +91,14 @@ public class CloneCommand extends GitCommand<Void> {
 			@Override
 			public void consume(String line) {
 				if (line.startsWith("Cloning into ") || line.equals("done."))
-					effectiveLogger.trace(line);
+					logger.trace(line);
 				else if (line.contains("You appear to have cloned an empty repository"))
-					effectiveLogger.warn(line);
+					logger.warn(line);
 				else
-					effectiveLogger.error(line);
+					logger.error(line);
 			}
 			
-		}, logger).checkReturnCode();
+		}).checkReturnCode();
 		
 		return null;
 	}

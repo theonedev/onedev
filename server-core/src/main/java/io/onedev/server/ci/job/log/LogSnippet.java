@@ -5,7 +5,7 @@ import java.util.List;
 
 public class LogSnippet {
 	
-	public List<LogEntry> entries = new LinkedList<>();
+	public List<JobLogEntry> entries = new LinkedList<>();
 	
 	/**
 	 * offset of first log entry in the snippet

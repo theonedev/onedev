@@ -100,6 +100,6 @@ public abstract class GitCommand<V> {
 		return AppLoader.getInstance(GitConfig.class).getExecutable();
 	}
 	
-	public abstract V call(@Nullable Logger logger);
+	public abstract V call();
 	
 }

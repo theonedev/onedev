@@ -21,7 +21,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.cache.JobCache;
-import io.onedev.server.ci.job.log.LogLevel;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
@@ -60,8 +59,6 @@ public class Job implements Serializable, Validatable {
 	private List<JobCache> caches = new ArrayList<>();
 	
 	private long timeout = 3600;
-	
-	private LogLevel logLevel = LogLevel.INFO;
 	
 	private transient Map<String, InputSpec> paramSpecMap;
 	
@@ -166,15 +163,6 @@ public class Job implements Serializable, Validatable {
 
 	public void setTimeout(long timeout) {
 		this.timeout = timeout;
-	}
-
-	@Editable(order=10300, group="More Settings")
-	public LogLevel getLogLevel() {
-		return logLevel;
-	}
-
-	public void setLogLevel(LogLevel logLevel) {
-		this.logLevel = logLevel;
 	}
 
 	public JobTrigger getMatchedTrigger(ProjectEvent event) {

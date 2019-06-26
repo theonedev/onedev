@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,6 +33,8 @@ import io.onedev.server.model.support.JobContext;
 @Singleton
 public class KubernetesResource {
 
+	public static final String TEST_JOB_TOKEN = UUID.randomUUID().toString();
+	
 	private final JobManager jobManager;
 	
     @Context
@@ -84,13 +87,23 @@ public class KubernetesResource {
 		return Response.ok().build();
 	}
 	
+	@GET
+	@Path("/test")
+	public Response test() {
+		String jobToken = request.getHeader(JobManager.JOB_TOKEN_HTTP_HEADER);
+		if (TEST_JOB_TOKEN.equals(jobToken))
+			return Response.ok().build();
+		else
+			return Response.status(400).entity("Invalid or no job token").build();
+	}
+	
 	private JobContext getJobContext() {
-		String jobId = request.getHeader(JobManager.JOB_ID_HTTP_HEADER);
-		if (jobId == null)
-			throw new OneException("Http header '" + JobManager.JOB_ID_HTTP_HEADER + "' is expected");
-		JobContext context = jobManager.getJobContext(jobId);
+		String jobToken = request.getHeader(JobManager.JOB_TOKEN_HTTP_HEADER);
+		if (jobToken == null)
+			throw new OneException("Http header '" + JobManager.JOB_TOKEN_HTTP_HEADER + "' is expected");
+		JobContext context = jobManager.getJobContext(jobToken);
 		if (context == null) 
-			throw new OneException("No job context found for specified job id");
+			throw new OneException("No job context found for specified job token");
 		return context;
 	}
 	

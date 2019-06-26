@@ -327,7 +327,7 @@ public class GitUtils {
 			new FetchCommand(toRepository.getDirectory())
 					.from(fromRepository.getDirectory().getAbsolutePath())
 					.refspec(fetchRef)
-					.call(null);
+					.call();
 		} else {
 			LockUtils.call("repository-fetch:" + fromRepository.getDirectory(), new Callable<Void>() {
 
@@ -340,7 +340,7 @@ public class GitUtils {
 						new FetchCommand(toRepository.getDirectory())
 								.from(fromRepository.getDirectory().getAbsolutePath())
 								.refspec(refUpdate.getName())
-								.call(null);
+								.call();
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -356,7 +356,7 @@ public class GitUtils {
     	if (gitEnvs != null && !gitEnvs.isEmpty()) {
         	IsAncestorCommand cmd = new IsAncestorCommand(repository.getDirectory(), gitEnvs);
         	cmd.ancestor(base.name()).descendant(tip.name());
-        	return cmd.call(null);
+        	return cmd.call();
     	} else {
     		try (RevWalk revWalk = new RevWalk(repository)) {
     			RevCommit baseCommit;

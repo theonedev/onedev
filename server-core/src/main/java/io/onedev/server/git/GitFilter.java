@@ -157,7 +157,7 @@ public class GitFilter implements Filter {
 					try {
 						InputStream is = ServletUtils.getInputStream(request);
 						OutputStream os = response.getOutputStream();
-						new UploadCommand(gitDir, environments).input(is).output(os).call(null);
+						new UploadCommand(gitDir, environments).input(is).output(os).call();
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -174,7 +174,7 @@ public class GitFilter implements Filter {
 					try {
 						InputStream is = ServletUtils.getInputStream(request);
 						OutputStream os = response.getOutputStream();
-						new ReceiveCommand(gitDir, environments).input(is).output(os).call(null);
+						new ReceiveCommand(gitDir, environments).input(is).output(os).call();
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}
@@ -221,13 +221,13 @@ public class GitFilter implements Filter {
 		if (service.contains("upload")) {
 			checkPullPermission(request, project);
 			writeInitial(response, service);
-			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call(null);
+			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
 		} else {
 			if (!SecurityUtils.canWriteCode(project.getFacade())) {
 				throw new UnauthorizedException("You do not have permission to push to this project.");
 			}
 			writeInitial(response, service);
-			new AdvertiseReceiveRefsCommand(gitDir).output(response.getOutputStream()).call(null);
+			new AdvertiseReceiveRefsCommand(gitDir).output(response.getOutputStream()).call();
 		}
 	}
 

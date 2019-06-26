@@ -108,7 +108,7 @@ public class PullRequestUpdate extends AbstractEntity {
 			ListFileChangesCommand cmd = new ListFileChangesCommand(getRequest().getTargetProject().getGitDir());
 			cmd.fromRev(getBaseCommitHash());
 			cmd.toRev(getHeadCommitHash());
-			fileChanges = cmd.call(null);
+			fileChanges = cmd.call();
 		}
 		return fileChanges;
 	}

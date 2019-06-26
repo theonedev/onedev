@@ -14,7 +14,7 @@ import io.onedev.server.model.support.JobContext;
 
 public interface JobManager {
 	
-	public static final String JOB_ID_HTTP_HEADER = "X-ONEDEV-JOB-ID";
+	public static final String JOB_TOKEN_HTTP_HEADER = "X-ONEDEV-JOB-TOKEN";
 	
 	Build submit(Project project, ObjectId commitId, String jobName, 
 			Map<String, List<String>> paramMap, @Nullable User submitter);
@@ -23,6 +23,6 @@ public interface JobManager {
 	
 	void cancel(Build build, @Nullable User canceller);
 	
-	JobContext getJobContext(String jobId);
+	JobContext getJobContext(String jobToken);
 	
 }

@@ -8,11 +8,11 @@ import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.slf4j.Logger;
 
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.ci.job.JobOutcome;
+import io.onedev.server.ci.job.log.JobLogger;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -50,7 +50,7 @@ public class JobHtmlReport extends JobOutcome {
 	}
 
 	@Override
-	public void process(Build build, File workspace, Logger logger) {
+	public void process(Build build, File workspace, JobLogger logger) {
 		File outcomeDir = getOutcomeDir(build, DIR);
 		FileUtils.createDir(outcomeDir);
 
@@ -78,7 +78,7 @@ public class JobHtmlReport extends JobOutcome {
 						}
 					}
 				} else {
-					logger.warn("Html report start page not found: " + startPage.getAbsolutePath());
+					logger.log("ERROR: Html report start page not found: " + startPage.getAbsolutePath());
 				}
 				return null;
 			}

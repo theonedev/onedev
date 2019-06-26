@@ -279,6 +279,9 @@ onedev.server = {
 		focusOn: function(componentId) {
 			if (componentId)
 				onedev.server.focus.doFocus($("#" + componentId));
+			else if (document.activeElement != document.body) 
+				document.activeElement.blur();
+				
 			onedev.server.focus.$components = null;
 		},
 		

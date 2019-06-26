@@ -17,7 +17,7 @@ import org.apache.wicket.request.resource.AbstractResource;
 import com.google.common.base.Charsets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.job.log.LogManager;
+import io.onedev.server.ci.job.log.JobLogManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
@@ -75,7 +75,7 @@ public class BuildLogDownloadResource extends AbstractResource {
 
 			@Override
 			public void writeData(Attributes attributes) throws IOException {
-				try (InputStream is = OneDev.getInstance(LogManager.class).openLogStream(build)) {
+				try (InputStream is = OneDev.getInstance(JobLogManager.class).openLogStream(build)) {
 					IOUtils.copy(is, attributes.getResponse().getOutputStream());
 				}
 			}			

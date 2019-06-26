@@ -4,11 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
-import org.slf4j.Logger;
-
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.ci.job.JobOutcome;
+import io.onedev.server.ci.job.log.JobLogger;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -20,7 +19,7 @@ public class JobArtifacts extends JobOutcome {
 	public static final String DIR = "artifacts";
 	
 	@Override
-	public void process(Build build, File workspace, Logger logger) {
+	public void process(Build build, File workspace, JobLogger logger) {
 		File outcomeDir = getOutcomeDir(build, DIR);
 		FileUtils.createDir(outcomeDir);
 
