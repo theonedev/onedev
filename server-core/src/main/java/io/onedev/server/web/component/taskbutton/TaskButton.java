@@ -97,19 +97,26 @@ public abstract class TaskButton extends AjaxButton {
 										feedback = String.format(
 											"<div class='task-feedback alert alert-success'>%s</div>", 
 											HtmlEscape.escapeHtml5(future.get()));					
-									} catch (Exception e) {
-										logger.error("Error " + message, e);
+									} catch (ExecutionException e) {	
+										logger.debug("Error " + message, e);
 										String suggestedSolution = ExceptionUtils.suggestSolution(e);
 										if (suggestedSolution != null)
 											logger.warn("!!! " + suggestedSolution);
 										feedback = "Error " + message;
-										if (e.getMessage() != null)
-											feedback += ": " + e.getMessage();
+										String exceptionMessage;
+										if (e.getCause() != null) 
+											exceptionMessage = e.getCause().getMessage();
+										else
+											exceptionMessage = e.getMessage();
+										if (exceptionMessage != null)
+											feedback += ": " + exceptionMessage;
 										feedback += ", check server log for details.";
 										feedback = String.format(
 												"<div class='task-feedback alert alert-danger'>%s</div>", 
 												HtmlEscape.escapeHtml5(feedback));					
-									} 
+									} catch (InterruptedException e) {
+										throw new RuntimeException(e);
+									}
 									feedback = StringUtils.replace(feedback, "\n", "<br>");
 									target.appendJavaScript(String.format(""
 											+ "var $form = $('#%s').closest('form');"
