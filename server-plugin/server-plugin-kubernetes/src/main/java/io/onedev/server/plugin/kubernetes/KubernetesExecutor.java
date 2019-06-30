@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.Maps;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
@@ -39,9 +40,11 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.JobContext;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.plugin.kubernetes.KubernetesExecutor.TestData;
+import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
+import jersey.repackaged.com.google.common.collect.Sets;
 
 @Editable(order=300)
 public class KubernetesExecutor extends JobExecutor implements Testable<TestData> {
@@ -61,6 +64,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private String imagePullSecrets;
 	
 	private String serviceAccount;
+	
+	private String cpuRequest = "500m";
+	
+	private String memoryRequest = "128m";
 	
 	@Editable(name="Kubectl Config File", order=100, description=
 			"Specify absolute path to the config file used by kubectl to access the "
@@ -129,6 +136,28 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		this.serviceAccount = serviceAccount;
 	}
 
+	@Editable(order=24000, group="More Settings", description="Specify cpu requirement of jobs using this executor. "
+			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu'>"
+			+ "kubernetes documentation</a> for details")
+	public String getCpuRequest() {
+		return cpuRequest;
+	}
+
+	public void setCpuRequest(String cpuRequest) {
+		this.cpuRequest = cpuRequest;
+	}
+
+	@Editable(order=25000, group="More Settings", description="Specify memory requirement of jobs using this executor. "
+			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory'>"
+			+ "kubernetes documentation</a> for details")
+	public String getMemoryRequest() {
+		return memoryRequest;
+	}
+
+	public void setMemoryRequest(String memoryRequest) {
+		this.memoryRequest = memoryRequest;
+	}
+
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
 		execute(jobContext.getEnvironment(), jobToken, jobContext.getLogger(), jobContext);
@@ -165,7 +194,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return cmdline;
 	}
 	
-	private String createResource(Map<Object, Object> resourceDef, JobLogger logger) {
+	private String createResource(Map<Object, Object> resourceDef, Collection<String> secretsToMask, JobLogger logger) {
 		Commandline kubectl = newKubeCtl();
 		File file = null;
 		try {
@@ -173,7 +202,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			file = File.createTempFile("k8s", ".yaml");
 			
 			String resourceYaml = new Yaml().dump(resourceDef);
-			KubernetesExecutor.logger.trace("Kubernetes: creating resource with yaml:\n" + resourceYaml);
+			String maskedYaml = resourceYaml;
+			for (String secret: secretsToMask) 
+				maskedYaml = StringUtils.replace(maskedYaml, secret, SecretInput.MASK);
+			KubernetesExecutor.logger.trace("Creating resource:\n" + maskedYaml);
 			
 			FileUtils.writeFile(file, resourceYaml, Charsets.UTF_8.name());
 			kubectl.addArgs("create", "-f", file.getAbsolutePath(), "-o", "jsonpath={.metadata.name}");
@@ -284,7 +316,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private String getOSName(JobLogger logger) {
 		logger.log("Checking working node OS...");
 		Commandline kubectl = newKubeCtl();
-		kubectl.addArgs("get", "nodes", "-o", "jsonpath={..nodeInfo.operatingSystem}");
+		kubectl.addArgs("get", "nodes", "-o", "jsonpath={range .items[*]}{.status.nodeInfo.operatingSystem}{'\\n'}{end}");
 		for (NodeSelectorEntry entry: getNodeSelector()) 
 			kubectl.addArgs("-l", entry.getLabelName() + "=" + entry.getLabelValue());
 		
@@ -361,8 +393,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			mainContainerSpec.put("workingDir", emptyDirMount.get("mountPath"));
 			emptyDirMount.put("name", "workspace");
 			mainContainerSpec.put("volumeMounts", Lists.<Object>newArrayList(emptyDirMount));
-			Map<Object, Object> resources = Maps.newLinkedHashMap("requests", Maps.newLinkedHashMap("cpu", "1"));
-			mainContainerSpec.put("resources", resources);
+			
+			mainContainerSpec.put("resources", Maps.newLinkedHashMap("requests", Maps.newLinkedHashMap(
+					"cpu", getCpuRequest(), 
+					"memory", getMemoryRequest())));
 	
 			List<Map<Object, Object>> envs = new ArrayList<>();
 			Map<Object, Object> serverUrlEnv = Maps.newLinkedHashMap(
@@ -389,9 +423,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"name", "init", 
 					"image", "1dev/k8s-helper", 
 					"command", Lists.newArrayList("java"), 
-					"args", initArgs, 
+					"args", initArgs,
 					"env", envs,
-					"resources", resources,
 					"volumeMounts", Lists.<Object>newArrayList(emptyDirMount));
 			
 			podSpec.put("containers", Lists.<Object>newArrayList(mainContainerSpec, sidecarContainerSpec));
@@ -418,9 +451,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							"namespace", getNamespace()), 
 					"spec", podSpec);
 			
-			String podName = createResource(podDef, logger);
+			String podName = createResource(podDef, Sets.newHashSet(), logger);
 			try {
 				logger.log("Preparing job environment...");
+				KubernetesExecutor.logger.debug("Waiting for init container to start (pod: {})...", podName);
 				watchPod(podName, new StatusChecker() {
 
 					@Override
@@ -443,8 +477,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				if (jobContext != null)
 					jobContext.notifyJobRunning();
 				
+				KubernetesExecutor.logger.debug("Waiting for init container to stop (pod: {})...", podName);
 				waitForContainerStop(podName, "init", logger);
 				
+				KubernetesExecutor.logger.debug("Waiting for main container to start (pod: {})...", podName);
 				watchPod(podName, new StatusChecker() {
 
 					@Override
@@ -455,7 +491,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							return new StopWatch(new OneException("Error executing init logic: " + errorMessage));
 						
 						JsonNode containerStatusesNode = statusNode.get("containerStatuses");
-						if (isContainerStarted(containerStatusesNode, "main"))
+						if (isContainerStarted(containerStatusesNode, "main")) 
 							return new StopWatch(null);
 						else
 							return null;
@@ -463,8 +499,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					
 				}, logger);
 				
+				KubernetesExecutor.logger.debug("Waiting for main container to stop (pod: {})...", podName);
 				waitForContainerStop(podName, "main", logger);
 				
+				KubernetesExecutor.logger.debug("Waiting for sidecar container to start (pod: {})...", podName);
 				watchPod(podName, new StatusChecker() {
 
 					@Override
@@ -482,8 +520,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					
 				}, logger);
 				
+				KubernetesExecutor.logger.debug("Waiting for sidecar container to stop (pod: {})...", podName);
 				waitForContainerStop(podName, "sidecar", logger);
 				
+				KubernetesExecutor.logger.debug("Checking sidecar container (pod: {})...", podName);
 				watchPod(podName, new StatusChecker() {
 
 					@Override
@@ -516,7 +556,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				if (containerStatusNode.get("name").asText().equals(containerName)) {
 					JsonNode terminatedNode = stateNode.get("terminated");
 					if (terminatedNode != null) {
-						String reason = terminatedNode.get("reason").asText();
+						String reason;
+						JsonNode reasonNode = terminatedNode.get("reason");
+						if (reasonNode != null)
+							reason = reasonNode.asText();
+						else
+							reason = "terminated for unknown reason";
+						
 						if (!reason.equals("Completed")) {
 							JsonNode messageNode = terminatedNode.get("message");
 							if (messageNode != null) {
@@ -576,7 +622,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"generateName", "secret-", 
 						"namespace", getNamespace()), 
 				"data", encodedSecrets);
-		return createResource(secretDef, logger);
+		return createResource(secretDef, encodedSecrets.values(), logger);
 	}
 	
 	private void watchPod(String podName, StatusChecker statusChecker, JobLogger logger) {
@@ -598,10 +644,11 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						json.append("{").append("\n");
 					} else if (line.startsWith("}")) {
 						json.append("}");
+						KubernetesExecutor.logger.trace("Watching pod:\n" + json.toString());
 						try {
 							process(mapper.readTree(json.toString()));
-						} catch (IOException e) {
-							KubernetesExecutor.logger.error("Error reading json", e);
+						} catch (Exception e) {
+							KubernetesExecutor.logger.error("Error processing pod watching record", e);
 						}
 						json.setLength(0);
 					} else {
@@ -618,7 +665,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 							if (conditionNode.get("type").asText().equals("PodScheduled") 
 									&& conditionNode.get("status").asText().equals("False")
 									&& conditionNode.get("reason").asText().equals("Unschedulable")) {
-								logger.log(conditionNode.get("message").asText());
+								logger.log("Kubernetes: " + conditionNode.get("message").asText());
 							}
 						}
 					}
