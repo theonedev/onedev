@@ -7,8 +7,8 @@ import java.util.concurrent.Callable;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.ci.job.JobOutcome;
-import io.onedev.server.ci.job.log.JobLogger;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.JobLogger;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(name="Artifacts")

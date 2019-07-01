@@ -22,6 +22,7 @@ import com.google.common.base.Joiner;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.authenticator.Authenticated;
+import io.onedev.server.util.JobLogger;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
@@ -133,7 +134,7 @@ public class AuthenticatorPage extends AdministrationPage {
 			}
 
 			@Override
-			protected String runTask() {
+			protected String runTask(JobLogger logger) {
 				try {
 					Authenticated authenticated = bean.getAuthenticator().authenticate(
 							new UsernamePasswordToken(token.getUserName(), token.getPassword()));

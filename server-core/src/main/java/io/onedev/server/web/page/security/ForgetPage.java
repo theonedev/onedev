@@ -17,6 +17,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.MailManager;
+import io.onedev.server.util.JobLogger;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -41,7 +42,7 @@ public class ForgetPage extends BasePage {
 		form.add(new TaskButton("resettingPassword") {
 			
 			@Override
-			protected String runTask() {
+			protected String runTask(JobLogger logger) {
 				UserManager userManager = OneDev.getInstance(UserManager.class);
 				User user = userManager.findByName(bean.getUserNameOrEmailAddress());
 				if (user == null) {

@@ -18,6 +18,7 @@ import org.apache.wicket.util.visit.IVisitor;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.model.support.JobExecutor;
+import io.onedev.server.util.JobLogger;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
@@ -174,8 +175,8 @@ abstract class JobExecutorEditPanel extends Panel {
 
 			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
-			protected String runTask() {
-				((Testable)bean.getExecutor()).test(testData);
+			protected String runTask(JobLogger logger) {
+				((Testable)bean.getExecutor()).test(testData, logger);
 				return "Job executor tested successfully";
 			}
 

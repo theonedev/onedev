@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import io.onedev.server.model.Build;
+import io.onedev.server.util.JobLogger;
 
 public interface JobLogManager {
 	

@@ -12,9 +12,9 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.server.ci.job.cache.JobCache;
-import io.onedev.server.ci.job.log.JobLogger;
 import io.onedev.server.git.command.CheckoutCommand;
 import io.onedev.server.git.command.FetchCommand;
+import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.patternset.PatternSet;
 
 public abstract class JobContext {

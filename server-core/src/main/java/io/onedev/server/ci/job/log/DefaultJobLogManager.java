@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
-import com.google.common.base.Throwables;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
@@ -48,6 +47,7 @@ import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.web.websocket.WebSocketManager;
 
@@ -134,13 +134,8 @@ public class DefaultJobLogManager implements JobLogManager {
 			}
 			
 			@Override
-			public void log(String message, Throwable throwable) {
+			public void log(String message) {
 				try {
-					if (throwable != null) {
-						for (String line: Splitter.on(EOL_PATTERN).split(Throwables.getStackTraceAsString(throwable)))
-							message += "\n    " + line;
-					}
-							
 					if (message.startsWith(LogInstruction.PREFIX)) {
 						doLog(message);
 						

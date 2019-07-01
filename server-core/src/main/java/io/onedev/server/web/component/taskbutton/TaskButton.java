@@ -1,7 +1,9 @@
 package io.onedev.server.web.component.taskbutton;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -18,8 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.joda.time.DateTime;
 import org.quartz.ScheduleBuilder;
@@ -27,7 +27,6 @@ import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
-import org.unbescape.javascript.JavaScriptEscape;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
@@ -37,7 +36,9 @@ import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.util.JobLogger;
 import io.onedev.server.web.component.modal.ModalPanel;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public abstract class TaskButton extends AjaxButton {
@@ -64,78 +65,91 @@ public abstract class TaskButton extends AjaxButton {
 	}
 	
 	protected void submitTask(AjaxRequestTarget target) {
-		target.appendJavaScript(String.format("$('#%s').closest('form').children('.task-feedback').remove();", getMarkupId()));
 		String path = getPath();
+		String title = WordUtils.uncamel(getId()).toLowerCase();
 		
 		ExecutorService executorService = OneDev.getInstance(ExecutorService.class);
+		List<String> messages = Lists.newArrayList("Please wait...");
 		TaskFuture future = getTaskFutures().put(path, new TaskFuture(executorService.submit(new Callable<String>() {
 
 			@Override
 			public String call() throws Exception {
-				return runTask();
+				String result;
+				try {
+					result = String.format(
+						"<div class='task-result alert alert-success'>%s</div>", 
+						HtmlEscape.escapeHtml5(runTask(new JobLogger() {
+
+							@Override
+							public void log(String message) {
+								synchronized (messages) {
+									messages.add(message);
+								}
+							}
+							
+						})));					
+				} catch (Exception e) {	
+					logger.debug("Error " + title, e);
+					String suggestedSolution = ExceptionUtils.suggestSolution(e);
+					if (suggestedSolution != null)
+						logger.warn("!!! " + suggestedSolution);
+					if (e.getMessage() != null)
+						result = e.getMessage();
+					else
+						result = "Error " + title;
+					result = String.format(
+							"<div class='task-result alert alert-danger'>%s</div>", 
+							HtmlEscape.escapeHtml5(result));					
+				} 
+				result = StringUtils.replace(result, "\n", "<br>");
+				return result;
 			}
 			
-		})));
+		}), messages));
+		
 		if (future != null && !future.isDone())
 			future.cancel(true);
 		
 		new ModalPanel(target) {
 			
 			@Override
+			protected void onClosed() {
+				super.onClosed();
+				Future<?> future = getTaskFutures().remove(path);
+				if (future != null && !future.isDone())
+					future.cancel(true);
+			}
+
+			@Override
 			protected Component newContent(String id) {
-				String message = WordUtils.uncamel(TaskButton.this.getId()).toLowerCase();
-				return new TaskWaitPanel(id, StringUtils.capitalize(message) + " in progress...") {
+				return new TaskFeedbackPanel(id, StringUtils.capitalize(title)) {
 
 					@Override
-					protected void check(AjaxRequestTarget target) {
-						Future<String> future = getTaskFutures().get(path);
-						if (future != null) {
-							if (future.isDone()) {
-								if (!future.isCancelled()) {
-									String feedback;
-									try {
-										feedback = String.format(
-											"<div class='task-feedback alert alert-success'>%s</div>", 
-											HtmlEscape.escapeHtml5(future.get()));					
-									} catch (ExecutionException e) {	
-										logger.debug("Error " + message, e);
-										String suggestedSolution = ExceptionUtils.suggestSolution(e);
-										if (suggestedSolution != null)
-											logger.warn("!!! " + suggestedSolution);
-										feedback = "Error " + message;
-										String exceptionMessage;
-										if (e.getCause() != null) 
-											exceptionMessage = e.getCause().getMessage();
-										else
-											exceptionMessage = e.getMessage();
-										if (exceptionMessage != null)
-											feedback += ": " + exceptionMessage;
-										feedback += ", check server log for details.";
-										feedback = String.format(
-												"<div class='task-feedback alert alert-danger'>%s</div>", 
-												HtmlEscape.escapeHtml5(feedback));					
-									} catch (InterruptedException e) {
-										throw new RuntimeException(e);
-									}
-									feedback = StringUtils.replace(feedback, "\n", "<br>");
-									target.appendJavaScript(String.format(""
-											+ "var $form = $('#%s').closest('form');"
-											+ "$form.append('%s');"
-											+ "$form.children('.task-feedback')[0].scrollIntoView({behavior: 'smooth', block: 'center'})",
-											TaskButton.this.getMarkupId(), JavaScriptEscape.escapeJavaScript(feedback)));
-								}
-								close();
-							} 
-						} else {
-							close();
-						}
+					protected void onClose(AjaxRequestTarget target) {
+						close();
 					}
 
 					@Override
-					protected void onCancel(AjaxRequestTarget target) {
-						Future<?> future = getTaskFutures().remove(path);
-						if (future != null && !future.isDone())
-							future.cancel(true);
+					protected List<String> getMessages() {
+						TaskFuture future = getTaskFutures().get(path);
+						if (future != null) 
+							return future.getMessages();
+						else
+							return new ArrayList<>();
+					}
+
+					@Override
+					protected String getResult() {
+						TaskFuture future = getTaskFutures().get(path);
+						if (future != null && future.isDone() && !future.isCancelled()) { 
+							try {
+								return future.get();
+							} catch (InterruptedException | ExecutionException e) {
+								throw new RuntimeException(e);
+							}
+						} else {
+							return null;
+						}
 					}
 
 				};
@@ -145,12 +159,6 @@ public abstract class TaskButton extends AjaxButton {
 	}
 	
 	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new TaskButtonCssResourceReference()));
-	}
-
-	@Override
 	protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 		super.onSubmit(target, form);
 		target.add(form);
@@ -158,7 +166,7 @@ public abstract class TaskButton extends AjaxButton {
 		submitTask(target);
 	}
 	
-	protected abstract String runTask();
+	protected abstract String runTask(JobLogger logger);
 
 	@Singleton
 	public static class TaskFutureManager implements SchedulableTask {
@@ -209,8 +217,11 @@ public abstract class TaskButton extends AjaxButton {
 		
 		private final Future<String> wrapped;
 		
-		public TaskFuture(Future<String> wrapped) {
+		private final List<String> messages;
+		
+		public TaskFuture(Future<String> wrapped, List<String> messages) {
 			this.wrapped = wrapped;
+			this.messages = messages;
 		}
 		
 		@Override
@@ -241,6 +252,12 @@ public abstract class TaskButton extends AjaxButton {
 		public String get(long timeout, TimeUnit unit)
 				throws InterruptedException, ExecutionException, TimeoutException {
 			return get(timeout, unit);
+		}
+		
+		public List<String> getMessages() {
+			synchronized (messages) {
+				return new ArrayList<>(messages);
+			}
 		}
 		
 	}

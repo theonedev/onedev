@@ -35,11 +35,11 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
-import io.onedev.server.ci.job.log.JobLogger;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.JobContext;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.plugin.kubernetes.KubernetesExecutor.TestData;
+import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -139,6 +139,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	@Editable(order=24000, group="More Settings", description="Specify cpu requirement of jobs using this executor. "
 			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu'>"
 			+ "kubernetes documentation</a> for details")
+	@NotEmpty
 	public String getCpuRequest() {
 		return cpuRequest;
 	}
@@ -150,6 +151,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	@Editable(order=25000, group="More Settings", description="Specify memory requirement of jobs using this executor. "
 			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory'>"
 			+ "kubernetes documentation</a> for details")
+	@NotEmpty
 	public String getMemoryRequest() {
 		return memoryRequest;
 	}
@@ -164,15 +166,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	@Override
-	public void test(TestData testData) {
-		execute(testData.getDockerImage(), KubernetesResource.TEST_JOB_TOKEN, new JobLogger() {
-
-			@Override
-			public void log(String message, Throwable t) {
-				logger.info(message, t);
-			}
-			
-		}, null);
+	public void test(TestData testData, JobLogger logger) {
+		execute(testData.getDockerImage(), KubernetesResource.TEST_JOB_TOKEN, logger, null);
 	}
 	
 	@Override
@@ -477,8 +472,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				if (jobContext != null)
 					jobContext.notifyJobRunning();
 				
-				KubernetesExecutor.logger.debug("Waiting for init container to stop (pod: {})...", podName);
-				waitForContainerStop(podName, "init", logger);
+				KubernetesExecutor.logger.debug("Collecting init container log (pod: {})...", podName);
+				collectContainerLog(podName, "init", logger);
 				
 				KubernetesExecutor.logger.debug("Waiting for main container to start (pod: {})...", podName);
 				watchPod(podName, new StatusChecker() {
@@ -499,8 +494,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					
 				}, logger);
 				
-				KubernetesExecutor.logger.debug("Waiting for main container to stop (pod: {})...", podName);
-				waitForContainerStop(podName, "main", logger);
+				KubernetesExecutor.logger.debug("Collecting main container log (pod: {})...", podName);
+				collectContainerLog(podName, "main", logger);
 				
 				KubernetesExecutor.logger.debug("Waiting for sidecar container to start (pod: {})...", podName);
 				watchPod(podName, new StatusChecker() {
@@ -520,10 +515,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					
 				}, logger);
 				
-				KubernetesExecutor.logger.debug("Waiting for sidecar container to stop (pod: {})...", podName);
-				waitForContainerStop(podName, "sidecar", logger);
+				KubernetesExecutor.logger.debug("Collecting sidecar container log (pod: {})...", podName);
+				collectContainerLog(podName, "sidecar", logger);
 				
-				KubernetesExecutor.logger.debug("Checking sidecar container (pod: {})...", podName);
+				KubernetesExecutor.logger.debug("Checking sidecar container result (pod: {})...", podName);
 				watchPod(podName, new StatusChecker() {
 
 					@Override
@@ -728,7 +723,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}		
 	}
 	
-	private void waitForContainerStop(String podName, String containerName, JobLogger logger) {
+	private void collectContainerLog(String podName, String containerName, JobLogger logger) {
 		Commandline kubectl = newKubeCtl();
 		kubectl.addArgs("logs", podName, "-c", containerName, "-n", getNamespace(), "--follow");
 		kubectl.execute(new LineConsumer() {
