@@ -9,10 +9,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.util.OneContext;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 @SuppressWarnings("serial")
 public abstract class PropertyContext<T> implements Serializable {

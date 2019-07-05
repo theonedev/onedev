@@ -20,7 +20,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.ci.JobDependency;
-import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
@@ -48,7 +47,7 @@ public class Job implements Serializable, Validatable {
 	
 	private String commands;
 	
-	private boolean cloneSource = true;
+	private boolean retrieveSource = true;
 	
 	private List<JobDependency> dependencies = new ArrayList<>();
 	
@@ -56,7 +55,7 @@ public class Job implements Serializable, Validatable {
 
 	private List<JobTrigger> triggers = new ArrayList<>();
 	
-	private List<JobCache> caches = new ArrayList<>();
+	private List<CacheSpec> caches = new ArrayList<>();
 	
 	private long timeout = 3600;
 	
@@ -106,14 +105,14 @@ public class Job implements Serializable, Validatable {
 		this.commands = commands;
 	}
 	
-	@Editable(order=130, description="Whether or not to clone the source code. If enabled, the repository will be "
-			+ "cloned into job workspace")
-	public boolean isCloneSource() {
-		return cloneSource;
+	@Editable(order=130, description="Whether or not to retrieve the source code. If enabled, the repository will be "
+			+ "retrieved into job workspace")
+	public boolean isRetrieveSource() {
+		return retrieveSource;
 	}
 
-	public void setCloneSource(boolean cloneSource) {
-		this.cloneSource = cloneSource;
+	public void setRetrieveSource(boolean retrieveSource) {
+		this.retrieveSource = retrieveSource;
 	}	
 	
 	@Editable(name="Dependency Jobs", order=140, description="Job dependencies determines the order and "
@@ -148,11 +147,11 @@ public class Job implements Serializable, Validatable {
 			+ "projects, you may cache the <tt>node_modules</tt> folder to avoid downloading node modules for "
 			+ "subsequent job executions. Note that cache is considered as a best-effort approach and your "
 			+ "build script should always consider that cache might not be available")
-	public List<JobCache> getCaches() {
+	public List<CacheSpec> getCaches() {
 		return caches;
 	}
 
-	public void setCaches(List<JobCache> caches) {
+	public void setCaches(List<CacheSpec> caches) {
 		this.caches = caches;
 	}
 
@@ -179,7 +178,7 @@ public class Job implements Serializable, Validatable {
 		Set<String> paths = new HashSet<>();
 		
 		boolean isValid = true;
-		for (JobCache cache: caches) {
+		for (CacheSpec cache: caches) {
 			if (keys.contains(cache.getKey())) {
 				isValid = false;
 				context.buildConstraintViolationWithTemplate("Duplicate key: " + cache.getKey())

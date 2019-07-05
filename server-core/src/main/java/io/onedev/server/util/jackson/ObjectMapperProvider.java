@@ -21,8 +21,6 @@ import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.jsontype.impl.StdTypeResolverBuilder;
-import com.fasterxml.jackson.datatype.guava.GuavaModule;
-import com.fasterxml.jackson.datatype.joda.JodaModule;
 
 @Singleton
 public class ObjectMapperProvider implements Provider<ObjectMapper> {
@@ -37,8 +35,6 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 	@Override
 	public ObjectMapper get() {
         ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new GuavaModule());
-        mapper.registerModule(new JodaModule());
         
         TypeResolverBuilder<?> typer = new StdTypeResolverBuilder() {
 

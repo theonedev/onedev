@@ -1,7 +1,9 @@
 package io.onedev.server.ci.job;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,6 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
@@ -19,6 +22,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.Lock;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -27,14 +31,13 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
@@ -42,8 +45,7 @@ import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.MatrixRunner;
-import io.onedev.commons.utils.schedule.SchedulableTask;
-import io.onedev.commons.utils.schedule.TaskScheduler;
+import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.InvalidCISpecException;
@@ -71,7 +73,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.JobContext;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
@@ -83,10 +84,9 @@ import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.patternset.PatternSet;
-import jersey.repackaged.com.google.common.collect.Sets;
 
 @Singleton
-public class DefaultJobManager implements JobManager, Runnable, SchedulableTask, CodePullAuthorizationSource {
+public class DefaultJobManager implements JobManager, Runnable, CodePullAuthorizationSource {
 
 	private static final int CHECK_INTERVAL = 1000; // check internal in milli-seconds
 	
@@ -116,22 +116,17 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 	
 	private final Set<DependencyPopulator> dependencyPopulators;
 	
-	private final TaskScheduler taskScheduler;
-	
 	private final BuildParamManager buildParamManager;
 	
 	private volatile List<JobExecutor> jobExecutors;
 	
-	private String taskId;
-	
 	private volatile Status status;
 	
 	@Inject
-	public DefaultJobManager(BuildManager buildManager, UserManager userManager,
-			ListenerRegistry listenerRegistry, SettingManager settingManager,
-			TransactionManager transactionManager, JobLogManager logManager, ExecutorService executorService,
-			SessionManager sessionManager, Set<DependencyPopulator> dependencyPopulators, 
-			TaskScheduler taskScheduler, BuildParamManager buildParamManager) {
+	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
+			SettingManager settingManager, TransactionManager transactionManager, JobLogManager logManager, 
+			ExecutorService executorService, SessionManager sessionManager, 
+			Set<DependencyPopulator> dependencyPopulators, BuildParamManager buildParamManager) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -141,7 +136,6 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 		this.executorService = executorService;
 		this.dependencyPopulators = dependencyPopulators;
 		this.sessionManager = sessionManager;
-		this.taskScheduler = taskScheduler;
 		this.buildParamManager = buildParamManager;
 	}
 
@@ -316,13 +310,11 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 								
 							});
 
-							logger.log("Executing job with executor '" + executor.getName() + "'...");
-							
 							List<String> commands = Splitter.on("\n").trimResults(CharMatcher.is('\r')).splitToList(job.getCommands());
 							
-							JobContext jobContext = new JobContext(projectName, projectGitDir, job.getEnvironment(), 
-									serverWorkspace, envVars, commands, job.isCloneSource(), commitId, job.getCaches(), 
-									new PatternSet(includeFiles, excludeFiles), logger) {
+							JobContext jobContext = new JobContext(projectName, projectGitDir, job.getEnvironment(), serverWorkspace, 
+									envVars, commands, job.isRetrieveSource(), commitId, job.getCaches(), 
+									new PatternSet(includeFiles, excludeFiles), executor.getCacheTTL(), logger) {
 
 								@Override
 								public void notifyJobRunning() {
@@ -375,8 +367,6 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 								throw e;
 							}
 						} finally {
-							logger.log("Deleting server workspace...");
-							executor.cleanDir(serverWorkspace);
 							FileUtils.deleteDir(serverWorkspace);
 							logger.log("Job finished");
 						}
@@ -397,8 +387,11 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 	}
 	
 	@Override
-	public JobContext getJobContext(String jobToken) {
-		return jobContexts.get(jobToken);
+	public JobContext getJobContext(String jobToken, boolean mustExist) {
+		JobContext jobContext = jobContexts.get(jobToken);
+		if (mustExist && jobContext == null)
+			throw new OneException("No job context found for specified job token");
+		return jobContext;
 	}
 	
 	private void markBuildError(Build build, String errorMessage) {
@@ -504,12 +497,10 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 		status = Status.STARTED;
 		jobExecutors = settingManager.getJobExecutors();
 		new Thread(this).start();		
-		taskId = taskScheduler.schedule(this);
 	}
 	
 	@Listen
 	public void on(SystemStopping event) {
-		taskScheduler.unschedule(taskId);
 		if (status == Status.STARTED) {
 			status = Status.STOPPING;
 			while (status == Status.STOPPING) {
@@ -627,25 +618,68 @@ public class DefaultJobManager implements JobManager, Runnable, SchedulableTask,
 	}
 	
 	@Override
-	public void execute() {
-		for (JobExecutor executor: jobExecutors)
-			executor.checkCaches();
-	}
-
-	@Override
-	public ScheduleBuilder<?> getScheduleBuilder() {
-		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
-	}
-
-	@Override
 	public boolean canPullCode(HttpServletRequest request, Project project) {
 		String jobToken = request.getHeader(JOB_TOKEN_HTTP_HEADER);
 		if (jobToken != null) {
-			JobContext context = getJobContext(jobToken);					
+			JobContext context = getJobContext(jobToken, false);					
 			if (context != null)
 				return context.getProjectName().equals(project.getName());
 		}
 		return false;
+	}
+
+	@Override
+	public synchronized Map<CacheInstance, String> allocateJobCaches(String jobToken, Date currentTime, 
+			Map<CacheInstance, Date> cacheInstances) {
+		JobContext context = getJobContext(jobToken, true);
+		
+		List<CacheInstance> sortedInstances = new ArrayList<>(cacheInstances.keySet());
+		sortedInstances.sort(new Comparator<CacheInstance>() {
+
+			@Override
+			public int compare(CacheInstance o1, CacheInstance o2) {
+				return cacheInstances.get(o2).compareTo(cacheInstances.get(o1));
+			}
+			
+		});
+		Collection<String> allAllocated = new HashSet<>();
+		for (JobContext each: jobContexts.values())
+			allAllocated.addAll(each.getAllocatedCaches());
+		Map<CacheInstance, String> allocations = new HashMap<>();
+		for (CacheSpec cacheSpec: context.getCacheSpecs()) {
+			Optional<CacheInstance> result = sortedInstances
+					.stream()
+					.filter(it->it.getCacheKey().equals(cacheSpec.getKey()))
+					.filter(it->!allAllocated.contains(it.getName()))
+					.findFirst();
+			CacheInstance allocation;
+			if (result.isPresent()) 
+				allocation = result.get();
+			else
+				allocation = new CacheInstance(UUID.randomUUID().toString(), cacheSpec.getKey());
+			allocations.put(allocation, cacheSpec.getPath());
+			context.getAllocatedCaches().add(allocation.getName());
+			allAllocated.add(allocation.getName());
+		}
+		
+		Consumer<CacheInstance> cacheCleaner = new Consumer<CacheInstance>() {
+
+			@Override
+			public void accept(CacheInstance instance) {
+				long ellapsed = currentTime.getTime() - cacheInstances.get(instance).getTime();
+				if (ellapsed > context.getCacheTTL() * 24L * 3600L * 1000L) {
+					allocations.put(instance, null);
+					context.getAllocatedCaches().add(instance.getName());
+				}
+			}
+			
+		};
+		cacheInstances.keySet()
+				.stream()
+				.filter(it->!allAllocated.contains(it.getName()))
+				.forEach(cacheCleaner);
+		
+		return allocations;
 	}
 
 }

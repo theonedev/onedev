@@ -26,12 +26,13 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
+import com.google.common.collect.Sets;
+
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
-import jersey.repackaged.com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 class ParamSpecListViewPanel extends Panel {

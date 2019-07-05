@@ -1,5 +1,6 @@
 package io.onedev.server.ci.job;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -7,10 +8,10 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.JobContext;
 
 public interface JobManager {
 	
@@ -23,6 +24,9 @@ public interface JobManager {
 	
 	void cancel(Build build, @Nullable User canceller);
 	
-	JobContext getJobContext(String jobToken);
+	JobContext getJobContext(String jobToken, boolean mustExist);
+	
+	Map<CacheInstance, String> allocateJobCaches(String jobToken, Date currentTime, 
+			Map<CacheInstance, Date> cacheInstances);
 	
 }

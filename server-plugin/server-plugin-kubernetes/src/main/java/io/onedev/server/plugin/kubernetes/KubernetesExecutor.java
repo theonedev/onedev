@@ -13,11 +13,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import org.apache.commons.codec.Charsets;
-import org.hibernate.validator.constraints.NotEmpty;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.unbescape.json.JsonEscape;
 import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,6 +28,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
@@ -35,19 +39,22 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
+import io.onedev.server.ci.job.JobContext;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.JobContext;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.plugin.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.inputspec.SecretInput;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
-import jersey.repackaged.com.google.common.collect.Sets;
 
 @Editable(order=300)
-public class KubernetesExecutor extends JobExecutor implements Testable<TestData> {
+@ClassValidating
+public class KubernetesExecutor extends JobExecutor implements Testable<TestData>, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -69,10 +76,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private String memoryRequest = "128m";
 	
+	private String cacheHome;
+	
 	@Editable(name="Kubectl Config File", order=100, description=
 			"Specify absolute path to the config file used by kubectl to access the "
 			+ "cluster. Leave empty to have kubectl determining cluster access "
 			+ "information automatically")
+	@NameOfEmptyValue("Use default")
 	public String getConfigFile() {
 		return configFile;
 	}
@@ -84,6 +94,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	@Editable(name="Path to kubectl", order=200, description=
 			"Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. "
 			+ "If left empty, OneDev will try to find the utility from system path")
+	@NameOfEmptyValue("Use default")
 	public String getKubeCtlPath() {
 		return kubeCtlPath;
 	}
@@ -91,7 +102,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	public void setKubeCtlPath(String kubeCtlPath) {
 		this.kubeCtlPath = kubeCtlPath;
 	}
-	
+
 	@Editable(order=20000, group="More Settings", description="Optionally specify Kubernetes namespace "
 			+ "used by this executor to place created Kubernetes resources (such as job pods)")
 	@NotEmpty
@@ -160,6 +171,27 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		this.memoryRequest = memoryRequest;
 	}
 
+	@Editable(order=40000, group="More Settings", description="Optionally specify an absolute directory on Kubernetes "
+			+ "working nodes to store job caches of this executor. If leave empty, OneDev will use directory "
+			+ "<tt>/onedev-cache</tt> on Linux, and <tt>C:\\onedev-cache</tt> on Windows")
+	@NameOfEmptyValue("Use default")
+	public String getCacheHome() {
+		return cacheHome;
+	}
+
+	public void setCacheHome(String cacheHome) {
+		this.cacheHome = cacheHome;
+	}
+
+	private String getEffectiveCacheHome(String osName) {
+		if (getCacheHome() != null)
+			return cacheHome;
+		else if (osName.equalsIgnoreCase("linux"))
+			return "/onedev-cache";
+		else
+			return "C:\\onedev-cache";
+	}
+	
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
 		execute(jobContext.getEnvironment(), jobToken, jobContext.getLogger(), jobContext);
@@ -170,15 +202,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		execute(testData.getDockerImage(), KubernetesResource.TEST_JOB_TOKEN, logger, null);
 	}
 	
-	@Override
-	public void checkCaches() {
-	}
-
-	@Override
-	public void cleanDir(File dir) {
-		FileUtils.cleanDir(dir);
-	}
-
 	private Commandline newKubeCtl() {
 		String kubectl = getKubeCtlPath();
 		if (kubectl == null)
@@ -337,7 +360,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			logger.log(String.format("OS of working node is '%s'", osName));
 			return osName;
 		} else {
-			throw new OneException("No applicable working nodes found for executor '" + getName() + "'");
+			throw new OneException("No applicable working nodes found for executor '" + getEffectiveCacheHome(osName) + "'");
 		}
 	}
 	
@@ -372,22 +395,37 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"name", "main", 
 					"image", dockerImage);
 	
-			Map<String, String> emptyDirMount = new LinkedHashMap<>();
-			String classPath;
+			String k8sHelperClassPath;
+			String containerCIHome;
+			String containerWorkspace;
+			String containerCacheHome;
 			if (osName.equalsIgnoreCase("linux")) {
+				containerCIHome = "/onedev-ci";
+				containerWorkspace = containerCIHome + "/workspace";
+				k8sHelperClassPath = "/k8s-helper/*";
+				containerCacheHome = "/onedev-cache";
 				mainContainerSpec.put("command", Lists.newArrayList("sh"));
-				mainContainerSpec.put("args", Lists.newArrayList(".onedev/job-commands-wrapper.sh"));
-				emptyDirMount.put("mountPath", "/onedev-workspace");
-				classPath = "/k8s-helper/*";
+				mainContainerSpec.put("args", Lists.newArrayList(containerCIHome + "/commands.sh"));
 			} else {
+				containerCIHome = "C:\\onedev-ci";
+				containerWorkspace = containerCIHome + "\\workspace";
+				k8sHelperClassPath = "C:\\k8s-helper\\*";
+				containerCacheHome = "C:\\onedev-cache";
 				mainContainerSpec.put("command", Lists.newArrayList("cmd"));
-				mainContainerSpec.put("args", Lists.newArrayList("/c", ".onedev\\job-commands-wrapper.bat"));
-				emptyDirMount.put("mountPath", "C:\\onedev-workspace");
-				classPath = "C:\\k8s-helper\\*";
+				mainContainerSpec.put("args", Lists.newArrayList("/c", containerCIHome + "\\commands.bat"));
 			}
-			mainContainerSpec.put("workingDir", emptyDirMount.get("mountPath"));
-			emptyDirMount.put("name", "workspace");
-			mainContainerSpec.put("volumeMounts", Lists.<Object>newArrayList(emptyDirMount));
+
+			Map<String, String> ciPathMount = Maps.newLinkedHashMap(
+					"name", "ci-home", 
+					"mountPath", containerCIHome);
+			Map<String, String> cacheHomeMount = Maps.newLinkedHashMap(
+					"name", "cache-home", 
+					"mountPath", containerCacheHome);
+			
+			List<Object> volumeMounts = Lists.<Object>newArrayList(ciPathMount, cacheHomeMount);
+			
+			mainContainerSpec.put("workingDir", containerWorkspace);
+			mainContainerSpec.put("volumeMounts", volumeMounts);
 			
 			mainContainerSpec.put("resources", Maps.newLinkedHashMap("requests", Maps.newLinkedHashMap(
 					"cpu", getCpuRequest(), 
@@ -400,8 +438,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			envs.add(serverUrlEnv);
 			envs.addAll(getSecretEnvs(secretName, secrets.keySet()));
 			
-			List<String> sidecarArgs = Lists.newArrayList("-classpath", classPath, "io.onedev.k8shelper.SideCar");
-			List<String> initArgs = Lists.newArrayList("-classpath", classPath, "io.onedev.k8shelper.Init");
+			List<String> sidecarArgs = Lists.newArrayList("-classpath", k8sHelperClassPath, "io.onedev.k8shelper.SideCar");
+			List<String> initArgs = Lists.newArrayList("-classpath", k8sHelperClassPath, "io.onedev.k8shelper.Init");
 			if (jobContext == null) {
 				sidecarArgs.add("test");
 				initArgs.add("test");
@@ -412,7 +450,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"command", Lists.newArrayList("java"), 
 					"args", sidecarArgs, 
 					"env", envs, 
-					"volumeMounts", Lists.<Object>newArrayList(emptyDirMount));
+					"volumeMounts", volumeMounts);
 			
 			Map<Object, Object> initContainerSpec = Maps.newHashMap(
 					"name", "init", 
@@ -420,7 +458,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"command", Lists.newArrayList("java"), 
 					"args", initArgs,
 					"env", envs,
-					"volumeMounts", Lists.<Object>newArrayList(emptyDirMount));
+					"volumeMounts", volumeMounts);
 			
 			podSpec.put("containers", Lists.<Object>newArrayList(mainContainerSpec, sidecarContainerSpec));
 			podSpec.put("initContainers", Lists.<Object>newArrayList(initContainerSpec));
@@ -434,9 +472,17 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			if (getServiceAccount() != null)
 				podSpec.put("serviceAccountName", getServiceAccount());
 			podSpec.put("restartPolicy", "Never");		
-			podSpec.put("volumes", Lists.<Object>newArrayList(Maps.newLinkedHashMap(
-					"name", "workspace", 
-					"emptyDir", Maps.newLinkedHashMap())));
+			
+			Map<Object, Object> ciHomeVolume = Maps.newLinkedHashMap(
+					"name", "ci-home", 
+					"emptyDir", Maps.newLinkedHashMap());
+			Map<Object, Object> cacheHomeVolume = Maps.newLinkedHashMap(
+					"name", "cache-home", 
+					"hostPath", Maps.newLinkedHashMap(
+							"path", JsonEscape.escapeJson(getEffectiveCacheHome(osName)), 
+							"type", "DirectoryOrCreate"));
+			
+			podSpec.put("volumes", Lists.<Object>newArrayList(ciHomeVolume, cacheHomeVolume));
 			
 			Map<Object, Object> podDef = Maps.newLinkedHashMap(
 					"apiVersion", "v1", 
@@ -449,6 +495,11 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			String podName = createResource(podDef, Sets.newHashSet(), logger);
 			try {
 				logger.log("Preparing job environment...");
+				
+				KubernetesExecutor.logger.debug("Checking error events (pod: {})...", podName);
+				// Some errors only reported via events
+				checkEventError(podName, logger);
+				
 				KubernetesExecutor.logger.debug("Waiting for init container to start (pod: {})...", podName);
 				watchPod(podName, new StatusChecker() {
 
@@ -723,6 +774,73 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}		
 	}
 	
+	private void checkEventError(String podName, JobLogger logger) {
+		Commandline kubectl = newKubeCtl();
+		
+		ObjectMapper mapper = new ObjectMapper();
+		
+		StringBuilder json = new StringBuilder();
+		kubectl.addArgs("get", "event", "-n", getNamespace(), "--field-selector", 
+				"involvedObject.kind=Pod,involvedObject.name=" + podName, "--watch", 
+				"-o", "json");
+		Thread thread = Thread.currentThread();
+		AtomicReference<StopWatch> stopWatchRef = new AtomicReference<>(null);
+		try {
+			kubectl.execute(new LineConsumer() {
+	
+				@Override
+				public void consume(String line) {
+					if (line.startsWith("{")) {
+						json.append("{").append("\n");
+					} else if (line.startsWith("}")) {
+						json.append("}");
+						KubernetesExecutor.logger.trace("Watching event:\n" + json.toString());
+						try {
+							JsonNode eventNode = mapper.readTree(json.toString()); 
+							String type = eventNode.get("type").asText();
+							String reason = eventNode.get("reason").asText();
+							JsonNode messageNode = eventNode.get("message");
+							String message = messageNode!=null? messageNode.asText(): reason;
+							if (type.equals("Warning")) {
+								if (reason.equals("FailedScheduling"))
+									logger.log("Kubernetes: " + message);
+								else
+									stopWatchRef.set(new StopWatch(new OneException(message)));
+							} else if (type.equals("Normal") && reason.equals("Started")) {
+								stopWatchRef.set(new StopWatch(null));
+							}
+							if (stopWatchRef.get() != null)
+								thread.interrupt();
+						} catch (Exception e) {
+							KubernetesExecutor.logger.error("Error processing event watching record", e);
+						}
+						json.setLength(0);
+					} else {
+						json.append(line).append("\n");
+					}
+				}
+				
+			}, new LineConsumer() {
+	
+				@Override
+				public void consume(String line) {
+					logger.log("Kubernetes: " + line);
+				}
+				
+			}).checkReturnCode();
+			
+			throw new OneException("Unexpected end of pod watching");
+		} catch (Exception e) {
+			StopWatch stopWatch = stopWatchRef.get();
+			if (stopWatch != null) {
+				if (stopWatch.getException() != null)
+					throw stopWatch.getException();
+			} else { 
+				throw ExceptionUtils.unchecked(e);
+			}
+		}		
+	}
+	
 	private void collectContainerLog(String podName, String containerName, JobLogger logger) {
 		Commandline kubectl = newKubeCtl();
 		kubectl.addArgs("logs", podName, "-c", containerName, "-n", getNamespace(), "--follow");
@@ -743,6 +861,21 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}).checkReturnCode();
 	}
 	
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		boolean isValid = true;
+		
+		if (getCacheHome() != null && FilenameUtils.getPrefixLength(getCacheHome()) == 0) {
+			isValid = false;
+			context.buildConstraintViolationWithTemplate("An absolute path is expected")
+					.addPropertyNode("cacheHome").addConstraintViolation();
+		}
+		
+		if (!isValid)
+			context.disableDefaultConstraintViolation();
+		return isValid;
+	}
+
 	@Editable
 	public static class NodeSelectorEntry implements Serializable {
 

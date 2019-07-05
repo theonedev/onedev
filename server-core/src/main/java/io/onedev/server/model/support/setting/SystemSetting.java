@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.git.config.CurlConfig;

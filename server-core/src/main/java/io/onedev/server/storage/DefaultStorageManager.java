@@ -166,5 +166,12 @@ public class DefaultStorageManager implements StorageManager {
 		FileUtils.createDir(buildDir);
 		return buildDir;
 	}
+
+	@Override
+	public File getJobCacheDir() {
+    	File projectsDir = new File(getStorageDir(), "jobcache");
+    	FileUtils.createDir(projectsDir);
+    	return projectsDir;
+	}
     
 }

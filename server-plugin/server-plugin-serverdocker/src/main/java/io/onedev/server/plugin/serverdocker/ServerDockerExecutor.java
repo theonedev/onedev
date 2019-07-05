@@ -6,13 +6,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import javax.validation.ConstraintValidatorContext;
 
@@ -27,19 +28,20 @@ import com.google.common.base.Joiner;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.commons.utils.command.ProcessKiller;
 import io.onedev.commons.utils.concurrent.CapacityRunner;
-import io.onedev.server.ci.job.cache.CacheAllocation;
-import io.onedev.server.ci.job.cache.CacheCallable;
-import io.onedev.server.ci.job.cache.CacheRunner;
-import io.onedev.server.ci.job.cache.JobCache;
-import io.onedev.server.model.support.JobContext;
+import io.onedev.k8shelper.CacheInstance;
+import io.onedev.k8shelper.KubernetesHelper;
+import io.onedev.server.OneDev;
+import io.onedev.server.ci.job.JobContext;
+import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.plugin.serverdocker.ServerDockerExecutor.TestData;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.validation.Validatable;
@@ -72,8 +74,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	
 	private transient CapacityRunner capacityRunner;
 
-	@Editable(order=20000, group="More Settings", description="Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
+	@Editable(order=100, description="Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
 			+ "Leave empty to use docker executable in PATH")
+	@NameOfEmptyValue("Use default")
 	public String getDockerExecutable() {
 		return dockerExecutable;
 	}
@@ -155,134 +158,152 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		return capacityRunner;
 	}
 	
-	private File getCacheHome() {
-		return new File(Bootstrap.getCacheDir(), getName());
-	}
-
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
-		JobLogger logger = jobContext.getLogger();
-		
-		getCapacityRunner().call(new Callable<Void>() {
-
-			@Override
-			public Void call() {
-				return new CacheRunner(getCacheHome(), jobContext.getCaches()).call(new CacheCallable<Void>() {
-
-					@Override
-					public Void call(Collection<CacheAllocation> allocations) {
-						jobContext.notifyJobRunning();
-						
-						login(logger);
-						
-						logger.log("Pulling image...") ;
-						Commandline docker = getDocker();
-						docker.addArgs("pull", jobContext.getEnvironment());
-						docker.execute(newDebugLogger(), newJobLogger(logger)).checkReturnCode();
-						
-						docker.clearArgs();
-						String jobInstance = UUID.randomUUID().toString();
-						docker.addArgs("run", "--rm", "--name", jobInstance);
-						for (Map.Entry<String, String> entry: jobContext.getEnvVars().entrySet())
-							docker.addArgs("--env", entry.getKey() + "=" + entry.getValue());
-						if (getRunOptions() != null)
-							docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
-						
-						String imageOS = getImageOS(logger, jobContext.getEnvironment());
-						logger.log("Detected image OS: " + imageOS);
-
-						boolean windows = imageOS.equals("windows");
-						
-						String dockerWorkspacePath;
-						if (windows)
-							dockerWorkspacePath = "C:\\" + WORKSPACE;
-						else 
-							dockerWorkspacePath = "/" + WORKSPACE;
-						
-						File workspaceCache = null;
-						for (CacheAllocation allocation: allocations) {
-							if (allocation.isWorkspace()) {
-								workspaceCache = allocation.getInstance();
-								break;
-							}
-						}
-						
-						File effectiveWorkspace = workspaceCache != null? workspaceCache: jobContext.getServerWorkspace();
-						
-						if (jobContext.isCloneSource()) {
-							logger.log("Cloning source code...");
-							jobContext.checkoutSource(effectiveWorkspace);
-						}
-						
-						if (workspaceCache != null) {
-							try {
-								FileUtils.copyDirectory(jobContext.getServerWorkspace(), workspaceCache);
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-						}
-						
-						docker.addArgs("-v", effectiveWorkspace.getAbsolutePath() + ":" + dockerWorkspacePath);
-						for (CacheAllocation allocation: allocations) {
-							if (!allocation.isWorkspace())
-								docker.addArgs("-v", allocation.getInstance().getAbsolutePath() + ":" + allocation.resolvePath(dockerWorkspacePath));
-						}
-						docker.addArgs("-w", dockerWorkspacePath);
-						
-						if (windows) {
-							File scriptFile = new File(effectiveWorkspace, "onedev-job-commands.bat");
-							try {
-								FileUtils.writeLines(scriptFile, jobContext.getCommands(), "\r\n");
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-							docker.addArgs(jobContext.getEnvironment());
-							docker.addArgs("cmd", "/c", dockerWorkspacePath + "\\onedev-job-commands.bat");
-						} else {
-							File scriptFile = new File(effectiveWorkspace, "onedev-job-commands.sh");
-							try {
-								FileUtils.writeLines(scriptFile, jobContext.getCommands(), "\n");
-							} catch (IOException e) {
-								throw new RuntimeException(e);
-							}
-							docker.addArgs(jobContext.getEnvironment());
-							docker.addArgs("sh", dockerWorkspacePath + "/onedev-job-commands.sh");
-						}
-						
-						logger.log("Running container to execute job...");
-						
-						try {
-							docker.execute(newDebugLogger(), newJobLogger(logger), null, new ProcessKiller() {
+		File hostCIHome = FileUtils.createTempDir("onedev-ci");
+		try {
+			JobLogger logger = jobContext.getLogger();
+			
+			getCapacityRunner().call(new Callable<Void>() {
 	
-								@Override
-								public void kill(Process process) {
-									logger.log("Stopping container...");
-									Commandline cmd = getDocker();
-									cmd.addArgs("stop", jobInstance);
-									cmd.execute(newDebugLogger(), newJobLogger(logger)).checkReturnCode();
-								}
-								
-							}).checkReturnCode();
+				@Override
+				public Void call() {
+					jobContext.notifyJobRunning();
+					
+					File hostCacheHome = getCacheHome();
+					
+					Map<CacheInstance, Date> cacheInstances = KubernetesHelper.getCacheInstances(hostCacheHome);
+					Map<CacheInstance, String> cacheAllocations = OneDev.getInstance(JobManager.class)
+							.allocateJobCaches(jobToken, new Date(), cacheInstances);
+					KubernetesHelper.preprocess(hostCacheHome, cacheAllocations, new Consumer<File>() {
+	
+						@Override
+						public void accept(File directory) {
+							cleanDirAsRoot(directory);
+						}
+						
+					});
+						
+					login(logger);
+					
+					logger.log("Pulling image...") ;
+					Commandline docker = getDocker();
+					docker.addArgs("pull", jobContext.getEnvironment());
+					docker.execute(newDebugLogger(), newJobLogger(logger)).checkReturnCode();
+					
+					docker.clearArgs();
+					String dockerInstance = UUID.randomUUID().toString();
+					docker.addArgs("run", "--rm", "--name", dockerInstance);
+					for (Map.Entry<String, String> entry: jobContext.getEnvVars().entrySet())
+						docker.addArgs("--env", entry.getKey() + "=" + entry.getValue());
+					if (getRunOptions() != null)
+						docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
+					
+					String imageOS = getImageOS(logger, jobContext.getEnvironment());
+					logger.log("Detected image OS: " + imageOS);
+	
+					boolean isWindows = imageOS.equals("windows");
+					
+					File workspaceCache = null;
+					for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
+						if (PathUtils.isCurrent(entry.getValue())) {
+							workspaceCache = entry.getKey().getDirectory(hostCacheHome);
+							break;
+						}
+					}
+					
+					File hostWorkspace;
+					if (workspaceCache != null) {
+						hostWorkspace = workspaceCache;
+					} else { 
+						hostWorkspace = new File(hostCIHome, "workspace");
+						FileUtils.createDir(hostWorkspace);
+					}
+					
+					if (jobContext.isRetrieveSource()) {
+						logger.log("Retrieving source code...");
+						jobContext.retrieveSource(hostWorkspace);
+					}
+					
+					try {
+						FileUtils.copyDirectory(jobContext.getServerWorkspace(), hostWorkspace);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+
+					String containerCIHome;
+					String containerWorkspace;
+					String[] containerCommand;
+					if (isWindows) {
+						containerCIHome = "C:\\onedev-ci";
+						containerWorkspace = "C:\\onedev-ci\\workspace";
+						containerCommand = new String[] {"cmd", "/c", "C:\\onedev-ci\\job-commands.bat"};						
+
+						File scriptFile = new File(hostCIHome, "job-commands.bat");
+						try {
+							FileUtils.writeLines(scriptFile, jobContext.getCommands(), "\r\n");
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					} else {
+						containerCIHome = "/onedev-ci";
+						containerWorkspace = "/onedev-ci/workspace";
+						containerCommand = new String[] {"sh", "/onedev-ci/job-commands.sh"};
+						
+						File scriptFile = new File(hostCIHome, "job-commands.sh");
+						try {
+							FileUtils.writeLines(scriptFile, jobContext.getCommands(), "\n");
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+					
+					docker.addArgs("-v", hostCIHome.getAbsolutePath() + ":" + containerCIHome);
+					if (workspaceCache != null)
+						docker.addArgs("-v", workspaceCache.getAbsolutePath() + ":" + containerWorkspace);
+					for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
+						if (!PathUtils.isCurrent(entry.getValue())) {
+							String hostCachePath = entry.getKey().getDirectory(hostCacheHome).getAbsolutePath();
+							String containerCachePath = PathUtils.resolve(containerWorkspace, entry.getValue());
+							docker.addArgs("-v", hostCachePath + ":" + containerCachePath);
+						}
+					}
+					docker.addArgs("-w", containerWorkspace, jobContext.getEnvironment());
+					docker.addArgs(containerCommand);
+					
+					logger.log("Running container to execute job...");
+					
+					try {
+						docker.execute(newJobLogger(logger), newJobLogger(logger), null, new ProcessKiller() {
+	
+							@Override
+							public void kill(Process process) {
+								logger.log("Stopping container...");
+								Commandline cmd = getDocker();
+								cmd.addArgs("stop", dockerInstance);
+								cmd.execute(newDebugLogger(), newJobLogger(logger)).checkReturnCode();
+							}
 							
-							return null;
-						} finally {
-							if (workspaceCache != null) {
-								int baseLen = workspaceCache.getAbsolutePath().length()+1;
-								for (File file: jobContext.getCollectFiles().listFiles(workspaceCache)) {
-									try {
-										FileUtils.copyFile(file, new File(jobContext.getServerWorkspace(), file.getAbsolutePath().substring(baseLen)));
-									} catch (IOException e) {
-										throw new RuntimeException(e);
-									}
-								}
+						}).checkReturnCode();
+					} finally {
+						int baseLen = hostWorkspace.getAbsolutePath().length()+1;
+						for (File file: jobContext.getCollectFiles().listFiles(hostWorkspace)) {
+							try {
+								FileUtils.copyFile(file, new File(jobContext.getServerWorkspace(), file.getAbsolutePath().substring(baseLen)));
+							} catch (IOException e) {
+								throw new RuntimeException(e);
 							}
 						}
 					}
 					
-				});
-			}
-			
-		});
+					return null;
+				}
+				
+			});
+		} finally {
+			cleanDirAsRoot(hostCIHome);
+			FileUtils.deleteDir(hostCIHome);
+		}
 	}
 
 	private LineConsumer newJobLogger(JobLogger logger) {
@@ -345,36 +366,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 	
 	@Override
-	public void checkCaches() {
-		File cacheHome = getCacheHome();
-		if (cacheHome.exists()) {
-			for (File keyDir: cacheHome.listFiles()) {
-				for (File cacheInstance: keyDir.listFiles()) {
-					if (System.currentTimeMillis() - cacheInstance.lastModified() > getCacheTTL() * 24L * 3600L * 1000L) {
-						File lockFile = new File(cacheInstance, JobCache.LOCK_FILE);
-						try {
-							if (lockFile.createNewFile()) {
-								LockUtils.call(keyDir.getAbsolutePath(), new Callable<Void>() {
-
-									@Override
-									public Void call() throws Exception {
-										cleanDir(cacheInstance);
-										FileUtils.deleteDir(cacheInstance);
-										return null;
-									}
-									
-								});
-							}
-						} catch (IOException e) {
-							logger.error("Error removing cache '" + cacheInstance.getAbsolutePath() + "'", e);
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
 		boolean isValid = true;
 		Set<String> registryUrls = new HashSet<>();
@@ -408,6 +399,10 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		return isValid;
 	}
 	
+	private File getCacheHome() {
+		return OneDev.getInstance(StorageManager.class).getJobCacheDir();
+	}
+	
 	@Override
 	public void test(TestData testData, JobLogger logger) {
 		login(logger);
@@ -421,13 +416,11 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		boolean windows = getImageOS(logger, testData.getDockerImage()).equals("windows");
 		
 		logger.log("Running container...");
-		File cacheHome = getCacheHome();
-		boolean cacheHomeExists = cacheHome.exists();
 		File workspaceDir = null;
 		File cacheDir = null;
 		try {
 			workspaceDir = Bootstrap.createTempDir("workspace");
-			cacheDir = new File(cacheHome, UUID.randomUUID().toString());
+			cacheDir = new File(getCacheHome(), UUID.randomUUID().toString());
 			FileUtils.createDir(cacheDir);
 			
 			cmd.clearArgs();
@@ -435,13 +428,13 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			if (getRunOptions() != null)
 				cmd.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 			String containerWorkspacePath;
-			String containerCachePath = "$onedev-cache-test$";
+			String containerCachePath;
 			if (windows) {
-				containerWorkspacePath = "C:\\" + WORKSPACE;
-				containerCachePath = "C:\\" + containerCachePath;
+				containerWorkspacePath = "C:\\onedev-ci\\workspace";
+				containerCachePath = "C:\\onedev-cache";
 			} else {
-				containerWorkspacePath = "/" + WORKSPACE;
-				containerCachePath = "/" + containerCachePath;
+				containerWorkspacePath = "/onedev-ci/workspace";
+				containerCachePath = "/onedev-cache";
 			}
 			cmd.addArgs("-v", workspaceDir.getAbsolutePath() + ":" + containerWorkspacePath);
 			cmd.addArgs("-v", cacheDir.getAbsolutePath() + ":" + containerCachePath);
@@ -460,8 +453,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 				FileUtils.deleteDir(workspaceDir);
 			if (cacheDir != null)
 				FileUtils.deleteDir(cacheDir);
-			if (!cacheHomeExists)
-				FileUtils.deleteDir(cacheHome);
 		}
 		
 		if (!SystemUtils.IS_OS_WINDOWS) {
@@ -472,13 +463,12 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		}
 	}
 	
-	@Override
-	public void cleanDir(File dir) {
+	public void cleanDirAsRoot(File dir) {
 		if (SystemUtils.IS_OS_WINDOWS) {
 			FileUtils.cleanDir(dir);
 		} else {
 			Commandline cmd = getDocker();
-			String containerPath = "/onedev_dir_to_clean";
+			String containerPath = "/dir-to-clean";
 			cmd.addArgs("run", "-v", dir.getAbsolutePath() + ":" + containerPath, "--rm", 
 					"busybox", "sh", "-c", "rm -rf " + containerPath + "/*");			
 			cmd.execute(new LineConsumer() {

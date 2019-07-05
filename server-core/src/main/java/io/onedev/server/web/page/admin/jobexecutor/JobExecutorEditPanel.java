@@ -5,8 +5,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -24,7 +22,6 @@ import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.util.Testable;
 
 @SuppressWarnings("serial")
@@ -41,21 +38,6 @@ abstract class JobExecutorEditPanel extends Panel {
 		this.executorIndex = executorIndex;
 	}
 	
-	private void checkNameDuplication(BeanEditor editor, JobExecutor executor) {
-		if (executorIndex != -1) { 
-			JobExecutor oldExecutor = executors.get(executorIndex);
-			if (!executor.getName().equals(oldExecutor.getName()) && getExecutor(executor.getName()) != null) {
-				editor.getErrorContext(new PathElement.Named("executor"))
-						.getErrorContext(new PathElement.Named("name"))
-						.addError("This name has already been used by another job executor");
-			}
-		} else if (getExecutor(executor.getName()) != null) {
-			editor.getErrorContext(new PathElement.Named("executor"))
-					.getErrorContext(new PathElement.Named("name"))
-					.addError("This name has already been used by another job executor");
-		}
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -73,7 +55,6 @@ abstract class JobExecutorEditPanel extends Panel {
 				super.onSubmit(target, form);
 				
 				JobExecutor executor = bean.getExecutor();
-				checkNameDuplication(editor, executor);
 
 				if (!editor.hasErrors(true)) {
 					if (executorIndex != -1) {
@@ -149,7 +130,6 @@ abstract class JobExecutorEditPanel extends Panel {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				checkNameDuplication(editor, bean.getExecutor());
 				if (!editor.hasErrors(true)) {
 					if (testData != null) {
 						new BeanEditModalPanel(target, testData) {
@@ -206,15 +186,6 @@ abstract class JobExecutorEditPanel extends Panel {
 		add(form);
 		
 		setOutputMarkupId(true);
-	}
-	
-	@Nullable
-	private JobExecutor getExecutor(String executorName) {
-		for (JobExecutor executor: executors) {
-			if (executorName.equals(executor.getName()))
-				return executor;
-		}
-		return null;
 	}
 	
 	protected abstract void onSave(AjaxRequestTarget target);

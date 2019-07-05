@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.DefaultCISpecProvider;
+import io.onedev.server.ci.job.CacheSpec;
 import io.onedev.server.ci.job.Job;
-import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.ci.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
@@ -97,7 +97,7 @@ public class DefaultMavenCISpecProvider implements DefaultCISpecProvider {
 			 * Cache Maven local repository in order not to download Maven dependencies all over again for 
 			 * subsequent builds
 			 */
-			JobCache cache = new JobCache();
+			CacheSpec cache = new CacheSpec();
 			cache.setKey("maven-local-repository");
 			cache.setPath("/root/.m2");
 			job.getCaches().add(cache);

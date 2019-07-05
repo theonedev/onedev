@@ -173,8 +173,11 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     @Override
     public void delete(Project project) {
     	Usage usage = new Usage();
-    	for (JobExecutor jobExecutor: settingManager.getJobExecutors())
-    		usage.add(jobExecutor.onDeleteProject(project.getName()).prefix("administration"));
+    	int index = 0;
+    	for (JobExecutor jobExecutor: settingManager.getJobExecutors()) {
+    		usage.add(jobExecutor.onDeleteProject(project.getName(), index).prefix("administration"));
+    		index++;
+    	}
     	
     	usage.checkInUse("Project '" + project.getName() + "'");
 

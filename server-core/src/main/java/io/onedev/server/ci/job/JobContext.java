@@ -1,8 +1,9 @@
-package io.onedev.server.model.support;
+package io.onedev.server.ci.job;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -11,7 +12,6 @@ import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.ci.job.cache.JobCache;
 import io.onedev.server.git.command.CheckoutCommand;
 import io.onedev.server.git.command.FetchCommand;
 import io.onedev.server.util.JobLogger;
@@ -31,30 +31,35 @@ public abstract class JobContext {
 	
 	private final List<String> commands;
 	
-	private final boolean cloneSource;
+	private final boolean retrieveSource;
 	
 	private final ObjectId commitId;
 	
-	private final Collection<JobCache> caches; 
+	private final Collection<CacheSpec> cacheSpecs; 
 	
 	private final PatternSet collectFiles;
 	
+	private final int cacheTTL;
+	
 	private final JobLogger logger;	
 	
-	public JobContext(String projectName, File gitDir, String environment, File workspace, 
-			Map<String, String> envVars, List<String> commands, boolean cloneSource, 
-			ObjectId commitId,  Collection<JobCache> caches, PatternSet collectFiles, 
-			JobLogger logger) {
+	private final Collection<String> allocatedCaches = new HashSet<>();
+	
+	public JobContext(String projectName, File gitDir, String environment, 
+			File workspace, Map<String, String> envVars, List<String> commands, 
+			boolean retrieveSource, ObjectId commitId,  Collection<CacheSpec> caches, 
+			PatternSet collectFiles, int cacheTTL, JobLogger logger) {
 		this.projectName = projectName;
 		this.gitDir = gitDir;
 		this.environment = environment;
 		this.serverWorkspace = workspace;
 		this.envVars = envVars;
 		this.commands = commands;
-		this.cloneSource = cloneSource;
+		this.retrieveSource = retrieveSource;
 		this.commitId = commitId;
-		this.caches = caches;
+		this.cacheSpecs = caches;
 		this.collectFiles = collectFiles;
+		this.cacheTTL = cacheTTL;
 		this.logger = logger;
 	}
 
@@ -82,12 +87,12 @@ public abstract class JobContext {
 		return commitId;
 	}
 
-	public boolean isCloneSource() {
-		return cloneSource;
+	public boolean isRetrieveSource() {
+		return retrieveSource;
 	}
 
-	public Collection<JobCache> getCaches() {
-		return caches;
+	public Collection<CacheSpec> getCacheSpecs() {
+		return cacheSpecs;
 	}
 
 	public PatternSet getCollectFiles() {
@@ -103,7 +108,7 @@ public abstract class JobContext {
 		new CheckoutCommand(checkoutDir).refspec(commitId.name()).call();
 	}
 	
-	public void checkoutSource(File dir) {
+	public void retrieveSource(File dir) {
 		if (new File(dir, ".git").exists()) {
 			try (Git git = Git.open(dir)) {
 				fetchAndCheckout(dir);
@@ -117,6 +122,14 @@ public abstract class JobContext {
 				throw ExceptionUtils.unchecked(e);
 			}
 		}
+	}
+
+	public int getCacheTTL() {
+		return cacheTTL;
+	}
+
+	public Collection<String> getAllocatedCaches() {
+		return allocatedCaches;
 	}
 
 	public abstract void notifyJobRunning();
