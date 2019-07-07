@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
@@ -44,6 +45,8 @@ public abstract class JobContext {
 	private final JobLogger logger;	
 	
 	private final Collection<String> allocatedCaches = new HashSet<>();
+	
+	private final Map<String, Integer> cacheCounts = new ConcurrentHashMap<>();
 	
 	public JobContext(String projectName, File gitDir, String environment, 
 			File workspace, Map<String, String> envVars, List<String> commands, 
@@ -130,6 +133,10 @@ public abstract class JobContext {
 
 	public Collection<String> getAllocatedCaches() {
 		return allocatedCaches;
+	}
+
+	public Map<String, Integer> getCacheCounts() {
+		return cacheCounts;
 	}
 
 	public abstract void notifyJobRunning();

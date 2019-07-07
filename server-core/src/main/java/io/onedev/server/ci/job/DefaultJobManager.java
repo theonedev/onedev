@@ -629,57 +629,83 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 
 	@Override
-	public synchronized Map<CacheInstance, String> allocateJobCaches(String jobToken, Date currentTime, 
+	public Map<CacheInstance, String> allocateJobCaches(String jobToken, Date currentTime, 
 			Map<CacheInstance, Date> cacheInstances) {
-		JobContext context = getJobContext(jobToken, true);
+		synchronized (jobContexts) {
+			JobContext context = getJobContext(jobToken, true);
+			
+			List<CacheInstance> sortedInstances = new ArrayList<>(cacheInstances.keySet());
+			sortedInstances.sort(new Comparator<CacheInstance>() {
+	
+				@Override
+				public int compare(CacheInstance o1, CacheInstance o2) {
+					return cacheInstances.get(o2).compareTo(cacheInstances.get(o1));
+				}
+				
+			});
 		
-		List<CacheInstance> sortedInstances = new ArrayList<>(cacheInstances.keySet());
-		sortedInstances.sort(new Comparator<CacheInstance>() {
-
-			@Override
-			public int compare(CacheInstance o1, CacheInstance o2) {
-				return cacheInstances.get(o2).compareTo(cacheInstances.get(o1));
+			Collection<String> allAllocated = new HashSet<>();
+			for (JobContext each: jobContexts.values())
+				allAllocated.addAll(each.getAllocatedCaches());
+			Map<CacheInstance, String> allocations = new HashMap<>();
+			for (CacheSpec cacheSpec: context.getCacheSpecs()) {
+				Optional<CacheInstance> result = sortedInstances
+						.stream()
+						.filter(it->it.getCacheKey().equals(cacheSpec.getKey()))
+						.filter(it->!allAllocated.contains(it.getName()))
+						.findFirst();
+				CacheInstance allocation;
+				if (result.isPresent()) 
+					allocation = result.get();
+				else
+					allocation = new CacheInstance(UUID.randomUUID().toString(), cacheSpec.getKey());
+				allocations.put(allocation, cacheSpec.getPath());
+				context.getAllocatedCaches().add(allocation.getName());
+				allAllocated.add(allocation.getName());
 			}
 			
-		});
-		Collection<String> allAllocated = new HashSet<>();
-		for (JobContext each: jobContexts.values())
-			allAllocated.addAll(each.getAllocatedCaches());
-		Map<CacheInstance, String> allocations = new HashMap<>();
-		for (CacheSpec cacheSpec: context.getCacheSpecs()) {
-			Optional<CacheInstance> result = sortedInstances
+			Consumer<CacheInstance> deletionMarker = new Consumer<CacheInstance>() {
+	
+				@Override
+				public void accept(CacheInstance instance) {
+					long ellapsed = currentTime.getTime() - cacheInstances.get(instance).getTime();
+					if (ellapsed > context.getCacheTTL() * 24L * 3600L * 1000L) {
+						allocations.put(instance, null);
+						context.getAllocatedCaches().add(instance.getName());
+					}
+				}
+				
+			};
+			
+			cacheInstances.keySet()
 					.stream()
-					.filter(it->it.getCacheKey().equals(cacheSpec.getKey()))
 					.filter(it->!allAllocated.contains(it.getName()))
-					.findFirst();
-			CacheInstance allocation;
-			if (result.isPresent()) 
-				allocation = result.get();
-			else
-				allocation = new CacheInstance(UUID.randomUUID().toString(), cacheSpec.getKey());
-			allocations.put(allocation, cacheSpec.getPath());
-			context.getAllocatedCaches().add(allocation.getName());
-			allAllocated.add(allocation.getName());
+					.forEach(deletionMarker);
+			return allocations;
 		}
-		
-		Consumer<CacheInstance> cacheCleaner = new Consumer<CacheInstance>() {
+	}
 
-			@Override
-			public void accept(CacheInstance instance) {
-				long ellapsed = currentTime.getTime() - cacheInstances.get(instance).getTime();
-				if (ellapsed > context.getCacheTTL() * 24L * 3600L * 1000L) {
-					allocations.put(instance, null);
-					context.getAllocatedCaches().add(instance.getName());
+	@Override
+	public void reportJobCaches(String jobToken, Collection<CacheInstance> cacheInstances) {
+		synchronized (jobContexts) {
+			JobContext context = getJobContext(jobToken, true);
+	
+			Collection<String> allOtherAllocated = new HashSet<>();
+			for (JobContext each: jobContexts.values()) {
+				if (each != context)
+					allOtherAllocated.addAll(each.getAllocatedCaches());
+			}
+			for (CacheInstance cacheInstance: cacheInstances) {
+				if (!allOtherAllocated.contains(cacheInstance.getName())) {
+					String cacheKey = cacheInstance.getCacheKey();
+					Integer cacheCount = context.getCacheCounts().get(cacheKey);
+					if (cacheCount == null)
+						cacheCount = 0;
+					cacheCount++;
+					context.getCacheCounts().put(cacheKey, cacheCount);
 				}
 			}
-			
-		};
-		cacheInstances.keySet()
-				.stream()
-				.filter(it->!allAllocated.contains(it.getName()))
-				.forEach(cacheCleaner);
-		
-		return allocations;
+		}
 	}
 
 }

@@ -170,11 +170,12 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 				public Void call() {
 					jobContext.notifyJobRunning();
 					
+					JobManager jobManager = OneDev.getInstance(JobManager.class);		
 					File hostCacheHome = getCacheHome();
 					
+					logger.log("Allocating job caches...") ;
 					Map<CacheInstance, Date> cacheInstances = KubernetesHelper.getCacheInstances(hostCacheHome);
-					Map<CacheInstance, String> cacheAllocations = OneDev.getInstance(JobManager.class)
-							.allocateJobCaches(jobToken, new Date(), cacheInstances);
+					Map<CacheInstance, String> cacheAllocations = jobManager.allocateJobCaches(jobToken, new Date(), cacheInstances);
 					KubernetesHelper.preprocess(hostCacheHome, cacheAllocations, new Consumer<File>() {
 	
 						@Override
@@ -225,6 +226,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						jobContext.retrieveSource(hostWorkspace);
 					}
 					
+					logger.log("Retrieving job dependencies...");
 					try {
 						FileUtils.copyDirectory(jobContext.getServerWorkspace(), hostWorkspace);
 					} catch (IOException e) {
@@ -286,6 +288,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							
 						}).checkReturnCode();
 					} finally {
+						logger.log("Sending job outcomes...");
+						
 						int baseLen = hostWorkspace.getAbsolutePath().length()+1;
 						for (File file: jobContext.getCollectFiles().listFiles(hostWorkspace)) {
 							try {
@@ -295,6 +299,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							}
 						}
 					}
+					logger.log("Reporting job caches...");
+					
+					jobManager.reportJobCaches(jobToken, KubernetesHelper.getCacheInstances(hostCacheHome).keySet());
 					
 					return null;
 				}

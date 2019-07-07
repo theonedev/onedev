@@ -2,10 +2,11 @@ package io.onedev.server.ci.job;
 
 import java.io.Serializable;
 
+import javax.validation.constraints.Pattern;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.util.validation.annotation.Path;
-import io.onedev.server.util.validation.annotation.PathSegment;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -18,8 +19,8 @@ public class CacheSpec implements Serializable {
 	private String path;
 
 	@Editable(order=100, description="Specify key of the cache. Caches with same key can be reused by different builds")
-	@PathSegment
 	@NotEmpty
+	@Pattern(regexp="[a-zA-Z0-9\\-_]+", message="Can only contain alphanumeric, dash and underscore")
 	public String getKey() {
 		return key;
 	}

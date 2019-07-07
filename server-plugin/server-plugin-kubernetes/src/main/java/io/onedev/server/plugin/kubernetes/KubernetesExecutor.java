@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,10 +15,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.io.FilenameUtils;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.json.JsonEscape;
@@ -35,10 +36,12 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.Maps;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
+import io.onedev.server.ci.job.CacheSpec;
 import io.onedev.server.ci.job.JobContext;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.JobExecutor;
@@ -59,6 +62,12 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = LoggerFactory.getLogger(KubernetesExecutor.class);
+	
+	private static final int MAX_AFFINITY_WEIGHT = 10; 
+	
+	private static final String CACHE_LABEL_PREFIX = "onedev-cache/";
+	
+	private static final int LABEL_UPDATE_BATCH = 100;
 	
 	private String configFile;
 	
@@ -323,12 +332,53 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 		return data;
 	}
-	
-	private Map<String, String> getNodeSelectorData() {
-		Map<String, String> data = new LinkedHashMap<>();
-		for (NodeSelectorEntry selector: getNodeSelector())
-			data.put(selector.getLabelName(), selector.getLabelValue());
-		return data;
+
+	@Nullable
+	private Map<Object, Object> getAffinity(@Nullable JobContext jobContext) {
+		Map<Object, Object> nodeAffinity = new LinkedHashMap<>();
+		
+		List<Object> matchExpressions = new ArrayList<>();
+		for (NodeSelectorEntry selector: getNodeSelector()) {
+			matchExpressions.add(Maps.newLinkedHashMap(
+					"key", selector.getLabelName(), 
+					"operator", "In", 
+					"values", Lists.newArrayList(selector.getLabelValue())));
+		}
+		if (!matchExpressions.isEmpty()) {
+			List<Object> nodeSelectorTerms = Lists.<Object>newArrayList(
+					Maps.newLinkedHashMap("matchExpressions", matchExpressions));
+			nodeAffinity.put("requiredDuringSchedulingIgnoredDuringExecution", 
+					Maps.newLinkedHashMap("nodeSelectorTerms", nodeSelectorTerms));
+		} 
+		
+		if (jobContext != null) {
+			List<Object> preferredDuringSchedulingIgnoredDuringExecution = new ArrayList<>();
+			for (CacheSpec cacheSpec: jobContext.getCacheSpecs()) {
+				 for (int i=1; i<MAX_AFFINITY_WEIGHT; i++) {
+				 preferredDuringSchedulingIgnoredDuringExecution.add(Maps.newLinkedHashMap(
+						 "weight", i, 
+						 "preference", Maps.newLinkedHashMap("matchExpressions",
+								 Lists.<Object>newArrayList(Maps.newLinkedHashMap(
+										 "key", "onedev-cache-" + cacheSpec.getKey(), 
+										 "operator", "In", 
+										 "values", Lists.newArrayList(String.valueOf(i))))))); 
+				 }
+				 preferredDuringSchedulingIgnoredDuringExecution.add(Maps.newLinkedHashMap(
+						"weight", MAX_AFFINITY_WEIGHT,
+						"preference", Maps.newLinkedHashMap(
+								"matchExpressions", Lists.<Object>newArrayList(Maps.newLinkedHashMap(
+										"key", CACHE_LABEL_PREFIX + cacheSpec.getKey(), 
+										"operator", "Gt", 
+										"values", Lists.newArrayList(String.valueOf(MAX_AFFINITY_WEIGHT-1)))))));
+			}
+			if (!preferredDuringSchedulingIgnoredDuringExecution.isEmpty())
+				nodeAffinity.put("preferredDuringSchedulingIgnoredDuringExecution", preferredDuringSchedulingIgnoredDuringExecution);
+		}
+		
+		if (!nodeAffinity.isEmpty()) 
+			return Maps.newLinkedHashMap("nodeAffinity", nodeAffinity);
+		else 
+			return null;
 	}
 	
 	private String getOSName(JobLogger logger) {
@@ -462,10 +512,11 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			
 			podSpec.put("containers", Lists.<Object>newArrayList(mainContainerSpec, sidecarContainerSpec));
 			podSpec.put("initContainers", Lists.<Object>newArrayList(initContainerSpec));
+
+			Map<Object, Object> affinity = getAffinity(jobContext);
+			if (affinity != null) 
+				podSpec.put("affinity", affinity);
 			
-			Map<String, String> nodeSelectorData = getNodeSelectorData();
-			if (!nodeSelectorData.isEmpty())
-				podSpec.put("nodeSelector", nodeSelectorData);
 			List<Object> imagePullSecretsData = getImagePullSecretsData();
 			if (!imagePullSecretsData.isEmpty())
 				podSpec.put("imagePullSecrets", imagePullSecretsData);
@@ -586,6 +637,108 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					
 				}, logger);
 				
+				if (jobContext != null) {
+					logger.log("Updating job cache labels...");
+					
+					AtomicReference<String> nodeNameRef = new AtomicReference<>(null);
+					Commandline kubectl = newKubeCtl();
+					kubectl.addArgs("get", "pod", podName, "-n", getNamespace(), "-o", "jsonpath={.spec.nodeName}");
+					kubectl.execute(new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							nodeNameRef.set(line);
+						}
+						
+					}, new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							logger.log("Kubernetes: " + line);
+						}
+						
+					}).checkReturnCode();
+					
+					String nodeName = Preconditions.checkNotNull(nodeNameRef.get());
+					
+					kubectl.clearArgs();
+					StringBuilder nodeJson = new StringBuilder();
+					kubectl.addArgs("get", "node", nodeName, "-o", "json");
+					kubectl.execute(new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							if (line.startsWith("{")) 
+								nodeJson.append("{").append("\n");
+							else if (line.startsWith("}")) 
+								nodeJson.append("}");
+							else 
+								nodeJson.append(line).append("\n");
+						}
+						
+					}, new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							logger.log("Kubernetes: " + line);
+						}
+						
+					}).checkReturnCode();
+
+					JsonNode nodeNode;
+					KubernetesExecutor.logger.trace("Node json:\n" + nodeJson.toString());
+					try {
+						nodeNode = new ObjectMapper().readTree(nodeJson.toString());
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+					
+					List<String> labelUpdates = new ArrayList<>();
+
+					Iterator<Map.Entry<String, JsonNode>> it = nodeNode.get("metadata").get("labels").fields();
+					while (it.hasNext()) {
+						Map.Entry<String, JsonNode> entry = it.next();
+						if (entry.getKey().startsWith(CACHE_LABEL_PREFIX)) {
+							String cacheKey = entry.getKey().substring(CACHE_LABEL_PREFIX.length());
+							int labelValue = entry.getValue().asInt();
+							Integer count = jobContext.getCacheCounts().remove(cacheKey);
+							if (count == null)
+								labelUpdates.add(entry.getKey() + "-");
+							else if (count != labelValue)
+								labelUpdates.add(entry.getKey() + "=" + count);
+						}
+					}
+					
+					for (Map.Entry<String, Integer> entry: jobContext.getCacheCounts().entrySet())
+						labelUpdates.add(CACHE_LABEL_PREFIX + entry.getKey() + "=" + entry.getValue());
+					
+					for (List<String> partition: Lists.partition(labelUpdates, LABEL_UPDATE_BATCH)) {
+						kubectl.clearArgs();
+						kubectl.addArgs("label", "node", nodeName, "--overwrite");
+						for (String labelUpdate: partition) 
+							kubectl.addArgs(labelUpdate);
+						AtomicBoolean labelNotFound = new AtomicBoolean(false);
+						ExecuteResult result = kubectl.execute(new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								KubernetesExecutor.logger.debug(line);
+							}
+							
+						}, new LineConsumer() {
+
+							@Override
+							public void consume(String line) {
+								if (line.startsWith("label") && line.endsWith("not found."))
+									labelNotFound.set(true);
+								logger.log("Kubernetes: " + line);
+							}
+							
+						});
+						if (!labelNotFound.get())
+							result.checkReturnCode();
+					}
+				}
 			} finally {
 				deleteResource("pod", podName, logger);
 			}
@@ -690,11 +843,11 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						json.append("{").append("\n");
 					} else if (line.startsWith("}")) {
 						json.append("}");
-						KubernetesExecutor.logger.trace("Watching pod:\n" + json.toString());
+						KubernetesExecutor.logger.trace("Pod watching output:\n" + json.toString());
 						try {
 							process(mapper.readTree(json.toString()));
 						} catch (Exception e) {
-							KubernetesExecutor.logger.error("Error processing pod watching record", e);
+							KubernetesExecutor.logger.error("Error processing pod watching output", e);
 						}
 						json.setLength(0);
 					} else {

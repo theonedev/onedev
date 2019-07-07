@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -28,6 +29,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.TarUtils;
 import io.onedev.k8shelper.CacheAllocationRequest;
+import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.job.JobContext;
 import io.onedev.server.ci.job.JobManager;
@@ -74,6 +76,16 @@ public class KubernetesResource {
 		return SerializationUtils.serialize((Serializable) jobManager.allocateJobCaches(
 				getJobToken(), allocationRequest.getCurrentTime(), allocationRequest.getInstances()));
     }
+	
+	@Path("/report-job-caches")
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	@POST
+	public void reportJobCaches(byte[] cacheInstanceBytes) {
+		@SuppressWarnings("unchecked")
+		Collection<CacheInstance> cacheInstances = (Collection<CacheInstance>) SerializationUtils
+				.deserialize(cacheInstanceBytes);
+		jobManager.reportJobCaches(getJobToken(), cacheInstances);
+	}
 	
 	@Path("/download-dependencies")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
