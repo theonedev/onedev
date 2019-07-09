@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
@@ -354,9 +355,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							});
 						} catch (Exception e) {
 							if (ExceptionUtils.find(e, InterruptedException.class) == null) {
-								DefaultJobManager.logger.debug("Error running build", e);
 								if (e.getMessage() != null)
 									logger.log(e.getMessage());
+								else
+									logger.log(Throwables.getStackTraceAsString(e));
 							}
 							String errorMessage = e.getMessage();
 							if (errorMessage != null) {

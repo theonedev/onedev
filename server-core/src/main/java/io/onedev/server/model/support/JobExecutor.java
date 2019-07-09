@@ -1,5 +1,6 @@
 package io.onedev.server.model.support;
 
+import java.io.File;
 import java.io.Serializable;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -105,6 +106,10 @@ public abstract class JobExecutor implements Serializable {
 
 	public void setCacheTTL(int cacheTTL) {
 		this.cacheTTL = cacheTTL;
+	}
+	
+	protected File getCacheHome() {
+		return new File(System.getProperty("user.home"), "onedev-cache"); 
 	}
 
 	public abstract void execute(String jobToken, JobContext context);

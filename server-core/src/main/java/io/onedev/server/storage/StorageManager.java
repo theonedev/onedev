@@ -49,6 +49,4 @@ public interface StorageManager {
      */
     File getBuildDir(Long projectId, Long buildNumber);
     
-    File getJobCacheDir();
-    
 }

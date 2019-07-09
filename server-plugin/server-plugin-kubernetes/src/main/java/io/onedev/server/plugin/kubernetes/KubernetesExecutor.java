@@ -14,10 +14,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.codec.Charsets;
-import org.apache.commons.io.FilenameUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,16 +46,13 @@ import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.plugin.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.inputspec.SecretInput;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=300)
-@ClassValidating
-public class KubernetesExecutor extends JobExecutor implements Testable<TestData>, Validatable {
+public class KubernetesExecutor extends JobExecutor implements Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -84,8 +79,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private String cpuRequest = "500m";
 	
 	private String memoryRequest = "128m";
-	
-	private String cacheHome;
 	
 	@Editable(name="Kubectl Config File", order=100, description=
 			"Specify absolute path to the config file used by kubectl to access the "
@@ -180,27 +173,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		this.memoryRequest = memoryRequest;
 	}
 
-	@Editable(order=40000, group="More Settings", description="Optionally specify an absolute directory on Kubernetes "
-			+ "working nodes to store job caches of this executor. If leave empty, OneDev will use directory "
-			+ "<tt>/onedev-cache</tt> on Linux, and <tt>C:\\onedev-cache</tt> on Windows")
-	@NameOfEmptyValue("Use default")
-	public String getCacheHome() {
-		return cacheHome;
-	}
-
-	public void setCacheHome(String cacheHome) {
-		this.cacheHome = cacheHome;
-	}
-
-	private String getEffectiveCacheHome(String osName) {
-		if (getCacheHome() != null)
-			return cacheHome;
-		else if (osName.equalsIgnoreCase("linux"))
-			return "/onedev-cache";
-		else
-			return "C:\\onedev-cache";
-	}
-	
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
 		execute(jobContext.getEnvironment(), jobToken, jobContext.getLogger(), jobContext);
@@ -359,7 +331,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						 "weight", i, 
 						 "preference", Maps.newLinkedHashMap("matchExpressions",
 								 Lists.<Object>newArrayList(Maps.newLinkedHashMap(
-										 "key", "onedev-cache-" + cacheSpec.getKey(), 
+										 "key", CACHE_LABEL_PREFIX + cacheSpec.getKey(), 
 										 "operator", "In", 
 										 "values", Lists.newArrayList(String.valueOf(i))))))); 
 				 }
@@ -410,7 +382,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			logger.log(String.format("OS of working node is '%s'", osName));
 			return osName;
 		} else {
-			throw new OneException("No applicable working nodes found for executor '" + getEffectiveCacheHome(osName) + "'");
+			throw new OneException("No applicable working nodes found");
 		}
 	}
 	
@@ -447,20 +419,17 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 			String k8sHelperClassPath;
 			String containerCIHome;
-			String containerWorkspace;
 			String containerCacheHome;
 			if (osName.equalsIgnoreCase("linux")) {
 				containerCIHome = "/onedev-ci";
-				containerWorkspace = containerCIHome + "/workspace";
+				containerCacheHome = containerCIHome + "/cache";
 				k8sHelperClassPath = "/k8s-helper/*";
-				containerCacheHome = "/onedev-cache";
 				mainContainerSpec.put("command", Lists.newArrayList("sh"));
 				mainContainerSpec.put("args", Lists.newArrayList(containerCIHome + "/commands.sh"));
 			} else {
 				containerCIHome = "C:\\onedev-ci";
-				containerWorkspace = containerCIHome + "\\workspace";
+				containerCacheHome = containerCIHome + "\\cache";
 				k8sHelperClassPath = "C:\\k8s-helper\\*";
-				containerCacheHome = "C:\\onedev-cache";
 				mainContainerSpec.put("command", Lists.newArrayList("cmd"));
 				mainContainerSpec.put("args", Lists.newArrayList("/c", containerCIHome + "\\commands.bat"));
 			}
@@ -474,7 +443,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			
 			List<Object> volumeMounts = Lists.<Object>newArrayList(ciPathMount, cacheHomeMount);
 			
-			mainContainerSpec.put("workingDir", containerWorkspace);
 			mainContainerSpec.put("volumeMounts", volumeMounts);
 			
 			mainContainerSpec.put("resources", Maps.newLinkedHashMap("requests", Maps.newLinkedHashMap(
@@ -530,7 +498,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			Map<Object, Object> cacheHomeVolume = Maps.newLinkedHashMap(
 					"name", "cache-home", 
 					"hostPath", Maps.newLinkedHashMap(
-							"path", JsonEscape.escapeJson(getEffectiveCacheHome(osName)), 
+							"path", JsonEscape.escapeJson(getCacheHome().getAbsolutePath()), 
 							"type", "DirectoryOrCreate"));
 			
 			podSpec.put("volumes", Lists.<Object>newArrayList(ciHomeVolume, cacheHomeVolume));
@@ -1014,21 +982,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}).checkReturnCode();
 	}
 	
-	@Override
-	public boolean isValid(ConstraintValidatorContext context) {
-		boolean isValid = true;
-		
-		if (getCacheHome() != null && FilenameUtils.getPrefixLength(getCacheHome()) == 0) {
-			isValid = false;
-			context.buildConstraintViolationWithTemplate("An absolute path is expected")
-					.addPropertyNode("cacheHome").addConstraintViolation();
-		}
-		
-		if (!isValid)
-			context.disableDefaultConstraintViolation();
-		return isValid;
-	}
-
 	@Editable
 	public static class NodeSelectorEntry implements Serializable {
 

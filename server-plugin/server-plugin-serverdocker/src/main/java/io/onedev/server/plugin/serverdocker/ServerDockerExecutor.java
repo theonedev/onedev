@@ -41,7 +41,6 @@ import io.onedev.server.ci.job.JobContext;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.plugin.serverdocker.ServerDockerExecutor.TestData;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.validation.Validatable;
@@ -172,6 +171,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 					
 					JobManager jobManager = OneDev.getInstance(JobManager.class);		
 					File hostCacheHome = getCacheHome();
+					FileUtils.createDir(hostCacheHome);
 					
 					logger.log("Allocating job caches...") ;
 					Map<CacheInstance, Date> cacheInstances = KubernetesHelper.getCacheInstances(hostCacheHome);
@@ -406,10 +406,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		return isValid;
 	}
 	
-	private File getCacheHome() {
-		return OneDev.getInstance(StorageManager.class).getJobCacheDir();
-	}
-	
 	@Override
 	public void test(TestData testData, JobLogger logger) {
 		login(logger);
@@ -438,10 +434,10 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			String containerCachePath;
 			if (windows) {
 				containerWorkspacePath = "C:\\onedev-ci\\workspace";
-				containerCachePath = "C:\\onedev-cache";
+				containerCachePath = "C:\\onedev-ci\\cache";
 			} else {
 				containerWorkspacePath = "/onedev-ci/workspace";
-				containerCachePath = "/onedev-cache";
+				containerCachePath = "/onedev-ci/cache";
 			}
 			cmd.addArgs("-v", workspaceDir.getAbsolutePath() + ":" + containerWorkspacePath);
 			cmd.addArgs("-v", cacheDir.getAbsolutePath() + ":" + containerCachePath);
