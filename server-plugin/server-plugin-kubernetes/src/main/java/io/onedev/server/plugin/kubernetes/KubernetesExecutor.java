@@ -19,7 +19,6 @@ import org.apache.commons.codec.Charsets;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.unbescape.json.JsonEscape;
 import org.yaml.snakeyaml.Yaml;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -403,6 +402,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return secretEnvs;
 	}
 	
+	private String getCacheHome(String osName) {
+		if (osName.equalsIgnoreCase("linux"))
+			return "/var/cache/onedev-ci"; 
+		else
+			return "C:\\ProgramData\\onedev-ci\\cache";
+	}
+	
 	private void execute(String dockerImage, String jobToken, JobLogger logger, @Nullable JobContext jobContext) {
 		createNamespaceIfNotExist(logger);
 
@@ -498,7 +504,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			Map<Object, Object> cacheHomeVolume = Maps.newLinkedHashMap(
 					"name", "cache-home", 
 					"hostPath", Maps.newLinkedHashMap(
-							"path", JsonEscape.escapeJson(getCacheHome().getAbsolutePath()), 
+							"path", getCacheHome(osName), 
 							"type", "DirectoryOrCreate"));
 			
 			podSpec.put("volumes", Lists.<Object>newArrayList(ciHomeVolume, cacheHomeVolume));

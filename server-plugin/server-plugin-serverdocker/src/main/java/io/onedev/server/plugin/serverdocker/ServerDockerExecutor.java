@@ -157,6 +157,10 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		return capacityRunner;
 	}
 	
+	private File getCacheHome() {
+		return new File(System.getProperty("user.home"), "onedev-cache"); 
+	}
+
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
 		File hostCIHome = FileUtils.createTempDir("onedev-ci");
