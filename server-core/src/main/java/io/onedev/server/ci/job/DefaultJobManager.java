@@ -634,7 +634,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public Map<CacheInstance, String> allocateJobCaches(String jobToken, Date currentTime, 
 			Map<CacheInstance, Date> cacheInstances) {
 		synchronized (jobContexts) {
-			JobContext context = getJobContext(jobToken, true);
+			JobContext jobContext = getJobContext(jobToken, true);
 			
 			List<CacheInstance> sortedInstances = new ArrayList<>(cacheInstances.keySet());
 			sortedInstances.sort(new Comparator<CacheInstance>() {
@@ -650,7 +650,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			for (JobContext each: jobContexts.values())
 				allAllocated.addAll(each.getAllocatedCaches());
 			Map<CacheInstance, String> allocations = new HashMap<>();
-			for (CacheSpec cacheSpec: context.getCacheSpecs()) {
+			for (CacheSpec cacheSpec: jobContext.getCacheSpecs()) {
 				Optional<CacheInstance> result = sortedInstances
 						.stream()
 						.filter(it->it.getCacheKey().equals(cacheSpec.getKey()))
@@ -662,7 +662,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				else
 					allocation = new CacheInstance(UUID.randomUUID().toString(), cacheSpec.getKey());
 				allocations.put(allocation, cacheSpec.getPath());
-				context.getAllocatedCaches().add(allocation.getName());
+				jobContext.getAllocatedCaches().add(allocation.getName());
 				allAllocated.add(allocation.getName());
 			}
 			
@@ -671,9 +671,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				@Override
 				public void accept(CacheInstance instance) {
 					long ellapsed = currentTime.getTime() - cacheInstances.get(instance).getTime();
-					if (ellapsed > context.getCacheTTL() * 24L * 3600L * 1000L) {
+					if (ellapsed > jobContext.getCacheTTL() * 24L * 3600L * 1000L) {
 						allocations.put(instance, null);
-						context.getAllocatedCaches().add(instance.getName());
+						jobContext.getAllocatedCaches().add(instance.getName());
+						allAllocated.add(instance.getName());
 					}
 				}
 				
@@ -683,30 +684,37 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					.stream()
 					.filter(it->!allAllocated.contains(it.getName()))
 					.forEach(deletionMarker);
+			
+			updateCacheCounts(jobContext, cacheInstances.keySet(), allAllocated);
+			
 			return allocations;
+		}
+	}
+	
+	private void updateCacheCounts(JobContext jobContext, Collection<CacheInstance> cacheInstances, 
+			Collection<String> allAllocated) {
+		for (CacheInstance cacheInstance: cacheInstances) {
+			if (!allAllocated.contains(cacheInstance.getName())) {
+				String cacheKey = cacheInstance.getCacheKey();
+				Integer cacheCount = jobContext.getCacheCounts().get(cacheKey);
+				if (cacheCount == null)
+					cacheCount = 0;
+				cacheCount++;
+				jobContext.getCacheCounts().put(cacheKey, cacheCount);
+			}
 		}
 	}
 
 	@Override
 	public void reportJobCaches(String jobToken, Collection<CacheInstance> cacheInstances) {
 		synchronized (jobContexts) {
-			JobContext context = getJobContext(jobToken, true);
-	
-			Collection<String> allOtherAllocated = new HashSet<>();
+			JobContext jobContext = getJobContext(jobToken, true);
+			Collection<String> allAllocated = new HashSet<>();
 			for (JobContext each: jobContexts.values()) {
-				if (each != context)
-					allOtherAllocated.addAll(each.getAllocatedCaches());
+				if (each != jobContext)
+					allAllocated.addAll(each.getAllocatedCaches());
 			}
-			for (CacheInstance cacheInstance: cacheInstances) {
-				if (!allOtherAllocated.contains(cacheInstance.getName())) {
-					String cacheKey = cacheInstance.getCacheKey();
-					Integer cacheCount = context.getCacheCounts().get(cacheKey);
-					if (cacheCount == null)
-						cacheCount = 0;
-					cacheCount++;
-					context.getCacheCounts().put(cacheKey, cacheCount);
-				}
-			}
+			updateCacheCounts(jobContext, cacheInstances, allAllocated);
 		}
 	}
 

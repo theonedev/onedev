@@ -148,7 +148,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		this.serviceAccount = serviceAccount;
 	}
 
-	@Editable(order=24000, group="More Settings", description="Specify cpu requirement of jobs using this executor. "
+	@Editable(order=24000, name="CPU Request", group="More Settings", description="Specify cpu requirement of jobs using this executor. "
 			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu'>"
 			+ "kubernetes documentation</a> for details")
 	@NotEmpty
@@ -353,7 +353,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	private String getOSName(JobLogger logger) {
-		logger.log("Checking working node OS...");
+		logger.log("Checking working node operating system...");
 		Commandline kubectl = newKubeCtl();
 		kubectl.addArgs("get", "nodes", "-o", "jsonpath={range .items[*]}{.status.nodeInfo.operatingSystem}{'\\n'}{end}");
 		for (NodeSelectorEntry entry: getNodeSelector()) 
@@ -378,7 +378,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		String osName = osNameRef.get();
 		if (osName != null) {
-			logger.log(String.format("OS of working node is '%s'", osName));
+			logger.log(String.format("Working node is running on %s", osName));
 			return osName;
 		} else {
 			throw new OneException("No applicable working nodes found");
@@ -548,8 +548,33 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				if (jobContext != null)
 					jobContext.notifyJobRunning();
 				
+				AtomicReference<String> nodeNameRef = new AtomicReference<>(null);
+				Commandline kubectl = newKubeCtl();
+				kubectl.addArgs("get", "pod", podName, "-n", getNamespace(), "-o", "jsonpath={.spec.nodeName}");
+				kubectl.execute(new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						nodeNameRef.set(line);
+					}
+					
+				}, new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						logger.log("Kubernetes: " + line);
+					}
+					
+				}).checkReturnCode();
+				
+				String nodeName = Preconditions.checkNotNull(nodeNameRef.get());
+				logger.log("Running job on node " + nodeName + "...");
+				
 				KubernetesExecutor.logger.debug("Collecting init container log (pod: {})...", podName);
 				collectContainerLog(podName, "init", logger);
+				
+				if (jobContext != null) 
+					updateCacheLabels(nodeName, jobContext, logger);
 				
 				KubernetesExecutor.logger.debug("Waiting for main container to start (pod: {})...", podName);
 				watchPod(podName, new StatusChecker() {
@@ -611,108 +636,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					
 				}, logger);
 				
-				if (jobContext != null) {
-					logger.log("Updating job cache labels...");
-					
-					AtomicReference<String> nodeNameRef = new AtomicReference<>(null);
-					Commandline kubectl = newKubeCtl();
-					kubectl.addArgs("get", "pod", podName, "-n", getNamespace(), "-o", "jsonpath={.spec.nodeName}");
-					kubectl.execute(new LineConsumer() {
-
-						@Override
-						public void consume(String line) {
-							nodeNameRef.set(line);
-						}
-						
-					}, new LineConsumer() {
-
-						@Override
-						public void consume(String line) {
-							logger.log("Kubernetes: " + line);
-						}
-						
-					}).checkReturnCode();
-					
-					String nodeName = Preconditions.checkNotNull(nodeNameRef.get());
-					
-					kubectl.clearArgs();
-					StringBuilder nodeJson = new StringBuilder();
-					kubectl.addArgs("get", "node", nodeName, "-o", "json");
-					kubectl.execute(new LineConsumer() {
-
-						@Override
-						public void consume(String line) {
-							if (line.startsWith("{")) 
-								nodeJson.append("{").append("\n");
-							else if (line.startsWith("}")) 
-								nodeJson.append("}");
-							else 
-								nodeJson.append(line).append("\n");
-						}
-						
-					}, new LineConsumer() {
-
-						@Override
-						public void consume(String line) {
-							logger.log("Kubernetes: " + line);
-						}
-						
-					}).checkReturnCode();
-
-					JsonNode nodeNode;
-					KubernetesExecutor.logger.trace("Node json:\n" + nodeJson.toString());
-					try {
-						nodeNode = new ObjectMapper().readTree(nodeJson.toString());
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-					
-					List<String> labelUpdates = new ArrayList<>();
-
-					Iterator<Map.Entry<String, JsonNode>> it = nodeNode.get("metadata").get("labels").fields();
-					while (it.hasNext()) {
-						Map.Entry<String, JsonNode> entry = it.next();
-						if (entry.getKey().startsWith(CACHE_LABEL_PREFIX)) {
-							String cacheKey = entry.getKey().substring(CACHE_LABEL_PREFIX.length());
-							int labelValue = entry.getValue().asInt();
-							Integer count = jobContext.getCacheCounts().remove(cacheKey);
-							if (count == null)
-								labelUpdates.add(entry.getKey() + "-");
-							else if (count != labelValue)
-								labelUpdates.add(entry.getKey() + "=" + count);
-						}
-					}
-					
-					for (Map.Entry<String, Integer> entry: jobContext.getCacheCounts().entrySet())
-						labelUpdates.add(CACHE_LABEL_PREFIX + entry.getKey() + "=" + entry.getValue());
-					
-					for (List<String> partition: Lists.partition(labelUpdates, LABEL_UPDATE_BATCH)) {
-						kubectl.clearArgs();
-						kubectl.addArgs("label", "node", nodeName, "--overwrite");
-						for (String labelUpdate: partition) 
-							kubectl.addArgs(labelUpdate);
-						AtomicBoolean labelNotFound = new AtomicBoolean(false);
-						ExecuteResult result = kubectl.execute(new LineConsumer() {
-
-							@Override
-							public void consume(String line) {
-								KubernetesExecutor.logger.debug(line);
-							}
-							
-						}, new LineConsumer() {
-
-							@Override
-							public void consume(String line) {
-								if (line.startsWith("label") && line.endsWith("not found."))
-									labelNotFound.set(true);
-								logger.log("Kubernetes: " + line);
-							}
-							
-						});
-						if (!labelNotFound.get())
-							result.checkReturnCode();
-					}
-				}
+				if (jobContext != null) 
+					updateCacheLabels(nodeName, jobContext, logger);
 			} finally {
 				deleteResource("pod", podName, logger);
 			}
@@ -782,6 +707,91 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			}
 		}
 		return false;
+	}
+	
+	private void updateCacheLabels(String nodeName, JobContext jobContext, JobLogger logger) {
+		logger.log("Updating cache labels on node...");
+		
+		Commandline kubectl = newKubeCtl();
+		kubectl.clearArgs();
+		StringBuilder nodeJson = new StringBuilder();
+		kubectl.addArgs("get", "node", nodeName, "-o", "json");
+		kubectl.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				if (line.startsWith("{")) 
+					nodeJson.append("{").append("\n");
+				else if (line.startsWith("}")) 
+					nodeJson.append("}");
+				else 
+					nodeJson.append(line).append("\n");
+			}
+			
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.log("Kubernetes: " + line);
+			}
+			
+		}).checkReturnCode();
+
+		JsonNode nodeNode;
+		KubernetesExecutor.logger.trace("Node json:\n" + nodeJson.toString());
+		try {
+			nodeNode = new ObjectMapper().readTree(nodeJson.toString());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		
+		List<String> labelUpdates = new ArrayList<>();
+
+		Iterator<Map.Entry<String, JsonNode>> it = nodeNode.get("metadata").get("labels").fields();
+		while (it.hasNext()) {
+			Map.Entry<String, JsonNode> entry = it.next();
+			if (entry.getKey().startsWith(CACHE_LABEL_PREFIX)) {
+				String cacheKey = entry.getKey().substring(CACHE_LABEL_PREFIX.length());
+				int labelValue = entry.getValue().asInt();
+				Integer count = jobContext.getCacheCounts().remove(cacheKey);
+				if (count == null)
+					labelUpdates.add(entry.getKey() + "-");
+				else if (count != labelValue)
+					labelUpdates.add(entry.getKey() + "=" + count);
+			}
+		}
+		
+		for (Map.Entry<String, Integer> entry: jobContext.getCacheCounts().entrySet())
+			labelUpdates.add(CACHE_LABEL_PREFIX + entry.getKey() + "=" + entry.getValue());
+		
+		jobContext.getCacheCounts().clear();
+		
+		for (List<String> partition: Lists.partition(labelUpdates, LABEL_UPDATE_BATCH)) {
+			kubectl.clearArgs();
+			kubectl.addArgs("label", "node", nodeName, "--overwrite");
+			for (String labelUpdate: partition) 
+				kubectl.addArgs(labelUpdate);
+			AtomicBoolean labelNotFound = new AtomicBoolean(false);
+			ExecuteResult result = kubectl.execute(new LineConsumer() {
+
+				@Override
+				public void consume(String line) {
+					KubernetesExecutor.logger.debug(line);
+				}
+				
+			}, new LineConsumer() {
+
+				@Override
+				public void consume(String line) {
+					if (line.startsWith("label") && line.endsWith("not found."))
+						labelNotFound.set(true);
+					logger.log("Kubernetes: " + line);
+				}
+				
+			});
+			if (!labelNotFound.get())
+				result.checkReturnCode();
+		}
 	}
 	
 	private String createSecret(Map<String, String> secrets, JobLogger logger) {
@@ -975,7 +985,12 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 			@Override
 			public void consume(String line) {
-				logger.log(line);
+				if (line.contains("rpc error:") && line.contains("No such container:") 
+						|| line.contains("Unable to retrieve container logs for")) { 
+					KubernetesExecutor.logger.debug(line);
+				} else {
+					logger.log(line);
+				} 
 			}
 			
 		}, new LineConsumer() {
