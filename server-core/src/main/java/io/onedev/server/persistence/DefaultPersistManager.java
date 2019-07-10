@@ -108,7 +108,7 @@ public class DefaultPersistManager implements PersistManager {
 		try (	Connection conn = getConnection();
 				Statement stmt = conn.createStatement();) {
 			for (String sql: sqls) {
-				logger.debug("Executing sql: " + sql);
+				logger.trace("Executing sql: " + sql);
 				if (failOnError) {
 					stmt.execute(sql);
 				} else {

@@ -107,7 +107,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 				@Override
 				public void complete() {
 					User user = (User) getSetting();
-					user.setPassword(passwordService.encryptPassword("admin"));
+					user.setPassword(passwordService.encryptPassword(user.getPassword()));
 					userManager.save(user, null);
 					idManager.init(User.class);
 				}
