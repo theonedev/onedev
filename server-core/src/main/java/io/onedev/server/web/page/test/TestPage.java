@@ -3,11 +3,9 @@ package io.onedev.server.web.page.test;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
-import org.apache.wicket.markup.html.form.Form;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.util.JobLogger;
-import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")
@@ -20,17 +18,14 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		Form<?> form = new Form<Void>("form");
-		form.add(new TaskButton("test") {
+
+		add(new Link<Void>("test") {
 
 			@Override
-			protected String runTask(JobLogger logger) {
-				return "successful";
+			public void onClick() {
 			}
-
+			
 		});
-		add(form);
 	}
 
 	@Override
