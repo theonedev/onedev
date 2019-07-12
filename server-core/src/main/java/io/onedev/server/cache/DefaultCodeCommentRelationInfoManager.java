@@ -140,7 +140,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 	}
 	
 	private boolean collect(Project project) {
-		logger.debug("Collecting code comment relation info in project '{}'...", project);
+		logger.debug("Collecting code comment relation info (project: {})...", project);
 		
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -264,6 +264,7 @@ public class DefaultCodeCommentRelationInfoManager extends AbstractEnvironmentMa
 				});
 			}
 		}
+		logger.debug("Collected code comment relation info (project: {})", project);
 		
 		return unprocessedPullRequestUpdates.size() == BATCH_SIZE || unprocessedCodeComments.size() == BATCH_SIZE;
 	}

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -21,10 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -42,6 +43,7 @@ import io.onedev.server.ci.job.CacheSpec;
 import io.onedev.server.ci.job.JobContext;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.JobExecutor;
+import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.plugin.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.inputspec.SecretInput;
@@ -71,7 +73,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private List<NodeSelectorEntry> nodeSelector = new ArrayList<>();
 	
-	private String imagePullSecrets;
+	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
 	private String serviceAccount;
 	
@@ -125,16 +127,14 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		this.nodeSelector = nodeSelector;
 	}
 
-	@Editable(order=22000, group="More Settings", description="Optionally specify space-separated image "
-			+ "pull secrets in above namespace for job pods to access private docker registries. "
-			+ "Refer to <a href='https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/'>kubernetes "
-			+ "documentation</a> on how to set up image pull secrets")
-	public String getImagePullSecrets() {
-		return imagePullSecrets;
+	@Editable(order=22000, group="More Settings", description="Specify login information of docker registries if necessary. These "
+			+ "logins will be used to create image pull secrets of the job pods")
+	public List<RegistryLogin> getRegistryLogins() {
+		return registryLogins;
 	}
 
-	public void setImagePullSecrets(String imagePullSecrets) {
-		this.imagePullSecrets = imagePullSecrets;
+	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
+		this.registryLogins = registryLogins;
 	}
 
 	@Editable(order=23000, group="More Settings", description="Optionally specify a service account in above namespace to run the job "
@@ -200,6 +200,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			file = File.createTempFile("k8s", ".yaml");
 			
 			String resourceYaml = new Yaml().dump(resourceDef);
+			
 			String maskedYaml = resourceYaml;
 			for (String secret: secretsToMask) 
 				maskedYaml = StringUtils.replace(maskedYaml, secret, SecretInput.MASK);
@@ -295,15 +296,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private List<Object> getImagePullSecretsData() {
-		List<Object> data = new ArrayList<>();
-		if (getImagePullSecrets() != null) {
-			for (String imagePullSecret: Splitter.on(" ").trimResults().omitEmptyStrings().split(getImagePullSecrets()))
-				data.add(Maps.newLinkedHashMap("name", imagePullSecret));
-		}
-		return data;
-	}
-
 	@Nullable
 	private Map<Object, Object> getAffinity(@Nullable JobContext jobContext) {
 		Map<Object, Object> nodeAffinity = new LinkedHashMap<>();
@@ -408,13 +400,41 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		else
 			return "C:\\ProgramData\\onedev-ci\\cache";
 	}
+
+	@Nullable
+	private String createImagePullSecret(JobLogger logger) {
+		if (!getRegistryLogins().isEmpty()) {
+			Encoder encoder = Base64.getEncoder();
+			Map<Object, Object> auths = new LinkedHashMap<>();
+			for (RegistryLogin login: getRegistryLogins()) {
+				String auth = login.getUserName() + ":" + login.getPassword();
+				String registryUrl = login.getRegistryUrl();
+				if (registryUrl == null)
+					registryUrl = "https://index.docker.io/v1/";
+				auths.put(registryUrl, Maps.newLinkedHashMap(
+						"auth", encoder.encodeToString(auth.getBytes(Charsets.UTF_8))));
+			}
+			try {
+				String dockerConfig = new ObjectMapper().writeValueAsString(Maps.newLinkedHashMap("auths", auths));
+				return createSecret(Maps.newLinkedHashMap(".dockerconfigjson", dockerConfig), "kubernetes.io/dockerconfigjson", logger);
+			} catch (JsonProcessingException e) {
+				throw new RuntimeException(e);
+			}
+		} else {
+			return null;
+		}
+	}
 	
 	private void execute(String dockerImage, String jobToken, JobLogger logger, @Nullable JobContext jobContext) {
 		createNamespaceIfNotExist(logger);
 
-		Map<String, String> secrets = Maps.newLinkedHashMap(KubernetesHelper.ENV_JOB_TOKEN, jobToken);
-		String secretName = createSecret(secrets, logger);
+		String jobSecretName = null;
+		String imagePullSecretName = null;
 		try {
+			Map<String, String> jobSecrets = Maps.newLinkedHashMap(KubernetesHelper.ENV_JOB_TOKEN, jobToken);
+			jobSecretName = createSecret(jobSecrets, null, logger);
+			imagePullSecretName = createImagePullSecret(logger);
+			
 			String osName = getOSName(logger);
 			
 			Map<String, Object> podSpec = new LinkedHashMap<>();
@@ -460,7 +480,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"name", KubernetesHelper.ENV_SERVER_URL, 
 					"value", getServerUrl());
 			envs.add(serverUrlEnv);
-			envs.addAll(getSecretEnvs(secretName, secrets.keySet()));
+			envs.addAll(getSecretEnvs(jobSecretName, jobSecrets.keySet()));
 			
 			List<String> sidecarArgs = Lists.newArrayList("-classpath", k8sHelperClassPath, "io.onedev.k8shelper.SideCar");
 			List<String> initArgs = Lists.newArrayList("-classpath", k8sHelperClassPath, "io.onedev.k8shelper.Init");
@@ -491,9 +511,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			if (affinity != null) 
 				podSpec.put("affinity", affinity);
 			
-			List<Object> imagePullSecretsData = getImagePullSecretsData();
-			if (!imagePullSecretsData.isEmpty())
-				podSpec.put("imagePullSecrets", imagePullSecretsData);
+			if (imagePullSecretName != null)
+				podSpec.put("imagePullSecrets", Lists.<Object>newArrayList(Maps.newLinkedHashMap("name", imagePullSecretName)));
 			if (getServiceAccount() != null)
 				podSpec.put("serviceAccountName", getServiceAccount());
 			podSpec.put("restartPolicy", "Never");		
@@ -642,7 +661,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				deleteResource("pod", podName, logger);
 			}
 		} finally {
-			deleteResource("secret", secretName, logger);
+			if (jobSecretName != null)
+				deleteResource("secret", jobSecretName, logger);
+			if (imagePullSecretName != null)
+				deleteResource("secret", imagePullSecretName, logger);
 		}
 	}
 	
@@ -794,7 +816,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private String createSecret(Map<String, String> secrets, JobLogger logger) {
+	private String createSecret(Map<String, String> secrets, @Nullable String type, JobLogger logger) {
 		Map<String, String> encodedSecrets = new LinkedHashMap<>();
 		for (Map.Entry<String, String> entry: secrets.entrySet())
 			encodedSecrets.put(entry.getKey(), Base64.getEncoder().encodeToString(entry.getValue().getBytes(Charsets.UTF_8)));
@@ -805,6 +827,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"generateName", "secret-", 
 						"namespace", getNamespace()), 
 				"data", encodedSecrets);
+		if (type != null)
+			secretDef.put("type", type);
 		return createResource(secretDef, encodedSecrets.values(), logger);
 	}
 	

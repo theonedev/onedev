@@ -314,6 +314,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	}
 	
 	private void doCollect(Project project, ObjectId commitId, String refName) {
+		logger.debug("Collecting commit information (project: {}, ref: {})...", refName, project.getName());
+		
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
 		Store commitsStore = getStore(env, COMMITS_STORE);
@@ -762,6 +764,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				}
 			}
 		}
+		logger.debug("Collected commit information (project: {}, ref: {})", project.getName(), refName);
 	}
 	
 	private void updateContribution(Map<Integer, Contribution> contributions, int key, GitCommit commit) {
@@ -991,11 +994,8 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 							collectingWorks.add((CollectingWork)work);
 						Collections.sort(collectingWorks, new CommitTimeComparator());
 						
-						for (CollectingWork work: collectingWorks) {
-							logger.debug("Collecting commit information up to ref '{}' in project '{}'...", 
-									work.getRefName(), project.getName());
+						for (CollectingWork work: collectingWorks) 
 							doCollect(project, work.getCommit().copy(), work.getRefName());
-						}
 					}
 					
 				});

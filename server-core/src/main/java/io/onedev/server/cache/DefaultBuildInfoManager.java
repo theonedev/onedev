@@ -115,7 +115,7 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 	}
 	
 	private boolean collect(Project project) {
-		logger.debug("Collecting build info in project '{}'...", project);
+		logger.debug("Collecting build info (project: {})...", project);
 		
 		Environment env = getEnv(project.getId().toString());
 		Store defaultStore = getStore(env, DEFAULT_STORE);
@@ -164,7 +164,7 @@ public class DefaultBuildInfoManager extends AbstractEnvironmentManager implemen
 				
 			});
 		}
-		
+		logger.debug("Collected build info (project: {})", project);
 		return unprocessedBuilds.size() == BATCH_SIZE;
 	}
 	

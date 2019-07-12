@@ -40,6 +40,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.ci.job.JobContext;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.model.support.JobExecutor;
+import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.plugin.serverdocker.ServerDockerExecutor.TestData;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.OneContext;
@@ -48,7 +49,6 @@ import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.util.Testable;
 
 @Editable(order=100, description="This executor interpretates job environments as docker images, "
@@ -496,50 +496,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 		}
 	}
 	
-	@Editable
-	public static class RegistryLogin implements Serializable {
-		
-		private static final long serialVersionUID = 1L;
-
-		private String registryUrl;
-		
-		private String userName;
-		
-		private String password;
-
-		@Editable(order=100, description="Specify registry url. Leave empty for official registry")
-		@NameOfEmptyValue("Default Registry")
-		public String getRegistryUrl() {
-			return registryUrl;
-		}
-
-		public void setRegistryUrl(String registryUrl) {
-			this.registryUrl = registryUrl;
-		}
-
-		@Editable(order=200)
-		@NotEmpty
-		public String getUserName() {
-			return userName;
-		}
-
-		public void setUserName(String userName) {
-			this.userName = userName;
-		}
-
-		@Editable(order=300)
-		@NotEmpty
-		@Password
-		public String getPassword() {
-			return password;
-		}
-
-		public void setPassword(String password) {
-			this.password = password;
-		}
-		
-	}
-
 	@Editable(name="Specify a Docker Image to Test Against")
 	public static class TestData implements Serializable {
 
