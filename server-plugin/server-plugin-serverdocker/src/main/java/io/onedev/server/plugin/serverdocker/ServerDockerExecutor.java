@@ -135,7 +135,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 			@Override
 			public void consume(String line) {
-				ServerDockerExecutor.logger.debug(line);
+				ServerDockerExecutor.logger.trace(line);
 				builder.append(line).append("\n");
 			}
 			
