@@ -23,7 +23,7 @@ import io.onedev.server.util.validation.EntityValidator;
 @Singleton
 public class ResetAdminPassword extends DefaultPersistManager {
 
-	public static final String COMMAND = "reset_admin_password";
+	public static final String COMMAND = "reset-admin-password";
 	
 	private static final Logger logger = LoggerFactory.getLogger(ResetAdminPassword.class);
 	

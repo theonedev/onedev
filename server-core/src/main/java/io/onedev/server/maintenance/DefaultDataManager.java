@@ -52,8 +52,6 @@ import io.onedev.server.persistence.annotation.Transactional;
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
 
-	private static final String BACKUP_DATETIME_FORMAT = "yyyy-MM-dd_HH-mm-ss";
-	
 	private final UserManager userManager;
 	
 	private final SettingManager settingManager;
@@ -211,15 +209,11 @@ public class DefaultDataManager implements DataManager, Serializable {
 				public void execute() {
 					File tempDir = FileUtils.createTempDir("backup");
 					try {
-						File backupDir = new File(backupSetting.getFolder());
-						if (!backupDir.isAbsolute()) 
-							backupDir = new File(Bootstrap.installDir, backupSetting.getFolder());
-						if (!backupDir.exists()) {
-							throw new RuntimeException("Backup directory does not exist: " + backupDir.getAbsolutePath());
-						}
+						File backupDir = new File(Bootstrap.getSiteDir(), Upgrade.DB_BACKUP_DIR);
+						FileUtils.createDir(backupDir);
 						persistManager.exportData(tempDir);
 						File backupFile = new File(backupDir, 
-								DateTimeFormat.forPattern(BACKUP_DATETIME_FORMAT).print(new DateTime()) + ".zip");
+								DateTimeFormat.forPattern(Upgrade.BACKUP_DATETIME_FORMAT).print(new DateTime()) + ".zip");
 						ZipUtils.zip(tempDir, backupFile);
 					} catch (Exception e) {
 						notifyBackupError(e);

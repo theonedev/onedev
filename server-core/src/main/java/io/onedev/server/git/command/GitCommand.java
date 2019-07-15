@@ -20,7 +20,7 @@ public abstract class GitCommand<V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(GitCommand.class);
 	
-	private static final String MIN_VERSION = "1.8.0";
+	private static final String MIN_VERSION = "2.15.0";
 	
 	protected final File gitDir;
 	

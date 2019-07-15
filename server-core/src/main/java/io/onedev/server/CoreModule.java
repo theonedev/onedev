@@ -161,7 +161,6 @@ import io.onedev.server.maintenance.BackupDatabase;
 import io.onedev.server.maintenance.CheckDataVersion;
 import io.onedev.server.maintenance.CleanDatabase;
 import io.onedev.server.maintenance.DataManager;
-import io.onedev.server.maintenance.DatabaseDialect;
 import io.onedev.server.maintenance.DefaultDataManager;
 import io.onedev.server.maintenance.ResetAdminPassword;
 import io.onedev.server.maintenance.RestoreDatabase;
@@ -646,8 +645,6 @@ public class CoreModule extends AbstractPluginModule {
 				bind(PersistManager.class).to(Upgrade.class);
 			else if (CleanDatabase.COMMAND.equals(Bootstrap.command.getName()))
 				bind(PersistManager.class).to(CleanDatabase.class);
-			else if (DatabaseDialect.COMMAND.equals(Bootstrap.command.getName()))
-				bind(PersistManager.class).to(DatabaseDialect.class);
 			else if (ResetAdminPassword.COMMAND.equals(Bootstrap.command.getName()))
 				bind(PersistManager.class).to(ResetAdminPassword.class);
 			else	

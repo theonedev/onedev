@@ -21,7 +21,7 @@ import io.onedev.server.util.validation.EntityValidator;
 @Singleton
 public class CleanDatabase extends DefaultPersistManager {
 
-	public static final String COMMAND = "clean";
+	public static final String COMMAND = "clean-db";
 	
 	private static final Logger logger = LoggerFactory.getLogger(CleanDatabase.class);
 	

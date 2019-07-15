@@ -7,7 +7,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.git.config.CurlConfig;
@@ -16,7 +15,6 @@ import io.onedev.server.git.config.SystemCurl;
 import io.onedev.server.git.config.SystemGit;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.util.validation.annotation.Directory;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -26,8 +24,6 @@ public class SystemSetting implements Serializable, Validatable {
 	private static final long serialVersionUID = 1;
 
 	private String serverUrl;
-	
-	private String storagePath;
 	
 	private GitConfig gitConfig = new SystemGit();
 	
@@ -44,17 +40,6 @@ public class SystemSetting implements Serializable, Validatable {
 
 	public void setServerUrl(String serverUrl) {
 		this.serverUrl = serverUrl;
-	}
-
-	@Editable(name="Storage Directory", order=100, description="Specify directory to store OneDev data such as Git projects.")
-	@Directory(absolute=true, outsideOfInstallDir=true, writeable=true)
-	@NotEmpty
-	public String getStoragePath() {
-		return storagePath;
-	}
-
-	public void setStoragePath(String storagePath) {
-		this.storagePath = storagePath;
 	}
 
 	@Editable(order=200, description="OneDev requires git command line to manage repositories. The minimum "

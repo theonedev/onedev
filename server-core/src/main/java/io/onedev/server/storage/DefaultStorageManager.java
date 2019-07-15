@@ -9,9 +9,9 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.Project;
@@ -28,27 +28,17 @@ public class DefaultStorageManager implements StorageManager {
 	
 	private static final String OLD_DELETE_MARK2 = "to_be_deleted_when_turbodev_is_restarted";
 	
-	private static final String DELETE_MARK = "to_be_deleted_when_onedev_is_restarted";
+	private static final String DELETE_MARK = "to-be-deleted-when-onedev-is-restarted";
 	
 	private final TransactionManager transactionManager;
 	
-    private final SettingManager configManager;
-    
     @Inject
-    public DefaultStorageManager(TransactionManager transactionManager, SettingManager configManager) {
-        this.configManager = configManager;
+    public DefaultStorageManager(TransactionManager transactionManager) {
         this.transactionManager = transactionManager;
     }
 
-    @Override
-    public File getStorageDir() {
-    	File storageDir = new File(configManager.getSystemSetting().getStoragePath());
-    	FileUtils.createDir(storageDir);
-    	return storageDir;
-    }
-    
     private File getProjectsDir() {
-    	File projectsDir = new File(getStorageDir(), "projects");
+    	File projectsDir = new File(Bootstrap.getSiteDir(), "projects");
     	FileUtils.createDir(projectsDir);
     	return projectsDir;
     }
@@ -142,7 +132,7 @@ public class DefaultStorageManager implements StorageManager {
 	}
 
     private File getUsersDir() {
-    	File usersDir = new File(getStorageDir(), "users");
+    	File usersDir = new File(Bootstrap.getSiteDir(), "users");
     	FileUtils.createDir(usersDir);
     	return usersDir;
     }

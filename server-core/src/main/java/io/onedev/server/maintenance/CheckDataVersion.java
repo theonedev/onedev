@@ -20,7 +20,7 @@ import io.onedev.server.util.validation.EntityValidator;
 @Singleton
 public class CheckDataVersion extends DefaultPersistManager {
 
-	public static final String COMMAND = "check_data_version";
+	public static final String COMMAND = "check-data-version";
 	
 	private static final Logger logger = LoggerFactory.getLogger(CheckDataVersion.class);
 	

@@ -158,7 +158,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 	}
 	
 	private File getCacheHome() {
-		return new File(System.getProperty("user.home"), "onedev-cache"); 
+		return new File(Bootstrap.getSiteDir(), "job-cache"); 
 	}
 
 	@Override

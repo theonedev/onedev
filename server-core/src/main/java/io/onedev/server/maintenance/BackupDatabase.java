@@ -25,7 +25,7 @@ import io.onedev.server.util.validation.EntityValidator;
 @Singleton
 public class BackupDatabase extends DefaultPersistManager {
 
-	public static final String COMMAND = "backup";
+	public static final String COMMAND = "backup-db";
 	
 	private static final Logger logger = LoggerFactory.getLogger(BackupDatabase.class);
 	

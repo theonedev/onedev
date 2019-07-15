@@ -27,7 +27,7 @@ public class RestoreDatabase extends DefaultPersistManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(RestoreDatabase.class);
 	
-	public static final String COMMAND = "restore";
+	public static final String COMMAND = "restore-db";
 	
 	@Inject
 	public RestoreDatabase(PhysicalNamingStrategy physicalNamingStrategy,
@@ -111,7 +111,7 @@ public class RestoreDatabase extends DefaultPersistManager {
 		} catch (Exception e) {
 			logger.error("Failed to apply database constraints", e);
 			logger.info("If above error is caused by foreign key constraint violations, you may fix it via your database sql tool, "
-					+ "and then run {} to reapply database constraints", Command.getScript("apply_db_constraints"));
+					+ "and then run {} to reapply database constraints", Command.getScript("apply-db-constraints"));
 			System.exit(1);
 		}
 	}

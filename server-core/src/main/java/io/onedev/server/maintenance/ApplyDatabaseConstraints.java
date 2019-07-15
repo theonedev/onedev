@@ -25,7 +25,7 @@ import io.onedev.server.util.validation.EntityValidator;
 @Singleton
 public class ApplyDatabaseConstraints extends DefaultPersistManager {
 
-	public static final String COMMAND = "apply_db_constraints";
+	public static final String COMMAND = "apply-db-constraints";
 	
 	private static final Logger logger = LoggerFactory.getLogger(ApplyDatabaseConstraints.class);
 	

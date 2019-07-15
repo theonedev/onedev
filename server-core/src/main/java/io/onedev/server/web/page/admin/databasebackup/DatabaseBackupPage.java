@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.tika.mime.MimeTypes;
-import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -15,7 +14,6 @@ import io.onedev.commons.utils.ZipUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.persistence.PersistManager;
-import io.onedev.server.storage.StorageManager;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
@@ -29,8 +27,6 @@ public class DatabaseBackupPage extends AdministrationPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		add(new Label("storageDir", OneDev.getInstance(StorageManager.class).getStorageDir()));
 		
 		BackupSettingHolder backupSettingHolder = new BackupSettingHolder();
 		backupSettingHolder.setBackupSetting(OneDev.getInstance(SettingManager.class).getBackupSetting());
