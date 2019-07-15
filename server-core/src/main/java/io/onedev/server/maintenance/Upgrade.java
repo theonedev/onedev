@@ -480,6 +480,10 @@ public class Upgrade extends DefaultPersistManager {
 			if (file.getName().endsWith(".sh"))
 				file.setExecutable(true);
 		}
+		for (File file: new File(installDir, "boot").listFiles()) {
+			if (file.getName().startsWith("wrapper-"))
+				file.setExecutable(true);
+		}
 	}
 	
 }
