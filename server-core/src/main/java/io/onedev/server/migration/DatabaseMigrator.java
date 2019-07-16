@@ -1034,5 +1034,5 @@ public class DatabaseMigrator {
 			}
 		}
 	}
-	
+
 }
