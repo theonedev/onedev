@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: onedev
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: onedev
+  namespace: onedev
+spec:
+  ports:
+  - port: 80
+    targetPort: 6610
+    protocol: TCP
+  selector:
+    app: onedev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onedev
+  namespace: onedev
+  labels:
+    app: onedev
+spec:
+  selector:
+    matchLabels:
+      app: onedev
+  template:
+    metadata:
+      name: onedev
+      namespace: onedev
+      labels:
+        app: onedev
+    spec:
+      containers:
+      - name: onedev
+        image: 1dev/server
+        volumeMounts:
+        - mountPath: "/opt/onedev"
+          name: onedev-data
+        ports:
+        - containerPort: 6610
+      volumes:
+      - name: onedev-data
+        persistentVolumeClaim:
+          claimName: onedev-data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: onedev-data
+  namespace: onedev
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
