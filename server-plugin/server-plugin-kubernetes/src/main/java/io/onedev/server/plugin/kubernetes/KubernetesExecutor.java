@@ -52,7 +52,8 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=300)
+@Editable(order=100, description="This executor interpretates job environments as docker images, "
+		+ "and will create pods in Kubernetes cluster to run CI jobs")
 public class KubernetesExecutor extends JobExecutor implements Testable<TestData> {
 
 	private static final long serialVersionUID = 1L;
@@ -68,8 +69,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private String configFile;
 	
 	private String kubeCtlPath;
-	
-	private String namespace = "onedev-ci";
 	
 	private List<NodeSelectorEntry> nodeSelector = new ArrayList<>();
 	
@@ -104,17 +103,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	public void setKubeCtlPath(String kubeCtlPath) {
 		this.kubeCtlPath = kubeCtlPath;
-	}
-
-	@Editable(order=20000, group="More Settings", description="Optionally specify Kubernetes namespace "
-			+ "used by this executor to place created Kubernetes resources (such as job pods)")
-	@NotEmpty
-	public String getNamespace() {
-		return namespace;
-	}
-
-	public void setNamespace(String namespace) {
-		this.namespace = namespace;
 	}
 
 	@Editable(order=21000, group="More Settings", description="Optionally specify node selectors of the "
@@ -235,7 +223,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private void deleteResource(String resourceType, String resourceName, JobLogger logger) {
 		Commandline cmd = newKubeCtl();
-		cmd.addArgs("delete", resourceType, resourceName, "--namespace=" + getNamespace());
+		cmd.addArgs("delete", resourceType, resourceName, "--namespace=onedev");
 		cmd.execute(new LineConsumer() {
 
 			@Override
@@ -255,8 +243,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private void createNamespaceIfNotExist(JobLogger logger) {
 		Commandline cmd = newKubeCtl();
-		String query = String.format("{.items[?(@.metadata.name=='%s')]}", getNamespace());
-		cmd.addArgs("get", "namespaces", "-o", "jsonpath=" + query);
+		cmd.addArgs("get", "namespaces", "-o", "jsonpath={.items[?(@.metadata.name=='onedev')]}");
 		
 		AtomicBoolean hasNamespace = new AtomicBoolean(false);
 		cmd.execute(new LineConsumer() {
@@ -277,7 +264,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		if (!hasNamespace.get()) {
 			cmd = newKubeCtl();
-			cmd.addArgs("create", "namespace", getNamespace());
+			cmd.addArgs("create", "namespace", "onedev");
 			cmd.execute(new LineConsumer() {
 
 				@Override
@@ -426,6 +413,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	private void execute(String dockerImage, String jobToken, JobLogger logger, @Nullable JobContext jobContext) {
+		logger.log("Executing job with Kubernetes executor...");
+		
 		createNamespaceIfNotExist(logger);
 
 		String jobSecretName = null;
@@ -533,7 +522,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"kind", "Pod", 
 					"metadata", Maps.newLinkedHashMap(
 							"generateName", "job-", 
-							"namespace", getNamespace()), 
+							"namespace", "onedev"), 
 					"spec", podSpec);
 			
 			String podName = createResource(podDef, Sets.newHashSet(), logger);
@@ -569,7 +558,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 				AtomicReference<String> nodeNameRef = new AtomicReference<>(null);
 				Commandline kubectl = newKubeCtl();
-				kubectl.addArgs("get", "pod", podName, "-n", getNamespace(), "-o", "jsonpath={.spec.nodeName}");
+				kubectl.addArgs("get", "pod", podName, "-n", "onedev", "-o", "jsonpath={.spec.nodeName}");
 				kubectl.execute(new LineConsumer() {
 
 					@Override
@@ -825,7 +814,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				"kind", "Secret", 
 				"metadata", Maps.newLinkedHashMap(
 						"generateName", "secret-", 
-						"namespace", getNamespace()), 
+						"namespace", "onedev"), 
 				"data", encodedSecrets);
 		if (type != null)
 			secretDef.put("type", type);
@@ -840,7 +829,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		AtomicReference<StopWatch> stopWatchRef = new AtomicReference<>(null); 
 		
 		StringBuilder json = new StringBuilder();
-		kubectl.addArgs("get", "pod", podName, "-n", getNamespace(), "--watch", "-o", "json");
+		kubectl.addArgs("get", "pod", podName, "-n", "onedev", "--watch", "-o", "json");
+		
 		Thread thread = Thread.currentThread();
 		try {
 			kubectl.execute(new LineConsumer() {
@@ -941,7 +931,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		ObjectMapper mapper = new ObjectMapper();
 		
 		StringBuilder json = new StringBuilder();
-		kubectl.addArgs("get", "event", "-n", getNamespace(), "--field-selector", 
+		kubectl.addArgs("get", "event", "-n", "onedev", "--field-selector", 
 				"involvedObject.kind=Pod,involvedObject.name=" + podName, "--watch", 
 				"-o", "json");
 		Thread thread = Thread.currentThread();
@@ -1004,7 +994,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private void collectContainerLog(String podName, String containerName, JobLogger logger) {
 		Commandline kubectl = newKubeCtl();
-		kubectl.addArgs("logs", podName, "-c", containerName, "-n", getNamespace(), "--follow");
+		kubectl.addArgs("logs", podName, "-c", containerName, "-n", "onedev", "--follow");
 		kubectl.execute(new LineConsumer() {
 
 			@Override

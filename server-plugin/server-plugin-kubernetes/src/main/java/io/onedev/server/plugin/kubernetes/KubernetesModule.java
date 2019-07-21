@@ -8,6 +8,9 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.LineConsumer;
+import io.onedev.server.ci.job.JobExecutorDiscoverer;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.rest.jersey.JerseyConfigurator;
 
@@ -32,6 +35,33 @@ public class KubernetesModule extends AbstractPluginModule {
 			@Override
 			public Collection<Class<?>> getImplementations() {
 				return Sets.newHashSet(KubernetesExecutor.class);
+			}
+			
+		});
+		contribute(JobExecutorDiscoverer.class, new JobExecutorDiscoverer() {
+			
+			@Override
+			public JobExecutor discover() {
+				Commandline kubectl = new Commandline("kubectl");
+				kubectl.addArgs("version");
+				try {
+					kubectl.execute(new LineConsumer() {
+			
+						@Override
+						public void consume(String line) {
+						}
+						
+					}, new LineConsumer() {
+			
+						@Override
+						public void consume(String line) {
+						}
+						
+					}).checkReturnCode();
+					return new KubernetesExecutor();
+				} catch (Exception e) {
+					return null;
+				}
 			}
 			
 		});

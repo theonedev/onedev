@@ -10,6 +10,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxCheckBox;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
@@ -17,6 +18,7 @@ import org.apache.wicket.model.Model;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.EditableUtils;
 
 @SuppressWarnings("serial")
 abstract class JobExecutorPanel extends Panel {
@@ -36,6 +38,17 @@ abstract class JobExecutorPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		Label nameLabel = new Label("name", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				return EditableUtils.getDisplayName(getExecutor().getClass());
+			}
+			
+		});
+		nameLabel.setOutputMarkupPlaceholderTag(true);
+		add(nameLabel);
+		
 		add(new AjaxLink<Void>("edit") {
 
 			@Override
@@ -48,6 +61,8 @@ abstract class JobExecutorPanel extends Panel {
 						Component viewer = BeanContext.view("executor", getExecutor()).setOutputMarkupId(true);
 						JobExecutorPanel.this.replace(viewer);
 						target.add(viewer);
+						nameLabel.setVisible(true);
+						target.add(nameLabel);
 					}
 
 					@Override
@@ -55,11 +70,15 @@ abstract class JobExecutorPanel extends Panel {
 						Component viewer = BeanContext.view("executor", getExecutor()).setOutputMarkupId(true);
 						JobExecutorPanel.this.replace(viewer);
 						target.add(viewer);
+						nameLabel.setVisible(true);
+						target.add(nameLabel);
 					}
 					
 				};
 				JobExecutorPanel.this.replace(editor);
 				target.add(editor);
+				nameLabel.setVisible(false);
+				target.add(nameLabel);
 			}
 			
 		});

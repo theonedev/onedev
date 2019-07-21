@@ -38,6 +38,7 @@ import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.DiscoveredJobExecutor;
 import io.onedev.server.model.support.setting.BackupSetting;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.model.support.setting.MailSetting;
@@ -153,7 +154,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 		setting = settingManager.getSetting(Key.JOB_EXECUTORS);
 		if (setting == null) {
-			settingManager.saveJobExecutors(new ArrayList<>());
+			settingManager.saveJobExecutors(Lists.newArrayList(new DiscoveredJobExecutor()));
 		}
 		
 		setting = settingManager.getSetting(Key.MAIL);

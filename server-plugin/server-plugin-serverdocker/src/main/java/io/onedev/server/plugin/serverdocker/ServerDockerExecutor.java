@@ -51,11 +51,8 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=100, description="This executor interpretates job environments as docker images, "
-		+ "and will execute CI jobs inside docker containers created on OneDev server. Please "
-		+ "note that On non-Windows platforms, OneDev needs to run busybox image to do some "
-		+ "cleanups as root. This image has to be pre-pulled on server if your server is not "
-		+ "allowed to connect to official docker registry")
+@Editable(order=200, description="This executor interpretates job environments as docker images, "
+		+ "and will execute CI jobs inside docker containers created on OneDev server")
 @ClassValidating
 public class ServerDockerExecutor extends JobExecutor implements Testable<TestData>, Validatable {
 
@@ -163,6 +160,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
+		jobContext.getLogger().log("Executing job with server docker executor...");
+		
 		File hostCIHome = FileUtils.createTempDir("onedev-ci");
 		try {
 			JobLogger logger = jobContext.getLogger();

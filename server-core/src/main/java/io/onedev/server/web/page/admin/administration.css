@@ -37,3 +37,7 @@
 .license-management .actions a {
 	margin-right: 16px;
 }
+
+.job-executor .panel-heading .name {
+	margin-right: 8px;
+}

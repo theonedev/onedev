@@ -35,7 +35,6 @@ public class ProductModule extends AbstractPluginModule {
 
 		contribute(ServerConfigurator.class, ProductConfigurator.class);
 		contribute(ServletConfigurator.class, ProductServletConfigurator.class);
-		
 	}
 
 }
