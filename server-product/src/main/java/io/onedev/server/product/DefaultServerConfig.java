@@ -13,15 +13,15 @@ import io.onedev.server.util.serverconfig.SslConfig;
 @Singleton
 public class DefaultServerConfig implements ServerConfig {
 
-	private static final String PROP_HTTPPORT = "httpPort";
+	private static final String PROP_HTTPPORT = "http_port";
 	
-	private static final String PROP_HTTPSPORT = "httpsPort";
+	private static final String PROP_HTTPSPORT = "https_port";
 	
-	private static final String PROP_KEYSTOREPATH = "keystorePath";
+	private static final String PROP_KEYSTOREPATH = "keystore_path";
 	
-	private static final String PROP_KEYSTOREPASSWORD = "keystorePassword";
+	private static final String PROP_KEYSTOREPASSWORD = "keystore_password";
 	
-	private static final String PROP_KEYSTOREKEYPASSWORD = "keystoreKeyPassword";
+	private static final String PROP_KEYSTOREKEYPASSWORD = "keystore_key_password";
 	
 	private int httpPort;
 	
@@ -73,7 +73,7 @@ public class DefaultServerConfig implements ServerConfig {
 		if (httpPort == 0 && sslConfig == null)
 			throw new RuntimeException("Either httpPort or httpsPort or both should be enabled.");
 		
-		String sessionTimeoutStr = props.getProperty("sessionTimeout");
+		String sessionTimeoutStr = props.getProperty("session_timeout");
 		if (StringUtils.isNotBlank(sessionTimeoutStr))
 			sessionTimeout = Integer.parseInt(sessionTimeoutStr.trim());
 	}

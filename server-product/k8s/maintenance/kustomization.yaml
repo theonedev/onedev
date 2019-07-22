@@ -1,0 +1,4 @@
+bases:
+- ../production
+patchesStrategicMerge:
+- deployments.yaml

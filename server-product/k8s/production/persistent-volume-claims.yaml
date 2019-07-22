@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: onedev
+  labels:
+    tier: server
+spec:
+  accessModes:
+  - ReadWriteOnce
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql
+  labels:
+    tier: database
+spec:
+  accessModes:
+  - ReadWriteOnce
