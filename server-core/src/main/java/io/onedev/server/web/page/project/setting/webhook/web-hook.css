@@ -1,0 +1,9 @@
+.web-hook.list table thead th {
+	font-weight: bold !important;
+}
+.web-hook.list table thead th.property-eventTypes {
+	width: 25%;
+}
+.web-hook.list table .select2-container {
+    width: 100%;
+}

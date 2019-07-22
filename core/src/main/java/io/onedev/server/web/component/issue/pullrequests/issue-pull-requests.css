@@ -1,5 +1,0 @@
-@media(max-width: 991px) {
-	.issue-pull-requests thead, .issue-pull-requests td.expanded {
-		display: none;		
-	}
-}

@@ -1,0 +1,90 @@
+@media(max-width: 991px) {
+	.commit-list li.commit>.actions {
+		display: none;
+	}
+}
+.commit-list {
+    position: relative;
+}
+.commit-list>.head {
+	position: relative;
+}
+.commit-list>.head>* {
+	margin-bottom: 20px;
+}
+.commit-list>.head>.others>* {
+	margin-right: 16px;
+	color: #666;
+}
+.commit-list>.head>.others>*:last-child {
+	margin-right: 0;
+}
+
+.commit-list>.body .no-commits {
+	font-size: 16px;
+}
+.commit-list>.body li {
+	padding: 4px 0;
+	position: relative;
+}
+.commit-list>.body li.commit>.avatar {
+	margin-top: 4px;
+	position: absolute;
+}
+.commit-list>.body .label {
+	margin-right: 8px;
+}
+.commit-list>.body .summary a {
+	font-weight: bold;
+	font-size: 15px;
+	line-height: 12px;
+}
+.commit-list>.body .commit>.detail {
+	padding-left: 48px; 
+	padding-right: 8px;
+}
+
+.commit-list>.body li.commit:hover, .commit-list>.body li.commit.hover {
+	background: #F7ECB9;
+}
+.commit-list>.body .commit-message .highlight {
+	background: yellow;
+}
+.commit-list>.body li.commit .contribution {
+	font-size: 12px;
+}
+.commit-list>.body .message-and-labels {
+	margin-bottom: 4px;
+}
+.commit-list>.body .message-and-labels .commit-message {
+	margin-right: 8px;
+}
+.commit-list>.body .message-and-labels .commit-message .ellipsis-expander {
+	margin-bottom: 2px;
+}
+.commit-list>.body .commit>.pull-right {
+    margin: 6px 0 0 8px;
+}
+.commit-list>.body .commit>.pull-right.hash {
+    margin-left: 4px;
+}
+.commit-list>.body .commit>.pull-right.build-status {
+    margin-top: 10px;
+}
+.commit-list>.body>.list {
+	margin-bottom: 0;
+}
+.commit-list>.foot {
+	text-align: center;
+}
+.commit-list>.foot>.alert, .commit-list>.foot>.btn {
+	margin-top: 12px;
+	margin-bottom: 0;
+}
+.commit-list li.date {
+	font-size: 18px;
+	margin-top: 12px;
+	text-align: left;
+	border-bottom: 1px solid #EEE;
+}
+

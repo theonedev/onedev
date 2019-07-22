@@ -1,0 +1,33 @@
+<wicket:extend>
+	<div id="build-detail">
+		<div class="main">
+			<div wicket:id="summary" class="summary clearfix">
+                <div wicket:id="title" class="title pull-left"></div>
+                <div class="status pull-left">
+                    <span wicket:id="statusIcon"></span>
+                    <span wicket:id="statusLabel"></span>
+                </div>
+                <div class="actions pull-left">
+                    <a wicket:id="rebuild" class="btn btn-warning btn-sm"><i class="fa fa-undo"></i> Rebuild</a>
+                    <a wicket:id="cancel" class="btn btn-danger btn-sm"><i class="fa fa-ban"></i> Cancel</a>
+                </div>
+    			<a wicket:id="moreInfo" class="more-info pull-right" title="More info"><span class="fa fa-ellipsis-h"></span></a>
+            </div>
+            <pre wicket:id="statusMessage" class="status-message alert"></pre>
+            <div class="commit-info clearfix">
+                <div class="pull-left"><i class="fa fa-ext fa-commit"></i> Commit: </div>
+                <div class="pull-left">
+					<a wicket:id="commitHash" class="hash"><span wicket:id="label"></span></a>
+					<a wicket:id="copyCommitHash" class="copy"><i class="fa fa-clipboard"></i></a>
+                </div>
+                <div wicket:id="commitMessage" class="message pull-left"></div>
+                <div class="contribution pull-right">
+                    <span wicket:id="commitAvatars"></span> <span wicket:id="commitNames"></span>
+                </div>
+            </div>
+			<ul wicket:id="buildTabs" class="tabs nav nav-tabs"></ul>
+			<wicket:child></wicket:child>
+		</div>
+		<div wicket:id="side"></div>
+	</div>
+</wicket:extend>

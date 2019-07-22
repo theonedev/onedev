@@ -1,0 +1,5 @@
+.floating.job-trigger td.name {
+    width: 120px !important;
+    word-break: break-all !important;
+    white-space: normal !important;
+}

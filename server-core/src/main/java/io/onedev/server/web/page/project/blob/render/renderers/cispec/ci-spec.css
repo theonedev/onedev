@@ -1,0 +1,110 @@
+.ci-spec {
+    padding: 20px;
+}
+.ci-spec.not-defined {
+    font-style: italic;
+    font-size: 16px;
+    text-align: center;
+}
+.ci-spec>.invalid>.title {
+    font-size: 20px;
+    color: red;
+    margin-bottom: 20px;
+}
+.ci-spec>.invalid>.error-message {
+	white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 13px;
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.ci-spec>.valid>div {
+    border-radius: 4px;
+}
+.ci-spec>.valid>div>.head {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+.ci-spec>.valid>div>.body {
+    position: relative;
+}
+.ci-spec>.valid>div>.not-defined {
+    font-size: 16px;
+    font-style: italic;
+}
+
+.ci-spec>.valid>div>.body>:first-child {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 220px;
+}
+.ci-spec>.valid>div>.body>:last-child {
+    margin-left: 240px;
+}
+
+.ci-spec>.valid>div>.body>.side>.navs:not(:empty) {
+    margin-bottom: 20px;
+}
+.ci-spec>.valid>div>.body>.side>.navs>.nav {
+    position: relative;
+    background: #444;
+}
+.ci-spec>.valid>div>.body>.side>.navs>.nav a {
+    color: #BBB;
+}
+.ci-spec>.valid>div>.body>.side>.navs>.nav .drag-indicator {
+    color: inherit;
+    margin-right: 4px;
+}
+.ci-spec>.valid>div>.body>.side>.navs>.nav:hover a,
+.ci-spec>.valid>div>.body>.side>.navs>.nav.active a {
+    color: white;
+    font-weight: bold;
+}
+.ci-spec>.valid>div>.body>.side>.navs>.nav.active {
+    background: #080808;
+}
+.ci-spec>.valid>div>.body>.side>.navs>.nav:first-child {
+    border-radius: 4px 4px 0 0;
+}
+.ci-spec>.valid>div>.body>.side>.navs>.nav:last-child {
+    border-radius: 0 0 4px 4px;
+}
+.ci-spec>.valid>div>.body>.side>.navs>.nav:first-child:last-child {
+    border-radius: 4px;
+}
+
+.ci-spec>.valid>div>.body>.side>.navs>.nav>.select {
+    padding: 8px 28px 8px 8px;
+    text-decoration: none;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ci-spec>.valid>div>.body>.side>.navs>.nav>.delete, 
+.ci-spec>.valid>div>.body>.side>.navs>.nav>.run {
+    right: 0;
+    top: 0;
+    position: absolute;
+    border-left: 1px solid #EEE;
+    padding: 8px 8px;
+    display: block;
+}
+.ci-spec>.valid>div>.body>.contents>.content {
+    border-radius: 4px;
+    border: 2px solid #666;
+    padding: 20px;
+}
+
+.ci-spec>.valid .bean-properties>table>tbody>tr>td.name {
+    width: 200px;
+}
+.ci-spec>.valid .bean-properties>table>tbody>tr>td.value .form-control {
+    height: 32px;
+    font-size: 13px;
+}
+.ci-spec>.valid .def-list table>tbody>tr>td:first-child>div>a {
+    margin-left: 0;
+}

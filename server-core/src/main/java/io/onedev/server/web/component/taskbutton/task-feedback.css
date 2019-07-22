@@ -1,0 +1,13 @@
+.task-feedback .modal-footer {
+	text-align: center;
+}
+.task-feedback .messages {
+	background: white;
+	border: none;
+	padding: 0;
+	max-height: 480px;
+}
+.task-feedback .alert {
+	margin-top: 12px;
+	margin-bottom: 0;
+}

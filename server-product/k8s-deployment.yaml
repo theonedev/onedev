@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: Namespace
+metadata: 
+  name: onedev
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: onedev
+  namespace: onedev
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: onedev
+rules:
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list", "patch"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: onedev
+subjects:
+- kind: ServiceAccount
+  name: onedev
+  namespace: onedev
+roleRef:
+  kind: ClusterRole
+  name: onedev
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: onedev
+  name: onedev
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/log", "secrets", "events"]
+  verbs: ["create", "get", "list", "watch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: onedev
+  namespace: onedev 
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: onedev
+subjects:
+- kind: ServiceAccount
+  name: onedev
+  namespace: onedev
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: onedev
+  namespace: onedev
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 6610
+    protocol: TCP
+  selector:
+    app: onedev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onedev
+  namespace: onedev
+  labels:
+    app: onedev
+spec:
+  selector:
+    matchLabels:
+      app: onedev
+  template:
+    metadata:
+      name: onedev
+      namespace: onedev
+      labels:
+        app: onedev
+    spec:
+      containers:
+      - name: onedev
+        image: 1dev/server
+        volumeMounts:
+        - mountPath: "/opt/onedev"
+          name: onedev
+        ports:
+        - containerPort: 6610
+      volumes:
+      - name: onedev
+        persistentVolumeClaim:
+          claimName: onedev
+      serviceAccountName: onedev
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: onedev
+  namespace: onedev
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

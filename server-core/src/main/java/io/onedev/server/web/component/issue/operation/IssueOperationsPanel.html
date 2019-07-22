@@ -1,0 +1,23 @@
+<wicket:panel>
+	<div class="issue-operations">
+		<div class="state-and-actions clearfix">
+			<div wicket:id="state" class="pull-left"></div>
+			<wicket:enclosure child="transitions">
+			<a wicket:id="transitions" class="btn btn-default btn-sm pull-left"><span wicket:id="label"></span></a>
+			</wicket:enclosure>
+			<a wicket:id="newIssue" class="new-issue pull-left btn btn-success btn-sm"><i class="fa fa-plus"></i> New Issue</a>
+			<a wicket:id="moreInfo" class="more-info" title="More info"><i class="fa fa-ellipsis-h"></i></a>
+		</div>
+		<div wicket:id="actionOptions" class="action-options"></div>
+	</div>
+	<wicket:fragment wicket:id="transitionFrag">
+		<form wicket:id="form" class="state-transition leave-confirm">
+			<div wicket:id="fields"></div>
+			<div wicket:id="comment"></div>
+			<div class="actions">
+				<button wicket:id="save" type="submit" class="btn btn-primary">Ok</button>
+				<a wicket:id="cancel" class="btn btn-default">Cancel</a>
+			</div>
+		</form>
+	</wicket:fragment>
+</wicket:panel>

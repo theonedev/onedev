@@ -1,0 +1,21 @@
+<wicket:panel>
+	<div class="blob-edit autofit">
+		<div class="head clearfix">
+			<div class="pull-left active tab edit"><a><i class="fa fa-pencil"></i> Edit</a></div>
+			<div wicket:id="editPlainTab" class="pull-left tab edit-plain"><a><i class="fa fa-pencil"></i> Edit Source</a></div>
+			<div wicket:id="saveTab" class="pull-left save tab"><a><i class="fa fa-floppy-o"></i> Save</a></div>
+			<div class="pull-left cancel"><a wicket:id="cancelLink" tabindex="-1">Cancel</a></div>
+			<div wicket:id="editOptions" class="options pull-right expanded"></div>
+		</div>
+		<div class="body">
+            <form wicket:id="content" class="content leave-confirm" onsubmit="return false;">
+                <div wicket:id="feedback" class="feedback"></div>
+				<div wicket:id="editor" class="editor"></div>
+                <a wicket:id="edit" class="edit submit">submit</a>
+                <a wicket:id="editPlain" class="edit-plain submit">submit</a>
+                <a wicket:id="save" class="save submit">submit</a>
+			</form>
+			<div wicket:id="commitOptions" class="commit-options"></div>
+		</div>
+	</div>
+</wicket:panel>

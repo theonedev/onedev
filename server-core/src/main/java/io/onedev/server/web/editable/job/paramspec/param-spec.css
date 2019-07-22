@@ -1,0 +1,6 @@
+.floating.job-param-spec>.content>.body>.bean-viewer>.bean-properties>table>tbody>tr>td.name {
+	min-width: 150px;
+} 
+.floating.job-param-spec .property-uuid, .job-param-spec-edit .property-uuid {
+	display: none;
+}

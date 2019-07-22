@@ -1,0 +1,27 @@
+<wicket:extend>
+	<div class="issue-fields def-list list">
+		<div class="head clearfix">
+			<div class="pull-left">
+				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+			</div>
+		</div>
+		<table wicket:id="issueFields" class="table table-hover"></table>
+		<div class="help-block"><i class="fa fa-info-circle"></i> Define all custom issue fields here. Each project can 
+		decide to use all or a subset of these fields via its issue transition setting</div>
+	</div>
+	<wicket:fragment wicket:id="nameColumnFrag">
+		<span class="fa fa-reorder drag-indicator"></span>
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="otherColumnFrag">
+		<a wicket:id="link"><span wicket:id="label"></span></a>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="viewFieldFrag">
+		<div class="actions">
+			<a wicket:id="edit" class="btn btn-sm btn-default"><i class="fa fa-pencil"></i> Edit</a>
+			<a wicket:id="delete" class="btn btn-sm btn-default"><i class="fa fa-trash"></i> Delete</a>
+		</div>
+		<div wicket:id="viewer1"></div>
+		<div wicket:id="viewer2"></div>
+	</wicket:fragment>
+</wicket:extend>
