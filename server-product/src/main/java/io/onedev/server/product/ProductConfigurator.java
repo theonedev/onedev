@@ -34,9 +34,9 @@ public class ProductConfigurator implements ServerConfigurator {
 		SslConfig sslConfig = serverConfig.getSslConfig();
 		if (sslConfig != null) {
 			SslContextFactory sslContextFactory = new SslContextFactory();
-			sslContextFactory.setKeyStorePath(sslConfig.getKeystorePath());
+			sslContextFactory.setKeyStoreType("pkcs12");
+			sslContextFactory.setKeyStorePath(sslConfig.getKeystore());
 			sslContextFactory.setKeyStorePassword(sslConfig.getKeystorePassword());
-			sslContextFactory.setKeyManagerPassword(sslConfig.getKeystoreKeyPassword());
 			
 			ServerConnector connector = new ServerConnector(server, sslContextFactory);
 			connector.setPort(sslConfig.getPort());

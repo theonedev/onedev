@@ -1,0 +1,14 @@
+namespace: onedev
+bases:
+- ../production
+configMapGenerator:
+- name: keystore
+  files:
+  - keystore=change-me.p12.base64 #PKCS file in base64 encoding
+secretGenerator:
+- name: keystore
+  literals:
+  - password=change-me
+patchesStrategicMerge:
+- deployments.yaml
+- services.yaml

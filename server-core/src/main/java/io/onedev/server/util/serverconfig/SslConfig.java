@@ -3,9 +3,7 @@ package io.onedev.server.util.serverconfig;
 public interface SslConfig {
 	int getPort();
 	
-	String getKeystorePath();
+	String getKeystore();
 	
 	String getKeystorePassword();
-	
-	String getKeystoreKeyPassword();
 }

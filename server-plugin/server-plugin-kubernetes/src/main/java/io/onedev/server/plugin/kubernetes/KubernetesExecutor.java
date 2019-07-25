@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -17,6 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import javax.annotation.Nullable;
 
 import org.apache.commons.codec.Charsets;
+import org.apache.commons.codec.binary.Base64;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -391,7 +390,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	@Nullable
 	private String createImagePullSecret(JobLogger logger) {
 		if (!getRegistryLogins().isEmpty()) {
-			Encoder encoder = Base64.getEncoder();
 			Map<Object, Object> auths = new LinkedHashMap<>();
 			for (RegistryLogin login: getRegistryLogins()) {
 				String auth = login.getUserName() + ":" + login.getPassword();
@@ -399,7 +397,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				if (registryUrl == null)
 					registryUrl = "https://index.docker.io/v1/";
 				auths.put(registryUrl, Maps.newLinkedHashMap(
-						"auth", encoder.encodeToString(auth.getBytes(Charsets.UTF_8))));
+						"auth", Base64.encodeBase64String(auth.getBytes(Charsets.UTF_8))));
 			}
 			try {
 				String dockerConfig = new ObjectMapper().writeValueAsString(Maps.newLinkedHashMap("auths", auths));
@@ -808,7 +806,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private String createSecret(Map<String, String> secrets, @Nullable String type, JobLogger logger) {
 		Map<String, String> encodedSecrets = new LinkedHashMap<>();
 		for (Map.Entry<String, String> entry: secrets.entrySet())
-			encodedSecrets.put(entry.getKey(), Base64.getEncoder().encodeToString(entry.getValue().getBytes(Charsets.UTF_8)));
+			encodedSecrets.put(entry.getKey(), Base64.encodeBase64String(entry.getValue().getBytes(Charsets.UTF_8)));
 		Map<Object, Object> secretDef = Maps.newLinkedHashMap(
 				"apiVersion", "v1", 
 				"kind", "Secret", 

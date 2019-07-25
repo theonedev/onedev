@@ -10,26 +10,19 @@ class SslConfigBean implements SslConfig {
 	
 	private String keyStorePassword;
 	
-	private String keyStoreKeyPassword;
-
 	@Override
 	public int getPort() {
 		return port;
 	}
 
 	@Override
-	public String getKeystorePath() {
+	public String getKeystore() {
 		return keyStorePath;
 	}
 
 	@Override
 	public String getKeystorePassword() {
 		return keyStorePassword;
-	}
-
-	@Override
-	public String getKeystoreKeyPassword() {
-		return keyStoreKeyPassword;
 	}
 
 	public void setPort(int port) {
@@ -42,10 +35,6 @@ class SslConfigBean implements SslConfig {
 
 	public void setKeyStorePassword(String keyStorePassword) {
 		this.keyStorePassword = keyStorePassword;
-	}
-
-	public void setKeyStoreKeyPassword(String keyStoreKeyPassword) {
-		this.keyStoreKeyPassword = keyStoreKeyPassword;
 	}
 
 }
