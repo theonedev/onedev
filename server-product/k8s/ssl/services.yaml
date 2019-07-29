@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: onedev #base64
+  name: onedev
 spec:
   ports:
   - name: https 

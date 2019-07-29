@@ -1,8 +1,6 @@
 namespace: onedev
 bases:
 - ../base
-commonLabels:
-  app: onedev
 patchesStrategicMerge:
 - cpu-settings.yaml
 - memory-settings.yaml

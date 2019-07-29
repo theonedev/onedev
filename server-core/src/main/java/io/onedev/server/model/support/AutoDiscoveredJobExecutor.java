@@ -13,7 +13,7 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=10000, description="Discover appropriate job executor automatically to run CI jobs")
-public class DiscoveredJobExecutor extends JobExecutor {
+public class AutoDiscoveredJobExecutor extends JobExecutor {
 
 	private static final long serialVersionUID = 1L;
 	

@@ -1,4 +1,8 @@
-package io.onedev.server.util.serverconfig;
+package io.onedev.server.util;
+
+import java.io.File;
+
+import javax.annotation.Nullable;
 
 public interface ServerConfig {
 	
@@ -12,15 +16,15 @@ public interface ServerConfig {
 	 */
 	int getHttpPort();
 	
-	/**
-	 * Get ssl config of the server.
-	 * <p>
-	 * @return
-	 * 			ssl config of the server, or <tt>null</tt> if ssl setting is not defined. 
-	 * 			In case ssl setting is not defined, {@link #getHttpPort()} must not 
-	 * 			return <i>0</i>
-	 */
-	SslConfig getSslConfig();
+	int getHttpsPort();
+	
+	@Nullable
+	File getKeystoreFile();
+	
+	String getKeystorePassword();
+	
+	@Nullable
+	File getTrustCertsDir();
 	
 	/**
 	 * Get web session timeout in seconds.

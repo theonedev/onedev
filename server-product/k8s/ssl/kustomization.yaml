@@ -4,11 +4,11 @@ bases:
 configMapGenerator:
 - name: keystore
   files:
-  - keystore=change-me.p12.base64 #PKCS file in base64 encoding
+  - keystore=changeit.pfx.base64 # base64 encoded pkcs12 keystore
 secretGenerator:
 - name: keystore
   literals:
-  - password=change-me
+  - password=changeit
 patchesStrategicMerge:
 - deployments.yaml
 - services.yaml

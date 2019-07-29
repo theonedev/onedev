@@ -22,11 +22,11 @@ spec:
               name: keystore
               key: password
         volumeMounts:
-        - name: config
+        - name: keystore
           mountPath: /root/config
         ports:
         - containerPort: 6643
       volumes:
-      - name: config
+      - name: keystore
         configMap:
           name: keystore

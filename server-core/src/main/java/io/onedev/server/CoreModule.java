@@ -167,7 +167,7 @@ import io.onedev.server.maintenance.RestoreDatabase;
 import io.onedev.server.maintenance.Upgrade;
 import io.onedev.server.migration.JpaConverter;
 import io.onedev.server.migration.PersistentBagConverter;
-import io.onedev.server.model.support.DiscoveredJobExecutor;
+import io.onedev.server.model.support.AutoDiscoveredJobExecutor;
 import io.onedev.server.model.support.authenticator.Authenticator;
 import io.onedev.server.notification.CodeCommentNotificationManager;
 import io.onedev.server.notification.CommitNotificationManager;
@@ -391,12 +391,12 @@ public class CoreModule extends AbstractPluginModule {
 
 			@Override
 			public Class<?> getAbstractClass() {
-				return DiscoveredJobExecutor.class;
+				return AutoDiscoveredJobExecutor.class;
 			}
 
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(DiscoveredJobExecutor.class);
+				return Sets.newHashSet(AutoDiscoveredJobExecutor.class);
 			}
 			
 		});

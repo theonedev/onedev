@@ -10,8 +10,6 @@ spec:
         resources:
           requests: 
             memory: 1Gi
-          limits:
-            memory: 4Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -24,24 +22,4 @@ spec:
       - name: mysql
         resources:
           requests: 
-            memory: 512Mi
-          limits:
-            memory: 4Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: onedev
-spec:
-  resources:
-    requests:
-      storage: 1Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql
-spec:
-  resources:
-    requests:
-      storage: 1Gi
+            memory: 500Mi

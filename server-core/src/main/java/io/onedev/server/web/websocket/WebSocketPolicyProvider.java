@@ -6,7 +6,7 @@ import javax.inject.Singleton;
 
 import org.eclipse.jetty.websocket.api.WebSocketPolicy;
 
-import io.onedev.server.util.serverconfig.ServerConfig;
+import io.onedev.server.util.ServerConfig;
 
 @Singleton
 public class WebSocketPolicyProvider implements Provider<WebSocketPolicy> {

@@ -9,9 +9,9 @@ import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.persistence.HibernateProperties;
+import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.jetty.ServerConfigurator;
 import io.onedev.server.util.jetty.ServletConfigurator;
-import io.onedev.server.util.serverconfig.ServerConfig;
 
 public class ProductModule extends AbstractPluginModule {
 

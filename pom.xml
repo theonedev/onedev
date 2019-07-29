@@ -195,7 +195,7 @@
 		</repository>
 	</repositories>
 	<properties>
-		<commons.version>1.1.6</commons.version>
+		<commons.version>1.1.7</commons.version>
 		<antlr.version>4.7.2</antlr.version>
 	</properties>
 </project>

@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onedev
+spec:
+  template:
+    metadata:
+      name: onedev
+    spec:
+      containers:
+      - name: onedev
+        env:
+        - name: trust_certs
+          value: /root/config/trust-certs
+        volumeMounts:
+        - name: trust-certs
+          mountPath: /root/config/trust-certs
+      volumes:
+      - name: trust-certs
+        configMap:
+          name: trust-certs

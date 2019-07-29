@@ -1,10 +1,21 @@
 package io.onedev.server.plugin.kubernetes;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
+import java.io.StringWriter;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +27,8 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.binary.Base64;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +58,7 @@ import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.plugin.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -410,6 +424,72 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
+	private String getCertContent(Certificate cert) {
+	    StringWriter stringWriter = new StringWriter();
+	    try (PemWriter pemWriter = new PemWriter(stringWriter)) {
+	    	pemWriter.writeObject(new PemObject("CERTIFICATE", cert.getEncoded()));
+	    	pemWriter.flush();
+	    } catch (CertificateEncodingException|IOException e) {
+	    	throw new RuntimeException(e);
+		}
+	    return stringWriter.toString().trim();
+	}
+	
+	@Nullable
+	private String createTrustCertsConfigMap(JobLogger logger) {
+		Map<String, String> configMapData = new LinkedHashMap<>();
+		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
+		File keystoreFile = serverConfig.getKeystoreFile();
+		if (keystoreFile != null) {
+			try (InputStream is = new FileInputStream(keystoreFile)) {
+				KeyStore keystore = KeyStore.getInstance("pkcs12");
+				keystore.load(is, serverConfig.getKeystorePassword().toCharArray());
+				Enumeration<String> aliases = keystore.aliases();
+				while (aliases.hasMoreElements()) {
+					String alias = aliases.nextElement();
+					String siteCertContent = getCertContent(keystore.getCertificate(alias));
+					String safeAlias = alias.replaceAll("[^a-zA-Z0-9\\.\\_]", "-");
+					configMapData.put("keystore-site-cert-" + safeAlias + ".pem", siteCertContent);
+					
+				    Certificate chain[] = keystore.getCertificateChain(alias);
+				    if (chain != null) {
+				    	for (int i=0; i<chain.length; i++) {
+				    		String caCertContent = getCertContent(chain[i]);
+						    if (!caCertContent.equals(siteCertContent))
+						    	configMapData.put("keystore-ca-cert-" + safeAlias + "-" + i + ".pem", caCertContent);
+				    	}
+				    }
+				}
+			} catch (IOException|KeyStoreException|NoSuchAlgorithmException|CertificateException e) {
+				throw new RuntimeException(e);
+			} 
+		}
+		File trustCertsDir = serverConfig.getTrustCertsDir();
+		if (trustCertsDir != null) {
+			for (File file: trustCertsDir.listFiles()) {
+				if (file.isFile()) {
+					try {
+						configMapData.put("specified-cert-" + file.getName(), FileUtils.readFileToString(file));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}
+		}
+		if (!configMapData.isEmpty()) {
+			Map<Object, Object> configMapDef = Maps.newLinkedHashMap(
+					"apiVersion", "v1", 
+					"kind", "ConfigMap",
+					"metadata", Maps.newLinkedHashMap(
+							"generateName", "configmap-", 
+							"namespace", "onedev"), 
+					"data", configMapData);
+			return createResource(configMapDef, new HashSet<>(), logger);			
+		} else {
+			return null;
+		}
+	}
+	
 	private void execute(String dockerImage, String jobToken, JobLogger logger, @Nullable JobContext jobContext) {
 		logger.log("Executing job with Kubernetes executor...");
 		
@@ -417,10 +497,12 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 		String jobSecretName = null;
 		String imagePullSecretName = null;
+		String trustCertsConfigMapName = null;
 		try {
 			Map<String, String> jobSecrets = Maps.newLinkedHashMap(KubernetesHelper.ENV_JOB_TOKEN, jobToken);
 			jobSecretName = createSecret(jobSecrets, null, logger);
 			imagePullSecretName = createImagePullSecret(logger);
+			trustCertsConfigMapName = createTrustCertsConfigMap(logger);
 			
 			String osName = getOSName(logger);
 			
@@ -433,28 +515,36 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			String k8sHelperClassPath;
 			String containerCIHome;
 			String containerCacheHome;
+			String trustCertsHome;
 			if (osName.equalsIgnoreCase("linux")) {
 				containerCIHome = "/onedev-ci";
 				containerCacheHome = containerCIHome + "/cache";
+				trustCertsHome = containerCIHome + "/trust-certs";
 				k8sHelperClassPath = "/k8s-helper/*";
 				mainContainerSpec.put("command", Lists.newArrayList("sh"));
 				mainContainerSpec.put("args", Lists.newArrayList(containerCIHome + "/commands.sh"));
 			} else {
 				containerCIHome = "C:\\onedev-ci";
 				containerCacheHome = containerCIHome + "\\cache";
+				trustCertsHome = containerCIHome + "\\trust-certs";
 				k8sHelperClassPath = "C:\\k8s-helper\\*";
 				mainContainerSpec.put("command", Lists.newArrayList("cmd"));
 				mainContainerSpec.put("args", Lists.newArrayList("/c", containerCIHome + "\\commands.bat"));
 			}
 
-			Map<String, String> ciPathMount = Maps.newLinkedHashMap(
+			Map<String, String> ciHomeMount = Maps.newLinkedHashMap(
 					"name", "ci-home", 
 					"mountPath", containerCIHome);
 			Map<String, String> cacheHomeMount = Maps.newLinkedHashMap(
 					"name", "cache-home", 
 					"mountPath", containerCacheHome);
+			Map<String, String> trustCertsMount = Maps.newLinkedHashMap(
+					"name", "trust-certs-home", 
+					"mountPath", trustCertsHome);
 			
-			List<Object> volumeMounts = Lists.<Object>newArrayList(ciPathMount, cacheHomeMount);
+			List<Object> volumeMounts = Lists.<Object>newArrayList(ciHomeMount, cacheHomeMount);
+			if (trustCertsConfigMapName != null)
+				volumeMounts.add(trustCertsMount);
 			
 			mainContainerSpec.put("volumeMounts", volumeMounts);
 			
@@ -512,8 +602,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"hostPath", Maps.newLinkedHashMap(
 							"path", getCacheHome(osName), 
 							"type", "DirectoryOrCreate"));
-			
-			podSpec.put("volumes", Lists.<Object>newArrayList(ciHomeVolume, cacheHomeVolume));
+			List<Object> volumes = Lists.<Object>newArrayList(ciHomeVolume, cacheHomeVolume);
+			if (trustCertsConfigMapName != null) {
+				Map<Object, Object> trustCertsHomeVolume = Maps.newLinkedHashMap(
+						"name", "trust-certs-home", 
+						"configMap", Maps.newLinkedHashMap(
+								"name", trustCertsConfigMapName));			
+				volumes.add(trustCertsHomeVolume);
+			}
+			podSpec.put("volumes", volumes);
 			
 			Map<Object, Object> podDef = Maps.newLinkedHashMap(
 					"apiVersion", "v1", 
@@ -648,6 +745,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				deleteResource("pod", podName, logger);
 			}
 		} finally {
+			if (trustCertsConfigMapName != null)
+				deleteResource("configmap", trustCertsConfigMapName, logger);
 			if (jobSecretName != null)
 				deleteResource("secret", jobSecretName, logger);
 			if (imagePullSecretName != null)
