@@ -8,8 +8,7 @@ secretGenerator:
 resources:
 - namespaces.yaml
 - service-accounts.yaml
-- roles.yaml
-- role-bindings.yaml
+- clusterrole-bindings.yaml
 - services.yaml
 - deployments.yaml
 - persistent-volume-claims.yaml
