@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <excludeFromCompile>
+      <directory url="file://$PROJECT_DIR$/server-plugin/server-plugin-archetype/src/main/resources/archetype-resources" includeSubdirectories="true" />
+    </excludeFromCompile>
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="server-core" />
+        <module name="server-plugin-archetype" />
+        <module name="server-plugin-artifact" />
+        <module name="server-plugin-asp.net" />
+        <module name="server-plugin-htmlreport" />
+        <module name="server-plugin-kubernetes" />
+        <module name="server-plugin-maven" />
+        <module name="server-plugin-serverdocker" />
+        <module name="server-product" />
+      </profile>
+    </annotationProcessing>
+  </component>
+</project>
