@@ -340,19 +340,19 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								executor.execute(jobToken, jobContext);
 							} finally {
 								jobContexts.remove(jobToken);
-							}
-							
-							sessionManager.run(new Runnable() {
-
-								@Override
-								public void run() {
-									logger.log("Processing job outcomes...");
-									Build build = buildManager.load(buildId);
-									for (JobOutcome outcome: job.getOutcomes())
-										outcome.process(build, serverWorkspace, logger);
-								}
 								
-							});
+								sessionManager.run(new Runnable() {
+
+									@Override
+									public void run() {
+										logger.log("Processing job outcomes...");
+										Build build = buildManager.load(buildId);
+										for (JobOutcome outcome: job.getOutcomes())
+											outcome.process(build, serverWorkspace, logger);
+									}
+									
+								});
+							}
 						} catch (Exception e) {
 							if (ExceptionUtils.find(e, InterruptedException.class) == null) {
 								if (e.getMessage() != null)

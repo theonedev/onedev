@@ -273,6 +273,9 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							docker.addArgs("-v", hostCachePath + ":" + containerCachePath);
 						}
 					}
+					if (SystemUtils.IS_OS_LINUX)
+						docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
+					
 					docker.addArgs("-w", containerWorkspace, jobContext.getEnvironment());
 					docker.addArgs(containerCommand);
 					

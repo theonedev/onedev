@@ -529,6 +529,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			String containerCIHome;
 			String containerCacheHome;
 			String trustCertsHome;
+			String dockerSock;
 			if (osName.equalsIgnoreCase("linux")) {
 				containerCIHome = "/onedev-ci";
 				containerCacheHome = containerCIHome + "/cache";
@@ -536,6 +537,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				k8sHelperClassPath = "/k8s-helper/*";
 				mainContainerSpec.put("command", Lists.newArrayList("sh"));
 				mainContainerSpec.put("args", Lists.newArrayList(containerCIHome + "/commands.sh"));
+				dockerSock = "/var/run/docker.sock";
 			} else {
 				containerCIHome = "C:\\onedev-ci";
 				containerCacheHome = containerCIHome + "\\cache";
@@ -543,6 +545,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				k8sHelperClassPath = "C:\\k8s-helper\\*";
 				mainContainerSpec.put("command", Lists.newArrayList("cmd"));
 				mainContainerSpec.put("args", Lists.newArrayList("/c", containerCIHome + "\\commands.bat"));
+				dockerSock = null;
 			}
 
 			Map<String, String> ciHomeMount = Maps.newLinkedHashMap(
@@ -554,10 +557,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			Map<String, String> trustCertsMount = Maps.newLinkedHashMap(
 					"name", "trust-certs-home", 
 					"mountPath", trustCertsHome);
+			Map<String, String> dockerSockMount = Maps.newLinkedHashMap(
+					"name", "docker-sock", 
+					"mountPath", dockerSock);
 			
 			List<Object> volumeMounts = Lists.<Object>newArrayList(ciHomeMount, cacheHomeMount);
 			if (trustCertsConfigMapName != null)
 				volumeMounts.add(trustCertsMount);
+			if (dockerSock != null)
+				volumeMounts.add(dockerSockMount);
 			
 			mainContainerSpec.put("volumeMounts", volumeMounts);
 			
@@ -571,6 +579,14 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"value", getServerUrl());
 			envs.add(serverUrlEnv);
 			envs.addAll(getSecretEnvs(jobSecretName, jobSecrets.keySet()));
+			if (jobContext != null) {
+				for (Map.Entry<String, String> entry: jobContext.getEnvVars().entrySet()) {
+					envs.add(Maps.newLinkedHashMap(
+							"name", entry.getKey(), 
+							"value", entry.getValue()));
+				}
+			}
+			mainContainerSpec.put("env", envs);
 			
 			List<String> sidecarArgs = Lists.newArrayList("-classpath", k8sHelperClassPath, "io.onedev.k8shelper.SideCar");
 			List<String> initArgs = Lists.newArrayList("-classpath", k8sHelperClassPath, "io.onedev.k8shelper.Init");
@@ -622,6 +638,14 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 						"configMap", Maps.newLinkedHashMap(
 								"name", trustCertsConfigMapName));			
 				volumes.add(trustCertsHomeVolume);
+			}
+			if (dockerSock != null) {
+				Map<Object, Object> dockerSockVolume = Maps.newLinkedHashMap(
+						"name", "docker-sock", 
+						"hostPath", Maps.newLinkedHashMap(
+								"path", dockerSock, 
+								"type", "File"));
+				volumes.add(dockerSockVolume);
 			}
 			podSpec.put("volumes", volumes);
 			

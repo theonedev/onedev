@@ -78,7 +78,7 @@ public class JobHtmlReport extends JobOutcome {
 						}
 					}
 				} else {
-					logger.log("ERROR: Html report start page not found: " + startPage.getAbsolutePath());
+					logger.log("WARNING: Html report start page not found: " + startPage.getAbsolutePath());
 				}
 				return null;
 			}
