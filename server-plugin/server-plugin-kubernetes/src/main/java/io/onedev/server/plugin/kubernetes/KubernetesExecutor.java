@@ -658,14 +658,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"spec", podSpec);
 			
 			String podName = createResource(podDef, Sets.newHashSet(), logger);
+			String podFQN = getNamespace() + "/" + podName;
 			try {
 				logger.log("Preparing job environment...");
 				
-				KubernetesExecutor.logger.debug("Checking error events (pod: {})...", podName);
+				KubernetesExecutor.logger.debug("Checking error events (pod: {})...", podFQN);
 				// Some errors only reported via events
 				checkEventError(podName, logger);
 				
-				KubernetesExecutor.logger.debug("Waiting for init container to start (pod: {})...", podName);
+				KubernetesExecutor.logger.debug("Waiting for init container to start (pod: {})...", podFQN);
 				watchPod(podName, new StatusChecker() {
 
 					@Override
@@ -708,15 +709,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				}).checkReturnCode();
 				
 				String nodeName = Preconditions.checkNotNull(nodeNameRef.get());
-				logger.log("Running job on node " + nodeName + "...");
+				logger.log("Running pod " + podFQN + " on node " + nodeName + "...");
 				
-				KubernetesExecutor.logger.debug("Collecting init container log (pod: {})...", podName);
+				KubernetesExecutor.logger.debug("Collecting init container log (pod: {})...", podFQN);
 				collectContainerLog(podName, "init", logger);
 				
 				if (jobContext != null) 
 					updateCacheLabels(nodeName, jobContext, logger);
 				
-				KubernetesExecutor.logger.debug("Waiting for main container to start (pod: {})...", podName);
+				KubernetesExecutor.logger.debug("Waiting for main container to start (pod: {})...", podFQN);
 				watchPod(podName, new StatusChecker() {
 
 					@Override
@@ -735,19 +736,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					
 				}, logger);
 				
-				KubernetesExecutor.logger.debug("Collecting main container log (pod: {})...", podName);
+				KubernetesExecutor.logger.debug("Collecting main container log (pod: {})...", podFQN);
 				collectContainerLog(podName, "main", logger);
 				
-				KubernetesExecutor.logger.debug("Waiting for sidecar container to start (pod: {})...", podName);
+				KubernetesExecutor.logger.debug("Waiting for sidecar container to start (pod: {})...", podFQN);
 				watchPod(podName, new StatusChecker() {
 
 					@Override
 					public StopWatch check(JsonNode statusNode) {
 						JsonNode containerStatusesNode = statusNode.get("containerStatuses");
-						String errorMessage = getContainerError(containerStatusesNode, "main");
-						if (errorMessage != null)
-							return new StopWatch(new OneException(errorMessage));
-						
 						if (isContainerStarted(containerStatusesNode, "sidecar"))
 							return new StopWatch(null);
 						else
@@ -756,22 +753,27 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					
 				}, logger);
 				
-				KubernetesExecutor.logger.debug("Collecting sidecar container log (pod: {})...", podName);
+				KubernetesExecutor.logger.debug("Collecting sidecar container log (pod: {})...", podFQN);
 				collectContainerLog(podName, "sidecar", logger);
 				
-				KubernetesExecutor.logger.debug("Checking sidecar container result (pod: {})...", podName);
+				KubernetesExecutor.logger.debug("Checking execution result (pod: {})...", podFQN);
 				watchPod(podName, new StatusChecker() {
 
 					@Override
 					public StopWatch check(JsonNode statusNode) {
 						JsonNode containerStatusesNode = statusNode.get("containerStatuses");
-						String errorMessage = getContainerError(containerStatusesNode, "sidecar");
-						if (errorMessage != null)
-							return new StopWatch(new OneException("Error executing sidecar logic: " + errorMessage));
-						else if (isContainerStopped(containerStatusesNode, "sidecar"))
-							return new StopWatch(null);
-						else
-							return null;
+						String errorMessage = getContainerError(containerStatusesNode, "main");
+						if (errorMessage != null) {
+							return new StopWatch(new OneException(errorMessage));
+						} else {
+							errorMessage = getContainerError(containerStatusesNode, "sidecar");
+							if (errorMessage != null)
+								return new StopWatch(new OneException("Error executing sidecar logic: " + errorMessage));
+							else if (isContainerStopped(containerStatusesNode, "sidecar"))
+								return new StopWatch(null);
+							else
+								return null;
+						}
 					}
 					
 				}, logger);
