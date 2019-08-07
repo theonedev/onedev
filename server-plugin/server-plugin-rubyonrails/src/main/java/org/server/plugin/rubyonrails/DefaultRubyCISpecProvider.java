@@ -3,8 +3,6 @@ package org.server.plugin.rubyonrails;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.DefaultCISpecProvider;
@@ -17,79 +15,106 @@ import io.onedev.server.model.Project;
 
 public class DefaultRubyCISpecProvider implements DefaultCISpecProvider {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultRubyCISpecProvider.class);
-	
+
 	@Override
 	public CISpec getDefaultCISpec(Project project, ObjectId commitId) {
 
-			Blob gemFileLockBlob = project.getBlob(new BlobIdent(commitId.name(), "Gemfile.lock", FileMode.TYPE_FILE), false);
-			if(gemFileLockBlob != null) {
-				
-				return getCISpec(gemFileLockBlob,project,commitId);
+		Blob gemFileLockBlob = project.getBlob(new BlobIdent(commitId.name(), "Gemfile.lock", FileMode.TYPE_FILE),
+				false);
+		if (gemFileLockBlob != null) {
 
-			}else {
-				Blob gemFileBlob = project.getBlob(new BlobIdent(commitId.name(), "Gemfile", FileMode.TYPE_FILE), false);
-				if(gemFileBlob != null) {
-					
-					return getCISpec(gemFileBlob,project,commitId);
-					
-				}
-				
-			}
-			return null; 	
-	}
-			
-	private CISpec getCISpec(Blob blob,Project project,ObjectId commitId) {
-		
-		String version = blob.getText().getContent();
-		
-		if(version.contains("rails") || version.contains("ruby")) {
-			CISpec ciSpec = new CISpec();
-			
-			Job job = new Job();
+			return getCISpec(gemFileLockBlob, project, commitId);
 
-			job.setName("ci");
-			
-			Blob rubyVersionBlob = project.getBlob(new BlobIdent(commitId.name(), ".ruby-version", FileMode.TYPE_FILE), false);
-			
-			if (rubyVersionBlob != null) {
-				
-				String rubyVersion = rubyVersionBlob.getText().getContent();
+		} else {
+			Blob gemFileBlob = project.getBlob(new BlobIdent(commitId.name(), "Gemfile", FileMode.TYPE_FILE), false);
+			if (gemFileBlob != null) {
 
-				job.setEnvironment(StringUtils.remove(rubyVersion.replace("-", ":"), " "));
-				
-			}else {
-				job.setEnvironment("ruby");
+				return getCISpec(gemFileBlob, project, commitId);
+
 			}
 
-			setJob(job, ciSpec);
-			
-			return ciSpec;
-			
 		}
 		return null;
 	}
-	
-	private void setJob(Job job,CISpec ciSpec) {
-		job.setCommands(""
-				+ "echo \"Detecting project version (may require some time while downloading rails dependencies)...\"\n"+
-				"bundle install"+ "\n"
-				+"rails test");
 
-		// Trigger the job automatically when there is a push to the branch			
-		BranchUpdateTrigger trigger = new BranchUpdateTrigger();
-		job.getTriggers().add(trigger);
-		
-		/*
-		 * Cache Gemfile local repository in order not to download rails dependencies all over again for 
-		 * subsequent builds
-		 */
-		CacheSpec cache = new CacheSpec();
-		cache.setKey("bundle-local-repository");
-		cache.setPath("/usr/local/bundle");
-		job.getCaches().add(cache);
-		
-		ciSpec.getJobs().add(job);
+	private CISpec getCISpec(Blob blob, Project project, ObjectId commitId) {
+
+		String version = blob.getText().getContent();
+
+		if (version.contains("rails") || version.contains("ruby")) {
+			CISpec ciSpec = new CISpec();
+
+			Job job = new Job();
+
+			job.setName("ci");
+
+			Blob rubyVersionBlob = project.getBlob(new BlobIdent(commitId.name(), ".ruby-version", FileMode.TYPE_FILE),
+					false);
+
+			if (rubyVersionBlob != null) {
+
+				String rubyVersion = rubyVersionBlob.getText().getContent();
+
+				rubyVersion = StringUtils.trim(rubyVersion);
+
+				rubyVersion = StringUtils.strip(rubyVersion, "ruby-: ");
+
+				job.setEnvironment("ruby:" + rubyVersion);
+
+			} else {
+				job.setEnvironment("ruby");
+			}
+			String projectVersion = null;
+			
+			Blob projectVersionBlob = project.getBlob(new BlobIdent(commitId.name(), "config/version.rb", FileMode.TYPE_FILE),
+					false);
+			if(projectVersionBlob != null) {
+				
+				String projectVersionBlobContext = projectVersionBlob.getText().getContent();
+				
+				String[] blobStrings = projectVersionBlobContext.split("\n");
+				
+				for(String targetString : blobStrings) {
+					targetString = StringUtils.trim(targetString);
+					if(targetString.startsWith("VERSION")) {
+						projectVersion = StringUtils.substringAfter(targetString,"=");
+						projectVersion = StringUtils.strip(projectVersion.trim(),"'\",");					
+						break;
+					}
+				}
+	
+			}
+			if(projectVersion == null) {
+				job.setCommands("bundle install" + "\n"
+						+ "rails test");
+			}else {
+				job.setCommands("set -e\n"+"buildVersion="+projectVersion+"\n"
+						+ "echo \"##onedev[SetBuildVersion '$buildVersion']\"\n"
+						+ "bundle install" + "\n"
+						+ "rails test");
+				
+			}
+			
+			
+
+			// Trigger the job automatically when there is a push to the branch
+			BranchUpdateTrigger trigger = new BranchUpdateTrigger();
+			job.getTriggers().add(trigger);
+
+			/*
+			 * Cache Gemfile local repository in order not to download rails dependencies
+			 * all over again for subsequent builds
+			 */
+			CacheSpec cache = new CacheSpec();
+			cache.setKey("bundle-local-repository");
+			cache.setPath("/usr/local/bundle");
+			job.getCaches().add(cache);
+
+			ciSpec.getJobs().add(job);
+			return ciSpec;
+
+		}
+		return null;
 	}
 
 	@Override

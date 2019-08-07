@@ -1,9 +1,8 @@
 package org.server.plugin.django;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.DefaultCISpecProvider;
@@ -16,7 +15,6 @@ import io.onedev.server.model.Project;
 
 public class DefaultDjangoCISpecProvider implements DefaultCISpecProvider {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultDjangoCISpecProvider.class);
 	
 	@Override
 	public CISpec getDefaultCISpec(Project project, ObjectId commitId) {
@@ -40,17 +38,10 @@ public class DefaultDjangoCISpecProvider implements DefaultCISpecProvider {
 			String version = null;
 			
 			if (projectVersionBlob != null) {
-				String string = projectVersionBlob.getText().getContent();
-				String[] strings = string.split("\n");
-				for(String string2:strings) {
-					if(string2.contains("version")) {
-						int first = string2.indexOf("'");
-						int last = string2.lastIndexOf("'");
-						version = string2.substring(first+1, last);
-						break;
-					}
-				}
-				if(version == null)
+				
+				version = getVersion(projectVersionBlob, "version");
+				//Django default version is "0.0.0"
+				if(version.isEmpty())
 					version = "0.0.0";
 				
 				job.setCommands("set -e\n"+"buildVersion="+version+"\n"
@@ -90,6 +81,24 @@ public class DefaultDjangoCISpecProvider implements DefaultCISpecProvider {
 		} 	
 
 	}
+	
+	private String getVersion(Blob blob,String containName) {
+		String projectVersion = null;
+		String blobString = blob.getText().getContent();
+		String[] blobStrings = blobString.split("\n");
+		for(String targetString : blobStrings) {
+			targetString = StringUtils.trim(targetString);
+			if(targetString.startsWith(containName)) {
+				projectVersion = StringUtils.substringAfter(targetString,"=");
+				projectVersion = StringUtils.strip(projectVersion.trim(),"'\",");
+				break;
+			}
+		}
+		if(projectVersion == null)
+			projectVersion = " ";
+		return projectVersion;
+	}
+	
 
 	@Override
 	public int getPriority() {

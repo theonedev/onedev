@@ -40,11 +40,6 @@
         </dependency>  
         <dependency> 
             <groupId>io.onedev</groupId>  
-            <artifactId>server-plugin-asp.net</artifactId>  
-            <version>${project.version}</version> 
-        </dependency>  
-        <dependency> 
-            <groupId>io.onedev</groupId>  
             <artifactId>server-plugin-rubyonrails</artifactId>  
             <version>${project.version}</version> 
         </dependency> 
