@@ -86,16 +86,8 @@
 }
 
 #commit-detail>.jobs>.job {
-    border: 2px solid #DDD;
-    padding: 4px 8px;
     margin-right: 20px;
-    background: #F9F9F9;
-    border-radius: 4px;
-    font-size: 16px;
-    font-weight: bold;
-    display: inline-block;
 }
-#commit-detail>.jobs>.job>.run {
-    margin-left: 20px;
-    color: #666;
+#commit-detail>.jobs>.job .no-builds i {
+	display: none;
 }

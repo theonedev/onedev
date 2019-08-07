@@ -3,6 +3,7 @@ package io.onedev.server.web.page.project.commits;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,12 +15,15 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
+import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.extensions.ajax.markup.html.AjaxLazyLoadPanel;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
@@ -35,16 +39,20 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
@@ -53,20 +61,24 @@ import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.CommitMessageTransformer;
 import io.onedev.server.util.diff.WhitespaceOption;
+import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.branch.create.CreateBranchLink;
+import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
+import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.createtag.CreateTagLink;
 import io.onedev.server.web.component.diff.revision.CommentSupport;
 import io.onedev.server.web.component.diff.revision.RevisionDiffPanel;
-import io.onedev.server.web.component.job.JobDefLink;
-import io.onedev.server.web.component.job.JobStatusPanel;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.RunJobLink;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
+import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 
 @SuppressWarnings("serial")
@@ -244,10 +256,101 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 			protected void populateItem(ListItem<Job> item) {
 				ObjectId commitId = getCommit().copy();
 				Job job = item.getModelObject();
-				Link<Void> jobLink = new JobDefLink("name", getProject(), commitId, job.getName());
-				jobLink.add(new Label("label", job.getName()));
-				item.add(jobLink);
-				item.add(new JobStatusPanel("status", getProject(), commitId, job.getName()));
+				
+				DropdownLink detailLink = new DropdownLink("detail") {
+
+					@Override
+					protected Component newContent(String id, FloatingPanel dropdown) {
+						return new SimpleBuildListPanel(id, new LoadableDetachableModel<List<Build>>() {
+
+							@Override
+							protected List<Build> load() {
+								BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+								List<Build> builds = new ArrayList<>(buildManager.query(getProject(), commitId, job.getName()));
+								builds.sort(Comparator.comparing(Build::getNumber));
+								return builds;
+							}
+							
+						}) {
+
+							@Override
+							protected Component newListLink(String componentId) {
+								return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
+										ProjectBuildsPage.paramsOf(getProject(), Job.getBuildQuery(commitId, job.getName()), 0)) {
+									
+									@Override
+									protected void onConfigure() {
+										super.onConfigure();
+										setVisible(!getBuilds().isEmpty());
+									}
+									
+								};
+							}
+
+						};
+					}
+
+					@Override
+					protected void onComponentTag(ComponentTag tag) {
+						super.onComponentTag(tag);
+						
+						String cssClasses = "btn btn-default";
+						Build.Status status = getProject().getCommitStatus(commitId).get(job.getName());
+						String title;
+						if (status != null) {
+							if (status != Status.SUCCESSFUL)
+								title = "Some builds are "; 
+							else
+								title = "Builds are "; 
+							title += status.getDisplayName().toLowerCase() + ", click for details";
+						} else {
+							title = "No builds";
+							cssClasses += " no-builds";
+						}
+						tag.put("class", cssClasses);
+						tag.put("title", title);
+					}
+
+					@Override
+					protected void onConfigure() {
+						super.onConfigure();
+						setEnabled(getProject().getCommitStatus(commitId).get(job.getName()) != null);
+					}
+					
+				};
+				detailLink.add(new BuildStatusIcon("status", new LoadableDetachableModel<Status>() {
+
+					@Override
+					protected Status load() {
+						return getProject().getCommitStatus(commitId).get(job.getName());
+					}
+					
+				}));
+				
+				detailLink.add(new Label("name", job.getName()));
+				
+				detailLink.add(new WebSocketObserver() {
+					
+					@Override
+					public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
+						handler.add(component);
+					}
+					
+					@Override
+					public void onConnectionOpened(IPartialPageRequestHandler handler) {
+						handler.add(component);
+					}
+					
+					@Override
+					public Collection<String> getObservables() {
+						return Lists.newArrayList("job-status:" + getProject().getId() + ":" + commitId.name() + ":" + job.getName());
+					}
+					
+				});
+				
+				detailLink.setOutputMarkupId(true);
+				item.add(detailLink);
+				
 				item.add(new RunJobLink("run", getProject(), commitId, job.getName()));
 			}
 

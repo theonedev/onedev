@@ -109,7 +109,6 @@ import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -527,11 +526,15 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 						PullRequest request = getPullRequest();
 						MergePreview preview = request.getMergePreview();
 						Preconditions.checkState(preview != null && preview.getMerged() != null);
-						ObjectId commitId = ObjectId.fromString(preview.getMerged());
-						Project project = request.getTargetProject();
 						String jobName = item.getModelObject();
 
-						WebMarkupContainer link = new DropdownLink("status") {
+						Status status = Status.getOverallStatus(request.getPullRequestBuilds()
+								.stream()
+								.filter(it->it.getBuild().getJobName().equals(jobName))
+								.map(it->it.getBuild().getStatus())
+								.collect(Collectors.toSet()));
+						
+						WebMarkupContainer link = new DropdownLink("job") {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown) {
@@ -562,19 +565,10 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 									
 								};
 							}
-							
-						};
-						
-						Status status = Status.getOverallStatus(request.getPullRequestBuilds()
-								.stream()
-								.filter(it->it.getBuild().getJobName().equals(jobName))
-								.map(it->it.getBuild().getStatus())
-								.collect(Collectors.toSet()));
-						
-						link.add(new BuildStatusIcon("icon", Model.of(status)) {
 
 							@Override
-							protected String getTooltip(Status status) {
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
 								String title;
 								if (status != null) {
 									if (status != Status.SUCCESSFUL)
@@ -585,14 +579,15 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 								} else {
 									title = "No builds";
 								}
-								return title;
+								tag.put("title", title);
 							}
-
-						});
+							
+						};
+						
+						link.add(new BuildStatusIcon("status", Model.of(status)));
 						item.add(link);
 						
-						link = new JobDefLink("name", project, commitId, jobName);
-						link.add(new Label("label", jobName));
+						link.add(new Label("name", jobName));
 						item.add(link);
 					}
 

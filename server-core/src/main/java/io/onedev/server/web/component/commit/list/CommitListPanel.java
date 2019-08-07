@@ -601,7 +601,14 @@ public class CommitListPanel extends Panel {
 			item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 			
 			getCommitIdsToQueryStatus().add(commit.copy());
-			item.add(new CommitStatusPanel("buildStatus", getProject(), commit.copy()));
+			item.add(new CommitStatusPanel("buildStatus", getProject(), commit.copy()) {
+
+				@Override
+				protected String getCssClasses() {
+					return "btn btn-default";
+				}
+				
+			});
 
 			item.add(AttributeAppender.append("class", "commit clearfix"));
 		} else {

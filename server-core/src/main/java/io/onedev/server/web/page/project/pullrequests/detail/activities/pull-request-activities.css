@@ -45,7 +45,7 @@
 	width: 35px;
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status {
-	width: 160px;
+	width: 170px;
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status>span {
 	margin-left: 8px;

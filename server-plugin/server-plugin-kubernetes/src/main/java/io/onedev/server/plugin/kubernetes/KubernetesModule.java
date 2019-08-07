@@ -43,7 +43,7 @@ public class KubernetesModule extends AbstractPluginModule {
 			@Override
 			public JobExecutor discover() {
 				Commandline kubectl = new Commandline("kubectl");
-				kubectl.addArgs("version");
+				kubectl.addArgs("cluster-info");
 				try {
 					kubectl.execute(new LineConsumer() {
 			

@@ -26,11 +26,16 @@
 			</div>
         </div>
         <wicket:enclosure child="jobs">
-        <div class="jobs">
-            <div wicket:id="jobs" class="job">
-                <span wicket:id="status" class="status"></span>
-                <a wicket:id="name" class="name"><span wicket:id="label"></span></a>
-                <a wicket:id="run" class="run" title="Run this job"><i class="fa fa-play"></i></a>
+        <div class="jobs clearfix">
+            <div wicket:id="jobs" class="job pull-left">
+				<span class="btn-group">
+					<a wicket:id="detail" class="btn btn-default">
+						<span wicket:id="status" class="status"></span>
+						<b wicket:id="name" class="name"></b>
+						<i class="fa fa-angle-down"></i>
+					</a>					
+	                <a wicket:id="run" class="run btn btn-default" title="Run this job"><i class="fa fa-play"></i></a>
+				</span>
             </div>
         </div>
         </wicket:enclosure>
