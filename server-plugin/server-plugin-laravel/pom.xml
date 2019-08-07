@@ -8,14 +8,6 @@
 		<version>3.0.1</version>
 	</parent>
 	<properties>
-		<moduleClass>io.onedev.server.plugin.laravel.PluginModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.laravel.LaravelPluginModule</moduleClass>
 	</properties>
-	
-	<dependencies>
-		<dependency> 
-            <groupId>io.onedev</groupId>  
-            <artifactId>server-plugin-node</artifactId>  
-            <version>${project.version}</version> 
-        </dependency>  
-	</dependencies>
 </project>

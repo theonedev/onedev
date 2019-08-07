@@ -7,7 +7,7 @@ import io.onedev.server.ci.DefaultCISpecProvider;
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
  *
  */
-public class PluginModule extends AbstractPluginModule {
+public class NodePluginModule extends AbstractPluginModule {
 
 	@Override
 	protected void configure() {

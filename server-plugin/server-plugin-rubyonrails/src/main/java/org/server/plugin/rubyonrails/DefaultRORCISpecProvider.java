@@ -13,7 +13,7 @@ import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 
-public class DefaultRubyCISpecProvider implements DefaultCISpecProvider {
+public class DefaultRORCISpecProvider implements DefaultCISpecProvider {
 
 
 	@Override

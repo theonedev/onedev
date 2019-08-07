@@ -8,6 +8,6 @@
 		<version>3.0.1</version>
 	</parent>
 	<properties>
-		<moduleClass>org.server.plugin.rubyonrails.PluginModule</moduleClass>
+		<moduleClass>org.server.plugin.rubyonrails.RORPluginModule</moduleClass>
 	</properties>
 </project>

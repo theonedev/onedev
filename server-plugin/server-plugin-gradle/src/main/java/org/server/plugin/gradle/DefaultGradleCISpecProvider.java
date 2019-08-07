@@ -1,4 +1,4 @@
-package org.server.plugin.android;
+package org.server.plugin.gradle;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.FileMode;
@@ -13,7 +13,7 @@ import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 
-public class DefaultAndriodCISpecProvider implements DefaultCISpecProvider {
+public class DefaultGradleCISpecProvider implements DefaultCISpecProvider {
 
 		
 	@Override

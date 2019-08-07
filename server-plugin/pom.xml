@@ -23,11 +23,9 @@
 		<module>server-plugin-kubernetes</module>
 		<module>server-plugin-serverdocker</module>
   		<module>server-plugin-node</module>
-    	<module>server-plugin-laravel</module>
-    	<module>server-plugin-asp.net</module>
-    	<module>server-plugin-angular</module>
-    	<module>server-plugin-rubyonrails</module>
-    	<module>server-plugin-django</module>
-    	<module>server-plugin-android</module>
+    		<module>server-plugin-laravel</module>
+    		<module>server-plugin-rubyonrails</module>
+    		<module>server-plugin-django</module>
+    		<module>server-plugin-gradle</module>
     </modules>
 </project>

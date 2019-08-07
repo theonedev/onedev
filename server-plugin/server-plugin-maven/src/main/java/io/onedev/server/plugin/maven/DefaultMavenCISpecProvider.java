@@ -63,18 +63,13 @@ public class DefaultMavenCISpecProvider implements DefaultCISpecProvider {
 			Job job = new Job();
 
 			job.setName("ci");
-			
-			switch (javaVersion) {
-			case "13":
-				job.setEnvironment("maven:3.6.1-jdk-13");
-				break;
-			case "12":
-				job.setEnvironment("maven:3.6.1-jdk-12");
-				break;
-			case "11":
-				job.setEnvironment("maven:3.6.1-jdk-11");
-				break;
-			default:
+
+			try {
+				if (Integer.parseInt(javaVersion) <= 8)
+					job.setEnvironment("maven:3.6.1-jdk-8");
+				else
+					job.setEnvironment("maven:latest");
+			} catch (NumberFormatException e) {
 				job.setEnvironment("maven:3.6.1-jdk-8");
 			}
 

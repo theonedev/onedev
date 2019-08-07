@@ -19,6 +19,7 @@ public class AutoDiscoveredJobExecutor extends JobExecutor {
 	
 	@Override
 	public void execute(String jobToken, JobContext context) {
+		context.getLogger().log("Discovering appropriate job executor...");
 		List<JobExecutor> jobExecutors = new ArrayList<>();
 		for (JobExecutorDiscoverer discoverer: OneDev.getExtensions(JobExecutorDiscoverer.class)) {
 			JobExecutor jobExecutor = discoverer.discover();

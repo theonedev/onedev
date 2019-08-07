@@ -8,7 +8,7 @@
 		<version>3.0.1</version>
 	</parent>
 	<properties>
-		<moduleClass>io.onedev.server.plugin.node.PluginModule</moduleClass>
+		<moduleClass>io.onedev.server.plugin.node.NodePluginModule</moduleClass>
 	</properties>
 
 </project>
