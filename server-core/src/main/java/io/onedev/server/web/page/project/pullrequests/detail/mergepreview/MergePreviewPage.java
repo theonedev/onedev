@@ -112,7 +112,14 @@ public class MergePreviewPage extends PullRequestDetailPage {
 			fragment.add(hashLink);
 			hashLink.add(new Label("hash", GitUtils.abbreviateSHA(preview.getMerged())));
 			fragment.add(new WebMarkupContainer("copyMergedCommit").add(new CopyClipboardBehavior(Model.of(preview.getMerged()))));
-			fragment.add(new CommitStatusPanel("buildStatus", getProject(), ObjectId.fromString(preview.getMerged())));
+			fragment.add(new CommitStatusPanel("buildStatus", getProject(), ObjectId.fromString(preview.getMerged())) {
+
+				@Override
+				protected String getCssClasses() {
+					return "btn btn-default";
+				}
+				
+			});
 			fragment.add(new WebMarkupContainer("outDated") {
 
 				@Override

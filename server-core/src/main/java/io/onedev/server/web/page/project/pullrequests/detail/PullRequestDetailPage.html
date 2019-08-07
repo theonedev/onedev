@@ -104,11 +104,14 @@
 		</wicket:enclosure>
 		<wicket:enclosure child="jobs">
 		<div class="jobs">
-			<div class="head">Builds</div> 
-			<div class="body">
-				<div wicket:id="jobs" class="job clearfix">
-                    <a wicket:id="status" class="status pull-left"><span wicket:id="icon"></span></a>
-                    <a wicket:id="name" class="name pull-left"><span wicket:id="label"></span></a>
+			<div class="head">Jobs</div> 
+			<div class="body clearfix">
+				<div wicket:id="jobs" class="job pull-left">
+					<a wicket:id="job" class="btn btn-default">
+						<span wicket:id="status" class="status"></span>
+						<b wicket:id="name" class="name"></b>
+						<i class="fa fa-angle-down"></i>
+					</a>
                 </div>
 			</div>
 		</div>

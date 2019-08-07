@@ -68,9 +68,6 @@
 .commit-list>.body .commit>.pull-right.hash {
     margin-left: 4px;
 }
-.commit-list>.body .commit>.pull-right.build-status {
-    margin-top: 10px;
-}
 .commit-list>.body>.list {
 	margin-bottom: 0;
 }

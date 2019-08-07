@@ -5,9 +5,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -19,7 +21,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Lists;
@@ -60,6 +61,15 @@ public class CommitStatusPanel extends Panel {
 		
 	};
 	
+	private IModel<Status> statusModel = new LoadableDetachableModel<Status>() {
+
+		@Override
+		protected Status load() {
+			return Status.getOverallStatus(getProject().getCommitStatus(commitId).values());
+		}
+		
+	};
+	
 	public CommitStatusPanel(String id, Project project, ObjectId commitId) {
 		super(id);
 		
@@ -75,12 +85,8 @@ public class CommitStatusPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		DropdownLink link = new DropdownLink("link") {
+		DropdownLink statusLink = new DropdownLink("status") {
 
-			private boolean isShowJobDetail(WebMarkupContainer jobItem) {
-				return (boolean) jobItem.getDefaultModelObject();
-			}
-			
 			@Override
 			protected Component newContent(String id, FloatingPanel dropdown) {
 				Fragment fragment = new Fragment(id, "detailFrag", CommitStatusPanel.this);
@@ -88,42 +94,14 @@ public class CommitStatusPanel extends Panel {
 				RepeatingView jobsView = new RepeatingView("jobs");
 				fragment.add(jobsView);
 				for (Job job: jobsModel.getObject()) {
-					WebMarkupContainer jobItem = new WebMarkupContainer(jobsView.newChildId(), Model.of(false));
-					AjaxLink<Void> detailLink = new AjaxLink<Void>("jobDetailToggle") {
-
-						@Override
-						public void onClick(AjaxRequestTarget target) {
-							jobItem.setDefaultModelObject(!isShowJobDetail(jobItem));
-							target.add(jobItem);
-						}
-						
-					};
+					WebMarkupContainer jobItem = new WebMarkupContainer(jobsView.newChildId());
 					Status status = getProject().getCommitStatus(commitId).get(job.getName());
-					detailLink.add(new BuildStatusIcon("icon", Model.of(status)) {
-						
-						@Override
-						protected String getTooltip(Status status) {
-							String title;
-							if (status != null) {
-								if (status != Status.SUCCESSFUL)
-									title = "Some builds in job are "; 
-								else
-									title = "Builds in job are "; 
-								title += status.getDisplayName().toLowerCase() + ", click to toggle details";
-							} else {
-								title = "No builds in job";
-							}
-							return title;
-						}
-						
-					});
-					jobItem.add(detailLink);
 					
-					Link<Void> defLink = new JobDefLink("jobDef", getProject(), commitId, job.getName());
+					Link<Void> defLink = new JobDefLink("name", getProject(), commitId, job.getName());
 					defLink.add(new Label("label", job.getName()));
 					jobItem.add(defLink);
 					
-					jobItem.add(new RunJobLink("runJob", getProject(), commitId, job.getName()) {
+					jobItem.add(new RunJobLink("run", getProject(), commitId, job.getName()) {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
@@ -139,12 +117,12 @@ public class CommitStatusPanel extends Panel {
 						@Override
 						protected void onConfigure() {
 							super.onConfigure();
-							setVisible(status != null && isShowJobDetail(jobItem));
+							setVisible(status != null);
 						}
 						
 					});
 					
-					jobItem.add(new SimpleBuildListPanel("jobDetail", new LoadableDetachableModel<List<Build>>() {
+					jobItem.add(new SimpleBuildListPanel("detail", new LoadableDetachableModel<List<Build>>() {
 
 						@Override
 						protected List<Build> load() {
@@ -154,15 +132,7 @@ public class CommitStatusPanel extends Panel {
 							return builds;
 						}
 						
-					}) {
-
-						@Override
-						protected void onConfigure() {
-							super.onConfigure();
-							setVisible(isShowJobDetail(jobItem));
-						}
-						
-					});
+					}));
 					
 					jobItem.setOutputMarkupId(true);
 					jobsView.add(jobItem);
@@ -170,20 +140,14 @@ public class CommitStatusPanel extends Panel {
 				
 				return fragment;
 			}
-			
-		};
-		link.add(new BuildStatusIcon("icon", new LoadableDetachableModel<Status>() {
 
 			@Override
-			protected Status load() {
-				return Status.getOverallStatus(getProject().getCommitStatus(commitId).values());
-			}
-			
-		}) {
-			
-			@Override
-			protected String getTooltip(Status status) {
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				
+				String cssClasses = "commit-status ";
 				String title;
+				Build.Status status = statusModel.getObject();
 				if (status != null) {
 					if (status != Status.SUCCESSFUL)
 						title = "Some builds are "; 
@@ -193,22 +157,29 @@ public class CommitStatusPanel extends Panel {
 				} else {
 					title = "No builds";
 				}
-				return title;
+				if (getCssClasses() != null)
+					cssClasses += getCssClasses();
+				tag.put("class", cssClasses);
+				tag.put("title", title);
 			}
-
+			
+		};
+		statusLink.add(new BuildStatusIcon("icon", statusModel) {
+			
 			@Override
 			protected Collection<String> getWebSocketObservables() {
 				return Lists.newArrayList("commit-status:" + getProject().getId() + ":" + commitId.name());
 			}
 			
 		});
-		add(link);
+		add(statusLink);
 	}
 
 	@Override
 	protected void onDetach() {
 		projectModel.detach();
 		jobsModel.detach();
+		statusModel.detach();
 		super.onDetach();
 	}
 
@@ -222,6 +193,11 @@ public class CommitStatusPanel extends Panel {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new CommitStatusCssResourceReference()));
+	}
+	
+	@Nullable
+	protected String getCssClasses() {
+		return null;
 	}
 	
 }
