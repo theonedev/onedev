@@ -40,6 +40,21 @@
         </dependency>  
         <dependency> 
             <groupId>io.onedev</groupId>  
+            <artifactId>server-plugin-rubyonrails</artifactId>  
+            <version>${project.version}</version> 
+        </dependency> 
+        <dependency> 
+            <groupId>io.onedev</groupId>  
+            <artifactId>server-plugin-django</artifactId>  
+            <version>${project.version}</version> 
+        </dependency> 
+         <dependency> 
+            <groupId>io.onedev</groupId>  
+            <artifactId>server-plugin-android</artifactId>  
+            <version>${project.version}</version> 
+        </dependency> 
+        <dependency> 
+            <groupId>io.onedev</groupId>  
             <artifactId>server-plugin-kubernetes</artifactId>  
             <version>${project.version}</version> 
         </dependency>  
@@ -53,4 +68,5 @@
         <executables>bin/*.sh, boot/wrapper-*</executables>  
         <moduleClass>io.onedev.server.product.ProductModule</moduleClass>  
     </properties> 
+
 </project>

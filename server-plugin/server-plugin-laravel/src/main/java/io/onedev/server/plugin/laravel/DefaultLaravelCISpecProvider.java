@@ -1,10 +1,7 @@
 package io.onedev.server.plugin.laravel;
 
-import java.util.Iterator;
-
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
-import org.json.*;
 
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.DefaultCISpecProvider;
