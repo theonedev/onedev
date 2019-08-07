@@ -6,6 +6,7 @@ server-product/docker/onedev-*/
 **/.settings
 **/.project
 **/.vscode
+**/.idea
 release.properties
 pom.xml.releaseBackup
 
