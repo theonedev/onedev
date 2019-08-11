@@ -170,8 +170,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		if (pullRequestRef.get() == null) {
 			ObjectId baseCommitId = GitUtils.getMergeBase(
 					target.getProject().getRepository(), target.getObjectId(), 
-					source.getProject().getRepository(), source.getObjectId(), 
-					GitUtils.branch2ref(source.getBranch()));
+					source.getProject().getRepository(), source.getObjectId());
 			if (baseCommitId != null) {
 				PullRequest request = new PullRequest();
 				request.setTitle(StringUtils.capitalize(source.getBranch().replace('-', ' ').replace('_', ' ').toLowerCase()));

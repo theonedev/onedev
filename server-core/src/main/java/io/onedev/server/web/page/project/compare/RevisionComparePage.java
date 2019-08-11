@@ -1,6 +1,5 @@
 package io.onedev.server.web.page.project.compare;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,7 +24,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
 
 import com.google.common.collect.Lists;
 
@@ -217,16 +215,9 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 			
 		};
 
-		try {
-			Ref ref = state.rightSide.getProject().getRepository().findRef(state.rightSide.getRevision());
-			String refName = ref!=null?ref.getName():null;
-			mergeBase = GitUtils.getMergeBase(
-					state.leftSide.getProject().getRepository(), leftCommitId, 
-					state.rightSide.getProject().getRepository(), rightCommitId, 
-					refName);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+		mergeBase = GitUtils.getMergeBase(
+				state.leftSide.getProject().getRepository(), leftCommitId, 
+				state.rightSide.getProject().getRepository(), rightCommitId);
 	}
 	
 	@Override

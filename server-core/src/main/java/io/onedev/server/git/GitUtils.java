@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 
@@ -52,7 +51,6 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 
-import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.git.command.FetchCommand;
 import io.onedev.server.git.command.IsAncestorCommand;
@@ -314,41 +312,19 @@ public class GitUtils {
      */
     @Nullable
 	public static ObjectId getMergeBase(Repository repository1, ObjectId commit1, 
-			Repository repository2, ObjectId commit2, @Nullable String fetchRef) {
-		if (repository1.getDirectory() == null || !repository1.getDirectory().equals(repository2.getDirectory())) {
-			fetch(repository2, commit2, repository1, fetchRef);
+			Repository repository2, ObjectId commit2) {
+		if (repository1.getDirectory() == null 
+				|| !repository1.getDirectory().equals(repository2.getDirectory())) {
+			fetch(repository2, commit2, repository1);
 		}
 		return GitUtils.getMergeBase(repository1, commit1, commit2);
 	}
 	
-	public static void fetch(Repository fromRepository, ObjectId fromCommit, Repository toRepository, 
-			@Nullable String fetchRef) {
-		if (fetchRef != null) {
-			new FetchCommand(toRepository.getDirectory())
-					.from(fromRepository.getDirectory().getAbsolutePath())
-					.refspec(fetchRef)
-					.call();
-		} else {
-			LockUtils.call("repository-fetch:" + fromRepository.getDirectory(), new Callable<Void>() {
-
-				@Override
-				public Void call() throws Exception {
-					try {
-						RefUpdate refUpdate = fromRepository.updateRef("refs/temp/fetch");
-						refUpdate.setNewObjectId(fromCommit);
-						updateRef(refUpdate);
-						new FetchCommand(toRepository.getDirectory())
-								.from(fromRepository.getDirectory().getAbsolutePath())
-								.refspec(refUpdate.getName())
-								.call();
-					} catch (IOException e) {
-						throw new RuntimeException(e);
-					}
-					return null;
-				}
-				
-			});
-		}
+	public static void fetch(Repository fromRepository, ObjectId fromCommit, Repository toRepository) {
+		new FetchCommand(toRepository.getDirectory())
+				.from(fromRepository.getDirectory().getAbsolutePath())
+				.refspec(fromCommit.name())
+				.call();
 	}
     
     public static boolean isMergedInto(Repository repository, @Nullable Map<String, String> gitEnvs, 

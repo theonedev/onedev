@@ -43,7 +43,7 @@ public class SystemSetting implements Serializable, Validatable {
 	}
 
 	@Editable(order=200, description="OneDev requires git command line to manage repositories. The minimum "
-			+ "required version is 1.8.0.")
+			+ "required version is 2.11.1")
 	@Valid
 	@NotNull(message="may not be empty")
 	public GitConfig getGitConfig() {

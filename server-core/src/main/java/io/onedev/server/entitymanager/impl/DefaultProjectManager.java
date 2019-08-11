@@ -154,11 +154,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     	dao.persist(project);
     	
        	if (isNew) {
-    		UserAuthorization authorization = new UserAuthorization();
-    		authorization.setPrivilege(ProjectPrivilege.ADMINISTRATION);
-    		authorization.setProject(project);
-    		authorization.setUser(SecurityUtils.getUser());
-    		userAuthorizationManager.save(authorization);
+       		authorizeCreator(project, SecurityUtils.getUser());
            	checkSanity(project);
     	} 
        	
@@ -206,12 +202,22 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     		return null;
     }
 
+    private void authorizeCreator(Project project, User user) {
+		UserAuthorization authorization = new UserAuthorization();
+		authorization.setPrivilege(ProjectPrivilege.ADMINISTRATION);
+		authorization.setProject(project);
+		authorization.setUser(user);
+		userAuthorizationManager.save(authorization);
+    }
+    
     @Transactional
 	@Override
 	public void fork(Project from, Project to) {
-    	save(to);
+    	dao.persist(to);
+    	authorizeCreator(to, SecurityUtils.getUser());
         FileUtils.cleanDir(to.getGitDir());
         new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
+        checkSanity(to);
         commitInfoManager.cloneInfo(from, to);
         avatarManager.copyAvatar(from.getFacade(), to.getFacade());
 	}
