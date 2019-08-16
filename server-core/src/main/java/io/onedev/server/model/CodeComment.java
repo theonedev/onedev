@@ -39,8 +39,8 @@ import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageSupport;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 

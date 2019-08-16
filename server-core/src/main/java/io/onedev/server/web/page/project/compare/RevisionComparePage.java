@@ -42,7 +42,7 @@ import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.diff.revision.CommentSupport;

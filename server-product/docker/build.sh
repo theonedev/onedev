@@ -1,4 +1,5 @@
 #!/bin/sh
+rm -rf build onedev-*
 unzip ../target/onedev-*.zip 
 mv onedev-* build
 cp ../target/sandbox/site/lib/mysql* ../target/sandbox/site/lib/postgresql* build/site/lib

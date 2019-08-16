@@ -22,7 +22,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 
 @SuppressWarnings("serial")
 public abstract class CreateTagPanel extends Panel {

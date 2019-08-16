@@ -13,7 +13,7 @@ import org.apache.wicket.request.resource.AbstractResource;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;

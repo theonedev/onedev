@@ -20,7 +20,7 @@ import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.IssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;

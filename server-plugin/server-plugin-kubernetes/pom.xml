@@ -8,13 +8,6 @@
 		<artifactId>server-plugin</artifactId>
 		<version>3.0.1</version>
 	</parent>
-	<dependencies>
-		<dependency>
-			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
-			<version>1.62</version>
-		</dependency>
-	</dependencies>
 	<properties>
 		<moduleClass>io.onedev.server.plugin.kubernetes.KubernetesModule</moduleClass>
 	</properties>

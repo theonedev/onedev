@@ -1,20 +1,10 @@
 package io.onedev.server.plugin.kubernetes;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
-import java.io.StringWriter;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -27,8 +17,6 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.binary.Base64;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemWriter;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +46,7 @@ import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.plugin.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -437,45 +426,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 	}
 	
-	private String getCertContent(Certificate cert) {
-	    StringWriter stringWriter = new StringWriter();
-	    try (PemWriter pemWriter = new PemWriter(stringWriter)) {
-	    	pemWriter.writeObject(new PemObject("CERTIFICATE", cert.getEncoded()));
-	    	pemWriter.flush();
-	    } catch (CertificateEncodingException|IOException e) {
-	    	throw new RuntimeException(e);
-		}
-	    return stringWriter.toString().trim();
-	}
-	
 	@Nullable
 	private String createTrustCertsConfigMap(JobLogger logger) {
 		Map<String, String> configMapData = new LinkedHashMap<>();
 		ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
 		File keystoreFile = serverConfig.getKeystoreFile();
 		if (keystoreFile != null) {
-			try (InputStream is = new FileInputStream(keystoreFile)) {
-				KeyStore keystore = KeyStore.getInstance("pkcs12");
-				keystore.load(is, serverConfig.getKeystorePassword().toCharArray());
-				Enumeration<String> aliases = keystore.aliases();
-				while (aliases.hasMoreElements()) {
-					String alias = aliases.nextElement();
-					String siteCertContent = getCertContent(keystore.getCertificate(alias));
-					String safeAlias = alias.replaceAll("[^a-zA-Z0-9\\.\\_]", "-");
-					configMapData.put("keystore-site-cert-" + safeAlias + ".pem", siteCertContent);
-					
-				    Certificate chain[] = keystore.getCertificateChain(alias);
-				    if (chain != null) {
-				    	for (int i=0; i<chain.length; i++) {
-				    		String caCertContent = getCertContent(chain[i]);
-						    if (!caCertContent.equals(siteCertContent))
-						    	configMapData.put("keystore-ca-cert-" + safeAlias + "-" + i + ".pem", caCertContent);
-				    	}
-				    }
-				}
-			} catch (IOException|KeyStoreException|NoSuchAlgorithmException|CertificateException e) {
-				throw new RuntimeException(e);
-			} 
+			String password = serverConfig.getKeystorePassword();
+			for (Map.Entry<String, String> entry: new PKCS12CertExtractor(keystoreFile, password).extact().entrySet()) 
+				configMapData.put(entry.getKey(), entry.getValue());
 		}
 		File trustCertsDir = serverConfig.getTrustCertsDir();
 		if (trustCertsDir != null) {

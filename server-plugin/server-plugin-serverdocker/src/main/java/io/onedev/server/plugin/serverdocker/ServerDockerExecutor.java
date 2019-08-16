@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -25,9 +26,12 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
+import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.Maps;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
@@ -39,11 +43,15 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.ci.job.JobContext;
 import io.onedev.server.ci.job.JobManager;
+import io.onedev.server.ci.job.SubmoduleCredential;
+import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.plugin.serverdocker.ServerDockerExecutor.TestData;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.PKCS12CertExtractor;
+import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -226,7 +234,106 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 					
 					if (jobContext.isRetrieveSource()) {
 						logger.log("Retrieving source code...");
-						jobContext.retrieveSource(hostWorkspace);
+						File tempHome = FileUtils.createTempDir();
+						try {
+							Map<String, String> environments = Maps.newHashMap("HOME", tempHome.getAbsolutePath());
+							Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
+							git.environments(environments).workingDir(hostWorkspace);
+							LineConsumer logger = new LineConsumer() {
+
+								@Override
+								public void consume(String line) {
+									jobContext.getLogger().log(line);
+								}
+								
+							};
+							
+							git.addArgs("config", "--global", "credential.modalprompt", "false");
+							git.execute(logger, logger).checkReturnCode();
+							
+							// clear credential.helper list to remove possible Windows credential manager
+							git.clearArgs();
+							if (SystemUtils.IS_OS_WINDOWS)
+								git.addArgs("config", "--global", "credential.helper", "\"\"");
+							else
+								git.addArgs("config", "--global", "credential.helper", "");
+								
+							git.execute(logger, logger).checkReturnCode();
+							
+							git.clearArgs();
+							git.addArgs("config", "--global", "--add", "credential.helper", "store");
+							git.execute(logger, logger).checkReturnCode();
+							
+							git.clearArgs();
+							git.addArgs("config", "--global", "credential.useHttpPath", "true");
+							git.execute(logger, logger).checkReturnCode();
+
+							List<String> trustCertContent = new ArrayList<>();
+							ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
+							File keystoreFile = serverConfig.getKeystoreFile();
+							if (keystoreFile != null) {
+								String password = serverConfig.getKeystorePassword();
+								for (Map.Entry<String, String> entry: new PKCS12CertExtractor(keystoreFile, password).extact().entrySet()) 
+									trustCertContent.addAll(Splitter.on('\n').trimResults().splitToList(entry.getValue()));
+							}
+							if (serverConfig.getTrustCertsDir() != null) {
+								for (File file: serverConfig.getTrustCertsDir().listFiles()) {
+									if (file.isFile()) 
+										trustCertContent.addAll(FileUtils.readLines(file));
+								}
+							}
+
+							if (!trustCertContent.isEmpty()) {
+								File trustCertFile = new File(tempHome, "trust-cert.pem");
+								FileUtils.writeLines(trustCertFile, trustCertContent, "\n");
+								git.clearArgs();
+								git.addArgs("config", "--global", "http.sslCAInfo", trustCertFile.getAbsolutePath());
+								git.execute(logger, logger).checkReturnCode();
+							}
+							
+							List<String> submoduleCredentials = new ArrayList<>();
+							for (SubmoduleCredential submoduleCredential: jobContext.getSubmoduleCredentials()) {
+								String url = submoduleCredential.getUrl();
+								String userName = URLEncoder.encode(submoduleCredential.getUserName(), Charsets.UTF_8.name());
+								String password = URLEncoder.encode(submoduleCredential.getPasswordSecret(), Charsets.UTF_8.name());
+								if (url.startsWith("http://")) {
+									submoduleCredentials.add("http://" + userName + ":" + password 
+											+ "@" + url.substring("http://".length()).replace(":", "%3a"));
+								} else {
+									submoduleCredentials.add("https://" + userName + ":" + password 
+											+ "@" + url.substring("https://".length()).replace(":", "%3a"));
+								}
+							}
+							FileUtils.writeLines(new File(tempHome, ".git-credentials"), submoduleCredentials, "\n");
+							
+							if (!new File(hostWorkspace, ".git").exists()) {
+								git.clearArgs();
+								git.addArgs("init", ".");
+								git.execute(logger, logger).checkReturnCode();
+							}								
+							
+							git.clearArgs();
+							git.addArgs("fetch", jobContext.getProjectGitDir().getAbsolutePath(), "--force", "--quiet", 
+									"--depth=1", jobContext.getCommitId().name());
+							git.execute(logger, logger).checkReturnCode();
+							
+							git.clearArgs();
+							git.addArgs("checkout", "--quiet", jobContext.getCommitId().name());
+							git.execute(logger, logger).checkReturnCode();
+							
+							// deinit submodules in case submodule url is changed
+							git.clearArgs();
+							git.addArgs("submodule", "deinit", "--all", "--force", "--quiet");
+							git.execute(logger, logger).checkReturnCode();
+							
+							git.clearArgs();
+							git.addArgs("submodule", "update", "--init", "--recursive", "--force", "--quiet", "--depth=1");
+							git.execute(logger, logger).checkReturnCode();
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						} finally {
+							FileUtils.deleteDir(tempHome);
+						}
 					}
 					
 					logger.log("Retrieving job dependencies...");

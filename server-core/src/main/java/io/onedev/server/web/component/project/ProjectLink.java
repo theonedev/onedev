@@ -3,7 +3,7 @@ package io.onedev.server.web.component.project;
 import org.apache.wicket.Page;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;

@@ -23,12 +23,14 @@ import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
+import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.Script;
+import io.onedev.server.web.editable.annotation.ShowCondition;
 
 @Editable
 @Horizontal
@@ -48,6 +50,8 @@ public class Job implements Serializable, Validatable {
 	private String commands;
 	
 	private boolean retrieveSource = true;
+	
+	private List<SubmoduleCredential> submoduleCredentials = new ArrayList<>();
 	
 	private List<JobDependency> dependencies = new ArrayList<>();
 	
@@ -105,16 +109,31 @@ public class Job implements Serializable, Validatable {
 		this.commands = commands;
 	}
 	
-	@Editable(order=130, description="Whether or not to retrieve the source code. If enabled, the repository will be "
-			+ "retrieved into job workspace")
+	@Editable(order=130, description="Check this to retrieve files stored in the repository into job workspace")
 	public boolean isRetrieveSource() {
 		return retrieveSource;
 	}
 
 	public void setRetrieveSource(boolean retrieveSource) {
 		this.retrieveSource = retrieveSource;
-	}	
+	}
+
+	@Editable(order=135, description="For git submodules accessing via http/https, you will "
+			+ "need to specify credentials here if required")
+	@ShowCondition("isSubmoduleCredentialsVisible")
+	public List<SubmoduleCredential> getSubmoduleCredentials() {
+		return submoduleCredentials;
+	}
+
+	public void setSubmoduleCredentials(List<SubmoduleCredential> submoduleCredentials) {
+		this.submoduleCredentials = submoduleCredentials;
+	}
 	
+	@SuppressWarnings("unused")
+	private static boolean isSubmoduleCredentialsVisible() {
+		return (boolean) OneContext.get().getEditContext().getInputValue("retrieveSource");
+	}
+
 	@Editable(name="Dependency Jobs", order=140, description="Job dependencies determines the order and "
 			+ "concurrency when run different jobs")
 	public List<JobDependency> getDependencies() {
@@ -214,6 +233,22 @@ public class Job implements Serializable, Validatable {
 						.addPropertyNode("paramSpecs").addConstraintViolation();
 			} else {
 				paramSpecNames.add(paramSpec.getName());
+			}
+		}
+		
+		if (retrieveSource) {
+			int index = 0;
+			for (SubmoduleCredential credential: submoduleCredentials) {
+				if (credential.getUrl() != null 
+						&& !credential.getUrl().startsWith("http://") 
+						&& !credential.getUrl().startsWith("https://")) {
+					isValid = false;
+					context.buildConstraintViolationWithTemplate("Can only provide credentials for submodules accessing via http/https")
+							.addPropertyNode("submoduleCredentials").addPropertyNode("url")
+								.inIterable().atIndex(index)
+							.addConstraintViolation();
+				}
+				index++;
 			}
 		}
 		

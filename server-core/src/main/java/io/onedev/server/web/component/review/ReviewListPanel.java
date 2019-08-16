@@ -30,7 +30,7 @@ import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.userident.UserIdent;

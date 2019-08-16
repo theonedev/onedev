@@ -37,9 +37,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Build;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
 
 @SuppressWarnings("serial")

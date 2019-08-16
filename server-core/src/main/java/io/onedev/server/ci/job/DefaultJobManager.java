@@ -313,8 +313,18 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 							List<String> commands = Splitter.on("\n").trimResults(CharMatcher.is('\r')).splitToList(job.getCommands());
 							
+							List<SubmoduleCredential> submoduleCredentials = new ArrayList<>();
+							if (job.isRetrieveSource()) {
+								for (SubmoduleCredential submoduleCredential: job.getSubmoduleCredentials()) {
+									SubmoduleCredential resolvedSubmoduleCredential = new SubmoduleCredential();
+									resolvedSubmoduleCredential.setUrl(submoduleCredential.getUrl());
+									resolvedSubmoduleCredential.setUserName(submoduleCredential.getUserName());
+									resolvedSubmoduleCredential.setPasswordSecret(build.getSecretValue(submoduleCredential.getPasswordSecret()));
+									submoduleCredentials.add(resolvedSubmoduleCredential);
+								}
+							}
 							JobContext jobContext = new JobContext(projectName, projectGitDir, job.getEnvironment(), serverWorkspace, 
-									envVars, commands, job.isRetrieveSource(), commitId, job.getCaches(), 
+									envVars, commands, job.isRetrieveSource(), submoduleCredentials, commitId, job.getCaches(), 
 									new PatternSet(includeFiles, excludeFiles), executor.getCacheTTL(), logger) {
 
 								@Override

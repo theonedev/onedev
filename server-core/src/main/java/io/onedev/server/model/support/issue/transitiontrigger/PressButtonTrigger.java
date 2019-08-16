@@ -10,7 +10,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;

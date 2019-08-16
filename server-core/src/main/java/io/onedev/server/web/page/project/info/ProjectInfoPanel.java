@@ -21,7 +21,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;

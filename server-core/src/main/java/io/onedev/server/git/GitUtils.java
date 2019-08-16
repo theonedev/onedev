@@ -321,7 +321,7 @@ public class GitUtils {
 	}
 	
 	public static void fetch(Repository fromRepository, ObjectId fromCommit, Repository toRepository) {
-		new FetchCommand(toRepository.getDirectory())
+		new FetchCommand(toRepository.getDirectory(), null)
 				.from(fromRepository.getDirectory().getAbsolutePath())
 				.refspec(fromCommit.name())
 				.call();

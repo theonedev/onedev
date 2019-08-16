@@ -29,7 +29,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.FixedIssueCriteria;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;

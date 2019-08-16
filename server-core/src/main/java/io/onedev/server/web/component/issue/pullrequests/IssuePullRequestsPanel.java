@@ -26,7 +26,7 @@ import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 

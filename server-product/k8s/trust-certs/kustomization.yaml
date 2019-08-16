@@ -4,6 +4,6 @@ bases:
 configMapGenerator:
 - name: trust-certs
   files:
-  - onedev.pem
+  - changeme.pem
 patchesStrategicMerge:
 - deployments.yaml

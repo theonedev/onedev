@@ -6,8 +6,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.DefaultPrivilege;
+import io.onedev.server.util.SecurityUtils;
 
 public class ProjectFacade extends EntityFacade {
 	

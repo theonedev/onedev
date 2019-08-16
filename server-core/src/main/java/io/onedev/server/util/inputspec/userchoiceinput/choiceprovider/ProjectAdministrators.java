@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.OneContext;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.editable.annotation.Editable;
 

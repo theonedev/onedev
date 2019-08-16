@@ -42,8 +42,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.CodePullAuthorizationSource;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.work.WorkExecutor;
 

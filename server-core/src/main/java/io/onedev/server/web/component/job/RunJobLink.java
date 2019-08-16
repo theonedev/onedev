@@ -20,7 +20,7 @@ import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;

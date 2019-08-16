@@ -24,7 +24,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.jersey.ValidQueryParams;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 
 @Path("/pulls")
 @Consumes(MediaType.WILDCARD)

@@ -30,8 +30,8 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.SecurityUtils;
 
 public class ArtifactDownloadResource extends AbstractResource {
 

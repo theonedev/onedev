@@ -22,7 +22,7 @@ import com.google.common.base.Charsets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 
 public class ArchiveDownloadResource extends AbstractResource {
 

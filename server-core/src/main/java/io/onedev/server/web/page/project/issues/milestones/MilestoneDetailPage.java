@@ -17,7 +17,7 @@ import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.milestone.MilestoneDueLabel;

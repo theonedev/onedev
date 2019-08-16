@@ -80,7 +80,7 @@ import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.model.support.ProjectAndRevision;
 import io.onedev.server.search.code.IndexManager;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.patternset.PatternSet;

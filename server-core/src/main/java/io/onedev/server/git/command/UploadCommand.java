@@ -51,7 +51,7 @@ public class UploadCommand extends GitCommand<Void> {
 			@Override
 			public void consume(String line) {
 				// This error may happen during a normal shallow fetch/clone 
-				if (line.contains("The remote end hung up unexpectedly")) {
+				if (line.contains("remote end hung up unexpectedly")) {
 					toleratedErrors.set(true);
 					logger.debug(line);
 				} else {
@@ -63,7 +63,6 @@ public class UploadCommand extends GitCommand<Void> {
 		
 		if (result.getReturnCode() != 0 && !toleratedErrors.get())
 			throw result.buildException();
-		
 		return null;
 	}
 
