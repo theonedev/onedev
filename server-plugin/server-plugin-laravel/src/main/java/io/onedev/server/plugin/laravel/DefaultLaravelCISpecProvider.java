@@ -31,7 +31,7 @@ public class DefaultLaravelCISpecProvider implements DefaultCISpecProvider {
 
 			job.setEnvironment("1dev/php7.3:laravel");
 			
-			if (content.indexOf("laravel/framework") != -1) {	//Recognize react projects
+			if (content.indexOf("laravel/framework") != -1) {
 				
 				job.setCommands( "" 
 							+ "composer install \n" 

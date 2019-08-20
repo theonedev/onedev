@@ -116,6 +116,7 @@ public class DefaultGradleCISpecProvider implements DefaultCISpecProvider {
 			projectVersion = " ";
 		return projectVersion;
 	}
+	
 	//判断字符串是否是整数
 	private boolean isValidInt(String value) {  
         try {  
@@ -125,7 +126,6 @@ public class DefaultGradleCISpecProvider implements DefaultCISpecProvider {
         }  
         return true;  
     }  
-	
 
 	@Override
 	public int getPriority() {

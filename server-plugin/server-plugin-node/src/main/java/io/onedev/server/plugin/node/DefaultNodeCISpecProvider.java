@@ -5,8 +5,9 @@ import java.util.Iterator;
 
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -21,8 +22,10 @@ import io.onedev.server.model.Project;
 
 public class DefaultNodeCISpecProvider implements DefaultCISpecProvider {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultNodeCISpecProvider.class);
+	
 	@Override
-	public CISpec getDefaultCISpec(Project project, ObjectId commitId){
+	public CISpec getDefaultCISpec(Project project, ObjectId commitId) {
 		Blob blob = project.getBlob(new BlobIdent(commitId.name(), "package.json", FileMode.TYPE_FILE), false);
 
 		if (blob != null) {
@@ -31,9 +34,14 @@ public class DefaultNodeCISpecProvider implements DefaultCISpecProvider {
 
 			content = blob.getText().getContent();
 			ObjectMapper objectMapper = new ObjectMapper();
+			JsonNode jsonNode;
 			try {
-				JsonNode jsonNode = objectMapper.readTree(content);
-			
+				jsonNode = objectMapper.readTree(content);
+			} catch (IOException e) {
+				logger.error("Error parsing package.json", e);
+				return null;
+			}
+
 			CISpec ciSpec = new CISpec();
 
 			Job job = new Job();
@@ -41,71 +49,72 @@ public class DefaultNodeCISpecProvider implements DefaultCISpecProvider {
 			job.setName("ci");
 
 			job.setEnvironment("node:10.16-alpine");
-			
-			if (content.indexOf("angular/core") != -1) {	//Recognize angular projects
-				
+
+			if (content.indexOf("angular/core") != -1) { // Recognize angular projects
+
 				job.setEnvironment("1dev/node:10.16-alpine-chrome");
-				
+
 				version = jsonNode.findValue("version").asText();
-				
+
 				String Commands = "" 
-						+ "buildVersion=" + version +  " \n"
+						+ "buildVersion=" + version + " \n"
 						+ "echo \"##onedev[SetBuildVersion '$buildVersion']\"\n" 
 						+ "echo\n" 
 						+ "npm install \n"
 						+ "npm install @angular/cli \n";
-			
-			if (jsonNode.has("scripts")) {
-				JsonNode jsonScripts = jsonNode.get("scripts");
-				Iterator<String> iterator = jsonScripts.fieldNames();
-				int length = jsonScripts.size();
-				String[] valueArray = new String[length];
-				int valueIndex = 0;
 
-				while (iterator.hasNext()) {
-					String key = (String) iterator.next();
-					if (key.indexOf("lint") != -1 || key.indexOf("build") != -1) {
-						String value = jsonScripts.findValue(key).asText();
-						valueArray[valueIndex] = value;
-						valueIndex++;
-					}else if(key.indexOf("test") != -1) {
-						String value = jsonScripts.findValue(key).asText();
-						valueArray[valueIndex] = value + " --watch=false --browsers=ChromeHeadless";
-						valueIndex++;
-					}
-				}
+				if (jsonNode.has("scripts")) {
+					JsonNode jsonScripts = jsonNode.get("scripts");
+					Iterator<String> iterator = jsonScripts.fieldNames();
+					int length = jsonScripts.size();
+					String[] valueArray = new String[length];
+					int valueIndex = 0;
 
-				if (valueArray[0] != null) {
-					for (int i = 0; i < valueIndex; i++) {
-						Commands = Commands + "npx " + valueArray[i] + " \n";
+					while (iterator.hasNext()) {
+						String key = (String) iterator.next();
+						if (key.indexOf("lint") != -1 || key.indexOf("build") != -1) {
+							String value = jsonScripts.findValue(key).asText();
+							valueArray[valueIndex] = value;
+							valueIndex++;
+						} else if (key.indexOf("test") != -1) {
+							String value = jsonScripts.findValue(key).asText();
+							valueArray[valueIndex] = value + " --watch=false --browsers=ChromeHeadless";
+							valueIndex++;
+						}
 					}
-				}else {
-					Commands = Commands
+
+					if (valueArray[0] != null) {
+						for (int i = 0; i < valueIndex; i++) {
+							Commands = Commands 
+									+ "npx " + valueArray[i] + " \n";
+						}
+					} else {
+						Commands = Commands 
+								+ "npx ng lint \n"
+								+ "npx ng test --watch=false --browsers=ChromeHeadless \n" 
+								+ "npx ng build \n";
+					}
+				} else {
+					Commands = Commands 
 							+ "npx ng lint \n"
 							+ "npx ng test --watch=false --browsers=ChromeHeadless \n" 
 							+ "npx ng build \n";
 				}
-			} else {
-				Commands = Commands
-						+ "npx ng lint \n"
-						+ "npx ng test --watch=false --browsers=ChromeHeadless \n" 
-						+ "npx ng build \n";
-			}
 
-			job.setCommands(Commands);
+				job.setCommands(Commands);
 
-			} else if (content.indexOf("react") != -1) {	//Recognize react projects
-				
+			} else if (content.indexOf("react") != -1) { // Recognize react projects
+
 				version = jsonNode.findValue("version").asText();
-				
+
 				String Commands = "" 
-							+ "buildVersion=" + version +  " \n"
-							+ "echo \"##onedev[SetBuildVersion '$buildVersion']\"\n" 
-							+ "echo\n"
-							+ "npm install typescript \n" 
-							+ "npm install \n" 
-							+ "export CI=TRUE \n";
-				
+						+ "buildVersion=" + version + " \n"
+						+ "echo \"##onedev[SetBuildVersion '$buildVersion']\"\n" 
+						+ "echo\n"
+						+ "npm install typescript \n" 
+						+ "npm install \n" 
+						+ "export CI=TRUE \n";
+
 				if (jsonNode.has("scripts")) {
 					JsonNode jsonScripts = jsonNode.get("scripts");
 					Iterator<String> iterator = jsonScripts.fieldNames();
@@ -126,29 +135,29 @@ public class DefaultNodeCISpecProvider implements DefaultCISpecProvider {
 						for (int i = 0; i < valueIndex; i++) {
 							Commands = Commands + "npx " + valueArray[i] + " \n";
 						}
-					}else {
-						Commands = Commands
-								+ "npx react-scripts test \n"
+					} else {
+						Commands = Commands 
+								+ "npx react-scripts test \n" 
 								+ "npx react-scripts build \n";
 					}
 				} else {
-					Commands = Commands
-							+ "npx react-scripts test \n"
+					Commands = Commands 
+							+ "npx react-scripts test \n" 
 							+ "npx react-scripts build \n";
 				}
 
 				job.setCommands(Commands);
 
-			} else if (content.indexOf("vue") != -1) {	//Recognize vue projects
+			} else if (content.indexOf("vue") != -1) { // Recognize vue projects
 
 				version = jsonNode.findValue("version").asText();
-				
+
 				String Commands = "" 
-						+ "buildVersion=" + version +  " \n"
+						+ "buildVersion=" + version + " \n"
 						+ "echo \"##onedev[SetBuildVersion '$buildVersion']\"\n" 
 						+ "echo\n" 
 						+ "npm install \n";
-				
+
 				if (jsonNode.has("scripts")) {
 					JsonNode jsonScripts = jsonNode.get("scripts");
 					Iterator<String> iterator = jsonScripts.fieldNames();
@@ -169,27 +178,25 @@ public class DefaultNodeCISpecProvider implements DefaultCISpecProvider {
 						for (int i = 0; i < valueIndex; i++) {
 							Commands = Commands + "npx " + valueArray[i] + " \n";
 						}
-					}else {
-						Commands = Commands
-								+ "npx jest \n";
-						}
-				} else {
-					Commands = Commands
-							+ "npx jest \n";
+					} else {
+						Commands = Commands + "npx jest \n";
 					}
+				} else {
+					Commands = Commands + "npx jest \n";
+				}
 
 				job.setCommands(Commands);
 
-			} else if (content.indexOf("express") != -1) {	//Recognize express projects
+			} else if (content.indexOf("express") != -1) { // Recognize express projects
 
 				version = jsonNode.findValue("version").asText();
-				
+
 				String Commands = "" 
-						+ "buildVersion=" + version +  " \n"
+						+ "buildVersion=" + version + " \n"
 						+ "echo \"##onedev[SetBuildVersion '$buildVersion']\"\n" 
 						+ "echo\n" 
 						+ "npm install \n";
-				
+
 				if (jsonNode.has("scripts")) {
 					JsonNode jsonScripts = jsonNode.get("scripts");
 					Iterator<String> iterator = jsonScripts.fieldNames();
@@ -210,14 +217,14 @@ public class DefaultNodeCISpecProvider implements DefaultCISpecProvider {
 						for (int i = 0; i < valueIndex; i++) {
 							Commands = Commands + "npx " + valueArray[i] + " \n";
 						}
-					}else {
-						Commands = Commands
+					} else {
+						Commands = Commands 
 								+ "npx mocha \n";
-						}
-				} else {
-					Commands = Commands
-							+ "npx mocha \n";
 					}
+				} else {
+					Commands = Commands 
+							+ "npx mocha \n";
+				}
 			} else {
 				return null;
 			}
@@ -233,20 +240,10 @@ public class DefaultNodeCISpecProvider implements DefaultCISpecProvider {
 			ciSpec.getJobs().add(job);
 
 			return ciSpec;
-			
-			
-		} catch (JsonProcessingException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
 		} else {
 			return null;
 		}
 	}
-	
 
 	@Override
 	public int getPriority() {
