@@ -136,6 +136,8 @@ public abstract class JobExecutor implements Serializable {
 		if (patternSet.getExcludes().remove(oldName))
 			patternSet.getExcludes().add(newName);
 		setProjects(patternSet.toString());
+		if (getProjects().length() == 0)
+			setProjects(null);
 	}
 	
 }
