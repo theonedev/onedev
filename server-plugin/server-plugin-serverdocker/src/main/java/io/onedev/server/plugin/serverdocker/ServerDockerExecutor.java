@@ -257,7 +257,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 								git.addArgs("config", "--global", "credential.helper", "\"\"");
 							else
 								git.addArgs("config", "--global", "credential.helper", "");
-								
 							git.execute(logger, logger).checkReturnCode();
 							
 							git.clearArgs();
@@ -291,20 +290,22 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 								git.execute(logger, logger).checkReturnCode();
 							}
 							
-							List<String> submoduleCredentials = new ArrayList<>();
-							for (SubmoduleCredential submoduleCredential: jobContext.getSubmoduleCredentials()) {
-								String url = submoduleCredential.getUrl();
-								String userName = URLEncoder.encode(submoduleCredential.getUserName(), Charsets.UTF_8.name());
-								String password = URLEncoder.encode(submoduleCredential.getPasswordSecret(), Charsets.UTF_8.name());
-								if (url.startsWith("http://")) {
-									submoduleCredentials.add("http://" + userName + ":" + password 
-											+ "@" + url.substring("http://".length()).replace(":", "%3a"));
-								} else {
-									submoduleCredentials.add("https://" + userName + ":" + password 
-											+ "@" + url.substring("https://".length()).replace(":", "%3a"));
+							if (!jobContext.getSubmoduleCredentials().isEmpty()) {
+								List<String> submoduleCredentials = new ArrayList<>();
+								for (SubmoduleCredential submoduleCredential: jobContext.getSubmoduleCredentials()) {
+									String url = submoduleCredential.getUrl();
+									String userName = URLEncoder.encode(submoduleCredential.getUserName(), Charsets.UTF_8.name());
+									String password = URLEncoder.encode(submoduleCredential.getPasswordSecret(), Charsets.UTF_8.name());
+									if (url.startsWith("http://")) {
+										submoduleCredentials.add("http://" + userName + ":" + password 
+												+ "@" + url.substring("http://".length()).replace(":", "%3a"));
+									} else {
+										submoduleCredentials.add("https://" + userName + ":" + password 
+												+ "@" + url.substring("https://".length()).replace(":", "%3a"));
+									}
 								}
+								FileUtils.writeLines(new File(tempHome, ".git-credentials"), submoduleCredentials, "\n");
 							}
-							FileUtils.writeLines(new File(tempHome, ".git-credentials"), submoduleCredentials, "\n");
 							
 							if (!new File(hostWorkspace, ".git").exists()) {
 								git.clearArgs();
@@ -392,7 +393,7 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 						docker.execute(newJobLogger(logger), newJobLogger(logger), null, new ProcessKiller() {
 	
 							@Override
-							public void kill(Process process) {
+							public void kill(Process process, String executionId) {
 								logger.log("Stopping container...");
 								Commandline cmd = getDocker();
 								cmd.addArgs("stop", dockerInstance);
