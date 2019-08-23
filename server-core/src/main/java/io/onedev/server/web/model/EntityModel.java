@@ -1,9 +1,9 @@
 package io.onedev.server.web.model;
 
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.hibernate.proxy.HibernateProxyHelper;
 
 import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.persistence.dao.Dao;
 
@@ -22,7 +22,7 @@ public class EntityModel<T extends AbstractEntity> extends LoadableDetachableMod
 	
 	@SuppressWarnings("unchecked")
 	public EntityModel(T entity) {
-		this((Class<T>) ClassUtils.unproxy(entity.getClass()), entity.getId());
+		this((Class<T>) HibernateProxyHelper.getClassWithoutInitializingProxy(entity), entity.getId());
 		setObject(entity);
 	}
 

@@ -13,7 +13,6 @@ import org.hibernate.criterion.Projections;
 
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.launcher.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.ClassUtils;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.model.AbstractEntity;
@@ -38,13 +37,13 @@ public class DefaultDao implements Dao, Serializable {
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T get(Class<T> entityClass, Long entityId) {
-		return (T) getSession().get(ClassUtils.unproxy(entityClass), entityId);
+		return (T) getSession().get(entityClass, entityId);
 	}
 
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> T load(Class<T> entityClass, Long entityId) {
-		return (T) getSession().load(ClassUtils.unproxy(entityClass), entityId);
+		return (T) getSession().load(entityClass, entityId);
 	}
 
 	@Transactional

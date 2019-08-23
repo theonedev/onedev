@@ -8,6 +8,7 @@ import java.util.Set;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.hibernate.proxy.HibernateProxyHelper;
 
 import com.google.common.collect.Sets;
 
@@ -85,7 +86,7 @@ public class BeanContext implements Serializable {
 	@SuppressWarnings("unchecked")
 	public static BeanEditor editModel(String componentId, 
 			IModel<? extends Serializable> beanModel, Collection<String> properties, boolean excluded) {
-		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
+		Class<?> beanClass = HibernateProxyHelper.getClassWithoutInitializingProxy(beanModel.getObject());
 		BeanContext beanContext = new BeanContext(beanClass, properties, excluded);
 		return beanContext.renderForEdit(componentId, (IModel<Serializable>)beanModel);
 	}
@@ -112,7 +113,7 @@ public class BeanContext implements Serializable {
 			}
 			
 		};
-		Class<?> beanClass = ClassUtils.unproxy(beanModel.getObject().getClass());
+		Class<?> beanClass = HibernateProxyHelper.getClassWithoutInitializingProxy(beanModel.getObject());
 		BeanContext beanContext = new BeanContext(beanClass, properties, excluded);
 		beanModel = beanContext.wrapAsSelfUpdating(beanModel);
 		return beanContext.renderForEdit(componentId, beanModel);

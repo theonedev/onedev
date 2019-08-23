@@ -68,7 +68,7 @@ import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
-import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.schedule.DefaultTaskScheduler;
 import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.cache.BuildInfoManager;
@@ -615,13 +615,14 @@ public class CoreModule extends AbstractPluginModule {
 										field.getAnnotation(Version.class) == null;
 							}
 							
-							@SuppressWarnings("unchecked")
 							@Override
 							public String serializedClass(Class type) {
 								if (type == PersistentBag.class)
 									return super.serializedClass(ArrayList.class);
-								else if (type != null)
-									return super.serializedClass(ClassUtils.unproxy(type));
+								else if (type == null)
+									return super.serializedClass(type);
+								else if (type.getName().contains("$HibernateProxy$"))
+									return StringUtils.substringBefore(type.getName(), "$HibernateProxy$");
 								else
 									return super.serializedClass(type);
 							}
