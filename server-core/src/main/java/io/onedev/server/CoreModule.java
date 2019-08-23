@@ -630,6 +630,8 @@ public class CoreModule extends AbstractPluginModule {
 					}
 					
 				};
+				XStream.setupDefaultSecurity(xstream);
+				xstream.allowTypesByWildcard(new String[] {"**"});				
 				
 				// register NullConverter as highest; otherwise NPE when unmarshal a map 
 				// containing an entry with value set to null.
