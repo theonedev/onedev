@@ -325,7 +325,17 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 							// deinit submodules in case submodule url is changed
 							git.clearArgs();
 							git.addArgs("submodule", "deinit", "--all", "--force", "--quiet");
-							git.execute(logger, logger).checkReturnCode();
+							git.execute(logger, new LineConsumer() {
+
+								@Override
+								public void consume(String line) {
+									if (!line.contains("error: could not lock config file") && 
+											!line.contains("warning: Could not unset core.worktree setting in submodule")) {
+										jobContext.getLogger().log(line);
+									}
+								}
+								
+							}).checkReturnCode();
 							
 							git.clearArgs();
 							git.addArgs("submodule", "update", "--init", "--recursive", "--force", "--quiet", "--depth=1");
