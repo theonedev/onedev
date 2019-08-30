@@ -229,8 +229,8 @@ a.tree-junction {
 }
     
 /* WEB SOCKET ERROR */
-#websocket-error {
-	z-index: 1000;
+.websocket-error {
+	z-index: 1050;
 	display: none;
 	position: fixed; 
 	left: 50%; 
@@ -241,8 +241,11 @@ a.tree-junction {
 	padding: 4px 8px; 
 	margin-left: -120px;
 }	
-#websocket-error span {
+.websocket-error span {
 	color: #F54D4D;
+}
+.websocket-error.websocket-client-error {
+	margin-left: -240px;
 }
 
 /* FILE INPUT */
