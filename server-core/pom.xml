@@ -404,8 +404,8 @@
 		<jgit.version>5.1.3.201810200350-r</jgit.version>
 		<flexmark.version>0.18.3</flexmark.version>
 		<groovy.version>2.4.14</groovy.version>
-		<wicket.version>7.10.0</wicket.version>
-		<wicketbootstrap.version>0.10.17</wicketbootstrap.version>
+		<wicket.version>7.14.0</wicket.version>
+		<wicketbootstrap.version>0.10.18</wicketbootstrap.version>
 		<jersey.version>2.26</jersey.version>
 		<jetty.version>9.3.27.v20190418</jetty.version>
 		<servlet.version>3.1.0</servlet.version>
