@@ -15,8 +15,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.protocol.http.ClientProperties;
-import org.apache.wicket.protocol.http.request.WebClientInfo;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -62,11 +60,8 @@ import io.onedev.server.web.page.security.RegisterPage;
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
 	
-	private final ClientProperties clientProperties;
-	
 	public LayoutPage(PageParameters params) {
 		super(params);
-		clientProperties = ((WebClientInfo)getSession().getClientInfo()).getProperties();
 	}
 	
 	@Override
@@ -236,10 +231,6 @@ public abstract class LayoutPage extends BasePage {
 
 	protected Component newNavContext(String componentId) {
 		return new WebMarkupContainer(componentId);
-	}
-	
-	public ClientProperties getClientProperties() {
-		return clientProperties;
 	}
 	
 }

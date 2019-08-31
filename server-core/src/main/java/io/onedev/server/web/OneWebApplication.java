@@ -83,7 +83,6 @@ public class OneWebApplication extends WebApplication {
 	protected void init() {
 		super.init();
 
-		getRequestCycleSettings().setGatherExtendedBrowserInfo(true);
 		getMarkupSettings().setDefaultMarkupEncoding("UTF-8");
 		getMarkupSettings().setStripComments(true);
 		getMarkupSettings().setStripWicketTags(true);

@@ -38,7 +38,6 @@ import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.watch.WatchStatus;
-import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -49,7 +48,6 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
@@ -150,12 +148,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 		WebRequest request = (WebRequest) RequestCycle.get().getRequest();
 		Cookie cookie = request.getCookie(getCookieName());
-		if (cookie != null) {
-			closed = "yes".equals(cookie.getValue());
-		} else {
-			LayoutPage page = (LayoutPage) getPage();
-			closed = page.getClientProperties().getScreenWidth() < WebConstants.NARROW_SCREEN;
-		}
+		closed = cookie == null || "yes".equals(cookie.getValue());
 		
 		add(new AjaxLink<Void>("close") {
 
