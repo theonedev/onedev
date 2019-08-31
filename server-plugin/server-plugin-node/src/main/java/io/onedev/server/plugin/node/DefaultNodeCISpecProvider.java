@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.onedev.server.OneDev;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.DefaultCISpecProvider;
 import io.onedev.server.ci.job.CacheSpec;
@@ -33,7 +34,7 @@ public class DefaultNodeCISpecProvider implements DefaultCISpecProvider {
 			String version = null;
 
 			content = blob.getText().getContent();
-			ObjectMapper objectMapper = new ObjectMapper();
+			ObjectMapper objectMapper = OneDev.getInstance(ObjectMapper.class);
 			JsonNode jsonNode;
 			try {
 				jsonNode = objectMapper.readTree(content);

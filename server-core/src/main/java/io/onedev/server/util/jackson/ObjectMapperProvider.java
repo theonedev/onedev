@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.DeserializationConfig;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -53,6 +54,7 @@ public class ObjectMapperProvider implements Provider<ObjectMapper> {
 			private boolean useForType(JavaType t) {
 				return  !Collection.class.isAssignableFrom(t.getRawClass()) 
 						&& !Map.class.isAssignableFrom(t.getRawClass()) 
+						&& t.getRawClass() != JsonNode.class
 						&& (t.getRawClass() == Object.class || !t.isConcrete());				
 			}
 

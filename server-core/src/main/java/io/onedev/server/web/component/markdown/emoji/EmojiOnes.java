@@ -5,20 +5,20 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.utils.ExceptionUtils;
+import io.onedev.server.OneDev;
 
 public class EmojiOnes {
-	
-	private static final ObjectMapper objectMapper = new ObjectMapper(); 
 	
 	private final Map<String, String> codes;
 	
@@ -32,15 +32,15 @@ public class EmojiOnes {
     
 	private EmojiOnes() {
 		try (InputStream in = EmojiOnes.class.getResourceAsStream("emoji.json")) {
-			Map<String, Map<String, String>> json = 
-					objectMapper.readValue(in, new TypeReference<LinkedHashMap<String, Map<String, String>>>() {});
+			JsonNode emojis = OneDev.getInstance(ObjectMapper.class).readTree(in);
 			
 			Map<String, String> map = new HashMap<>();
 			
-			for (Entry<String, Map<String, String>> each : json.entrySet()) {
-				String code = each.getValue().get("unicode");
-				map.put(each.getKey(), code);
-				String aliases = each.getValue().get("aliases");
+			for (Iterator<Entry<String, JsonNode>> it = emojis.fields(); it.hasNext();) {
+				Entry<String, JsonNode> entry = it.next();
+				String code = entry.getValue().get("unicode").asText();
+				map.put(entry.getKey(), code);
+				String aliases = entry.getValue().get("aliases").asText();
 				for (String alias : Splitter.on(" ").omitEmptyStrings().split(aliases)) {
 					String name = alias.substring(1, alias.length() - 1);
 					map.put(name, code);

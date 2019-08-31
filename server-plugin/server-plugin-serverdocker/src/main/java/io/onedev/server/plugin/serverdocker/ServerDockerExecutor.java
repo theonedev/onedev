@@ -129,7 +129,6 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			return new Commandline("docker");
 	}
 	
-	@SuppressWarnings("unchecked")
 	private String getImageOS(JobLogger logger, String image) {
 		logger.log("Checking image OS...");
 		Commandline docker = getDocker();
@@ -146,11 +145,8 @@ public class ServerDockerExecutor extends JobExecutor implements Testable<TestDa
 			
 		}, newJobLogger(logger)).checkReturnCode();
 
-		Map<String, Object> map;
 		try {
-			map = (Map<String, Object>) new ObjectMapper()
-					.readValue(builder.toString(), List.class).iterator().next();
-			return (String) map.get("Os");
+			return OneDev.getInstance(ObjectMapper.class).readTree(builder.toString()).iterator().next().get("Os").asText();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

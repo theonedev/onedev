@@ -415,8 +415,9 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				auths.put(registryUrl, Maps.newLinkedHashMap(
 						"auth", Base64.encodeBase64String(auth.getBytes(Charsets.UTF_8))));
 			}
+			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			try {
-				String dockerConfig = new ObjectMapper().writeValueAsString(Maps.newLinkedHashMap("auths", auths));
+				String dockerConfig = mapper.writeValueAsString(Maps.newLinkedHashMap("auths", auths));
 				return createSecret(Maps.newLinkedHashMap(".dockerconfigjson", dockerConfig), "kubernetes.io/dockerconfigjson", logger);
 			} catch (JsonProcessingException e) {
 				throw new RuntimeException(e);
@@ -846,7 +847,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		JsonNode nodeNode;
 		KubernetesExecutor.logger.trace("Node json:\n" + nodeJson.toString());
 		try {
-			nodeNode = new ObjectMapper().readTree(nodeJson.toString());
+			nodeNode = OneDev.getInstance(ObjectMapper.class).readTree(nodeJson.toString());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -919,7 +920,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private void watchPod(String podName, StatusChecker statusChecker, JobLogger logger) {
 		Commandline kubectl = newKubeCtl();
 		
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 		
 		AtomicReference<StopWatch> stopWatchRef = new AtomicReference<>(null); 
 		
@@ -1023,7 +1024,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private void checkEventError(String podName, JobLogger logger) {
 		Commandline kubectl = newKubeCtl();
 		
-		ObjectMapper mapper = new ObjectMapper();
+		ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 		
 		StringBuilder json = new StringBuilder();
 		kubectl.addArgs("get", "event", "-n", getNamespace(), "--field-selector", 
