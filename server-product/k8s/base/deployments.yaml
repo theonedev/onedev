@@ -47,6 +47,8 @@ spec:
         persistentVolumeClaim:
           claimName: onedev
       serviceAccountName: onedev
+      nodeSelector:
+        kubernetes.io/os: linux
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -102,3 +104,5 @@ spec:
       - name: mysql
         persistentVolumeClaim:
           claimName: mysql
+      nodeSelector:
+        kubernetes.io/os: linux

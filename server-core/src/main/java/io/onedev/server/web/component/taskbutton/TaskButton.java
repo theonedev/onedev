@@ -90,7 +90,7 @@ public abstract class TaskButton extends AjaxButton {
 							
 						})));					
 				} catch (Exception e) {	
-					logger.debug("Error " + title, e);
+					logger.error("Error " + title, e);
 					String suggestedSolution = ExceptionUtils.suggestSolution(e);
 					if (suggestedSolution != null)
 						logger.warn("!!! " + suggestedSolution);

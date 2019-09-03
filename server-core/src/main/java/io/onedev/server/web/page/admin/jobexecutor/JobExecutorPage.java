@@ -84,7 +84,7 @@ public class JobExecutorPage extends AdministrationPage {
 				target.add(container);
 			}
 			
-		}.items("li.executor"));
+		}.items("li.executor").handle(".panel-heading"));
 		
 		container.add(newAddNewFrag());
 	}

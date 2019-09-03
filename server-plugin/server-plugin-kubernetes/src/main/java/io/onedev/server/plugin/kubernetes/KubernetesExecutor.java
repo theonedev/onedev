@@ -1,8 +1,12 @@
 package io.onedev.server.plugin.kubernetes;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -26,6 +30,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
@@ -68,48 +73,33 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private static final int LABEL_UPDATE_BATCH = 100;
 	
+	private List<NodeSelectorEntry> nodeSelector = new ArrayList<>();
+	
+	private String namespace = "onedev-ci";
+	
+	private String serviceAccount;
+	
+	private List<RegistryLogin> registryLogins = new ArrayList<>();
+
 	private String configFile;
 	
 	private String kubeCtlPath;
 
-	private String namespace = "onedev-ci";
-	
-	private List<NodeSelectorEntry> nodeSelector = new ArrayList<>();
-	
-	private List<RegistryLogin> registryLogins = new ArrayList<>();
-
-	private String serviceAccount;
-	
 	private String cpuRequest = "500m";
 	
 	private String memoryRequest = "128m";
 	
-	@Editable(name="Kubectl Config File", order=100, description=
-			"Specify absolute path to the config file used by kubectl to access the "
-			+ "cluster. Leave empty to have kubectl determining cluster access "
-			+ "information automatically")
-	@NameOfEmptyValue("Use default")
-	public String getConfigFile() {
-		return configFile;
+	@Editable(order=20, description="Optionally specify node selectors of the "
+			+ "job pods created by this executor")
+	public List<NodeSelectorEntry> getNodeSelector() {
+		return nodeSelector;
 	}
 
-	public void setConfigFile(String configFile) {
-		this.configFile = configFile;
+	public void setNodeSelector(List<NodeSelectorEntry> nodeSelector) {
+		this.nodeSelector = nodeSelector;
 	}
 
-	@Editable(name="Path to kubectl", order=200, description=
-			"Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. "
-			+ "If left empty, OneDev will try to find the utility from system path")
-	@NameOfEmptyValue("Use default")
-	public String getKubeCtlPath() {
-		return kubeCtlPath;
-	}
-
-	public void setKubeCtlPath(String kubeCtlPath) {
-		this.kubeCtlPath = kubeCtlPath;
-	}
-
-	@Editable(order=20000, group="More Settings", description="Specify namespace to run the job pods")
+	@Editable(order=30, description="Specify namespace to run the job pods")
 	@NotEmpty
 	public String getNamespace() {
 		return namespace;
@@ -119,7 +109,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		this.namespace = namespace;
 	}
 	
-	@Editable(order=20500, group="More Settings", description="Optionally specify a service account in above namespace to run the job "
+	@Editable(order=40, description="Optionally specify a service account in above namespace to run the job "
 			+ "pod. Refer to <a href='https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'>"
 			+ "kubernetes documentation</a> on how to set up service accounts")
 	public String getServiceAccount() {
@@ -130,17 +120,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		this.serviceAccount = serviceAccount;
 	}
 
-	@Editable(order=21000, group="More Settings", description="Optionally specify node selectors of the "
-			+ "job pods created by this executor")
-	public List<NodeSelectorEntry> getNodeSelector() {
-		return nodeSelector;
-	}
-
-	public void setNodeSelector(List<NodeSelectorEntry> nodeSelector) {
-		this.nodeSelector = nodeSelector;
-	}
-
-	@Editable(order=22000, group="More Settings", description="Specify login information of docker registries if necessary. These "
+	@Editable(order=200, description="Specify login information of docker registries if necessary. These "
 			+ "logins will be used to create image pull secrets of the job pods")
 	public List<RegistryLogin> getRegistryLogins() {
 		return registryLogins;
@@ -172,6 +152,31 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	public void setMemoryRequest(String memoryRequest) {
 		this.memoryRequest = memoryRequest;
+	}
+
+	@Editable(name="Kubectl Config File", order=26000, group="More Settings", description=
+			"Specify absolute path to the config file used by kubectl to access the "
+			+ "cluster. Leave empty to have kubectl determining cluster access "
+			+ "information automatically")
+	@NameOfEmptyValue("Use default")
+	public String getConfigFile() {
+		return configFile;
+	}
+
+	public void setConfigFile(String configFile) {
+		this.configFile = configFile;
+	}
+
+	@Editable(name="Path to kubectl", order=27000, group="More Settings", description=
+			"Specify absolute path to the kubectl utility, for instance: <i>/usr/bin/kubectl</i>. "
+			+ "If left empty, OneDev will try to find the utility from system path")
+	@NameOfEmptyValue("Use default")
+	public String getKubeCtlPath() {
+		return kubeCtlPath;
+	}
+
+	public void setKubeCtlPath(String kubeCtlPath) {
+		this.kubeCtlPath = kubeCtlPath;
 	}
 
 	@Override
@@ -346,22 +351,17 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			return null;
 	}
 	
-	private String getOSName(JobLogger logger) {
+	private OsInfo getJobOsInfo(JobLogger logger) {
 		logger.log("Checking working node operating system...");
 		Commandline kubectl = newKubeCtl();
-		kubectl.addArgs("get", "nodes", "-o", "jsonpath={range .items[*]}{.status.nodeInfo.operatingSystem}{'\\n'}{end}");
+		kubectl.addArgs("get", "nodes", "-o", "jsonpath={range .items[*]}{.status.nodeInfo.operatingSystem} {.status.nodeInfo.kernelVersion} {.spec.unschedulable}{'|'}{end}");
 		for (NodeSelectorEntry entry: getNodeSelector()) 
 			kubectl.addArgs("-l", entry.getLabelName() + "=" + entry.getLabelValue());
 		
-		AtomicReference<String> osNameRef = new AtomicReference<>(null);
-		kubectl.execute(new LineConsumer() {
+		Collection<OsInfo> osInfos = new ArrayList<>();
 
-			@Override
-			public void consume(String line) {
-				osNameRef.set(line);
-			}
-			
-		}, new LineConsumer() {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		kubectl.execute(baos, new LineConsumer() {
 
 			@Override
 			public void consume(String line) {
@@ -370,10 +370,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			
 		}).checkReturnCode();
 		
-		String osName = osNameRef.get();
-		if (osName != null) {
-			logger.log(String.format("Working node is running on %s", osName));
-			return osName;
+		for (String osInfoString: Splitter.on('|').trimResults().omitEmptyStrings().splitToList(baos.toString())) {
+			osInfoString = osInfoString.replace('\n', ' ').replace('\r', ' ');
+			List<String> fields = Splitter.on(' ').omitEmptyStrings().trimResults().splitToList(osInfoString);
+			if (fields.size() == 2 || fields.get(2).equals("false"))
+				osInfos.add(new OsInfo(fields.get(0), fields.get(1)));
+		}
+
+		if (!osInfos.isEmpty()) {
+			return OsInfo.getBaseline(osInfos);
 		} else {
 			throw new OneException("No applicable working nodes found");
 		}
@@ -396,13 +401,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		return secretEnvs;
 	}
 	
-	private String getCacheHome(String osName) {
-		if (osName.equalsIgnoreCase("linux"))
-			return "/var/cache/onedev-ci"; 
-		else
-			return "C:\\ProgramData\\onedev-ci\\cache";
-	}
-
 	@Nullable
 	private String createImagePullSecret(JobLogger logger) {
 		if (!getRegistryLogins().isEmpty()) {
@@ -477,7 +475,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			imagePullSecretName = createImagePullSecret(logger);
 			trustCertsConfigMapName = createTrustCertsConfigMap(logger);
 			
-			String osName = getOSName(logger);
+			OsInfo osInfo = getJobOsInfo(logger);
 			
 			Map<String, Object> podSpec = new LinkedHashMap<>();
 			
@@ -490,7 +488,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			String containerCacheHome;
 			String trustCertsHome;
 			String dockerSock;
-			if (osName.equalsIgnoreCase("linux")) {
+			if (osInfo.isLinux()) {
 				containerCIHome = "/onedev-ci";
 				containerCacheHome = containerCIHome + "/cache";
 				trustCertsHome = containerCIHome + "/trust-certs";
@@ -548,15 +546,34 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			}
 			mainContainerSpec.put("env", envs);
 			
-			List<String> sidecarArgs = Lists.newArrayList("-classpath", k8sHelperClassPath, "io.onedev.k8shelper.SideCar");
-			List<String> initArgs = Lists.newArrayList("-classpath", k8sHelperClassPath, "io.onedev.k8shelper.Init");
+			List<String> sidecarArgs = Lists.newArrayList(
+					"-classpath", k8sHelperClassPath,
+					"io.onedev.k8shelper.SideCar");
+			List<String> initArgs = Lists.newArrayList(
+					"-classpath", k8sHelperClassPath, 
+					"io.onedev.k8shelper.Init");
 			if (jobContext == null) {
 				sidecarArgs.add("test");
 				initArgs.add("test");
 			}
+			
+			String helperImageVersion;
+			/*
+			try (InputStream is = KubernetesExecutor.class.getClassLoader().getResourceAsStream("k8s-helper-version.properties")) {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				IOUtils.copy(is, baos);
+				helperImageVersion = baos.toString();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+			*/
+			
+			// TODO: uncomment above for production code
+			helperImageVersion = "latest";
+			
 			Map<Object, Object> sidecarContainerSpec = Maps.newHashMap(
 					"name", "sidecar", 
-					"image", "1dev/k8s-helper", 
+					"image", "1dev/k8s-helper-" + osInfo.getHelperImageSuffix() + ":" + helperImageVersion, 
 					"command", Lists.newArrayList("java"), 
 					"args", sidecarArgs, 
 					"env", envs, 
@@ -564,7 +581,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			
 			Map<Object, Object> initContainerSpec = Maps.newHashMap(
 					"name", "init", 
-					"image", "1dev/k8s-helper", 
+					"image", "1dev/k8s-helper-" + osInfo.getHelperImageSuffix() + ":" + helperImageVersion, 
 					"command", Lists.newArrayList("java"), 
 					"args", initArgs,
 					"env", envs,
@@ -589,7 +606,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			Map<Object, Object> cacheHomeVolume = Maps.newLinkedHashMap(
 					"name", "cache-home", 
 					"hostPath", Maps.newLinkedHashMap(
-							"path", getCacheHome(osName), 
+							"path", osInfo.getCacheHome(), 
 							"type", "DirectoryOrCreate"));
 			List<Object> volumes = Lists.<Object>newArrayList(ciHomeVolume, cacheHomeVolume);
 			if (trustCertsConfigMapName != null) {
@@ -1089,28 +1106,49 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	private void collectContainerLog(String podName, String containerName, JobLogger logger) {
-		Commandline kubectl = newKubeCtl();
-		kubectl.addArgs("logs", podName, "-c", containerName, "-n", getNamespace(), "--follow");
-		kubectl.execute(new LineConsumer() {
-
-			@Override
-			public void consume(String line) {
-				if (line.contains("rpc error:") && line.contains("No such container:") 
-						|| line.contains("Unable to retrieve container logs for")) { 
-					KubernetesExecutor.logger.debug(line);
-				} else {
-					logger.log(line);
-				} 
-			}
+		AtomicReference<Instant> lastInstantRef = new AtomicReference<>(null);
+		AtomicBoolean endOfLogSeenRef = new AtomicBoolean(false);
+		
+		while (!endOfLogSeenRef.get()) {
+			Commandline kubectl = newKubeCtl();
+			kubectl.addArgs("logs", podName, "-c", containerName, "-n", getNamespace(), "--follow", "--timestamps=true");
+			if (lastInstantRef.get() != null)
+				kubectl.addArgs("--since-time=" + DateTimeFormatter.ISO_INSTANT.format(lastInstantRef.get()));
 			
-		}, new LineConsumer() {
+			LineConsumer logConsumer = new LineConsumer() {
 
-			@Override
-			public void consume(String line) {
-				logger.log(line);
-			}
+				@Override
+				public void consume(String line) {
+					if (line.contains("rpc error:") && line.contains("No such container:") 
+							|| line.contains("Unable to retrieve container logs for")) { 
+						KubernetesExecutor.logger.debug(line);
+					} else if (line.contains(KubernetesHelper.LOG_END_MESSAGE)) {
+						endOfLogSeenRef.set(true);
+					} else if (line.contains(" ")) {
+						String timestamp = StringUtils.substringBefore(line, " ");
+						try {
+							Instant instant = Instant.from(DateTimeFormatter.ISO_INSTANT.parse(timestamp));
+							if (lastInstantRef.get() == null || lastInstantRef.get().isBefore(instant))
+								lastInstantRef.set(instant);
+							logger.log(StringUtils.substringAfter(line, " "));
+						} catch (DateTimeParseException e) {
+							logger.log(line);
+						}
+					} else {
+						logger.log(line);
+					}
+				}
+				
+			};
 			
-		}).checkReturnCode();
+			kubectl.execute(logConsumer, logConsumer).checkReturnCode();
+			
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
+		}
 	}
 	
 	@Editable
@@ -1183,4 +1221,81 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 	}
 
+	private static class OsInfo {
+		
+		private static final Map<String, Integer> WINDOWS_VERSIONS = new LinkedHashMap<>();
+		
+		static {
+			// update this according to 
+			// https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility
+			WINDOWS_VERSIONS.put(".18362.", 1903);
+			WINDOWS_VERSIONS.put(".17763.", 1809);
+			WINDOWS_VERSIONS.put(".17134.", 1803); 
+			WINDOWS_VERSIONS.put(".16299.", 1709); 
+			WINDOWS_VERSIONS.put(".14393.", 1607);
+		}
+		
+		private final String osName;
+		
+		private final String kernelVersion;
+		
+		public OsInfo(String osName, String kernelVersion) {
+			this.osName = osName;
+			this.kernelVersion = kernelVersion;
+		}
+
+		public boolean isLinux() {
+			return osName.equalsIgnoreCase("linux");
+		}
+		
+		public boolean isWindows() {
+			return osName.equalsIgnoreCase("windows");
+		}
+		
+		public String getCacheHome() {
+			if (osName.equalsIgnoreCase("linux"))
+				return "/var/cache/onedev-ci"; 
+			else
+				return "C:\\ProgramData\\onedev-ci\\cache";
+		}
+		
+		public static OsInfo getBaseline(Collection<OsInfo> osInfos) {
+			if (osInfos.iterator().next().isLinux()) {
+				for (OsInfo osInfo: osInfos) {
+					if (!osInfo.isLinux())
+						throw new OneException("Linux and non-linux nodes should not be included in same executor");
+				}
+				return osInfos.iterator().next();
+			} else if (osInfos.iterator().next().isWindows()) {
+				OsInfo baseline = null;
+				for (OsInfo osInfo: osInfos) {
+					if (!osInfo.isWindows())
+						throw new OneException("Windows and non-windows nodes should not be included in same executor");
+					if (baseline == null || baseline.getWindowsVersion() > osInfo.getWindowsVersion())
+						baseline = osInfo;
+				}
+				return baseline;
+			} else {
+				throw new OneException("Either Windows or Linux nodes can be included in an executor");
+			}
+		}
+		
+		public int getWindowsVersion() {
+			Preconditions.checkState(isWindows());
+			for (Map.Entry<String, Integer> entry: WINDOWS_VERSIONS.entrySet()) {
+				if (kernelVersion.contains(entry.getKey()))
+					return entry.getValue();
+			}
+			throw new RuntimeException("Unsupported windows kernel version: " + kernelVersion);
+		}
+		
+		public String getHelperImageSuffix() {
+			if (isLinux())  
+				return "linux";
+			else 
+				return "windows-" + getWindowsVersion();
+		}
+		
+	}
+	
 }

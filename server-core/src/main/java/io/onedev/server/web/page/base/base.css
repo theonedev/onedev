@@ -643,6 +643,7 @@ td.ellipsis {
 	border-color: #ADADAD;
 }
 
-.panel-list .disabled .panel {
+.panel-list .disabled .panel, .panel-list .disabled .panel span, .panel-list .disabled .panel a {
 	color: #999;
 }
+

@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onedev
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onedev
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux

@@ -77,7 +77,7 @@ public class BranchProtectionPage extends ProjectSettingPage {
 				target.add(container);
 			}
 			
-		}.items("li.protection"));
+		}.items("li.protection").handle(".panel-heading"));
 		
 		container.add(newAddNewFrag());
 	}
