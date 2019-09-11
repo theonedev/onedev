@@ -17,52 +17,52 @@
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-artifact</artifactId>
+			<artifactId>server-plugin-outcome-artifact</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-htmlreport</artifactId>
+			<artifactId>server-plugin-outcome-htmlreport</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-maven</artifactId>
+			<artifactId>server-plugin-cispec-maven</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-node</artifactId>
+			<artifactId>server-plugin-cispec-node</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-laravel</artifactId>
+			<artifactId>server-plugin-cispec-laravel</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-rubyonrails</artifactId>
+			<artifactId>server-plugin-cispec-rubyonrails</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-django</artifactId>
+			<artifactId>server-plugin-cispec-django</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-gradle</artifactId>
+			<artifactId>server-plugin-cispec-gradle</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-kubernetes</artifactId>
+			<artifactId>server-plugin-executor-kubernetes</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-serverdocker</artifactId>
+			<artifactId>server-plugin-executor-docker</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

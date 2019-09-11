@@ -5,14 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Script;
 
@@ -23,19 +24,18 @@ public class ScriptingChoices implements ChoiceProvider {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ScriptingChoices.class);
 
-	private String script;
+	private List<String> script;
 
 	@Editable(description="Groovy script to be evaluated. The return value should be a list of group facade object to be used as choices. "
 			+ "Check <a href='$docRoot/Scripting' target='_blank'>scripting help</a> for details")
-	@NotEmpty
 	@Script(Script.GROOVY)
 	@OmitName
-	@Multiline
-	public String getScript() {
+	@Size(min=1, message="may not be empty")
+	public List<String> getScript() {
 		return script;
 	}
 
-	public void setScript(String script) {
+	public void setScript(List<String> script) {
 		this.script = script;
 	}
 
@@ -45,7 +45,7 @@ public class ScriptingChoices implements ChoiceProvider {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("allPossible", allPossible);
 		try {
-			return (List<GroupFacade>) GroovyUtils.evalScript(getScript(), variables);
+			return (List<GroupFacade>) GroovyUtils.evalScript(StringUtils.join(getScript(), "\n"), variables);
 		} catch (RuntimeException e) {
 			if (allPossible) {
 				logger.error("Error getting all possible choices", e);

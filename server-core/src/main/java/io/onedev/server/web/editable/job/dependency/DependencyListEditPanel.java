@@ -128,8 +128,25 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
-				Fragment fragment = new Fragment(componentId, "jobColumnFrag", DependencyListEditPanel.this);
-				ModalLink link = new ModalLink("link") {
+				cellItem.add(new Label(componentId, rowModel.getObject().getJobName()));
+			}
+		});		
+		
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("#Params")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getJobParams().size()));
+			}
+			
+		});		
+		
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", DependencyListEditPanel.this);
+				fragment.add(new ModalLink("edit") {
 
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
@@ -161,28 +178,7 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 						};
 					}
 					
-				};
-				link.add(new Label("label", rowModel.getObject().getJobName()));
-				fragment.add(link);
-				
-				cellItem.add(fragment);
-			}
-		});		
-		
-		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("#Params")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getJobParams().size()));
-			}
-			
-		});		
-		
-		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
-				Fragment fragment = new Fragment(componentId, "actionColumnFrag", DependencyListEditPanel.this);
+				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override

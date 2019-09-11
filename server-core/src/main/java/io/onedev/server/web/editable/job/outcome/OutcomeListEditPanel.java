@@ -97,8 +97,24 @@ class OutcomeListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
-				Fragment fragment = new Fragment(componentId, "typeColumnFrag", OutcomeListEditPanel.this);
-				ModalLink link = new ModalLink("link") {
+				cellItem.add(new Label(componentId, EditableUtils.getDisplayName(rowModel.getObject().getClass())));
+			}
+		});		
+		
+		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("File Patterns")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getFilePatterns()));
+			}
+		});		
+		
+		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", OutcomeListEditPanel.this);
+				fragment.add(new ModalLink("edit") {
 
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
@@ -120,27 +136,7 @@ class OutcomeListEditPanel extends PropertyEditor<List<Serializable>> {
 						};
 					}
 					
-				};
-				link.add(new Label("label", EditableUtils.getDisplayName(rowModel.getObject().getClass())));
-				fragment.add(link);
-				
-				cellItem.add(fragment);
-			}
-		});		
-		
-		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("File Patterns")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getFilePatterns()));
-			}
-		});		
-		
-		columns.add(new AbstractColumn<JobOutcome, Void>(Model.of("")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<JobOutcome>> cellItem, String componentId, IModel<JobOutcome> rowModel) {
-				Fragment fragment = new Fragment(componentId, "actionColumnFrag", OutcomeListEditPanel.this);
+				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override

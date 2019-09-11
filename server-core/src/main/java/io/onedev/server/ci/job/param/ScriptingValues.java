@@ -6,11 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.constraints.Size;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import edu.emory.mathcs.backport.java.util.Collections;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Script;
@@ -24,16 +26,16 @@ public class ScriptingValues implements ValuesProvider {
 	
 	public static final String SECRET_DISPLAY_NAME = "Evaluate script to get secrets";
 	
-	private String script;
+	private List<String> script;
 	
 	@Editable
-	@NotEmpty
 	@Script(Script.GROOVY)
-	public String getScript() {
+	@Size(min=1, message="may not be empty")
+	public List<String> getScript() {
 		return script;
 	}
 
-	public void setScript(String script) {
+	public void setScript(List<String> script) {
 		this.script = script;
 	}
 
@@ -61,7 +63,7 @@ public class ScriptingValues implements ValuesProvider {
 	public List<List<String>> getValues() {
 		Map<String, Object> variables = new HashMap<>();
 		List<List<String>> values = new ArrayList<>();
-		for (Object each: (List<Object>) GroovyUtils.evalScript(getScript(), variables)) {
+		for (Object each: (List<Object>) GroovyUtils.evalScript(StringUtils.join(getScript(), "\n"), variables)) {
 			List<String> strings = new ArrayList<>();
 			if (each instanceof Collection) { 
 				strings.addAll((Collection<? extends String>) each);

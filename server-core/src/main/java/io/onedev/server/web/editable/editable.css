@@ -68,7 +68,12 @@
 .property-editor>.bean-list>table>*>tr>.actions {
     font-size: 18px;
 }
-
+.property-editor>.list>table>tfoot>tr>td.norecords-td>div,
+.property-editor>.bean-list>table>tfoot>tr>td.no-elements>div {
+    border-top: 2px solid #DDD;
+    margin-top: -6px;
+    padding: 8px 0 0 8px;
+}
 .property-editor>.polymorphic-list>table>tbody>tr>td {
     border-top: 2px solid #BBB;
     padding-top: 20px;
@@ -83,6 +88,7 @@
 .property-editor>.polymorphic-list>table>tbody>tr>td>.head>.actions a {
     color: #666;
 }
+
 .property-viewer>.polymorphic-list>tbody>tr>td {
     border-top: 2px solid #BBB;
     padding-top: 12px;
@@ -90,6 +96,12 @@
 }
 .property-viewer>.polymorphic-list>tbody>tr>td>.type-selector {
     margin-bottom: 12px;
+}
+.property-viewer>.def-list>div>table>tfoot>tr>td.norecords-td>div,
+.property-viewer>.bean-list>tfoot>tr>td.no-elements>div {
+    border-top: 2px solid #DDD;
+    margin-top: -6px;
+    padding-top: 8px;
 }
 
 .editable>.polymorphic>.type-selector {

@@ -348,7 +348,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 			Component valuesEditor = paramItem.get("values");
 			if (valuesEditor instanceof PropertyEditor) {
 				ScriptingValues scriptingValues = new ScriptingValues();
-				scriptingValues.setScript((String) ((PropertyEditor<Serializable>) valuesEditor).getConvertedInput()); 
+				scriptingValues.setScript((List<String>) ((PropertyEditor<Serializable>) valuesEditor).getConvertedInput()); 
 				param.setValuesProvider(scriptingValues);
 			} else {
 				SpecifiedValues specifiedValues = new SpecifiedValues();

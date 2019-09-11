@@ -9,10 +9,13 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.job.JobContext;
 import io.onedev.server.ci.job.JobExecutorDiscoverer;
+import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Horizontal;
 
 @Editable(order=10000, description="Discover appropriate job executor automatically to run CI jobs")
+@Horizontal
 public class AutoDiscoveredJobExecutor extends JobExecutor {
 
 	private static final long serialVersionUID = 1L;
@@ -39,8 +42,8 @@ public class AutoDiscoveredJobExecutor extends JobExecutor {
 			jobExecutor.setBranches(getBranches());
 			jobExecutor.setCacheTTL(getCacheTTL());
 			jobExecutor.setEnabled(isEnabled());
-			jobExecutor.setEnvironments(getEnvironments());
-			jobExecutor.setJobs(getJobs());
+			jobExecutor.setJobEnvironments(getJobEnvironments());
+			jobExecutor.setJobNames(getJobNames());
 			jobExecutor.setProjects(getProjects());
 			jobExecutor.execute(jobToken, context);
 		} else {

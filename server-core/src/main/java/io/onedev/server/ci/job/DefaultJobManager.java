@@ -34,9 +34,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
-import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Sets;
 
@@ -73,8 +71,8 @@ import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
+import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -249,11 +247,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			Collection<String> jobSecretsToMask = Sets.newHashSet(jobToken);
 			Job job = build.getJob();
 			ObjectId commitId = ObjectId.fromString(build.getCommitHash());
-			JobExecutor executor = getJobExecutor(build.getProject(), commitId, job.getName(), job.getEnvironment());
+			JobExecutor executor = getJobExecutor(build.getProject(), commitId, job.getName(), job.getImage());
 			if (executor != null) {
 				JobLogger logger = logManager.getLogger(build, jobSecretsToMask); 
 				
 				Long buildId = build.getId();
+				Long buildNumber = build.getNumber();
 				String projectName = build.getProject().getName();
 				File projectGitDir = build.getProject().getGitDir();
 				JobExecution execution = new JobExecution(executorService.submit(new Runnable() {
@@ -291,13 +290,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 												for (String value: paramValues) {
 													if (paramType.equals(InputSpec.SECRET)) 
 														value = build.getSecretValue(value);
-													envVars.put(paramName + "_" + index++, value);
+													envVars.put("BUILD_PARAM_" + paramName.toUpperCase() + "_" + index++, value);
 												}
 											} else if (paramValues.size() == 1) {
 												String value = paramValues.iterator().next();
 												if (paramType.equals(InputSpec.SECRET)) 
 													value = build.getSecretValue(value);
-												envVars.put(paramName, value);
+												envVars.put("BUILD_PARAM_" + paramName.toUpperCase(), value);
 											}
 										}
 									}
@@ -311,8 +310,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								
 							});
 
-							List<String> commands = Splitter.on("\n").trimResults(CharMatcher.is('\r')).splitToList(job.getCommands());
-							
 							List<SubmoduleCredential> submoduleCredentials = new ArrayList<>();
 							if (job.isRetrieveSource()) {
 								for (SubmoduleCredential submoduleCredential: job.getSubmoduleCredentials()) {
@@ -323,9 +320,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									submoduleCredentials.add(resolvedSubmoduleCredential);
 								}
 							}
-							JobContext jobContext = new JobContext(projectName, projectGitDir, job.getEnvironment(), serverWorkspace, 
-									envVars, commands, job.isRetrieveSource(), submoduleCredentials, commitId, job.getCaches(), 
-									new PatternSet(includeFiles, excludeFiles), executor.getCacheTTL(), logger) {
+							JobContext jobContext = new JobContext(projectName, buildNumber, projectGitDir, job.getImage(), serverWorkspace, 
+									envVars, job.getCommands(), job.isRetrieveSource(), submoduleCredentials, job.getCpuRequirement(), 
+									job.getMemoryRequirement(), commitId, job.getCaches(), new PatternSet(includeFiles, excludeFiles), 
+									executor.getCacheTTL(), job.getServices(), logger) {
 
 								@Override
 								public void notifyJobRunning() {
@@ -346,13 +344,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							};
 							
 							jobContexts.put(jobToken, jobContext);
+							executor.execute(jobToken, jobContext);
+						} catch (Exception e) {
+							handleException(e, jobSecretsToMask, logger);
+						} finally {
+							jobContexts.remove(jobToken);
 							try {
-								executor.execute(jobToken, jobContext);
-							} finally {
-								jobContexts.remove(jobToken);
-								
 								sessionManager.run(new Runnable() {
-
+	
 									@Override
 									public void run() {
 										logger.log("Processing job outcomes...");
@@ -362,24 +361,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									}
 									
 								});
+								FileUtils.deleteDir(serverWorkspace);
+							} catch (Exception e) {
+								handleException(e, jobSecretsToMask, logger);
 							}
-						} catch (Exception e) {
-							if (ExceptionUtils.find(e, InterruptedException.class) == null) {
-								if (e.getMessage() != null)
-									logger.log(e.getMessage());
-								else
-									logger.log(Throwables.getStackTraceAsString(e));
-							}
-							String errorMessage = e.getMessage();
-							if (errorMessage != null) {
-								for (String secret: jobSecretsToMask)
-									errorMessage = StringUtils.replace(errorMessage, secret, SecretInput.MASK);
-								throw new RuntimeException(errorMessage);
-							} else {
-								throw e;
-							}
-						} finally {
-							FileUtils.deleteDir(serverWorkspace);
 							logger.log("Job finished");
 						}
 					}
@@ -395,6 +380,23 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			}
 		} catch (InvalidCISpecException e) {
 			markBuildError(build, e.getMessage());
+		}
+	}
+	
+	private void handleException(Exception e, Collection<String> jobSecretsToMask, JobLogger logger) {
+		if (ExceptionUtils.find(e, InterruptedException.class) == null) {
+			if (e.getMessage() != null)
+				logger.log(e.getMessage());
+			else
+				logger.log(Throwables.getStackTraceAsString(e));
+		}
+		String errorMessage = e.getMessage();
+		if (errorMessage != null) {
+			for (String secret: jobSecretsToMask)
+				errorMessage = StringUtils.replace(errorMessage, secret, SecretInput.MASK);
+			throw new RuntimeException(errorMessage);
+		} else {
+			throw ExceptionUtils.unchecked(e);
 		}
 	}
 	

@@ -169,6 +169,7 @@ import io.onedev.server.migration.JpaConverter;
 import io.onedev.server.migration.PersistentBagConverter;
 import io.onedev.server.model.support.AutoDiscoveredJobExecutor;
 import io.onedev.server.model.support.authenticator.Authenticator;
+import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.notification.CodeCommentNotificationManager;
 import io.onedev.server.notification.CommitNotificationManager;
 import io.onedev.server.notification.DefaultMailManager;
@@ -391,7 +392,7 @@ public class CoreModule extends AbstractPluginModule {
 
 			@Override
 			public Class<?> getAbstractClass() {
-				return AutoDiscoveredJobExecutor.class;
+				return JobExecutor.class;
 			}
 
 			@Override

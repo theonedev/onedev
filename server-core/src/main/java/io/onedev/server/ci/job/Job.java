@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.constraints.Size;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -45,9 +46,9 @@ public class Job implements Serializable, Validatable {
 	
 	private List<InputSpec> paramSpecs = new ArrayList<>();
 	
-	private String environment;
+	private String image;
 	
-	private String commands;
+	private List<String> commands;
 	
 	private boolean retrieveSource = true;
 	
@@ -59,7 +60,13 @@ public class Job implements Serializable, Validatable {
 
 	private List<JobTrigger> triggers = new ArrayList<>();
 	
+	private List<JobService> services = new ArrayList<>();
+	
 	private List<CacheSpec> caches = new ArrayList<>();
+
+	private String cpuRequirement = "500m";
+	
+	private String memoryRequirement = "128m";
 	
 	private long timeout = 3600;
 	
@@ -75,63 +82,36 @@ public class Job implements Serializable, Validatable {
 		this.name = name;
 	}
 
-	@Editable(order=105, name="Parameter Specs", description="Define parameter specifications of the job")
+	@Editable(order=110, description="Specify docker image of the job")
+	@NotEmpty
+	public String getImage() {
+		return image;
+	}
+
+	public void setImage(String image) {
+		this.image = image;
+	}
+
+	@Editable(order=120, description="Specify commands to execute in above image, with one command per line. "
+			+ "For Windows based images, commands will be interpretated by cmd.exe, and for Unix/Linux "
+			+ "based images, commands will be interpretated by shell")
+	@Script(Script.SHELL)
+	@Size(min=1, message="may not be empty")
+	public List<String> getCommands() {
+		return commands;
+	}
+
+	public void setCommands(List<String> commands) {
+		this.commands = commands;
+	}
+	
+	@Editable(order=130, name="Parameter Specs", description="Define parameter specifications of the job")
 	public List<InputSpec> getParamSpecs() {
 		return paramSpecs;
 	}
 
 	public void setParamSpecs(List<InputSpec> paramSpecs) {
 		this.paramSpecs = paramSpecs;
-	}
-
-	@Editable(order=110, description="Specify the environment to run the command. Environment will be interpretated "
-			+ "by underlying job executor. For instance, a docker executor will treat it as a docker image, and an "
-			+ "agent executor will treat it as labels to match agents")
-	@NotEmpty
-	public String getEnvironment() {
-		return environment;
-	}
-
-	public void setEnvironment(String environment) {
-		this.environment = environment;
-	}
-
-	@Editable(order=120, description="Specify commands to execute in above environment, with one command per line. "
-			+ "For Windows based environments, commands will be interpretated by cmd.exe, and for Unix/Linux "
-			+ "based environments, commands will be interpretated by shell")
-	@Script(Script.SHELL)
-	@NotEmpty
-	public String getCommands() {
-		return commands;
-	}
-
-	public void setCommands(String commands) {
-		this.commands = commands;
-	}
-	
-	@Editable(order=130, description="Check this to retrieve files stored in the repository into job workspace")
-	public boolean isRetrieveSource() {
-		return retrieveSource;
-	}
-
-	public void setRetrieveSource(boolean retrieveSource) {
-		this.retrieveSource = retrieveSource;
-	}
-
-	@Editable(order=135, description="For git submodules accessing via http/https, you will "
-			+ "need to specify credentials here if required")
-	@ShowCondition("isSubmoduleCredentialsVisible")
-	public List<SubmoduleCredential> getSubmoduleCredentials() {
-		return submoduleCredentials;
-	}
-
-	public void setSubmoduleCredentials(List<SubmoduleCredential> submoduleCredentials) {
-		this.submoduleCredentials = submoduleCredentials;
-	}
-	
-	@SuppressWarnings("unused")
-	private static boolean isSubmoduleCredentialsVisible() {
-		return (boolean) OneContext.get().getEditContext().getInputValue("retrieveSource");
 	}
 
 	@Editable(name="Dependency Jobs", order=140, description="Job dependencies determines the order and "
@@ -162,6 +142,62 @@ public class Job implements Serializable, Validatable {
 		this.triggers = triggers;
 	}
 
+	@Editable(order=9000, group="Source Retrieval", description="Check this to retrieve files stored in the repository into job workspace")
+	public boolean isRetrieveSource() {
+		return retrieveSource;
+	}
+
+	public void setRetrieveSource(boolean retrieveSource) {
+		this.retrieveSource = retrieveSource;
+	}
+
+	@Editable(order=9100, group="Source Retrieval", description="For git submodules accessing via http/https, you will "
+			+ "need to specify credentials here if required")
+	@ShowCondition("isSubmoduleCredentialsVisible")
+	public List<SubmoduleCredential> getSubmoduleCredentials() {
+		return submoduleCredentials;
+	}
+
+	public void setSubmoduleCredentials(List<SubmoduleCredential> submoduleCredentials) {
+		this.submoduleCredentials = submoduleCredentials;
+	}
+	
+	@SuppressWarnings("unused")
+	private static boolean isSubmoduleCredentialsVisible() {
+		return (boolean) OneContext.get().getEditContext().getInputValue("retrieveSource");
+	}
+
+	@Editable(order=9200, name="CPU Requirement", group="Resource Requirements", description="Specify CPU requirement of the job. "
+			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details")
+	@NotEmpty
+	public String getCpuRequirement() {
+		return cpuRequirement;
+	}
+
+	public void setCpuRequirement(String cpuRequirement) {
+		this.cpuRequirement = cpuRequirement;
+	}
+
+	@Editable(order=9300, group="Resource Requirements", description="Specify memory requirement of the job. "
+			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory' target='_blank'>kubernetes documentation</a> for details")
+	@NotEmpty
+	public String getMemoryRequirement() {
+		return memoryRequirement;
+	}
+
+	public void setMemoryRequirement(String memoryRequirement) {
+		this.memoryRequirement = memoryRequirement;
+	}
+
+	@Editable(order=10000, group="More Settings", description="Optionally define services used by this job")
+	public List<JobService> getServices() {
+		return services;
+	}
+
+	public void setServices(List<JobService> services) {
+		this.services = services;
+	}
+
 	@Editable(order=10100, group="More Settings", description="Cache specific paths to speed up job execution. For instance for node.js "
 			+ "projects, you may cache the <tt>node_modules</tt> folder to avoid downloading node modules for "
 			+ "subsequent job executions. Note that cache is considered as a best-effort approach and your "
@@ -174,7 +210,7 @@ public class Job implements Serializable, Validatable {
 		this.caches = caches;
 	}
 
-	@Editable(order=10200, group="More Settings", description="Specify timeout in seconds")
+	@Editable(order=10500, group="More Settings", description="Specify timeout in seconds")
 	public long getTimeout() {
 		return timeout;
 	}

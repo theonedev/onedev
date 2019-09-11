@@ -4,10 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import javax.validation.constraints.Size;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneException;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -21,20 +23,20 @@ public class ScriptingChoices extends ChoiceProvider {
 	
 	private static final Logger logger = LoggerFactory.getLogger(ScriptingChoices.class);
 
-	private String script;
+	private List<String> script;
 
 	@Editable(description="Groovy script to be evaluated. The return value should be a value to color map, "
 			+ "for instance:<br>"
 			+ "<code>return [\"Successful\":\"#00ff00\", \"Failed\":\"#ff0000\"]</code>, "
 			+ "Use <tt>null</tt> if the value does not have a color. Check <a href='$docRoot/Scripting' target='_blank'>scripting help</a> for details")
-	@NotEmpty
 	@Script(Script.GROOVY)
 	@OmitName
-	public String getScript() {
+	@Size(min=1, message="may not be empty")
+	public List<String> getScript() {
 		return script;
 	}
 
-	public void setScript(String script) {
+	public void setScript(List<String> script) {
 		this.script = script;
 	}
 
@@ -44,7 +46,7 @@ public class ScriptingChoices extends ChoiceProvider {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("allPossible", allPossible);
 		try {
-			Object result = GroovyUtils.evalScript(getScript(), variables);
+			Object result = GroovyUtils.evalScript(StringUtils.join(getScript(), "\n"), variables);
 			if (result instanceof Map) {
 				return (Map<String, String>) result;
 			} else if (result instanceof List) {

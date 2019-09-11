@@ -100,34 +100,7 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "nameColumnFrag", ParamSpecListEditPanel.this);
-				ModalLink link = new ModalLink("link") {
-
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						return new ParamSpecEditPanel(id, params, cellItem.findParent(Item.class).getIndex()) {
-
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
-
-							@Override
-							protected void onSave(AjaxRequestTarget target) {
-								markFormDirty(target);
-								modal.close();
-								onPropertyUpdating(target);
-								target.add(ParamSpecListEditPanel.this);
-							}
-
-						};
-					}
-					
-				};
-				link.add(new Label("label", rowModel.getObject().getName()));
-				fragment.add(link);
-				
-				cellItem.add(fragment);
+				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
 			}
 		});		
 		
@@ -153,6 +126,29 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 			@Override
 			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", ParamSpecListEditPanel.this);
+				fragment.add(new ModalLink("edit") {
+
+					@Override
+					protected Component newContent(String id, ModalPanel modal) {
+						return new ParamSpecEditPanel(id, params, cellItem.findParent(Item.class).getIndex()) {
+
+							@Override
+							protected void onCancel(AjaxRequestTarget target) {
+								modal.close();
+							}
+
+							@Override
+							protected void onSave(AjaxRequestTarget target) {
+								markFormDirty(target);
+								modal.close();
+								onPropertyUpdating(target);
+								target.add(ParamSpecListEditPanel.this);
+							}
+
+						};
+					}
+					
+				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override

@@ -574,6 +574,7 @@ a.disabled, a[disabled="disabled"] {
 .def-list table td.norecords-td {
 	padding: 5px;
 }
+
 .def-list table a {
 	display: block;
 	color: #666;

@@ -81,12 +81,12 @@ abstract class ParamSpecEditPanel extends Panel implements InputContext {
 				if (paramSpecIndex != -1) { 
 					InputSpec oldParam = paramSpecs.get(paramSpecIndex);
 					if (!param.getName().equals(oldParam.getName()) && getInputSpec(param.getName()) != null) {
-						editor.getErrorContext(new PathElement.Named("param"))
+						editor.getErrorContext(new PathElement.Named("paramSpec"))
 								.getErrorContext(new PathElement.Named("name"))
 								.addError("This name has already been used by another parameter");
 					}
 				} else if (getInputSpec(param.getName()) != null) {
-					editor.getErrorContext(new PathElement.Named("param"))
+					editor.getErrorContext(new PathElement.Named("paramSpec"))
 							.getErrorContext(new PathElement.Named("name"))
 							.addError("This name has already been used by another parameter");
 				}
@@ -151,7 +151,7 @@ abstract class ParamSpecEditPanel extends Panel implements InputContext {
 	
 	@Override
 	public void validateName(String inputName) {
-		if (!SourceVersion.isIdentifier(inputName)) { // param name will be passed to build as environment variable name 
+		if (!SourceVersion.isIdentifier(inputName) || inputName.contains("$")) { 
 			throw new ValidationException("param name should start with letter and can only consist of "
 					+ "alphanumeric and underscore characters");
 		} else if (BuildConstants.ALL_FIELDS.contains(inputName)) {

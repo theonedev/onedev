@@ -1,10 +1,12 @@
 package io.onedev.server.util.inputspec.groupchoiceinput.defaultvalueprovider;
 
-import org.hibernate.validator.constraints.NotEmpty;
+import java.util.List;
 
+import javax.validation.constraints.Size;
+
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Script;
 
@@ -13,25 +15,24 @@ public class ScriptingDefaultValue implements DefaultValueProvider {
 
 	private static final long serialVersionUID = 1L;
 
-	private String script;
+	private List<String> script;
 
 	@Editable(description="Groovy script to be evaluated. It should return name of a group. "
 			+ "Check <a href='$docRoot/Scripting' target='_blank'>scripting help</a> for details")
-	@NotEmpty
 	@Script(Script.GROOVY)
 	@OmitName
-	@Multiline
-	public String getScript() {
+	@Size(min=1, message="may not be empty")
+	public List<String> getScript() {
 		return script;
 	}
 
-	public void setScript(String script) {
+	public void setScript(List<String> script) {
 		this.script = script;
 	}
 
 	@Override
 	public String getDefaultValue() {
-		return (String) GroovyUtils.evalScript(getScript());
+		return (String) GroovyUtils.evalScript(StringUtils.join(getScript(), "\n"));
 	}
 
 }

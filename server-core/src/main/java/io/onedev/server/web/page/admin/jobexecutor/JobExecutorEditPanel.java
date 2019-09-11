@@ -15,7 +15,7 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.server.model.support.JobExecutor;
+import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskButton;

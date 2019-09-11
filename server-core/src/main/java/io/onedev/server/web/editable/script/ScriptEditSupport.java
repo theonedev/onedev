@@ -1,10 +1,12 @@
 package io.onedev.server.web.editable.script;
 
+import java.util.List;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
-import com.google.common.base.Preconditions;
-
+import io.onedev.commons.utils.ReflectionUtils;
+import io.onedev.server.OneException;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -21,32 +23,35 @@ public class ScriptEditSupport implements EditSupport {
 		Class<?> propertyClass = descriptor.getPropertyGetter().getReturnType();
 		Script annotation = descriptor.getPropertyGetter().getAnnotation(Script.class);
 		if (annotation != null) {
-			Preconditions.checkState(propertyClass == String.class, 
-					"@Code annotation should only be applied to a string property");
-			return new PropertyContext<String>(descriptor) {
+			if (List.class.isAssignableFrom(propertyClass) && ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType()) == String.class) {
+				return new PropertyContext<List<String>>(descriptor) {
 
-				@Override
-				public PropertyViewer renderForView(String componentId, final IModel<String> model) {
-					return new PropertyViewer(componentId, descriptor) {
+					@Override
+					public PropertyViewer renderForView(String componentId, final IModel<List<String>> model) {
+						return new PropertyViewer(componentId, descriptor) {
 
-						@Override
-						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-							if (model.getObject() != null) {
-								return new ScriptPropertyViewer(id, model.getObject(), annotation.value());
-							} else {
-								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+							@Override
+							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
+						        List<String> script = model.getObject();
+								if (script != null && !script.isEmpty()) {
+									return new ScriptPropertyViewer(id, model.getObject(), annotation.value());
+								} else {
+									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
+								}
 							}
-						}
-						
-					};
-				}
+							
+						};
+					}
 
-				@Override
-				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-					return new ScriptPropertyEditor(componentId, descriptor, model, annotation.value());
-				}
-				
-			};
+					@Override
+					public PropertyEditor<List<String>> renderForEdit(String componentId, IModel<List<String>> model) {
+						return new ScriptPropertyEditor(componentId, descriptor, model, annotation.value());
+					}
+					
+				};
+			} else {
+				throw new OneException("@Script annotation should only be applied to a string list property");
+			}
 		} else {
 			return null;
 		}
