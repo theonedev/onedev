@@ -20,13 +20,13 @@
 	border-top: none;
 	border-bottom: none;
 }
+#revision-compare>.revisions .revision .title .checkbox {
+	margin: 0 0 0 16px;
+}
 #revision-compare>.revisions .revision .title label {
 	font-size: 16px;
 	color: #888;
 	font-weight: normal;
-}
-#revision-compare>.revisions .revision .title input {
-	margin-left: 16px;
 }
 #revision-compare>.revisions .revision .title span {
 	color: #888;

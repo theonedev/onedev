@@ -4,8 +4,9 @@
 			<span class="drag-indicator"><i class="fa fa-reorder"></i></span>
 			<a wicket:id="edit" title="Edit this protection"><i class="fa fa-pencil"></i></a>
 			<a wicket:id="delete" title="Delete this protection"><i class="fa fa-trash"></i></a>
-			<input wicket:id="enable" type="checkbox">
-			<label wicket:id="enableLabel">Enable</label> 
+			<div class="checkbox">
+				<label><input wicket:id="enable" type="checkbox"> Enable</label>
+			</div>
 		</div>
 		<div class="panel-body">
 			<div wicket:id="protection"></div>

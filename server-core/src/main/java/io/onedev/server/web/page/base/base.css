@@ -648,3 +648,7 @@ td.ellipsis {
 	color: #999;
 }
 
+.panel-heading .checkbox {
+	display: inline-block;
+	margin: 0;
+}
