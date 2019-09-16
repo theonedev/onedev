@@ -20,7 +20,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 
 @SuppressWarnings("serial")
 public class SimpleBuildListPanel extends GenericPanel<List<Build>> {

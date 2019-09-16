@@ -35,6 +35,7 @@ import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -139,6 +140,21 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 				cellItem.add(new Label(componentId, rowModel.getObject().getJobParams().size()));
 			}
 			
+		});		
+		
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Artifacts to Retrieve")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
+				JobDependency dependency = rowModel.getObject();
+				if (dependency.getArtifacts() != null) {
+					cellItem.add(new Label(componentId, dependency.getArtifacts()));
+				} else try {
+					cellItem.add(new EmptyValueLabel(componentId, dependency.getClass().getDeclaredMethod("getArtifacts")));
+				} catch (NoSuchMethodException | SecurityException e) {
+					throw new RuntimeException(e);
+				}
+			}
 		});		
 		
 		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("")) {

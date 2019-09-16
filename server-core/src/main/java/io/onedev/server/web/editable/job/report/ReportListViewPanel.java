@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.job.service;
+package io.onedev.server.web.editable.job.report;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -14,8 +14,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
-import org.apache.wicket.markup.head.CssHeaderItem;
-import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
@@ -25,65 +23,63 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.server.ci.job.JobService;
+import io.onedev.server.ci.job.JobReport;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.page.layout.SideFloating.Placement;
 
 @SuppressWarnings("serial")
-class ServiceListViewPanel extends Panel {
+class ReportListViewPanel extends Panel {
 
-	private final List<JobService> services = new ArrayList<>();
+	private final List<JobReport> reports = new ArrayList<>();
 	
-	public ServiceListViewPanel(String id, List<Serializable> elements) {
+	public ReportListViewPanel(String id, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
-			services.add((JobService) each);
+			reports.add((JobReport) each);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<IColumn<JobService, Void>> columns = new ArrayList<>();
+		List<IColumn<JobReport, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<JobService, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<JobReport, Void>(Model.of("Type")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobService>> cellItem, String componentId, IModel<JobService> rowModel) {
+			public void populateItem(Item<ICellPopulator<JobReport>> cellItem, String componentId, IModel<JobReport> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getName());
+						return new Label(componentId, EditableUtils.getDisplayName(rowModel.getObject().getClass()));
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobService, Void>(Model.of("Image")) {
+		columns.add(new AbstractColumn<JobReport, Void>(Model.of("File Patterns")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobService>> cellItem, String componentId, IModel<JobService> rowModel) {
+			public void populateItem(Item<ICellPopulator<JobReport>> cellItem, String componentId, IModel<JobReport> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getImage());
+						return new Label(componentId, rowModel.getObject().getFilePatterns());
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobService, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<JobReport, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobService>> cellItem, String componentId, IModel<JobService> rowModel) {
+			public void populateItem(Item<ICellPopulator<JobReport>> cellItem, String componentId, IModel<JobReport> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
@@ -92,6 +88,7 @@ class ServiceListViewPanel extends Panel {
 					}
 					
 				});
+				
 			}
 
 			@Override
@@ -101,16 +98,16 @@ class ServiceListViewPanel extends Panel {
 			
 		});		
 		
-		IDataProvider<JobService> dataProvider = new ListDataProvider<JobService>() {
+		IDataProvider<JobReport> dataProvider = new ListDataProvider<JobReport>() {
 
 			@Override
-			protected List<JobService> getData() {
-				return services;
+			protected List<JobReport> getData() {
+				return reports;
 			}
 
 		};
 		
-		add(new DataTable<JobService, Void>("services", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new DataTable<JobReport, Void>("reports", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
@@ -121,19 +118,13 @@ class ServiceListViewPanel extends Panel {
 			
 		});
 	}
-	
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ServiceCssResourceReference()));
-	}
-	
+
 	private abstract class ColumnFragment extends Fragment {
 
 		private final int index;
 		
 		public ColumnFragment(String id, int index) {
-			super(id, "columnFrag", ServiceListViewPanel.this);
+			super(id, "columnFrag", ReportListViewPanel.this);
 			this.index = index;
 		}
 		
@@ -146,24 +137,24 @@ class ServiceListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, Placement.RIGHT) {
+					new SideFloating(target, SideFloating.Placement.RIGHT) {
 
 						@Override
 						protected String getTitle() {
-							return services.get(index).getName();
+							return EditableUtils.getDisplayName(reports.get(index).getClass());
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "service def-detail"));
+							add(AttributeAppender.append("class", "job-report def-detail"));
 						}
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.view(id, services.get(index), Sets.newHashSet("job"), true);
+							return BeanContext.view(id, reports.get(index));
 						}
-							
+
 					};
 				}
 				
@@ -171,6 +162,6 @@ class ServiceListViewPanel extends Panel {
 			link.add(newLabel("label"));
 			add(link);
 		}
+		
 	}
-	
 }

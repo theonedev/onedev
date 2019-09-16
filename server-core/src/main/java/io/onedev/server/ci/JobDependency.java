@@ -14,8 +14,10 @@ import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
+import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable
@@ -26,6 +28,8 @@ public class JobDependency implements Serializable {
 	private String jobName;
 	
 	private List<JobParam> jobParams = new ArrayList<>();
+	
+	private String artifacts = "**";
 	
 	@Editable(order=100)
 	@ChoiceProvider("getJobChoices")
@@ -49,6 +53,18 @@ public class JobDependency implements Serializable {
 		this.jobParams = jobParams;
 	}
 	
+	@Editable(order=300, name="Artifacts to Retrieve", description="Optionally specify artifacts to retrieve "
+			+ "from the dependency into job workspace. Leave empty to do not retrieve any artifacts")
+	@Patterns
+	@NameOfEmptyValue("Do not retrieve")
+	public String getArtifacts() {
+		return artifacts;
+	}
+
+	public void setArtifacts(String artifacts) {
+		this.artifacts = artifacts;
+	}
+
 	@SuppressWarnings("unused")
 	private static List<String> getJobChoices() {
 		List<String> choices = new ArrayList<>();

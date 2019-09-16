@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -40,6 +42,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.BuildInfoManager;
@@ -47,12 +51,14 @@ import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.model.support.Secret;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.inputspec.SecretInput;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 
@@ -74,6 +80,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	private static final Logger logger = LoggerFactory.getLogger(Build.class);
 	
 	public static final String STATUS = "status";
+	
+	public static final String ARTIFACTS_DIR = "artifacts";
 	
 	private static final int MAX_STATUS_MESSAGE_LEN = 1024;
 	
@@ -514,6 +522,71 @@ public class Build extends AbstractEntity implements Referenceable {
 			}
 		}
 		return paramBean;
+	}
+	
+	public File getPublishDir() {
+		return OneDev.getInstance(StorageManager.class).getBuildDir(getProject().getId(), getNumber());
+	}
+	
+	public File getArtifactsDir() {
+		return new File(getPublishDir(), ARTIFACTS_DIR);
+	}
+	
+	public String getReportLockKey(String reportDir) {
+		return "job-report:" + getId() + ":" + reportDir;
+	}
+	
+	public File getReportDir(String reportDir) {
+		return new File(getPublishDir(), reportDir);
+	}
+	
+	public void publishArtifacts(File workspaceDir, String artifacts) {
+		LockUtils.write(getArtifactsLockKey(), new Callable<Void>() {
+
+			@Override
+			public Void call() throws Exception {
+				File artifactsDir = getArtifactsDir();
+				FileUtils.createDir(artifactsDir);
+				PatternSet patternSet = PatternSet.fromString(artifacts);
+				int baseLen = workspaceDir.getAbsolutePath().length() + 1;
+				for (File file: patternSet.listFiles(workspaceDir)) {
+					try {
+						FileUtils.copyFile(file, new File(artifactsDir, file.getAbsolutePath().substring(baseLen)));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+				return null;
+			}
+			
+		});
+	}
+	
+	public void retrieveArtifacts(Build dependency, String artifacts, File workspaceDir) {
+		LockUtils.read(dependency.getArtifactsLockKey(), new Callable<Void>() {
+
+			@Override
+			public Void call() throws Exception {
+				File artifactsDir = dependency.getArtifactsDir();
+				if (artifactsDir.exists()) {
+					PatternSet patternSet = PatternSet.fromString(artifacts);
+					int baseLen = artifactsDir.getAbsolutePath().length() + 1;
+					for (File file: patternSet.listFiles(artifactsDir)) {
+						try {
+							FileUtils.copyFile(file, new File(workspaceDir, file.getAbsolutePath().substring(baseLen)));
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				}
+				return null;
+			}
+			
+		});
+	}
+	
+	public String getArtifactsLockKey() {
+		return "build-artifacts:" + getId();
 	}
 	
 	public static String getLogWebSocketObservable(Long buildId) {

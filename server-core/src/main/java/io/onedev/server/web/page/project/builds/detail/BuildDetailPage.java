@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
@@ -33,6 +34,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.job.JobManager;
@@ -64,6 +66,10 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
+import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
+import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
+import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.QueryPosition;
@@ -372,6 +378,18 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 					}
 					
 				});
+				
+				LockUtils.read(getBuild().getArtifactsLockKey(), new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						if (getBuild().getArtifactsDir().exists()) 
+							tabs.add(new BuildTab("Artifacts", BuildArtifactsPage.class));
+						return null;
+					}
+					
+				});
+				
 				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class));
 				tabs.add(new BuildTab("Changes", BuildChangesPage.class));
 				

@@ -14,7 +14,7 @@
     content: "\f017";
 }
 .build-status-running:before {
-    content: "\f1ce";
+    content: "\f021";
 }
 .build-status-waiting:before {
     content: "\f28c";

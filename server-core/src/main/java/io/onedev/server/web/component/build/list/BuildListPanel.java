@@ -66,7 +66,7 @@ import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.model.EntityModel;
-import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesOpened;

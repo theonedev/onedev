@@ -29,6 +29,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.ci.JobDependency;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.page.layout.SideFloating.Placement;
 
@@ -74,6 +75,28 @@ class DependencyListViewPanel extends Panel {
 					@Override
 					protected Component newLabel(String componentId) {
 						return new Label(componentId, rowModel.getObject().getJobParams().size());
+					}
+					
+				});
+			}
+		});		
+		
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Artifacts to Retrieve")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
+				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						JobDependency dependency = rowModel.getObject();
+						if (dependency.getArtifacts() != null) {
+							return new Label(componentId, dependency.getArtifacts());
+						} else try {
+							return new EmptyValueLabel(componentId, dependency.getClass().getDeclaredMethod("getArtifacts"));
+						} catch (NoSuchMethodException | SecurityException e) {
+							throw new RuntimeException(e);
+						}
 					}
 					
 				});

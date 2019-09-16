@@ -71,8 +71,8 @@ import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
-import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -113,8 +113,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final ExecutorService executorService;
 	
-	private final Set<DependencyPopulator> dependencyPopulators;
-	
 	private final BuildParamManager buildParamManager;
 	
 	private volatile List<JobExecutor> jobExecutors;
@@ -124,8 +122,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Inject
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
 			SettingManager settingManager, TransactionManager transactionManager, JobLogManager logManager, 
-			ExecutorService executorService, SessionManager sessionManager, 
-			Set<DependencyPopulator> dependencyPopulators, BuildParamManager buildParamManager) {
+			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -133,7 +130,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.transactionManager = transactionManager;
 		this.logManager = logManager;
 		this.executorService = executorService;
-		this.dependencyPopulators = dependencyPopulators;
 		this.sessionManager = sessionManager;
 		this.buildParamManager = buildParamManager;
 	}
@@ -218,6 +214,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						BuildDependence dependence = new BuildDependence();
 						dependence.setDependency(dependencyBuild);
 						dependence.setDependent(build);
+						dependence.setArtifacts(dependency.getArtifacts());
 						build.getDependencies().add(dependence);
 					}
 					
@@ -249,7 +246,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			ObjectId commitId = ObjectId.fromString(build.getCommitHash());
 			JobExecutor executor = getJobExecutor(build.getProject(), commitId, job.getName(), job.getImage());
 			if (executor != null) {
-				JobLogger logger = logManager.getLogger(build, jobSecretsToMask); 
+				JobLogger jobLogger = logManager.getLogger(build, jobSecretsToMask); 
 				
 				Long buildId = build.getId();
 				Long buildNumber = build.getNumber();
@@ -259,7 +256,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 					@Override
 					public void run() {
-						logger.log("Creating server workspace...");
+						jobLogger.log("Creating server workspace...");
 						File serverWorkspace = FileUtils.createTempDir("server-workspace");
 						try {
 							Map<String, String> envVars = new HashMap<>();
@@ -271,10 +268,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								@Override
 								public void run() {
 									Build build = buildManager.load(buildId);
-									logger.log("Populating job dependencies...");
+									jobLogger.log("Retrieving dependency artifacts...");
 									for (BuildDependence dependence: build.getDependencies()) {
-										for (DependencyPopulator populator: dependencyPopulators)
-											populator.populate(dependence.getDependency(), serverWorkspace, logger);
+										if (dependence.getArtifacts() != null) {
+											build.retrieveArtifacts(dependence.getDependency(), 
+													dependence.getArtifacts(), serverWorkspace);
+										}
 									}
 									envVars.put("ONEDEV_PROJECT", build.getProject().getName());
 									envVars.put("ONEDEV_COMMIT", commitId.name());
@@ -300,9 +299,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 											}
 										}
 									}
-									
-									for (JobOutcome outcome: job.getOutcomes()) {
-										PatternSet patternSet = PatternSet.fromString(outcome.getFilePatterns());
+
+									if (job.getArtifacts() != null) {
+										PatternSet patternSet = PatternSet.fromString(job.getArtifacts());
+										includeFiles.addAll(patternSet.getIncludes());
+										excludeFiles.addAll(patternSet.getExcludes());
+									}
+									for (JobReport report: job.getReports()) {
+										PatternSet patternSet = PatternSet.fromString(report.getFilePatterns());
 										includeFiles.addAll(patternSet.getIncludes());
 										excludeFiles.addAll(patternSet.getExcludes());
 									}
@@ -323,7 +327,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							JobContext jobContext = new JobContext(projectName, buildNumber, projectGitDir, job.getImage(), serverWorkspace, 
 									envVars, job.getCommands(), job.isRetrieveSource(), submoduleCredentials, job.getCpuRequirement(), 
 									job.getMemoryRequirement(), commitId, job.getCaches(), new PatternSet(includeFiles, excludeFiles), 
-									executor.getCacheTTL(), job.getServices(), logger) {
+									executor.getCacheTTL(), job.getServices(), jobLogger) {
 
 								@Override
 								public void notifyJobRunning() {
@@ -346,7 +350,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							jobContexts.put(jobToken, jobContext);
 							executor.execute(jobToken, jobContext);
 						} catch (Exception e) {
-							handleException(e, jobSecretsToMask, logger);
+							handleException(e, jobSecretsToMask, jobLogger);
 						} finally {
 							jobContexts.remove(jobToken);
 							try {
@@ -354,18 +358,23 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 									@Override
 									public void run() {
-										logger.log("Processing job outcomes...");
 										Build build = buildManager.load(buildId);
-										for (JobOutcome outcome: job.getOutcomes())
-											outcome.process(build, serverWorkspace, logger);
+										if (job.getArtifacts() != null) {
+											jobLogger.log("Publishing job artifacts...");
+											build.publishArtifacts(serverWorkspace, job.getArtifacts());
+										}
+										
+										jobLogger.log("Processing job reports...");
+										for (JobReport report: job.getReports())
+											report.process(build, serverWorkspace, jobLogger);
 									}
 									
 								});
 								FileUtils.deleteDir(serverWorkspace);
 							} catch (Exception e) {
-								handleException(e, jobSecretsToMask, logger);
+								handleException(e, jobSecretsToMask, jobLogger);
 							}
-							logger.log("Job finished");
+							jobLogger.log("Job finished");
 						}
 					}
 					

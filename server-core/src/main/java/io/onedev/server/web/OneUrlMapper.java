@@ -11,6 +11,7 @@ import org.apache.wicket.request.Url;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import io.onedev.server.web.download.ArchiveDownloadResourceReference;
+import io.onedev.server.web.download.ArtifactDownloadResourceReference;
 import io.onedev.server.web.download.AttachmentDownloadResourceReference;
 import io.onedev.server.web.download.BuildLogDownloadResourceReference;
 import io.onedev.server.web.download.RawBlobDownloadResourceReference;
@@ -54,9 +55,10 @@ import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
-import io.onedev.server.web.page.project.builds.detail.BuildChangesPage;
-import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
-import io.onedev.server.web.page.project.builds.detail.FixedIssuesPage;
+import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
+import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
+import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
+import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
@@ -122,6 +124,8 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new ResourceMapper("projects/${project}/archive/${revision}", new ArchiveDownloadResourceReference()));
 		add(new OneResourceMapper("projects/${project}/raw/${revision}/${path}", new RawBlobDownloadResourceReference()));
 		add(new ResourceMapper("projects/${project}/attachment/${uuid}/${attachment}", new AttachmentDownloadResourceReference()));
+		add(new OneResourceMapper("downloads/projects/${project}/builds/${build}/artifacts/${path}", 
+				new ArtifactDownloadResourceReference()));
 	}
 	
 	private void addSecurityPages() {
@@ -237,6 +241,8 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/builds/${build}/log", BuildLogPage.class));
 		add(new OnePageMapper("projects/${project}/builds/${build}/changes", BuildChangesPage.class));
 		add(new OnePageMapper("projects/${project}/builds/${build}/fixed-issues", FixedIssuesPage.class));
+		add(new OnePageMapper("projects/${project}/builds/${build}/artifacts", BuildArtifactsPage.class));
+		
 		add(new OnePageMapper("projects/${project}/milestones", MilestoneListPage.class));
 		add(new OnePageMapper("projects/${project}/milestones/${milestone}", MilestoneDetailPage.class));
 		add(new OnePageMapper("projects/${project}/milestones/${milestone}/edit", MilestoneEditPage.class));

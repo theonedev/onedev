@@ -30,6 +30,8 @@ import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.editable.annotation.Script;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
@@ -56,7 +58,9 @@ public class Job implements Serializable, Validatable {
 	
 	private List<JobDependency> dependencies = new ArrayList<>();
 	
-	private List<JobOutcome> outcomes = new ArrayList<>();
+	private String artifacts;
+	
+	private List<JobReport> reports = new ArrayList<>();
 
 	private List<JobTrigger> triggers = new ArrayList<>();
 	
@@ -114,25 +118,6 @@ public class Job implements Serializable, Validatable {
 		this.paramSpecs = paramSpecs;
 	}
 
-	@Editable(name="Dependency Jobs", order=140, description="Job dependencies determines the order and "
-			+ "concurrency when run different jobs")
-	public List<JobDependency> getDependencies() {
-		return dependencies;
-	}
-
-	public void setDependencies(List<JobDependency> dependencies) {
-		this.dependencies = dependencies;
-	}
-
-	@Editable(order=200, description="Specify job outcomes")
-	public List<JobOutcome> getOutcomes() {
-		return outcomes;
-	}
-
-	public void setOutcomes(List<JobOutcome> outcomes) {
-		this.outcomes = outcomes;
-	}
-
 	@Editable(order=500, description="Use triggers to run the job automatically under certain conditions")
 	public List<JobTrigger> getTriggers() {
 		return triggers;
@@ -165,6 +150,37 @@ public class Job implements Serializable, Validatable {
 	@SuppressWarnings("unused")
 	private static boolean isSubmoduleCredentialsVisible() {
 		return (boolean) OneContext.get().getEditContext().getInputValue("retrieveSource");
+	}
+
+	@Editable(name="Dependency Jobs", order=9110, group="Dependencies", description="Job dependencies determines the order and "
+			+ "concurrency when run different jobs")
+	public List<JobDependency> getDependencies() {
+		return dependencies;
+	}
+
+	public void setDependencies(List<JobDependency> dependencies) {
+		this.dependencies = dependencies;
+	}
+
+	@Editable(order=9115, group="Artifacts & Reports", description="Optionally specify files to publish as job artifacts. "
+			+ "Artifact files are relative to OneDev workspace, and may use * or ? for pattern match")
+	@Patterns
+	@NameOfEmptyValue("No artifacts")
+	public String getArtifacts() {
+		return artifacts;
+	}
+
+	public void setArtifacts(String artifacts) {
+		this.artifacts = artifacts;
+	}
+
+	@Editable(order=9120, group="Artifacts & Reports", description="Add job reports here")
+	public List<JobReport> getReports() {
+		return reports;
+	}
+
+	public void setReports(List<JobReport> reports) {
+		this.reports = reports;
 	}
 
 	@Editable(order=9200, name="CPU Requirement", group="Resource Requirements", description="Specify CPU requirement of the job. "

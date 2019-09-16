@@ -57,7 +57,6 @@ import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.docker.DockerExecutor.TestData;
 import io.onedev.server.util.JobLogger;
-import io.onedev.server.util.OneContext;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.validation.Validatable;
@@ -80,13 +79,13 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 
 	private String networkPrefix = "onedev-ci";
 	
-	private String dockerExecutable;
-	
-	private String runOptions;
+	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
 	private int capacity = Runtime.getRuntime().availableProcessors();
 	
-	private List<RegistryLogin> registryLogins = new ArrayList<>();
+	private String runOptions;
+	
+	private String dockerExecutable;
 	
 	private transient CapacityRunner capacityRunner;
 
@@ -103,32 +102,16 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		this.networkPrefix = networkPrefix;
 	}
 
-	@Editable(order=100, description="Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
-			+ "Leave empty to use docker executable in PATH")
-	@NameOfEmptyValue("Use default")
-	public String getDockerExecutable() {
-		return dockerExecutable;
+	@Editable(order=400, description="Specify login information for docker registries if necessary")
+	public List<RegistryLogin> getRegistryLogins() {
+		return registryLogins;
 	}
 
-	public void setDockerExecutable(String dockerExecutable) {
-		this.dockerExecutable = dockerExecutable;
+	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
+		this.registryLogins = registryLogins;
 	}
 
-	@Editable(order=200, description="Optionally specify options to run container. For instance, you may use <tt>-m 2g</tt> "
-			+ "to limit memory of created container to be 2 giga bytes")
-	public String getRunOptions() {
-		return runOptions;
-	}
-
-	public void setRunOptions(String runOptions) {
-		this.runOptions = runOptions;
-	}
-
-	public static boolean isRegistryAuthenticationRequired() {
-		return (boolean) OneContext.get().getEditContext().getInputValue("authenticateToRegistry");
-	}
-
-	@Editable(order=300, description="Specify max number of concurrent jobs being executed. Each job execution "
+	@Editable(order=475, description="Specify max number of concurrent jobs being executed. Each job execution "
 			+ "will launch a separate docker container. Defaults to number of processors in the system")
 	public int getCapacity() {
 		return capacity;
@@ -138,13 +121,25 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		this.capacity = capacity;
 	}
 
-	@Editable(order=400, description="Specify login information for docker registries if necessary")
-	public List<RegistryLogin> getRegistryLogins() {
-		return registryLogins;
+	@Editable(order=50050, group="More Settings", description="Optionally specify options to run container. For instance, you may use <tt>-m 2g</tt> "
+			+ "to limit memory of created container to be 2 giga bytes")
+	public String getRunOptions() {
+		return runOptions;
 	}
 
-	public void setRegistryLogins(List<RegistryLogin> registryLogins) {
-		this.registryLogins = registryLogins;
+	public void setRunOptions(String runOptions) {
+		this.runOptions = runOptions;
+	}
+
+	@Editable(order=50100, group="More Settings", description="Optionally specify docker executable, for instance <i>/usr/local/bin/docker</i>. "
+			+ "Leave empty to use docker executable in PATH")
+	@NameOfEmptyValue("Use default")
+	public String getDockerExecutable() {
+		return dockerExecutable;
+	}
+
+	public void setDockerExecutable(String dockerExecutable) {
+		this.dockerExecutable = dockerExecutable;
 	}
 
 	private Commandline newDocker() {
@@ -653,7 +648,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 							}
 						}
 						
-						jobLogger.log("Retrieving job dependencies...");
+						jobLogger.log("Copying job dependencies...");
 						try {
 							FileUtils.copyDirectory(jobContext.getServerWorkspace(), hostWorkspace);
 						} catch (IOException e) {

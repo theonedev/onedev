@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.servicelocator;
+package io.onedev.server.web.editable.job.report;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,16 +24,12 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.CISpecAware;
-import io.onedev.server.ci.job.Job;
-import io.onedev.server.ci.job.JobAware;
-import io.onedev.server.model.support.jobexecutor.ServiceLocator;
+import io.onedev.server.ci.job.JobReport;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.editable.EmptyValueLabel;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -41,33 +37,16 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
 
 @SuppressWarnings("serial")
-class LocatorListEditPanel extends PropertyEditor<List<Serializable>> {
+class ReportListEditPanel extends PropertyEditor<List<Serializable>> {
 
-	private final List<ServiceLocator> locators;
+	private final List<JobReport> reports;
 	
-	public LocatorListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
+	public ReportListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
-		locators = new ArrayList<>();
-		for (Serializable each: model.getObject()) {
-			locators.add((ServiceLocator) each);
-		}
-	}
-	
-	private CISpec getCISpec() {
-		CISpecAware ciSpecAware = findParent(CISpecAware.class);
-		if (ciSpecAware != null)
-			return ciSpecAware.getCISpec();
-		else
-			return null;
-	}
-
-	private Job getJob() {
-		JobAware jobAware = findParent(JobAware.class);
-		if (jobAware != null)
-			return jobAware.getJob();
-		else
-			return null;
+		reports = new ArrayList<>();
+		for (Serializable each: model.getObject()) 
+			reports.add((JobReport) each);
 	}
 	
 	@Override
@@ -77,7 +56,7 @@ class LocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new LocatorEditPanel(id, locators, -1) {
+				return new ReportEditPanel(id, reports, -1) {
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
@@ -89,17 +68,7 @@ class LocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 						markFormDirty(target);
 						modal.close();
 						onPropertyUpdating(target);
-						target.add(LocatorListEditPanel.this);
-					}
-
-					@Override
-					public CISpec getCISpec() {
-						return LocatorListEditPanel.this.getCISpec();
-					}
-
-					@Override
-					public Job getJob() {
-						return LocatorListEditPanel.this.getJob();
+						target.add(ReportListEditPanel.this);
 					}
 
 				};
@@ -107,12 +76,12 @@ class LocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});
 		
-		List<IColumn<ServiceLocator, Void>> columns = new ArrayList<>();
+		List<IColumn<JobReport, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<JobReport, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<ServiceLocator>> cellItem, String componentId, IModel<ServiceLocator> rowModel) {
+			public void populateItem(Item<ICellPopulator<JobReport>> cellItem, String componentId, IModel<JobReport> rowModel) {
 				cellItem.add(new Label(componentId, "<span class=\"drag-indicator fa fa-reorder\"></span>").setEscapeModelStrings(false));
 			}
 			
@@ -123,57 +92,32 @@ class LocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});		
 		
-		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of("Applicable Names")) {
+		columns.add(new AbstractColumn<JobReport, Void>(Model.of("Type")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<ServiceLocator>> cellItem, String componentId, IModel<ServiceLocator> rowModel) {
-				if (rowModel.getObject().getServiceNames() != null) {
-					cellItem.add(new Label(componentId, rowModel.getObject().getServiceNames()));
-				} else {
-					try {
-						cellItem.add(new EmptyValueLabel(componentId, ServiceLocator.class.getDeclaredMethod("getServiceNames")));
-					} catch (NoSuchMethodException | SecurityException e) {
-						throw new RuntimeException(e);
-					}
-				}
+			public void populateItem(Item<ICellPopulator<JobReport>> cellItem, String componentId, IModel<JobReport> rowModel) {
+				cellItem.add(new Label(componentId, EditableUtils.getDisplayName(rowModel.getObject().getClass())));
 			}
 		});		
 		
-		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of("Applicable Images")) {
+		columns.add(new AbstractColumn<JobReport, Void>(Model.of("File Patterns")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<ServiceLocator>> cellItem, String componentId, IModel<ServiceLocator> rowModel) {
-				if (rowModel.getObject().getServiceImages() != null) {
-					cellItem.add(new Label(componentId, rowModel.getObject().getServiceImages()));
-				} else {
-					try {
-						cellItem.add(new EmptyValueLabel(componentId, ServiceLocator.class.getDeclaredMethod("getServiceImages")));
-					} catch (NoSuchMethodException | SecurityException e) {
-						throw new RuntimeException(e);
-					}
-				}
+			public void populateItem(Item<ICellPopulator<JobReport>> cellItem, String componentId, IModel<JobReport> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getFilePatterns()));
 			}
-		});	
-		
-		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of("#Node Selector Entries")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<ServiceLocator>> cellItem, String componentId, IModel<ServiceLocator> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getNodeSelector().size()));
-			}
-			
 		});		
 		
-		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<JobReport, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<ServiceLocator>> cellItem, String componentId, IModel<ServiceLocator> rowModel) {
-				Fragment fragment = new Fragment(componentId, "actionColumnFrag", LocatorListEditPanel.this);
+			public void populateItem(Item<ICellPopulator<JobReport>> cellItem, String componentId, IModel<JobReport> rowModel) {
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", ReportListEditPanel.this);
 				fragment.add(new ModalLink("edit") {
 
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
-						return new LocatorEditPanel(id, locators, cellItem.findParent(Item.class).getIndex()) {
+						return new ReportEditPanel(id, reports, cellItem.findParent(Item.class).getIndex()) {
 
 							@Override
 							protected void onCancel(AjaxRequestTarget target) {
@@ -185,32 +129,21 @@ class LocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 								markFormDirty(target);
 								modal.close();
 								onPropertyUpdating(target);
-								target.add(LocatorListEditPanel.this);
-							}
-
-							@Override
-							public CISpec getCISpec() {
-								return LocatorListEditPanel.this.getCISpec();
-							}
-
-							@Override
-							public Job getJob() {
-								return LocatorListEditPanel.this.getJob();
+								target.add(ReportListEditPanel.this);
 							}
 
 						};
 					}
 					
 				});
-				
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
 						markFormDirty(target);
-						locators.remove(rowModel.getObject());
+						reports.remove(rowModel.getObject());
 						onPropertyUpdating(target);
-						target.add(LocatorListEditPanel.this);
+						target.add(ReportListEditPanel.this);
 					}
 					
 				});
@@ -224,17 +157,17 @@ class LocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});		
 		
-		IDataProvider<ServiceLocator> dataProvider = new ListDataProvider<ServiceLocator>() {
+		IDataProvider<JobReport> dataProvider = new ListDataProvider<JobReport>() {
 
 			@Override
-			protected List<ServiceLocator> getData() {
-				return locators;			
+			protected List<JobReport> getData() {
+				return reports;			
 			}
 
 		};
 		
-		DataTable<ServiceLocator, Void> dataTable;
-		add(dataTable = new DataTable<ServiceLocator, Void>("locators", columns, dataProvider, Integer.MAX_VALUE));
+		DataTable<JobReport, Void> dataTable;
+		add(dataTable = new DataTable<JobReport, Void>("reports", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
 		
@@ -246,13 +179,13 @@ class LocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 				int toIndex = to.getItemIndex();
 				if (fromIndex < toIndex) {
 					for (int i=0; i<toIndex-fromIndex; i++) 
-						Collections.swap(locators, fromIndex+i, fromIndex+i+1);
+						Collections.swap(reports, fromIndex+i, fromIndex+i+1);
 				} else {
 					for (int i=0; i<fromIndex-toIndex; i++) 
-						Collections.swap(locators, fromIndex-i, fromIndex-i-1);
+						Collections.swap(reports, fromIndex-i, fromIndex-i-1);
 				}
 				onPropertyUpdating(target);
-				target.add(LocatorListEditPanel.this);
+				target.add(ReportListEditPanel.this);
 			}
 			
 		}.sortable("tbody"));
@@ -271,7 +204,7 @@ class LocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 	@Override
 	protected List<Serializable> convertInputToValue() throws ConversionException {
 		List<Serializable> value = new ArrayList<>();
-		for (ServiceLocator each: locators)
+		for (JobReport each: reports)
 			value.add(each);
 		return value;
 	}

@@ -72,7 +72,7 @@ class LocatorListViewPanel extends Panel {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of("Applicable Environments")) {
+		columns.add(new AbstractColumn<ServiceLocator, Void>(Model.of("Applicable Images")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<ServiceLocator>> cellItem, String componentId, IModel<ServiceLocator> rowModel) {
@@ -84,7 +84,7 @@ class LocatorListViewPanel extends Panel {
 							return new Label("label", rowModel.getObject().getServiceImages());
 						} else {
 							try {
-								return new EmptyValueLabel("label", ServiceLocator.class.getDeclaredMethod("getEnvironments"));
+								return new EmptyValueLabel("label", ServiceLocator.class.getDeclaredMethod("getServiceImages"));
 							} catch (NoSuchMethodException | SecurityException e) {
 								throw new RuntimeException(e);
 							}
