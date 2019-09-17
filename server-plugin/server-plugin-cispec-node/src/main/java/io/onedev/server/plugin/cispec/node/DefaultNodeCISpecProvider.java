@@ -55,7 +55,7 @@ public class DefaultNodeCISpecProvider implements DefaultCISpecProvider {
 
 			if (content.indexOf("angular/core") != -1) { // Recognize angular projects
 
-				job.setImage("1dev/node:10.16-alpine-chrome");
+				job.setImage("1dev/cispec-node:10.16-alpine-chrome");
 
 				version = jsonNode.findValue("version").asText();
 

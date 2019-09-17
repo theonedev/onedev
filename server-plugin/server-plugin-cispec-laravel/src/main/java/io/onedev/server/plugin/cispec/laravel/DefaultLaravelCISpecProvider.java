@@ -31,7 +31,7 @@ public class DefaultLaravelCISpecProvider implements DefaultCISpecProvider {
 
 			job.setName("ci");
 
-			job.setImage("1dev/php7.3:laravel");
+			job.setImage("1dev/cispec-php:7.3-laravel");
 			
 			if (content.indexOf("laravel/framework") != -1) {
 				job.setCommands(Lists.newArrayList( 
