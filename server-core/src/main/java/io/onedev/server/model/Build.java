@@ -50,7 +50,6 @@ import io.onedev.server.cache.BuildInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.param.JobParam;
-import io.onedev.server.model.support.Secret;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
@@ -476,21 +475,10 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public String getSecretValue(String secretKey) {
-		if (secretKey.startsWith(SecretInput.LITERAL_VALUE_PREFIX)) {
+		if (secretKey.startsWith(SecretInput.LITERAL_VALUE_PREFIX))
 			return secretKey.substring(SecretInput.LITERAL_VALUE_PREFIX.length());
-		} else {
-			Project project = getProject();
-			Secret secret = project.getSecretMap().get(secretKey);
-			if (secret == null) 
-				throw new OneException("Can not find project secret: " + secretKey);
-			ObjectId commitId = ObjectId.fromString(getCommitHash());
-			if (secret.getBranches() != null && !project.isCommitOnBranches(commitId, secret.getBranches())) {
-				String message = String.format("Project secret '%s' can only be accessed by builds on branches '%s'", 
-						secretKey, secret.getBranches());
-				throw new OneException(message);
-			} 
-			return secret.getValue();
-		}
+		else
+			return project.getSecretValue(secretKey, ObjectId.fromString(getCommitHash()));
 	}
 	
 	public CISpec getCISpec() {

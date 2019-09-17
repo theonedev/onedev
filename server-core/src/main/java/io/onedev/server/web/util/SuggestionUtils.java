@@ -1,5 +1,6 @@
 package io.onedev.server.web.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,11 +8,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.stringmatch.PatternApplied;
 import io.onedev.commons.utils.stringmatch.WildcardUtils;
 import io.onedev.server.OneDev;
@@ -185,6 +190,24 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
+	public static List<InputSuggestion> suggestArtifacts(Build build, String matchWith) {
+		return LockUtils.read(build.getArtifactsLockKey(), new Callable<List<InputSuggestion>>() {
+
+			@Override
+			public List<InputSuggestion> call() throws Exception {
+				List<String> paths = new ArrayList<>();
+				File artifactsDir = build.getArtifactsDir();
+				if (artifactsDir.exists()) {
+					int baseLen = artifactsDir.getAbsolutePath().length()+1;
+					for (File file: FileUtils.listFiles(artifactsDir, Lists.newArrayList("**"), new ArrayList<>())) 
+						paths.add(file.getAbsolutePath().substring(baseLen));
+				}
+				return suggestPaths(paths, matchWith);
+			}
+			
+		});
+	}
+	
 	private static Set<String> getChildren(List<PatternApplied> allApplied, String path) {
 		Set<String> children = new HashSet<>();
 		for (PatternApplied applied: allApplied) {
@@ -200,12 +223,12 @@ public class SuggestionUtils {
 		return children;
 	}
 	
-	public static List<InputSuggestion> suggestPaths(List<String> files, String matchWith) {
+	public static List<InputSuggestion> suggestPaths(List<String> paths, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		
 		List<PatternApplied> allApplied = new ArrayList<>();
-		for (String path: files) {
+		for (String path: paths) {
 			PatternApplied applied = WildcardUtils.applyPattern(matchWith, path, false);
 			if (applied != null) 
 				allApplied.add(applied);

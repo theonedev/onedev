@@ -22,6 +22,7 @@ import io.onedev.commons.utils.DependencyAware;
 import io.onedev.commons.utils.DependencyUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.JobDependency;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.migration.VersionedDocument;
@@ -81,7 +82,7 @@ public class CISpec implements Serializable, Validatable {
 
 					@Override
 					public Set<String> getDependencies() {
-						return job.getDependencies().stream().map(it->it.getJobName()).collect(toSet());
+						return job.getJobDependencies().stream().map(it->it.getJobName()).collect(toSet());
 					}
 					
 				});
@@ -107,7 +108,7 @@ public class CISpec implements Serializable, Validatable {
 
 		for (int i=0; i<jobs.size(); i++) {
 			Job job = jobs.get(i);
-			for (JobDependency dependency: job.getDependencies()) {
+			for (JobDependency dependency: job.getJobDependencies()) {
 				Job dependencyJob = getJobMap().get(dependency.getJobName());
 				if (dependencyJob != null) {
 					try {
@@ -167,7 +168,7 @@ public class CISpec implements Serializable, Validatable {
 			dependencyChain.add(jobName);
 			Job job = getJobMap().get(jobName);
 			if (job != null) {
-				for (JobDependency dependency: job.getDependencies()) {
+				for (JobDependency dependency: job.getJobDependencies()) {
 					if (hasCircularDependencies(new ArrayList<>(dependencyChain), dependency.getJobName()))
 						return true;
 				}

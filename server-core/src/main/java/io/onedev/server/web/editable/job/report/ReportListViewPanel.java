@@ -141,7 +141,8 @@ class ReportListViewPanel extends Panel {
 
 						@Override
 						protected String getTitle() {
-							return EditableUtils.getDisplayName(reports.get(index).getClass());
+							JobReport report = reports.get(index);
+							return "Report (type: " + EditableUtils.getDisplayName(report.getClass()) + ")";
 						}
 
 						@Override

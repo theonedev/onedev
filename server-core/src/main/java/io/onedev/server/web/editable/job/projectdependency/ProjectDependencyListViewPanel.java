@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.job.dependency;
+package io.onedev.server.web.editable.job.projectdependency;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -25,100 +25,87 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.server.ci.JobDependency;
+import io.onedev.server.ci.job.ProjectDependency;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.page.layout.SideFloating.Placement;
 
 @SuppressWarnings("serial")
-class DependencyListViewPanel extends Panel {
+class ProjectDependencyListViewPanel extends Panel {
 
-	private final List<JobDependency> dependencies = new ArrayList<>();
+	private final List<ProjectDependency> dependencies = new ArrayList<>();
 	
-	public DependencyListViewPanel(String id, List<Serializable> elements) {
+	public ProjectDependencyListViewPanel(String id, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
-			dependencies.add((JobDependency) each);
+			dependencies.add((ProjectDependency) each);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<IColumn<JobDependency, Void>> columns = new ArrayList<>();
+		List<IColumn<ProjectDependency, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<ProjectDependency, Void>(Model.of("Project")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
+			public void populateItem(Item<ICellPopulator<ProjectDependency>> cellItem, String componentId, IModel<ProjectDependency> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getJobName());
+						return new Label(componentId, rowModel.getObject().getProjectName());
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("#Params")) {
+		columns.add(new AbstractColumn<ProjectDependency, Void>(Model.of("Build")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
+			public void populateItem(Item<ICellPopulator<ProjectDependency>> cellItem, String componentId, IModel<ProjectDependency> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getJobParams().size());
+						return new Label(componentId, "#" + rowModel.getObject().getBuildNumber());
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Artifacts to Retrieve")) {
+		columns.add(new AbstractColumn<ProjectDependency, Void>(Model.of("Artifacts to Retrieve")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
+			public void populateItem(Item<ICellPopulator<ProjectDependency>> cellItem, String componentId, IModel<ProjectDependency> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						JobDependency dependency = rowModel.getObject();
-						if (dependency.getArtifacts() != null) {
-							return new Label(componentId, dependency.getArtifacts());
-						} else try {
-							return new EmptyValueLabel(componentId, dependency.getClass().getDeclaredMethod("getArtifacts"));
-						} catch (NoSuchMethodException | SecurityException e) {
-							throw new RuntimeException(e);
-						}
+						return new Label(componentId, rowModel.getObject().getArtifacts());
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<ProjectDependency, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
-				if (!rowModel.getObject().getJobParams().isEmpty()) {
-					cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
+			public void populateItem(Item<ICellPopulator<ProjectDependency>> cellItem, String componentId, IModel<ProjectDependency> rowModel) {
+				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
-						@Override
-						protected Component newLabel(String componentId) {
-							return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
-						}
-						
-					});
-				} else {
-					cellItem.add(new Label(componentId));
-				}
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+					}
+					
+				});
+				
 			}
 
 			@Override
@@ -128,16 +115,16 @@ class DependencyListViewPanel extends Panel {
 			
 		});		
 		
-		IDataProvider<JobDependency> dataProvider = new ListDataProvider<JobDependency>() {
+		IDataProvider<ProjectDependency> dataProvider = new ListDataProvider<ProjectDependency>() {
 
 			@Override
-			protected List<JobDependency> getData() {
+			protected List<ProjectDependency> getData() {
 				return dependencies;
 			}
 
 		};
 		
-		add(new DataTable<JobDependency, Void>("dependencies", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new DataTable<ProjectDependency, Void>("dependencies", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
@@ -154,7 +141,7 @@ class DependencyListViewPanel extends Panel {
 		private final int index;
 		
 		public ColumnFragment(String id, int index) {
-			super(id, "columnFrag", DependencyListViewPanel.this);
+			super(id, "columnFrag", ProjectDependencyListViewPanel.this);
 			this.index = index;
 		}
 		
@@ -171,18 +158,18 @@ class DependencyListViewPanel extends Panel {
 
 						@Override
 						protected String getTitle() {
-							return dependencies.get(index).getJobName();
+							return "Project Dependency";
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "dependency def-detail"));
+							add(AttributeAppender.append("class", "project-dependency def-detail"));
 						}
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.view(id, dependencies.get(index), Sets.newHashSet("job"), true);
+							return BeanContext.view(id, dependencies.get(index));
 						}
 							
 					};
@@ -197,7 +184,7 @@ class DependencyListViewPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new DependencyCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new ProjectDependencyCssResourceReference()));
 	}
 	
 }

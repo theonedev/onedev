@@ -1,9 +1,8 @@
-package io.onedev.server.web.editable.job.paramspec;
+package io.onedev.server.web.editable.job.jobdependency;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -26,91 +25,93 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.google.common.collect.Sets;
-
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.ci.job.JobDependency;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
+import io.onedev.server.web.page.layout.SideFloating.Placement;
 
 @SuppressWarnings("serial")
-class ParamSpecListViewPanel extends Panel {
+class JobDependencyListViewPanel extends Panel {
 
-	private final List<InputSpec> paramSpecs = new ArrayList<>();
+	private final List<JobDependency> dependencies = new ArrayList<>();
 	
-	public ParamSpecListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
+	public JobDependencyListViewPanel(String id, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
-			paramSpecs.add((InputSpec) each);
+			dependencies.add((JobDependency) each);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<IColumn<InputSpec, Void>> columns = new ArrayList<>();
+		List<IColumn<JobDependency, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Job")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getName());
+						return new Label(componentId, rowModel.getObject().getJobName());
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Type")) {
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("#Params")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				InputSpec param = rowModel.getObject();
+			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, EditableUtils.getDisplayName(param.getClass()));
+						return new Label(componentId, rowModel.getObject().getJobParams().size());
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Allow Empty")) {
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Artifacts to Retrieve")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, StringUtils.describe(rowModel.getObject().isAllowEmpty()));
+						JobDependency dependency = rowModel.getObject();
+						if (dependency.getArtifacts() != null) 
+							return new Label(componentId, dependency.getArtifacts());
+						else
+							return new Label(componentId, "<i>Do not retrieve</i>").setEscapeModelStrings(false);
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+						if (!rowModel.getObject().getJobParams().isEmpty()) 
+							return new Label(componentId, "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false);
+						else
+							return new Label(componentId);
 					}
 					
 				});
-				
 			}
 
 			@Override
@@ -120,16 +121,16 @@ class ParamSpecListViewPanel extends Panel {
 			
 		});		
 		
-		IDataProvider<InputSpec> dataProvider = new ListDataProvider<InputSpec>() {
+		IDataProvider<JobDependency> dataProvider = new ListDataProvider<JobDependency>() {
 
 			@Override
-			protected List<InputSpec> getData() {
-				return paramSpecs;
+			protected List<JobDependency> getData() {
+				return dependencies;
 			}
 
 		};
 		
-		add(new DataTable<InputSpec, Void>("paramSpecs", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new DataTable<JobDependency, Void>("dependencies", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
@@ -140,19 +141,13 @@ class ParamSpecListViewPanel extends Panel {
 			
 		});
 	}
-
-	@Override
-	public void renderHead(IHeaderResponse response) {
-		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ParamSpecCssResourceReference()));
-	}
 	
 	private abstract class ColumnFragment extends Fragment {
 
 		private final int index;
 		
 		public ColumnFragment(String id, int index) {
-			super(id, "columnFrag", ParamSpecListViewPanel.this);
+			super(id, "columnFrag", JobDependencyListViewPanel.this);
 			this.index = index;
 		}
 		
@@ -165,26 +160,24 @@ class ParamSpecListViewPanel extends Panel {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					new SideFloating(target, SideFloating.Placement.RIGHT) {
+					new SideFloating(target, Placement.RIGHT) {
 
 						@Override
 						protected String getTitle() {
-							InputSpec param = paramSpecs.get(index);
-							return "Parameter Spec (type: " + EditableUtils.getDisplayName(param.getClass()) + ")";
+							return "Job Dependency";
 						}
 
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "job-param-spec def-detail"));
+							add(AttributeAppender.append("class", "job-dependency def-detail"));
 						}
 
 						@Override
 						protected Component newBody(String id) {
-							Set<String> excludedProperties = Sets.newHashSet("canBeChangedBy", "nameOfEmptyValue");
-							return BeanContext.view(id, paramSpecs.get(index), excludedProperties, true);
+							return BeanContext.view(id, dependencies.get(index));
 						}
-
+							
 					};
 				}
 				
@@ -192,6 +185,12 @@ class ParamSpecListViewPanel extends Panel {
 			link.add(newLabel("label"));
 			add(link);
 		}
-		
 	}
+	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new JobDependencyCssResourceReference()));
+	}
+	
 }

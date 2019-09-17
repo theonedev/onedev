@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.job.dependency;
+package io.onedev.server.web.editable.job.jobdependency;
 
 import java.util.List;
 
@@ -12,21 +12,21 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.ci.CISpecAware;
-import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.JobAware;
+import io.onedev.server.ci.job.JobDependency;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathElement;
 
 @SuppressWarnings("serial")
-abstract class DependencyEditPanel extends Panel implements CISpecAware, JobAware {
+abstract class JobDependencyEditPanel extends Panel implements CISpecAware, JobAware {
 
 	private final List<JobDependency> dependencies;
 	
 	private final int dependencyIndex;
 	
-	public DependencyEditPanel(String id, List<JobDependency> dependencies, int dependencyIndex) {
+	public JobDependencyEditPanel(String id, List<JobDependency> dependencies, int dependencyIndex) {
 		super(id);
 	
 		this.dependencies = dependencies;
@@ -60,7 +60,7 @@ abstract class DependencyEditPanel extends Panel implements CISpecAware, JobAwar
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(DependencyEditPanel.this));
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(JobDependencyEditPanel.this));
 			}
 
 			@Override
@@ -108,7 +108,7 @@ abstract class DependencyEditPanel extends Panel implements CISpecAware, JobAwar
 			@Override
 			protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
 				super.updateAjaxAttributes(attributes);
-				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(DependencyEditPanel.this));
+				attributes.getAjaxCallListeners().add(new ConfirmLeaveListener(JobDependencyEditPanel.this));
 			}
 
 			@Override
@@ -122,9 +122,9 @@ abstract class DependencyEditPanel extends Panel implements CISpecAware, JobAwar
 		add(form);
 	}
 
-	private JobDependency getDependency(String job) {
+	private JobDependency getDependency(String jobName) {
 		for (JobDependency dependency: dependencies) {
-			if (job.equals(dependency.getJobName()))
+			if (jobName.equals(dependency.getJobName()))
 				return dependency;
 		}
 		return null;

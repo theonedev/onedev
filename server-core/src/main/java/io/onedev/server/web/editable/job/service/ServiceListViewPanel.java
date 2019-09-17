@@ -25,8 +25,6 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import com.google.common.collect.Sets;
-
 import io.onedev.server.ci.job.JobService;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
@@ -150,7 +148,7 @@ class ServiceListViewPanel extends Panel {
 
 						@Override
 						protected String getTitle() {
-							return services.get(index).getName();
+							return "Service";
 						}
 
 						@Override
@@ -161,7 +159,7 @@ class ServiceListViewPanel extends Panel {
 
 						@Override
 						protected Component newBody(String id) {
-							return BeanContext.view(id, services.get(index), Sets.newHashSet("job"), true);
+							return BeanContext.view(id, services.get(index));
 						}
 							
 					};

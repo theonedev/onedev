@@ -273,6 +273,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		List<Issue> issues = new ArrayList<>();
 
 		EntityCriteria<Issue> criteria = newCriteria();
+		criteria.add(Restrictions.eq("project", project));
 		
 		if (StringUtils.isNotBlank(term)) {
 			if (term.startsWith("#")) {
@@ -285,15 +286,13 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 							Restrictions.ilike("title", "#" + term, MatchMode.ANYWHERE),
 							Restrictions.ilike("noSpaceTitle", "#" + term, MatchMode.ANYWHERE)));
 				}
-			} else {
-				try {
-					long buildNumber = Long.parseLong(term);
-					criteria.add(Restrictions.eq("number", buildNumber));
-				} catch (NumberFormatException e) {
-					criteria.add(Restrictions.or(
-							Restrictions.ilike("title", term, MatchMode.ANYWHERE),
-							Restrictions.ilike("noSpaceTitle", term, MatchMode.ANYWHERE)));
-				}
+			} else try {
+				long buildNumber = Long.parseLong(term);
+				criteria.add(Restrictions.eq("number", buildNumber));
+			} catch (NumberFormatException e) {
+				criteria.add(Restrictions.or(
+						Restrictions.ilike("title", term, MatchMode.ANYWHERE),
+						Restrictions.ilike("noSpaceTitle", term, MatchMode.ANYWHERE)));
 			}
 		}
 		

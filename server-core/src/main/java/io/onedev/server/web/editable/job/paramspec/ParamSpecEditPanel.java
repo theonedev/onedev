@@ -84,7 +84,7 @@ abstract class ParamSpecEditPanel extends Panel implements InputContext {
 						editor.getErrorContext(new PathElement.Named("paramSpec"))
 								.getErrorContext(new PathElement.Named("name"))
 								.addError("This name has already been used by another parameter");
-					}
+					}					
 				} else if (getInputSpec(param.getName()) != null) {
 					editor.getErrorContext(new PathElement.Named("paramSpec"))
 							.getErrorContext(new PathElement.Named("name"))

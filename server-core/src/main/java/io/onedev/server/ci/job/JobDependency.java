@@ -1,4 +1,4 @@
-package io.onedev.server.ci;
+package io.onedev.server.ci.job;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -7,8 +7,8 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.ci.job.Job;
-import io.onedev.server.ci.job.JobAware;
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.CISpecAware;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.util.OneContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -31,7 +31,7 @@ public class JobDependency implements Serializable {
 	
 	private String artifacts = "**";
 	
-	@Editable(order=100)
+	@Editable(order=100, name="Job")
 	@ChoiceProvider("getJobChoices")
 	@NotEmpty
 	public String getJobName() {

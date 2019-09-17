@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.job.dependency;
+package io.onedev.server.web.editable.job.projectdependency;
 
 import java.io.Serializable;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.utils.ReflectionUtils;
-import io.onedev.server.ci.JobDependency;
+import io.onedev.server.ci.job.ProjectDependency;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -16,13 +16,13 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 
 @SuppressWarnings("serial")
-public class DependencyListEditSupport implements EditSupport {
+public class ProjectDependencyListEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
 			Class<?> elementClass = ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType());
-			if (elementClass == JobDependency.class) {
+			if (elementClass == ProjectDependency.class) {
 				return new PropertyContext<List<Serializable>>(descriptor) {
 
 					@Override
@@ -32,7 +32,7 @@ public class DependencyListEditSupport implements EditSupport {
 							@Override
 							protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 								if (model.getObject() != null) 
-									return new DependencyListViewPanel(id, model.getObject());
+									return new ProjectDependencyListViewPanel(id, model.getObject());
 								else 
 									return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 							}
@@ -42,7 +42,7 @@ public class DependencyListEditSupport implements EditSupport {
 
 					@Override
 					public PropertyEditor<List<Serializable>> renderForEdit(String componentId, IModel<List<Serializable>> model) {
-						return new DependencyListEditPanel(componentId, descriptor, model);
+						return new ProjectDependencyListEditPanel(componentId, descriptor, model);
 					}
 					
 				};

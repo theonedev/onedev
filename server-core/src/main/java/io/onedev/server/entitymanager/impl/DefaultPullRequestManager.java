@@ -1048,6 +1048,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		List<PullRequest> requests = new ArrayList<>();
 
 		EntityCriteria<PullRequest> criteria = newCriteria();
+		criteria.add(Restrictions.eq("project", targetProject));
 		
 		if (StringUtils.isNotBlank(term)) {
 			if (term.startsWith("#")) {
@@ -1060,15 +1061,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 							Restrictions.ilike("title", "#" + term, MatchMode.ANYWHERE),
 							Restrictions.ilike("noSpaceTitle", "#" + term, MatchMode.ANYWHERE)));
 				}
-			} else {
-				try {
-					long buildNumber = Long.parseLong(term);
-					criteria.add(Restrictions.eq("number", buildNumber));
-				} catch (NumberFormatException e) {
-					criteria.add(Restrictions.or(
-							Restrictions.ilike("title", term, MatchMode.ANYWHERE),
-							Restrictions.ilike("noSpaceTitle", term, MatchMode.ANYWHERE)));
-				}
+			} else try {
+				long buildNumber = Long.parseLong(term);
+				criteria.add(Restrictions.eq("number", buildNumber));
+			} catch (NumberFormatException e) {
+				criteria.add(Restrictions.or(
+						Restrictions.ilike("title", term, MatchMode.ANYWHERE),
+						Restrictions.ilike("noSpaceTitle", term, MatchMode.ANYWHERE)));
 			}
 		}
 		

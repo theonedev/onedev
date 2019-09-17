@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.job.dependency;
+package io.onedev.server.web.editable.job.jobdependency;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -28,14 +28,13 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.CISpecAware;
-import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobAware;
+import io.onedev.server.ci.job.JobDependency;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -43,11 +42,11 @@ import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
 
 @SuppressWarnings("serial")
-class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
+class JobDependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 
 	private final List<JobDependency> dependencies;
 	
-	public DependencyListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
+	public JobDependencyListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
 		dependencies = new ArrayList<>();
@@ -79,7 +78,7 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
-				return new DependencyEditPanel(id, dependencies, -1) {
+				return new JobDependencyEditPanel(id, dependencies, -1) {
 
 					@Override
 					protected void onCancel(AjaxRequestTarget target) {
@@ -91,17 +90,17 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 						markFormDirty(target);
 						modal.close();
 						onPropertyUpdating(target);
-						target.add(DependencyListEditPanel.this);
+						target.add(JobDependencyListEditPanel.this);
 					}
 
 					@Override
 					public CISpec getCISpec() {
-						return DependencyListEditPanel.this.getCISpec();
+						return JobDependencyListEditPanel.this.getCISpec();
 					}
 
 					@Override
 					public Job getJob() {
-						return DependencyListEditPanel.this.getJob();
+						return JobDependencyListEditPanel.this.getJob();
 					}
 
 				};
@@ -125,7 +124,7 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});		
 		
-		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Job")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
@@ -147,13 +146,10 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 			@Override
 			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
 				JobDependency dependency = rowModel.getObject();
-				if (dependency.getArtifacts() != null) {
+				if (dependency.getArtifacts() != null) 
 					cellItem.add(new Label(componentId, dependency.getArtifacts()));
-				} else try {
-					cellItem.add(new EmptyValueLabel(componentId, dependency.getClass().getDeclaredMethod("getArtifacts")));
-				} catch (NoSuchMethodException | SecurityException e) {
-					throw new RuntimeException(e);
-				}
+				else  
+					cellItem.add(new Label(componentId, "<i>Do not retrieve</i>").setEscapeModelStrings(false));
 			}
 		});		
 		
@@ -161,12 +157,12 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
-				Fragment fragment = new Fragment(componentId, "actionColumnFrag", DependencyListEditPanel.this);
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", JobDependencyListEditPanel.this);
 				fragment.add(new ModalLink("edit") {
 
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
-						return new DependencyEditPanel(id, dependencies, cellItem.findParent(Item.class).getIndex()) {
+						return new JobDependencyEditPanel(id, dependencies, cellItem.findParent(Item.class).getIndex()) {
 
 							@Override
 							protected void onCancel(AjaxRequestTarget target) {
@@ -178,17 +174,17 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 								markFormDirty(target);
 								modal.close();
 								onPropertyUpdating(target);
-								target.add(DependencyListEditPanel.this);
+								target.add(JobDependencyListEditPanel.this);
 							}
 
 							@Override
 							public CISpec getCISpec() {
-								return DependencyListEditPanel.this.getCISpec();
+								return JobDependencyListEditPanel.this.getCISpec();
 							}
 
 							@Override
 							public Job getJob() {
-								return DependencyListEditPanel.this.getJob();
+								return JobDependencyListEditPanel.this.getJob();
 							}
 
 						};
@@ -202,7 +198,7 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 						markFormDirty(target);
 						dependencies.remove(rowModel.getObject());
 						onPropertyUpdating(target);
-						target.add(DependencyListEditPanel.this);
+						target.add(JobDependencyListEditPanel.this);
 					}
 					
 				});
@@ -244,7 +240,7 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 						Collections.swap(dependencies, fromIndex-i, fromIndex-i-1);
 				}
 				onPropertyUpdating(target);
-				target.add(DependencyListEditPanel.this);
+				target.add(JobDependencyListEditPanel.this);
 			}
 			
 		}.sortable("tbody"));
@@ -271,7 +267,7 @@ class DependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new DependencyCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new JobDependencyCssResourceReference()));
 	}
 
 	@Override

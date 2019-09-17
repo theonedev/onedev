@@ -57,8 +57,12 @@ public class BuildChoiceProvider extends ChoiceProvider<Build> {
 	public void query(String term, int page, Response<Build> response) {
 		int count = (page+1) * WebConstants.PAGE_SIZE;
 		Project project = projectModel.getObject();
-		List<Build> builds = OneDev.getInstance(BuildManager.class).query(project, term, count);		
-		new ResponseFiller<>(response).fill(builds, page, WebConstants.PAGE_SIZE);
+		if (project != null) {
+			List<Build> builds = OneDev.getInstance(BuildManager.class).query(project, term, count);		
+			new ResponseFiller<>(response).fill(builds, page, WebConstants.PAGE_SIZE);
+		} else {
+			response.setHasMore(false);
+		}
 	}
 	
 }

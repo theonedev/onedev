@@ -624,6 +624,25 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	private void execute(String dockerImage, String jobToken, JobLogger jobLogger, @Nullable JobContext jobContext) {
+		jobLogger.log("Checking cluster access...");
+		Commandline kubectl = newKubeCtl();
+		kubectl.addArgs("cluster-info");
+		kubectl.execute(new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				logger.debug(line);
+			}
+			
+		}, new LineConsumer() {
+
+			@Override
+			public void consume(String line) {
+				jobLogger.log(line);
+			}
+			
+		}).checkReturnCode();
+		
 		String namespace = createNamespace(jobContext, jobLogger);
 		jobLogger.log("Executing job with kubernetes under namespace " + namespace + "...");
 		
@@ -832,7 +851,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				jobContext.notifyJobRunning();
 			
 			AtomicReference<String> nodeNameRef = new AtomicReference<>(null);
-			Commandline kubectl = newKubeCtl();
+			
+			kubectl.clearArgs();
 			kubectl.addArgs("get", "pod", podName, "-n", namespace, "-o", "jsonpath={.spec.nodeName}");
 			kubectl.execute(new LineConsumer() {
 

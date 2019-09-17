@@ -30,6 +30,8 @@ import javax.inject.Singleton;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authc.credential.PasswordService;
+import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,12 +50,12 @@ import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.InvalidCISpecException;
-import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.log.JobLogManager;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.BuildCommitAware;
@@ -78,6 +80,8 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.CodePullAuthorizationSource;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -97,6 +101,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final Map<Long, JobExecution> jobExecutions = new ConcurrentHashMap<>();
 	
+	private final ProjectManager projectManager;
+	
 	private final BuildManager buildManager;
 	
 	private final ListenerRegistry listenerRegistry;
@@ -115,6 +121,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final BuildParamManager buildParamManager;
 	
+	private final PasswordService passwordService;
+	
 	private volatile List<JobExecutor> jobExecutors;
 	
 	private volatile Status status;
@@ -122,7 +130,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Inject
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
 			SettingManager settingManager, TransactionManager transactionManager, JobLogManager logManager, 
-			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager) {
+			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
+			ProjectManager projectManager, PasswordService passwordService) {
 		this.settingManager = settingManager;
 		this.buildManager = buildManager;
 		this.userManager = userManager;
@@ -132,6 +141,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		this.executorService = executorService;
 		this.sessionManager = sessionManager;
 		this.buildParamManager = buildParamManager;
+		this.projectManager = projectManager;
+		this.passwordService = passwordService;
 	}
 
 	@Transactional
@@ -204,7 +215,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				}
 			}
 			
-			for (JobDependency dependency: build.getJob().getDependencies()) {
+			for (JobDependency dependency: build.getJob().getJobDependencies()) {
 				new MatrixRunner<List<String>>(JobParam.getParamMatrix(dependency.getJobParams())) {
 					
 					@Override
@@ -219,6 +230,47 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					}
 					
 				}.run();
+			}
+			
+			for (ProjectDependency dependency: build.getJob().getProjectDependencies()) {
+				Project dependencyProject = projectManager.find(dependency.getProjectName());
+				if (dependencyProject == null)
+					throw new OneException("Unable to find dependency project: " + dependency.getProjectName());
+
+				Subject subject;
+				if (dependency.getAuthentication() != null) {
+					String userName = dependency.getAuthentication().getUserName();
+					User user = userManager.findByName(userName);
+					if (user == null) {
+						throw new OneException("Unable to access dependency project '" 
+								+ dependency.getProjectName() + "': user not found");
+					}
+					String password = project.getSecretValue(dependency.getAuthentication().getPasswordSecret(), commitId);
+					if (!passwordService.passwordsMatch(password, user.getPassword())) {
+						throw new OneException("Unable to access dependency project '" 
+								+ dependency.getProjectName() + "': password incorrect");
+					}
+					subject = user.asSubject();
+				} else {
+					subject = User.asSubject(0L);
+				}
+				if (!subject.isPermitted(new ProjectPermission(dependencyProject.getFacade(), 
+						ProjectPrivilege.CODE_READ))) {
+					throw new OneException("Unable to access dependency project '" 
+							+ dependency.getProjectName() + "': permission denied");
+				}
+				
+				Build dependencyBuild = buildManager.find(dependencyProject, dependency.getBuildNumber());
+				if (dependencyBuild == null) {
+					String errorMessage = String.format("Unable to find dependency build (project: %s, build number: %d)", 
+							dependency.getProjectName(), dependency.getBuildNumber());
+					throw new OneException(errorMessage);
+				}
+				BuildDependence dependence = new BuildDependence();
+				dependence.setDependency(dependencyBuild);
+				dependence.setDependent(build);
+				dependence.setArtifacts(dependency.getArtifacts());
+				build.getDependencies().add(dependence);
 			}
 
 			buildManager.create(build);
@@ -575,7 +627,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								}
 								
 								if (hasUnsuccessful) {
-									markBuildError(build, "There are failed dependency jobs");
+									markBuildError(build, "There are failed dependencies");
 								} else if (!hasUnfinished) {
 									build.setStatus(Build.Status.PENDING);
 									build.setPendingDate(new Date());

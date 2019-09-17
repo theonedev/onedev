@@ -76,6 +76,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
 import io.onedev.commons.utils.stringmatch.Matcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.DefaultCISpecProvider;
@@ -356,8 +357,7 @@ public class Project extends AbstractEntity implements Validatable {
 		this.description = description;
 	}
 
-	@Editable(order=300, description="Optionally specify default privilege for users not "
-			+ "joining any teams of the project")
+	@Editable(order=300, description="Optionally specify default privilege of the project")
 	@NameOfEmptyValue("No default privilege")
 	@Nullable
 	public DefaultPrivilege getDefaultPrivilege() {
@@ -1554,4 +1554,15 @@ public class Project extends AbstractEntity implements Validatable {
 		return isValid;
 	}
 
+	public String getSecretValue(String secretKey, ObjectId commitId) {
+		Secret secret = getSecretMap().get(secretKey);
+		if (secret == null) 
+			throw new OneException("Can not find project secret: " + secretKey);
+		if (secret.getBranches() != null && !isCommitOnBranches(commitId, secret.getBranches())) {
+			String message = String.format("Project secret '%s' can only be accessed by builds on branches '%s'", 
+					secretKey, secret.getBranches());
+			throw new OneException(message);
+		} 
+		return secret.getValue();
+	}
 }

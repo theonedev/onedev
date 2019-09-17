@@ -20,7 +20,6 @@ import javax.validation.constraints.Size;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
@@ -56,7 +55,9 @@ public class Job implements Serializable, Validatable {
 	
 	private List<SubmoduleCredential> submoduleCredentials = new ArrayList<>();
 	
-	private List<JobDependency> dependencies = new ArrayList<>();
+	private List<JobDependency> jobDependencies = new ArrayList<>();
+	
+	private List<ProjectDependency> projectDependencies = new ArrayList<>();
 	
 	private String artifacts;
 	
@@ -152,14 +153,24 @@ public class Job implements Serializable, Validatable {
 		return (boolean) OneContext.get().getEditContext().getInputValue("retrieveSource");
 	}
 
-	@Editable(name="Dependency Jobs", order=9110, group="Dependencies", description="Job dependencies determines the order and "
-			+ "concurrency when run different jobs")
-	public List<JobDependency> getDependencies() {
-		return dependencies;
+	@Editable(name="Job Dependencies", order=9110, group="Dependencies", description="Job dependencies determines the order and "
+			+ "concurrency when run different jobs. You may also specify artifacts to retrieve from upstream jobs")
+	public List<JobDependency> getJobDependencies() {
+		return jobDependencies;
 	}
 
-	public void setDependencies(List<JobDependency> dependencies) {
-		this.dependencies = dependencies;
+	public void setJobDependencies(List<JobDependency> jobDependencies) {
+		this.jobDependencies = jobDependencies;
+	}
+
+	@Editable(name="Project Dependencies", order=9113, group="Dependencies", description="Use project dependency to retrieve "
+			+ "artifacts from other projects")
+	public List<ProjectDependency> getProjectDependencies() {
+		return projectDependencies;
+	}
+
+	public void setProjectDependencies(List<ProjectDependency> projectDependencies) {
+		this.projectDependencies = projectDependencies;
 	}
 
 	@Editable(order=9115, group="Artifacts & Reports", description="Optionally specify files to publish as job artifacts. "
@@ -267,7 +278,7 @@ public class Job implements Serializable, Validatable {
 		}
 
 		Set<String> dependencyJobs = new HashSet<>();
-		for (JobDependency dependency: dependencies) {
+		for (JobDependency dependency: jobDependencies) {
 			if (dependencyJobs.contains(dependency.getJobName())) {
 				isValid = false;
 				context.buildConstraintViolationWithTemplate("Duplicate dependency: " + dependency.getJobName())

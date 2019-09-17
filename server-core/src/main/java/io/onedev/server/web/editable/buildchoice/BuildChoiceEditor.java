@@ -1,5 +1,7 @@
 package io.onedev.server.web.editable.buildchoice;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -7,17 +9,22 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import com.google.common.base.Preconditions;
+
+import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.OneContext;
 import io.onedev.server.web.component.build.choice.BuildChoiceProvider;
 import io.onedev.server.web.component.build.choice.BuildSingleChoice;
 import io.onedev.server.web.editable.ErrorContext;
 import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.editable.annotation.BuildChoice;
+import io.onedev.server.web.util.ProjectAware;
 
 @SuppressWarnings("serial")
 public class BuildChoiceEditor extends PropertyEditor<Long> {
@@ -29,8 +36,29 @@ public class BuildChoiceEditor extends PropertyEditor<Long> {
 		super(id, propertyDescriptor, propertyModel);
 	}
 
+	@Nullable
 	private Project getProject() {
-		return ((ProjectPage)getPage()).getProject();		
+		OneContext.push(new OneContext(this));
+		try {
+			BuildChoice choice = Preconditions.checkNotNull(descriptor
+					.getPropertyGetter().getAnnotation(BuildChoice.class));
+			if (choice.value().length() != 0) {
+				return (Project) ReflectionUtils.invokeStaticMethod(
+						descriptor.getBeanClass(), choice.value());
+			} else {
+				return findParent(ProjectAware.class).getProject();
+			}
+		} finally {
+			OneContext.pop();
+		}
+	}
+	
+	@Nullable
+	private Build getBuild() {
+		if (getProject() != null && getModelObject() != null)
+			return OneDev.getInstance(BuildManager.class).find(getProject(), getModelObject());
+		else
+			return null;
 	}
 
 	@Override
@@ -38,7 +66,7 @@ public class BuildChoiceEditor extends PropertyEditor<Long> {
 		super.onInitialize();
 
 		Build build;
-		if (getModelObject() != null)
+		if (getProject() != null && getModelObject() != null)
 			build = OneDev.getInstance(BuildManager.class).find(getProject(), getModelObject());
 		else
 			build = null;
