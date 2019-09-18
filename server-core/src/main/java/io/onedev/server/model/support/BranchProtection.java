@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Usage;
@@ -129,7 +129,7 @@ public class BranchProtection implements Serializable {
 	@Nullable
 	public FileProtection getFileProtection(String file) {
 		for (FileProtection protection: fileProtections) {
-			if (PatternSet.fromString(protection.getPaths()).matches(new ChildAwareMatcher(), file))
+			if (PatternSet.fromString(protection.getPaths()).matches(new PathMatcher(), file))
 				return protection;
 		}
 		return null;

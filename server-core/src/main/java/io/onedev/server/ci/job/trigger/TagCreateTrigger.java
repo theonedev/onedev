@@ -2,7 +2,7 @@ package io.onedev.server.ci.job.trigger;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
@@ -38,7 +38,7 @@ public class TagCreateTrigger extends JobTrigger {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String pushedTag = GitUtils.ref2tag(refUpdated.getRefName());
 			if (pushedTag != null && !refUpdated.getNewCommitId().equals(ObjectId.zeroId()) 
-					&& (getTags() == null || PatternSet.fromString(getTags()).matches(new ChildAwareMatcher(), pushedTag))) {
+					&& (getTags() == null || PatternSet.fromString(getTags()).matches(new PathMatcher(), pushedTag))) {
 				return true;
 			}
 		}

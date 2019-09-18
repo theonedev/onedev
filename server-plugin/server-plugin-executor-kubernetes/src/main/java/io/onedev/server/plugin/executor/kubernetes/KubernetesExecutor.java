@@ -871,7 +871,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			}).checkReturnCode();
 			
 			String nodeName = Preconditions.checkNotNull(nodeNameRef.get());
-			jobLogger.log("Running job as pod " + podFQN + " on node " + nodeName + "...");
+			jobLogger.log("Running job pod on node " + nodeName + "...");
 			
 			logger.debug("Collecting init container log (pod: {})...", podFQN);
 			collectContainerLog(namespace, podName, "init", KubernetesHelper.LOG_END_MESSAGE, jobLogger);

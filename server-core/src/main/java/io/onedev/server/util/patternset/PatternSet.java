@@ -20,7 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 import org.unbescape.java.JavaEscape;
 
-import io.onedev.commons.utils.stringmatch.Matcher;
+import io.onedev.commons.utils.match.Matcher;
 import io.onedev.server.OneException;
 import io.onedev.server.util.patternset.PatternSetParser.PatternContext;
 import io.onedev.server.util.patternset.PatternSetParser.PatternsContext;

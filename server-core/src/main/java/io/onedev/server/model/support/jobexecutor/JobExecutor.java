@@ -5,8 +5,8 @@ import java.io.Serializable;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.launcher.loader.ExtensionPoint;
-import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
-import io.onedev.commons.utils.stringmatch.Matcher;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.ci.job.JobContext;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Usage;
@@ -31,7 +31,7 @@ public abstract class JobExecutor implements Serializable {
 	
 	private String jobNames;
 	
-	private String jobEnvironments;
+	private String jobImages;
 
 	private int cacheTTL = 7;
 	
@@ -82,17 +82,17 @@ public abstract class JobExecutor implements Serializable {
 		this.jobNames = jobNames;
 	}
 
-	@Editable(order=10300, name="Applicable Job Environments", group="Job Applicability",
-			description="Optionally specify space-separated job environments applicable for this executor. "
+	@Editable(order=10300, name="Applicable Job Images", group="Job Applicability",
+			description="Optionally specify space-separated job images applicable for this executor. "
 					+ "Use * or ? for wildcard match. Leave empty to match all")
 	@Patterns
 	@NameOfEmptyValue("All")
-	public String getJobEnvironments() {
-		return jobEnvironments;
+	public String getJobImages() {
+		return jobImages;
 	}
 
-	public void setJobEnvironments(String jobEnvironments) {
-		this.jobEnvironments = jobEnvironments;
+	public void setJobImages(String jobImages) {
+		this.jobImages = jobImages;
 	}
 	
 	@Editable(order=50000, group="More Settings", description="Specify job cache TTL (time to live) by days. "
@@ -110,12 +110,12 @@ public abstract class JobExecutor implements Serializable {
 	public abstract void execute(String jobToken, JobContext context);
 
 	public final boolean isApplicable(Project project, ObjectId commitId, String jobName, String jobEnvironment) {
-		Matcher matcher = new ChildAwareMatcher();
+		Matcher matcher = new PathMatcher();
 
 		return isEnabled() 
 				&& (getProjects() == null || PatternSet.fromString(getProjects()).matches(matcher, project.getName()))
 				&& (getJobNames() == null || PatternSet.fromString(getJobNames()).matches(matcher, jobName))
-				&& (getJobEnvironments() == null || PatternSet.fromString(getJobEnvironments()).matches(matcher, jobEnvironment))
+				&& (getJobImages() == null || PatternSet.fromString(getJobImages()).matches(matcher, jobEnvironment))
 				&& (getBranches() == null || project.isCommitOnBranches(commitId, getBranches()));
 	}
 	

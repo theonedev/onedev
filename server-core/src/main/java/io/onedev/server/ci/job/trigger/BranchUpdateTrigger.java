@@ -6,8 +6,8 @@ import java.util.List;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.PathUtils;
-import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
@@ -81,8 +81,10 @@ public class BranchUpdateTrigger extends JobTrigger {
 			} else {
 				Collection<String> changedFiles = GitUtils.getChangedFiles(refUpdated.getProject().getRepository(), 
 						refUpdated.getOldCommitId(), refUpdated.getNewCommitId());
+				PatternSet patternSet = PatternSet.fromString(getPaths());
+				Matcher matcher = new PathMatcher();
 				for (String changedFile: changedFiles) {
-					if (PathUtils.matchChildAware(getPaths(), changedFile))
+					if (patternSet.matches(matcher, changedFile))
 						return true;
 				}
 				return false;
@@ -98,7 +100,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String branch = GitUtils.ref2branch(refUpdated.getRefName());
 			if (branch != null) {
-				if ((getBranches() == null || PatternSet.fromString(getBranches()).matches(new ChildAwareMatcher(), branch)) 
+				if ((getBranches() == null || PatternSet.fromString(getBranches()).matches(new PathMatcher(), branch)) 
 						&& touchedFile(refUpdated)) {
 					return true;
 				}

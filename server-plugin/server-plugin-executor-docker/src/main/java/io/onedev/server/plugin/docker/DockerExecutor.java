@@ -540,17 +540,23 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 								Map<String, String> environments = Maps.newHashMap("HOME", tempHome.getAbsolutePath());
 								Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
 								git.environments(environments).workingDir(hostWorkspace);
-								LineConsumer logger = new LineConsumer() {
+								
+								git.addArgs("config", "--global", "credential.modalprompt", "false");
+								git.execute(new LineConsumer() {
 	
 									@Override
 									public void consume(String line) {
 										jobContext.getLogger().log(line);
 									}
 									
-								};
-								
-								git.addArgs("config", "--global", "credential.modalprompt", "false");
-								git.execute(logger, logger).checkReturnCode();
+								}, new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}).checkReturnCode();
 								
 								// clear credential.helper list to remove possible Windows credential manager
 								git.clearArgs();
@@ -558,15 +564,57 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 									git.addArgs("config", "--global", "credential.helper", "\"\"");
 								else
 									git.addArgs("config", "--global", "credential.helper", "");
-								git.execute(logger, logger).checkReturnCode();
+								git.execute(new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}, new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}).checkReturnCode();
 								
 								git.clearArgs();
 								git.addArgs("config", "--global", "--add", "credential.helper", "store");
-								git.execute(logger, logger).checkReturnCode();
+								git.execute(new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}, new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}).checkReturnCode();
 								
 								git.clearArgs();
 								git.addArgs("config", "--global", "credential.useHttpPath", "true");
-								git.execute(logger, logger).checkReturnCode();
+								git.execute(new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}, new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}).checkReturnCode();
 	
 								List<String> trustCertContent = new ArrayList<>();
 								ServerConfig serverConfig = OneDev.getInstance(ServerConfig.class); 
@@ -588,7 +636,21 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 									FileUtils.writeLines(trustCertFile, trustCertContent, "\n");
 									git.clearArgs();
 									git.addArgs("config", "--global", "http.sslCAInfo", trustCertFile.getAbsolutePath());
-									git.execute(logger, logger).checkReturnCode();
+									git.execute(new LineConsumer() {
+										
+										@Override
+										public void consume(String line) {
+											jobContext.getLogger().log(line);
+										}
+										
+									}, new LineConsumer() {
+										
+										@Override
+										public void consume(String line) {
+											jobContext.getLogger().log(line);
+										}
+										
+									}).checkReturnCode();
 								}
 								
 								if (!jobContext.getSubmoduleCredentials().isEmpty()) {
@@ -611,22 +673,72 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 								if (!new File(hostWorkspace, ".git").exists()) {
 									git.clearArgs();
 									git.addArgs("init", ".");
-									git.execute(logger, logger).checkReturnCode();
+									git.execute(new LineConsumer() {
+										
+										@Override
+										public void consume(String line) {
+											if (!line.contains("Initialized empty Git repository"))
+												jobContext.getLogger().log(line);
+										}
+										
+									}, new LineConsumer() {
+										
+										@Override
+										public void consume(String line) {
+											jobContext.getLogger().log(line);
+										}
+										
+									}).checkReturnCode();
 								}								
 								
 								git.clearArgs();
 								git.addArgs("fetch", jobContext.getProjectGitDir().getAbsolutePath(), "--force", "--quiet", 
 										"--depth=1", jobContext.getCommitId().name());
-								git.execute(logger, logger).checkReturnCode();
+								git.execute(new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}, new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}).checkReturnCode();
 								
 								git.clearArgs();
 								git.addArgs("checkout", "--quiet", jobContext.getCommitId().name());
-								git.execute(logger, logger).checkReturnCode();
+								git.execute(new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}, new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}).checkReturnCode();
 								
 								// deinit submodules in case submodule url is changed
 								git.clearArgs();
 								git.addArgs("submodule", "deinit", "--all", "--force", "--quiet");
-								git.execute(logger, new LineConsumer() {
+								git.execute(new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}, new LineConsumer() {
 	
 									@Override
 									public void consume(String line) {
@@ -640,7 +752,21 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 								
 								git.clearArgs();
 								git.addArgs("submodule", "update", "--init", "--recursive", "--force", "--quiet", "--depth=1");
-								git.execute(logger, logger).checkReturnCode();
+								git.execute(new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}, new LineConsumer() {
+	
+									@Override
+									public void consume(String line) {
+										jobContext.getLogger().log(line);
+									}
+									
+								}).checkReturnCode();
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							} finally {

@@ -122,7 +122,7 @@ public class CommitStatusPanel extends Panel {
 						
 					});
 					
-					jobItem.add(new SimpleBuildListPanel("detail", new LoadableDetachableModel<List<Build>>() {
+					IModel<List<Build>> buildsModel = new LoadableDetachableModel<List<Build>>() {
 
 						@Override
 						protected List<Build> load() {
@@ -132,7 +132,25 @@ public class CommitStatusPanel extends Panel {
 							return builds;
 						}
 						
-					}));
+					};
+					jobItem.add(new SimpleBuildListPanel("detail", buildsModel) {
+						
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							setVisible(!buildsModel.getObject().isEmpty());
+						}
+						
+					});
+					jobItem.add(new WebMarkupContainer("noBuilds") {
+
+						@Override
+						protected void onConfigure() {
+							super.onConfigure();
+							setVisible(buildsModel.getObject().isEmpty());
+						}
+						
+					});
 					
 					jobItem.setOutputMarkupId(true);
 					jobsView.add(jobItem);

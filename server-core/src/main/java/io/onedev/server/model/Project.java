@@ -73,8 +73,8 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.MatrixRunner;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
-import io.onedev.commons.utils.stringmatch.Matcher;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.CommitInfoManager;
@@ -1244,7 +1244,7 @@ public class Project extends AbstractEntity implements Validatable {
 		for (TagProtection protection: tagProtections) {
 			if (protection.isEnabled() 
 					&& UserMatcher.fromString(protection.getUser()).matches(this, user)
-					&& PatternSet.fromString(protection.getTags()).matches(new ChildAwareMatcher(), tagName)) {
+					&& PatternSet.fromString(protection.getTags()).matches(new PathMatcher(), tagName)) {
 				return protection;
 			}
 		}
@@ -1256,7 +1256,7 @@ public class Project extends AbstractEntity implements Validatable {
 		for (BranchProtection protection: branchProtections) {
 			if (protection.isEnabled() 
 					&& UserMatcher.fromString(protection.getUser()).matches(this, user) 
-					&& PatternSet.fromString(protection.getBranches()).matches(new ChildAwareMatcher(), branchName)) {
+					&& PatternSet.fromString(protection.getBranches()).matches(new PathMatcher(), branchName)) {
 				return protection;
 			}
 		}
@@ -1419,7 +1419,7 @@ public class Project extends AbstractEntity implements Validatable {
 		Collection<ObjectId> descendants = commitInfoManager.getDescendants(this, Sets.newHashSet(commitId));
 		descendants.add(commitId);
 	
-		Matcher matcher = new ChildAwareMatcher();
+		Matcher matcher = new PathMatcher();
 		PatternSet branchPatterns = PatternSet.fromString(branches);
 		for (RefInfo ref: getBranches()) {
 			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
@@ -1464,12 +1464,13 @@ public class Project extends AbstractEntity implements Validatable {
 			try {
 				CISpec ciSpec = getCISpec(getObjectId(branch, true));
 				if (ciSpec != null) {
+					Matcher matcher = new PathMatcher();
 					for (Job job: ciSpec.getJobs()) {
 						for (JobTrigger trigger: job.getTriggers()) {
 							if (trigger instanceof BranchUpdateTrigger) {
 								BranchUpdateTrigger branchUpdateTrigger = (BranchUpdateTrigger) trigger;
 								if (branchUpdateTrigger.isRejectIfNotSuccessful() 
-										&& (branchUpdateTrigger.getBranches() == null || PatternSet.fromString(branchUpdateTrigger.getBranches()).matches(new ChildAwareMatcher(), branch))) {
+										&& (branchUpdateTrigger.getBranches() == null || PatternSet.fromString(branchUpdateTrigger.getBranches()).matches(matcher, branch))) {
 									return true;
 								}
 							}
@@ -1490,12 +1491,13 @@ public class Project extends AbstractEntity implements Validatable {
 			try {
 				CISpec ciSpec = getCISpec(oldObjectId);
 				if (ciSpec != null) {
+					Matcher matcher = new PathMatcher();
 					for (Job job: ciSpec.getJobs()) {
 						for (JobTrigger trigger: job.getTriggers()) {
 							if (trigger instanceof BranchUpdateTrigger) {
 								BranchUpdateTrigger branchUpdateTrigger = (BranchUpdateTrigger) trigger;
 								if (branchUpdateTrigger.isRejectIfNotSuccessful() 
-										&& (branchUpdateTrigger.getBranches() == null || PatternSet.fromString(branchUpdateTrigger.getBranches()).matches(new ChildAwareMatcher(), branch))) {
+										&& (branchUpdateTrigger.getBranches() == null || PatternSet.fromString(branchUpdateTrigger.getBranches()).matches(matcher, branch))) {
 									Map<String, List<List<String>>> paramMatrix = new HashMap<>();
 									Set<String> secretParamNames = new HashSet<>();
 									for (JobParam param: trigger.getParams()) { 

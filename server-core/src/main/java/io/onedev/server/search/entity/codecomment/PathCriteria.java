@@ -5,7 +5,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import io.onedev.commons.utils.stringmatch.WildcardUtils;
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -33,10 +33,7 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 	
 	@Override
 	public boolean matches(CodeComment comment, User user) {
-		String normalized = value.toLowerCase();
-		if (normalized.endsWith("/"))
-			normalized += "*";
-		return WildcardUtils.matchString(normalized, comment.getMarkPos().getPath().toLowerCase());
+		return WildcardUtils.matchPath(value.toLowerCase(), comment.getMarkPos().getPath().toLowerCase());
 	}
 
 	@Override

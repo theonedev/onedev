@@ -88,7 +88,7 @@ public class ProjectDependency implements Serializable {
 
 	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve "
 			+ "into job workspace")
-	@Patterns("suggestArtifacts")
+	@Patterns("getArtifactSuggestions")
 	@NotEmpty
 	public String getArtifacts() {
 		return artifacts;
@@ -99,7 +99,7 @@ public class ProjectDependency implements Serializable {
 	}
 	
 	@SuppressWarnings("unused")
-	private static List<InputSuggestion> suggestArtifacts(String matchWith) {
+	private static List<InputSuggestion> getArtifactSuggestions(String matchWith) {
 		Project project = getEditingProject();
 		Long buildNumber = (Long) OneContext.get().getEditContext().getInputValue("buildNumber");
 		if (project != null && buildNumber != null) {

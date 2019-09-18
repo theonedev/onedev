@@ -6,8 +6,8 @@ import java.util.List;
 
 import javax.validation.constraints.Size;
 
-import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
-import io.onedev.commons.utils.stringmatch.Matcher;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.ci.job.JobService;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -62,8 +62,7 @@ public class ServiceLocator implements Serializable {
 	}
 	
 	public final boolean isApplicable(JobService service) {
-		Matcher matcher = new ChildAwareMatcher();
-
+		Matcher matcher = new PathMatcher();
 		return (getServiceNames() == null || PatternSet.fromString(getServiceNames()).matches(matcher, service.getName()))
 				&& (getServiceImages() == null || PatternSet.fromString(getServiceImages()).matches(matcher, service.getImage()));
 	}

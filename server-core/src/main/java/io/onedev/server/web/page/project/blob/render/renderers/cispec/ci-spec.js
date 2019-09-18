@@ -41,6 +41,7 @@ onedev.server.ciSpec = {
         $contents.children().hide();
         var $content = $contents.children().eq(index);
         $content.show();
+        $(window).resize();
         onedev.server.focus.doFocus($content);
     },
     edit: {

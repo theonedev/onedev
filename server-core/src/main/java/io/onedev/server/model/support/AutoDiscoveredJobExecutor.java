@@ -42,7 +42,7 @@ public class AutoDiscoveredJobExecutor extends JobExecutor {
 			jobExecutor.setBranches(getBranches());
 			jobExecutor.setCacheTTL(getCacheTTL());
 			jobExecutor.setEnabled(isEnabled());
-			jobExecutor.setJobEnvironments(getJobEnvironments());
+			jobExecutor.setJobImages(getJobImages());
 			jobExecutor.setJobNames(getJobNames());
 			jobExecutor.setProjects(getProjects());
 			jobExecutor.execute(jobToken, context);

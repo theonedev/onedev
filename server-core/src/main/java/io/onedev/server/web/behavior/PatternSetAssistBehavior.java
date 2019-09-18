@@ -44,9 +44,6 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 			String unmatched = terminalExpect.getUnmatchedText();
 			if (spec.getRuleName().equals("NQuoted")) {
 				List<InputSuggestion> suggestions = suggest(unmatched);
-				int index = "*".indexOf(unmatched);
-				if (index != -1)
-					suggestions.add(new InputSuggestion("*", "all", new LinearRange(index, unmatched.length())));
 				return suggestions
 						.stream()
 						.filter(it->!matches.contains(it.getContent()))

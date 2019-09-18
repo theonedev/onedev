@@ -71,7 +71,7 @@
 .property-editor>.list>table>tfoot>tr>td.norecords-td>div,
 .property-editor>.bean-list>table>tfoot>tr>td.no-elements>div {
     border-top: 2px solid #DDD;
-    margin-top: -6px;
+    margin-top: -7px;
     padding: 8px 0 0 8px;
 }
 .property-editor>.polymorphic-list>table>tbody>tr>td {

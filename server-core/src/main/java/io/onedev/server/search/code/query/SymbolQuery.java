@@ -18,7 +18,7 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.stringmatch.WildcardUtils;
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.search.code.SearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
