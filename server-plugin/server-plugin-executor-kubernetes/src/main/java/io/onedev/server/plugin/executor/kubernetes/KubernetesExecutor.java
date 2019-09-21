@@ -45,19 +45,19 @@ import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.job.CacheSpec;
+import io.onedev.server.ci.job.EnvVar;
 import io.onedev.server.ci.job.JobContext;
 import io.onedev.server.ci.job.JobService;
-import io.onedev.server.ci.job.Variable;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.RegistryLogin;
-import io.onedev.server.model.support.jobexecutor.JobExecutor;
-import io.onedev.server.model.support.jobexecutor.NodeSelectorEntry;
-import io.onedev.server.model.support.jobexecutor.ServiceLocator;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.NodeSelectorEntry;
+import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
+import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
-import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
@@ -481,7 +481,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				"cpu", jobService.getCpuRequirement(), 
 				"memory", jobService.getMemoryRequirement())));
 		List<Map<Object, Object>> envs = new ArrayList<>();
-		for (Variable envVar: jobService.getEnvVars()) {
+		for (EnvVar envVar: jobService.getEnvVars()) {
 			envs.add(Maps.newLinkedHashMap(
 					"name", envVar.getName(), 
 					"value", envVar.getValue()));
@@ -722,16 +722,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			envs.add(Maps.newLinkedHashMap(
 					"name", KubernetesHelper.ENV_JOB_TOKEN, 
 					"value", jobToken));
-			if (jobContext != null) {
-				for (Map.Entry<String, String> entry: jobContext.getEnvVars().entrySet()) {
-					envs.add(Maps.newLinkedHashMap(
-							"name", entry.getKey(), 
-							"value", entry.getValue()));
-				}
-			}
-			
-			mainContainerSpec.put("env", envs);
-			
+
 			List<String> sidecarArgs = Lists.newArrayList(
 					"-classpath", k8sHelperClassPath,
 					"io.onedev.k8shelper.SideCar");

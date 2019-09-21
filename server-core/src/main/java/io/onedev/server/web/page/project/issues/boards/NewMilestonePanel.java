@@ -15,7 +15,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.PathNode;
+import io.onedev.server.web.editable.Path;
 
 @SuppressWarnings("serial")
 abstract class NewMilestonePanel extends Panel {
@@ -43,10 +44,10 @@ abstract class NewMilestonePanel extends Panel {
 				MilestoneManager milestoneManager = OneDev.getInstance(MilestoneManager.class);
 				Milestone milestoneWithSameName = milestoneManager.find(getProject(), milestone.getName());
 				if (milestoneWithSameName != null) {
-					editor.getErrorContext(new PathElement.Named("name"))
-							.addError("This name has already been used by another milestone in the project");
+					editor.error(new Path(new PathNode.Named("name")),
+							"This name has already been used by another milestone in the project");
 				} 
-				if (!editor.hasErrors(true)){
+				if (editor.isValid()){
 					milestone.setProject(getProject());
 					milestoneManager.save(milestone);
 					Session.get().success("New milestone created");

@@ -13,7 +13,7 @@ import org.hibernate.proxy.HibernateProxyHelper;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.ComponentContext;
 
 @SuppressWarnings("serial")
 public abstract class PropertyContext<T> implements Serializable {
@@ -150,8 +150,8 @@ public abstract class PropertyContext<T> implements Serializable {
 		return descriptor.isPropertyRequired();
 	}
 
-	public boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor) {
-		return descriptor.isPropertyVisible(oneContext, beanDescriptor);
+	public boolean isPropertyVisible(ComponentContext componentContext, BeanDescriptor beanDescriptor) {
+		return descriptor.isPropertyVisible(componentContext, beanDescriptor);
 	}
 	
 }

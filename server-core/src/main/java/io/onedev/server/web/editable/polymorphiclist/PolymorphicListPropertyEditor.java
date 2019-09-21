@@ -35,10 +35,12 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.PathNode;
+import io.onedev.server.web.editable.PathNode.Indexed;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.ValueEditor;
+import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
@@ -300,8 +302,8 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 	}
 
 	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		int index = ((PathElement.Indexed) element).getIndex();
+	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
+		int index = ((Indexed) propertyNode).getIndex();
 
 		int currentIndex = 0;
 		Iterator<Component> it = rows.iterator();
@@ -309,8 +311,7 @@ public class PolymorphicListPropertyEditor extends PropertyEditor<List<Serializa
 		while (currentIndex++ < index) {
 			row = it.next();
 		}
-		
-		return (ErrorContext) row.get("elementEditor");
+		((ValueEditor<?>) row.get("elementEditor")).error(pathInProperty, errorMessage);
 	}
 
 	@Override

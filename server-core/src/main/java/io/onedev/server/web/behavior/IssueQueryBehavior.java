@@ -41,27 +41,25 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.fieldspec.BooleanField;
+import io.onedev.server.model.support.issue.fieldspec.BuildChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.DateField;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.issue.fieldspec.GroupChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.IssueChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.NumberField;
+import io.onedev.server.model.support.issue.fieldspec.PullRequestChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.TextField;
+import io.onedev.server.model.support.issue.fieldspec.UserChoiceField;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParser;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.EditContext;
 import io.onedev.server.util.IssueConstants;
-import io.onedev.server.util.OneContext;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.inputspec.BuildChoiceInput;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.IssueChoiceInput;
-import io.onedev.server.util.inputspec.PullRequestChoiceInput;
-import io.onedev.server.util.inputspec.booleaninput.BooleanInput;
-import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.dateinput.DateInput;
-import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
-import io.onedev.server.util.inputspec.numberinput.NumberInput;
-import io.onedev.server.util.inputspec.textinput.TextInput;
-import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -115,13 +113,13 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(IssueConstants.QUERY_FIELDS);
-							for (InputSpec field: issueSetting.getFieldSpecs())
+							for (FieldSpec field: issueSetting.getFieldSpecs())
 								candidates.add(field.getName());
 							suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(IssueConstants.ORDER_FIELDS.keySet());
-							for (InputSpec field: issueSetting.getFieldSpecs()) {
-								if (field instanceof NumberInput || field instanceof ChoiceInput || field instanceof DateInput) 
+							for (FieldSpec field: issueSetting.getFieldSpecs()) {
+								if (field instanceof NumberField || field instanceof ChoiceField || field instanceof DateField) 
 									candidates.add(field.getName());
 							}
 							suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
@@ -158,46 +156,46 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								
 								try {
 									IssueQuery.checkField(fieldName, operator);
-									InputSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
-									if (fieldSpec instanceof DateInput || fieldName.equals(FIELD_SUBMIT_DATE) 
+									FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
+									if (fieldSpec instanceof DateField || fieldName.equals(FIELD_SUBMIT_DATE) 
 											|| fieldName.equals(FIELD_UPDATE_DATE)) {
 										suggestions.addAll(SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, unfencedLowerCaseMatchWith));
 										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
-									} else if (fieldSpec instanceof UserChoiceInput) {
+									} else if (fieldSpec instanceof UserChoiceField) {
 										suggestions.addAll(escape(SuggestionUtils.suggestUsers(unfencedLowerCaseMatchWith)));
-									} else if (fieldSpec instanceof IssueChoiceInput) {
+									} else if (fieldSpec instanceof IssueChoiceField) {
 										List<Issue> issues = OneDev.getInstance(IssueManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
 										for (Issue issue: issues) {
 											InputSuggestion suggestion = new InputSuggestion("#" + issue.getNumber(), StringUtils.abbreviate(issue.getTitle(), MAX_ISSUE_TITLE_LEN), null);
 											suggestions.add(suggestion);
 										}
-									} else if (fieldSpec instanceof BuildChoiceInput) {
+									} else if (fieldSpec instanceof BuildChoiceField) {
 										List<Build> builds = OneDev.getInstance(BuildManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
 										for (Build build: builds) {
 											InputSuggestion suggestion = new InputSuggestion("#" + build.getNumber(), null, null);
 											suggestions.add(suggestion);
 										}
-									} else if (fieldSpec instanceof PullRequestChoiceInput) {
+									} else if (fieldSpec instanceof PullRequestChoiceField) {
 										List<PullRequest> requests = OneDev.getInstance(PullRequestManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
 										for (PullRequest request: requests) {
 											InputSuggestion suggestion = new InputSuggestion("#" + request.getNumber(), StringUtils.abbreviate(request.getTitle(), MAX_ISSUE_TITLE_LEN), null);
 											suggestions.add(suggestion);
 										}
-									} else if (fieldSpec instanceof BooleanInput) {
+									} else if (fieldSpec instanceof BooleanField) {
 										suggestions.addAll(SuggestionUtils.suggest(Lists.newArrayList("true", "false"), unfencedLowerCaseMatchWith));
-									} else if (fieldSpec instanceof GroupChoiceInput) {
+									} else if (fieldSpec instanceof GroupChoiceField) {
 										List<String> candidates = OneDev.getInstance(GroupManager.class).query().stream().map(it->it.getName()).collect(Collectors.toList());
 										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
 									} else if (fieldName.equals(FIELD_STATE)) {
 										List<String> candidates = issueSetting.getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
 										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
-									} else if (fieldSpec instanceof ChoiceInput) {
-										OneContext.push(newOneContext());
+									} else if (fieldSpec instanceof ChoiceField) {
+										ComponentContext.push(new ComponentContext(getComponent()));
 										try {
-											List<String> candidates = new ArrayList<>(((ChoiceInput)fieldSpec).getChoiceProvider().getChoices(true).keySet());
+											List<String> candidates = new ArrayList<>(((ChoiceField)fieldSpec).getChoiceProvider().getChoices(true).keySet());
 											suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
 										} finally {
-											OneContext.pop();
+											ComponentContext.pop();
 										}			
 									} else if (fieldName.equals(FIELD_MILESTONE)) {
 										List<String> candidates = project.getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
@@ -205,7 +203,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldName.equals(FIELD_TITLE) || fieldName.equals(FIELD_DESCRIPTION) 
 											|| fieldName.equals(FIELD_COMMENT) || fieldName.equals(FIELD_VOTE_COUNT) 
 											|| fieldName.equals(FIELD_COMMENT_COUNT) || fieldName.equals(FIELD_NUMBER) 
-											|| fieldSpec instanceof NumberInput || fieldSpec instanceof TextInput) {
+											|| fieldSpec instanceof NumberField || fieldSpec instanceof TextField) {
 										return null;
 									}
 								} catch (OneException ex) {
@@ -215,34 +213,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 						return suggestions;
 					}
 					
-					private OneContext newOneContext() {
-						return new OneContext(IssueQueryBehavior.this.getComponent()) {
-
-							@Override
-							public Project getProject() {
-								return IssueQueryBehavior.this.getProject();
-							}
-
-							@Override
-							public EditContext getEditContext(int level) {
-								return new EditContext() {
-
-									@Override
-									public Object getInputValue(String name) {
-										return null;
-									}
-									
-								};
-							}
-
-							@Override
-							public InputContext getInputContext() {
-								throw new UnsupportedOperationException();
-							}
-
-						};
-					}
-
 					@Override
 					protected String getFencingDescription() {
 						return "quote as literal value";

@@ -6,7 +6,7 @@ import java.util.List;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.model.Project;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -21,7 +21,7 @@ public class FileProtection implements Serializable {
 	private String reviewRequirement;
 	
 	@Editable(order=100, description="Specify space-separated paths to be protected. Use * or ? for wildcard match")
-	@Patterns("getPathSuggestions")
+	@Patterns(suggester = "getPathSuggestions")
 	@NotEmpty
 	public String getPaths() {
 		return paths;
@@ -33,7 +33,7 @@ public class FileProtection implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> getPathSuggestions(String matchWith) {
-		return SuggestionUtils.suggestBlobs(OneContext.get().getProject(), matchWith);
+		return SuggestionUtils.suggestBlobs(Project.get(), matchWith);
 	}
 
 	@Editable(order=200, name="Reviewers", description="Specify required reviewers if specified path is "

@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.Valid;
 import javax.validation.ValidationException;
 
 import com.google.common.base.Charsets;
@@ -37,7 +38,7 @@ public class CISpec implements Serializable, Validatable {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String BLOB_PATH = "onedev-ci.xml";
-
+	
 	private List<Job> jobs = new ArrayList<>();
 	
 	private transient Map<String, Job> jobMap;
@@ -45,6 +46,7 @@ public class CISpec implements Serializable, Validatable {
 	private transient List<Job> sortedJobs;
 
 	@Editable
+	@Valid
 	public List<Job> getJobs() {
 		return jobs;
 	}
@@ -190,5 +192,5 @@ public class CISpec implements Serializable, Validatable {
 			return null;
 		}
 	}
-	
+
 }

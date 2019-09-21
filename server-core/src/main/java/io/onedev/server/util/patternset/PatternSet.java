@@ -18,7 +18,6 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
-import org.unbescape.java.JavaEscape;
 
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.server.OneException;
@@ -29,8 +28,6 @@ public class PatternSet implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String ESCAPE_CHARS = "\\\"";
-	
 	private final Set<String> includes;
 	
 	private final Set<String> excludes;
@@ -90,20 +87,21 @@ public class PatternSet implements Serializable {
 				if (pattern.Quoted() != null)
 					value = unescape(pattern.Quoted().getText());
 				else
-					value = pattern.NQuoted().getText();
-				if (pattern.Excluded() != null) {
+					value = unescape(pattern.NQuoted().getText());
+				if (pattern.Excluded() != null)
 					excludes.add(value);
-				} else {
+				else 
 					includes.add(value);
-				}
 			}			
 		}
 		
 		return new PatternSet(includes, excludes);
 	}
 	
-	public static String unescape(String quoted) {
-		return JavaEscape.unescapeJava(quoted.substring(1, quoted.length()-1));
+	public static String unescape(String pattern) {
+		if (pattern.startsWith("\""))
+			pattern = pattern.substring(1, pattern.length()-1);
+		return StringUtils.replace(pattern, "\\\"", "\"");
 	}
 
 	public static PatternsContext parse(String patternSetString) {
@@ -137,7 +135,7 @@ public class PatternSet implements Serializable {
 		StringBuilder builder = new StringBuilder();
 		for (int i=0; i<pattern.length(); i++) {
 			char ch = pattern.charAt(i);
-			if (ESCAPE_CHARS.indexOf(ch) != -1)
+			if (ch == '"')
 				builder.append("\\");
 			builder.append(ch);
 		}

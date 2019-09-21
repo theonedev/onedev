@@ -7,13 +7,16 @@ import java.util.List;
 import org.apache.wicket.Component;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.CISpecAware;
 import io.onedev.server.ci.job.param.JobParam;
-import io.onedev.server.util.OneContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
@@ -31,6 +34,7 @@ public class JobDependency implements Serializable {
 	
 	private String artifacts = "**";
 	
+	// change Named("jobName") also if change name of this property 
 	@Editable(order=100, name="Job")
 	@ChoiceProvider("getJobChoices")
 	@NotEmpty
@@ -54,7 +58,9 @@ public class JobDependency implements Serializable {
 	}
 	
 	@Editable(order=300, name="Artifacts to Retrieve", description="Optionally specify artifacts to retrieve "
-			+ "from the dependency into job workspace. Leave empty to do not retrieve any artifacts")
+			+ "from the dependency into job workspace. Leave empty to do not retrieve any artifacts. "
+			+ "<b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns
 	@NameOfEmptyValue("Do not retrieve")
 	public String getArtifacts() {
@@ -66,9 +72,14 @@ public class JobDependency implements Serializable {
 	}
 
 	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestVariables(String matchWith) {
+		return Job.suggestVariables(matchWith);
+	}
+	
+	@SuppressWarnings("unused")
 	private static List<String> getJobChoices() {
 		List<String> choices = new ArrayList<>();
-		Component component = OneContext.get().getComponent();
+		Component component = ComponentContext.get().getComponent();
 		CISpecAware ciSpecAware = WicketUtils.findInnermost(component, CISpecAware.class);
 		if (ciSpecAware != null) {
 			CISpec ciSpec = ciSpecAware.getCISpec();
@@ -89,10 +100,10 @@ public class JobDependency implements Serializable {
 	}
 	
 	@SuppressWarnings("unused")
-	private static List<InputSpec> getParamSpecs() {
-		String jobName = (String) OneContext.get().getEditContext().getInputValue("jobName");
+	private static List<ParamSpec> getParamSpecs() {
+		String jobName = (String) EditContext.get().getInputValue("jobName");
 		if (jobName != null) {
-			Component component = OneContext.get().getComponent();
+			Component component = ComponentContext.get().getComponent();
 			CISpecAware ciSpecAware = WicketUtils.findInnermost(component, CISpecAware.class);
 			if (ciSpecAware != null) {
 				CISpec ciSpec = ciSpecAware.getCISpec();

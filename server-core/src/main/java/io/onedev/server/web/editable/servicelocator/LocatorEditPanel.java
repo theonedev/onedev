@@ -13,7 +13,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.ci.CISpecAware;
 import io.onedev.server.ci.job.JobAware;
-import io.onedev.server.model.support.jobexecutor.ServiceLocator;
+import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;

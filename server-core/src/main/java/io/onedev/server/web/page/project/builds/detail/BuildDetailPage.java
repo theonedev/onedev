@@ -39,13 +39,16 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.scriptidentity.JobIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -76,7 +79,7 @@ import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
 
 @SuppressWarnings("serial")
-public abstract class BuildDetailPage extends ProjectPage implements InputContext {
+public abstract class BuildDetailPage extends ProjectPage implements InputContext, ScriptIdentityAware {
 
 	public static final String PARAM_BUILD = "build";
 	
@@ -503,13 +506,13 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 	}
 
 	@Override
-	public InputSpec getInputSpec(String inputName) {
-		return Preconditions.checkNotNull(getBuild().getJob().getParamSpecMap().get(inputName));
+	public ParamSpec getInputSpec(String paramName) {
+		return Preconditions.checkNotNull(getBuild().getJob().getParamSpecMap().get(paramName));
 	}
 
 	@Override
-	public void validateName(String inputName) {
-		throw new UnsupportedOperationException();
+	public ScriptIdentity getScriptIdentity() {
+		return new JobIdentity(getBuild().getProject(), getBuild().getCommitId());
 	}
-	
+
 }

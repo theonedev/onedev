@@ -20,7 +20,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.editable.annotation.OmitName;
 
 @SuppressWarnings("serial")
@@ -78,7 +78,7 @@ public class BeanViewer extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(property.isPropertyVisible(new OneContext(this), descriptor) && !property.isPropertyExcluded());
+						setVisible(property.isPropertyVisible(new ComponentContext(this), descriptor) && !property.isPropertyExcluded());
 					}
 					
 				};

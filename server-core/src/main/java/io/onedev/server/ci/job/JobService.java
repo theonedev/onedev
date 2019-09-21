@@ -6,8 +6,10 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.util.validation.annotation.VariableName;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Editable
 public class JobService implements Serializable {
@@ -20,7 +22,7 @@ public class JobService implements Serializable {
 	
 	private String arguments;
 	
-	private List<Variable> envVars = new ArrayList<>();
+	private List<EnvVar> envVars = new ArrayList<>();
 	
 	private String readinessCheckCommand;
 	
@@ -29,7 +31,8 @@ public class JobService implements Serializable {
 	private String memoryRequirement = "128m";
 	
 	@Editable(order=100, description="Specify name of the service, which can be used to access "
-			+ "the service")
+			+ "the service. <b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	@VariableName
 	@NotEmpty
 	public String getName() {
@@ -40,7 +43,9 @@ public class JobService implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200, description="Specify docker image of the service")
+	@Editable(order=200, description="Specify docker image of the service. Type '@' to start "
+			+ "inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getImage() {
 		return image;
@@ -50,7 +55,9 @@ public class JobService implements Serializable {
 		this.image = image;
 	}
 
-	@Editable(order=220, description="Optionally specify arguments to run above image")
+	@Editable(order=220, description="Optionally specify arguments to run above image. "
+			+ "<b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	public String getArguments() {
 		return arguments;
 	}
@@ -61,17 +68,18 @@ public class JobService implements Serializable {
 
 	@Editable(order=300, name="Environment Variables", description="Optionally specify environment variables of "
 			+ "the service")
-	public List<Variable> getEnvVars() {
+	public List<EnvVar> getEnvVars() {
 		return envVars;
 	}
 
-	public void setEnvVars(List<Variable> envVars) {
+	public void setEnvVars(List<EnvVar> envVars) {
 		this.envVars = envVars;
 	}
 
 	@Editable(order=400, description="Specify command to check readiness of the service. This command will "
 			+ "be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be "
-			+ "executed repeatedly until a zero code is returned, which means that service is ready")
+			+ "executed repeatedly until a zero code is returned to indicate service ready. Variable can "
+			+ "be inserted to this field by typing '@'")
 	@NotEmpty
 	public String getReadinessCheckCommand() {
 		return readinessCheckCommand;
@@ -101,6 +109,11 @@ public class JobService implements Serializable {
 
 	public void setMemoryRequirement(String memoryRequirement) {
 		this.memoryRequirement = memoryRequirement;
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestVariables(String matchWith) {
+		return Job.suggestVariables(matchWith);
 	}
 	
 }

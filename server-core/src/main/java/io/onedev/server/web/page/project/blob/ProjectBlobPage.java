@@ -17,8 +17,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -79,6 +77,9 @@ import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.scriptidentity.JobIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
 import io.onedev.server.web.PrioritizedComponentRenderer;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -107,7 +108,7 @@ import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
-public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
+public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, ScriptIdentityAware {
 
 	private static final String PARAM_REVISION = "revision";
 	
@@ -1011,7 +1012,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		String branch = state.blobIdent.revision;
 		getProject().cacheObjectId(branch, refUpdated.getNewCommitId());
 
-		Subject subject = SecurityUtils.getSubject();
 		Long projectId = project.getId();
 		String refName = refUpdated.getRefName();
 		ObjectId oldCommitId = refUpdated.getOldCommitId();
@@ -1024,21 +1024,16 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 					@Override
 					public void run() {
-						ThreadContext.bind(subject);
-						try {
-							Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-							project.cacheObjectId(branch, newCommitId);
-							RefUpdated refUpdated = new RefUpdated(project, refName, oldCommitId, newCommitId);
-							OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
-						} finally {
-							ThreadContext.unbindSubject();
-						}
+						Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+						project.cacheObjectId(branch, newCommitId);
+						RefUpdated refUpdated = new RefUpdated(project, refName, oldCommitId, newCommitId);
+						OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
 					}
 					
 				});
 			}
 			
-		});
+		}, SecurityUtils.getSubject());
 		
 		if (target != null) {
 			BlobIdent newBlobIdent;
@@ -1233,6 +1228,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public ScriptIdentity getScriptIdentity() {
+		return new JobIdentity(getProject(), getCommit().copy());
 	}
 
 }

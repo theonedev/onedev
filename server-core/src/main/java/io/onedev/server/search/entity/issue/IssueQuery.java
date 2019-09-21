@@ -39,7 +39,18 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.fieldspec.BooleanField;
+import io.onedev.server.model.support.issue.fieldspec.BuildChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.DateField;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.issue.fieldspec.GroupChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.IssueChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.NumberField;
+import io.onedev.server.model.support.issue.fieldspec.PullRequestChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.TextField;
+import io.onedev.server.model.support.issue.fieldspec.UserChoiceField;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -58,17 +69,6 @@ import io.onedev.server.search.entity.issue.IssueQueryParser.QueryContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.RevisionCriteriaContext;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.util.inputspec.BuildChoiceInput;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.IssueChoiceInput;
-import io.onedev.server.util.inputspec.PullRequestChoiceInput;
-import io.onedev.server.util.inputspec.booleaninput.BooleanInput;
-import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.dateinput.DateInput;
-import io.onedev.server.util.inputspec.groupchoiceinput.GroupChoiceInput;
-import io.onedev.server.util.inputspec.numberinput.NumberInput;
-import io.onedev.server.util.inputspec.textinput.TextInput;
-import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.web.page.admin.issuesetting.GlobalIssueSettingPage;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.util.WicketUtils;
@@ -131,7 +131,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 			if (criteriaContext != null) {
 				issueCriteria = new IssueQueryBaseVisitor<IssueCriteria>() {
 
-					private long getValueOrdinal(ChoiceInput field, String value) {
+					private long getValueOrdinal(ChoiceField field, String value) {
 						List<String> choices = new ArrayList<>(field.getChoiceProvider().getChoices(true).keySet());
 						return choices.indexOf(value);
 					}
@@ -234,13 +234,13 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(FIELD_COMMENT)) {
 								return new CommentCriteria(value);
 							} else {
-								InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
-								if (fieldSpec instanceof TextInput) {
+								FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
+								if (fieldSpec instanceof TextField) {
 									return new StringFieldCriteria(fieldName, value, operator);
 								} else {
 									long ordinal;
 									if (validate)
-										ordinal = getValueOrdinal((ChoiceInput) fieldSpec, value);
+										ordinal = getValueOrdinal((ChoiceField) fieldSpec, value);
 									else
 										ordinal = 0;
 									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, true);
@@ -258,22 +258,22 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(FIELD_NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
-								InputSpec field = getIssueSetting().getFieldSpec(fieldName);
-								if (field instanceof IssueChoiceInput || field instanceof BuildChoiceInput 
-										|| field instanceof PullRequestChoiceInput) {
+								FieldSpec field = getIssueSetting().getFieldSpec(fieldName);
+								if (field instanceof IssueChoiceField || field instanceof BuildChoiceField 
+										|| field instanceof PullRequestChoiceField) {
 									value = value.trim();
 									if (value.startsWith("#"))
 										value = value.substring(1);
 									return new ReferenceableFieldCriteria(fieldName, getIntValue(value));
-								} else if (field instanceof BooleanInput) {
+								} else if (field instanceof BooleanField) {
 									return new BooleanFieldCriteria(fieldName, getBooleanValue(value));
-								} else if (field instanceof NumberInput) {
+								} else if (field instanceof NumberField) {
 									return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
-								} else if (field instanceof ChoiceInput) { 
-									long ordinal = getValueOrdinal((ChoiceInput) field, value);
+								} else if (field instanceof ChoiceField) { 
+									long ordinal = getValueOrdinal((ChoiceField) field, value);
 									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
-								} else if (field instanceof UserChoiceInput 
-										|| field instanceof GroupChoiceInput) {
+								} else if (field instanceof UserChoiceField 
+										|| field instanceof GroupChoiceField) {
 									return new ChoiceFieldCriteria(fieldName, value, -1, operator, false);
 								} else {
 									return new StringFieldCriteria(fieldName, value, operator);
@@ -288,13 +288,13 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(FIELD_NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
-								InputSpec field = getIssueSetting().getFieldSpec(fieldName);
-								if (field instanceof NumberInput) {
+								FieldSpec field = getIssueSetting().getFieldSpec(fieldName);
+								if (field instanceof NumberField) {
 									return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
 								} else {
 									long ordinal;
 									if (validate)
-										ordinal = getValueOrdinal((ChoiceInput) field, value);
+										ordinal = getValueOrdinal((ChoiceField) field, value);
 									else
 										ordinal = 0;
 									return new ChoiceFieldCriteria(fieldName, value, ordinal, operator, false);
@@ -335,9 +335,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
 				if (validate && !IssueConstants.ORDER_FIELDS.containsKey(fieldName)) {
-					InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
-					if (!(fieldSpec instanceof ChoiceInput) && !(fieldSpec instanceof DateInput) 
-							&& !(fieldSpec instanceof NumberInput)) {
+					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
+					if (!(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField) 
+							&& !(fieldSpec instanceof NumberField)) {
 						throw new OneException("Can not order by field: " + fieldName);
 					}
 				}
@@ -369,7 +369,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 	}
 	
 	public static void checkField(String fieldName, int operator) {
-		InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
+		FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec == null && !IssueConstants.QUERY_FIELDS.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
@@ -378,19 +378,19 @@ public class IssueQuery extends EntityQuery<Issue> {
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsMe:
-			if (!(fieldSpec instanceof UserChoiceInput))
+			if (!(fieldSpec instanceof UserChoiceField))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsBefore:
 		case IssueQueryLexer.IsAfter:
-			if (!fieldName.equals(FIELD_SUBMIT_DATE) && !fieldName.equals(FIELD_UPDATE_DATE) && !(fieldSpec instanceof DateInput))
+			if (!fieldName.equals(FIELD_SUBMIT_DATE) && !fieldName.equals(FIELD_UPDATE_DATE) && !(fieldSpec instanceof DateField))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.Contains:
 			if (!fieldName.equals(FIELD_TITLE) 
 					&& !fieldName.equals(FIELD_DESCRIPTION)
 					&& !fieldName.equals(FIELD_COMMENT)
-					&& !(fieldSpec instanceof TextInput) 
+					&& !(fieldSpec instanceof TextField) 
 					&& !(fieldSpec != null && fieldSpec.isAllowMultiple())) {
 				throw newOperatorException(fieldName, operator);
 			}
@@ -401,15 +401,15 @@ public class IssueQuery extends EntityQuery<Issue> {
 					&& !fieldName.equals(FIELD_COMMENT_COUNT) 
 					&& !fieldName.equals(FIELD_NUMBER)
 					&& !fieldName.equals(FIELD_MILESTONE)
-					&& !(fieldSpec instanceof IssueChoiceInput)
-					&& !(fieldSpec instanceof PullRequestChoiceInput)
-					&& !(fieldSpec instanceof BuildChoiceInput)
-					&& !(fieldSpec instanceof BooleanInput)
-					&& !(fieldSpec instanceof NumberInput) 
-					&& !(fieldSpec instanceof ChoiceInput) 
-					&& !(fieldSpec instanceof UserChoiceInput)
-					&& !(fieldSpec instanceof GroupChoiceInput)
-					&& !(fieldSpec instanceof TextInput)) {
+					&& !(fieldSpec instanceof IssueChoiceField)
+					&& !(fieldSpec instanceof PullRequestChoiceField)
+					&& !(fieldSpec instanceof BuildChoiceField)
+					&& !(fieldSpec instanceof BooleanField)
+					&& !(fieldSpec instanceof NumberField) 
+					&& !(fieldSpec instanceof ChoiceField) 
+					&& !(fieldSpec instanceof UserChoiceField)
+					&& !(fieldSpec instanceof GroupChoiceField)
+					&& !(fieldSpec instanceof TextField)) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
@@ -418,8 +418,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 			if (!fieldName.equals(FIELD_VOTE_COUNT)
 					&& !fieldName.equals(FIELD_COMMENT_COUNT)
 					&& !fieldName.equals(FIELD_NUMBER)
-					&& !(fieldSpec instanceof NumberInput) 
-					&& !(fieldSpec instanceof ChoiceInput))
+					&& !(fieldSpec instanceof NumberField) 
+					&& !(fieldSpec instanceof ChoiceField))
 				throw newOperatorException(fieldName, operator);
 			break;
 		}

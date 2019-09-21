@@ -2,7 +2,7 @@ package io.onedev.server.web.page.admin.mailsetting;
 
 import java.io.Serializable;
 
-import io.onedev.server.model.support.setting.MailSetting;
+import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable

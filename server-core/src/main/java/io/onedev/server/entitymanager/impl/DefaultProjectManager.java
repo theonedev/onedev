@@ -14,8 +14,6 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
@@ -52,7 +50,8 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.model.support.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.groovyscript.GroovyScript;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -161,6 +160,8 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     	if (oldName != null && !oldName.equals(project.getName())) {
         	for (JobExecutor jobExecutor: settingManager.getJobExecutors())
         		jobExecutor.onRenameProject(oldName, project.getName());
+        	for (GroovyScript groovyScript: settingManager.getGroovyScripts())
+        		groovyScript.onRenameProject(oldName, project.getName());
     	}
     	
     }
@@ -172,6 +173,10 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     	int index = 0;
     	for (JobExecutor jobExecutor: settingManager.getJobExecutors()) {
     		usage.add(jobExecutor.onDeleteProject(project.getName(), index).prefix("administration"));
+    		index++;
+    	}
+    	for (GroovyScript groovyScript: settingManager.getGroovyScripts()) {
+    		usage.add(groovyScript.onDeleteProject(project.getName(), index).prefix("administration"));
     		index++;
     	}
     	
@@ -339,7 +344,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			throw ExceptionUtils.unchecked(e);
 		}
     	
-    	Subject subject = SecurityUtils.getSubject();
     	Long projectId = project.getId();
     	transactionManager.runAfterCommit(new Runnable() {
 
@@ -349,16 +353,11 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 
 					@Override
 					public void run() {
-						ThreadContext.bind(subject);
-						try {
-							Project project = load(projectId);
-							listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
-						} finally {
-							ThreadContext.unbindSubject();
-						}
+						Project project = load(projectId);
+						listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
 					}
 		    		
-		    	});
+		    	}, SecurityUtils.getSubject());
 			}
     		
     	});
@@ -395,7 +394,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 			throw new RuntimeException(e);
 		}
 
-    	Subject subject = SecurityUtils.getSubject();
     	Long projectId = project.getId();
     	transactionManager.runAfterCommit(new Runnable() {
 
@@ -405,16 +403,11 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 
 					@Override
 					public void run() {
-						ThreadContext.bind(subject);
-						try {
-							Project project = load(projectId);
-							listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
-						} finally {
-							ThreadContext.unbindSubject();
-						}
+						Project project = load(projectId);
+						listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
 					}
 		    		
-		    	});
+		    	}, SecurityUtils.getSubject());
 			}
     		
     	});

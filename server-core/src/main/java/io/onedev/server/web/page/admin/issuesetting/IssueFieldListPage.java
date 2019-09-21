@@ -23,14 +23,16 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -39,7 +41,6 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
-import com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 public class IssueFieldListPage extends GlobalIssueSettingPage {
@@ -48,7 +49,7 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 		super(params);
 	}
 
-	private DataTable<InputSpec, Void> fieldsTable;
+	private DataTable<FieldSpec, Void> fieldsTable;
 	
 	@Override
 	protected void onInitialize() {
@@ -81,29 +82,31 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 			
 		});
 		
-		List<IColumn<InputSpec, Void>> columns = new ArrayList<>();
+		List<IColumn<FieldSpec, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Name")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, true) {
+			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
+				FieldSpec field = rowModel.getObject();
+				cellItem.add(new ColumnFragment(componentId, field) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getName());
+						return new Label(componentId, "<span class=\"drag-indicator fa fa-reorder\"></span> " 
+								+ HtmlEscape.escapeHtml5(field.getName())).setEscapeModelStrings(false);
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Type")) {
+		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Type")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				InputSpec field = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, rowModel, false) {
+			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
+				FieldSpec field = rowModel.getObject();
+				cellItem.add(new ColumnFragment(componentId, field) {
 
 					@Override
 					protected Component newLabel(String componentId) {
@@ -114,31 +117,35 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Prompt upon Issue Open")) {
+		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Description")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, false) {
+			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
+				FieldSpec field = rowModel.getObject();
+				cellItem.add(new ColumnFragment(componentId, field) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						InputSpec field = rowModel.getObject();
-						return new Label(componentId, StringUtils.describe(getSetting().getDefaultPromptFieldsUponIssueOpen().contains(field.getName())));
+						String description = field.getDescription();
+						if (description != null)
+							return new Label(componentId, description);
+						else
+							return new Label(componentId, "<i>No description</i>").setEscapeModelStrings(false);
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Display in Issue List")) {
+		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Display in Issue List")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, false) {
+			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
+				FieldSpec field = rowModel.getObject();
+				cellItem.add(new ColumnFragment(componentId, field) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						InputSpec field = rowModel.getObject();
 						return new Label(componentId, StringUtils.describe(getSetting().getDefaultListFields().contains(field.getName())));
 					}
 					
@@ -152,11 +159,11 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 			
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel, false) {
+			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
+				cellItem.add(new ColumnFragment(componentId, rowModel.getObject()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
@@ -173,16 +180,16 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 			
 		});		
 		
-		IDataProvider<InputSpec> dataProvider = new ListDataProvider<InputSpec>() {
+		IDataProvider<FieldSpec> dataProvider = new ListDataProvider<FieldSpec>() {
 
 			@Override
-			protected List<InputSpec> getData() {
+			protected List<FieldSpec> getData() {
 				return getSetting().getFieldSpecs();
 			}
 
 		};
 		
-		add(fieldsTable = new DataTable<InputSpec, Void>("issueFields", columns, dataProvider, Integer.MAX_VALUE));
+		add(fieldsTable = new DataTable<FieldSpec, Void>("issueFields", columns, dataProvider, Integer.MAX_VALUE));
 		fieldsTable.addTopToolbar(new HeadersToolbar<Void>(fieldsTable, null));
 		fieldsTable.addBottomToolbar(new NoRecordsToolbar(fieldsTable));
 		fieldsTable.setOutputMarkupId(true);
@@ -218,16 +225,11 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 	
 	private abstract class ColumnFragment extends Fragment {
 
-		private final int index;
+		private final FieldSpec field;
 		
-		public ColumnFragment(String id, IModel<InputSpec> model, boolean nameColumn) {
-			super(id, nameColumn?"nameColumnFrag":"otherColumnFrag", IssueFieldListPage.this, model);
-			this.index = getFieldSpecIndex(getField().getName());
-			Preconditions.checkState(this.index != -1);
-		}
-		
-		private InputSpec getField() {
-			return (InputSpec) getDefaultModelObject();
+		public ColumnFragment(String id, FieldSpec field) {
+			super(id, "columnFrag", IssueFieldListPage.this);
+			this.field = field;
 		}
 		
 		protected abstract Component newLabel(String componentId);
@@ -235,6 +237,10 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 		@Override
 		protected void onInitialize() {
 			super.onInitialize();
+			
+			int index = getFieldSpecIndex(field.getName());
+			Preconditions.checkState(index != -1);
+			
 			AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
 				@Override
@@ -243,7 +249,7 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 
 						@Override
 						protected String getTitle() {
-							return getField().getName() + " (type: " + EditableUtils.getDisplayName(getField().getClass()) + ")";
+							return field.getName() + " (type: " + EditableUtils.getDisplayName(field.getClass()) + ")";
 						}
 
 						@Override
@@ -256,10 +262,10 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 						protected Component newBody(String id) {
 							SideFloating sideFloating = this;
 							Fragment fragment = new Fragment(id, "viewFieldFrag", IssueFieldListPage.this);
-							fragment.add(BeanContext.view("viewer1", getField(), Sets.newHashSet("name"), true));
+							fragment.add(BeanContext.view("viewer1", field, Sets.newHashSet("name"), true));
 							FieldBean bean = new FieldBean();
-							bean.setPromptUponIssueOpen(getSetting().getDefaultPromptFieldsUponIssueOpen().contains(getField().getName()));
-							bean.setDisplayInIssueList(getSetting().getDefaultListFields().contains(getField().getName()));
+							bean.setPromptUponIssueOpen(getSetting().getDefaultPromptFieldsUponIssueOpen().contains(field.getName()));
+							bean.setDisplayInIssueList(getSetting().getDefaultListFields().contains(field.getName()));
 							fragment.add(BeanContext.view("viewer2", bean, Sets.newHashSet("field"), true));
 							fragment.add(new ModalLink("edit") {
 
@@ -299,9 +305,9 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 								@Override
 								public void onClick(AjaxRequestTarget target) {
 									getSetting().getFieldSpecs().remove(index);
-									getSetting().getDefaultPromptFieldsUponIssueOpen().remove(getField().getName());
-									getSetting().getDefaultListFields().remove(getField().getName());
-									getSetting().onDeleteField(getField().getName());
+									getSetting().getDefaultPromptFieldsUponIssueOpen().remove(field.getName());
+									getSetting().getDefaultListFields().remove(field.getName());
+									getSetting().onDeleteField(field.getName());
 									getSetting().setReconciled(false);
 									OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
 									target.add(fieldsTable);

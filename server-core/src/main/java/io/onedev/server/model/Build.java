@@ -3,6 +3,8 @@ package io.onedev.server.model;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,24 +44,32 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.BeanUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.BuildInfoManager;
+import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.VariableInterpolator;
 import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.ci.job.paramspec.SecretParam;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.RefInfo;
+import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.SecretInput;
+import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Entity
 @Table(
@@ -341,7 +351,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	public void setPullRequestBuilds(Collection<PullRequestBuild> pullRequestBuilds) {
 		this.pullRequestBuilds = pullRequestBuilds;
 	}
-
+	
 	public Map<String, List<String>> getParamMap() {
 		if (paramMap == null) {
 			paramMap = new HashMap<>();
@@ -399,7 +409,7 @@ public class Build extends AbstractEntity implements Referenceable {
 		Map<String, Integer> paramOrders = new HashMap<>();
 		
 		int index = 1;
-		for (InputSpec paramSpec: getJob().getParamSpecs())
+		for (ParamSpec paramSpec: getJob().getParamSpecs())
 			paramOrders.put(paramSpec.getName(), index++);
 			
 		Collections.sort(params, new Comparator<BuildParam>() {
@@ -435,7 +445,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	public Collection<String> getSecretValuesToMask() {
 		Collection<String> secretValuesToMask = new HashSet<>();
 		for (BuildParam param: getParams()) {
-			if (param.getType().equals(InputSpec.SECRET) && param.getValue() != null) {		
+			if (param.getType().equals(ParamSpec.SECRET) && param.getValue() != null) {		
 				try {
 					String value = getSecretValue(param.getValue());
 					if (value.length() >= SecretInput.MASK.length())
@@ -456,7 +466,7 @@ public class Build extends AbstractEntity implements Referenceable {
 		if (!checkedParamNames.add(paramName))
 			return false;
 		
-		InputSpec paramSpec = Preconditions.checkNotNull(getJob().getParamSpecMap().get(paramName));
+		ParamSpec paramSpec = Preconditions.checkNotNull(getJob().getParamSpecMap().get(paramName));
 		if (paramSpec.getShowCondition() != null) {
 			Input dependentInput = getParamInputs().get(paramSpec.getShowCondition().getInputName());
 			Preconditions.checkNotNull(dependentInput);
@@ -474,11 +484,11 @@ public class Build extends AbstractEntity implements Referenceable {
 		}
 	}
 	
-	public String getSecretValue(String secretKey) {
-		if (secretKey.startsWith(SecretInput.LITERAL_VALUE_PREFIX))
-			return secretKey.substring(SecretInput.LITERAL_VALUE_PREFIX.length());
+	public String getSecretValue(String secretName) {
+		if (secretName.startsWith(SecretParam.LITERAL_VALUE_PREFIX))
+			return secretName.substring(SecretParam.LITERAL_VALUE_PREFIX.length());
 		else
-			return project.getSecretValue(secretKey, ObjectId.fromString(getCommitHash()));
+			return project.getSecretValue(secretName, ObjectId.fromString(getCommitHash()));
 	}
 	
 	public CISpec getCISpec() {
@@ -503,7 +513,7 @@ public class Build extends AbstractEntity implements Referenceable {
 		BeanDescriptor descriptor = new BeanDescriptor(paramBean.getClass());
 		for (List<PropertyDescriptor> groupProperties: descriptor.getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) {
-				InputSpec paramSpec = getJob().getParamSpecMap().get(property.getDisplayName());
+				ParamSpec paramSpec = getJob().getParamSpecMap().get(property.getDisplayName());
 				Preconditions.checkNotNull(paramSpec);
 				Input input = Preconditions.checkNotNull(getParamInputs().get(paramSpec.getName()));
 				property.setPropertyValue(paramBean, paramSpec.convertToObject(input.getValues()));
@@ -575,6 +585,61 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public String getArtifactsLockKey() {
 		return "build-artifacts:" + getId();
+	}
+	
+	public String interpolate(@Nullable String interpolativeString) {
+		if (interpolativeString != null) 
+			return Interpolative.fromString(interpolativeString).interpolateWith(new VariableInterpolator(this));
+		else 
+			return null;
+	}	
+	
+	@SuppressWarnings("unchecked")
+	public void interpolate(Serializable bean) {
+		try {
+			for (Method getter: BeanUtils.findGetters(bean.getClass())) {
+				Method setter = BeanUtils.findSetter(getter);
+				if (setter != null && getter.getAnnotation(Editable.class) != null) {
+					Serializable value = (Serializable) getter.invoke(bean);
+					if (value != null) {
+						if (getter.getAnnotation(io.onedev.server.web.editable.annotation.Interpolative.class) != null) {
+							if (value instanceof String) {
+								setter.invoke(bean, interpolate((String) getter.invoke(bean)));
+							} else if (value instanceof List) {
+								List<String> list = (List<String>) value;
+								for (int i=0; i<list.size(); i++)
+									list.set(i, interpolate(list.get(i)));
+							}
+						} else if (value instanceof Collection) {
+							for (Serializable element: (Collection<Serializable>) value) {
+								if (element.getClass().getAnnotation(Editable.class) != null)
+									interpolate(element);
+							}
+						} else if (value.getClass().getAnnotation(Editable.class) != null) {
+							interpolate(value);
+						}
+					}
+				}
+			}
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public Collection<String> getOnBranches() {
+		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
+		Collection<ObjectId> descendants = commitInfoManager.getDescendants(
+				getProject(), Sets.newHashSet(getCommitId()));
+		descendants.add(getCommitId());
+	
+		Collection<String> branches = new ArrayList<>();
+		for (RefInfo ref: getProject().getBranches()) {
+			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
+			if (descendants.contains(ref.getPeeledObj()))
+				branches.add(branchName);
+		}
+		
+		return branches;
 	}
 	
 	public static String getLogWebSocketObservable(Long buildId) {

@@ -25,19 +25,19 @@ import org.apache.wicket.util.time.Duration;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -221,7 +221,7 @@ public abstract class BuildSidePanel extends Panel {
 			protected void populateItem(ListItem<BuildParam> item) {
 				BuildParam param = item.getModelObject();
 				item.add(new Label("name", param.getName()));
-				if (param.getType().equals(InputSpec.SECRET))
+				if (param.getType().equals(ParamSpec.SECRET))
 					item.add(new Label("value", SecretInput.MASK));
 				else
 					item.add(new Label("value", param.getValue()));

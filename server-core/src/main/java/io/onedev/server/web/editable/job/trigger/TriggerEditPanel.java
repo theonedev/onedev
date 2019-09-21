@@ -72,7 +72,7 @@ abstract class TriggerEditPanel extends Panel implements JobAware {
 				super.onSubmit(target, form);
 
 				JobTrigger trigger = bean.getTrigger();
-				if (!editor.hasErrors(true)) {
+				if (editor.isValid()) {
 					if (triggerIndex != -1) {
 						triggers.set(triggerIndex, trigger);
 					} else {

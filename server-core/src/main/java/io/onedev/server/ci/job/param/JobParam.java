@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
+import javax.validation.Valid;
 import javax.validation.ValidationException;
 import javax.validation.constraints.NotNull;
 
@@ -24,11 +25,14 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.ci.job.Job;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.SecretInput;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.ci.job.paramspec.SecretParam;
+import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.annotation.Editable;
 
+@Editable
 public class JobParam implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -51,6 +55,7 @@ public class JobParam implements Serializable {
 	}
 
 	@NotNull
+	@Valid
 	public ValuesProvider getValuesProvider() {
 		return valuesProvider;
 	}
@@ -100,10 +105,10 @@ public class JobParam implements Serializable {
 		}
 	}
 	
-	public static void validateParamMatrix(Map<String, InputSpec> paramSpecMap, Map<String, List<List<String>>> paramMatrix) {
+	public static void validateParamMatrix(Map<String, ParamSpec> paramSpecMap, Map<String, List<List<String>>> paramMatrix) {
 		validateParamNames(paramSpecMap.keySet(), paramMatrix.keySet());
 		for (Map.Entry<String, List<List<String>>> entry: paramMatrix.entrySet()) {
-			InputSpec paramSpec = Preconditions.checkNotNull(paramSpecMap.get(entry.getKey()));
+			ParamSpec paramSpec = Preconditions.checkNotNull(paramSpecMap.get(entry.getKey()));
 			if (entry.getValue() != null) {
 				try {
 					validateParamValues(entry.getValue());
@@ -118,12 +123,12 @@ public class JobParam implements Serializable {
 		}
 	}
 	
-	private static void validateParamValue(InputSpec paramSpec, String paramName, List<String> paramValue) {
+	private static void validateParamValue(ParamSpec paramSpec, String paramName, List<String> paramValue) {
 		try {
 			paramSpec.convertToObject(paramValue);
 		} catch (Exception e) {
 			String displayValue;
-			if (paramSpec instanceof SecretInput)
+			if (paramSpec instanceof SecretParam)
 				displayValue = SecretInput.MASK;
 			else
 				displayValue = paramValue.toString();
@@ -143,22 +148,22 @@ public class JobParam implements Serializable {
 		}
 	}
 	
-	public static void validateParamMap(Map<String, InputSpec> paramSpecMap, Map<String, List<String>> paramMap) {
+	public static void validateParamMap(Map<String, ParamSpec> paramSpecMap, Map<String, List<String>> paramMap) {
 		validateParamNames(paramSpecMap.keySet(), paramMap.keySet());
 		for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
-			InputSpec paramSpec = Preconditions.checkNotNull(paramSpecMap.get(entry.getKey()));
+			ParamSpec paramSpec = Preconditions.checkNotNull(paramSpecMap.get(entry.getKey()));
 			validateParamValue(paramSpec, entry.getKey(), entry.getValue());
 		}
 	}
 	
-	public static Map<String, InputSpec> getParamSpecMap(List<InputSpec> paramSpecs) {
-		Map<String, InputSpec> paramSpecMap = new LinkedHashMap<>();
-		for (InputSpec paramSpec: paramSpecs)
+	public static Map<String, ParamSpec> getParamSpecMap(List<ParamSpec> paramSpecs) {
+		Map<String, ParamSpec> paramSpecMap = new LinkedHashMap<>();
+		for (ParamSpec paramSpec: paramSpecs)
 			paramSpecMap.put(paramSpec.getName(), paramSpec);
 		return paramSpecMap;
 	}
 	
-	public static void validateParams(List<InputSpec> paramSpecs, List<JobParam> params) {
+	public static void validateParams(List<ParamSpec> paramSpecs, List<JobParam> params) {
 		Map<String, List<List<String>>> paramMap = new HashMap<>();
 		for (JobParam param: params) {
 			List<List<String>> values;
@@ -173,15 +178,15 @@ public class JobParam implements Serializable {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static Class<? extends Serializable> defineBeanClass(Collection<InputSpec> paramSpecs) {
+	public static Class<? extends Serializable> defineBeanClass(Collection<ParamSpec> paramSpecs) {
 		byte[] bytes = SerializationUtils.serialize((Serializable) paramSpecs);
 		String className = PARAM_BEAN_PREFIX + "_" + Hex.encodeHexString(bytes);
 		
-		List<InputSpec> paramSpecsCopy = new ArrayList<>(paramSpecs);
+		List<ParamSpec> paramSpecsCopy = new ArrayList<>(paramSpecs);
 		for (int i=0; i<paramSpecsCopy.size(); i++) {
-			InputSpec paramSpec = paramSpecsCopy.get(i);
-			if (paramSpec instanceof SecretInput) {
-				InputSpec paramSpecClone = (InputSpec) SerializationUtils.clone(paramSpec);
+			ParamSpec paramSpec = paramSpecsCopy.get(i);
+			if (paramSpec instanceof SecretParam) {
+				ParamSpec paramSpecClone = (ParamSpec) SerializationUtils.clone(paramSpec);
 				String description = paramSpecClone.getDescription();
 				if (description == null)
 					description = "";
@@ -191,7 +196,7 @@ public class JobParam implements Serializable {
 				paramSpecsCopy.set(i, paramSpecClone);
 			}
 		}
-		return (Class<? extends Serializable>) InputSpec.defineClass(className, "Build Parameters", paramSpecsCopy);
+		return (Class<? extends Serializable>) ParamSpec.defineClass(className, "Build Parameters", paramSpecsCopy);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -204,7 +209,7 @@ public class JobParam implements Serializable {
 			} catch (DecoderException e) {
 				throw new RuntimeException(e);
 			}
-			List<InputSpec> paramSpecs = (List<InputSpec>) SerializationUtils.deserialize(bytes);
+			List<ParamSpec> paramSpecs = (List<ParamSpec>) SerializationUtils.deserialize(bytes);
 			return defineBeanClass(paramSpecs);
 		} else {
 			return null;
@@ -218,11 +223,11 @@ public class JobParam implements Serializable {
 			for (PropertyDescriptor property: groupProperties) {
 				if (paramNames.contains(property.getDisplayName()))	{
 					Object typedValue = property.getPropertyValue(paramBean);
-					InputSpec paramSpec = Preconditions.checkNotNull(job.getParamSpecMap().get(property.getDisplayName()));
+					ParamSpec paramSpec = Preconditions.checkNotNull(job.getParamSpecMap().get(property.getDisplayName()));
 					List<String> values = new ArrayList<>();
 					for (String value: paramSpec.convertToStrings(typedValue)) {
-						if (paramSpec instanceof SecretInput)
-							value = SecretInput.LITERAL_VALUE_PREFIX + value;
+						if (paramSpec instanceof SecretParam)
+							value = SecretParam.LITERAL_VALUE_PREFIX + value;
 						values.add(value);
 					}
 					paramMap.put(paramSpec.getName(), values);

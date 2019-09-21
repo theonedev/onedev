@@ -43,9 +43,11 @@ import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -60,8 +62,6 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateResolution;
@@ -309,7 +309,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		Query<?> query = getSession().createQuery("select distinct name from IssueField");
 		Set<String> undefinedFields = new HashSet<>();
 		for (String fieldName: (List<String>)query.getResultList()) {
-			InputSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
+			FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 			if (field == null)
 				undefinedFields.add(fieldName);
 		}
@@ -378,7 +378,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Override
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		Query query = getSession().createQuery("select distinct name, value from IssueField where type=:choice");
-		query.setParameter("choice", InputSpec.ENUMERATION);
+		query.setParameter("choice", FieldSpec.ENUMERATION);
 		Set<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
 		for (Object[] row: (List<Object[]>)query.getResultList()) {
 			String fieldName = (String) row[0];
@@ -449,7 +449,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Override
 	public void fixFieldValueOrders() {
 		Query query = getSession().createQuery("select distinct name, value, ordinal from IssueField where type=:choice");
-		query.setParameter("choice", InputSpec.ENUMERATION);
+		query.setParameter("choice", FieldSpec.ENUMERATION);
 
 		for (Object[] row: (List<Object[]>)query.getResultList()) {
 			String name = (String) row[0];

@@ -13,8 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.SecretInput;
+import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.model.support.inputspec.SecretInput;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 
 public class Input implements Serializable {
 
@@ -74,17 +75,21 @@ public class Input implements Serializable {
 
 	@Nullable
 	public Object getTypedValue(@Nullable InputSpec inputSpec) {
-		try {
-			return inputSpec.convertToObject(getValues());
-		} catch (ValidationException e) {
-			String displayValue;
-			if (type.equals(InputSpec.SECRET)) 
-				displayValue = SecretInput.MASK;
-			else 
-				displayValue = "" + getValues();
-			
-			logger.error("Error converting field value (field: {}, value: {}, error: {})", 
-					getName(), displayValue, e.getMessage());
+		if (inputSpec != null) {
+			try {
+				return inputSpec.convertToObject(getValues());
+			} catch (ValidationException e) {
+				String displayValue;
+				if (type.equals(FieldSpec.SECRET)) 
+					displayValue = SecretInput.MASK;
+				else 
+					displayValue = "" + getValues();
+				
+				logger.error("Error converting field value (field: {}, value: {}, error: {})", 
+						getName(), displayValue, e.getMessage());
+				return null;
+			}
+		} else {
 			return null;
 		}
 	}

@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -31,13 +32,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
-import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TagCommand;
@@ -107,6 +104,7 @@ import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
+import io.onedev.server.model.support.BuildSetting;
 import io.onedev.server.model.support.CommitMessageTransform;
 import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
@@ -114,32 +112,31 @@ import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.Secret;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
-import io.onedev.server.model.support.build.BuildSetting;
 import io.onedev.server.model.support.issue.IssueSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.permission.DefaultPrivilege;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatcher.UserMatcher;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.util.ProjectAware;
+import io.onedev.server.web.util.WicketUtils;
 
 @Entity
 @Table(indexes={@Index(columnList="o_forkedFrom_id"), @Index(columnList="name")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @DynamicUpdate
-@ClassValidating
 @Editable
-public class Project extends AbstractEntity implements Validatable {
+public class Project extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -147,6 +144,23 @@ public class Project extends AbstractEntity implements Validatable {
 	
 	public static final int MAX_UPLOAD_SIZE = 10; // In mega bytes
 	
+	static ThreadLocal<Stack<Project>> stack =  new ThreadLocal<Stack<Project>>() {
+
+		@Override
+		protected Stack<Project> initialValue() {
+			return new Stack<Project>();
+		}
+	
+	};
+	
+	public static void push(Project project) {
+		stack.get().push(project);
+	}
+
+	public static void pop() {
+		stack.get().pop();
+	}
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
 	private Project forkedFrom;
@@ -333,8 +347,6 @@ public class Project extends AbstractEntity implements Validatable {
     private transient Optional<CommitQuerySetting> commitQuerySettingOfCurrentUserHolder;
     
 	private transient List<Milestone> sortedMilestones;
-	
-	private transient Map<String, Secret> secretMap;
 	
 	@Editable(order=100)
 	@ProjectName
@@ -925,7 +937,6 @@ public class Project extends AbstractEntity implements Validatable {
 			String refName = GitUtils.branch2ref(branchName); 
 			cacheObjectId(refName, commit);
 			
-	    	Subject subject = SecurityUtils.getSubject();
 	    	ObjectId commitId = commit.copy();
 	    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
 
@@ -935,17 +946,12 @@ public class Project extends AbstractEntity implements Validatable {
 
 						@Override
 						public void run() {
-							ThreadContext.bind(subject);
-							try {
-								Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-								OneDev.getInstance(ListenerRegistry.class).post(
-										new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
-							} finally {
-								ThreadContext.unbindSubject();
-							}
+							Project project = OneDev.getInstance(ProjectManager.class).load(getId());
+							OneDev.getInstance(ListenerRegistry.class).post(
+									new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
 						}
 			    		
-			    	});
+			    	}, SecurityUtils.getSubject());
 				}
 	    		
 	    	});			
@@ -967,7 +973,6 @@ public class Project extends AbstractEntity implements Validatable {
 			String refName = GitUtils.tag2ref(tagName);
 			cacheObjectId(refName, tag.getObjectId());
 			
-	    	Subject subject = SecurityUtils.getSubject();
 	    	ObjectId commitId = tag.getObjectId().copy();
 	    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
 
@@ -977,17 +982,12 @@ public class Project extends AbstractEntity implements Validatable {
 
 						@Override
 						public void run() {
-							ThreadContext.bind(subject);
-							try {
-								Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-								OneDev.getInstance(ListenerRegistry.class).post(
-										new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
-							} finally {
-								ThreadContext.unbindSubject();
-							}
+							Project project = OneDev.getInstance(ProjectManager.class).load(getId());
+							OneDev.getInstance(ListenerRegistry.class).post(
+									new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
 						}
 			    		
-			    	});
+			    	}, SecurityUtils.getSubject());
 				}
 	    		
 	    	});			
@@ -1230,15 +1230,6 @@ public class Project extends AbstractEntity implements Validatable {
 		this.secrets = secrets;
 	}
 	
-	public Map<String, Secret> getSecretMap() {
-		if (secretMap == null) {
-			secretMap = new HashMap<>();
-			for (Secret secret: getSecrets())
-				secretMap.put(secret.getName(), secret);
-		}
-		return secretMap;
-	}
-
 	@Nullable
 	public TagProtection getTagProtection(String tagName, User user) {
 		for (TagProtection protection: tagProtections) {
@@ -1540,31 +1531,27 @@ public class Project extends AbstractEntity implements Validatable {
 		return false;		
 	}
 	
-	@Override
-	public boolean isValid(ConstraintValidatorContext context) {
-		boolean isValid = true;
-		try {
-			Secret.validateSecrets(getSecrets());
-		} catch (ValidationException e) {
-			isValid = false;
-			context.buildConstraintViolationWithTemplate(e.getMessage()).addPropertyNode("secrets").addConstraintViolation();
+	public String getSecretValue(String secretName, ObjectId commitId) {
+		for (Secret secret: getSecrets()) {
+			if (secret.getName().equals(secretName) && secret.isAuthorized(this, commitId))
+				return secret.getValue();
 		}
-
-		if (!isValid)
-			context.disableDefaultConstraintViolation();
-		
-		return isValid;
+		throw new OneException("No authorized secret found: " + secretName);
 	}
-
-	public String getSecretValue(String secretKey, ObjectId commitId) {
-		Secret secret = getSecretMap().get(secretKey);
-		if (secret == null) 
-			throw new OneException("Can not find project secret: " + secretKey);
-		if (secret.getBranches() != null && !isCommitOnBranches(commitId, secret.getBranches())) {
-			String message = String.format("Project secret '%s' can only be accessed by builds on branches '%s'", 
-					secretKey, secret.getBranches());
-			throw new OneException(message);
-		} 
-		return secret.getValue();
+	
+	@Nullable
+	public static Project get() {
+		if (!stack.get().isEmpty()) { 
+			return stack.get().peek();
+		} else {
+			ComponentContext componentContext = ComponentContext.get();
+			if (componentContext != null) {
+				ProjectAware projectAware = WicketUtils.findInnermost(componentContext.getComponent(), ProjectAware.class);
+				if (projectAware != null) 
+					return projectAware.getProject();
+			}
+			return null;
+		}
 	}
+	
 }

@@ -28,14 +28,12 @@ import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.CISpecAware;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobAware;
-import io.onedev.server.model.support.jobexecutor.ServiceLocator;
+import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.EmptyValueLabel;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
@@ -276,9 +274,4 @@ class LocatorListEditPanel extends PropertyEditor<List<Serializable>> {
 		return value;
 	}
 
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
-	}
-	
 }

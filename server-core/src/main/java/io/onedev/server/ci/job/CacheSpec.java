@@ -1,13 +1,15 @@
 package io.onedev.server.ci.job;
 
 import java.io.Serializable;
-
-import javax.validation.constraints.Pattern;
+import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.util.validation.annotation.Path;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Editable
 public class CacheSpec implements Serializable {
@@ -18,9 +20,11 @@ public class CacheSpec implements Serializable {
 	
 	private String path;
 
-	@Editable(order=100, description="Specify key of the cache. Caches with same key can be reused by different builds")
+	@Editable(order=100, description="Specify key of the cache. Caches with same key can be reused by different builds. "
+			+ "<b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
-	@Pattern(regexp="[a-zA-Z0-9\\-_]+", message="Can only contain alphanumeric, dash and underscore")
+	@RegEx(interpolative=true, value="[a-zA-Z0-9\\-_]+", message="Can only contain alphanumeric, dash and underscore")
 	public String getKey() {
 		return key;
 	}
@@ -28,9 +32,10 @@ public class CacheSpec implements Serializable {
 	public void setKey(String key) {
 		this.key = key;
 	}
-
+	
 	@Editable(order=200, description="Specify path to cache. Non-absolute path is considered to be relative to job workspace. "
-			+ "Specify \".\" (without quote) to cache workspace itself")
+			+ "Specify \".\" (without quote) to cache workspace itself. <b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	@Path
 	@NotEmpty
 	public String getPath() {
@@ -41,4 +46,9 @@ public class CacheSpec implements Serializable {
 		this.path = path;
 	}
 	
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestVariables(String matchWith) {
+		return Job.suggestVariables(matchWith);
+	}
+
 }

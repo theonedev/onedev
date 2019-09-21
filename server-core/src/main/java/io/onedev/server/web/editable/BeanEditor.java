@@ -33,9 +33,9 @@ import org.apache.wicket.validation.IValidator;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.OneContext;
-import io.onedev.server.web.editable.PathElement.Named;
+import io.onedev.server.web.editable.PathNode.Named;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.Vertical;
@@ -109,10 +109,10 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				}
 			}				
 			validate();
-			if (!hasErrors(true)) 
+			if (isValid()) 
 				send(this, Broadcast.BUBBLE, new BeanUpdating(propertyUpdating.getHandler()));
 			else
-				clearErrors(true);
+				clearErrors();
 		}		
 	}
 
@@ -162,13 +162,13 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 				Serializable propertyValue;		
 				
-				OneContext context = new OneContext(this);
+				ComponentContext context = new ComponentContext(this);
 				
-				OneContext.push(context);
+				ComponentContext.push(context);
 				try {
 					propertyValue = (Serializable) property.getDescriptor().getPropertyValue(getModelObject());
 				} finally {
-					OneContext.pop();
+					ComponentContext.pop();
 				}
 				PropertyEditor<Serializable> propertyEditor = property.renderForEdit("value", Model.of(propertyValue)); 
 				valueContainer.add(propertyEditor);
@@ -228,7 +228,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!property.getDescriptor().isPropertyExcluded() 
-						&& property.getDescriptor().isPropertyVisible(new OneContext(this), descriptor));
+						&& property.getDescriptor().isPropertyVisible(new ComponentContext(this), descriptor));
 			}
 
 		};
@@ -287,16 +287,13 @@ public class BeanEditor extends ValueEditor<Serializable> {
 
 			@Override
 			public void validate(IValidatable<Serializable> validatable) {
-				OneContext.push(getOneContext());
+				ComponentContext.push(newComponentContext());
 				try {
 					Validator validator = AppLoader.getInstance(Validator.class);
-					for (ConstraintViolation<Serializable> violation: validator.validate(validatable.getValue())) {
-						ErrorContext errorContext = getErrorContext(new ValuePath(violation.getPropertyPath()));
-						if (errorContext != null)
-							errorContext.addError(violation.getMessage());
-					}
+					for (ConstraintViolation<Serializable> violation: validator.validate(validatable.getValue()))
+						error(new Path(violation.getPropertyPath()), violation.getMessage());
 				} finally {
-					OneContext.pop();
+					ComponentContext.pop();
 				}
 			}
 			
@@ -317,21 +314,24 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	}
 
 	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		PathElement.Named namedElement = (Named) element;
-		return visitChildren(PropertyEditor.class, new IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>() {
+	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
+		PathNode.Named named = (Named) propertyNode;
+		PropertyEditor<?> propertyEditor = visitChildren(PropertyEditor.class, 
+				new IVisitor<PropertyEditor<Serializable>, PropertyEditor<Serializable>>() {
 
 			@Override
 			public void component(PropertyEditor<Serializable> object, IVisit<PropertyEditor<Serializable>> visit) {
-				if (object.getDescriptor().getPropertyName().equals(namedElement.getName()) && object.isVisibleInHierarchy())
+				if (object.getDescriptor().getPropertyName().equals(named.getName()) && object.isVisibleInHierarchy())
 					visit.stop(object);
 				else
 					visit.dontGoDeeper();
 			}
 			
 		});
+		if (propertyEditor != null)
+			propertyEditor.error(pathInProperty, errorMessage);
 	}
-
+	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
@@ -357,18 +357,18 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		return bean;
 	}
 	
-	public OneContext getOneContext() {
-		return new OneContext(this) {
+	public ComponentContext newComponentContext() {
+		return new ComponentContext(this) {
 
 			@Override
-			public OneContext getPropertyContext(String propertyName) {
+			public ComponentContext getChildContext(String childName) {
 				for (Component groupContainer: groupsView) {
 					RepeatingView propertiesView = (RepeatingView) groupContainer.get("content").get("properties");
 					for (Component item: propertiesView) {
 						@SuppressWarnings("unchecked")
 						PropertyContext<Serializable> propertyContext = (PropertyContext<Serializable>) item.getDefaultModelObject(); 
-						if (propertyContext.getPropertyName().equals(propertyName))
-							return new OneContext(item);
+						if (propertyContext.getPropertyName().equals(childName))
+							return new ComponentContext(item);
 					}
 				}
 				return null;

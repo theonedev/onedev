@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.validation.annotation.Pattern;
+import io.onedev.server.util.validation.annotation.JavaPattern;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -18,7 +18,7 @@ public class CommitMessageTransform implements Serializable {
 
 	@Editable(order=100)
 	@NotEmpty
-	@Pattern
+	@JavaPattern
 	public String getSearchFor() {
 		return searchFor;
 	}

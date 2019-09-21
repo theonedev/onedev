@@ -14,7 +14,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneException;
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
 
@@ -57,7 +56,7 @@ abstract class ConfirmActionPanel extends Panel {
 				try {
 					onConfirm(target);
 				} catch (OneException e) {
-					error(HtmlUtils.formatAsHtml(e.getMessage()));
+					error(e.getMessage());
 					target.add(ConfirmActionPanel.this);
 				}
 			}

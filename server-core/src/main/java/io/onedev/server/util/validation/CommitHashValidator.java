@@ -5,21 +5,30 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.validation.annotation.CommitHash;
 
 public class CommitHashValidator implements ConstraintValidator<CommitHash, String> {
 
+	private boolean interpolative;
+	
+	private String message;
+	
 	@Override
 	public void initialize(CommitHash constaintAnnotation) {
+		interpolative = constaintAnnotation.interpolative();
+		message = constaintAnnotation.message();
 	}
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
-		if (value == null) {
+		if (value == null) 
 			return true;
-		} else if (!ObjectId.isId(value)) {
+		if (interpolative && !Interpolated.get() && !Interpolative.fromString(value).getSegments().isEmpty())
+			return true;
+		
+		if (!ObjectId.isId(value)) {
 			constraintContext.disableDefaultConstraintViolation();
-			String message = "'" + value + "' is not a valid commit hash";
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
 		} else {

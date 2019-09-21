@@ -36,13 +36,14 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.behavior.RunTaskBehavior;
@@ -144,7 +145,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		}).add(newOnChangeBehavior(form)));
 		
 		List<String> customFieldNames = new ArrayList<>();
-		for (InputSpec field: getIssueSetting().getFieldSpecs()) {
+		for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
 			if (UserMatcher.fromString(field.getCanBeChangedBy()).matches(getProject(), SecurityUtils.getUser()))
 				customFieldNames.add(field.getName());
 		}
@@ -257,7 +258,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 						else
 							milestone = null;
 						
-						Map<String, Object> fieldValues = IssueUtils.getFieldValues(customFieldsEditor.getOneContext(), 
+						Map<String, Object> fieldValues = IssueUtils.getFieldValues(customFieldsEditor.newComponentContext(), 
 								customFieldsBean, selectedFields);
 						OneDev.getInstance(IssueChangeManager.class).batchUpdate(
 								getIssueIterator(), state, milestone, fieldValues, comment, SecurityUtils.getUser());
@@ -321,11 +322,6 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		return getIssueSetting().getFieldSpec(inputName);
 	}
 	
-	@Override
-	public void validateName(String inputName) {
-		throw new UnsupportedOperationException();
-	}
-
 	protected abstract Project getProject();
 	
 	@Nullable

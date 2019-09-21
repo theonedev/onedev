@@ -38,12 +38,10 @@ import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.param.ScriptingValues;
 import io.onedev.server.ci.job.param.SpecifiedValues;
 import io.onedev.server.ci.job.param.ValuesProvider;
-import io.onedev.server.util.OneContext;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.SecretInput;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.ci.job.paramspec.SecretParam;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.editable.BeanDescriptor;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -59,7 +57,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	
 	private final String paramSpecProviderMethodName;
 	
-	private transient Map<String, InputSpec> paramSpecs;
+	private transient Map<String, ParamSpec> paramSpecs;
 	
 	private transient Serializable defaultParamBean;
 	
@@ -77,17 +75,17 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private Map<String, InputSpec> getParamSpecs() {
+	private Map<String, ParamSpec> getParamSpecs() {
 		if (paramSpecs == null) {
-			OneContext.push(new OneContext(this));
+			ComponentContext.push(new ComponentContext(this));
 			paramSpecs = new LinkedHashMap<>();
 			try {
-				for (InputSpec paramSpec: (List<InputSpec>) ReflectionUtils.invokeStaticMethod(
+				for (ParamSpec paramSpec: (List<ParamSpec>) ReflectionUtils.invokeStaticMethod(
 						getDescriptor().getBeanClass(), paramSpecProviderMethodName)) {
 					paramSpecs.put(paramSpec.getName(), paramSpec);
 				}
 			} finally {
-				OneContext.pop();
+				ComponentContext.pop();
 			}
 		}
 		return paramSpecs;
@@ -214,8 +212,10 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 						try {
 							JobParam.validateParamValues(specifiedValues.getValues());
 						} catch (ValidationException e) {
-							RepeatingView paramsView = (RepeatingView) get("params");
-							paramsView.get(index).get("values").error(e.getMessage());
+							if (!getFlag(FLAG_RENDERING)) {
+								RepeatingView paramsView = (RepeatingView) get("params");
+								paramsView.get(index).get("values").error(e.getMessage());
+							}
 						}
 					}
 					index++;
@@ -230,7 +230,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	private SpecifiedValues newSpecifiedValueProvider(PropertyDescriptor property) {
 		SpecifiedValues specifiedValues = new SpecifiedValues();
 		Object typedValue = property.getPropertyValue(getDefaultParamBean());
-		InputSpec paramSpec = getParamSpecs().get(property.getDisplayName());
+		ParamSpec paramSpec = getParamSpecs().get(property.getDisplayName());
 		Preconditions.checkNotNull(paramSpec);
 		List<String> strings = paramSpec.convertToStrings(typedValue);
 		List<List<String>> values = new ArrayList<>();
@@ -241,13 +241,15 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 	
 	private Component newSpecifiedValueEditor(String componentId, PropertyDescriptor property, @Nullable List<String> value) {
 		WebMarkupContainer item = new WebMarkupContainer(componentId);
-		InputSpec paramSpec = Preconditions.checkNotNull(getParamSpecs().get(property.getDisplayName()));
+		ParamSpec paramSpec = Preconditions.checkNotNull(getParamSpecs().get(property.getDisplayName()));
+		
 		Serializable paramBean;
 		try {
 			paramBean = getDefaultParamBean().getClass().newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		}
+		
 		try {
 			if (value != null) 
 				property.setPropertyValue(paramBean, paramSpec.convertToObject(value));
@@ -263,7 +265,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 			bean.setSecret((String) property.getPropertyValue(paramBean));
 			item.add(PropertyContext.edit("value", bean, "secret"));
 			item.add(new Label("description", "Secrets can be defined in project setting"));
-		}
+		}			
 		
 		item.add(new AjaxLink<Void>("delete") {
 
@@ -326,15 +328,10 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 			fragment.setOutputMarkupId(true);
 			return fragment;
 		} else {
-			return PropertyContext.edit("values", valuesProvider, "script").setOutputMarkupId(true);
+			return PropertyContext.edit("values", valuesProvider, "scriptName").setOutputMarkupId(true);
 		}
 	}
 
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
-	}
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	protected List<Serializable> convertInputToValue() throws ConversionException {
@@ -343,17 +340,17 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 			Label label = (Label) paramItem.get("name");
 			JobParam param = new JobParam();
 			param.setName((String) label.getDefaultModelObject());
-			InputSpec paramSpec = Preconditions.checkNotNull(getParamSpecs().get(param.getName()));
-			param.setSecret(paramSpec instanceof SecretInput);
+			ParamSpec paramSpec = Preconditions.checkNotNull(getParamSpecs().get(param.getName()));
+			param.setSecret(paramSpec instanceof SecretParam);
 			Component valuesEditor = paramItem.get("values");
 			if (valuesEditor instanceof PropertyEditor) {
 				ScriptingValues scriptingValues = new ScriptingValues();
-				scriptingValues.setScript((List<String>) ((PropertyEditor<Serializable>) valuesEditor).getConvertedInput()); 
+				scriptingValues.setScriptName((String) ((PropertyEditor<Serializable>) valuesEditor).getConvertedInput()); 
 				param.setValuesProvider(scriptingValues);
 			} else {
 				SpecifiedValues specifiedValues = new SpecifiedValues();
 				for (Component valueItem: (WebMarkupContainer)valuesEditor.get("values")) {
-					Object propertyValue = ((PropertyEditor<Serializable>) valueItem.get("value")).getConvertedInput(); 
+					Object propertyValue = ((PropertyEditor<Serializable>) valueItem.get("value")).getConvertedInput();
 					specifiedValues.getValues().add(paramSpec.convertToStrings(propertyValue));
 				}
 				param.setValuesProvider(specifiedValues);

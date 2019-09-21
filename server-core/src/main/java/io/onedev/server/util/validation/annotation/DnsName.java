@@ -15,7 +15,10 @@ import io.onedev.server.util.validation.DnsNameValidator;
 @Constraint(validatedBy=DnsNameValidator.class) 
 public @interface DnsName {
 
-    String message() default "";
+	boolean interpolative() default false;
+	
+    String message() default "can only contain alphanumberic characters or '-', and can only "
+			+ "start and end with alphanumeric characters";
 
     Class<?>[] groups() default {};
 

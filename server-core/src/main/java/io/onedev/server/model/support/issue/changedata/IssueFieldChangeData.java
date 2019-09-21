@@ -15,9 +15,9 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.util.CommentSupport;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
 
 public class IssueFieldChangeData implements IssueChangeData {
@@ -108,14 +108,14 @@ public class IssueFieldChangeData implements IssueChangeData {
 		for (Input oldField: oldFields.values()) {
 			Input newField = newFields.get(oldField.getName());
 			if (newField != null && !describe(oldField).equals(describe(newField)) 
-					&& newField.getType().equals(InputSpec.USER) && !newField.getValues().isEmpty()) { 
+					&& newField.getType().equals(FieldSpec.USER) && !newField.getValues().isEmpty()) { 
 				User user = userManager.findByName(newField.getValues().iterator().next());
 				if (user != null)
 					newUsers.put(newField.getName(), user);
 			}
 		}
 		for (Input newField: newFields.values()) {
-			if (!oldFields.containsKey(newField.getName()) && newField.getType().equals(InputSpec.USER) 
+			if (!oldFields.containsKey(newField.getName()) && newField.getType().equals(FieldSpec.USER) 
 					&& !newField.getValues().isEmpty()) { 
 				User user = userManager.findByName(newField.getValues().iterator().next());
 				if (user != null)
@@ -134,7 +134,7 @@ public class IssueFieldChangeData implements IssueChangeData {
 			Input newField = newFields.get(oldField.getName());
 			if (newField != null 
 					&& !describe(oldField).equals(describe(newField)) 
-					&& newField.getType().equals(InputSpec.GROUP) 
+					&& newField.getType().equals(FieldSpec.GROUP) 
 					&& !newField.getValues().isEmpty()) { 
 				Group group = groupManager.find(newField.getValues().iterator().next());
 				if (group != null)
@@ -143,7 +143,7 @@ public class IssueFieldChangeData implements IssueChangeData {
 		}
 		for (Input newField: newFields.values()) {
 			if (!oldFields.containsKey(newField.getName()) 
-					&& newField.getType().equals(InputSpec.GROUP) 
+					&& newField.getType().equals(FieldSpec.GROUP) 
 					&& !newField.getValues().isEmpty()) { 
 				Group group = groupManager.find(newField.getValues().iterator().next());
 				if (group != null)

@@ -150,6 +150,11 @@ a.wicket_orderDown:AFTER {
 .pagination a.first, .pagination a.prev, .pagination a.next, .pagination a.last {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
+.table>thead+tfoot>tr>td.norecords-td>div {
+    border-top: 2px solid #DDD;
+    margin-top: -10px;
+    padding-top: 10px;
+}
 .norecords-td {
 	font-style: italic;
 }
@@ -574,24 +579,16 @@ a.disabled, a[disabled="disabled"] {
 .def-list table td.norecords-td {
 	padding: 5px;
 }
+.def-list table>tfoot>tr>td.norecords-td>div {
+    margin-top: -7px;
+    padding-top: 7px;
+}
 
 .def-list table a {
 	display: block;
 	color: #666;
 	text-decoration: none;
 	padding: 8px;
-}
-.def-list table>tbody>tr>td:first-child>div {
-	position: relative;
-	top: 0;
-}
-.def-list table>tbody>tr>td:first-child>div>.drag-indicator {
-	position: absolute;
-	left: 6px;
-	top: 10px;
-}
-.def-list table>tbody>tr>td:first-child>div>a {
-	margin-left: 16px;
 }
 
 .floating.side.def-detail {

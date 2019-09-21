@@ -4,25 +4,24 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.ExcludedProperties;
 
 @Editable
 public class ParamSpecBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private InputSpec paramSpec;
+	private ParamSpec paramSpec;
 
+	// change Named("paramSpec") also if change name of this property 
 	@Editable(name="Type", order=100)
 	@NotNull(message="may not be empty")
-	@ExcludedProperties({"canBeChangedBy", "nameOfEmptyValue"})
-	public InputSpec getParamSpec() {
+	public ParamSpec getParamSpec() {
 		return paramSpec;
 	}
 
-	public void setParamSpec(InputSpec paramSpec) {
+	public void setParamSpec(ParamSpec paramSpec) {
 		this.paramSpec = paramSpec;
 	}
 

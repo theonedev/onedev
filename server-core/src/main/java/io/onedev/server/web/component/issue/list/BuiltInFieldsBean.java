@@ -8,8 +8,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -53,7 +53,7 @@ public class BuiltInFieldsBean implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getMilestoneChoices() {
-		return OneContext.get().getProject().getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
+		return Project.get().getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 	
 }

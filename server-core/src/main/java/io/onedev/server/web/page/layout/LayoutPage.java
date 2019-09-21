@@ -30,6 +30,7 @@ import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
+import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.GroupPage;
 import io.onedev.server.web.page.admin.group.NewGroupPage;
@@ -129,6 +130,11 @@ public abstract class LayoutPage extends BasePage {
 		administrationContainer.add(item = new WebMarkupContainer("jobExecutors"));
 		item.add(new ViewStateAwarePageLink<Void>("link", JobExecutorPage.class));
 		if (getPage() instanceof JobExecutorPage)
+			item.add(AttributeAppender.append("class", "active"));
+		
+		administrationContainer.add(item = new WebMarkupContainer("groovyScripts"));
+		item.add(new ViewStateAwarePageLink<Void>("link", GroovyScriptListPage.class));
+		if (getPage() instanceof GroovyScriptListPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
 		administrationContainer.add(item = new WebMarkupContainer("systemSetting"));

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -16,11 +15,11 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.web.editable.annotation.BuildChoice;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -35,10 +34,11 @@ public class ProjectDependency implements Serializable {
 	
 	private String projectName;
 
-	private Long buildNumber;
+	private String buildNumber;
 	
 	private String artifacts = "**";
 	
+	// change Named("projectName") also if change name of this property 
 	@Editable(order=200, name="Project", description="Specify project to retrieve artifacts from")
 	@ChoiceProvider("getProjectChoices")
 	@NotEmpty
@@ -64,31 +64,42 @@ public class ProjectDependency implements Serializable {
 		return choices;
 	}
 	
-	@Editable(order=300, name="Build", description="Specify build to retrieve artifacts from")
-	@BuildChoice("getEditingProject")
-	@NotNull
-	public Long getBuildNumber() {
+	@Editable(order=300, name="Build", description="Specify build to retrieve artifacts from. "
+			+ "<b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables", literalSuggester="suggestBuilds")
+	@NotEmpty
+	public String getBuildNumber() {
 		return buildNumber;
 	}
 
-	public void setBuildNumber(Long buildNumber) {
+	public void setBuildNumber(String buildNumber) {
 		this.buildNumber = buildNumber;
 	}
-	
+
 	@Nullable
-	private static Project getEditingProject() {
-		String projectName = (String) OneContext.get().getEditContext().getInputValue("projectName");
+	private static Project getInputProject() {
+		String projectName = (String) EditContext.get().getInputValue("projectName");
 		if (projectName != null) {
 			Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
-			if (SecurityUtils.canReadCode(project.getFacade()))
+			if (project != null && SecurityUtils.canReadCode(project.getFacade()))
 				return project;
 		}
 		return null;
 	}
+	
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestBuilds(String matchWith) {
+		Project project = getInputProject();
+		if (project != null)
+			return SuggestionUtils.suggestBuilds(project, matchWith);
+		else
+			return new ArrayList<>();
+	}
 
 	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve "
-			+ "into job workspace")
-	@Patterns("getArtifactSuggestions")
+			+ "into job workspace. <b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
+	@Patterns(suggester="suggestArtifacts")
 	@NotEmpty
 	public String getArtifacts() {
 		return artifacts;
@@ -99,11 +110,16 @@ public class ProjectDependency implements Serializable {
 	}
 	
 	@SuppressWarnings("unused")
-	private static List<InputSuggestion> getArtifactSuggestions(String matchWith) {
-		Project project = getEditingProject();
-		Long buildNumber = (Long) OneContext.get().getEditContext().getInputValue("buildNumber");
-		if (project != null && buildNumber != null) {
-			Build build = OneDev.getInstance(BuildManager.class).find(project, buildNumber);
+	private static List<InputSuggestion> suggestVariables(String matchWith) {
+		return Job.suggestVariables(matchWith);
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestArtifacts(String matchWith) {
+		Project project = getInputProject();
+		String buildNumber = (String) EditContext.get().getInputValue("buildNumber");
+		if (project != null && io.onedev.server.util.interpolative.Interpolative.fromString(buildNumber).getSegments().isEmpty()) {
+			Build build = OneDev.getInstance(BuildManager.class).find(project, Long.parseLong(buildNumber));
 			if (build != null)
 				return SuggestionUtils.suggestArtifacts(build, matchWith);
 		}

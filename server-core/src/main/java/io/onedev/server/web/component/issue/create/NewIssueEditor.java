@@ -26,12 +26,12 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
@@ -147,11 +147,6 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		return getIssueSetting().getFieldSpec(inputName);
 	}
 
-	@Override
-	public void validateName(String inputName) {
-		throw new UnsupportedOperationException();
-	}
-	
 	private Issue newIssue() {
 		Issue issue = new Issue();
 		issue.setUUID(uuid);
@@ -173,7 +168,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			issue.setMilestone(getProject().getMilestone(milestoneChoice.getConvertedInput()));
 			
 			Collection<String> fieldNames = getProject().getIssueSetting().getPromptFieldsUponIssueOpen(true); 
-			issue.setFieldValues(IssueUtils.getFieldValues(fieldEditor.getOneContext(), fieldEditor.getConvertedInput(), fieldNames));
+			issue.setFieldValues(IssueUtils.getFieldValues(fieldEditor.newComponentContext(), fieldEditor.getConvertedInput(), fieldNames));
 			setConvertedInput(issue);
 		} catch (ConversionException e) {
 			error(newValidationError(e));

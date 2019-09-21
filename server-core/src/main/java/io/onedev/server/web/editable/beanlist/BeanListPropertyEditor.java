@@ -14,7 +14,6 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.IEvent;
-import org.apache.wicket.feedback.FeedbackMessage;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -32,13 +31,14 @@ import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
-import io.onedev.server.web.editable.PathElement.Named;
+import io.onedev.server.web.editable.PathNode;
+import io.onedev.server.web.editable.PathNode.Indexed;
+import io.onedev.server.web.editable.PathNode.Named;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
+import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
@@ -289,46 +289,20 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 	}
 	
 	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		final int index = ((PathElement.Indexed) element).getIndex();
-		final String messagePrefix = "Item " + (index+1) + ": ";
-		
-		return new ErrorContext() {
-
-			@Override
-			public void addError(String errorMessage) {
-				error(messagePrefix + errorMessage);
-			}
-
-			@Override
-			public boolean hasErrors(boolean recursive) {
-				for (FeedbackMessage message: getFeedbackMessages()) {
-					if (message.getMessage().toString().startsWith(messagePrefix)) {
-						return true;
-					}
+	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
+		int index = ((Indexed) propertyNode).getIndex();
+		String messagePrefix = "Item " + (index+1) + ": ";
+		PathNode.Named named = (Named) pathInProperty.takeNode();
+		if (named != null) {
+			for (PropertyEditor<Serializable> propertyEditor: getPropertyEditorsAtRow(index)) {
+				if (propertyEditor.getDescriptor().getPropertyName().equals(named.getName())) {
+					error(pathInProperty, errorMessage);
+					break;
 				}
-				
-				if (recursive) {
-					for (PropertyEditor<Serializable> propertyEditor: getPropertyEditorsAtRow(index)) {
-						if (propertyEditor.hasErrors(true))
-							return true;
-					}
-				} 
-				return false;
 			}
-
-			@Override
-			public ErrorContext getErrorContext(PathElement element) {
-				PathElement.Named namedElement = (Named) element;
-
-				for (PropertyEditor<Serializable> propertyEditor: getPropertyEditorsAtRow(index)) {
-					if (propertyEditor.getDescriptor().getPropertyName().equals(namedElement.getName()))
-						return propertyEditor;
-				}
-				return null;
-			}
-			
-		};
+		} else {
+			error(messagePrefix + errorMessage);
+		}
 	}
 
 	@Override

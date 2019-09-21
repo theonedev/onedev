@@ -13,8 +13,6 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.issue.choice.IssueChoiceProvider;
 import io.onedev.server.web.component.issue.choice.IssueSingleChoice;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -75,11 +73,6 @@ public class IssueChoiceEditor extends PropertyEditor<Long> {
 			
 		});
 		add(input);
-	}
-
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
 	}
 
 	@Override

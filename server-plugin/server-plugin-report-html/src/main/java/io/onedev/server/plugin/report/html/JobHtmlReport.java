@@ -4,17 +4,21 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobReport;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Interpolative;
 
 @Editable(name="Html Report")
 public class JobHtmlReport extends JobReport {
@@ -29,7 +33,8 @@ public class JobHtmlReport extends JobReport {
 	
 	private String startPage;
 
-	@Editable(order=1000)
+	@Editable(order=1000, description="Specify report name. <b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getReportName() {
 		return reportName;
@@ -38,8 +43,10 @@ public class JobHtmlReport extends JobReport {
 	public void setReportName(String reportName) {
 		this.reportName = reportName;
 	}
-
-	@Editable(order=1100, description="Specify start page of the report relative to workspace, for instance: api/index.html")
+	
+	@Editable(order=1100, description="Specify start page of the report relative to workspace, for instance: api/index.html. "
+			+ "<b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getStartPage() {
 		return startPage;
@@ -47,6 +54,11 @@ public class JobHtmlReport extends JobReport {
 
 	public void setStartPage(String startPage) {
 		this.startPage = startPage;
+	}
+
+	@SuppressWarnings("unused")
+	private List<InputSuggestion> suggestVariables(String matchWith) {
+		return Job.suggestVariables(matchWith);
 	}
 
 	@Override
@@ -85,4 +97,5 @@ public class JobHtmlReport extends JobReport {
 			
 		});
 	}
+
 }

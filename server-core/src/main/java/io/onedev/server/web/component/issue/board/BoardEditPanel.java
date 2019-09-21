@@ -16,7 +16,8 @@ import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.Path;
+import io.onedev.server.web.editable.PathNode;
 
 @SuppressWarnings("serial")
 public abstract class BoardEditPanel extends Panel {
@@ -68,14 +69,14 @@ public abstract class BoardEditPanel extends Panel {
 				if (boardIndex != -1) { 
 					BoardSpec oldBoard = boards.get(boardIndex);
 					if (!board.getName().equals(oldBoard.getName()) && getBoard(board.getName()) != null) {
-						editor.getErrorContext(new PathElement.Named("name"))
-								.addError("This name has already been used by another board");
+						editor.error(new Path(new PathNode.Named("name")), 
+								"This name has already been used by another board");
 					}
 				} else if (getBoard(board.getName()) != null) {
-					editor.getErrorContext(new PathElement.Named("name"))
-							.addError("This name has already been used by another board");
+					editor.error(new Path(new PathNode.Named("name")),
+							"This name has already been used by another board");
 				}
-				if (!editor.hasErrors(true)) {
+				if (editor.isValid()) {
 					board.getColumns().clear();
 					for (String column: board.getEditColumns()) 
 						board.getColumns().add(column.equals(BoardSpec.NULL_COLUMN)?null:column);

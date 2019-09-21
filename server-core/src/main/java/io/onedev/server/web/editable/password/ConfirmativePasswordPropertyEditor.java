@@ -9,8 +9,6 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.Password;
@@ -64,11 +62,6 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 			}
 			
 		});
-	}
-
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
 	}
 
 	@Override

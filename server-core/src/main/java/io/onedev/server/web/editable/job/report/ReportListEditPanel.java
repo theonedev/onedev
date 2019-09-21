@@ -30,8 +30,6 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
@@ -209,9 +207,4 @@ class ReportListEditPanel extends PropertyEditor<List<Serializable>> {
 		return value;
 	}
 
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
-	}
-	
 }

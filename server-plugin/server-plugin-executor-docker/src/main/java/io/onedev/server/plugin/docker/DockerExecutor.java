@@ -51,10 +51,10 @@ import io.onedev.server.ci.job.JobContext;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.JobService;
 import io.onedev.server.ci.job.SubmoduleCredential;
-import io.onedev.server.ci.job.Variable;
+import io.onedev.server.ci.job.EnvVar;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.model.support.RegistryLogin;
-import io.onedev.server.model.support.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.docker.DockerExecutor.TestData;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.PKCS12CertExtractor;
@@ -340,7 +340,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		docker.clearArgs();
 		docker.addArgs("run", "-d", "--name=" + containerName, "--network=" + network, 
 				"--network-alias=" + jobService.getName());
-		for (Variable var: jobService.getEnvVars()) 
+		for (EnvVar var: jobService.getEnvVars()) 
 			docker.addArgs("--env", var.getName() + "=" + var.getValue());
 		docker.addArgs(jobService.getImage());
 		if (jobService.getArguments() != null) {
@@ -811,8 +811,6 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 						String containerName = network + "-job";
 						docker.clearArgs();
 						docker.addArgs("run", "--name=" + containerName, "--network=" + network);
-						for (Map.Entry<String, String> entry: jobContext.getEnvVars().entrySet())
-							docker.addArgs("--env", entry.getKey() + "=" + entry.getValue());
 						if (getRunOptions() != null)
 							docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 						

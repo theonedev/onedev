@@ -12,11 +12,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.StringUtils;
@@ -25,8 +26,6 @@ import io.onedev.server.event.RefUpdated;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
-
-import com.google.common.base.Preconditions;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -91,7 +90,6 @@ public class GitPostReceiveCallback extends HttpServlet {
 
 			@Override
 			public void run() {
-				ThreadContext.bind(User.asSubject(userId));
 		        try {
 		            Project project = projectManager.load(projectId);
 		            
@@ -127,12 +125,10 @@ public class GitPostReceiveCallback extends HttpServlet {
 			        }
 		        } catch (Exception e) {
 		        	logger.error("Error executing post-receive callback", e);
-				} finally {
-		        	ThreadContext.unbindSubject();
-		        }
+				}
 			}
         	
-        });
+        }, User.asSubject(userId));
 	}
 
 }

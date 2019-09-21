@@ -15,7 +15,9 @@ import io.onedev.server.util.validation.CommitHashValidator;
 @Constraint(validatedBy=CommitHashValidator.class) 
 public @interface CommitHash {
 
-    String message() default "";
+	boolean interpolative() default false;
+	
+    String message() default "Not a valid commit hash";
 
     Class<?>[] groups() default {};
 

@@ -20,6 +20,10 @@
 .job-params-edit>.job-param .specified-value>a>i {
     font-size: 20px;
 }
+.job-params-edit>.job-param .specified-value.has-error {
+    background: #FEDADA;
+    color: #DD4B4B;
+}
 .job-params-edit>.job-param>.values>.help {
     color: #444;
     font-size: 18px;
@@ -52,3 +56,4 @@
 .job-params-view .specified-values {
     padding-left: 30px;
 }
+

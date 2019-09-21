@@ -63,7 +63,7 @@ class ParamListViewPanel extends Panel {
 					paramItem.add(new Label("valuesProvider", ScriptingValues.SECRET_DISPLAY_NAME));
 				else
 					paramItem.add(new Label("valuesProvider", ScriptingValues.DISPLAY_NAME));
-				paramItem.add(PropertyContext.view("values", param.getValuesProvider(), "script"));
+				paramItem.add(PropertyContext.view("values", param.getValuesProvider(), "scriptName"));
 			}
 			paramsView.add(paramItem);
 		}

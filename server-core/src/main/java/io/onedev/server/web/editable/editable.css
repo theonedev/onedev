@@ -97,11 +97,10 @@
 .property-viewer>.polymorphic-list>tbody>tr>td>.type-selector {
     margin-bottom: 12px;
 }
-.property-viewer>.def-list>div>table>tfoot>tr>td.norecords-td>div,
 .property-viewer>.bean-list>tfoot>tr>td.no-elements>div {
     border-top: 2px solid #DDD;
     margin-top: -6px;
-    padding-top: 8px;
+    padding-top: 6px;
 }
 
 .editable>.polymorphic>.type-selector {

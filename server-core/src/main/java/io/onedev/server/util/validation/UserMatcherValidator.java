@@ -8,8 +8,11 @@ import io.onedev.server.web.editable.annotation.UserMatcher;
 
 public class UserMatcherValidator implements ConstraintValidator<UserMatcher, String> {
 
+	private String message;
+	
 	@Override
 	public void initialize(UserMatcher constaintAnnotation) {
+		message = constaintAnnotation.message();
 	}
 
 	@Override
@@ -22,11 +25,13 @@ public class UserMatcherValidator implements ConstraintValidator<UserMatcher, St
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();
-				String message;
-				if (StringUtils.isNotBlank(e.getMessage()))
-					message = e.getMessage();
-				else
-					message = "Malformed user matcher";
+				String message = this.message;
+				if (message.length() == 0) {
+					if (StringUtils.isNotBlank(e.getMessage()))
+						message = e.getMessage();
+					else
+						message = "Malformed user matcher";
+				}
 				
 				constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 				return false;

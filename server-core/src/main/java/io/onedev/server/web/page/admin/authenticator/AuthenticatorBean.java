@@ -2,7 +2,7 @@ package io.onedev.server.web.page.admin.authenticator;
 
 import java.io.Serializable;
 
-import io.onedev.server.model.support.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 

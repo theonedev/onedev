@@ -15,8 +15,10 @@ import io.onedev.server.util.validation.ProjectNameValidator;
 @Constraint(validatedBy=ProjectNameValidator.class) 
 public @interface ProjectName {
 
-    String message() default "";
-
+	boolean interpolative() default false;
+	
+	String message() default "";
+	
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};

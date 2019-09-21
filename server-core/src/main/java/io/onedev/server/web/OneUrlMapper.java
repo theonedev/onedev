@@ -20,6 +20,7 @@ import io.onedev.server.web.mapper.OnePageMapper;
 import io.onedev.server.web.mapper.OneResourceMapper;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
+import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.group.GroupAuthorizationsPage;
 import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.GroupMembershipsPage;
@@ -158,6 +159,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/settings/authenticator", AuthenticatorPage.class));
 
 		add(new OnePageMapper("administration/settings/job-executors", JobExecutorPage.class));
+		add(new OnePageMapper("administration/settings/groovy-scripts", GroovyScriptListPage.class));
 		
 		add(new OnePageMapper("administration/settings/issue-fields", IssueFieldListPage.class));
 		add(new OnePageMapper("administration/settings/issue-states", IssueStateListPage.class));

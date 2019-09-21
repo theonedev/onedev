@@ -17,7 +17,8 @@ import io.onedev.server.ci.job.JobService;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.PathNode;
+import io.onedev.server.web.editable.Path;
 
 @SuppressWarnings("serial")
 abstract class ServiceEditPanel extends Panel implements CISpecAware, JobAware {
@@ -81,15 +82,15 @@ abstract class ServiceEditPanel extends Panel implements CISpecAware, JobAware {
 				if (serviceIndex != -1) { 
 					JobService oldService = services.get(serviceIndex);
 					if (!service.getName().equals(oldService.getName()) && getService(service.getName()) != null) {
-						editor.getErrorContext(new PathElement.Named("name"))
-								.addError("Service is already defined");
+						editor.error(new Path(new PathNode.Named("name")),
+								"Service is already defined");
 					}
 				} else if (getService(service.getName()) != null) {
-					editor.getErrorContext(new PathElement.Named("name"))
-							.addError("Service is already defined");
+					editor.error(new Path(new PathNode.Named("name")),
+							"Service is already defined");
 				}
 
-				if (!editor.hasErrors(true)) {
+				if (editor.isValid()) {
 					if (serviceIndex != -1) {
 						services.set(serviceIndex, service);
 					} else {

@@ -18,6 +18,7 @@ package io.onedev.server.persistence;
 
 import java.util.concurrent.Callable;
 
+import org.apache.shiro.subject.Subject;
 import org.hibernate.Session;
 
 public interface SessionManager {
@@ -30,7 +31,7 @@ public interface SessionManager {
 	
 	void run(Runnable runnable);
 	
-	void runAsync(Runnable runnable);
+	void runAsync(Runnable runnable, Subject subject);
 	
 	Session getSession();
 	

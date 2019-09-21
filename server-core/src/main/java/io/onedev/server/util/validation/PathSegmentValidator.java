@@ -1,16 +1,24 @@
 package io.onedev.server.util.validation;
 
 import java.nio.file.Paths;
+import java.util.function.Function;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.validation.annotation.PathSegment;
 
 public class PathSegmentValidator implements ConstraintValidator<PathSegment, String> {
 
+	private boolean interpolative;
+	
+	private String message;
+	
 	@Override
 	public void initialize(PathSegment constaintAnnotation) {
+		interpolative = constaintAnnotation.interpolative();
+		message = constaintAnnotation.message();
 	}
 
 	@Override
@@ -18,20 +26,38 @@ public class PathSegmentValidator implements ConstraintValidator<PathSegment, St
 		if (value == null)
 			return true;
 
-		String errorMessage = null;
+		if (interpolative && !Interpolated.get()) try {
+			value = Interpolative.fromString(value).interpolateWith(new Function<String, String>() {
+
+				@Override
+				public String apply(String t) {
+					return "a";
+				}
+				
+			});
+		} catch (Exception e) {
+			return true; // will be handled by interpolative validator
+		}
+
+		boolean valid = true;
+		String message = this.message;
 		if (value.contains("/") || value.contains("\\")) {
-			errorMessage = "Slash and back slash characters are not allowed";
+			valid = false;
+			if (message.length() == 0)
+				message = "Slash and back slash characters are not allowed";
 		} else {
 			try {
 				Paths.get(value);
 			} catch (Exception e) {
-				errorMessage = e.getMessage();
+				valid = false;
+				if (message.length() == 0)
+					message = e.getMessage();
 			}
 		}
 		
-		if (errorMessage != null) {
+		if (!valid) {
 			constraintContext.disableDefaultConstraintViolation();
-			constraintContext.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
+			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
 		}
 		

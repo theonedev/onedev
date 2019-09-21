@@ -222,7 +222,7 @@ public abstract class IssueSidePanel extends Panel {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 
-						Map<String, Object> fieldValues = IssueUtils.getFieldValues(beanEditor.getOneContext(), fieldBean, getIssue().getFieldNames());
+						Map<String, Object> fieldValues = IssueUtils.getFieldValues(beanEditor.newComponentContext(), fieldBean, getIssue().getFieldNames());
 						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues, SecurityUtils.getUser());
 						Component fieldsContainer = newFieldsContainer();
 						IssueSidePanel.this.replace(fieldsContainer);

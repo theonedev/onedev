@@ -15,8 +15,10 @@ import io.onedev.server.util.validation.GroupNameValidator;
 @Constraint(validatedBy=GroupNameValidator.class) 
 public @interface GroupName {
 
-    String message() default "";
-
+	boolean interpolative() default false;
+	
+	String message() default "";
+	
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};

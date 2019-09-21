@@ -18,13 +18,15 @@ import io.onedev.server.util.validation.DirectoryValidator;
 @Constraint(validatedBy=DirectoryValidator.class) 
 public @interface Directory {
 
+	boolean interpolative() default false;
+	
 	boolean writeable();
 	
 	boolean outsideOfInstallDir();
 	
 	boolean absolute();
-	
-	String message() default "Invalid directory";
+
+	String message() default "";
 	
 	Class<?>[] groups() default {};
 

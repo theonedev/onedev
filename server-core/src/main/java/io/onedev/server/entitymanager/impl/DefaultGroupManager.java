@@ -12,7 +12,7 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.model.support.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;

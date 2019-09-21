@@ -39,12 +39,16 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.IssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.issue.fieldspec.UserChoiceField;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.ChoiceFieldCriteria;
 import io.onedev.server.search.entity.issue.FieldOperatorCriteria;
 import io.onedev.server.search.entity.issue.IssueCriteria;
@@ -54,13 +58,9 @@ import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.IssueConstants;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -166,7 +166,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 										}
 									}
 								} else if (SecurityUtils.canWriteCode(issue.getProject().getFacade())) {
-									InputSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
+									FieldSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
 									UserMatcher userMatcher = UserMatcher.fromString(fieldSpec.getCanBeChangedBy());
 									if (fieldSpec != null && userMatcher.matches(getProject(), SecurityUtils.getUser())) {
 										issue = SerializationUtils.clone(issue);
@@ -229,21 +229,21 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				if (stateSpec != null)
 					color = stateSpec.getColor();
 			} else {
-				InputSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
-				if (fieldSpec instanceof ChoiceInput) {
-					ChoiceProvider choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
-					OneContext.push(new OneContext(this));
+				FieldSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
+				if (fieldSpec instanceof ChoiceField) {
+					ChoiceProvider choiceProvider = ((ChoiceField)fieldSpec).getChoiceProvider();
+					ComponentContext.push(new ComponentContext(this));
 					try {
 						color = choiceProvider.getChoices(true).get(getColumn());
 					} finally {
-						OneContext.pop();
+						ComponentContext.pop();
 					}
-				} else if (fieldSpec instanceof UserChoiceInput) {
+				} else if (fieldSpec instanceof UserChoiceField) {
 					user = OneDev.getInstance(UserManager.class).findByName(getColumn());
 				}
 			}
 		} else {
-			InputSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
+			FieldSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
 			if (fieldSpec != null) 
 				title = "<i>" + HtmlEscape.escapeHtml5(fieldSpec.getNameOfEmptyValue()) + "</i>";
 			else
@@ -360,7 +360,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					boolean hasPromptFields = false;
 					PressButtonTrigger trigger = (PressButtonTrigger) transitionRef.get().getTrigger();
 					for (String promptField: trigger.getPromptFields()) {
-						InputSpec fieldSpec = getIssueSetting().getFieldSpec(promptField);
+						FieldSpec fieldSpec = getIssueSetting().getFieldSpec(promptField);
 						if (fieldSpec != null && UserMatcher.fromString(fieldSpec.getCanBeChangedBy()).matches(getProject(), SecurityUtils.getUser())) {
 							hasPromptFields = true;
 							break;
@@ -408,7 +408,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					if (!SecurityUtils.canWriteCode(issue.getProject().getFacade())) 
 						throw new UnauthorizedException("Permission denied");
 					
-					InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
+					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 					if (fieldSpec == null)
 						throw new OneException("Undefined custom field: " + fieldName);
 					

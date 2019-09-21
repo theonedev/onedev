@@ -17,7 +17,8 @@ import io.onedev.server.ci.job.JobDependency;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.PathNode;
+import io.onedev.server.web.editable.Path;
 
 @SuppressWarnings("serial")
 abstract class JobDependencyEditPanel extends Panel implements CISpecAware, JobAware {
@@ -81,15 +82,15 @@ abstract class JobDependencyEditPanel extends Panel implements CISpecAware, JobA
 				if (dependencyIndex != -1) { 
 					JobDependency oldDependency = dependencies.get(dependencyIndex);
 					if (!dependency.getJobName().equals(oldDependency.getJobName()) && getDependency(dependency.getJobName()) != null) {
-						editor.getErrorContext(new PathElement.Named("jobName"))
-								.addError("Dependency to this job is already defined");
+						editor.error(new Path(new PathNode.Named("jobName")),
+								"Dependency to this job is already defined");
 					}
 				} else if (getDependency(dependency.getJobName()) != null) {
-					editor.getErrorContext(new PathElement.Named("jobName"))
-							.addError("Dependency to this job is already defined");
+					editor.error(new Path(new PathNode.Named("jobName")),
+							"Dependency to this job is already defined");
 				}
 
-				if (!editor.hasErrors(true)) {
+				if (editor.isValid()) {
 					if (dependencyIndex != -1) {
 						dependencies.set(dependencyIndex, dependency);
 					} else {

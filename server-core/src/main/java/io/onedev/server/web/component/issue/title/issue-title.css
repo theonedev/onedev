@@ -21,3 +21,16 @@
 	font-weight: normal;
 	font-size: 14px;
 }
+.issue-title form {
+	position: relative;
+	padding-right: 100px;
+}
+.issue-title form .actions {
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin: 0;
+}
+.issue-title form .actions a:first-child {
+	margin-right: 0;
+}

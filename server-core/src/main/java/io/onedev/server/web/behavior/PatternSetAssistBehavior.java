@@ -35,10 +35,8 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 
 			Set<String> matches = new HashSet<>();
 			for (Token token: terminalExpect.getRoot().getState().getMatchedTokens()) {
-				if (token.getType() == PatternSetLexer.Quoted)
+				if (token.getType() == PatternSetLexer.Quoted || token.getType() == PatternSetLexer.NQuoted)
 					matches.add(PatternSet.unescape(token.getText()));
-				else if (token.getType() == PatternSetLexer.NQuoted)
-					matches.add(token.getText());
 			}
 
 			String unmatched = terminalExpect.getUnmatchedText();
@@ -49,7 +47,7 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 						.filter(it->!matches.contains(it.getContent()))
 						.map(it->{
 							if (StringUtils.containsAny(it.getContent(), " \"") || it.getContent().startsWith("-")) {
-								InputSuggestion suggestion = it.escape(PatternSet.ESCAPE_CHARS);
+								InputSuggestion suggestion = it.escape("\"");
 								suggestion = new InputSuggestion("\"" + suggestion.getContent() + "\"", 
 										suggestion.getCaret()!=-1? suggestion.getCaret()+1: -1,
 										suggestion.getDescription(), 
@@ -74,7 +72,7 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 								&& suggestions.isEmpty()) {
 							return null;
 						} else {
-							return suggestions.stream().map(it->it.escape(PatternSet.ESCAPE_CHARS)).collect(Collectors.toList());
+							return suggestions.stream().map(it->it.escape("\"")).collect(Collectors.toList());
 						}
 					}
 

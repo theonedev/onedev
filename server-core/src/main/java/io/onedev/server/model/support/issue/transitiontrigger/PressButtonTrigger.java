@@ -9,9 +9,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -66,7 +66,7 @@ public class PressButtonTrigger implements TransitionTrigger {
 	private static List<String> getFieldChoices() {
 		List<String> fields = new ArrayList<>();
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		for (InputSpec field: issueSetting.getFieldSpecs())
+		for (FieldSpec field: issueSetting.getFieldSpecs())
 			fields.add(field.getName());
 		return fields;
 	}

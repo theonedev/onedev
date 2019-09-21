@@ -43,7 +43,7 @@ public class PatternsEditSupport implements EditSupport {
 									@SuppressWarnings("unchecked")
 									@Override
 									protected List<InputSuggestion> suggest(String matchWith) {
-										String suggestionMethod = patterns.value();
+										String suggestionMethod = patterns.suggester();
 										if (suggestionMethod.length() != 0) {
 											return (List<InputSuggestion>) ReflectionUtils.invokeStaticMethod(
 													descriptor.getBeanClass(), suggestionMethod, new Object[] {matchWith});

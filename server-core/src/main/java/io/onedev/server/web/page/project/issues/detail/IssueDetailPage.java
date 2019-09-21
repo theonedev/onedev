@@ -30,9 +30,12 @@ import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
+import io.onedev.server.util.scriptidentity.SiteAdministrator;
 import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
@@ -53,7 +56,7 @@ import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
 
 @SuppressWarnings("serial")
-public abstract class IssueDetailPage extends ProjectPage implements InputContext {
+public abstract class IssueDetailPage extends ProjectPage implements InputContext, ScriptIdentityAware {
 
 	public static final String PARAM_ISSUE = "issue";
 	
@@ -277,15 +280,15 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 	}
 
 	@Override
-	public InputSpec getInputSpec(String inputName) {
+	public FieldSpec getInputSpec(String inputName) {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
 	}
 	
 	@Override
-	public void validateName(String inputName) {
-		throw new UnsupportedOperationException();
+	public ScriptIdentity getScriptIdentity() {
+		return new SiteAdministrator();
 	}
-	
+
 	private class IssueTab extends PageTab {
 
 		public IssueTab(String title, Class<? extends Page> pageClass) {

@@ -21,7 +21,7 @@ import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 
@@ -125,16 +125,16 @@ public class PropertyDescriptor implements Serializable {
 			return null;
 	}
 
-	public boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor) {
-		return isPropertyVisible(oneContext, beanDescriptor, Sets.newHashSet());
+	public boolean isPropertyVisible(ComponentContext componentContext, BeanDescriptor beanDescriptor) {
+		return isPropertyVisible(componentContext, beanDescriptor, Sets.newHashSet());
 	}
 	
-	private boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
+	private boolean isPropertyVisible(ComponentContext componentContext, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
 		if (!checkedPropertyNames.add(getPropertyName()))
 			return false;
 		
 		Set<String> prevDependencyPropertyNames = new HashSet<>(getDependencyPropertyNames());
-		OneContext.push(oneContext);
+		ComponentContext.push(componentContext);
 		try {
 			/* 
 			 * Sometimes, the dependency may include properties introduced while evaluating available choices 
@@ -147,13 +147,13 @@ public class PropertyDescriptor implements Serializable {
 				return false;
 			for (String dependencyPropertyName: getDependencyPropertyNames()) {
 				Set<String> copyOfCheckedPropertyNames = new HashSet<>(checkedPropertyNames);
-				if (!beanDescriptor.getProperty(dependencyPropertyName).isPropertyVisible(oneContext, beanDescriptor, copyOfCheckedPropertyNames))
+				if (!beanDescriptor.getProperty(dependencyPropertyName).isPropertyVisible(componentContext, beanDescriptor, copyOfCheckedPropertyNames))
 					return false;
 			}
 			return true;
 		} finally {
 			getDependencyPropertyNames().addAll(prevDependencyPropertyNames);
-			OneContext.pop();
+			ComponentContext.pop();
 		}
 	}
 	
@@ -181,13 +181,13 @@ public class PropertyDescriptor implements Serializable {
 	public String getDescription(Component component) {
 		String description = getDescription();
 		if (description != null) {
-			OneContext.push(new OneContext(component));
+			ComponentContext.push(new ComponentContext(component));
 			try {
 				description = Application.get().getResourceSettings().getLocalizer().getString(description, component, description);
 				description = StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
 				return HtmlUtils.clean(description).body().html();
 			} finally {
-				OneContext.pop();
+				ComponentContext.pop();
 			}
 		} else {
 			return null;

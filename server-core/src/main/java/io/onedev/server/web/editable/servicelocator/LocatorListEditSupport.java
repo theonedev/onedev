@@ -7,7 +7,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.utils.ReflectionUtils;
-import io.onedev.server.model.support.jobexecutor.ServiceLocator;
+import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;

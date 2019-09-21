@@ -7,8 +7,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
@@ -36,11 +34,6 @@ public class BooleanPropertyEditor extends PropertyEditor<Boolean> {
 			
 		});
 		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
-	}
-
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
 	}
 
 	@Override

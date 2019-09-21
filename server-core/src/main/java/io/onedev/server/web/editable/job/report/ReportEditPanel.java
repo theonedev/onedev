@@ -71,7 +71,7 @@ abstract class ReportEditPanel extends Panel {
 				super.onSubmit(target, form);
 
 				JobReport report = bean.getReport();
-				if (!editor.hasErrors(true)) {
+				if (editor.isValid()) {
 					if (reportIndex != -1) {
 						reports.set(reportIndex, report);
 					} else {

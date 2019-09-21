@@ -18,11 +18,14 @@ import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.scriptidentity.JobIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
@@ -51,6 +54,7 @@ public class RunJobLink extends AjaxLink<Void> {
 	@Override
 	public void onClick(AjaxRequestTarget target) {
 		CISpec ciSpec = Preconditions.checkNotNull(getProject().getCISpec(commitId));
+		
 		Job job = Preconditions.checkNotNull(ciSpec.getJobMap().get(jobName));
 		if (!job.getParamSpecs().isEmpty()) {
 			Serializable paramBean;
@@ -77,15 +81,15 @@ public class RunJobLink extends AjaxLink<Void> {
 				}
 
 				@Override
-				public InputSpec getInputSpec(String inputName) {
-					return Preconditions.checkNotNull(job.getParamSpecMap().get(inputName));
+				public ParamSpec getInputSpec(String paramName) {
+					return Preconditions.checkNotNull(job.getParamSpecMap().get(paramName));
 				}
 
 				@Override
-				public void validateName(String inputName) {
-					throw new UnsupportedOperationException();
+				public ScriptIdentity getScriptIdentity() {
+					return new JobIdentity(getProject(), commitId);
 				}
-				
+
 			};
 		} else {
 			Build build = OneDev.getInstance(JobManager.class).submit(getProject(), commitId, 
@@ -106,7 +110,7 @@ public class RunJobLink extends AjaxLink<Void> {
 		super.onDetach();
 	}
 
-	private abstract class ParamEditModalPanel extends BeanEditModalPanel implements InputContext {
+	private abstract class ParamEditModalPanel extends BeanEditModalPanel implements InputContext, ScriptIdentityAware {
 
 		public ParamEditModalPanel(AjaxRequestTarget target, Serializable bean) {
 			super(target, bean);

@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.OneContext;
+import io.onedev.server.model.Project;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -42,7 +42,7 @@ public class Authentication implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getPasswordSecretChoices() {
-		return OneContext.get().getProject().getSecrets().stream().map(it->it.getName()).collect(Collectors.toList());
+		return Project.get().getSecrets().stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 	
 }

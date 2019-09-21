@@ -3,9 +3,6 @@ package io.onedev.server.web.editable.job.paramspec;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.lang.model.SourceVersion;
-import javax.validation.ValidationException;
-
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -14,22 +11,22 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.util.BuildConstants;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.Path;
+import io.onedev.server.web.editable.PathNode;
 
 @SuppressWarnings("serial")
 abstract class ParamSpecEditPanel extends Panel implements InputContext {
 
-	private final List<InputSpec> paramSpecs;
+	private final List<ParamSpec> paramSpecs;
 	
 	private final int paramSpecIndex;
 	
-	public ParamSpecEditPanel(String id, List<InputSpec> paramSpecs, int paramSpecIndex) {
+	public ParamSpecEditPanel(String id, List<ParamSpec> paramSpecs, int paramSpecIndex) {
 		super(id);
 	
 		this.paramSpecs = paramSpecs;
@@ -77,21 +74,19 @@ abstract class ParamSpecEditPanel extends Panel implements InputContext {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				InputSpec param = bean.getParamSpec();
+				ParamSpec param = bean.getParamSpec();
 				if (paramSpecIndex != -1) { 
-					InputSpec oldParam = paramSpecs.get(paramSpecIndex);
+					ParamSpec oldParam = paramSpecs.get(paramSpecIndex);
 					if (!param.getName().equals(oldParam.getName()) && getInputSpec(param.getName()) != null) {
-						editor.getErrorContext(new PathElement.Named("paramSpec"))
-								.getErrorContext(new PathElement.Named("name"))
-								.addError("This name has already been used by another parameter");
+						editor.error(new Path(new PathNode.Named("paramSpec"), new PathNode.Named("name")),
+								"This name has already been used by another parameter");
 					}					
 				} else if (getInputSpec(param.getName()) != null) {
-					editor.getErrorContext(new PathElement.Named("paramSpec"))
-							.getErrorContext(new PathElement.Named("name"))
-							.addError("This name has already been used by another parameter");
+					editor.error(new Path(new PathNode.Named("paramSpec"), new PathNode.Named("name")),
+							"This name has already been used by another parameter");
 				}
 
-				if (!editor.hasErrors(true)) {
+				if (editor.isValid()) {
 					if (paramSpecIndex != -1) {
 						paramSpecs.set(paramSpecIndex, param);
 					} else {
@@ -130,33 +125,23 @@ abstract class ParamSpecEditPanel extends Panel implements InputContext {
 
 	@Override
 	public List<String> getInputNames() {
-		List<String> inputNames = new ArrayList<>();
+		List<String> paramNames = new ArrayList<>();
 		int currentIndex = 0;
-		for (InputSpec param: paramSpecs) {
+		for (ParamSpec param: paramSpecs) {
 			if (currentIndex != paramSpecIndex)
-				inputNames.add(param.getName());
+				paramNames.add(param.getName());
 			currentIndex++;
 		}
-		return inputNames;
+		return paramNames;
 	}
 	
 	@Override
-	public InputSpec getInputSpec(String paramName) {
-		for (InputSpec param: paramSpecs) {
+	public ParamSpec getInputSpec(String paramName) {
+		for (ParamSpec param: paramSpecs) {
 			if (paramName.equals(param.getName()))
 				return param;
 		}
 		return null;
 	}
-	
-	@Override
-	public void validateName(String inputName) {
-		if (!SourceVersion.isIdentifier(inputName) || inputName.contains("$")) { 
-			throw new ValidationException("param name should start with letter and can only consist of "
-					+ "alphanumeric and underscore characters");
-		} else if (BuildConstants.ALL_FIELDS.contains(inputName)) {
-			throw new ValidationException("'" + inputName + "' is reserved");
-		}
-	}
-	
+		
 }

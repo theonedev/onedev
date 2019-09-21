@@ -2,13 +2,16 @@ package io.onedev.server.ci.job;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.Patterns;
 
 @Editable
@@ -20,7 +23,9 @@ public abstract class JobReport implements Serializable {
 	
 	private transient PatternSet patternSet;
 
-	@Editable(order=100, description="Specify files relative to OneDev workspace. Use * or ? for pattern match")
+	@Editable(order=100, description="Specify files relative to OneDev workspace. Use * or ? for pattern match. "
+			+ "<b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns
 	@NotEmpty
 	public String getFilePatterns() {
@@ -29,6 +34,11 @@ public abstract class JobReport implements Serializable {
 
 	public void setFilePatterns(String filePatterns) {
 		this.filePatterns = filePatterns;
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestVariables(String matchWith) {
+		return Job.suggestVariables(matchWith);
 	}
 
 	public PatternSet getPatternSet() {

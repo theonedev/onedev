@@ -15,7 +15,8 @@ import io.onedev.server.ci.job.ProjectDependency;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.PathNode;
+import io.onedev.server.web.editable.Path;
 
 @SuppressWarnings("serial")
 abstract class ProjectDependencyEditPanel extends Panel {
@@ -79,15 +80,15 @@ abstract class ProjectDependencyEditPanel extends Panel {
 				if (dependencyIndex != -1) { 
 					ProjectDependency oldDependency = dependencies.get(dependencyIndex);
 					if (!dependency.getProjectName().equals(oldDependency.getProjectName()) && getDependency(dependency.getProjectName()) != null) {
-						editor.getErrorContext(new PathElement.Named("projectName"))
-								.addError("Dependency to this project is already defined");
+						editor.error(new Path(new PathNode.Named("projectName")),
+								"Dependency to this project is already defined");
 					}
 				} else if (getDependency(dependency.getProjectName()) != null) {
-					editor.getErrorContext(new PathElement.Named("projectName"))
-							.addError("Dependency to this project is already defined");
+					editor.error(new Path(new PathNode.Named("projectName")),
+							"Dependency to this project is already defined");
 				}
 
-				if (!editor.hasErrors(true)) {
+				if (editor.isValid()) {
 					if (dependencyIndex != -1) {
 						dependencies.set(dependencyIndex, dependency);
 					} else {

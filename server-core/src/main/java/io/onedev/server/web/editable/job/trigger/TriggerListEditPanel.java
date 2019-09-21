@@ -33,8 +33,6 @@ import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
@@ -236,11 +234,6 @@ class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new TriggerCssResourceReference()));
-	}
-	
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
 	}
 	
 }

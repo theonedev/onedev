@@ -4,14 +4,16 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.apache.wicket.Component;
 
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobAware;
 import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.event.ProjectEvent;
-import io.onedev.server.util.OneContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
@@ -27,6 +29,7 @@ public abstract class JobTrigger implements Serializable {
 	@Editable(name="Trigger Parameters", order=1000)
 	@ParamSpecProvider("getParamSpecs")
 	@OmitName
+	@Valid
 	public List<JobParam> getParams() {
 		return params;
 	}
@@ -36,8 +39,8 @@ public abstract class JobTrigger implements Serializable {
 	}
 	
 	@SuppressWarnings("unused")
-	private static List<InputSpec> getParamSpecs() {
-		Component component = OneContext.get().getComponent();
+	private static List<ParamSpec> getParamSpecs() {
+		Component component = ComponentContext.get().getComponent();
 		JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
 		if (jobAware != null) {
 			Job job = jobAware.getJob();

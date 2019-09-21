@@ -24,8 +24,6 @@ public abstract class JobContext {
 	
 	private final File serverWorkspace;
 	
-	private final Map<String, String> envVars;
-	
 	private final List<String> commands;
 	
 	private final boolean retrieveSource;
@@ -53,17 +51,15 @@ public abstract class JobContext {
 	private final Map<String, Integer> cacheCounts = new ConcurrentHashMap<>();
 	
 	public JobContext(String projectName, Long buildNumber, File projectGitDir, String image, 
-			File workspace, Map<String, String> envVars, List<String> commands, boolean retrieveSource, 
-			List<SubmoduleCredential> submoduleCredentials, 
-			String cpuRequirement, String memoryRequirement, ObjectId commitId,  
-			Collection<CacheSpec> caches, PatternSet collectFiles, int cacheTTL, 
-			List<JobService> services, JobLogger logger) {
+			File workspace, List<String> commands, boolean retrieveSource, 
+			List<SubmoduleCredential> submoduleCredentials, String cpuRequirement, 
+			String memoryRequirement, ObjectId commitId, Collection<CacheSpec> caches, 
+			PatternSet collectFiles, int cacheTTL, List<JobService> services, JobLogger logger) {
 		this.projectName = projectName;
 		this.buildNumber = buildNumber;
 		this.projectGitDir = projectGitDir;
 		this.image = image;
 		this.serverWorkspace = workspace;
-		this.envVars = envVars;
 		this.commands = commands;
 		this.retrieveSource = retrieveSource;
 		this.submoduleCredentials = submoduleCredentials;
@@ -95,10 +91,6 @@ public abstract class JobContext {
 
 	public File getServerWorkspace() {
 		return serverWorkspace;
-	}
-
-	public Map<String, String> getEnvVars() {
-		return envVars;
 	}
 
 	public List<String> getCommands() {

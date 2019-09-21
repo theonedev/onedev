@@ -15,7 +15,7 @@ import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.server.model.support.jobexecutor.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.taskbutton.TaskButton;
@@ -56,7 +56,7 @@ abstract class JobExecutorEditPanel extends Panel {
 				
 				JobExecutor executor = bean.getExecutor();
 
-				if (!editor.hasErrors(true)) {
+				if (editor.isValid()) {
 					if (executorIndex != -1) {
 						executors.set(executorIndex, executor);
 					} else {
@@ -130,7 +130,7 @@ abstract class JobExecutorEditPanel extends Panel {
 
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
-				if (!editor.hasErrors(true)) {
+				if (editor.isValid()) {
 					if (testData != null) {
 						new BeanEditModalPanel(target, testData) {
 

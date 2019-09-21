@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -19,10 +20,11 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usermatcher.Anyone;
 import io.onedev.server.util.usermatcher.UserMatcher;
-import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
 @Horizontal
@@ -55,7 +57,7 @@ public class BranchProtection implements Serializable {
 	}
 
 	@Editable(order=100, description="Specify space-separated branches to be protected. Use * or ? for wildcard match")
-	@BranchPatterns
+	@Patterns(suggester = "suggestBranches")
 	@NotEmpty
 	public String getBranches() {
 		return branches;
@@ -65,6 +67,11 @@ public class BranchProtection implements Serializable {
 		this.branches = branches;
 	}
 
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestBranches(String matchWith) {
+		return SuggestionUtils.suggestBranches(Project.get(), matchWith);
+	}
+	
 	@Editable(order=150, name="Applicable Users", description="Rule will apply only if the user changing the branch matches criteria specified here")
 	@io.onedev.server.web.editable.annotation.UserMatcher
 	@NotEmpty(message="may not be empty")

@@ -35,17 +35,17 @@ import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.DateField;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.dateinput.DateInput;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -148,7 +148,7 @@ public abstract class IssueOperationsPanel extends Panel {
 									super.onSubmit(target, form);
 
 									getIssue().removeFields(transition.getRemoveFields());
-									Map<String, Object> fieldValues = IssueUtils.getFieldValues(editor.getOneContext(), fieldBean, trigger.getPromptFields());
+									Map<String, Object> fieldValues = IssueUtils.getFieldValues(editor.newComponentContext(), fieldBean, trigger.getPromptFields());
 									IssueChangeManager manager = OneDev.getInstance(IssueChangeManager.class);
 									manager.changeState(getIssue(), transition.getToState(), fieldValues, comment, SecurityUtils.getUser());
 									onStateChanged(target);
@@ -189,11 +189,11 @@ public abstract class IssueOperationsPanel extends Panel {
 				if (strings.isEmpty()) {
 					criterias.add(IssueQuery.quote(entry.getKey()) + " is empty");
 				} else { 
-					InputSpec field = issueSetting.getFieldSpec(entry.getKey());
-					if (field instanceof ChoiceInput && ((ChoiceInput)field).isAllowMultiple()) {
+					FieldSpec field = issueSetting.getFieldSpec(entry.getKey());
+					if (field instanceof ChoiceField && ((ChoiceField)field).isAllowMultiple()) {
 						for (String string: strings)
 							criterias.add(IssueQuery.quote(entry.getKey()) + " contains " + IssueQuery.quote(string));
-					} else if (!(field instanceof DateInput)) { 
+					} else if (!(field instanceof DateField)) { 
 						criterias.add(IssueQuery.quote(entry.getKey()) + " is " + IssueQuery.quote(strings.iterator().next()));
 					}
 				}

@@ -26,15 +26,12 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
@@ -42,14 +39,14 @@ import io.onedev.server.web.editable.PropertyUpdating;
 @SuppressWarnings("serial")
 class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 
-	private final List<InputSpec> params;
+	private final List<ParamSpec> params;
 	
 	public ParamSpecListEditPanel(String id, PropertyDescriptor propertyDescriptor, IModel<List<Serializable>> model) {
 		super(id, propertyDescriptor, model);
 		
 		params = new ArrayList<>();
 		for (Serializable each: model.getObject()) {
-			params.add((InputSpec) each);
+			params.add((ParamSpec) each);
 		}
 	}
 	
@@ -80,12 +77,12 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});
 		
-		List<IColumn<InputSpec, Void>> columns = new ArrayList<>();
+		List<IColumn<ParamSpec, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+			public void populateItem(Item<ICellPopulator<ParamSpec>> cellItem, String componentId, IModel<ParamSpec> rowModel) {
 				cellItem.add(new Label(componentId, "<span class=\"drag-indicator fa fa-reorder\"></span>").setEscapeModelStrings(false));
 			}
 			
@@ -96,35 +93,39 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("Name")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+			public void populateItem(Item<ICellPopulator<ParamSpec>> cellItem, String componentId, IModel<ParamSpec> rowModel) {
 				cellItem.add(new Label(componentId, rowModel.getObject().getName()));
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Type")) {
+		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("Type")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+			public void populateItem(Item<ICellPopulator<ParamSpec>> cellItem, String componentId, IModel<ParamSpec> rowModel) {
 				cellItem.add(new Label(componentId, EditableUtils.getDisplayName(rowModel.getObject().getClass())));
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Allow Empty")) {
+		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("Description")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				cellItem.add(new Label(componentId, StringUtils.describe(rowModel.getObject().isAllowEmpty())));
+			public void populateItem(Item<ICellPopulator<ParamSpec>> cellItem, String componentId, IModel<ParamSpec> rowModel) {
+				String description = rowModel.getObject().getDescription();
+				if (description != null)
+					cellItem.add(new Label(componentId, description));
+				else
+					cellItem.add(new Label(componentId, "<i>No description</i>").setEscapeModelStrings(false));
 			}
 			
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+			public void populateItem(Item<ICellPopulator<ParamSpec>> cellItem, String componentId, IModel<ParamSpec> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionColumnFrag", ParamSpecListEditPanel.this);
 				fragment.add(new ModalLink("edit") {
 
@@ -170,17 +171,17 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});		
 		
-		IDataProvider<InputSpec> dataProvider = new ListDataProvider<InputSpec>() {
+		IDataProvider<ParamSpec> dataProvider = new ListDataProvider<ParamSpec>() {
 
 			@Override
-			protected List<InputSpec> getData() {
+			protected List<ParamSpec> getData() {
 				return params;			
 			}
 
 		};
 		
-		DataTable<InputSpec, Void> dataTable;
-		add(dataTable = new DataTable<InputSpec, Void>("paramSpecs", columns, dataProvider, Integer.MAX_VALUE));
+		DataTable<ParamSpec, Void> dataTable;
+		add(dataTable = new DataTable<ParamSpec, Void>("paramSpecs", columns, dataProvider, Integer.MAX_VALUE));
 		dataTable.addTopToolbar(new HeadersToolbar<Void>(dataTable, null));
 		dataTable.addBottomToolbar(new NoRecordsToolbar(dataTable));
 		
@@ -217,16 +218,11 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 	@Override
 	protected List<Serializable> convertInputToValue() throws ConversionException {
 		List<Serializable> value = new ArrayList<>();
-		for (InputSpec each: params)
+		for (ParamSpec each: params)
 			value.add(each);
 		return value;
 	}
 
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
-	}
-	
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);

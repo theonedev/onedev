@@ -2,7 +2,7 @@ package io.onedev.server.notification;
 
 import java.util.Collection;
 
-import io.onedev.server.model.support.setting.MailSetting;
+import io.onedev.server.model.support.administration.MailSetting;
 
 public interface MailManager {
 	

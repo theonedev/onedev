@@ -16,11 +16,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.component.build.choice.BuildChoiceProvider;
 import io.onedev.server.web.component.build.choice.BuildSingleChoice;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.BuildChoice;
@@ -38,18 +36,18 @@ public class BuildChoiceEditor extends PropertyEditor<Long> {
 
 	@Nullable
 	private Project getProject() {
-		OneContext.push(new OneContext(this));
+		ComponentContext.push(new ComponentContext(this));
 		try {
 			BuildChoice choice = Preconditions.checkNotNull(descriptor
 					.getPropertyGetter().getAnnotation(BuildChoice.class));
-			if (choice.value().length() != 0) {
+			if (choice.project().length() != 0) {
 				return (Project) ReflectionUtils.invokeStaticMethod(
-						descriptor.getBeanClass(), choice.value());
+						descriptor.getBeanClass(), choice.project());
 			} else {
 				return findParent(ProjectAware.class).getProject();
 			}
 		} finally {
-			OneContext.pop();
+			ComponentContext.pop();
 		}
 	}
 	
@@ -103,11 +101,6 @@ public class BuildChoiceEditor extends PropertyEditor<Long> {
 			
 		});
 		add(input);
-	}
-
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
 	}
 
 	@Override

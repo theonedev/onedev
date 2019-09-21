@@ -2,7 +2,7 @@ package io.onedev.server.web.page.admin.databasebackup;
 
 import java.io.Serializable;
 
-import io.onedev.server.model.support.setting.BackupSetting;
+import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable

@@ -14,13 +14,14 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
-import io.onedev.server.model.support.authenticator.Authenticator;
-import io.onedev.server.model.support.jobexecutor.JobExecutor;
-import io.onedev.server.model.support.setting.BackupSetting;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.model.support.setting.MailSetting;
-import io.onedev.server.model.support.setting.SecuritySetting;
-import io.onedev.server.model.support.setting.SystemSetting;
+import io.onedev.server.model.support.administration.BackupSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.MailSetting;
+import io.onedev.server.model.support.administration.SecuritySetting;
+import io.onedev.server.model.support.administration.SystemSetting;
+import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.groovyscript.GroovyScript;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -45,6 +46,8 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	private volatile Long authenticatorId;
 	
 	private volatile Long jobExecutorsId;
+	
+	private volatile Long jobScriptsId;
 	
 	@Inject
 	public DefaultSettingManager(Dao dao, DataManager dataManager) {
@@ -246,4 +249,31 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 		dao.persist(setting);
 	}
 
+	@Sessional
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<GroovyScript> getGroovyScripts() {
+        Setting setting;
+        if (jobScriptsId == null) {
+    		setting = getSetting(Key.JOB_SCRIPTS);
+    		Preconditions.checkNotNull(setting);
+    		jobScriptsId = setting.getId();
+        } else {
+            setting = load(jobScriptsId);
+        }
+        return (List<GroovyScript>) setting.getValue();
+	}
+
+	@Transactional
+	@Override
+	public void saveGroovyScripts(List<GroovyScript> jobScripts) {
+		Setting setting = getSetting(Key.JOB_SCRIPTS);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(Key.JOB_SCRIPTS);
+		}
+		setting.setValue((Serializable) jobScripts);
+		dao.persist(setting);
+	}
+	
 }

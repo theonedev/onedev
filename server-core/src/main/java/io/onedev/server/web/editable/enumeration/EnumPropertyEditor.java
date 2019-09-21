@@ -14,8 +14,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
@@ -82,11 +80,6 @@ public class EnumPropertyEditor extends PropertyEditor<Enum<?>> {
         
         add(input);
     }
-
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
-	}
 
 	@Override
 	protected Enum<?> convertInputToValue() throws ConversionException {

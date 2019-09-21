@@ -17,6 +17,9 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.transitionprerequisite.TransitionPrerequisite;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsNotAnyOf;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsOneOf;
@@ -25,12 +28,9 @@ import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTri
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.PullRequestTrigger;
 import io.onedev.server.model.support.issue.transitiontrigger.TransitionTrigger;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -126,7 +126,7 @@ public class TransitionSpec implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getFieldChoices() {
 		List<String> fields = new ArrayList<>();
-		for (InputSpec field: getGlobalIssueSetting().getFieldSpecs())
+		for (FieldSpec field: getGlobalIssueSetting().getFieldSpecs())
 			fields.add(field.getName());
 		return fields;
 	}

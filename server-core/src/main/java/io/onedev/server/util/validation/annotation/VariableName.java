@@ -15,8 +15,11 @@ import io.onedev.server.util.validation.VariableNameValidator;
 @Constraint(validatedBy=VariableNameValidator.class) 
 public @interface VariableName {
 
-    String message() default "";
-
+	boolean interpolative() default false;
+	
+	String message() default "name should start with letter and can only consist of "
+			+ "alphanumeric and underscore characters";
+	
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};

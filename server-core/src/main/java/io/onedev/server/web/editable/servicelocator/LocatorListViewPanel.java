@@ -25,7 +25,7 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.model.support.jobexecutor.ServiceLocator;
+import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.page.layout.SideFloating;

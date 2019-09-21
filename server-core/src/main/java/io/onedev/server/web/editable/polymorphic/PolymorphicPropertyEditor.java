@@ -30,10 +30,11 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.ValueEditor;
+import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.annotation.ExcludedProperties;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
@@ -86,7 +87,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 			@Override
 			protected String load() {
-				if (hasErrors(false))
+				if (hasErrorMessage())
 					return " has-error";
 				else
 					return "";
@@ -225,8 +226,8 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 	}
 
 	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return ((ErrorContext) get(BEAN_EDITOR_ID)).getErrorContext(element);
+	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
+		((ValueEditor<?>) get(BEAN_EDITOR_ID)).error(pathInProperty, errorMessage);
 	}
 
 	@Override

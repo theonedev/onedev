@@ -1,0 +1,24 @@
+.code-support {
+	border: 1px solid #E0E0E0;
+	border-radius: 4px;
+	padding: 1px;
+}
+.has-error .code-support {
+	border-color: #a94442;
+}
+.code-support .CodeMirror {
+	height: auto;
+}
+.code-support .CodeMirror-scroll {
+    min-height: 120px;
+}
+.property-viewer .CodeMirror .CodeMirror-cursor {
+	border-left: none;
+}
+.CodeMirror-hints>.tips {
+	background: #F0F0F0;
+	padding: 8px;
+}
+.CodeMirror-hint {
+	padding: 4px;
+}

@@ -1,26 +1,47 @@
 package io.onedev.server.util.validation;
 
+import java.util.function.Function;
+
 import javax.lang.model.SourceVersion;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.validation.annotation.VariableName;
 
 public class VariableNameValidator implements ConstraintValidator<VariableName, String> {
 
+	private boolean interpolative;
+	
+	private String message;
+	
 	@Override
 	public void initialize(VariableName constaintAnnotation) {
+		interpolative = constaintAnnotation.interpolative();
+		message = constaintAnnotation.message();
 	}
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
-		if (value == null) {
+		if (value == null) 
 			return true;
-		} else if (!SourceVersion.isIdentifier(value) || value.contains("$")) {  
+
+		if (interpolative && !Interpolated.get()) try {
+			value = Interpolative.fromString(value).interpolateWith(new Function<String, String>() {
+
+				@Override
+				public String apply(String t) {
+					return "a";
+				}
+				
+			});
+		} catch (Exception e) {
+			return true; // will be handled by interpolative validator
+		}
+		
+		if (!SourceVersion.isIdentifier(value) || value.contains("$")) {  
 			constraintContext.disableDefaultConstraintViolation();
-			String errorMessage = "name should start with letter and can only consist of "
-					+ "alphanumeric and underscore characters";
-			constraintContext.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
+			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
 		} else {
 			return true;

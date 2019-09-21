@@ -11,8 +11,11 @@ import io.onedev.server.util.validation.annotation.CurrentPassword;
 
 public class CurrentPasswordValidator implements ConstraintValidator<CurrentPassword, String> {
 
+	private String message;
+	
 	@Override
 	public void initialize(CurrentPassword constaintAnnotation) {
+		message = constaintAnnotation.message();
 	}
 
 	@Override
@@ -25,7 +28,7 @@ public class CurrentPasswordValidator implements ConstraintValidator<CurrentPass
 			} catch (Exception e) {
 			}
 			constraintContext.disableDefaultConstraintViolation();
-			constraintContext.buildConstraintViolationWithTemplate("Current password does not match").addConstraintViolation();
+			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
 		} else {
 			return true;

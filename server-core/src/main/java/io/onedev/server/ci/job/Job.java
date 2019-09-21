@@ -15,24 +15,34 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
+import org.apache.wicket.Component;
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
-import io.onedev.server.util.OneContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
+import io.onedev.server.util.validation.annotation.GroupName;
+import io.onedev.server.web.editable.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
+import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
-import io.onedev.server.web.editable.annotation.Script;
 import io.onedev.server.web.editable.annotation.ShowCondition;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.util.SuggestionUtils;
+import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 @Horizontal
@@ -45,7 +55,7 @@ public class Job implements Serializable, Validatable {
 	
 	private String name;
 	
-	private List<InputSpec> paramSpecs = new ArrayList<>();
+	private List<ParamSpec> paramSpecs = new ArrayList<>();
 	
 	private String image;
 	
@@ -75,9 +85,10 @@ public class Job implements Serializable, Validatable {
 	
 	private long timeout = 3600;
 	
-	private transient Map<String, InputSpec> paramSpecMap;
+	private transient Map<String, ParamSpec> paramSpecMap;
 	
 	@Editable(order=100, description="Specify name of the job")
+	@GroupName
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -87,7 +98,8 @@ public class Job implements Serializable, Validatable {
 		this.name = name;
 	}
 
-	@Editable(order=110, description="Specify docker image of the job")
+	@Editable(order=110, description="Specify docker image of the job. <b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getImage() {
 		return image;
@@ -97,10 +109,24 @@ public class Job implements Serializable, Validatable {
 		this.image = image;
 	}
 
+	public static List<InputSuggestion> suggestVariables(String matchWith) {
+		Component component = ComponentContext.get().getComponent();
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
+		JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
+		if (jobAware != null) {
+			Job job = jobAware.getJob();
+			if (job != null)
+				suggestions.addAll(SuggestionUtils.suggestVariables(page.getProject(), page.getCommit(), job, matchWith));
+		}
+		return suggestions;
+	}
+	
 	@Editable(order=120, description="Specify commands to execute in above image, with one command per line. "
 			+ "For Windows based images, commands will be interpretated by cmd.exe, and for Unix/Linux "
-			+ "based images, commands will be interpretated by shell")
-	@Script(Script.SHELL)
+			+ "based images, commands will be interpretated by shell. <b>Note:</b> Input '@' to start inserting variable")
+	@Interpolative
+	@Code(language = Code.SHELL, variableProvider="getVariables")
 	@Size(min=1, message="may not be empty")
 	public List<String> getCommands() {
 		return commands;
@@ -110,16 +136,30 @@ public class Job implements Serializable, Validatable {
 		this.commands = commands;
 	}
 	
+	@SuppressWarnings("unused")
+	private static List<String> getVariables() {
+		List<String> variables = new ArrayList<>();
+		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
+		Project project = page.getProject();
+		ObjectId commitId = page.getCommit();
+		Job job = ComponentContext.get().getComponent().findParent(JobAware.class).getJob();
+		for (InputSuggestion suggestion: SuggestionUtils.suggestVariables(project, commitId, job, ""))  
+			variables.add(suggestion.getContent());
+		return variables;
+	}
+	
 	@Editable(order=130, name="Parameter Specs", description="Define parameter specifications of the job")
-	public List<InputSpec> getParamSpecs() {
+	@Valid
+	public List<ParamSpec> getParamSpecs() {
 		return paramSpecs;
 	}
 
-	public void setParamSpecs(List<InputSpec> paramSpecs) {
+	public void setParamSpecs(List<ParamSpec> paramSpecs) {
 		this.paramSpecs = paramSpecs;
 	}
 
 	@Editable(order=500, description="Use triggers to run the job automatically under certain conditions")
+	@Valid
 	public List<JobTrigger> getTriggers() {
 		return triggers;
 	}
@@ -140,6 +180,7 @@ public class Job implements Serializable, Validatable {
 	@Editable(order=9100, group="Source Retrieval", description="For git submodules accessing via http/https, you will "
 			+ "need to specify credentials here if required")
 	@ShowCondition("isSubmoduleCredentialsVisible")
+	@Valid
 	public List<SubmoduleCredential> getSubmoduleCredentials() {
 		return submoduleCredentials;
 	}
@@ -150,11 +191,12 @@ public class Job implements Serializable, Validatable {
 	
 	@SuppressWarnings("unused")
 	private static boolean isSubmoduleCredentialsVisible() {
-		return (boolean) OneContext.get().getEditContext().getInputValue("retrieveSource");
+		return (boolean) EditContext.get().getInputValue("retrieveSource");
 	}
 
 	@Editable(name="Job Dependencies", order=9110, group="Dependencies", description="Job dependencies determines the order and "
 			+ "concurrency when run different jobs. You may also specify artifacts to retrieve from upstream jobs")
+	@Valid
 	public List<JobDependency> getJobDependencies() {
 		return jobDependencies;
 	}
@@ -165,6 +207,7 @@ public class Job implements Serializable, Validatable {
 
 	@Editable(name="Project Dependencies", order=9113, group="Dependencies", description="Use project dependency to retrieve "
 			+ "artifacts from other projects")
+	@Valid
 	public List<ProjectDependency> getProjectDependencies() {
 		return projectDependencies;
 	}
@@ -174,7 +217,9 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9115, group="Artifacts & Reports", description="Optionally specify files to publish as job artifacts. "
-			+ "Artifact files are relative to OneDev workspace, and may use * or ? for pattern match")
+			+ "Artifact files are relative to OneDev workspace, and may use * or ? for pattern match. Variable can be "
+			+ "inserted by typing '@'")
+	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns
 	@NameOfEmptyValue("No artifacts")
 	public String getArtifacts() {
@@ -186,6 +231,7 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9120, group="Artifacts & Reports", description="Add job reports here")
+	@Valid
 	public List<JobReport> getReports() {
 		return reports;
 	}
@@ -195,7 +241,9 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9200, name="CPU Requirement", group="Resource Requirements", description="Specify CPU requirement of the job. "
-			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details")
+			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details. "
+			+ "<b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getCpuRequirement() {
 		return cpuRequirement;
@@ -206,7 +254,9 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9300, group="Resource Requirements", description="Specify memory requirement of the job. "
-			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory' target='_blank'>kubernetes documentation</a> for details")
+			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory' target='_blank'>kubernetes documentation</a> for details. "
+			+ "<b>Note:</b> Type '@' to start inserting variable")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getMemoryRequirement() {
 		return memoryRequirement;
@@ -217,6 +267,7 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=10000, group="More Settings", description="Optionally define services used by this job")
+	@Valid
 	public List<JobService> getServices() {
 		return services;
 	}
@@ -229,6 +280,7 @@ public class Job implements Serializable, Validatable {
 			+ "projects, you may cache the <tt>node_modules</tt> folder to avoid downloading node modules for "
 			+ "subsequent job executions. Note that cache is considered as a best-effort approach and your "
 			+ "build script should always consider that cache might not be available")
+	@Valid
 	public List<CacheSpec> getCaches() {
 		return caches;
 	}
@@ -289,7 +341,7 @@ public class Job implements Serializable, Validatable {
 		}
 		
 		Set<String> paramSpecNames = new HashSet<>();
-		for (InputSpec paramSpec: paramSpecs) {
+		for (ParamSpec paramSpec: paramSpecs) {
 			if (paramSpecNames.contains(paramSpec.getName())) {
 				isValid = false;
 				context.buildConstraintViolationWithTemplate("Duplicate parameter spec: " + paramSpec.getName())
@@ -320,8 +372,8 @@ public class Job implements Serializable, Validatable {
 		
 		return isValid;
 	}
-
-	public Map<String, InputSpec> getParamSpecMap() {
+	
+	public Map<String, ParamSpec> getParamSpecMap() {
 		if (paramSpecMap == null)
 			paramSpecMap = JobParam.getParamSpecMap(paramSpecs);
 		return paramSpecMap;
