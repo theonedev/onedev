@@ -38,12 +38,6 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
-	private static final String VALUE_OPEN = "\"";
-	
-	private static final String VALUE_CLOSE = "\"";
-	
-	private static final String ESCAPE_CHARS = "\"\\";
-	
 	public PullRequestQueryBehavior(IModel<Project> projectModel) {
 		super(PullRequestQueryParser.class, "query", false);
 		this.projectModel = projectModel;
@@ -60,7 +54,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 	}
 
 	private List<InputSuggestion> escape(List<InputSuggestion> suggestions) {
-		return suggestions.stream().map(it->it.escape(ESCAPE_CHARS)).collect(Collectors.toList());
+		return suggestions.stream().map(it->it.escape("\"")).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -68,19 +62,19 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Quoted")) {
-				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
+				return new FenceAware(codeAssist.getGrammar(), "\"", "\"") {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						String unfencedLowerCaseMatchWith = unfencedMatchWith.toLowerCase();
+					protected List<InputSuggestion> match(String matchWith) {
+						String normalizedMatchWith = PullRequestQuery.unescapeQuotes(matchWith.toLowerCase());
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						Project project = getProject();
 
 						if ("criteriaField".equals(spec.getLabel())) {
-							suggestions.addAll(escape(SuggestionUtils.suggest(PullRequestConstants.QUERY_FIELDS, unfencedLowerCaseMatchWith)));
+							suggestions.addAll(escape(SuggestionUtils.suggest(PullRequestConstants.QUERY_FIELDS, normalizedMatchWith)));
 						} else if ("orderField".equals(spec.getLabel())) {
 							suggestions.addAll(escape(SuggestionUtils.suggest(new ArrayList<>(PullRequestConstants.ORDER_FIELDS.keySet()), 
-									unfencedLowerCaseMatchWith)));
+									normalizedMatchWith)));
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
@@ -89,9 +83,9 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 							int operator = PullRequestQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
 								if (operator == PullRequestQueryLexer.IncludesIssue)
-									suggestions.addAll(escape(SuggestionUtils.suggestIssues(project, unfencedLowerCaseMatchWith)));
+									suggestions.addAll(escape(SuggestionUtils.suggestIssues(project, normalizedMatchWith)));
 								else if (operator != PullRequestQueryLexer.IncludesCommit)
-									suggestions.addAll(escape(SuggestionUtils.suggestUsers(unfencedLowerCaseMatchWith)));
+									suggestions.addAll(escape(SuggestionUtils.suggestUsers(normalizedMatchWith)));
 								else
 									return null;
 							} else {
@@ -101,24 +95,24 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 									if (fieldName.equals(PullRequestConstants.FIELD_SUBMIT_DATE) 
 											|| fieldName.equals(PullRequestConstants.FIELD_UPDATE_DATE)
 											|| fieldName.equals(PullRequestConstants.FIELD_CLOSE_DATE)) {
-										suggestions.addAll(SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, unfencedLowerCaseMatchWith));
-										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
+										suggestions.addAll(SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, normalizedMatchWith));
+										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, matchWith));
 									} else if (fieldName.equals(PullRequestConstants.FIELD_SOURCE_PROJECT)) {
 										List<String> candidates = new ArrayList<>();
 										for (Project each: OneDev.getInstance(ProjectManager.class).query())
 											candidates.add(each.getName());
-										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
+										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, normalizedMatchWith)));
 									} else if (fieldName.equals(PullRequestConstants.FIELD_TARGET_BRANCH) 
 											|| fieldName.equals(PullRequestConstants.FIELD_SOURCE_BRANCH)) {
 										List<String> candidates = new ArrayList<>();
 										for (RefInfo refInfo: project.getBranches()) 
 											candidates.add(GitUtils.ref2branch(refInfo.getRef().getName()));
-										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
+										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, normalizedMatchWith)));
 									} else if (fieldName.equals(PullRequestConstants.FIELD_MERGE_STRATEGY)) {
 										List<String> candidates = new ArrayList<>();
 										for (MergeStrategy strategy: MergeStrategy.values())
 											candidates.add(strategy.toString());
-										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
+										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, normalizedMatchWith)));
 									} else if (fieldName.equals(PullRequestConstants.FIELD_TITLE) 
 											|| fieldName.equals(PullRequestConstants.FIELD_DESCRIPTION) 
 											|| fieldName.equals(PullRequestConstants.FIELD_NUMBER) 

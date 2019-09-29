@@ -18,6 +18,7 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.permission.ProjectPrivilege;
+import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.reviewrequirement.ReviewRequirementParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -26,12 +27,6 @@ import io.onedev.server.web.util.SuggestionUtils;
 public class ReviewRequirementBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
-	
-	private static final String VALUE_OPEN = "(";
-	
-	private static final String VALUE_CLOSE = ")";
-	
-	private static final String ESCAPE_CHARS = "\\()";
 	
 	public ReviewRequirementBehavior(IModel<Project> projectModel) {
 		super(ReviewRequirementParser.class, "requirement", false);
@@ -45,7 +40,7 @@ public class ReviewRequirementBehavior extends ANTLRAssistBehavior {
 	}
 
 	private List<InputSuggestion> escape(List<InputSuggestion> suggestions) {
-		return suggestions.stream().map(it->it.escape(ESCAPE_CHARS)).collect(Collectors.toList());
+		return suggestions.stream().map(it->it.escape("()")).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -53,16 +48,17 @@ public class ReviewRequirementBehavior extends ANTLRAssistBehavior {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Value")) {
-				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
+				return new FenceAware(codeAssist.getGrammar(), "(", ")") {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
+					protected List<InputSuggestion> match(String matchWith) {
+						String normalizedMatchWith = ReviewRequirement.unescapeBraces(matchWith.toLowerCase());
 						Project project = projectModel.getObject();
 						if (terminalExpect.findExpectByRule("userCriteria") != null) {
 							return escape(SuggestionUtils.suggestUsers(project, ProjectPrivilege.CODE_READ, 
-									unfencedMatchWith));
+									normalizedMatchWith));
 						} else {
-							return escape(SuggestionUtils.suggestGroups(unfencedMatchWith));
+							return escape(SuggestionUtils.suggestGroups(normalizedMatchWith));
 						}
 					}
 

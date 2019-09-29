@@ -14,7 +14,4 @@ DIGIT: [1-9][0-9]*;
 USER: 'user';
 GROUP: 'group';
 
-Value: '(' (ESCAPE|~[()\\])+? ')';
-
-fragment
-ESCAPE: '\\'[()\\];
+Value: '(' ('\\'[()]|~[()])+? ')';

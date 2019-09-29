@@ -28,6 +28,7 @@ import io.onedev.server.git.NameAndEmail;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser;
 import io.onedev.server.util.Constants;
+import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -35,12 +36,6 @@ import io.onedev.server.web.util.SuggestionUtils;
 public class CommitQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
-	
-	private static final String VALUE_OPEN = "(";
-	
-	private static final String VALUE_CLOSE = ")";
-	
-	private static final String ESCAPE_CHARS = "\\()";
 	
 	private static final List<String> DATE_EXAMPLES = Lists.newArrayList(
 			"one hour ago", "2 hours ago", "3PM", "noon", "today", "yesterday", 
@@ -59,7 +54,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 	}
 
 	private List<InputSuggestion> escape(List<InputSuggestion> suggestions) {
-		return suggestions.stream().map(it->it.escape(ESCAPE_CHARS)).collect(Collectors.toList());
+		return suggestions.stream().map(it->it.escape("()")).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -67,23 +62,23 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Value")) {
-				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
+				return new FenceAware(codeAssist.getGrammar(), "(", ")") {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
+					protected List<InputSuggestion> match(String matchWith) {
+						String normalizedMatchWith = ReviewRequirement.unescapeBraces(matchWith.toLowerCase());
 						int tokenType = terminalExpect.getState().getLastMatchedToken().getType();
-						String unfencedLowerCaseMatchWith = unfencedMatchWith.toLowerCase();
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						Project project = projectModel.getObject();
 						switch (tokenType) {
 						case CommitQueryParser.BRANCH:
-							suggestions.addAll(escape(SuggestionUtils.suggestBranches(project, unfencedMatchWith)));
+							suggestions.addAll(escape(SuggestionUtils.suggestBranches(project, normalizedMatchWith)));
 							break;
 						case CommitQueryParser.TAG:
-							suggestions.addAll(escape(SuggestionUtils.suggestTags(project, unfencedMatchWith)));
+							suggestions.addAll(escape(SuggestionUtils.suggestTags(project, normalizedMatchWith)));
 							break;
 						case CommitQueryParser.BUILD:
-							suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedMatchWith)));
+							suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, normalizedMatchWith)));
 							break;
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
@@ -97,25 +92,24 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 								else
 									content = user.getName();
 								content = content.trim();
-								PatternApplied applied = WildcardUtils.applyPattern(unfencedLowerCaseMatchWith, content, 
-										false);
+								PatternApplied applied = WildcardUtils.applyPattern(normalizedMatchWith, content, false);
 								if (applied != null)
 									suggestedInputs.put(applied.getText(), applied.getMatch());
 							}
 							
 							for (Map.Entry<String, LinearRange> entry: suggestedInputs.entrySet()) 
-								suggestions.add(new InputSuggestion(entry.getKey(), -1, null, entry.getValue()).escape(ESCAPE_CHARS));
+								suggestions.add(new InputSuggestion(entry.getKey(), -1, null, entry.getValue()).escape("()"));
 							break;
 						case CommitQueryParser.BEFORE:
 						case CommitQueryParser.AFTER:
 							List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
 							candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
 							candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
-							suggestions.addAll(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith));
-							CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
+							suggestions.addAll(SuggestionUtils.suggest(candidates, normalizedMatchWith));
+							CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, matchWith));
 							break;
 						case CommitQueryParser.PATH:
-							suggestions.addAll(escape(SuggestionUtils.suggestBlobs(projectModel.getObject(), unfencedMatchWith)));
+							suggestions.addAll(escape(SuggestionUtils.suggestBlobs(projectModel.getObject(), normalizedMatchWith)));
 							break;
 						default: 
 							return null;
@@ -139,7 +133,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if (spec.getRuleName().equals("Value") && !terminalExpect.getUnmatchedText().contains(VALUE_CLOSE)) {
+			if (spec.getRuleName().equals("Value") && !terminalExpect.getUnmatchedText().contains(")")) {
 				int tokenType = terminalExpect.getState().getLastMatchedToken().getType();
 				if (tokenType == CommitQueryParser.COMMITTER) {
 					hints.add("Use * to match any part of committer");

@@ -23,6 +23,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser;
+import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.util.CodeCommentConstants;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
@@ -32,12 +33,6 @@ import io.onedev.server.web.util.SuggestionUtils;
 public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
-	
-	private static final String VALUE_OPEN = "\"";
-	
-	private static final String VALUE_CLOSE = "\"";
-	
-	private static final String ESCAPE_CHARS = "\"\\";
 	
 	public CodeCommentQueryBehavior(IModel<Project> projectModel) {
 		super(CodeCommentQueryParser.class, "query", false);
@@ -55,7 +50,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 	}
 	
 	private List<InputSuggestion> escape(List<InputSuggestion> suggestions) {
-		return suggestions.stream().map(it->it.escape(ESCAPE_CHARS)).collect(Collectors.toList());
+		return suggestions.stream().map(it->it.escape("\"")).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -63,18 +58,18 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Quoted")) {
-				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
+				return new FenceAware(codeAssist.getGrammar(), "\"", "\"") {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						String unfencedLowerCaseMatchWith = unfencedMatchWith.toLowerCase();
+					protected List<InputSuggestion> match(String matchWith) {
+						String normalizedMatchWith = PullRequestQuery.unescapeQuotes(matchWith.toLowerCase());
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						Project project = getProject();
 
 						if ("criteriaField".equals(spec.getLabel())) {
-							suggestions.addAll(escape(SuggestionUtils.suggest(CodeCommentConstants.QUERY_FIELDS, unfencedLowerCaseMatchWith)));
+							suggestions.addAll(escape(SuggestionUtils.suggest(CodeCommentConstants.QUERY_FIELDS, normalizedMatchWith)));
 						} else if ("orderField".equals(spec.getLabel())) {
-							suggestions.addAll(escape(SuggestionUtils.suggest(new ArrayList<>(CodeCommentConstants.ORDER_FIELDS.keySet()), unfencedLowerCaseMatchWith)));
+							suggestions.addAll(escape(SuggestionUtils.suggest(new ArrayList<>(CodeCommentConstants.ORDER_FIELDS.keySet()), normalizedMatchWith)));
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
@@ -83,7 +78,7 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 							int operator = CodeCommentQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
 								if (operator == CodeCommentQueryLexer.CreatedBy) {
-									suggestions.addAll(SuggestionUtils.suggestUsers(unfencedLowerCaseMatchWith));
+									suggestions.addAll(SuggestionUtils.suggestUsers(normalizedMatchWith));
 								} else {
 									return null;
 								}
@@ -92,10 +87,10 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 								try {
 									CodeCommentQuery.checkField(project, fieldName, operator);
 									if (fieldName.equals(CodeCommentConstants.FIELD_CREATE_DATE) || fieldName.equals(CodeCommentConstants.FIELD_UPDATE_DATE)) {
-										suggestions.addAll(SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, unfencedLowerCaseMatchWith));
-										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
+										suggestions.addAll(SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, normalizedMatchWith));
+										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, matchWith));
 									} else if (fieldName.equals(CodeCommentConstants.FIELD_PATH)) {
-										suggestions.addAll(escape(SuggestionUtils.suggestBlobs(projectModel.getObject(), unfencedLowerCaseMatchWith)));
+										suggestions.addAll(escape(SuggestionUtils.suggestBlobs(projectModel.getObject(), normalizedMatchWith)));
 									} else {
 										return null;
 									}

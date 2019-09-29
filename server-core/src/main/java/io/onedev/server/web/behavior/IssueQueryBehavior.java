@@ -69,12 +69,6 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
-	private static final String VALUE_OPEN = "\"";
-	
-	private static final String VALUE_CLOSE = "\"";
-
-	private static final String ESCAPE_CHARS = "\"\\";
-	
 	private static final int MAX_ISSUE_TITLE_LEN = 75;
 	
 	public IssueQueryBehavior(IModel<Project> projectModel) {
@@ -93,7 +87,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	}
 
 	private List<InputSuggestion> escape(List<InputSuggestion> suggestions) {
-		return suggestions.stream().map(it->it.escape(ESCAPE_CHARS)).collect(Collectors.toList());
+		return suggestions.stream().map(it->it.escape("\"")).collect(Collectors.toList());
 	}
 	
 	@Override
@@ -103,11 +97,11 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Quoted")) {
-				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
+				return new FenceAware(codeAssist.getGrammar(), "\"", "\"") {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						String unfencedLowerCaseMatchWith = unfencedMatchWith.toLowerCase();
+					protected List<InputSuggestion> match(String matchWith) {
+						String normalizedMatchWith = IssueQuery.unescapeQuotes(matchWith.toLowerCase());
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						Project project = getProject();
 
@@ -115,29 +109,29 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							List<String> candidates = new ArrayList<>(IssueConstants.QUERY_FIELDS);
 							for (FieldSpec field: issueSetting.getFieldSpecs())
 								candidates.add(field.getName());
-							suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
+							suggestions.addAll(escape(SuggestionUtils.suggest(candidates, normalizedMatchWith)));
 						} else if ("orderField".equals(spec.getLabel())) {
 							List<String> candidates = new ArrayList<>(IssueConstants.ORDER_FIELDS.keySet());
 							for (FieldSpec field: issueSetting.getFieldSpecs()) {
 								if (field instanceof NumberField || field instanceof ChoiceField || field instanceof DateField) 
 									candidates.add(field.getName());
 							}
-							suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
+							suggestions.addAll(escape(SuggestionUtils.suggest(candidates, normalizedMatchWith)));
 						} else if ("revisionValue".equals(spec.getLabel())) {
 							String revisionType = terminalExpect.getState()
 									.findMatchedElementsByLabel("revisionType", true).iterator().next().getMatchedText();
 							switch (revisionType) {
 							case "branch":
 								if (getProject() != null)
-									suggestions.addAll(escape(SuggestionUtils.suggestBranches(project, unfencedLowerCaseMatchWith)));
+									suggestions.addAll(escape(SuggestionUtils.suggestBranches(project, normalizedMatchWith)));
 								break;
 							case "tag":
 								if (getProject() != null)
-									suggestions.addAll(escape(SuggestionUtils.suggestTags(project, unfencedLowerCaseMatchWith)));
+									suggestions.addAll(escape(SuggestionUtils.suggestTags(project, normalizedMatchWith)));
 								break;
 							case "build":
 								if (getProject() != null)
-									suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedLowerCaseMatchWith)));
+									suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, normalizedMatchWith)));
 								break;
 							}
 						} else if ("criteriaValue".equals(spec.getLabel())) {
@@ -148,9 +142,9 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							int operator = IssueQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
 								if (operator == IssueQueryLexer.SubmittedBy)
-									suggestions.addAll(escape(SuggestionUtils.suggestUsers(unfencedLowerCaseMatchWith)));
+									suggestions.addAll(escape(SuggestionUtils.suggestUsers(normalizedMatchWith)));
 								else
-									suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedLowerCaseMatchWith)));
+									suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, normalizedMatchWith)));
 							} else {
 								String fieldName = IssueQuery.getValue(fieldElements.get(0).getMatchedText());
 								
@@ -159,47 +153,47 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
 									if (fieldSpec instanceof DateField || fieldName.equals(FIELD_SUBMIT_DATE) 
 											|| fieldName.equals(FIELD_UPDATE_DATE)) {
-										suggestions.addAll(SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, unfencedLowerCaseMatchWith));
-										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
+										suggestions.addAll(SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, normalizedMatchWith));
+										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, matchWith));
 									} else if (fieldSpec instanceof UserChoiceField) {
-										suggestions.addAll(escape(SuggestionUtils.suggestUsers(unfencedLowerCaseMatchWith)));
+										suggestions.addAll(escape(SuggestionUtils.suggestUsers(normalizedMatchWith)));
 									} else if (fieldSpec instanceof IssueChoiceField) {
-										List<Issue> issues = OneDev.getInstance(IssueManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
+										List<Issue> issues = OneDev.getInstance(IssueManager.class).query(project, normalizedMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
 										for (Issue issue: issues) {
 											InputSuggestion suggestion = new InputSuggestion("#" + issue.getNumber(), StringUtils.abbreviate(issue.getTitle(), MAX_ISSUE_TITLE_LEN), null);
 											suggestions.add(suggestion);
 										}
 									} else if (fieldSpec instanceof BuildChoiceField) {
-										List<Build> builds = OneDev.getInstance(BuildManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
+										List<Build> builds = OneDev.getInstance(BuildManager.class).query(project, normalizedMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
 										for (Build build: builds) {
 											InputSuggestion suggestion = new InputSuggestion("#" + build.getNumber(), null, null);
 											suggestions.add(suggestion);
 										}
 									} else if (fieldSpec instanceof PullRequestChoiceField) {
-										List<PullRequest> requests = OneDev.getInstance(PullRequestManager.class).query(project, unfencedLowerCaseMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
+										List<PullRequest> requests = OneDev.getInstance(PullRequestManager.class).query(project, normalizedMatchWith, InputAssistBehavior.MAX_SUGGESTIONS);		
 										for (PullRequest request: requests) {
 											InputSuggestion suggestion = new InputSuggestion("#" + request.getNumber(), StringUtils.abbreviate(request.getTitle(), MAX_ISSUE_TITLE_LEN), null);
 											suggestions.add(suggestion);
 										}
 									} else if (fieldSpec instanceof BooleanField) {
-										suggestions.addAll(SuggestionUtils.suggest(Lists.newArrayList("true", "false"), unfencedLowerCaseMatchWith));
+										suggestions.addAll(SuggestionUtils.suggest(Lists.newArrayList("true", "false"), normalizedMatchWith));
 									} else if (fieldSpec instanceof GroupChoiceField) {
 										List<String> candidates = OneDev.getInstance(GroupManager.class).query().stream().map(it->it.getName()).collect(Collectors.toList());
-										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
+										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, normalizedMatchWith)));
 									} else if (fieldName.equals(FIELD_STATE)) {
 										List<String> candidates = issueSetting.getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
-										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
+										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, normalizedMatchWith)));
 									} else if (fieldSpec instanceof ChoiceField) {
 										ComponentContext.push(new ComponentContext(getComponent()));
 										try {
 											List<String> candidates = new ArrayList<>(((ChoiceField)fieldSpec).getChoiceProvider().getChoices(true).keySet());
-											suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
+											suggestions.addAll(escape(SuggestionUtils.suggest(candidates, normalizedMatchWith)));
 										} finally {
 											ComponentContext.pop();
 										}			
 									} else if (fieldName.equals(FIELD_MILESTONE)) {
 										List<String> candidates = project.getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
-										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, unfencedLowerCaseMatchWith)));
+										suggestions.addAll(escape(SuggestionUtils.suggest(candidates, normalizedMatchWith)));
 									} else if (fieldName.equals(FIELD_TITLE) || fieldName.equals(FIELD_DESCRIPTION) 
 											|| fieldName.equals(FIELD_COMMENT) || fieldName.equals(FIELD_VOTE_COUNT) 
 											|| fieldName.equals(FIELD_COMMENT_COUNT) || fieldName.equals(FIELD_NUMBER) 

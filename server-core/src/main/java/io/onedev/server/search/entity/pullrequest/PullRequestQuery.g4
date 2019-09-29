@@ -161,7 +161,7 @@ RParens
 	;
 
 Quoted
-    : '"' (ESCAPE|~["\\])+? '"'
+    : '"' ('\\"'|~'"')+? '"'
     ;
 
 WS
@@ -171,8 +171,3 @@ WS
 Identifier
 	: [a-zA-Z0-9:_/\\+\-;]+
 	;    
-
-fragment
-ESCAPE
-    : '\\'["\\]
-    ;

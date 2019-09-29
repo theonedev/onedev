@@ -15,6 +15,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.apache.commons.lang.StringUtils;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -46,7 +47,7 @@ public class ReviewRequirement {
 			
 			for (CriteriaContext criteria: requirement.criteria()) {
 				if (criteria.userCriteria() != null) {
-					String userName = getBracedValue(criteria.userCriteria().Value());
+					String userName = getValue(criteria.userCriteria().Value());
 					User user = OneDev.getInstance(UserManager.class).findByName(userName);
 					if (user != null) {
 						if (!users.contains(user)) { 
@@ -58,7 +59,7 @@ public class ReviewRequirement {
 						throw new OneException("Unable to find user '" + userName + "'");
 					}
 				} else if (criteria.groupCriteria() != null) {
-					String groupName = getBracedValue(criteria.groupCriteria().Value());
+					String groupName = getValue(criteria.groupCriteria().Value());
 					Group group = OneDev.getInstance(GroupManager.class).find(groupName);
 					if (group != null) {
 						if (!groups.containsKey(group)) {
@@ -104,9 +105,19 @@ public class ReviewRequirement {
 		return parser.requirement();
 	}
 	
-	private static String getBracedValue(TerminalNode terminal) {
+	private static String getValue(TerminalNode terminal) {
 		String value = terminal.getText().substring(1);
-		return value.substring(0, value.length()-1).trim();
+		return unescapeBraces(value.substring(0, value.length()-1).trim());
+	}
+	
+	public static String escapeBraces(String value) {
+		value = StringUtils.replace(value, ")", "\\)");
+		return StringUtils.replace(value, "(", "\\(");
+	}
+	
+	public static String unescapeBraces(String value) {
+		value = StringUtils.replace(value, "\\)", ")");
+		return StringUtils.replace(value, "\\(", "(");
 	}
 	
 	public List<User> getUsers() {
@@ -176,9 +187,9 @@ public class ReviewRequirement {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (User user: users)
-			builder.append("user(").append(user.getName()).append(") ");
+			builder.append("user(").append(ReviewRequirement.escapeBraces(user.getName())).append(") ");
 		for (Map.Entry<Group, Integer> entry: groups.entrySet()) {
-			builder.append("group(").append(entry.getKey().getName()).append(")");
+			builder.append("group(").append(ReviewRequirement.escapeBraces(entry.getKey().getName())).append(")");
 			if (entry.getValue() == 0)
 				builder.append(":all");
 			else if (entry.getValue() != 1)

@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
@@ -43,6 +44,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -133,6 +136,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	private static final String BLOB_NAVIGATOR_ID = "blobNavigator";
 
 	private static final String BLOB_CONTENT_ID = "blobContent";
+	
+	private static final Logger logger = LoggerFactory.getLogger(ProjectBlobPage.class);
 	
 	private State state = new State();
 	
@@ -336,8 +341,20 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		blobOperations.setOutputMarkupId(true);
 		
 		String revision = state.blobIdent.revision;
-		boolean reviewRequired = getProject().isReviewRequiredForModification(getLoginUser(), revision, null); 
-		boolean buildRequired = getProject().isBuildRequiredForModification(revision, null);
+		
+		AtomicBoolean reviewRequired = new AtomicBoolean(true);
+		try {
+			reviewRequired.set(getProject().isReviewRequiredForModification(getLoginUser(), revision, null)); 
+		} catch (Exception e) {
+			logger.error("Error checking review requirement", e);
+		}
+		
+		AtomicBoolean buildRequired = new AtomicBoolean(true);
+		try {
+			buildRequired.set(getProject().isBuildRequiredForModification(revision, null));
+		} catch (Exception e) {
+			logger.error("Error checking build requirement", e);
+		}
 
 		blobOperations.add(new MenuLink("add") {
 
@@ -412,10 +429,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (reviewRequired) {
+				if (reviewRequired.get()) {
 					tag.append("class", "disabled", " ");
 					tag.put("title", "Review required for this change. Submit pull request instead");
-				} else if (buildRequired) {
+				} else if (buildRequired.get()) {
 					tag.append("class", "disabled", " ");
 					tag.put("title", "Build required for this change. Submit pull request instead");
 				} else {
@@ -432,7 +449,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 						&& isOnBranch() && state.blobIdent.isTree() 
 						&& SecurityUtils.canWriteCode(project.getFacade())) {
 					setVisible(true);
-					setEnabled(!reviewRequired && !buildRequired);
+					setEnabled(!reviewRequired.get() && !buildRequired.get());
 				} else {
 					setVisible(false);
 				}
