@@ -660,22 +660,24 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Sessional
 	protected void checkAsync(Collection<PullRequest> requests) {
 		Collection<Long> requestIds = requests.stream().map(it->it.getId()).collect(Collectors.toList());
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				dao.getSessionManager().runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-				        for (Long requestId: requestIds)
-				        	check(load(requestId));
-					}
-					
-				}, SecurityUtils.getSubject());
-			}
-			
-		});
+		if (!requestIds.isEmpty()) {
+			transactionManager.runAfterCommit(new Runnable() {
+	
+				@Override
+				public void run() {
+					dao.getSessionManager().runAsync(new Runnable() {
+	
+						@Override
+						public void run() {
+					        for (Long requestId: requestIds)
+					        	check(load(requestId));
+						}
+						
+					}, SecurityUtils.getSubject());
+				}
+				
+			});
+		}
 	}
 	
 	@Transactional
