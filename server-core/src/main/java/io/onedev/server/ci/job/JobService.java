@@ -31,7 +31,7 @@ public class JobService implements Serializable {
 	private String memoryRequirement = "128m";
 	
 	@Editable(order=100, description="Specify name of the service, which can be used to access "
-			+ "the service. <b>Note:</b> Type '@' to start inserting variable")
+			+ "the service. <b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@VariableName
 	@NotEmpty
@@ -43,8 +43,8 @@ public class JobService implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200, description="Specify docker image of the service. Type '@' to start "
-			+ "inserting variable")
+	@Editable(order=200, description="Specify docker image of the service. "
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getImage() {
@@ -56,7 +56,7 @@ public class JobService implements Serializable {
 	}
 
 	@Editable(order=220, description="Optionally specify arguments to run above image. "
-			+ "<b>Note:</b> Type '@' to start inserting variable")
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getArguments() {
 		return arguments;
@@ -78,8 +78,8 @@ public class JobService implements Serializable {
 
 	@Editable(order=400, description="Specify command to check readiness of the service. This command will "
 			+ "be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be "
-			+ "executed repeatedly until a zero code is returned to indicate service ready. Variable can "
-			+ "be inserted to this field by typing '@'")
+			+ "executed repeatedly until a zero code is returned to indicate service ready. "
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@NotEmpty
 	public String getReadinessCheckCommand() {
 		return readinessCheckCommand;

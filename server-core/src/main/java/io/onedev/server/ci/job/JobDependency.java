@@ -59,9 +59,9 @@ public class JobDependency implements Serializable {
 	
 	@Editable(order=300, name="Artifacts to Retrieve", description="Optionally specify artifacts to retrieve "
 			+ "from the dependency into job workspace. Leave empty to do not retrieve any artifacts. "
-			+ "<b>Note:</b> Type '@' to start inserting variable")
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@Patterns
+	@Patterns(interpolative = true)
 	@NameOfEmptyValue("Do not retrieve")
 	public String getArtifacts() {
 		return artifacts;

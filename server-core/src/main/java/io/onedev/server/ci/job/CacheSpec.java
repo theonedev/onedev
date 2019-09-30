@@ -21,7 +21,7 @@ public class CacheSpec implements Serializable {
 	private String path;
 
 	@Editable(order=100, description="Specify key of the cache. Caches with same key can be reused by different builds. "
-			+ "<b>Note:</b> Type '@' to start inserting variable")
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	@RegEx(interpolative=true, value="[a-zA-Z0-9\\-_]+", message="Can only contain alphanumeric, dash and underscore")
@@ -34,7 +34,8 @@ public class CacheSpec implements Serializable {
 	}
 	
 	@Editable(order=200, description="Specify path to cache. Non-absolute path is considered to be relative to job workspace. "
-			+ "Specify \".\" (without quote) to cache workspace itself. <b>Note:</b> Type '@' to start inserting variable")
+			+ "Specify \".\" (without quote) to cache workspace itself. "
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Path
 	@NotEmpty

@@ -7,14 +7,14 @@ import javax.validation.ValidationException;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.booleaninput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.web.util.LocaleUtils;
 
 public class BooleanInput {
 
 	public static List<String> getPossibleValues() {
-		return Lists.newArrayList(StringUtils.describe(true), StringUtils.describe(false));
+		return Lists.newArrayList(LocaleUtils.describe(true), LocaleUtils.describe(false));
 	}
 	
 	public static String getPropertyDef(InputSpec inputSpec, Map<String, Integer> indexes, 
@@ -35,9 +35,9 @@ public class BooleanInput {
 			throw new ValidationException("Invalid boolean value");
 		} else if (strings.size() == 1) {
 			String string = strings.iterator().next();
-			if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase(StringUtils.describe(true)))
+			if (string.equalsIgnoreCase("true") || string.equalsIgnoreCase(LocaleUtils.describe(true)))
 				return true;
-			else if (string.equalsIgnoreCase("false") || string.equalsIgnoreCase(StringUtils.describe(false)))
+			else if (string.equalsIgnoreCase("false") || string.equalsIgnoreCase(LocaleUtils.describe(false)))
 				return false;
 			else
 				throw new ValidationException("Invalid boolean value");
@@ -48,9 +48,9 @@ public class BooleanInput {
 
 	public static List<String> convertToStrings(Object value) {
 		if (value instanceof Boolean)
-			return Lists.newArrayList(StringUtils.describe((Boolean)value));
+			return Lists.newArrayList(LocaleUtils.describe((Boolean)value));
 		else
-			return Lists.newArrayList(StringUtils.describe(false));
+			return Lists.newArrayList(LocaleUtils.describe(false));
 	}
 
 }

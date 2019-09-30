@@ -17,6 +17,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.interpolative.Segment;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -65,7 +66,7 @@ public class ProjectDependency implements Serializable {
 	}
 	
 	@Editable(order=300, name="Build", description="Specify build to retrieve artifacts from. "
-			+ "<b>Note:</b> Type '@' to start inserting variable")
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables", literalSuggester="suggestBuilds")
 	@NotEmpty
 	public String getBuildNumber() {
@@ -96,10 +97,10 @@ public class ProjectDependency implements Serializable {
 			return new ArrayList<>();
 	}
 
-	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve "
-			+ "into job workspace. <b>Note:</b> Type '@' to start inserting variable")
+	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into job workspace. "
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@Patterns(suggester="suggestArtifacts")
+	@Patterns(suggester="suggestArtifacts", interpolative=true)
 	@NotEmpty
 	public String getArtifacts() {
 		return artifacts;
@@ -118,7 +119,9 @@ public class ProjectDependency implements Serializable {
 	private static List<InputSuggestion> suggestArtifacts(String matchWith) {
 		Project project = getInputProject();
 		String buildNumber = (String) EditContext.get().getInputValue("buildNumber");
-		if (project != null && io.onedev.server.util.interpolative.Interpolative.fromString(buildNumber).getSegments().isEmpty()) {
+		if (project != null && io.onedev.server.util.interpolative.Interpolative.fromString(buildNumber).getSegments(Segment.Type.VARIABLE).isEmpty()) {
+			if (buildNumber.startsWith("#"))
+				buildNumber = buildNumber.substring(1);
 			Build build = OneDev.getInstance(BuildManager.class).find(project, Long.parseLong(buildNumber));
 			if (build != null)
 				return SuggestionUtils.suggestArtifacts(build, matchWith);

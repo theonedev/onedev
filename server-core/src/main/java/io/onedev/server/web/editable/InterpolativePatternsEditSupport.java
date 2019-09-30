@@ -69,14 +69,10 @@ public class InterpolativePatternsEditSupport implements EditSupport {
 									
 									@Override
 									protected List<String> getHints(TerminalExpect terminalExpect) {
-										char interpolativeMark = io.onedev.server.util.interpolative.Interpolative.MARK;
 										return Lists.newArrayList(
 												"Pattern containing spaces or starting with dash needs to be quoted",
 												"Use * or ? for wildcard match",
-												String.format("Type '%c' to start inserting variable", interpolativeMark),
-												String.format("Type '\\%c' to input normal '%c' character", 
-														interpolativeMark, interpolativeMark)
-												);
+												"Prepend '\\' to escape '@' or '\\'"); 
 									}
 									
     							};

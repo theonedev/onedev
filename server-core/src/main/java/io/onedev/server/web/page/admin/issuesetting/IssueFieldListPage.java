@@ -28,7 +28,6 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
@@ -41,6 +40,7 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
+import io.onedev.server.web.util.LocaleUtils;
 
 @SuppressWarnings("serial")
 public class IssueFieldListPage extends GlobalIssueSettingPage {
@@ -146,7 +146,7 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, StringUtils.describe(getSetting().getDefaultListFields().contains(field.getName())));
+						return new Label(componentId, LocaleUtils.describe(getSetting().getDefaultListFields().contains(field.getName())));
 					}
 					
 				});

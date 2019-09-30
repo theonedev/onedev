@@ -24,9 +24,9 @@ public abstract class JobReport implements Serializable {
 	private transient PatternSet patternSet;
 
 	@Editable(order=100, description="Specify files relative to OneDev workspace. Use * or ? for pattern match. "
-			+ "<b>Note:</b> Type '@' to start inserting variable")
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@Patterns
+	@Patterns(interpolative = true)
 	@NotEmpty
 	public String getFilePatterns() {
 		return filePatterns;

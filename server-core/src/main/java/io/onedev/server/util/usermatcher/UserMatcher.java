@@ -14,7 +14,9 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
+import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneException;
 import io.onedev.server.model.Project;
@@ -27,8 +29,6 @@ public class UserMatcher implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String ESCAPE_CHARS = "\\()";
-	
 	private final List<UserMatcherCriteria> criterias;
 	
 	private final List<UserMatcherCriteria> exceptCriterias;
@@ -70,12 +70,12 @@ public class UserMatcher implements Serializable {
 		} else if (criteriaContext.IssueReaders() != null) {
 			return new IssueReaders();
 		} else if (criteriaContext.userCriteria() != null) {
-			String userName = unescape(removeParens(criteriaContext.userCriteria().Value().getText()));
+			String userName = getValue(criteriaContext.userCriteria().Value());
 			SpecifiedUser specifiedUser = new SpecifiedUser();
 			specifiedUser.setUserName(userName);
 			return specifiedUser;
 		} else if (criteriaContext.groupCriteria() != null) {
-			String groupName = unescape(removeParens(criteriaContext.groupCriteria().Value().getText()));
+			String groupName = getValue(criteriaContext.groupCriteria().Value());
 			SpecifiedGroup specifiedGroup = new SpecifiedGroup();
 			specifiedGroup.setGroupName(groupName);
 			return specifiedGroup;
@@ -102,16 +102,8 @@ public class UserMatcher implements Serializable {
 		return new UserMatcher(criterias, exceptCriterias);
 	}
 	
-	public static String unescape(String value) {
-		return value.replace("\\(", "(").replace("\\)", ")").replace("\\\\", "\\");
-	}
-
-	public static String removeParens(String value) {
-		if (value.startsWith("("))
-			value = value.substring(1);
-		if (value.endsWith(")"))
-			value = value.substring(0, value.length()-1);
-		return value;
+	private static String getValue(TerminalNode terminal) {
+		return StringUtils.unescape(FenceAware.unfence(terminal.getText()));
 	}
 	
 	public static UserMatcherContext parse(String userMatcherString) {
@@ -134,17 +126,6 @@ public class UserMatcher implements Serializable {
 		return parser.userMatcher();
 	}
 
-	public static String escape(String value) {
-		StringBuilder builder = new StringBuilder();
-		for (int i=0; i<value.length(); i++) {
-			char ch = value.charAt(i);
-			if (ESCAPE_CHARS.indexOf(ch) != -1)
-				builder.append("\\");
-			builder.append(ch);
-		}
-		return builder.toString();
-	}	
-	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

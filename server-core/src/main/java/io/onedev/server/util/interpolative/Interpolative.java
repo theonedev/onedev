@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -12,8 +15,8 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import org.apache.commons.lang3.StringUtils;
 
+import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.server.OneException;
 import io.onedev.server.util.interpolative.InterpolativeParser.InterpolativeContext;
 import io.onedev.server.util.interpolative.InterpolativeParser.SegmentContext;
@@ -23,8 +26,6 @@ public class Interpolative implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final char MARK = '@';
-	
 	private final List<Segment> segments;
 	
 	public Interpolative(List<Segment> segments) {
@@ -35,15 +36,15 @@ public class Interpolative implements Serializable {
 		List<Segment> segments = new ArrayList<>();
 		for (SegmentContext segment: parse(interpolativeString).segment()) {
 			if (segment.Literal() != null) 
-				segments.add(new Segment(Type.LITERAL, unescape(segment.Literal().getText())));
-			else 
-				segments.add(new Segment(Type.VARIABLE, unescape(segment.Variable().getText())));
+				segments.add(new Segment(Type.LITERAL, segment.Literal().getText()));
+			else
+				segments.add(new Segment(Type.VARIABLE, FenceAware.unfence(segment.Variable().getText())));
 		}
 		return new Interpolative(segments);
 	}
 
-	public List<Segment> getSegments() {
-		return segments;
+	public List<Segment> getSegments(@Nullable Type type) {
+		return segments.stream().filter(it -> type==null || it.getType() == type).collect(Collectors.toList());
 	}
 	
 	public String interpolateWith(Function<String, String> interpolator) {
@@ -57,13 +58,6 @@ public class Interpolative implements Serializable {
 		return builder.toString();
 	}
 	
-	public static String unescape(String literal) {
-		String markString = String.valueOf(MARK);
-		if (literal.startsWith(markString))
-			literal = literal.substring(1, literal.length()-1);
-		return StringUtils.replace(literal, "\\" + markString, markString);
-	}
-
 	public static InterpolativeContext parse(String interpolativeString) {
 		CharStream is = CharStreams.fromString(interpolativeString); 
 		InterpolativeLexer lexer = new InterpolativeLexer(is);
@@ -82,17 +76,6 @@ public class Interpolative implements Serializable {
 		parser.removeErrorListeners();
 		parser.setErrorHandler(new BailErrorStrategy());
 		return parser.interpolative();
-	}
-
-	public static String escape(String literal) {
-		StringBuilder builder = new StringBuilder();
-		for (int i=0; i<literal.length(); i++) {
-			char ch = literal.charAt(i);
-			if (ch == MARK)
-				builder.append("\\");
-			builder.append(ch);
-		}
-		return builder.toString();
 	}
 
 }

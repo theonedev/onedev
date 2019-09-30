@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.Token;
-import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Optional;
 
@@ -16,10 +15,9 @@ import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.server.util.interpolative.Interpolative;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.patternset.InterpolativePatternSetLexer;
 import io.onedev.server.util.patternset.InterpolativePatternSetParser;
-import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 
 @SuppressWarnings("serial")
@@ -33,35 +31,18 @@ public abstract class InterpolativePatternSetAssistBehavior extends ANTLRAssistB
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-
-			String mark = String.valueOf(Interpolative.MARK);
-			Set<String> matches = new HashSet<>();
-			for (Token token: terminalExpect.getRoot().getState().getMatchedTokens()) {
-				if (token.getType() == InterpolativePatternSetLexer.Variable) {
-					matches.add(Interpolative.unescape(token.getText()));
-				} else if (token.getType() == InterpolativePatternSetLexer.Quoted 
-						|| token.getType() == InterpolativePatternSetLexer.NQuoted) {
-					matches.add(PatternSet.unescape(token.getText()));
-				} 
-			}
-
 			String unmatched = terminalExpect.getUnmatchedText();
-			if (spec.getRuleName().equals("Variable") && unmatched.startsWith(mark)) {
-				return new FenceAware(codeAssist.getGrammar(), mark, mark) {
+			
+			if (spec.getRuleName().equals("Variable") && unmatched.startsWith("@")) {
+				return new FenceAware(codeAssist.getGrammar(), '@', '@') {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						List<InputSuggestion> suggestions = suggestVariables(unfencedMatchWith)
-								.stream()
-								.filter(it->!matches.contains(it.getContent()))
-								.collect(Collectors.toList());
-						if (unfencedMatchWith.length() != 0 
-								&& !matches.contains(unfencedMatchWith) 
-								&& suggestions.isEmpty()) {
+					protected List<InputSuggestion> match(String matchWith) {
+						List<InputSuggestion> suggestions = suggestVariables(matchWith);
+						if (!suggestions.isEmpty() || matchWith.length() == 0)
+							return suggestions;
+						else
 							return null;
-						} else {
-							return suggestions.stream().map(it->it.escape(mark)).collect(Collectors.toList());
-						}
 					}
 
 					@Override
@@ -70,48 +51,58 @@ public abstract class InterpolativePatternSetAssistBehavior extends ANTLRAssistB
 					}
 					
 				}.suggest(terminalExpect);
-			} else if (spec.getRuleName().equals("NQuoted")) {
-				List<InputSuggestion> suggestions = suggestPatterns(unmatched);
-				return suggestions
-						.stream()
-						.filter(it->!matches.contains(it.getContent()))
-						.map(it->{
-							if (StringUtils.containsAny(it.getContent(), " \"") || it.getContent().startsWith("-")) {
-								InputSuggestion suggestion = it.escape("\"" + mark);
-								suggestion = new InputSuggestion("\"" + suggestion.getContent() + "\"", 
-										suggestion.getCaret()!=-1? suggestion.getCaret()+1: -1,
-										suggestion.getDescription(), 
-										new LinearRange(suggestion.getMatch().getFrom()+1, suggestion.getMatch().getTo()+1));
-								return suggestion;
-							} else {
-								return it;
-							}
-						})
-						.collect(Collectors.toList());
-			} else if (spec.getRuleName().equals("Quoted") && unmatched.startsWith("\"")) {
-				return new FenceAware(codeAssist.getGrammar(), "\"", "\"") {
-
-					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						List<InputSuggestion> suggestions = suggestPatterns(unfencedMatchWith)
-								.stream()
-								.filter(it->!matches.contains(it.getContent()))
-								.collect(Collectors.toList());
-						if (unfencedMatchWith.length() != 0 
-								&& !matches.contains(unfencedMatchWith) 
-								&& suggestions.isEmpty()) {
-							return null;
-						} else {
-							return suggestions.stream().map(it->it.escape("\"" + mark)).collect(Collectors.toList());
+			} else {
+				Set<String> matches = new HashSet<>();
+				for (Token token: terminalExpect.getRoot().getState().getMatchedTokens()) {
+					if (token.getType() == InterpolativePatternSetLexer.Quoted)
+						matches.add(StringUtils.unescape(FenceAware.unfence(token.getText())));
+					else
+						matches.add(StringUtils.unescape(token.getText()));
+				}
+				if (spec.getRuleName().equals("NQuoted")) {
+					List<InputSuggestion> suggestions = suggestPatterns(unmatched);
+					return suggestions
+							.stream()
+							.filter(it->!matches.contains(it.getContent()))
+							.map(it->{
+								if (it.getContent().contains(" ") || it.getContent().startsWith("-")) {
+									InputSuggestion suggestion = it.escape("\"@");
+									suggestion = new InputSuggestion("\"" + suggestion.getContent() + "\"", 
+											suggestion.getCaret()!=-1? suggestion.getCaret()+1: -1,
+											suggestion.getDescription(), 
+											new LinearRange(suggestion.getMatch().getFrom()+1, suggestion.getMatch().getTo()+1));
+									return suggestion;
+								} else {
+									return it;
+								}
+							})
+							.collect(Collectors.toList());
+				} else if (spec.getRuleName().equals("Quoted") && unmatched.startsWith("\"")) {
+					/*
+					 *  provide this suggestion only when we typed quote as otherwise we will have duplicated suggestions
+					 *  (one for nquoted, and one for quoted) 
+					 */
+					return new FenceAware(codeAssist.getGrammar(), '"', '"', "@") {
+	
+						@Override
+						protected List<InputSuggestion> match(String matchWith) {
+							List<InputSuggestion> suggestions = suggestPatterns(matchWith)
+									.stream()
+									.filter(it -> !matches.contains(it.getContent()))
+									.collect(Collectors.toList());
+							if (!suggestions.isEmpty() || matches.contains(matchWith) || matchWith.length() == 0) 
+								return suggestions;
+							else 
+								return null;
 						}
-					}
-
-					@Override
-					protected String getFencingDescription() {
-						return null;
-					}
-					
-				}.suggest(terminalExpect);
+	
+						@Override
+						protected String getFencingDescription() {
+							return null;
+						}
+						
+					}.suggest(terminalExpect);
+				}
 			}
 		}
 		return null;
@@ -119,7 +110,7 @@ public abstract class InterpolativePatternSetAssistBehavior extends ANTLRAssistB
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
-		if (suggestedLiteral.equals(String.valueOf(Interpolative.MARK)))
+		if (suggestedLiteral.equals("@"))
 			return null;
 		String description;
 		switch (suggestedLiteral) {

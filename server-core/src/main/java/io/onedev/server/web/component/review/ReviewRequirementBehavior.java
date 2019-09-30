@@ -3,7 +3,6 @@ package io.onedev.server.web.component.review;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
@@ -18,7 +17,6 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.model.Project;
 import io.onedev.server.security.permission.ProjectPrivilege;
-import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.reviewrequirement.ReviewRequirementParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -39,27 +37,20 @@ public class ReviewRequirementBehavior extends ANTLRAssistBehavior {
 		projectModel.detach();
 	}
 
-	private List<InputSuggestion> escape(List<InputSuggestion> suggestions) {
-		return suggestions.stream().map(it->it.escape("()")).collect(Collectors.toList());
-	}
-	
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Value")) {
-				return new FenceAware(codeAssist.getGrammar(), "(", ")") {
+				return new FenceAware(codeAssist.getGrammar(), '(', ')') {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
-						String normalizedMatchWith = ReviewRequirement.unescapeBraces(matchWith.toLowerCase());
 						Project project = projectModel.getObject();
-						if (terminalExpect.findExpectByRule("userCriteria") != null) {
-							return escape(SuggestionUtils.suggestUsers(project, ProjectPrivilege.CODE_READ, 
-									normalizedMatchWith));
-						} else {
-							return escape(SuggestionUtils.suggestGroups(normalizedMatchWith));
-						}
+						if (terminalExpect.findExpectByRule("userCriteria") != null)
+							return SuggestionUtils.suggestUsers(project, ProjectPrivilege.CODE_READ, matchWith);
+						else 
+							return SuggestionUtils.suggestGroups(matchWith);
 					}
 
 					@Override

@@ -7,12 +7,13 @@ import java.util.List;
 
 import javax.persistence.criteria.Path;
 
-import org.apache.commons.lang.StringUtils;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Splitter;
 
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -36,12 +37,10 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 
 	public abstract List<EntitySort> getSorts();
 	
-	public static String getValue(String tokenText) {
-		String value = tokenText.substring(1);
-		value = value.substring(0, value.length()-1);
-		return unescapeQuotes(value);
+	public static String getValue(String token) {
+		return StringUtils.unescape(FenceAware.unfence(token));
 	}
-
+	
 	public static int getIntValue(String value) {
 		try {
 			return Integer.parseInt(value);
@@ -146,15 +145,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	}
 	
 	public static String quote(String value) {
-		return "\"" + escapeQuotes(value) + "\"";
-	}
-	
-	public static String escapeQuotes(String value) {
-		return StringUtils.replace(value, "\"", "\\\"");
-	}
-	
-	public static String unescapeQuotes(String value) {
-		return StringUtils.replace(value, "\\\"", "\"");
+		return "\"" + StringUtils.escape(value, "\"") + "\"";
 	}
 	
 	public static <T> Path<T> getPath(Path<?> root, String pathName) {

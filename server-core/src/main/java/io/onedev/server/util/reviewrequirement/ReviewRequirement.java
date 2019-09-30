@@ -15,8 +15,9 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang.StringUtils;
 
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.GroupManager;
@@ -106,18 +107,7 @@ public class ReviewRequirement {
 	}
 	
 	private static String getValue(TerminalNode terminal) {
-		String value = terminal.getText().substring(1);
-		return unescapeBraces(value.substring(0, value.length()-1).trim());
-	}
-	
-	public static String escapeBraces(String value) {
-		value = StringUtils.replace(value, ")", "\\)");
-		return StringUtils.replace(value, "(", "\\(");
-	}
-	
-	public static String unescapeBraces(String value) {
-		value = StringUtils.replace(value, "\\)", ")");
-		return StringUtils.replace(value, "\\(", "(");
+		return StringUtils.unescape(FenceAware.unfence(terminal.getText()));
 	}
 	
 	public List<User> getUsers() {
@@ -187,9 +177,9 @@ public class ReviewRequirement {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (User user: users)
-			builder.append("user(").append(ReviewRequirement.escapeBraces(user.getName())).append(") ");
+			builder.append("user(").append(StringUtils.escape(user.getName(), "()")).append(") ");
 		for (Map.Entry<Group, Integer> entry: groups.entrySet()) {
-			builder.append("group(").append(ReviewRequirement.escapeBraces(entry.getKey().getName())).append(")");
+			builder.append("group(").append(StringUtils.escape(entry.getKey().getName(), "()")).append(")");
 			if (entry.getValue() == 0)
 				builder.append(":all");
 			else if (entry.getValue() != 1)

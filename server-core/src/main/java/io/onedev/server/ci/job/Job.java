@@ -98,7 +98,8 @@ public class Job implements Serializable, Validatable {
 		this.name = name;
 	}
 
-	@Editable(order=110, description="Specify docker image of the job. <b>Note:</b> Type '@' to start inserting variable")
+	@Editable(order=110, description="Specify docker image of the job. "
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getImage() {
@@ -124,7 +125,8 @@ public class Job implements Serializable, Validatable {
 	
 	@Editable(order=120, description="Specify commands to execute in above image, with one command per line. "
 			+ "For Windows based images, commands will be interpretated by cmd.exe, and for Unix/Linux "
-			+ "based images, commands will be interpretated by shell. <b>Note:</b> Input '@' to start inserting variable")
+			+ "based images, commands will be interpretated by shell. "
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative
 	@Code(language = Code.SHELL, variableProvider="getVariables")
 	@Size(min=1, message="may not be empty")
@@ -217,10 +219,10 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9115, group="Artifacts & Reports", description="Optionally specify files to publish as job artifacts. "
-			+ "Artifact files are relative to OneDev workspace, and may use * or ? for pattern match. Variable can be "
-			+ "inserted by typing '@'")
+			+ "Artifact files are relative to OneDev workspace, and may use * or ? for pattern match. "
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@Patterns
+	@Patterns(interpolative = true)
 	@NameOfEmptyValue("No artifacts")
 	public String getArtifacts() {
 		return artifacts;
@@ -242,7 +244,7 @@ public class Job implements Serializable, Validatable {
 
 	@Editable(order=9200, name="CPU Requirement", group="Resource Requirements", description="Specify CPU requirement of the job. "
 			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details. "
-			+ "<b>Note:</b> Type '@' to start inserting variable")
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getCpuRequirement() {
@@ -255,7 +257,7 @@ public class Job implements Serializable, Validatable {
 
 	@Editable(order=9300, group="Resource Requirements", description="Specify memory requirement of the job. "
 			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory' target='_blank'>kubernetes documentation</a> for details. "
-			+ "<b>Note:</b> Type '@' to start inserting variable")
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getMemoryRequirement() {

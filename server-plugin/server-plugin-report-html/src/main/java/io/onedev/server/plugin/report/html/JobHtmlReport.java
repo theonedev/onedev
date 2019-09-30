@@ -33,7 +33,8 @@ public class JobHtmlReport extends JobReport {
 	
 	private String startPage;
 
-	@Editable(order=1000, description="Specify report name. <b>Note:</b> Type '@' to start inserting variable")
+	@Editable(order=1000, description="Specify report name. "
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getReportName() {
@@ -45,7 +46,7 @@ public class JobHtmlReport extends JobReport {
 	}
 	
 	@Editable(order=1100, description="Specify start page of the report relative to workspace, for instance: api/index.html. "
-			+ "<b>Note:</b> Type '@' to start inserting variable")
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getStartPage() {

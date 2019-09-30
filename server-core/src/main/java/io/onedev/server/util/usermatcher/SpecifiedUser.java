@@ -2,6 +2,7 @@ package io.onedev.server.util.usermatcher;
 
 import com.google.common.base.Preconditions;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
@@ -30,7 +31,7 @@ public class SpecifiedUser implements UserMatcherCriteria {
 
 	@Override
 	public String toString() {
-		return "user(" + UserMatcher.escape(userName) + ")";
+		return "user(" + StringUtils.escape(userName, "()") + ")";
 	}
 	
 }

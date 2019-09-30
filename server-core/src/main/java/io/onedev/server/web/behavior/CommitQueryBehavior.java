@@ -4,9 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
@@ -28,7 +26,6 @@ import io.onedev.server.git.NameAndEmail;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser;
 import io.onedev.server.util.Constants;
-import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -53,33 +50,24 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 		projectModel.detach();
 	}
 
-	private List<InputSuggestion> escape(List<InputSuggestion> suggestions) {
-		return suggestions.stream().map(it->it.escape("()")).collect(Collectors.toList());
-	}
-	
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Value")) {
-				return new FenceAware(codeAssist.getGrammar(), "(", ")") {
+				return new FenceAware(codeAssist.getGrammar(), '(', ')') {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
-						String normalizedMatchWith = ReviewRequirement.unescapeBraces(matchWith.toLowerCase());
 						int tokenType = terminalExpect.getState().getLastMatchedToken().getType();
-						List<InputSuggestion> suggestions = new ArrayList<>();
 						Project project = projectModel.getObject();
 						switch (tokenType) {
 						case CommitQueryParser.BRANCH:
-							suggestions.addAll(escape(SuggestionUtils.suggestBranches(project, normalizedMatchWith)));
-							break;
+							return SuggestionUtils.suggestBranches(project, matchWith);
 						case CommitQueryParser.TAG:
-							suggestions.addAll(escape(SuggestionUtils.suggestTags(project, normalizedMatchWith)));
-							break;
+							return SuggestionUtils.suggestTags(project, matchWith);
 						case CommitQueryParser.BUILD:
-							suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, normalizedMatchWith)));
-							break;
+							return SuggestionUtils.suggestBuilds(project, matchWith);
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
 							Map<String, LinearRange> suggestedInputs = new LinkedHashMap<>();
@@ -92,29 +80,27 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 								else
 									content = user.getName();
 								content = content.trim();
-								PatternApplied applied = WildcardUtils.applyPattern(normalizedMatchWith, content, false);
+								PatternApplied applied = WildcardUtils.applyPattern(matchWith, content, false);
 								if (applied != null)
 									suggestedInputs.put(applied.getText(), applied.getMatch());
 							}
 							
+							List<InputSuggestion> suggestions = new ArrayList<>();
 							for (Map.Entry<String, LinearRange> entry: suggestedInputs.entrySet()) 
-								suggestions.add(new InputSuggestion(entry.getKey(), -1, null, entry.getValue()).escape("()"));
-							break;
+								suggestions.add(new InputSuggestion(entry.getKey(), -1, null, entry.getValue()));
+							return suggestions;
 						case CommitQueryParser.BEFORE:
 						case CommitQueryParser.AFTER:
 							List<String> candidates = new ArrayList<>(DATE_EXAMPLES);
 							candidates.add(Constants.DATETIME_FORMATTER.print(System.currentTimeMillis()));
 							candidates.add(Constants.DATE_FORMATTER.print(System.currentTimeMillis()));
-							suggestions.addAll(SuggestionUtils.suggest(candidates, normalizedMatchWith));
-							CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, matchWith));
-							break;
+							suggestions = SuggestionUtils.suggest(candidates, matchWith);
+							return !suggestions.isEmpty()? suggestions: null;
 						case CommitQueryParser.PATH:
-							suggestions.addAll(escape(SuggestionUtils.suggestBlobs(projectModel.getObject(), normalizedMatchWith)));
-							break;
+							return SuggestionUtils.suggestBlobs(projectModel.getObject(), matchWith);
 						default: 
 							return null;
 						} 
-						return suggestions;
 					}
 
 					@Override

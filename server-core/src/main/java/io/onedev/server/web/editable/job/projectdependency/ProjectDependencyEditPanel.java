@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.server.ci.job.JobAware;
 import io.onedev.server.ci.job.ProjectDependency;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
@@ -19,7 +20,7 @@ import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.Path;
 
 @SuppressWarnings("serial")
-abstract class ProjectDependencyEditPanel extends Panel {
+abstract class ProjectDependencyEditPanel extends Panel implements JobAware {
 
 	private final List<ProjectDependency> dependencies;
 	

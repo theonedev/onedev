@@ -26,6 +26,8 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.JobAware;
 import io.onedev.server.ci.job.ProjectDependency;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -69,6 +71,11 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 						modal.close();
 						onPropertyUpdating(target);
 						target.add(ProjectDependencyListEditPanel.this);
+					}
+
+					@Override
+					public Job getJob() {
+						return ProjectDependencyListEditPanel.this.getJob();
 					}
 
 				};
@@ -143,6 +150,11 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 								target.add(ProjectDependencyListEditPanel.this);
 							}
 
+							@Override
+							public Job getJob() {
+								return ProjectDependencyListEditPanel.this.getJob();
+							}
+
 						};
 					}
 					
@@ -202,6 +214,14 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 		}.sortable("tbody"));
 	}
 
+	private Job getJob() {
+		JobAware jobAware = findParent(JobAware.class);
+		if (jobAware != null)
+			return jobAware.getJob();
+		else
+			return null;
+	}
+	
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);

@@ -20,7 +20,7 @@ public class EnvVar implements Serializable {
 	private String value;
 
 	@Editable(order=100, description="Specify name of the environment variable. "
-			+ "<b>Note:</b> Type '@' to start inserting job variable")
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@VariableName
 	@NotEmpty
@@ -33,7 +33,7 @@ public class EnvVar implements Serializable {
 	}
 
 	@Editable(order=200, description="Specify value of the environment variable. "
-			+ "<b>Note:</b> Type '@' to start inserting job variable")
+			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getValue() {

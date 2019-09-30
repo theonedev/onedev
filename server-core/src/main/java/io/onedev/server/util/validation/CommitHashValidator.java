@@ -6,6 +6,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.util.interpolative.Interpolative;
+import io.onedev.server.util.interpolative.Segment;
 import io.onedev.server.util.validation.annotation.CommitHash;
 
 public class CommitHashValidator implements ConstraintValidator<CommitHash, String> {
@@ -22,9 +23,7 @@ public class CommitHashValidator implements ConstraintValidator<CommitHash, Stri
 
 	@Override
 	public boolean isValid(String value, ConstraintValidatorContext constraintContext) {
-		if (value == null) 
-			return true;
-		if (interpolative && !Interpolated.get() && !Interpolative.fromString(value).getSegments().isEmpty())
+		if (value == null || interpolative && !Interpolated.get() && !Interpolative.fromString(value).getSegments(Segment.Type.VARIABLE).isEmpty())
 			return true;
 		
 		if (!ObjectId.isId(value)) {

@@ -38,7 +38,7 @@ public class InterpolativeValidator implements ConstraintValidator<Interpolative
 					constraintContext.disableDefaultConstraintViolation();
 					String message = this.message;
 					if (message.length() == 0)
-						message = "Malformed interpolative";
+						message = "Malformed interpolative: please make sure '@' and '\\' is escaped appropriately";
 					constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 					return false;
 				}

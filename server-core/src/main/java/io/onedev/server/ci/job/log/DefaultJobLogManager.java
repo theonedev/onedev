@@ -160,7 +160,7 @@ public class DefaultJobLogManager implements JobLogManager {
 									paramName = "";
 								List<String> paramValues = new ArrayList<>();
 								for (TerminalNode terminalNode: paramContext.Value())
-									paramValues.add(LogInstruction.unescape(LogInstruction.removeQuotes(terminalNode.getText())));
+									paramValues.add(LogInstruction.getValue(terminalNode));
 								params.put(paramName, paramValues);
 							}
 							doLog("Executing log instruction '" + name + "'...");

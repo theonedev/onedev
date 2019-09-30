@@ -31,7 +31,6 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.collect.Sets;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.groovyscript.GroovyScript;
@@ -43,6 +42,7 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.layout.SideFloating;
+import io.onedev.server.web.util.LocaleUtils;
 
 @SuppressWarnings("serial")
 public class GroovyScriptListPage extends AdministrationPage {
@@ -134,7 +134,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, StringUtils.describe(script.getJobAuthorization() != null));
+						return new Label(componentId, LocaleUtils.describe(script.getJobAuthorization() != null));
 					}
 					
 				});

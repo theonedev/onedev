@@ -16,9 +16,10 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.DirectoryScanner;
 
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.server.OneException;
 import io.onedev.server.util.patternset.PatternSetParser.PatternContext;
@@ -84,10 +85,11 @@ public class PatternSet implements Serializable {
 			
 			for (PatternContext pattern: patterns.pattern()) {
 				String value;
-				if (pattern.Quoted() != null)
-					value = unescape(pattern.Quoted().getText());
-				else
-					value = unescape(pattern.NQuoted().getText());
+				if (pattern.Quoted() != null) 
+					value = FenceAware.unfence(pattern.Quoted().getText());
+				else 
+					value = pattern.NQuoted().getText();
+				value = StringUtils.unescape(value);
 				if (pattern.Excluded() != null)
 					excludes.add(value);
 				else 
@@ -96,12 +98,6 @@ public class PatternSet implements Serializable {
 		}
 		
 		return new PatternSet(includes, excludes);
-	}
-	
-	public static String unescape(String pattern) {
-		if (pattern.startsWith("\""))
-			pattern = pattern.substring(1, pattern.length()-1);
-		return StringUtils.replace(pattern, "\\\"", "\"");
 	}
 
 	public static PatternsContext parse(String patternSetString) {
@@ -125,21 +121,10 @@ public class PatternSet implements Serializable {
 	}
 
 	public static String quoteIfNecessary(String pattern) {
-		if (StringUtils.containsAny(pattern, " \"") || pattern.startsWith("-"))
-			return "\"" + escape(pattern) + "\"";
-		else
-			return pattern;
-	}
-	
-	public static String escape(String pattern) {
-		StringBuilder builder = new StringBuilder();
-		for (int i=0; i<pattern.length(); i++) {
-			char ch = pattern.charAt(i);
-			if (ch == '"')
-				builder.append("\\");
-			builder.append(ch);
-		}
-		return builder.toString();
+		pattern = StringUtils.escape(pattern, "\"");
+		if (pattern.indexOf(" ") != -1 || pattern.startsWith("-"))
+			pattern = "\"" + pattern + "\"";
+		return pattern;
 	}
 	
 	@Override

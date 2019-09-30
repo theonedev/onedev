@@ -5,6 +5,7 @@ import java.util.function.Function;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.validation.annotation.UserName;
 
@@ -26,14 +27,14 @@ public class UserNameValidator implements ConstraintValidator<UserName, String> 
 			return true;
 		
 		if (interpolative && !Interpolated.get()) try {
-			value = Interpolative.fromString(value).interpolateWith(new Function<String, String>() {
+			value = StringUtils.unescape(Interpolative.fromString(value).interpolateWith(new Function<String, String>() {
 
 				@Override
 				public String apply(String t) {
 					return "a";
 				}
 				
-			});
+			}));
 		} catch (Exception e) {
 			return true; // will be handled by interpolative validator
 		}

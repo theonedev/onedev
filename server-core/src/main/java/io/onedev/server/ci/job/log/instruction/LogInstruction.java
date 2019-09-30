@@ -10,8 +10,11 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
+import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.launcher.loader.ExtensionPoint;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.job.log.instruction.LogInstructionParser.InstructionContext;
 import io.onedev.server.model.Build;
@@ -21,22 +24,12 @@ public abstract class LogInstruction {
 
 	public static final String PREFIX = "##onedev";
 	
-	public static final String ESCAPE_CHARS = "\\\"";
-	
 	public abstract String getName();
 	
 	public abstract void execute(Build build, Map<String, List<String>> params);
 	
-	public static String unescape(String value) {
-		return value.replace("\\'", "'").replace("\\\\", "\\");
-	}
-
-	public static String removeQuotes(String value) {
-		if (value.startsWith("'"))
-			value = value.substring(1);
-		if (value.endsWith("'"))
-			value = value.substring(0, value.length()-1);
-		return value;
+	public static String getValue(TerminalNode valueNode) {
+		return StringUtils.unescape(FenceAware.unfence(valueNode.getText()));
 	}
 	
 	public static InstructionContext parse(String instructionString) {
@@ -58,16 +51,5 @@ public abstract class LogInstruction {
 		parser.setErrorHandler(new BailErrorStrategy());
 		return parser.instruction();
 	}
-
-	public static String escape(String value) {
-		StringBuilder builder = new StringBuilder();
-		for (int i=0; i<value.length(); i++) {
-			char ch = value.charAt(i);
-			if (ESCAPE_CHARS.indexOf(ch) != -1)
-				builder.append("\\");
-			builder.append(ch);
-		}
-		return builder.toString();
-	}	
 	
 }

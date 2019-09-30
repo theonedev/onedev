@@ -30,7 +30,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -47,6 +46,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.BeanUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.BuildInfoManager;
@@ -589,7 +589,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public String interpolate(@Nullable String interpolativeString) {
 		if (interpolativeString != null) 
-			return Interpolative.fromString(interpolativeString).interpolateWith(new VariableInterpolator(this));
+			return StringUtils.unescape(Interpolative.fromString(interpolativeString).interpolateWith(new VariableInterpolator(this)));
 		else 
 			return null;
 	}	

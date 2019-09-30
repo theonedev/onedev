@@ -1,5 +1,5 @@
 onedev.server.codeSupport = {
-	onEditorDomReady: function(inputId, modeName, variables, varMark) {
+	onEditorDomReady: function(inputId, modeName, varQueryCallback) {
 		var cm = CodeMirror.fromTextArea(document.getElementById(inputId), {
 			indentWithTabs: true,
 			indentUnit: 4,
@@ -22,47 +22,52 @@ onedev.server.codeSupport = {
 			onedev.server.form.markDirty($input.closest("form"));
 		});
 		
-		cm.on("keypress", function(cm, event) {
-			if (String.fromCharCode(event.keyCode) == varMark) {
+		cm.on("keyup", function(cm, event) {
+			if (event.keyCode == 50) {
 		    	var cursor = cm.getCursor();
 		    	var line = cursor.line;
 		    	var start = cursor.ch;
-
-		    	if (start < 1 || cm.doc.getLine(line).substr(start-1, 1) != "\\") {
-					CodeMirror.showHint(cm, function () {
+		    	
+		    	var beforeCursor = cm.doc.getLine(line).substring(0, start);
+		    	
+		    	var escapeFiltered = beforeCursor.replace("\\\\", "").replace("\\@", "");
+		    	if ((escapeFiltered.match(/@/g) || []).length % 2 == 1) { // only show hint when type left @
+		    		function hint(cm, showHintCallback) {
 				    	var end = cm.getCursor().ch;
-				    	var matchWith = cm.doc.getLine(line).substr(start, end);
-				    	var matched = variables.filter(function (item) {
-				    		return item.text.indexOf(matchWith) >= 0;
-				    	});
-						for (var i = 0; i < matched.length; i++) {
-							if (i == matched.length-1) {
-								matched[i].render = function(element, self, data) {
-									var $element = $(element);
-									$element.append(data.text);
-									$element.parent().append(
-											"<li class='tips'>" +
-											"<div>Type '" + varMark + "' to start inserting variable</div>" +
-											"<div>Type '\\" + varMark + "' to input normal '" + varMark + "' character</div>" +
-											"</li>");
-								};
-							} else {
-								matched[i].render = function(element, self, data) {
-									$(element).append(data.text);
-								};
-							}
-						}
-				    	return {
-				    		list: matched,
-				    		from: CodeMirror.Pos(line, start),
-				    		to: CodeMirror.Pos(line, end)
-				    	};
-					}, {completeSingle: false});
+				    	var matchWith = cm.doc.getLine(line).substring(start, end);
+				    	$input.data("showHintCallback", showHintCallback);
+				    	varQueryCallback(matchWith, line, start, end);
+					}
+		    		hint.async = true;
+					CodeMirror.showHint(cm, hint, {completeSingle: false});
 		    	}
 			}
 		});
 		
 	    onedev.server.codeSupport.trackWidth(inputId);
+    },
+    showVariables: function(inputId, variables, line, start, end) {
+		for (var i = 0; i < variables.length; i++) {
+			if (i == variables.length-1) {
+				variables[i].render = function(element, self, data) {
+					var $element = $(element);
+					$element.append(data.text);
+					$element.parent().append(
+							"<li class='tips'>" +
+							"<div>Prepend '\\' to escape '@' or '\\'</div>" +
+							"</li>");
+				};
+			} else {
+				variables[i].render = function(element, self, data) {
+					$(element).append(data.text);
+				};
+			}
+		}
+    	$("#" + inputId).data("showHintCallback")({
+    		list: variables,
+    		from: CodeMirror.Pos(line, start-1),
+    		to: CodeMirror.Pos(line, end)
+    	});
     },
 	onViewerDomReady: function(inputId, modeName) {
 		var cm = CodeMirror.fromTextArea(document.getElementById(inputId), {

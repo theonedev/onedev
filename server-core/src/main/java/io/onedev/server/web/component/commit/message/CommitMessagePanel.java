@@ -2,6 +2,7 @@ package io.onedev.server.web.component.commit.message;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
@@ -19,7 +20,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.utils.Highlighter;
-import io.onedev.commons.utils.Transformer;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.CommitMessageTransformer;
@@ -56,19 +56,19 @@ public class CommitMessagePanel extends Panel {
 	}
 	
 	private String highlight(String text, @Nullable String commitUrl) {
-		return Highlighter.highlightPatterns(text, highlightPatternsModel.getObject(), new Transformer<String>() {
+		return Highlighter.highlightPatterns(text, highlightPatternsModel.getObject(), new Function<String, String>() {
 
 			@Override
-			public String transform(String text) {
-				String transformed = new CommitMessageTransformer(getProject(), commitUrl).transform(text);
+			public String apply(String text) {
+				String transformed = new CommitMessageTransformer(getProject(), commitUrl).apply(text);
 				return "<span class='highlight'>" + transformed + "</span>";
 			}
 			
-		}, new Transformer<String>() {
+		}, new Function<String, String>() {
 
 			@Override
-			public String transform(String text) {
-				return new CommitMessageTransformer(getProject(), commitUrl).transform(text);
+			public String apply(String text) {
+				return new CommitMessageTransformer(getProject(), commitUrl).apply(text);
 			}
 			
 		});

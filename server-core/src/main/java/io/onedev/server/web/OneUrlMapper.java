@@ -108,7 +108,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		addMyPages();
 		addAdministrationPages();
 		addSecurityPages();
-		
+				
 		addResources();
 	}
 

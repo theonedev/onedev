@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
@@ -11,6 +12,8 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.IRequestParameters;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.util.convert.ConversionException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -25,7 +28,7 @@ import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.interpolative.Interpolative;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
@@ -35,6 +38,8 @@ import io.onedev.server.web.editable.annotation.Code;
 public class CodePropertyEditor extends PropertyEditor<List<String>> {
 
 	private TextArea<String> input;
+	
+	private AbstractPostAjaxBehavior behavior;
 	
 	public CodePropertyEditor(String id, PropertyDescriptor propertyDescriptor, IModel<List<String>> propertyModel) {
 		super(id, propertyDescriptor, propertyModel);
@@ -59,6 +64,50 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 			}
 			
 		});
+		add(behavior = new AbstractPostAjaxBehavior() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
+				String matchWith = params.getParameterValue("matchWith").toString();
+				matchWith = StringUtils.unescape(matchWith.toLowerCase());
+				String line = params.getParameterValue("line").toString();
+				String start = params.getParameterValue("start").toString();
+				String end = params.getParameterValue("end").toString();
+				
+				String variableProvider = getCode().variableProvider();
+				ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
+				ArrayNode variablesNode = mapper.createArrayNode();
+				if (variableProvider.length() != 0) {
+					ComponentContext.push(new ComponentContext(input));
+					try { 
+						for (String each: (List<String>) ReflectionUtils.invokeStaticMethod(
+								descriptor.getBeanClass(), variableProvider)) {
+							if (each.contains(matchWith.toLowerCase())) {
+								ObjectNode variableNode = mapper.createObjectNode();
+								variableNode.put("text", "@" + StringUtils.escape(each, "@") + "@"); 
+								variablesNode.add(variableNode);
+							}
+						}
+					} finally {
+						ComponentContext.pop();
+					}
+				}
+				try {
+					String script = String.format("onedev.server.codeSupport.showVariables('%s', %s, %s, %s, %s);", 
+							input.getMarkupId(), mapper.writeValueAsString(variablesNode), line, start, end);
+					target.appendJavaScript(script);
+				} catch (JsonProcessingException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+		});
+	}
+	
+	private Code getCode() {
+		return Preconditions.checkNotNull(descriptor.getPropertyGetter().getAnnotation(Code.class));
 	}
 
 	@Override
@@ -69,38 +118,21 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 		return convertedInput;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new CodeSupportResourceReference()));
 
-		Code code = Preconditions.checkNotNull(descriptor.getPropertyGetter().getAnnotation(Code.class));
-		
-		String variableProvider = code.variableProvider();
-		ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
-		ArrayNode variablesNode = mapper.createArrayNode();
-		if (variableProvider.length() != 0) {
-			ComponentContext.push(new ComponentContext(this));
-			try { 
-				for (String each: (List<String>) ReflectionUtils.invokeStaticMethod(
-						descriptor.getBeanClass(), variableProvider)) {
-					ObjectNode variableNode = mapper.createObjectNode();
-					variableNode.put("text", Interpolative.MARK + each + Interpolative.MARK); 
-					variablesNode.add(variableNode);
-				}
-			} finally {
-				ComponentContext.pop();
-			}
-		}
-		
-		try {
-			String script = String.format("onedev.server.codeSupport.onEditorDomReady('%s', '%s', %s, '%s');", 
-					input.getMarkupId(), code.language(), mapper.writeValueAsString(variablesNode), Interpolative.MARK);
-			response.render(OnLoadHeaderItem.forScript(script));
-		} catch (JsonProcessingException e) {
-			throw new RuntimeException(e);
-		}
+		CallbackParameter matchWith = CallbackParameter.explicit("matchWith");
+		CallbackParameter line = CallbackParameter.explicit("line");
+		CallbackParameter start = CallbackParameter.explicit("start");
+		CallbackParameter end = CallbackParameter.explicit("end");
+		String script = String.format(
+				"onedev.server.codeSupport.onEditorDomReady('%s', '%s', %s);", 
+				input.getMarkupId(), 
+				getCode().language(), 
+				behavior.getCallbackFunction(matchWith, line, start, end));
+		response.render(OnLoadHeaderItem.forScript(script));
 	}
 
 }

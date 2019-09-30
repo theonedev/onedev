@@ -137,7 +137,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String transformed = new CommitMessageTransformer(getProject(), null).transform(getCommit().getShortMessage());
+		String transformed = new CommitMessageTransformer(getProject(), null).apply(getCommit().getShortMessage());
 		add(new Label("title", transformed).setEscapeModelStrings(false));
 
 		BlobIdent blobIdent = new BlobIdent(getCommit().name(), null, FileMode.TYPE_TREE);
@@ -165,7 +165,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		
 		String message = GitUtils.getDetailMessage(getCommit());
 		if (message != null) {
-			transformed = new CommitMessageTransformer(getProject(), null).transform(message);
+			transformed = new CommitMessageTransformer(getProject(), null).apply(message);
 			add(new Label("detail", transformed).setEscapeModelStrings(false));
 		} else {
 			add(new WebMarkupContainer("detail").setVisible(false));

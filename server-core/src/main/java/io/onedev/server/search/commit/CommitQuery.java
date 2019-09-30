@@ -14,12 +14,13 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
@@ -148,9 +149,8 @@ public class CommitQuery implements Serializable {
 		return criterias.stream().anyMatch(it->it.needsLogin());
 	}
 	
-	private static String getValue(TerminalNode terminalNode) {
-		String value = terminalNode.getText().substring(1);
-		return unescapeBraces(value.substring(0, value.length()-1));
+	private static String getValue(TerminalNode valueNode) {
+		return StringUtils.unescape(FenceAware.unfence(valueNode.getText())); 
 	}
 	
 	public boolean matches(RefUpdated event, User user) {
@@ -158,16 +158,6 @@ public class CommitQuery implements Serializable {
 			return criterias.stream().allMatch(it->it.matches(event, user));
 		else 
 			return false;
-	}
-	
-	public static String escapeBraces(String value) {
-		value = StringUtils.replace(value, ")", "\\)");
-		return StringUtils.replace(value, "(", "\\(");
-	}
-	
-	public static String unescapeBraces(String value) {
-		value = StringUtils.replace(value, "\\)", ")");
-		return StringUtils.replace(value, "\\(", "(");
 	}
 	
 	public void fill(Project project, RevListCommand command) {
