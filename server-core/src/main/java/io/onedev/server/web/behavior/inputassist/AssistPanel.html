@@ -2,13 +2,8 @@
 	<div class="input-assist">
 		<div wicket:id="suggestions" class="suggestions autosize">
 			<table>
-				<tr wicket:id="suggestions">
-					<td class="suggestion">
-						<a wicket:id="link">
-							<wicket:link><img src="bullet.gif"></wicket:link>
-							<span wicket:id="label"></span>
-						</a>			
-					</td>
+				<tr wicket:id="suggestions" class="suggestion">
+					<td wicket:id="content" class="content"></td>
 					<td wicket:id="description" class="description"></td>
 				</tr>
 			</table>
@@ -16,7 +11,7 @@
 		<ul class="help list-unstyled">
 			<li wicket:id="hints"></li>
 			<li class="complete"></li>
-			<li class="esc">Press 'esc' to hide suggestions</li>
+			<li class="select">&uarr;&darr; to select item</li>
 		</ul>
 	</div>
 </wicket:panel>

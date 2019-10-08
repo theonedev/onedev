@@ -1,13 +1,13 @@
 .input-assist {
 	padding: 8px;
 }
-.input-assist td {
-	padding: 4px 8px;
+.input-assist .suggestions {
+	max-height: 400px;
 }
-.input-assist a {
+.input-assist td {
 	color: #333;
-	text-decoration: none;
-	display: block;
+	padding: 4px 8px;
+	cursor: pointer;
 }
 .input-assist tr:hover td {
 	background-color: #E0F0FC;
@@ -16,19 +16,21 @@
 	background-color: #CBE8FB;
 	border-color: #8BC8F9;
 }
-.input-assist .description {
-	color: #999;
-	text-align: right;
-	font-size: 12px;
-}
-.input-assist .suggestions {
-	max-height: 400px;
-}
-.input-assist .suggestion a {
+.input-assist tr.suggestion td.content {
 	padding-right: 12px;
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 	font-size: 12px;
 	white-space: nowrap;
+}
+.input-assist tr.suggestion td.content:before {
+    font-family: FontAwesome; 
+	content: "\f105";
+	margin-right: 8px;
+}
+.input-assist td.description {
+	text-align: right;
+	font-size: 12px;
+	color: #999;
 }
 .input-assist .help {
 	margin-top: 8px;
