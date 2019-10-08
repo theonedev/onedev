@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -55,11 +54,6 @@ public abstract class InterpolativeAssistBehavior extends ANTLRAssistBehavior {
 			}
 		}
 		return null;
-	}
-	
-	@Override
-	protected List<String> getHints(TerminalExpect terminalExpect) {
-		return Lists.newArrayList("Prepend '\\' to escape '@' or '\\'");
 	}
 	
 	@Override

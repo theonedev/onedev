@@ -71,8 +71,7 @@ public class InterpolativePatternsEditSupport implements EditSupport {
 									protected List<String> getHints(TerminalExpect terminalExpect) {
 										return Lists.newArrayList(
 												"Pattern containing spaces or starting with dash needs to be quoted",
-												"Use * or ? for wildcard match",
-												"Prepend '\\' to escape '@' or '\\'"); 
+												"Use * or ? for wildcard match"); 
 									}
 									
     							};

@@ -66,7 +66,7 @@ public class ProjectDependency implements Serializable {
 	}
 	
 	@Editable(order=300, name="Build", description="Specify build to retrieve artifacts from. "
-			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables", literalSuggester="suggestBuilds")
 	@NotEmpty
 	public String getBuildNumber() {
@@ -98,7 +98,7 @@ public class ProjectDependency implements Serializable {
 	}
 
 	@Editable(order=400, name="Artifacts to Retrieve", description="Specify artifacts to retrieve into job workspace. "
-			+ "<b>Note:</b> Type '@' to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>")
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(suggester="suggestArtifacts", interpolative=true)
 	@NotEmpty

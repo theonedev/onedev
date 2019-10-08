@@ -15,10 +15,6 @@
 .property-viewer .CodeMirror .CodeMirror-cursor {
 	border-left: none;
 }
-.CodeMirror-hints>.tips {
-	background: #F0F0F0;
-	padding: 8px;
-}
 .CodeMirror-hint {
 	padding: 4px;
 }

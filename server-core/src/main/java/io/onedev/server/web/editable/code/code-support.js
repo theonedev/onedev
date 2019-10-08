@@ -47,22 +47,6 @@ onedev.server.codeSupport = {
 	    onedev.server.codeSupport.trackWidth(inputId);
     },
     showVariables: function(inputId, variables, line, start, end) {
-		for (var i = 0; i < variables.length; i++) {
-			if (i == variables.length-1) {
-				variables[i].render = function(element, self, data) {
-					var $element = $(element);
-					$element.append(data.text);
-					$element.parent().append(
-							"<li class='tips'>" +
-							"<div>Prepend '\\' to escape '@' or '\\'</div>" +
-							"</li>");
-				};
-			} else {
-				variables[i].render = function(element, self, data) {
-					$(element).append(data.text);
-				};
-			}
-		}
     	$("#" + inputId).data("showHintCallback")({
     		list: variables,
     		from: CodeMirror.Pos(line, start-1),
