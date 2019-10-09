@@ -37,7 +37,6 @@ public class ReviewerProvider extends AbstractUserChoiceProvider {
 			if (review.getExcludeDate() == null && review.getResult() == null)
 				users.remove(review.getUser().getFacade());
 		}
-		users.remove(SecurityUtils.getUser().getFacade());
 		
 		List<UserFacade> reviewers = new ArrayList<>(users);
 

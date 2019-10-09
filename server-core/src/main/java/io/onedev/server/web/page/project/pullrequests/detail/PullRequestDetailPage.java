@@ -7,8 +7,8 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SO
 import static io.onedev.server.search.entity.EntityQuery.quote;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.AssociatedWithPullRequest;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
 import static io.onedev.server.util.BuildConstants.FIELD_JOB;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.APPROVE;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.DELETE_SOURCE_BRANCH;
@@ -363,15 +363,6 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		
 		summaryContainer.add(newMergedNoteContainer());
 		summaryContainer.add(newMergeStatusContainer());
-		summaryContainer.add(new WebMarkupContainer("doNotMerge") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().isOpen() && getPullRequest().getMergeStrategy() == MergeStrategy.DO_NOT_MERGE);
-			}
-			
-		}.setOutputMarkupPlaceholderTag(true));
 		
 		summaryContainer.add(newOperationsContainer());
 		
@@ -841,7 +832,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				setVisible(request.isOpen() && request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE);
+				setVisible(request.isOpen());
 			}
 			
 		};

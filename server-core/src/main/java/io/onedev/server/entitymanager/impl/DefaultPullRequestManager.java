@@ -470,7 +470,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Sessional
 	@Override
 	public MergePreview previewMerge(PullRequest request) {
-		if (!request.isNew() && request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE) {
+		if (!request.isNew()) {
 			MergePreview lastPreview = request.getLastMergePreview();
 			if (request.isOpen() && !request.isMergeIntoTarget()) {
 				if (lastPreview == null || !lastPreview.isUpToDate(request)) {
@@ -782,18 +782,16 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		PullRequest request = update.getRequest();
 		
 		for (User user: reviewRequirement.getUsers()) {
-			if (!user.equals(request.getSubmitter())) {
-				PullRequestReview review = request.getReview(user);
-				if (review == null) {
-					review = new PullRequestReview();
-					review.setRequest(request);
-					review.setUser(user);
-					request.getReviews().add(review);
-				} else if (review.getExcludeDate() != null) {
-					review.setExcludeDate(null);
-				} else if (review.getUpdate() == null || review.getUpdate().getId()<update.getId()) {
-					review.setResult(null);
-				}
+			PullRequestReview review = request.getReview(user);
+			if (review == null) {
+				review = new PullRequestReview();
+				review.setRequest(request);
+				review.setUser(user);
+				request.getReviews().add(review);
+			} else if (review.getExcludeDate() != null) {
+				review.setExcludeDate(null);
+			} else if (review.getUpdate() == null || review.getUpdate().getId()<update.getId()) {
+				review.setResult(null);
 			}
 		}
 		
@@ -813,21 +811,17 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		int effectiveCount = 0;
 		Set<User> potentialReviewers = new HashSet<>();
 		for (User user: users) {
-			if (user.equals(request.getSubmitter())) {
-				effectiveCount++;
-			} else {
-				PullRequestReview review = request.getReview(user);
-				if (review != null && review.getExcludeDate() == null) {
-					if (review.getResult() == null)
-						requiredCount--;
-					else if (review.getUpdate() != null && review.getUpdate().getId()>=update.getId())
-						effectiveCount++;
-					else
-						potentialReviewers.add(user);
-				} else {
+			PullRequestReview review = request.getReview(user);
+			if (review != null && review.getExcludeDate() == null) {
+				if (review.getResult() == null)
+					requiredCount--;
+				else if (review.getUpdate() != null && review.getUpdate().getId()>=update.getId())
+					effectiveCount++;
+				else
 					potentialReviewers.add(user);
-				}
-			} 
+			} else {
+				potentialReviewers.add(user);
+			}
 			if (effectiveCount >= requiredCount)
 				break;
 		}

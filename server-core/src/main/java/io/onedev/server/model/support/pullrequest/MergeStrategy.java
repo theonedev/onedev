@@ -66,14 +66,6 @@ public enum MergeStrategy {
 			return GitUtils.rebase(repository, requestHead, targetHead, user);
 		}
 		
-	},
-	DO_NOT_MERGE("Do not merge now, only for review") {
-
-		@Override
-		public ObjectId merge(PullRequest request) {
-			throw new UnsupportedOperationException();
-		}
-		
 	};
 
 	private final String description;
