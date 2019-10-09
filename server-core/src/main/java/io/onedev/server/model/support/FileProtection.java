@@ -4,10 +4,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.validation.ConstraintValidatorContext;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.JobChoice;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -15,7 +19,8 @@ import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
-public class FileProtection implements Serializable {
+@ClassValidating
+public class FileProtection implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -61,6 +66,18 @@ public class FileProtection implements Serializable {
 
 	public void setJobNames(List<String> jobNames) {
 		this.jobNames = jobNames;
+	}
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		if (getJobNames().isEmpty() && getReviewRequirement() == null) {
+			context.disableDefaultConstraintViolation();
+			String message = "Either reviewer or required builds should be specified";
+			context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
 }

@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
-import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
@@ -29,8 +28,6 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usermatcher.Anyone;
 import io.onedev.server.util.usermatcher.UserMatcher;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.JobChoice;
@@ -40,8 +37,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
 @Horizontal
-@ClassValidating
-public class BranchProtection implements Serializable, Validatable {
+public class BranchProtection implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -312,21 +308,4 @@ public class BranchProtection implements Serializable, Validatable {
 		return !requiredJobNames.isEmpty();			
 	}
 
-	@Override
-	public boolean isValid(ConstraintValidatorContext context) {
-		int index = 1;
-		for (FileProtection fileProtection: getFileProtections()) {
-			if (fileProtection.getJobNames().isEmpty() && fileProtection.getReviewRequirement() == null) {
-				context.disableDefaultConstraintViolation();
-				String message = "File protection # " + index + ": Either reviewer or required builds should be specified";
-				context.buildConstraintViolationWithTemplate(message)
-						.addPropertyNode("fileProtections")
-						.addConstraintViolation();
-				return false;
-			} 
-			index++;
-		}
-		return true;
-	}
-	
 }
