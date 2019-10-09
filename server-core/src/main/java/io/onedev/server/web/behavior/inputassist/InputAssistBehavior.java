@@ -155,7 +155,14 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 							@Override
 							protected Component newContent(String id) {
-								return new AssistPanel(id, getComponent(), inputStatus, suggestions, getHints(inputStatus));
+								return new AssistPanel(id, getComponent(), inputStatus, suggestions, getHints(inputStatus)) {
+
+									@Override
+									protected void onClose(AjaxRequestTarget target) {
+										close();
+									}
+									
+								};
 							}
 
 							@Override
@@ -170,7 +177,14 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 						target.appendJavaScript(script);
 					} else {
 						Component content = dropdown.getContent();
-						Component newContent = new AssistPanel(content.getId(), getComponent(), inputStatus, suggestions, getHints(inputStatus));
+						Component newContent = new AssistPanel(content.getId(), getComponent(), inputStatus, suggestions, getHints(inputStatus)) {
+
+							@Override
+							protected void onClose(AjaxRequestTarget target) {
+								close();
+							}
+							
+						};
 						content.replaceWith(newContent);
 						target.add(newContent);
 
