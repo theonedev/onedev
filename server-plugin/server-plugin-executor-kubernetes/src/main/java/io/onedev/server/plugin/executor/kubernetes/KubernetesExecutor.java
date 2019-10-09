@@ -92,6 +92,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	private String configFile;
 	
 	private String kubeCtlPath;
+	
+	private boolean createCacheLabels = true;
 
 	@Editable(order=20, description="Optionally specify node selector of the job pods")
 	public List<NodeSelectorEntry> getNodeSelector() {
@@ -170,6 +172,18 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 	public void setKubeCtlPath(String kubeCtlPath) {
 		this.kubeCtlPath = kubeCtlPath;
+	}
+
+	@Editable(order=60000, group="More Settings", description="If enabled, OneDev will create labels "
+			+ "on nodes to record cache count for each cache key in job definition, and then "
+			+ "leverage Kubernetes node affinity feature to improve job cache hit rate. Note that "
+			+ "many labels might be created on node if there are many cache keys")
+	public boolean isCreateCacheLabels() {
+		return createCacheLabels;
+	}
+
+	public void setCreateCacheLabels(boolean createCacheLabels) {
+		this.createCacheLabels = createCacheLabels;
 	}
 
 	@Override
@@ -867,7 +881,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			logger.debug("Collecting init container log (pod: {})...", podFQN);
 			collectContainerLog(namespace, podName, "init", KubernetesHelper.LOG_END_MESSAGE, jobLogger);
 			
-			if (jobContext != null) 
+			if (jobContext != null && isCreateCacheLabels()) 
 				updateCacheLabels(nodeName, jobContext, jobLogger);
 			
 			logger.debug("Waiting for main container to start (pod: {})...", podFQN);
@@ -931,7 +945,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				
 			}, jobLogger);
 			
-			if (jobContext != null) 
+			if (jobContext != null && isCreateCacheLabels()) 
 				updateCacheLabels(nodeName, jobContext, jobLogger);
 		} finally {
 			deleteNamespace(namespace, jobLogger);

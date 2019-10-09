@@ -23,12 +23,5 @@ onedev.server.editable = {
 			$checkbox.children("label").append($label.children("span").text());
 			$label.remove();
 		});
-		
-		$container.find("td.value>div>.checkbox").each(function() {
-			var $checkbox = $(this);
-			var $td = $checkbox.parent().parent().prev("td.name");
-			$checkbox.children("label").append($td.children("span").text());
-			$td.empty();
-		});
 	}
 }

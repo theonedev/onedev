@@ -48,6 +48,9 @@
 	padding-bottom: 0;
 	margin-bottom: 0;
 }
+.editable td.value>div>.checkbox, .editable td.value>div>.checkbox>label {
+	margin: 0;
+}
  
 .editable>.bean-properties>table>tbody>tr>td.name {
 	font-weight: bold;
@@ -141,3 +144,4 @@
 .form-group>.editable>.list>.head {
 	margin-top: 8px;
 }
+
