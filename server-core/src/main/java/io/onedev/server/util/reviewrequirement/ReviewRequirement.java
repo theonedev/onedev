@@ -136,7 +136,7 @@ public class ReviewRequirement {
 	}
 	
 	@Nullable
-	public static String onRenameGroup(String reviewRequirementString, String oldName, String newName) {
+	public static String onRenameGroup(@Nullable String reviewRequirementString, String oldName, String newName) {
 		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
 		for (Group group: reviewRequirement.getGroups().keySet()) {
 			if (group.getName().equals(oldName))
@@ -145,7 +145,7 @@ public class ReviewRequirement {
 		return reviewRequirement.toString();
 	}
 
-	public static String onRenameUser(String reviewRequirementString, String oldName, String newName) {
+	public static String onRenameUser(@Nullable String reviewRequirementString, String oldName, String newName) {
 		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
 		for (User user: reviewRequirement.getUsers()) {
 			if (user.getName().equals(oldName))
@@ -154,7 +154,7 @@ public class ReviewRequirement {
 		return reviewRequirement.toString();
 	}
 	
-	public static boolean isUsingUser(String reviewRequirementString, String userName) {
+	public static boolean isUsingUser(@Nullable String reviewRequirementString, String userName) {
 		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
 		for (User user: reviewRequirement.getUsers()) {
 			if (user.getName().equals(userName))
@@ -163,7 +163,7 @@ public class ReviewRequirement {
 		return false;
 	}
 	
-	public static boolean isUsingGroup(String reviewRequirementString, String groupName) {
+	public static boolean isUsingGroup(@Nullable String reviewRequirementString, String groupName) {
 		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
 		for (Group group: reviewRequirement.getGroups().keySet()) {
 			if (group.getName().equals(groupName))

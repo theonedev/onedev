@@ -58,7 +58,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
@@ -351,7 +350,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		
 		AtomicBoolean buildRequired = new AtomicBoolean(true);
 		try {
-			buildRequired.set(getProject().isBuildRequiredForModification(revision, null));
+			buildRequired.set(getProject().isBuildRequiredForModification(getLoginUser(), revision, null));
 		} catch (Exception e) {
 			logger.error("Error checking build requirement", e);
 		}
@@ -1194,14 +1193,16 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				parentPath = directory;
 		}
 		
+		User user = Preconditions.checkNotNull(SecurityUtils.getUser());
+		
 		for (FileUpload upload: uploads) {
 			String blobPath = upload.getClientFileName();
 			if (parentPath != null)
 				blobPath = parentPath + "/" + blobPath;
 			
-			if (getProject().isReviewRequiredForModification(SecurityUtils.getUser(), blobIdent.revision, blobPath)) 
+			if (getProject().isReviewRequiredForModification(user, blobIdent.revision, blobPath)) 
 				throw new BlobUploadException("Review required for this change. Please submit pull request instead");
-			else if (getProject().isBuildRequiredForModification(blobIdent.revision, blobPath)) 
+			else if (getProject().isBuildRequiredForModification(user, blobIdent.revision, blobPath)) 
 				throw new BlobUploadException("Build required for this change. Please submit pull request instead");
 			
 			BlobContent blobContent = new BlobContent.Immutable(upload.getBytes(), FileMode.REGULAR_FILE);
@@ -1210,8 +1211,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 
 		BlobEdits blobEdits = new BlobEdits(Sets.newHashSet(), newBlobs);
 		String refName = GitUtils.branch2ref(blobIdent.revision);
-
-		User user = Preconditions.checkNotNull(OneDev.getInstance(UserManager.class).getCurrent());
 
 		ObjectId prevCommitId = getProject().getObjectId(blobIdent.revision, true);
 

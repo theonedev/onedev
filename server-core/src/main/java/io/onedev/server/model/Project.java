@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.stream.Collectors;
 
@@ -68,7 +67,6 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.MatrixRunner;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
@@ -77,10 +75,6 @@ import io.onedev.server.OneException;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.DefaultCISpecProvider;
-import io.onedev.server.ci.job.Job;
-import io.onedev.server.ci.job.param.JobParam;
-import io.onedev.server.ci.job.trigger.BranchUpdateTrigger;
-import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
 import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
@@ -347,6 +341,8 @@ public class Project extends AbstractEntity {
     private transient Optional<CommitQuerySetting> commitQuerySettingOfCurrentUserHolder;
     
 	private transient List<Milestone> sortedMilestones;
+	
+	private transient List<String> jobNames;
 	
 	@Editable(order=100)
 	@ProjectName
@@ -745,11 +741,17 @@ public class Project extends AbstractEntity {
 	}
 	
 	public List<String> getJobNames() {
-		CISpec ciSpec = getCISpec(getObjectId(getDefaultBranch(), true));
-		if (ciSpec != null)
-			return new ArrayList<>(ciSpec.getJobMap().keySet());
-		else 
-			return new ArrayList<>();
+		if (jobNames == null) {
+			Set<String> jobNameSet = new HashSet<>();
+			for (RefInfo refInfo: getBranches()) {
+				CISpec ciSpec = getCISpec(refInfo.getPeeledObj());
+				if (ciSpec != null)
+					jobNameSet.addAll(ciSpec.getJobMap().keySet());
+			}
+			jobNames = new ArrayList<>(jobNameSet);
+			Collections.sort(jobNames);
+		}
+		return jobNames;
 	}
 	
 	public LastCommitsOfChildren getLastCommitsOfChildren(String revision, @Nullable String path) {
@@ -1432,103 +1434,28 @@ public class Project extends AbstractEntity {
 	}
 	
 	public boolean isReviewRequiredForModification(User user, String branch, @Nullable String file) {
-		BranchProtection branchProtection = getBranchProtection(branch, user);
-		if (branchProtection != null) 
-			return branchProtection.isReviewRequiredForModification(user, this, branch, file);
+		BranchProtection protection = getBranchProtection(branch, user);
+		if (protection != null) 
+			return protection.isReviewRequiredForModification(user, this, branch, file);
 		else
 			return false;
 	}
 
 	public boolean isReviewRequiredForPush(User user, String branch, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
-		BranchProtection branchProtection = getBranchProtection(branch, user);
-		if (branchProtection != null) { 		
-			return branchProtection.isReviewRequiredForPush(user, this, branch, oldObjectId, newObjectId, gitEnvs);
-		} else {
-			return false;
-		}
+		BranchProtection protection = getBranchProtection(branch, user);
+		return protection != null && protection.isReviewRequiredForPush(user, this, branch, oldObjectId, newObjectId, gitEnvs);
 	}
 	
-	public boolean isBuildRequiredForModification(String branch, @Nullable String file) {
-		// Exclude cispec from build requirement to avoid being locking out
-		if (!CISpec.BLOB_PATH.equals(file)) {
-			try {
-				CISpec ciSpec = getCISpec(getObjectId(branch, true));
-				if (ciSpec != null) {
-					Matcher matcher = new PathMatcher();
-					for (Job job: ciSpec.getJobs()) {
-						for (JobTrigger trigger: job.getTriggers()) {
-							if (trigger instanceof BranchUpdateTrigger) {
-								BranchUpdateTrigger branchUpdateTrigger = (BranchUpdateTrigger) trigger;
-								if (branchUpdateTrigger.isRejectIfNotSuccessful() 
-										&& (branchUpdateTrigger.getBranches() == null || PatternSet.fromString(branchUpdateTrigger.getBranches()).matches(matcher, branch))) {
-									return true;
-								}
-							}
-						}
-					}
-				}
-			} catch (Exception e) {
-			}
-		}
-		return false;
+	public boolean isBuildRequiredForModification(User user, String branch, @Nullable String file) {
+		BranchProtection protection = getBranchProtection(branch, user);
+		return protection != null && protection.isBuildRequiredForModification(this, branch, file);
 	}
 	
-	public boolean isBuildRequiredForPush(String branch, ObjectId oldObjectId, ObjectId newObjectId, 
+	public boolean isBuildRequiredForPush(User user, String branch, ObjectId oldObjectId, ObjectId newObjectId, 
 			Map<String, String> gitEnvs) {
-		// Exclude cispec from build requirement to avoid being locking out
-		if (!getChangedFiles(oldObjectId, newObjectId, gitEnvs).contains(CISpec.BLOB_PATH)) {
-			Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(this, newObjectId);
-			try {
-				CISpec ciSpec = getCISpec(oldObjectId);
-				if (ciSpec != null) {
-					Matcher matcher = new PathMatcher();
-					for (Job job: ciSpec.getJobs()) {
-						for (JobTrigger trigger: job.getTriggers()) {
-							if (trigger instanceof BranchUpdateTrigger) {
-								BranchUpdateTrigger branchUpdateTrigger = (BranchUpdateTrigger) trigger;
-								if (branchUpdateTrigger.isRejectIfNotSuccessful() 
-										&& (branchUpdateTrigger.getBranches() == null || PatternSet.fromString(branchUpdateTrigger.getBranches()).matches(matcher, branch))) {
-									Map<String, List<List<String>>> paramMatrix = new HashMap<>();
-									Set<String> secretParamNames = new HashSet<>();
-									for (JobParam param: trigger.getParams()) { 
-										paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
-										if (param.isSecret())
-											secretParamNames.add(param.getName());
-									}
-									
-									AtomicReference<Build> buildRef = new AtomicReference<>(null);
-									new MatrixRunner<List<String>>(paramMatrix) {
-										
-										@Override
-										public void run(Map<String, List<String>> params) {
-											for (Build build: builds) {
-												Map<String, List<String>> paramsWithoutSecrets = new HashMap<>(params);
-												Map<String, List<String>> buildParamsWithoutSecrets = new HashMap<>(build.getParamMap());
-												paramsWithoutSecrets.keySet().removeAll(secretParamNames);
-												buildParamsWithoutSecrets.keySet().removeAll(secretParamNames);
-												if (build.getJobName().equals(job.getName()) 
-														&& buildParamsWithoutSecrets.equals(paramsWithoutSecrets)) {
-													buildRef.set(build);
-													break;
-												}
-											}
-										}
-										
-									}.run();
-									
-									Build build = buildRef.get();
-									if (build == null || build.getStatus() != Build.Status.SUCCESSFUL)
-										return true;
-								}
-							}
-						}
-					}
-				}
-			} catch (Exception e) {
-			}
-		}
-		return false;		
+		BranchProtection protection = getBranchProtection(branch, user);
+		return protection != null && protection.isBuildRequiredForPush(this, branch, oldObjectId, newObjectId, gitEnvs);
 	}
 	
 	public String getSecretValue(String secretName, ObjectId commitId) {

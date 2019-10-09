@@ -54,7 +54,7 @@ public class CommitStatusPanel extends Panel {
 		protected List<Job> load() {
 			CISpec ciSpec = getProject().getCISpec(commitId);
 			if (ciSpec != null)
-				return ciSpec.getSortedJobs();
+				return ciSpec.getJobs();
 			else
 				return new ArrayList<>();
 		}

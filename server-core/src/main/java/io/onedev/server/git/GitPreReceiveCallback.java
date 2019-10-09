@@ -162,7 +162,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    			if (errorMessages.isEmpty() 
 	    					&& !oldObjectId.equals(ObjectId.zeroId()) 
 	    					&& !newObjectId.equals(ObjectId.zeroId()) 
-	    					&& project.isBuildRequiredForPush(branchName, oldObjectId, newObjectId, gitEnvs)) {
+	    					&& project.isBuildRequiredForPush(user, branchName, oldObjectId, newObjectId, gitEnvs)) {
 	    				errorMessages.add("Build required for your change. Please submit pull request instead");
 	    			}
 	    			if (errorMessages.isEmpty() && newObjectId.equals(ObjectId.zeroId())) {

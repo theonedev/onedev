@@ -245,7 +245,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 			protected List<Job> load() {
 				CISpec ciSpec = getProject().getCISpec(getCommit().copy());
 				if (ciSpec != null)
-					return ciSpec.getSortedJobs();
+					return ciSpec.getJobs();
 				else
 					return new ArrayList<>();
 			}

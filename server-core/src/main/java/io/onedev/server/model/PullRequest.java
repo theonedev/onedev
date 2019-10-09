@@ -824,9 +824,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return true;
 	}
 	
-	public boolean isAllBuildsSuccessful() {
-		for (PullRequestBuild requirement: getPullRequestBuilds()) {
-			if (requirement.getBuild().getStatus() != Build.Status.SUCCESSFUL)
+	public boolean isRequiredBuildsSuccessful() {
+		for (PullRequestBuild pullRequestBuild: getPullRequestBuilds()) {
+			if (pullRequestBuild.isRequired() && pullRequestBuild.getBuild().getStatus() != Build.Status.SUCCESSFUL)
 				return false;
 		}
 		return true;

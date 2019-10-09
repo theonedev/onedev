@@ -87,7 +87,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ProjectPrivilege;
-import io.onedev.server.util.CommitAware;
+import io.onedev.server.util.BuildCommitAware;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.scriptidentity.JobIdentity;
@@ -492,8 +492,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Sessional
 	@Listen
 	public void on(ProjectEvent event) {
-		if (event instanceof CommitAware) {
-			ObjectId commitId = ((CommitAware) event).getCommitId();
+		if (event instanceof BuildCommitAware) {
+			ObjectId commitId = ((BuildCommitAware) event).getBuildCommit();
 			if (!commitId.equals(ObjectId.zeroId())) {
 				ScriptIdentity.push(new JobIdentity(event.getProject(), commitId));
 				try {

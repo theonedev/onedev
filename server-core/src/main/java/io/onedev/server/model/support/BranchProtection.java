@@ -2,10 +2,15 @@ package io.onedev.server.model.support;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.jgit.lib.ObjectId;
@@ -13,6 +18,10 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.model.Build;
+import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Usage;
@@ -20,15 +29,19 @@ import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.usermatcher.Anyone;
 import io.onedev.server.util.usermatcher.UserMatcher;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
+import io.onedev.server.web.editable.annotation.JobChoice;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
 @Horizontal
-public class BranchProtection implements Serializable {
+@ClassValidating
+public class BranchProtection implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -45,6 +58,8 @@ public class BranchProtection implements Serializable {
 	private boolean noCreation = true;
 	
 	private String reviewRequirement;
+	
+	private List<String> jobNames = new ArrayList<>();
 	
 	private List<FileProtection> fileProtections = new ArrayList<>();
 
@@ -122,9 +137,21 @@ public class BranchProtection implements Serializable {
 		this.reviewRequirement = reviewRequirement;
 	}
 
+	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")
+	@JobChoice
+	@NameOfEmptyValue("No any")
+	public List<String> getJobNames() {
+		return jobNames;
+	}
+
+	public void setJobNames(List<String> jobNames) {
+		this.jobNames = jobNames;
+	}
+	
 	@Editable(order=700, description="Optionally specify additional users to review "
 			+ "particular paths. For each changed file, the first matched file protection setting will be used")
 	@NotNull(message="may not be empty")
+	@Valid
 	public List<FileProtection> getFileProtections() {
 		return fileProtections;
 	}
@@ -218,6 +245,17 @@ public class BranchProtection implements Serializable {
 		}
 		return false;
 	}
+	
+	public boolean isBuildRequiredForModification(Project project, String branch, @Nullable String file) {
+		if (!getJobNames().isEmpty()) 
+			return true;
+		if (file != null) {
+			FileProtection fileProtection = getFileProtection(file);
+			if (fileProtection != null && !fileProtection.getJobNames().isEmpty()) 
+				return true;
+		}
+		return false;
+	}
 
 	/**
 	 * Check if specified user can push specified commit to specified ref.
@@ -248,6 +286,47 @@ public class BranchProtection implements Serializable {
 			}
 		}
 		return false;
+	}
+
+	public Collection<String> getRequiredJobs(Project project, String branch, 
+			ObjectId oldObjectId, ObjectId newObjectId, Map<String, String> gitEnvs) {
+		Collection<String> requiredJobs = new HashSet<>(getJobNames());
+		for (String changedFile: project.getChangedFiles(oldObjectId, newObjectId, gitEnvs)) {
+			FileProtection fileProtection = getFileProtection(changedFile);
+			if (fileProtection != null) 
+				requiredJobs.addAll(fileProtection.getJobNames());
+		}
+		return requiredJobs;
+	}
+	
+	public boolean isBuildRequiredForPush(Project project, String branch, ObjectId oldObjectId, 
+			ObjectId newObjectId, Map<String, String> gitEnvs) {
+		Collection<String> requiredJobNames = getRequiredJobs(project, branch, oldObjectId, newObjectId, gitEnvs);
+
+		Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(project, newObjectId);
+		for (Build build: builds) {
+			if (requiredJobNames.contains(build.getJobName()) && build.getStatus() != Status.SUCCESSFUL)
+				return true;
+		}
+		requiredJobNames.removeAll(builds.stream().map(it->it.getJobName()).collect(Collectors.toSet()));
+		return !requiredJobNames.isEmpty();			
+	}
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		int index = 1;
+		for (FileProtection fileProtection: getFileProtections()) {
+			if (fileProtection.getJobNames().isEmpty() && fileProtection.getReviewRequirement() == null) {
+				context.disableDefaultConstraintViolation();
+				String message = "File protection # " + index + ": Either reviewer or required builds should be specified";
+				context.buildConstraintViolationWithTemplate(message)
+						.addPropertyNode("fileProtections")
+						.addConstraintViolation();
+				return false;
+			} 
+			index++;
+		}
+		return true;
 	}
 	
 }

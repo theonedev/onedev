@@ -75,7 +75,7 @@ public abstract class BlobViewPanel extends Panel {
 			String revision = context.getBlobIdent().revision;
 			String path = context.getBlobIdent().path;
 			boolean reviewRequired = project.isReviewRequiredForModification(user, revision, path);
-			boolean buildRequired = project.isBuildRequiredForModification(revision, path);
+			boolean buildRequired = project.isBuildRequiredForModification(user, revision, path);
 
 			if (isEditSupported()) {
 				AjaxLink<Void> editLink = new ViewStateAwareAjaxLink<Void>("edit", true) {

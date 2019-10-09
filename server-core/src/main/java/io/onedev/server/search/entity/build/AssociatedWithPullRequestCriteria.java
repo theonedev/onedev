@@ -14,23 +14,20 @@ import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.BuildConstants;
 
-public class RequiredByPullRequestCriteria extends EntityCriteria<Build> {
+public class AssociatedWithPullRequestCriteria extends EntityCriteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
 	private PullRequest value;
 	
-	public RequiredByPullRequestCriteria(PullRequest value) {
+	public AssociatedWithPullRequestCriteria(PullRequest value) {
 		this.value = value;
 	}
 
 	@Override
 	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
 		From<?, ?> join = root.join(BuildConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT);
-		
-		return builder.and(
-				builder.equal(join.get(PullRequestBuild.ATTR_REQUEST), value), 
-				builder.equal(join.get(PullRequestBuild.ATTR_REQUIRED), true)); 
+		return builder.equal(join.get(PullRequestBuild.ATTR_REQUEST), value); 
 	}
 
 	@Override
@@ -45,7 +42,7 @@ public class RequiredByPullRequestCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.getRuleName(BuildQueryLexer.RequiredByPullRequest) + " " + BuildQuery.quote("#" + value.getNumber());
+		return BuildQuery.getRuleName(BuildQueryLexer.AssociatedWithPullRequest) + " " + BuildQuery.quote("#" + value.getNumber());
 	}
 
 }
