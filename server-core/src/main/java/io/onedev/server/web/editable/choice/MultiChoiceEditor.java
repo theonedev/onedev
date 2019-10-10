@@ -16,11 +16,9 @@ import org.apache.wicket.util.convert.ConversionException;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ReflectionUtils;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.component.select2.Select2MultiChoice;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
@@ -44,9 +42,9 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 			protected Map<String, String> load() {
 				Map<String, String> choices;
 				
-				OneContext oneContext = new OneContext(MultiChoiceEditor.this);
+				ComponentContext componentContext = new ComponentContext(MultiChoiceEditor.this);
 				
-				OneContext.push(oneContext);
+				ComponentContext.push(componentContext);
 				try {
 					io.onedev.server.web.editable.annotation.ChoiceProvider choiceProvider = 
 							descriptor.getPropertyGetter().getAnnotation(
@@ -61,7 +59,7 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
 						choices = (Map<String, String>)result;
 					}
 				} finally {
-					OneContext.pop();
+					ComponentContext.pop();
 				}
 				
 				return choices;
@@ -107,11 +105,6 @@ public class MultiChoiceEditor extends PropertyEditor<List<String>> {
         add(input);
     }
 
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
-	}
-	
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
 		Collection<String> convertedInput = input.getConvertedInput();

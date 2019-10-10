@@ -27,9 +27,16 @@
 }
 #project>.sidebar>.head i {
 	position: absolute;
-	right: 4px;
-	top: 16px;
+	right: 12px;
+	top: 12px;
+	font-style: normal;
+	font-size: 20px;
 }
+#project>.sidebar>.head i:before {
+	font-family: "FontAwesome";
+	content: "\f142";
+}
+
 #project>.sidebar>.tabs {
 	top: 50px;
 }
@@ -40,9 +47,13 @@
 	display: none;
 }
 #project>.minimized.sidebar>.head i {
-	left: 14px;	
-	top: 43px;
+	left: 11px;	
+	top: 38px;
 }
+#project>.minimized.sidebar>.head i:before {
+	content: "\f141";
+}
+
 #project>.minimized.sidebar>.tabs {
 	top: 64px;
 }

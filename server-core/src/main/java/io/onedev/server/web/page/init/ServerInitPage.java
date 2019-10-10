@@ -18,7 +18,7 @@ import io.onedev.commons.utils.init.Skippable;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.wizard.ManualConfigStep;
 import io.onedev.server.web.component.wizard.Wizard;

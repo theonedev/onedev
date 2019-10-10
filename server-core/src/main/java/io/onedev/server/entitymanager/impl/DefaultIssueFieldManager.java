@@ -16,11 +16,11 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.inputspec.InputSpec;
 
 @Singleton
 public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> implements IssueFieldManager {
@@ -59,7 +59,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 	@Override
 	public void onRenameGroup(String oldName, String newName) {
 		Query query = getSession().createQuery("update IssueField set value=:newName where type=:groupChoice and value=:oldName");
-		query.setParameter("groupChoice", InputSpec.GROUP);
+		query.setParameter("groupChoice", FieldSpec.GROUP);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
 		query.executeUpdate();
@@ -69,7 +69,7 @@ public class DefaultIssueFieldManager extends AbstractEntityManager<IssueField> 
 	@Override
 	public void onRenameUser(String oldName, String newName) {
 		Query query = getSession().createQuery("update IssueField set value=:newName where type=:userChoice and value=:oldName");
-		query.setParameter("userChoice", InputSpec.USER);
+		query.setParameter("userChoice", FieldSpec.USER);
 		query.setParameter("oldName", oldName);
 		query.setParameter("newName", newName);
 		query.executeUpdate();

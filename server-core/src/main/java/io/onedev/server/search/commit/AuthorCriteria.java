@@ -12,7 +12,7 @@ import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 
 public class AuthorCriteria extends CommitCriteria {
 

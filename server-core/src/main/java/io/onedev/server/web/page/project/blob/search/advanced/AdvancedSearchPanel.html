@@ -16,57 +16,57 @@
 	<wicket:fragment wicket:id="symbolSearchFrag">
 		<div wicket:id="term" class="form-group">
 			<label>Search For</label>
-			<input wicket:id="term" name="searchFor" class="form-control" type="text"></input>
+			<input wicket:id="term" name="searchFor" class="form-control" type="text">
 			<p class="help-block">(* = any string, ? = any character)</p>
 			<div wicket:id="feedback"></div>
 		</div>
 		<div class="form-group">
-			<label class="checkbox-inline"><input wicket:id="caseSensitive" type="checkbox"></input> Case sensitive</label>
+			<label class="checkbox-inline"><input wicket:id="caseSensitive" type="checkbox"> Case sensitive</label>
 		</div>
 		<div class="form-group">
 			<label>File name patterns (separated by comma)</label>
-			<input wicket:id="fileNames" class="form-control" type="text" placeholder="File name patterns such as *.java, *.c"></input>
+			<input wicket:id="fileNames" class="form-control" type="text" placeholder="File name patterns such as *.java, *.c">
 		</div>
 		<wicket:enclosure child="insideCurrentDir">
 		<div class="form-group">
-			<label class="checkbox-inline"><input wicket:id="insideCurrentDir" type="checkbox"></input> Search inside current tree</label>
+			<label class="checkbox-inline"><input wicket:id="insideCurrentDir" type="checkbox"> Search inside current tree</label>
 		</div>
 		</wicket:enclosure>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="fileSearchFrag">
 		<div wicket:id="term" class="form-group">
 			<label>Search For</label>
-			<input wicket:id="term" name="searchFor" class="form-control" type="text"></input>
+			<input wicket:id="term" name="searchFor" class="form-control" type="text">
 			<p class="help-block">(* = any string, ? = any character)</p>
 			<div wicket:id="feedback"></div>
 		</div>
 		<div class="form-group">
-			<label class="checkbox-inline"><input wicket:id="caseSensitive" type="checkbox"></input> Case sensitive</label>
+			<label class="checkbox-inline"><input wicket:id="caseSensitive" type="checkbox"> Case sensitive</label>
 		</div>
 		<wicket:enclosure child="insideCurrentDir">
 		<div class="form-group">
-			<label class="checkbox-inline"><input wicket:id="insideCurrentDir" type="checkbox"></input> Search inside current tree</label>
+			<label class="checkbox-inline"><input wicket:id="insideCurrentDir" type="checkbox"> Search inside current tree</label>
 		</div>
 		</wicket:enclosure>
 	</wicket:fragment>
 	<wicket:fragment wicket:id="textSearchFrag">
 		<div wicket:id="term" class="form-group">
 			<label>Search For</label>
-			<input wicket:id="term" name="searchFor" class="form-control" type="text"></input>
+			<input wicket:id="term" name="searchFor" class="form-control" type="text">
 			<div wicket:id="feedback"></div>
 		</div>
 		<div class="form-group">
-			<label class="checkbox-inline"><input wicket:id="regex" type="checkbox"></input> Regular expression</label>
-			<label class="checkbox-inline"><input wicket:id="wholeWord" type="checkbox"></input> Whole word</label>
-			<label class="checkbox-inline"><input wicket:id="caseSensitive" type="checkbox"></input> Case sensitive</label>
+			<label class="checkbox-inline"><input wicket:id="regex" type="checkbox"> Regular expression</label>
+			<label class="checkbox-inline"><input wicket:id="wholeWord" type="checkbox"> Whole word</label>
+			<label class="checkbox-inline"><input wicket:id="caseSensitive" type="checkbox"> Case sensitive</label>
 		</div>
 		<div class="form-group">
 			<label>File name patterns (separated by comma)</label>
-			<input wicket:id="fileNames" class="form-control" type="text" placeholder="File name patterns such as *.java, *.c"></input>
+			<input wicket:id="fileNames" class="form-control" type="text" placeholder="File name patterns such as *.java, *.c">
 		</div>
 		<wicket:enclosure child="insideCurrentDir">
 		<div class="form-group">
-			<label class="checkbox-inline"><input wicket:id="insideCurrentDir" type="checkbox"></input> Search inside current tree</label>
+			<label class="checkbox-inline"><input wicket:id="insideCurrentDir" type="checkbox"> Search inside current tree</label>
 		</div>
 		</wicket:enclosure>
 	</wicket:fragment>

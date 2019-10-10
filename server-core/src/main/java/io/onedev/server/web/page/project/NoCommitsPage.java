@@ -4,7 +4,7 @@ import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.issues.list.IssueListPage;
 

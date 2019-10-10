@@ -9,7 +9,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 
 @SuppressWarnings("serial")
 public class AffinalProjectsModel extends LoadableDetachableModel<Collection<Project>> {

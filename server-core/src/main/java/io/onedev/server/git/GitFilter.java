@@ -42,9 +42,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.CodePullAuthorizationSource;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.serverconfig.ServerConfig;
+import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.work.WorkExecutor;
 
 @Singleton
@@ -128,12 +128,12 @@ public class GitFilter implements Filter {
 		doNotCache(response);
 		response.setHeader("Content-Type", "application/x-" + service + "-result");			
 
-		final Map<String, String> environments = new HashMap<>();
+		Map<String, String> environments = new HashMap<>();
 		String serverUrl;
         if (serverConfig.getHttpPort() != 0)
             serverUrl = "http://localhost:" + serverConfig.getHttpPort();
         else 
-            serverUrl = "https://localhost:" + serverConfig.getSslConfig().getPort();
+            serverUrl = "https://localhost:" + serverConfig.getHttpsPort();
 
         environments.put("ONEDEV_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
 		environments.put("ONEDEV_URL", serverUrl);

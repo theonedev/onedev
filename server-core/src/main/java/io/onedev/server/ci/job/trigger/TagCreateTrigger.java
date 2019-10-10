@@ -1,16 +1,21 @@
 package io.onedev.server.ci.job.trigger;
 
+import java.util.List;
+
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.editable.annotation.TagPatterns;
+import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable(order=200, name="When create tags")
 public class TagCreateTrigger extends JobTrigger {
@@ -22,7 +27,7 @@ public class TagCreateTrigger extends JobTrigger {
 	@Editable(name="Tags", order=100, 
 			description="Optionally specify space-separated tags to check. Use * or ? for wildcard match. "
 					+ "Leave empty to match all tags")
-	@TagPatterns
+	@Patterns(suggester = "suggestTags")
 	@NameOfEmptyValue("Any tag")
 	public String getTags() {
 		return tags;
@@ -31,6 +36,11 @@ public class TagCreateTrigger extends JobTrigger {
 	public void setTags(String tags) {
 		this.tags = tags;
 	}
+	
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestTags(String matchWith) {
+		return SuggestionUtils.suggestTags(Project.get(), matchWith);
+	}
 
 	@Override
 	public boolean matches(ProjectEvent event, Job job) {
@@ -38,7 +48,7 @@ public class TagCreateTrigger extends JobTrigger {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String pushedTag = GitUtils.ref2tag(refUpdated.getRefName());
 			if (pushedTag != null && !refUpdated.getNewCommitId().equals(ObjectId.zeroId()) 
-					&& (getTags() == null || PatternSet.fromString(getTags()).matches(new ChildAwareMatcher(), pushedTag))) {
+					&& (getTags() == null || PatternSet.fromString(getTags()).matches(new PathMatcher(), pushedTag))) {
 				return true;
 			}
 		}

@@ -28,8 +28,7 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
@@ -37,25 +36,25 @@ import io.onedev.server.web.page.layout.SideFloating;
 @SuppressWarnings("serial")
 class ParamSpecListViewPanel extends Panel {
 
-	private final List<InputSpec> paramSpecs = new ArrayList<>();
+	private final List<ParamSpec> paramSpecs = new ArrayList<>();
 	
 	public ParamSpecListViewPanel(String id, Class<?> elementClass, List<Serializable> elements) {
 		super(id);
 		
 		for (Serializable each: elements)
-			paramSpecs.add((InputSpec) each);
+			paramSpecs.add((ParamSpec) each);
 	}
 
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		List<IColumn<InputSpec, Void>> columns = new ArrayList<>();
+		List<IColumn<ParamSpec, Void>> columns = new ArrayList<>();
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Name")) {
+		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("Name")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+			public void populateItem(Item<ICellPopulator<ParamSpec>> cellItem, String componentId, IModel<ParamSpec> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
@@ -67,11 +66,11 @@ class ParamSpecListViewPanel extends Panel {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Type")) {
+		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("Type")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
-				InputSpec param = rowModel.getObject();
+			public void populateItem(Item<ICellPopulator<ParamSpec>> cellItem, String componentId, IModel<ParamSpec> rowModel) {
+				ParamSpec param = rowModel.getObject();
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
@@ -83,25 +82,29 @@ class ParamSpecListViewPanel extends Panel {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("Allow Empty")) {
+		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("Description")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+			public void populateItem(Item<ICellPopulator<ParamSpec>> cellItem, String componentId, IModel<ParamSpec> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, StringUtils.describe(rowModel.getObject().isAllowEmpty()));
+						String description = rowModel.getObject().getDescription();
+						if (description != null)
+							return new Label(componentId, description);
+						else
+							return new Label(componentId, "<i>No description</i>").setEscapeModelStrings(false);
 					}
 					
 				});
 			}
 		});		
 		
-		columns.add(new AbstractColumn<InputSpec, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("")) {
 
 			@Override
-			public void populateItem(Item<ICellPopulator<InputSpec>> cellItem, String componentId, IModel<InputSpec> rowModel) {
+			public void populateItem(Item<ICellPopulator<ParamSpec>> cellItem, String componentId, IModel<ParamSpec> rowModel) {
 				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
 
 					@Override
@@ -120,16 +123,16 @@ class ParamSpecListViewPanel extends Panel {
 			
 		});		
 		
-		IDataProvider<InputSpec> dataProvider = new ListDataProvider<InputSpec>() {
+		IDataProvider<ParamSpec> dataProvider = new ListDataProvider<ParamSpec>() {
 
 			@Override
-			protected List<InputSpec> getData() {
+			protected List<ParamSpec> getData() {
 				return paramSpecs;
 			}
 
 		};
 		
-		add(new DataTable<InputSpec, Void>("paramSpecs", columns, dataProvider, Integer.MAX_VALUE) {
+		add(new DataTable<ParamSpec, Void>("paramSpecs", columns, dataProvider, Integer.MAX_VALUE) {
 
 			@Override
 			protected void onInitialize() {
@@ -169,8 +172,8 @@ class ParamSpecListViewPanel extends Panel {
 
 						@Override
 						protected String getTitle() {
-							InputSpec param = paramSpecs.get(index);
-							return param.getName() + " (type: " + EditableUtils.getDisplayName(param.getClass()) + ")";
+							ParamSpec param = paramSpecs.get(index);
+							return "Parameter Spec (type: " + EditableUtils.getDisplayName(param.getClass()) + ")";
 						}
 
 						@Override
@@ -181,7 +184,7 @@ class ParamSpecListViewPanel extends Panel {
 
 						@Override
 						protected Component newBody(String id) {
-							Set<String> excludedProperties = Sets.newHashSet("name", "canBeChangedBy", "nameOfEmptyValue");
+							Set<String> excludedProperties = Sets.newHashSet("canBeChangedBy", "nameOfEmptyValue");
 							return BeanContext.view(id, paramSpecs.get(index), excludedProperties, true);
 						}
 

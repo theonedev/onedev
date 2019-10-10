@@ -8,7 +8,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.DiffSupport;
 import io.onedev.server.web.component.diff.plain.PlainDiffPanel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;

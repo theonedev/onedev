@@ -1,18 +1,12 @@
 package io.onedev.server.web.editable;
 
-import java.io.Serializable;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import javax.validation.Validator;
 
-import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.utils.BeanUtils;
-import io.onedev.commons.utils.ClassUtils;
-import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -120,18 +114,4 @@ public class EditableUtils {
 		annotatedElements.sort((element1, element2) -> getOrder(element1) - getOrder(element2));
 	}
 	
-	public static boolean hasEditableProperties(Class<?> beanClass) {
-	    for (Method getter: BeanUtils.findGetters(ClassUtils.unproxy(beanClass))) {
-	        Method setter = BeanUtils.findSetter(getter);
-	        if (setter != null && getter.getAnnotation(Editable.class) != null)
-	        	return true;
-	    }
-	    return false;
-	}
-	
-	public static boolean isDefaultInstanceValid(Class<? extends Serializable> beanClass) {
-		Serializable bean = ReflectionUtils.instantiateClass(beanClass);
-		return AppLoader.getInstance(Validator.class).validate(bean).isEmpty();
-	}
-
 }

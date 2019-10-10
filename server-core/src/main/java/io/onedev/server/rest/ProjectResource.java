@@ -22,7 +22,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.rest.jersey.ValidQueryParams;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 
 @Path("/projects")
 @Consumes(MediaType.WILDCARD)

@@ -10,8 +10,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.util.OneContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -56,14 +56,14 @@ public class UndefinedFieldResolution implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static boolean isNewFieldVisible() {
-		return OneContext.get().getEditContext().getInputValue("fixType") == FixType.CHANGE_TO_ANOTHER_FIELD;
+		return EditContext.get().getInputValue("fixType") == FixType.CHANGE_TO_ANOTHER_FIELD;
 	}
 	
 	@SuppressWarnings("unused")
 	private static List<String> getFieldChoices() {
 		ProjectPage page = (ProjectPage) WicketUtils.getPage();
 		List<String> fields = new ArrayList<>();
-		for (InputSpec field: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs()) 
+		for (FieldSpec field: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs()) 
 			fields.add(field.getName());
 		return fields;
 	}

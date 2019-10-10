@@ -18,6 +18,9 @@ package io.onedev.server.persistence;
 
 import java.util.concurrent.Callable;
 
+import javax.annotation.Nullable;
+
+import org.apache.shiro.subject.Subject;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -41,7 +44,7 @@ public interface TransactionManager {
 	 */
 	void runAfterCommit(Runnable runnable);
 
-	void runAsyncAfterCommit(Runnable runnable);
+	void runAsyncAfterCommit(Runnable runnable, @Nullable Subject subject);
 	
 	void mustRunAfterTransaction(Runnable runnable);
 }

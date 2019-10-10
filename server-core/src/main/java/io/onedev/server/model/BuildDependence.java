@@ -1,5 +1,6 @@
 package io.onedev.server.model;
 
+import javax.annotation.Nullable;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -24,7 +25,7 @@ public class BuildDependence extends AbstractEntity {
 	public static final String ATTR_DEPENDENT = "dependent";
 	
 	public static final String ATTR_DEPENDENCY = "dependency";
-
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Build dependent;
@@ -33,6 +34,8 @@ public class BuildDependence extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Build dependency;
 
+	private String artifacts;
+	
 	public Build getDependent() {
 		return dependent;
 	}
@@ -47,6 +50,15 @@ public class BuildDependence extends AbstractEntity {
 
 	public void setDependency(Build dependency) {
 		this.dependency = dependency;
+	}
+
+	@Nullable
+	public String getArtifacts() {
+		return artifacts;
+	}
+
+	public void setArtifacts(String artifacts) {
+		this.artifacts = artifacts;
 	}
 	
 }

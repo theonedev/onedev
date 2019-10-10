@@ -28,12 +28,14 @@ public class RequiredByPullRequestCriteria extends EntityCriteria<Build> {
 	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
 		From<?, ?> join = root.join(BuildConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT);
 		
-		return builder.equal(join.get(PullRequestBuild.ATTR_REQUEST), value); 
+		return builder.and(
+				builder.equal(join.get(PullRequestBuild.ATTR_REQUEST), value), 
+				builder.equal(join.get(PullRequestBuild.ATTR_REQUIRED), true)); 
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return build.getPullRequestBuilds().stream().anyMatch(it->it.getRequest().equals(value));
+		return build.getPullRequestBuilds().stream().anyMatch(it -> it.getRequest().equals(value) && it.isRequired());
 	}
 
 	@Override

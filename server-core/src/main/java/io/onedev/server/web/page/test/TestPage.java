@@ -11,6 +11,8 @@ import io.onedev.server.web.page.base.BasePage;
 @SuppressWarnings("serial")
 public class TestPage extends BasePage {
 
+	static Thread thread;
+	
 	public TestPage(PageParameters params) {
 		super(params);
 	}

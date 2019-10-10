@@ -43,7 +43,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.component.issue.activities.activity.IssueActivity;
 import io.onedev.server.web.component.issue.activities.activity.IssueChangeActivity;

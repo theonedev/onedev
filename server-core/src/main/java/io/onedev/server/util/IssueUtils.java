@@ -24,9 +24,8 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -48,7 +47,7 @@ public class IssueUtils {
 	public static Class<? extends Serializable> defineFieldBeanClass(Project project) {
 		String className = FIELD_BEAN_PREFIX + project.getId();
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		return (Class<? extends Serializable>) InputSpec.defineClass(className, "Issue Fields", issueSetting.getFieldSpecs());
+		return (Class<? extends Serializable>) FieldSpec.defineClass(className, "Issue Fields", issueSetting.getFieldSpecs());
 	}
 	
 	@Nullable
@@ -69,7 +68,7 @@ public class IssueUtils {
 		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(fieldBeanClass).getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) {
 				if (fieldNames.contains(property.getDisplayName())) {
-					InputSpec field = settingManager.getIssueSetting().getFieldSpec(property.getDisplayName());
+					FieldSpec field = settingManager.getIssueSetting().getFieldSpec(property.getDisplayName());
 					if (field != null && UserMatcher.fromString(field.getCanBeChangedBy()).matches(project, user))
 						propertyNames.add(property.getPropertyName());
 				}
@@ -78,8 +77,8 @@ public class IssueUtils {
 		return propertyNames;
 	}
 	
-	public static Map<String, Object> getFieldValues(OneContext context, Serializable fieldBean, Collection<String> fieldNames) {
-		OneContext.push(context);
+	public static Map<String, Object> getFieldValues(ComponentContext context, Serializable fieldBean, Collection<String> fieldNames) {
+		ComponentContext.push(context);
 		try {
 			Map<String, Object> fieldValues = new HashMap<>();
 			BeanDescriptor beanDescriptor = new BeanDescriptor(fieldBean.getClass());
@@ -92,7 +91,7 @@ public class IssueUtils {
 			
 			return fieldValues;
 		} finally {
-			OneContext.pop();
+			ComponentContext.pop();
 		}
 	}
 	

@@ -20,7 +20,8 @@ public abstract class GitCommand<V> {
 
 	private static final Logger logger = LoggerFactory.getLogger(GitCommand.class);
 	
-	private static final String MIN_VERSION = "2.11.0";
+	// requires at least 2.11.1 to use allowAnySHA1InWant
+	private static final String MIN_VERSION = "2.11.1";
 	
 	protected final File gitDir;
 	

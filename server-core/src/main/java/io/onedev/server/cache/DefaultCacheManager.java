@@ -22,6 +22,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
@@ -47,7 +48,6 @@ import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.inputspec.InputSpec;
 
 @Singleton
 public class DefaultCacheManager implements CacheManager {
@@ -152,7 +152,7 @@ public class DefaultCacheManager implements CacheManager {
 		
 		query = dao.getSession().createQuery("select distinct name, type, value, id from BuildParam order by id");
 		for (Object[] fields: (List<Object[]>)query.list()) {
-			if (!fields[1].equals(InputSpec.SECRET))
+			if (!fields[1].equals(ParamSpec.SECRET))
 				addBuildParam((String) fields[0], (String) fields[2]);
 		}
 	}
@@ -261,7 +261,7 @@ public class DefaultCacheManager implements CacheManager {
 					buildParamsLock.writeLock().lock();
 					try {
 						BuildParam param = (BuildParam) event.getEntity();
-						if (!param.getType().equals(InputSpec.SECRET))
+						if (!param.getType().equals(ParamSpec.SECRET))
 							addBuildParam(param.getName(), param.getValue());
 					} finally {
 						buildParamsLock.writeLock().unlock();

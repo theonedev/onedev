@@ -8,7 +8,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Color;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
@@ -48,7 +47,6 @@ public class StateSpec implements Serializable {
 
 	@Editable(order=200)
 	@NameOfEmptyValue("No description")
-	@Multiline
 	public String getDescription() {
 		return description;
 	}

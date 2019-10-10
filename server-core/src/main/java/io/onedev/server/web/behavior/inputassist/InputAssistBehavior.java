@@ -28,7 +28,7 @@ import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.RangeUtils;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.AlignTarget;
@@ -136,11 +136,11 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 			if (inputCaret != null) {
 				InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
 				List<InputCompletion> suggestions;				
-				OneContext.push(new OneContext(getComponent()));
+				ComponentContext.push(new ComponentContext(getComponent()));
 				try {
 					suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
 				} finally {
-					OneContext.pop();
+					ComponentContext.pop();
 				}
 				int count = 0;
 				for (Iterator<InputCompletion> it = suggestions.iterator(); it.hasNext();) {
@@ -155,7 +155,14 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 							@Override
 							protected Component newContent(String id) {
-								return new AssistPanel(id, getComponent(), inputStatus, suggestions, getHints(inputStatus));
+								return new AssistPanel(id, getComponent(), inputStatus, suggestions, getHints(inputStatus)) {
+
+									@Override
+									protected void onClose(AjaxRequestTarget target) {
+										close();
+									}
+									
+								};
 							}
 
 							@Override
@@ -170,7 +177,14 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 						target.appendJavaScript(script);
 					} else {
 						Component content = dropdown.getContent();
-						Component newContent = new AssistPanel(content.getId(), getComponent(), inputStatus, suggestions, getHints(inputStatus));
+						Component newContent = new AssistPanel(content.getId(), getComponent(), inputStatus, suggestions, getHints(inputStatus)) {
+
+							@Override
+							protected void onClose(AjaxRequestTarget target) {
+								close();
+							}
+							
+						};
 						content.replaceWith(newContent);
 						target.add(newContent);
 

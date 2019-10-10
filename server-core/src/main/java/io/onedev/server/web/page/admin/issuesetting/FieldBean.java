@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -12,7 +12,7 @@ public class FieldBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private InputSpec field;
+	private FieldSpec field;
 
 	private boolean promptUponIssueOpen = true;
 	
@@ -20,11 +20,11 @@ public class FieldBean implements Serializable {
 
 	@Editable(name="Type", order=100)
 	@NotNull(message="may not be empty")
-	public InputSpec getField() {
+	public FieldSpec getField() {
 		return field;
 	}
 
-	public void setField(InputSpec field) {
+	public void setField(FieldSpec field) {
 		this.field = field;
 	}
 

@@ -15,12 +15,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.IssueUtils;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
@@ -57,7 +57,7 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 				super.onSubmit(target, form);
 				
 				getIssue().removeFields(getTransition().getRemoveFields());
-				Map<String, Object> fieldValues = IssueUtils.getFieldValues(editor.getOneContext(), fieldBean, trigger.getPromptFields());
+				Map<String, Object> fieldValues = IssueUtils.getFieldValues(editor.newComponentContext(), fieldBean, trigger.getPromptFields());
 				OneDev.getInstance(IssueChangeManager.class).changeState(getIssue(), getTransition().getToState(), fieldValues, null, SecurityUtils.getUser());
 				onSaved(target);
 			}
@@ -98,11 +98,6 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 	@Override
 	public InputSpec getInputSpec(String inputName) {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);
-	}
-	
-	@Override
-	public void validateName(String inputName) {
-		throw new UnsupportedOperationException();
 	}
 	
 	protected abstract Issue getIssue();

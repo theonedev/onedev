@@ -26,6 +26,8 @@ import io.onedev.server.web.page.project.ProjectListPage;
 @SuppressWarnings("serial")
 public class ErrorPage extends BasePage {
 	
+	private static final int MAX_TITLE_LEN = 240;
+	
 	private String title;
 	
 	private String detailMessage;
@@ -55,7 +57,7 @@ public class ErrorPage extends BasePage {
 		container.setOutputMarkupId(true);
 		add(container);
 		
-		container.add(new Label("title", StringUtils.abbreviate(title, 80)));
+		container.add(new Label("title", StringUtils.abbreviate(title, MAX_TITLE_LEN)));
 		
 		container.add(new ViewStateAwarePageLink<Void>("home", ProjectListPage.class));
 		

@@ -8,12 +8,12 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
+import org.hibernate.proxy.HibernateProxyHelper;
 
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.utils.ClassUtils;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.ComponentContext;
 
 @SuppressWarnings("serial")
 public abstract class PropertyContext<T> implements Serializable {
@@ -42,7 +42,7 @@ public abstract class PropertyContext<T> implements Serializable {
 
 	public static PropertyEditor<Serializable> editModel(String componentId, IModel<Serializable> beanModel, String propertyName) {
 		
-		PropertyContext<Serializable> editContext = of(ClassUtils.unproxy(beanModel.getObject().getClass()), propertyName);
+		PropertyContext<Serializable> editContext = of(HibernateProxyHelper.getClassWithoutInitializingProxy(beanModel.getObject()), propertyName);
 		return editContext.renderForEdit(componentId, new IModel<Serializable>() {
 
 			@Override
@@ -86,7 +86,7 @@ public abstract class PropertyContext<T> implements Serializable {
 	}
 
 	public static Component viewModel(String componentId, IModel<Serializable> beanModel, String propertyName) {
-		PropertyContext<Serializable> editContext = of(ClassUtils.unproxy(beanModel.getObject().getClass()), propertyName);
+		PropertyContext<Serializable> editContext = of(HibernateProxyHelper.getClassWithoutInitializingProxy(beanModel.getObject()), propertyName);
 		return editContext.renderForView(componentId, new LoadableDetachableModel<Serializable>() {
 
 			@Override
@@ -150,8 +150,8 @@ public abstract class PropertyContext<T> implements Serializable {
 		return descriptor.isPropertyRequired();
 	}
 
-	public boolean isPropertyVisible(OneContext oneContext, BeanDescriptor beanDescriptor) {
-		return descriptor.isPropertyVisible(oneContext, beanDescriptor);
+	public boolean isPropertyVisible(ComponentContext componentContext, BeanDescriptor beanDescriptor) {
+		return descriptor.isPropertyVisible(componentContext, beanDescriptor);
 	}
 	
 }

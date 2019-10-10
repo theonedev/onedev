@@ -28,6 +28,7 @@ import org.apache.wicket.markup.repeater.data.IDataProvider;
 import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -103,11 +104,14 @@ public abstract class StateTransitionListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), true) {
+				TransitionSpec transition = rowModel.getObject();
+				cellItem.add(new ColumnFragment(componentId, transition) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, StringUtils.join(rowModel.getObject().getFromStates()));
+						String escaped = HtmlEscape.escapeHtml5(StringUtils.join(transition.getFromStates())); 
+						return new Label(componentId, "<span class='drag-indicator fa fa-reorder'></span> " + escaped)
+								.setEscapeModelStrings(false);
 					}
 					
 				});
@@ -118,11 +122,12 @@ public abstract class StateTransitionListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), false) {
+				TransitionSpec transition = rowModel.getObject();
+				cellItem.add(new ColumnFragment(componentId, transition) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getToState());
+						return new Label(componentId, transition.getToState());
 					}
 					
 				});
@@ -134,11 +139,12 @@ public abstract class StateTransitionListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), false) {
+				TransitionSpec transition = rowModel.getObject();
+				cellItem.add(new ColumnFragment(componentId, transition) {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, EditableUtils.getDisplayName(rowModel.getObject().getTrigger().getClass()));
+						return new Label(componentId, EditableUtils.getDisplayName(transition.getTrigger().getClass()));
 					}
 					
 				});
@@ -150,7 +156,7 @@ public abstract class StateTransitionListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<TransitionSpec>> cellItem, String componentId, IModel<TransitionSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, rowModel.getObject(), false) {
+				cellItem.add(new ColumnFragment(componentId, rowModel.getObject()) {
 
 					@Override
 					protected Component newLabel(String componentId) {
@@ -221,8 +227,8 @@ public abstract class StateTransitionListPanel extends Panel {
 
 		private final int index;
 		
-		public ColumnFragment(String id, TransitionSpec transition, boolean firstColumn) {
-			super(id, firstColumn?"firstColumnFrag":"otherColumnsFrag", StateTransitionListPanel.this);
+		public ColumnFragment(String id, TransitionSpec transition) {
+			super(id, "columnFrag", StateTransitionListPanel.this);
 			this.index = getTransitionSpecIndex(transition);
 			Preconditions.checkState(this.index != -1);
 		}

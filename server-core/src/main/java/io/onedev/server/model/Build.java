@@ -1,7 +1,10 @@
 package io.onedev.server.model;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
@@ -26,7 +30,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -40,21 +43,33 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.BeanUtils;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.LockUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.BuildInfoManager;
+import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.VariableInterpolator;
 import io.onedev.server.ci.job.param.JobParam;
-import io.onedev.server.model.support.Secret;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.ci.job.paramspec.SecretParam;
+import io.onedev.server.git.GitUtils;
+import io.onedev.server.git.RefInfo;
+import io.onedev.server.model.support.inputspec.SecretInput;
+import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.SecretInput;
+import io.onedev.server.util.interpolative.Interpolative;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
+import io.onedev.server.web.editable.annotation.Editable;
 
 @Entity
 @Table(
@@ -74,6 +89,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	private static final Logger logger = LoggerFactory.getLogger(Build.class);
 	
 	public static final String STATUS = "status";
+	
+	public static final String ARTIFACTS_DIR = "artifacts";
 	
 	private static final int MAX_STATUS_MESSAGE_LEN = 1024;
 	
@@ -334,7 +351,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	public void setPullRequestBuilds(Collection<PullRequestBuild> pullRequestBuilds) {
 		this.pullRequestBuilds = pullRequestBuilds;
 	}
-
+	
 	public Map<String, List<String>> getParamMap() {
 		if (paramMap == null) {
 			paramMap = new HashMap<>();
@@ -392,7 +409,7 @@ public class Build extends AbstractEntity implements Referenceable {
 		Map<String, Integer> paramOrders = new HashMap<>();
 		
 		int index = 1;
-		for (InputSpec paramSpec: getJob().getParamSpecs())
+		for (ParamSpec paramSpec: getJob().getParamSpecs())
 			paramOrders.put(paramSpec.getName(), index++);
 			
 		Collections.sort(params, new Comparator<BuildParam>() {
@@ -428,7 +445,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	public Collection<String> getSecretValuesToMask() {
 		Collection<String> secretValuesToMask = new HashSet<>();
 		for (BuildParam param: getParams()) {
-			if (param.getType().equals(InputSpec.SECRET) && param.getValue() != null) {		
+			if (param.getType().equals(ParamSpec.SECRET) && param.getValue() != null) {		
 				try {
 					String value = getSecretValue(param.getValue());
 					if (value.length() >= SecretInput.MASK.length())
@@ -449,7 +466,7 @@ public class Build extends AbstractEntity implements Referenceable {
 		if (!checkedParamNames.add(paramName))
 			return false;
 		
-		InputSpec paramSpec = Preconditions.checkNotNull(getJob().getParamSpecMap().get(paramName));
+		ParamSpec paramSpec = Preconditions.checkNotNull(getJob().getParamSpecMap().get(paramName));
 		if (paramSpec.getShowCondition() != null) {
 			Input dependentInput = getParamInputs().get(paramSpec.getShowCondition().getInputName());
 			Preconditions.checkNotNull(dependentInput);
@@ -467,22 +484,11 @@ public class Build extends AbstractEntity implements Referenceable {
 		}
 	}
 	
-	public String getSecretValue(String secretKey) {
-		if (secretKey.startsWith(SecretInput.LITERAL_VALUE_PREFIX)) {
-			return secretKey.substring(SecretInput.LITERAL_VALUE_PREFIX.length());
-		} else {
-			Project project = getProject();
-			Secret secret = project.getSecretMap().get(secretKey);
-			if (secret == null) 
-				throw new OneException("Can not find project secret: " + secretKey);
-			ObjectId commitId = ObjectId.fromString(getCommitHash());
-			if (secret.getBranches() != null && !project.isCommitOnBranches(commitId, secret.getBranches())) {
-				String message = String.format("Project secret '%s' can only be accessed by builds on branches '%s'", 
-						secretKey, secret.getBranches());
-				throw new OneException(message);
-			} 
-			return secret.getValue();
-		}
+	public String getSecretValue(String secretName) {
+		if (secretName.startsWith(SecretParam.LITERAL_VALUE_PREFIX))
+			return secretName.substring(SecretParam.LITERAL_VALUE_PREFIX.length());
+		else
+			return project.getSecretValue(secretName, ObjectId.fromString(getCommitHash()));
 	}
 	
 	public CISpec getCISpec() {
@@ -507,13 +513,133 @@ public class Build extends AbstractEntity implements Referenceable {
 		BeanDescriptor descriptor = new BeanDescriptor(paramBean.getClass());
 		for (List<PropertyDescriptor> groupProperties: descriptor.getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) {
-				InputSpec paramSpec = getJob().getParamSpecMap().get(property.getDisplayName());
+				ParamSpec paramSpec = getJob().getParamSpecMap().get(property.getDisplayName());
 				Preconditions.checkNotNull(paramSpec);
 				Input input = Preconditions.checkNotNull(getParamInputs().get(paramSpec.getName()));
 				property.setPropertyValue(paramBean, paramSpec.convertToObject(input.getValues()));
 			}
 		}
 		return paramBean;
+	}
+	
+	public File getPublishDir() {
+		return OneDev.getInstance(StorageManager.class).getBuildDir(getProject().getId(), getNumber());
+	}
+	
+	public File getArtifactsDir() {
+		return new File(getPublishDir(), ARTIFACTS_DIR);
+	}
+	
+	public String getReportLockKey(String reportDir) {
+		return "job-report:" + getId() + ":" + reportDir;
+	}
+	
+	public File getReportDir(String reportDir) {
+		return new File(getPublishDir(), reportDir);
+	}
+	
+	public void publishArtifacts(File workspaceDir, String artifacts) {
+		LockUtils.write(getArtifactsLockKey(), new Callable<Void>() {
+
+			@Override
+			public Void call() throws Exception {
+				File artifactsDir = getArtifactsDir();
+				FileUtils.createDir(artifactsDir);
+				PatternSet patternSet = PatternSet.fromString(artifacts);
+				int baseLen = workspaceDir.getAbsolutePath().length() + 1;
+				for (File file: patternSet.listFiles(workspaceDir)) {
+					try {
+						FileUtils.copyFile(file, new File(artifactsDir, file.getAbsolutePath().substring(baseLen)));
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+				return null;
+			}
+			
+		});
+	}
+	
+	public void retrieveArtifacts(Build dependency, String artifacts, File workspaceDir) {
+		LockUtils.read(dependency.getArtifactsLockKey(), new Callable<Void>() {
+
+			@Override
+			public Void call() throws Exception {
+				File artifactsDir = dependency.getArtifactsDir();
+				if (artifactsDir.exists()) {
+					PatternSet patternSet = PatternSet.fromString(artifacts);
+					int baseLen = artifactsDir.getAbsolutePath().length() + 1;
+					for (File file: patternSet.listFiles(artifactsDir)) {
+						try {
+							FileUtils.copyFile(file, new File(workspaceDir, file.getAbsolutePath().substring(baseLen)));
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					}
+				}
+				return null;
+			}
+			
+		});
+	}
+	
+	public String getArtifactsLockKey() {
+		return "build-artifacts:" + getId();
+	}
+	
+	public String interpolate(@Nullable String interpolativeString) {
+		if (interpolativeString != null) 
+			return StringUtils.unescape(Interpolative.fromString(interpolativeString).interpolateWith(new VariableInterpolator(this)));
+		else 
+			return null;
+	}	
+	
+	@SuppressWarnings("unchecked")
+	public void interpolate(Serializable bean) {
+		try {
+			for (Method getter: BeanUtils.findGetters(bean.getClass())) {
+				Method setter = BeanUtils.findSetter(getter);
+				if (setter != null && getter.getAnnotation(Editable.class) != null) {
+					Serializable value = (Serializable) getter.invoke(bean);
+					if (value != null) {
+						if (getter.getAnnotation(io.onedev.server.web.editable.annotation.Interpolative.class) != null) {
+							if (value instanceof String) {
+								setter.invoke(bean, interpolate((String) getter.invoke(bean)));
+							} else if (value instanceof List) {
+								List<String> list = (List<String>) value;
+								for (int i=0; i<list.size(); i++)
+									list.set(i, interpolate(list.get(i)));
+							}
+						} else if (value instanceof Collection) {
+							for (Serializable element: (Collection<Serializable>) value) {
+								if (element.getClass().getAnnotation(Editable.class) != null)
+									interpolate(element);
+							}
+						} else if (value.getClass().getAnnotation(Editable.class) != null) {
+							interpolate(value);
+						}
+					}
+				}
+			}
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	public Collection<String> getOnBranches() {
+		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
+		Collection<ObjectId> descendants = commitInfoManager.getDescendants(
+				getProject(), Sets.newHashSet(getCommitId()));
+		descendants.add(getCommitId());
+	
+		Collection<String> branches = new ArrayList<>();
+		for (RefInfo ref: getProject().getBranches()) {
+			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
+			if (descendants.contains(ref.getPeeledObj()))
+				branches.add(branchName);
+		}
+		
+		return branches;
 	}
 	
 	public static String getLogWebSocketObservable(Long buildId) {

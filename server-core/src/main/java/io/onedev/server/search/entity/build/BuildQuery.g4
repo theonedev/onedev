@@ -8,7 +8,7 @@ query
 
 criteria
 	: operator=(Successful|Failed|InError|Cancelled|Running|Waiting|Pending|TimedOut|SubmittedByMe|CancelledByMe) #OperatorCriteria
-	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|RequiredByPullRequest) WS+ criteriaValue=Quoted #OperatorValueCriteria
+	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|AssociatedWithPullRequest|RequiredByPullRequest) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -84,6 +84,10 @@ FixedIssue
 	: 'fixed' WS+ 'issue'
 	;
 	
+AssociatedWithPullRequest
+	: 'associated' WS+ 'with' WS+ 'pull' WS+ 'request'
+	;
+	
 RequiredByPullRequest
 	: 'required' WS+ 'by' WS+ 'pull' WS+ 'request'
 	;
@@ -141,7 +145,7 @@ RParens
 	;
 
 Quoted
-    : '"' (ESCAPE|~["\\])+? '"'
+    : '"' ('\\'.|~[\\"])+? '"'
     ;
 
 WS
@@ -151,8 +155,3 @@ WS
 Identifier
 	: [a-zA-Z0-9:_/\\+\-;]+
 	;    
-
-fragment
-ESCAPE
-    : '\\'["\\]
-    ;

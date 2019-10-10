@@ -32,6 +32,7 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -165,7 +166,14 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 
 		if (initialSplit) {
 			container.add(AttributeAppender.append("class", "split-mode"));
-			preview.add(new Label("rendered", renderInput(getModelObject())) {
+			preview.add(new Label("rendered", new LoadableDetachableModel<String>() {
+
+				@Override
+				protected String load() {
+					return renderInput(input.getConvertedInput());
+				}
+				
+			}) {
 
 				@Override
 				public void renderHead(IHeaderResponse response) {

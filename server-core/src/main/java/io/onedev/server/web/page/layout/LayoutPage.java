@@ -15,8 +15,6 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.repeater.RepeatingView;
-import org.apache.wicket.protocol.http.ClientProperties;
-import org.apache.wicket.protocol.http.request.WebClientInfo;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -24,7 +22,7 @@ import io.onedev.commons.launcher.loader.Plugin;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -32,6 +30,7 @@ import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.admin.authenticator.AuthenticatorPage;
 import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
+import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.GroupPage;
 import io.onedev.server.web.page.admin.group.NewGroupPage;
@@ -62,11 +61,8 @@ import io.onedev.server.web.page.security.RegisterPage;
 @SuppressWarnings("serial")
 public abstract class LayoutPage extends BasePage {
 	
-	private final ClientProperties clientProperties;
-	
 	public LayoutPage(PageParameters params) {
 		super(params);
-		clientProperties = ((WebClientInfo)getSession().getClientInfo()).getProperties();
 	}
 	
 	@Override
@@ -134,6 +130,11 @@ public abstract class LayoutPage extends BasePage {
 		administrationContainer.add(item = new WebMarkupContainer("jobExecutors"));
 		item.add(new ViewStateAwarePageLink<Void>("link", JobExecutorPage.class));
 		if (getPage() instanceof JobExecutorPage)
+			item.add(AttributeAppender.append("class", "active"));
+		
+		administrationContainer.add(item = new WebMarkupContainer("groovyScripts"));
+		item.add(new ViewStateAwarePageLink<Void>("link", GroovyScriptListPage.class));
+		if (getPage() instanceof GroovyScriptListPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
 		administrationContainer.add(item = new WebMarkupContainer("systemSetting"));
@@ -236,10 +237,6 @@ public abstract class LayoutPage extends BasePage {
 
 	protected Component newNavContext(String componentId) {
 		return new WebMarkupContainer(componentId);
-	}
-	
-	public ClientProperties getClientProperties() {
-		return clientProperties;
 	}
 	
 }

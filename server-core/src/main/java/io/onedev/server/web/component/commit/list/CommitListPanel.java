@@ -64,8 +64,8 @@ import io.onedev.server.search.commit.CommitCriteria;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.MessageCriteria;
 import io.onedev.server.search.commit.PathCriteria;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Constants;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.behavior.CommitQueryBehavior;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
@@ -601,7 +601,14 @@ public class CommitListPanel extends Panel {
 			item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 			
 			getCommitIdsToQueryStatus().add(commit.copy());
-			item.add(new CommitStatusPanel("buildStatus", getProject(), commit.copy()));
+			item.add(new CommitStatusPanel("buildStatus", getProject(), commit.copy()) {
+
+				@Override
+				protected String getCssClasses() {
+					return "btn btn-default";
+				}
+				
+			});
 
 			item.add(AttributeAppender.append("class", "commit clearfix"));
 		} else {

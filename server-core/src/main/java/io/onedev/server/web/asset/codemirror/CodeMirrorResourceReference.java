@@ -44,6 +44,7 @@ public class CodeMirrorResourceReference extends BaseDependentResourceReference 
 		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/scroll/annotatescrollbar.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/display/fullscreen.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/selection/mark-selection.js")));
+		dependencies.add(JavaScriptHeaderItem.forReference(new WebjarsJavaScriptResourceReference("codemirror/current/addon/hint/show-hint.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(CodeMirrorResourceReference.class, "annotatescrollbar2.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(CodeMirrorResourceReference.class, "simplescrollbars.js")));
 		dependencies.add(JavaScriptHeaderItem.forReference(new BaseDependentResourceReference(CodeMirrorResourceReference.class, "gotoline.js")));
@@ -61,6 +62,7 @@ public class CodeMirrorResourceReference extends BaseDependentResourceReference 
 		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/scroll/simplescrollbars.css")));
 		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/search/matchesonscrollbar.css")));
 		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/display/fullscreen.css")));
+		dependencies.add(CssHeaderItem.forReference(new WebjarsCssResourceReference("codemirror/current/addon/hint/show-hint.css")));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(CodeMirrorResourceReference.class, "highlight.css")));
 		dependencies.add(CssHeaderItem.forReference(new BaseDependentCssResourceReference(CodeMirrorResourceReference.class, "codemirror.css")));
 

@@ -410,11 +410,14 @@ onedev.server = {
 				if (messagesToSent.indexOf(message) == -1)
 					messagesToSent.push(message);				
 			} else if (message == "ErrorMessage") {
-				$("#websocket-error").show();
+				$(".websocket-server-error").show();
 			}
 		});
 		Wicket.Event.subscribe("/websocket/open", function(jqEvent) {
 			Wicket.WebSocket.send("ConnectionOpened");
+		});
+		Wicket.Event.subscribe("/websocket/error", function(jqEvent) {
+			$(".websocket-client-error").show();			
 		});
 	},
 

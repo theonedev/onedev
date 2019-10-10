@@ -7,8 +7,8 @@ import static io.onedev.server.model.support.pullrequest.MergeStrategy.SQUASH_SO
 import static io.onedev.server.search.entity.EntityQuery.quote;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
+import static io.onedev.server.search.entity.build.BuildQueryLexer.AssociatedWithPullRequest;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
-import static io.onedev.server.search.entity.build.BuildQueryLexer.RequiredByPullRequest;
 import static io.onedev.server.util.BuildConstants.FIELD_JOB;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.APPROVE;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.DELETE_SOURCE_BRANCH;
@@ -20,8 +20,10 @@ import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestO
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -70,7 +72,6 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.visit.IVisit;
 import org.apache.wicket.util.visit.IVisitor;
-import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -80,7 +81,6 @@ import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.UserInfoManager;
-import io.onedev.server.ci.CISpec;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
@@ -90,6 +90,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.PullRequestWatch;
 import io.onedev.server.model.support.EntityWatch;
@@ -98,8 +99,8 @@ import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -109,7 +110,6 @@ import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.entity.watches.EntityWatchesPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
-import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -363,15 +363,6 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		
 		summaryContainer.add(newMergedNoteContainer());
 		summaryContainer.add(newMergeStatusContainer());
-		summaryContainer.add(new WebMarkupContainer("doNotMerge") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().isOpen() && getPullRequest().getMergeStrategy() == MergeStrategy.DO_NOT_MERGE);
-			}
-			
-		}.setOutputMarkupPlaceholderTag(true));
 		
 		summaryContainer.add(newOperationsContainer());
 		
@@ -497,41 +488,51 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				fragment.add(newMergeStrategyContainer());
 				fragment.add(new ReviewListPanel("reviews", requestModel));
 				
-				fragment.add(new ListView<String>("jobs", new LoadableDetachableModel<List<String>>() {
+				fragment.add(new ListView<JobBuilds>("jobs", new LoadableDetachableModel<List<JobBuilds>>() {
 
 					@Override
-					protected List<String> load() {
+					protected List<JobBuilds> load() {
 						PullRequest request = getPullRequest();
-						MergePreview preview = request.getMergePreview();
-						if (preview != null && preview.getMerged() != null) {
-							CISpec ciSpec = request.getTargetProject().getCISpec(ObjectId.fromString(preview.getMerged()));
-							if (ciSpec != null) {
-								Set<String> pullRequestJobNames = request.getPullRequestBuilds()
-										.stream()
-										.map(it->it.getBuild().getJobName())
-										.collect(Collectors.toSet());
-								return ciSpec.getSortedJobs()
-										.stream()
-										.map(it->it.getName())
-										.filter(it->pullRequestJobNames.contains(it))
-										.collect(Collectors.toList());
+						Map<String, List<PullRequestBuild>> map = new HashMap<>();
+						for (PullRequestBuild pullRequestBuild: request.getPullRequestBuilds()) {
+							String jobName = pullRequestBuild.getBuild().getJobName();
+							List<PullRequestBuild> list = map.get(jobName);
+							if (list == null) {
+								list = new ArrayList<>();
+								map.put(jobName, list);
 							}
-						} 
-						return new ArrayList<>();
+							list.add(pullRequestBuild);
+						}
+						List<JobBuilds> listOfJobBuilds = new ArrayList<>();
+						for (Map.Entry<String, List<PullRequestBuild>> entry: map.entrySet()) {
+							List<Build> builds = entry.getValue().stream().map(it->it.getBuild()).collect(Collectors.toList());
+							Collections.sort(builds);
+							listOfJobBuilds.add(new JobBuilds(entry.getKey(), entry.getValue().iterator().next().isRequired(), builds));
+						}
+						Collections.sort(listOfJobBuilds, new Comparator<JobBuilds>() {
+
+							@Override
+							public int compare(JobBuilds o1, JobBuilds o2) {
+								return o1.getBuilds().iterator().next().getId().compareTo(o2.getBuilds().iterator().next().getId());
+							}
+							
+						});
+						return listOfJobBuilds;
 					}
 					
 				}) {
 
 					@Override
-					protected void populateItem(ListItem<String> item) {
-						PullRequest request = getPullRequest();
-						MergePreview preview = request.getMergePreview();
-						Preconditions.checkState(preview != null && preview.getMerged() != null);
-						ObjectId commitId = ObjectId.fromString(preview.getMerged());
-						Project project = request.getTargetProject();
-						String jobName = item.getModelObject();
+					protected void populateItem(ListItem<JobBuilds> item) {
+						JobBuilds jobBuilds = item.getModelObject();
 
-						WebMarkupContainer link = new DropdownLink("status") {
+						String jobName = jobBuilds.getJobName();
+						Status status = Status.getOverallStatus(jobBuilds.getBuilds()
+								.stream()
+								.map(it->it.getStatus())
+								.collect(Collectors.toSet()));
+						
+						WebMarkupContainer link = new DropdownLink("job") {
 
 							@Override
 							protected Component newContent(String id, FloatingPanel dropdown) {
@@ -539,13 +540,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 
 									@Override
 									protected List<Build> load() {
-										List<Build> builds = getPullRequest().getPullRequestBuilds()
-												.stream()
-												.map(it->it.getBuild())
-												.filter(it->it.getJobName().equals(jobName))
-												.collect(Collectors.toList());
-										Collections.sort(builds);
-										return builds;
+										return item.getModelObject().getBuilds();
 									}
 									
 								}) {
@@ -553,7 +548,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 									@Override
 									protected Component newListLink(String componentId) {
 										String query = "" 
-												+ getRuleName(RequiredByPullRequest) + " " + quote("#" + getPullRequest().getNumber()) 
+												+ getRuleName(AssociatedWithPullRequest) + " " + quote("#" + getPullRequest().getNumber()) 
 												+ " " + getRuleName(And) + " "
 												+ quote(FIELD_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
 										return new BookmarkablePageLink<Void>(componentId, ProjectBuildsPage.class, 
@@ -562,19 +557,10 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 									
 								};
 							}
-							
-						};
-						
-						Status status = Status.getOverallStatus(request.getPullRequestBuilds()
-								.stream()
-								.filter(it->it.getBuild().getJobName().equals(jobName))
-								.map(it->it.getBuild().getStatus())
-								.collect(Collectors.toSet()));
-						
-						link.add(new BuildStatusIcon("icon", Model.of(status)) {
 
 							@Override
-							protected String getTooltip(Status status) {
+							protected void onComponentTag(ComponentTag tag) {
+								super.onComponentTag(tag);
 								String title;
 								if (status != null) {
 									if (status != Status.SUCCESSFUL)
@@ -585,14 +571,18 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 								} else {
 									title = "No builds";
 								}
-								return title;
+								tag.put("title", title);
 							}
-
-						});
+							
+						};
+										
+						link.add(new BuildStatusIcon("status", Model.of(status)));
 						item.add(link);
-						
-						link = new JobDefLink("name", project, commitId, jobName);
-						link.add(new Label("label", jobName));
+
+						if (jobBuilds.isRequired())
+							link.add(new Label("name", jobName + " (required)"));
+						else
+							link.add(new Label("name", jobName));
 						item.add(link);
 					}
 
@@ -842,7 +832,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				super.onConfigure();
 				
 				PullRequest request = getPullRequest();
-				setVisible(request.isOpen() && request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE);
+				setVisible(request.isOpen());
 			}
 			
 		};
@@ -1348,4 +1338,30 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		
 	}
 	
+	private static class JobBuilds {
+		private final String jobName;
+
+		private final boolean required;
+		
+		private final List<Build> builds;
+		
+		public JobBuilds(String jobName, boolean required, List<Build> builds) {
+			this.jobName = jobName;
+			this.required = required;
+			this.builds = builds;
+		}
+
+		public String getJobName() {
+			return jobName;
+		}
+
+		public boolean isRequired() {
+			return required;
+		}
+
+		public List<Build> getBuilds() {
+			return builds;
+		}
+		
+	}
 }

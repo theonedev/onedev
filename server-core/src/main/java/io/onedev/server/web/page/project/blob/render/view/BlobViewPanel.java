@@ -28,7 +28,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
@@ -75,7 +75,7 @@ public abstract class BlobViewPanel extends Panel {
 			String revision = context.getBlobIdent().revision;
 			String path = context.getBlobIdent().path;
 			boolean reviewRequired = project.isReviewRequiredForModification(user, revision, path);
-			boolean buildRequired = project.isBuildRequiredForModification(revision, path);
+			boolean buildRequired = project.isBuildRequiredForModification(user, revision, path);
 
 			if (isEditSupported()) {
 				AjaxLink<Void> editLink = new ViewStateAwareAjaxLink<Void>("edit", true) {

@@ -1,20 +1,14 @@
 package io.onedev.server.ci.job;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.git.command.CheckoutCommand;
-import io.onedev.server.git.command.FetchCommand;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.patternset.PatternSet;
 
@@ -22,23 +16,31 @@ public abstract class JobContext {
 	
 	private final String projectName;
 	
-	private final File gitDir;
+	private final Long buildNumber;
 	
-	private final String environment;
+	private final File projectGitDir;
+	
+	private final String image;
 	
 	private final File serverWorkspace;
-	
-	private final Map<String, String> envVars;
 	
 	private final List<String> commands;
 	
 	private final boolean retrieveSource;
+	
+	private final List<SubmoduleCredential> submoduleCredentials;
+	
+	private final String cpuRequirement;
+	
+	private final String memoryRequirement;
 	
 	private final ObjectId commitId;
 	
 	private final Collection<CacheSpec> cacheSpecs; 
 	
 	private final PatternSet collectFiles;
+	
+	private final List<JobService> services;
 	
 	private final int cacheTTL;
 	
@@ -48,21 +50,26 @@ public abstract class JobContext {
 	
 	private final Map<String, Integer> cacheCounts = new ConcurrentHashMap<>();
 	
-	public JobContext(String projectName, File gitDir, String environment, 
-			File workspace, Map<String, String> envVars, List<String> commands, 
-			boolean retrieveSource, ObjectId commitId,  Collection<CacheSpec> caches, 
-			PatternSet collectFiles, int cacheTTL, JobLogger logger) {
+	public JobContext(String projectName, Long buildNumber, File projectGitDir, String image, 
+			File workspace, List<String> commands, boolean retrieveSource, 
+			List<SubmoduleCredential> submoduleCredentials, String cpuRequirement, 
+			String memoryRequirement, ObjectId commitId, Collection<CacheSpec> caches, 
+			PatternSet collectFiles, int cacheTTL, List<JobService> services, JobLogger logger) {
 		this.projectName = projectName;
-		this.gitDir = gitDir;
-		this.environment = environment;
+		this.buildNumber = buildNumber;
+		this.projectGitDir = projectGitDir;
+		this.image = image;
 		this.serverWorkspace = workspace;
-		this.envVars = envVars;
 		this.commands = commands;
 		this.retrieveSource = retrieveSource;
+		this.submoduleCredentials = submoduleCredentials;
+		this.cpuRequirement = cpuRequirement;
+		this.memoryRequirement = memoryRequirement;
 		this.commitId = commitId;
 		this.cacheSpecs = caches;
 		this.collectFiles = collectFiles;
 		this.cacheTTL = cacheTTL;
+		this.services = services;
 		this.logger = logger;
 	}
 
@@ -70,16 +77,20 @@ public abstract class JobContext {
 		return projectName;
 	}
 
-	public String getEnvironment() {
-		return environment;
+	public Long getBuildNumber() {
+		return buildNumber;
+	}
+
+	public File getProjectGitDir() {
+		return projectGitDir;
+	}
+
+	public String getImage() {
+		return image;
 	}
 
 	public File getServerWorkspace() {
 		return serverWorkspace;
-	}
-
-	public Map<String, String> getEnvVars() {
-		return envVars;
 	}
 
 	public List<String> getCommands() {
@@ -92,6 +103,18 @@ public abstract class JobContext {
 
 	public boolean isRetrieveSource() {
 		return retrieveSource;
+	}
+	
+	public List<SubmoduleCredential> getSubmoduleCredentials() {
+		return submoduleCredentials;
+	}
+
+	public String getCpuRequirement() {
+		return cpuRequirement;
+	}
+
+	public String getMemoryRequirement() {
+		return memoryRequirement;
 	}
 
 	public Collection<CacheSpec> getCacheSpecs() {
@@ -106,33 +129,16 @@ public abstract class JobContext {
 		return logger;
 	}
 	
-	private void fetchAndCheckout(File checkoutDir) {	
-		new FetchCommand(checkoutDir).depth(1).from(gitDir.getAbsolutePath()).refspec(commitId.name()).call();
-		new CheckoutCommand(checkoutDir).refspec(commitId.name()).call();
-	}
-	
-	public void retrieveSource(File dir) {
-		if (new File(dir, ".git").exists()) {
-			try (Git git = Git.open(dir)) {
-				fetchAndCheckout(dir);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-	        try (Git git = Git.init().setDirectory(dir).call()) {
-				fetchAndCheckout(dir);
-			} catch (GitAPIException e) {
-				throw ExceptionUtils.unchecked(e);
-			}
-		}
-	}
-
 	public int getCacheTTL() {
 		return cacheTTL;
 	}
 
 	public Collection<String> getAllocatedCaches() {
 		return allocatedCaches;
+	}
+
+	public List<JobService> getServices() {
+		return services;
 	}
 
 	public Map<String, Integer> getCacheCounts() {

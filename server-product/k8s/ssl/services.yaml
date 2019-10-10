@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: onedev
+spec:
+  ports:
+  - name: https 
+    port: 443
+    targetPort: 6643
+    protocol: TCP

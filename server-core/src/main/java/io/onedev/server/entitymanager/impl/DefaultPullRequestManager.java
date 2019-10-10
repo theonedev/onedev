@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -27,12 +28,9 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.Permission;
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.ObjectId;
@@ -52,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
@@ -65,8 +64,8 @@ import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.param.JobParam;
-import io.onedev.server.ci.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.ci.job.trigger.JobTrigger;
+import io.onedev.server.ci.job.trigger.PullRequestTrigger;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestBuildManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
@@ -121,14 +120,16 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import io.onedev.server.util.scriptidentity.JobIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentity;
 import io.onedev.server.util.work.BatchWorkManager;
 import io.onedev.server.util.work.BatchWorker;
 
@@ -170,7 +171,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			PullRequestReviewManager pullRequestReviewManager, UserManager userManager, 
 			MarkdownManager markdownManager, BatchWorkManager batchWorkManager, 
 			ListenerRegistry listenerRegistry, SessionManager sessionManager,
-			PullRequestChangeManager pullRequestChangeManager, 
+			PullRequestChangeManager pullRequestChangeManager,
 			PullRequestBuildManager pullRequestBuildManager, TransactionManager transactionManager, 
 			JobManager jobManager, ProjectManager projectManager) {
 		super(dao);
@@ -254,7 +255,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		change.setRequest(request);
 		change.setUser(user);
 		pullRequestChangeManager.save(change);
-		checkAsync(request);
+		checkAsync(Lists.newArrayList(request));
 	}
 
 	@Transactional
@@ -327,7 +328,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		request.getTargetProject().cacheObjectId(request.getTargetRef(), mergedId);
 		
 		Long requestId = request.getId();
-		Subject subject = SecurityUtils.getSubject();
 		ObjectId newTargetHeadId = mergedId;
 		transactionManager.runAfterCommit(new Runnable() {
 
@@ -337,18 +337,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 					@Override
 					public void run() {
-						ThreadContext.bind(subject);
-						try {
-							PullRequest request = load(requestId);
-							request.getTargetProject().cacheObjectId(request.getTargetRef(), newTargetHeadId);
-							listenerRegistry.post(new RefUpdated(request.getTargetProject(), targetRef, 
-										targetHeadId, newTargetHeadId));
-						} finally {
-							ThreadContext.unbindSubject();
-						}
+						PullRequest request = load(requestId);
+						request.getTargetProject().cacheObjectId(request.getTargetRef(), newTargetHeadId);
+						listenerRegistry.post(new RefUpdated(request.getTargetProject(), targetRef, 
+									targetHeadId, newTargetHeadId));
 					}
 					
-				});
+				}, SecurityUtils.getSubject());
 			}
 		});
 	}
@@ -377,7 +372,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		pullRequestReviewManager.saveReviews(request);
 		pullRequestBuildManager.savePullRequestBuilds(request);
 
-		checkAsync(request);
+		checkAsync(Lists.newArrayList(request));
 		
 		listenerRegistry.post(new PullRequestOpened(request));
 	}
@@ -408,8 +403,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		if (!request.getHeadCommitHash().equals(request.getSource().getObjectName())) {
 			ObjectId mergeBase = GitUtils.getMergeBase(
 					request.getTargetProject().getRepository(), request.getTarget().getObjectId(), 
-					request.getSourceProject().getRepository(), request.getSource().getObjectId(), 
-					GitUtils.branch2ref(request.getSourceBranch()));
+					request.getSourceProject().getRepository(), request.getSource().getObjectId());
 			if (mergeBase != null) {
 				PullRequestUpdate update = new PullRequestUpdate();
 				update.setRequest(request);
@@ -451,7 +445,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 						MergePreview preview = request.getMergePreview();
 						
 						if (request.isAllReviewsApproved() 
-								&& request.isAllBuildsSuccessful()
+								&& request.isRequiredBuildsSuccessful()
 								&& request.getCheckError() == null 
 								&& preview != null 
 								&& preview.getMerged() != null) {
@@ -460,11 +454,14 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					}
 				}
 			}
-		} catch (ValidationException|OneException e) {
-			request.setCheckError(e.getMessage());
 		} catch (Exception e) {
-			request.setCheckError("Error checking pull request, check server log for details");
-			String message = String.format("Error checking pull request (project: %s, number: %d)", 
+			if (e.getMessage() != null)
+				request.setCheckError("Error checking pull request: " + e.getMessage());
+			else
+				request.setCheckError("Error checking pull request");
+			request.setCheckError(request.getCheckError() + ", check server log for details");
+				
+			String message = String.format("Error checking pull request (project: %s, number: #%d)", 
 					request.getTargetProject().getName(), request.getNumber());
 			logger.error(message, e);
 		}
@@ -473,7 +470,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Sessional
 	@Override
 	public MergePreview previewMerge(PullRequest request) {
-		if (!request.isNew() && request.getMergeStrategy() != MergeStrategy.DO_NOT_MERGE) {
+		if (!request.isNew()) {
 			MergePreview lastPreview = request.getLastMergePreview();
 			if (request.isOpen() && !request.isMergeIntoTarget()) {
 				if (lastPreview == null || !lastPreview.isUpToDate(request)) {
@@ -564,8 +561,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			Criterion criterion = Restrictions.and(
 					ofOpen(), 
 					Restrictions.or(ofSource(projectAndBranch), ofTarget(projectAndBranch)));
-			for (PullRequest request: query(EntityCriteria.of(PullRequest.class).add(criterion)))
-					check(request);
+			checkAsync(query(EntityCriteria.of(PullRequest.class).add(criterion)));
 		}
 	}
 
@@ -627,7 +623,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		if (data instanceof PullRequestApproveData || data instanceof PullRequestDiscardData  
 				|| data instanceof PullRequestReviewerRemoveData || data instanceof PullRequestReviewerAddData 
 				|| data instanceof PullRequestMergeStrategyChangeData) {
-			checkAsync(event.getRequest());
+			checkAsync(Lists.newArrayList(event.getRequest()));
 		}
 	}
 	
@@ -648,41 +644,40 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	public void on(BuildEvent event) {
 		Build build = event.getBuild();
-		for (PullRequestBuild pullRequestBuild: build.getPullRequestBuilds()) { 
+		for (PullRequestBuild pullRequestBuild: build.getPullRequestBuilds())  
 			listenerRegistry.post(new PullRequestBuildEvent(pullRequestBuild));
-			checkAsync(pullRequestBuild.getRequest());
-		}
+		checkAsync(build.getPullRequestBuilds()
+				.stream()
+				.map(it->it.getRequest())
+				.collect(Collectors.toList()));
 	}
 	
 	@Listen
 	public void on(PullRequestMergePreviewCalculated event) {
-		checkAsync(event.getRequest());
+		checkAsync(Lists.newArrayList(event.getRequest()));
 	}
 	
 	@Sessional
-	protected void checkAsync(PullRequest request) {
-		Long requestId = request.getId();
-		Subject subject = SecurityUtils.getSubject();
-		transactionManager.runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				dao.getSessionManager().runAsync(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-					        ThreadContext.bind(subject);
-							check(load(requestId));
-						} finally {
-							ThreadContext.unbindSubject();
+	protected void checkAsync(Collection<PullRequest> requests) {
+		Collection<Long> requestIds = requests.stream().map(it->it.getId()).collect(Collectors.toList());
+		if (!requestIds.isEmpty()) {
+			transactionManager.runAfterCommit(new Runnable() {
+	
+				@Override
+				public void run() {
+					dao.getSessionManager().runAsync(new Runnable() {
+	
+						@Override
+						public void run() {
+					        for (Long requestId: requestIds)
+					        	check(load(requestId));
 						}
-					}
-					
-				});
-			}
-			
-		});
+						
+					}, SecurityUtils.getSubject());
+				}
+				
+			});
+		}
 	}
 	
 	@Transactional
@@ -721,49 +716,64 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 
 	private void checkBuilds(PullRequest request) {
-		Collection<PullRequestBuild> prevRequirements = new ArrayList<>(request.getPullRequestBuilds());
+		Collection<PullRequestBuild> prevPullRequestBuilds = new ArrayList<>(request.getPullRequestBuilds());
 		request.getPullRequestBuilds().clear();
 		MergePreview preview = request.getMergePreview();
 		if (preview != null && preview.getMerged() != null) {
 			Project project = request.getTargetProject();
 			ObjectId commitId = ObjectId.fromString(preview.getMerged());
-			CISpec ciSpec = project.getCISpec(commitId);
-			if (ciSpec == null)
-				throw new OneException("No CI spec defined in merge preview commit");
-			for (Job job: ciSpec.getJobs()) {
-				for (JobTrigger trigger: job.getTriggers()) {
-					if (trigger instanceof BranchUpdateTrigger) {
-						BranchUpdateTrigger branchUpdateTrigger = (BranchUpdateTrigger) trigger;
-						if (branchUpdateTrigger.isRejectIfNotSuccessful()) {
-							RefUpdated updated = new RefUpdated(project, GitUtils.branch2ref(request.getTargetBranch()), 
-									request.getTarget().getObjectId(), commitId);
-							if (branchUpdateTrigger.matches(updated, job)) {
-								new MatrixRunner<List<String>>(JobParam.getParamMatrix(trigger.getParams())) {
-									
-									@Override
-									public void run(Map<String, List<String>> paramMap) {
-										Build build = jobManager.submit(request.getTargetProject(), 
-												commitId, job.getName(), paramMap, null);
-										PullRequestBuild pullRequestBuild = null;
-										for (PullRequestBuild prevRequirement: prevRequirements) {
-											if (prevRequirement.getBuild().equals(build)) {
-												pullRequestBuild = prevRequirement;
-												break;
+			ScriptIdentity.push(new JobIdentity(project, commitId));
+			try {
+				Collection<String> requiredJobNames;
+				BranchProtection protection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
+				if (protection != null) {
+					requiredJobNames = protection.getRequiredJobs(request.getTargetProject(), request.getTargetBranch(), 
+							request.getTarget().getObjectId(), commitId, new HashMap<>());
+				} else {
+					requiredJobNames = new HashSet<>();
+				}
+				CISpec ciSpec = project.getCISpec(commitId);
+				if (ciSpec != null) {
+					for (Job job: ciSpec.getJobs()) {
+						for (JobTrigger trigger: job.getTriggers()) {
+							if (trigger instanceof PullRequestTrigger) {
+								PullRequestTrigger pullRequestTrigger = (PullRequestTrigger) trigger;
+								PullRequestMergePreviewCalculated pullRequestMergePreviewCalculated = new PullRequestMergePreviewCalculated(request);
+								if (pullRequestTrigger.matches(pullRequestMergePreviewCalculated, job)) {
+									boolean required = requiredJobNames.contains(job.getName());
+									new MatrixRunner<List<String>>(JobParam.getParamMatrix(trigger.getParams())) {
+										
+										@Override
+										public void run(Map<String, List<String>> paramMap) {
+											Build build = jobManager.submit(request.getTargetProject(), 
+													commitId, job.getName(), paramMap, null);
+											PullRequestBuild pullRequestBuild = null;
+											for (PullRequestBuild prevPullRequestBuild: prevPullRequestBuilds) {
+												if (prevPullRequestBuild.getBuild().equals(build)) {
+													pullRequestBuild = prevPullRequestBuild;
+													break;
+												}
 											}
+											if (pullRequestBuild == null) {
+												pullRequestBuild = new PullRequestBuild();
+												pullRequestBuild.setRequest(request);
+												pullRequestBuild.setBuild(build);
+											}
+											pullRequestBuild.setRequired(required);
+											request.getPullRequestBuilds().add(pullRequestBuild);
 										}
-										if (pullRequestBuild == null) {
-											pullRequestBuild = new PullRequestBuild();
-											pullRequestBuild.setRequest(request);
-											pullRequestBuild.setBuild(build);
-										}
-										request.getPullRequestBuilds().add(pullRequestBuild);
-									}
-									
-								}.run();
+										
+									}.run();
+									requiredJobNames.remove(job.getName());
+								}
 							}
 						}
 					}
 				}
+				if (!requiredJobNames.isEmpty())
+					throw new OneException("No pull request trigger to fire required builds: " + requiredJobNames);					
+			} finally {
+				ScriptIdentity.pop();
 			}
 		}
 	}
@@ -772,18 +782,16 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		PullRequest request = update.getRequest();
 		
 		for (User user: reviewRequirement.getUsers()) {
-			if (!user.equals(request.getSubmitter())) {
-				PullRequestReview review = request.getReview(user);
-				if (review == null) {
-					review = new PullRequestReview();
-					review.setRequest(request);
-					review.setUser(user);
-					request.getReviews().add(review);
-				} else if (review.getExcludeDate() != null) {
-					review.setExcludeDate(null);
-				} else if (review.getUpdate() == null || review.getUpdate().getId()<update.getId()) {
-					review.setResult(null);
-				}
+			PullRequestReview review = request.getReview(user);
+			if (review == null) {
+				review = new PullRequestReview();
+				review.setRequest(request);
+				review.setUser(user);
+				request.getReviews().add(review);
+			} else if (review.getExcludeDate() != null) {
+				review.setExcludeDate(null);
+			} else if (review.getUpdate() == null || review.getUpdate().getId()<update.getId()) {
+				review.setResult(null);
 			}
 		}
 		
@@ -803,21 +811,17 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		int effectiveCount = 0;
 		Set<User> potentialReviewers = new HashSet<>();
 		for (User user: users) {
-			if (user.equals(request.getSubmitter())) {
-				effectiveCount++;
-			} else {
-				PullRequestReview review = request.getReview(user);
-				if (review != null && review.getExcludeDate() == null) {
-					if (review.getResult() == null)
-						requiredCount--;
-					else if (review.getUpdate() != null && review.getUpdate().getId()>=update.getId())
-						effectiveCount++;
-					else
-						potentialReviewers.add(user);
-				} else {
+			PullRequestReview review = request.getReview(user);
+			if (review != null && review.getExcludeDate() == null) {
+				if (review.getResult() == null)
+					requiredCount--;
+				else if (review.getUpdate() != null && review.getUpdate().getId()>=update.getId())
+					effectiveCount++;
+				else
 					potentialReviewers.add(user);
-				}
-			} 
+			} else {
+				potentialReviewers.add(user);
+			}
 			if (effectiveCount >= requiredCount)
 				break;
 		}
@@ -1011,8 +1015,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			User submitter, String title) {
 		ObjectId baseCommitId = GitUtils.getMergeBase(
 				target.getProject().getRepository(), target.getObjectId(), 
-				source.getProject().getRepository(), source.getObjectId(), 
-				GitUtils.branch2ref(source.getBranch()));
+				source.getProject().getRepository(), source.getObjectId());
 		if (baseCommitId != null) {
 			PullRequest request = new PullRequest();
 			request.setTarget(target);
@@ -1050,6 +1053,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		List<PullRequest> requests = new ArrayList<>();
 
 		EntityCriteria<PullRequest> criteria = newCriteria();
+		criteria.add(Restrictions.eq("targetProject", targetProject));
 		
 		if (StringUtils.isNotBlank(term)) {
 			if (term.startsWith("#")) {
@@ -1062,15 +1066,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 							Restrictions.ilike("title", "#" + term, MatchMode.ANYWHERE),
 							Restrictions.ilike("noSpaceTitle", "#" + term, MatchMode.ANYWHERE)));
 				}
-			} else {
-				try {
-					long buildNumber = Long.parseLong(term);
-					criteria.add(Restrictions.eq("number", buildNumber));
-				} catch (NumberFormatException e) {
-					criteria.add(Restrictions.or(
-							Restrictions.ilike("title", term, MatchMode.ANYWHERE),
-							Restrictions.ilike("noSpaceTitle", term, MatchMode.ANYWHERE)));
-				}
+			} else try {
+				long buildNumber = Long.parseLong(term);
+				criteria.add(Restrictions.eq("number", buildNumber));
+			} catch (NumberFormatException e) {
+				criteria.add(Restrictions.or(
+						Restrictions.ilike("title", term, MatchMode.ANYWHERE),
+						Restrictions.ilike("noSpaceTitle", term, MatchMode.ANYWHERE)));
 			}
 		}
 		

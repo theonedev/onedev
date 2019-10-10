@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.annotation.Nullable;
 
@@ -17,8 +18,6 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -45,6 +44,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -57,7 +58,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.BlobContent;
 import io.onedev.server.git.BlobEdits;
@@ -78,7 +78,10 @@ import io.onedev.server.search.code.SearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.scriptidentity.JobIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
 import io.onedev.server.web.PrioritizedComponentRenderer;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -107,7 +110,7 @@ import io.onedev.server.web.websocket.PageDataChanged;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @SuppressWarnings("serial")
-public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
+public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, ScriptIdentityAware {
 
 	private static final String PARAM_REVISION = "revision";
 	
@@ -132,6 +135,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 	private static final String BLOB_NAVIGATOR_ID = "blobNavigator";
 
 	private static final String BLOB_CONTENT_ID = "blobContent";
+	
+	private static final Logger logger = LoggerFactory.getLogger(ProjectBlobPage.class);
 	
 	private State state = new State();
 	
@@ -335,8 +340,20 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		blobOperations.setOutputMarkupId(true);
 		
 		String revision = state.blobIdent.revision;
-		boolean reviewRequired = getProject().isReviewRequiredForModification(getLoginUser(), revision, null); 
-		boolean buildRequired = getProject().isBuildRequiredForModification(revision, null);
+		
+		AtomicBoolean reviewRequired = new AtomicBoolean(true);
+		try {
+			reviewRequired.set(getProject().isReviewRequiredForModification(getLoginUser(), revision, null)); 
+		} catch (Exception e) {
+			logger.error("Error checking review requirement", e);
+		}
+		
+		AtomicBoolean buildRequired = new AtomicBoolean(true);
+		try {
+			buildRequired.set(getProject().isBuildRequiredForModification(getLoginUser(), revision, null));
+		} catch (Exception e) {
+			logger.error("Error checking build requirement", e);
+		}
 
 		blobOperations.add(new MenuLink("add") {
 
@@ -411,10 +428,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 			protected void onComponentTag(ComponentTag tag) {
 				super.onComponentTag(tag);
 				
-				if (reviewRequired) {
+				if (reviewRequired.get()) {
 					tag.append("class", "disabled", " ");
 					tag.put("title", "Review required for this change. Submit pull request instead");
-				} else if (buildRequired) {
+				} else if (buildRequired.get()) {
 					tag.append("class", "disabled", " ");
 					tag.put("title", "Build required for this change. Submit pull request instead");
 				} else {
@@ -431,7 +448,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 						&& isOnBranch() && state.blobIdent.isTree() 
 						&& SecurityUtils.canWriteCode(project.getFacade())) {
 					setVisible(true);
-					setEnabled(!reviewRequired && !buildRequired);
+					setEnabled(!reviewRequired.get() && !buildRequired.get());
 				} else {
 					setVisible(false);
 				}
@@ -1011,7 +1028,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		String branch = state.blobIdent.revision;
 		getProject().cacheObjectId(branch, refUpdated.getNewCommitId());
 
-		Subject subject = SecurityUtils.getSubject();
 		Long projectId = project.getId();
 		String refName = refUpdated.getRefName();
 		ObjectId oldCommitId = refUpdated.getOldCommitId();
@@ -1024,21 +1040,16 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 					@Override
 					public void run() {
-						ThreadContext.bind(subject);
-						try {
-							Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
-							project.cacheObjectId(branch, newCommitId);
-							RefUpdated refUpdated = new RefUpdated(project, refName, oldCommitId, newCommitId);
-							OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
-						} finally {
-							ThreadContext.unbindSubject();
-						}
+						Project project = OneDev.getInstance(ProjectManager.class).load(projectId);
+						project.cacheObjectId(branch, newCommitId);
+						RefUpdated refUpdated = new RefUpdated(project, refName, oldCommitId, newCommitId);
+						OneDev.getInstance(ListenerRegistry.class).post(refUpdated);
 					}
 					
 				});
 			}
 			
-		});
+		}, SecurityUtils.getSubject());
 		
 		if (target != null) {
 			BlobIdent newBlobIdent;
@@ -1182,14 +1193,16 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 				parentPath = directory;
 		}
 		
+		User user = Preconditions.checkNotNull(SecurityUtils.getUser());
+		
 		for (FileUpload upload: uploads) {
 			String blobPath = upload.getClientFileName();
 			if (parentPath != null)
 				blobPath = parentPath + "/" + blobPath;
 			
-			if (getProject().isReviewRequiredForModification(SecurityUtils.getUser(), blobIdent.revision, blobPath)) 
+			if (getProject().isReviewRequiredForModification(user, blobIdent.revision, blobPath)) 
 				throw new BlobUploadException("Review required for this change. Please submit pull request instead");
-			else if (getProject().isBuildRequiredForModification(blobIdent.revision, blobPath)) 
+			else if (getProject().isBuildRequiredForModification(user, blobIdent.revision, blobPath)) 
 				throw new BlobUploadException("Build required for this change. Please submit pull request instead");
 			
 			BlobContent blobContent = new BlobContent.Immutable(upload.getBytes(), FileMode.REGULAR_FILE);
@@ -1198,8 +1211,6 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 
 		BlobEdits blobEdits = new BlobEdits(Sets.newHashSet(), newBlobs);
 		String refName = GitUtils.branch2ref(blobIdent.revision);
-
-		User user = Preconditions.checkNotNull(OneDev.getInstance(UserManager.class).getCurrent());
 
 		ObjectId prevCommitId = getProject().getObjectId(blobIdent.revision, true);
 
@@ -1233,6 +1244,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext {
 		} catch (URISyntaxException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public ScriptIdentity getScriptIdentity() {
+		return new JobIdentity(getProject(), getCommit().copy());
 	}
 
 }

@@ -52,9 +52,9 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.AppendLoadingIndicatorListener;
@@ -222,7 +222,7 @@ public abstract class IssueSidePanel extends Panel {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 
-						Map<String, Object> fieldValues = IssueUtils.getFieldValues(beanEditor.getOneContext(), fieldBean, getIssue().getFieldNames());
+						Map<String, Object> fieldValues = IssueUtils.getFieldValues(beanEditor.newComponentContext(), fieldBean, getIssue().getFieldNames());
 						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues, SecurityUtils.getUser());
 						Component fieldsContainer = newFieldsContainer();
 						IssueSidePanel.this.replace(fieldsContainer);

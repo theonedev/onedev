@@ -14,7 +14,7 @@ import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 
 public enum PullRequestOperation {
 	DISCARD {

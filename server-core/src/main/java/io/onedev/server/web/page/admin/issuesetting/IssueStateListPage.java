@@ -16,7 +16,6 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -25,14 +24,16 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -40,7 +41,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
-import com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 public class IssueStateListPage extends GlobalIssueSettingPage {
@@ -96,22 +96,20 @@ public class IssueStateListPage extends GlobalIssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "nameColumnFrag", IssueStateListPage.this);
 				StateSpec state = rowModel.getObject();
-				int index = getStateSpecIndex(state.getName());
-				Preconditions.checkState(index != -1);
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				cellItem.add(new ColumnFragment(componentId, state) {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
-						newStateDetail(target, index);
+					protected Component newLabel(String componentId) {
+						String label = "<span class='drag-indicator fa fa-reorder'></span> " 
+								+ HtmlEscape.escapeHtml5(state.getName());
+
+						if (getStateSpecIndex(state.getName()) == 0)
+							label += " <span class='label label-default'>Initial</span>";
+						return new Label(componentId, label).setEscapeModelStrings(false);
 					}
 					
-				};
-				link.add(new Label("label", state.getName()));
-				link.add(new WebMarkupContainer("initial").setVisible(index == 0));
-				fragment.add(link);
-				cellItem.add(fragment);
+				});
 			}
 		});		
 		
@@ -119,21 +117,15 @@ public class IssueStateListPage extends GlobalIssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "otherColumnFrag", IssueStateListPage.this);
 				StateSpec state = rowModel.getObject();
-				int index = getStateSpecIndex(state.getName());				
-				Preconditions.checkState(index != -1);
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				cellItem.add(new ColumnFragment(componentId, state) {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
-						newStateDetail(target, index);
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, StringUtils.capitalize(state.getCategory().name().toLowerCase()));
 					}
 					
-				};
-				link.add(new Label("label", StringUtils.capitalize(rowModel.getObject().getCategory().name().toLowerCase())));
-				fragment.add(link);
-				cellItem.add(fragment);
+				});
 			}
 			
 		});		
@@ -142,51 +134,36 @@ public class IssueStateListPage extends GlobalIssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "otherColumnFrag", IssueStateListPage.this);
 				StateSpec state = rowModel.getObject();
-				int index = getStateSpecIndex(state.getName());				
-				Preconditions.checkState(index != -1);
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				cellItem.add(new ColumnFragment(componentId, state) {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
-						newStateDetail(target, index);
+					protected Component newLabel(String componentId) {
+						return new Label(componentId).add(AttributeAppender.append("style", "background: " + state.getColor() + ";"));
 					}
 					
-				};
-				link.add(new Label("label").add(AttributeAppender.append("style", "background: " + state.getColor() + ";")));
-				fragment.add(AttributeAppender.append("class", "color"));
-				fragment.add(link);
-				cellItem.add(fragment);
+				}.add(AttributeAppender.append("class", "color")));
 			}
 			
 		});		
 		
-		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("")) {
+		columns.add(new AbstractColumn<StateSpec, Void>(Model.of("Description")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<StateSpec>> cellItem, String componentId, IModel<StateSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "otherColumnFrag", IssueStateListPage.this);
 				StateSpec state = rowModel.getObject();
-				int index = getStateSpecIndex(state.getName());				
-				Preconditions.checkState(index != -1);
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				cellItem.add(new ColumnFragment(componentId, state) {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
-						newStateDetail(target, index);
+					protected Component newLabel(String componentId) {
+						String description = state.getDescription();
+						if (description != null)
+							return new Label(componentId, description);
+						else
+							return new Label(componentId, "<i>No description</i>").setEscapeModelStrings(false);
 					}
 					
-				};
-				link.add(new Label("label", "<i class='fa fa-ellipsis-h'></i>").setEscapeModelStrings(false));
-				fragment.add(link);
-				cellItem.add(fragment);
-				
-			}
-
-			@Override
-			public String getCssClass() {
-				return "ellipsis";
+				});
 			}
 			
 		});		
@@ -226,84 +203,108 @@ public class IssueStateListPage extends GlobalIssueSettingPage {
 		}.sortable("tbody"));
 	}
 	
-	private void newStateDetail(AjaxRequestTarget target, int index) {
-		new SideFloating(target, SideFloating.Placement.RIGHT) {
+	private abstract class ColumnFragment extends Fragment {
 
-			private StateSpec getState() {
-				return getSetting().getStateSpecs().get(index);
-			}
-			
-			@Override
-			protected String getTitle() {
-				return getState().getName();
-			}
+		private final StateSpec state;
+		
+		public ColumnFragment(String id, StateSpec state) {
+			super(id, "columnFrag", IssueStateListPage.this);
+			this.state = state;
+		}
 
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(AttributeAppender.append("class", "state-spec def-detail"));
-			}
+		@Override
+		protected void onInitialize() {
+			super.onInitialize();
+			int index = getStateSpecIndex(state.getName());				
+			Preconditions.checkState(index != -1);
+			AjaxLink<Void> link = new AjaxLink<Void>("link") {
 
-			@Override
-			protected Component newBody(String id) {
-				SideFloating sideFloating = this;
-				Fragment fragment = new Fragment(id, "viewStateFrag", IssueStateListPage.this);
-				fragment.add(BeanContext.view("viewer", getState(), Sets.newHashSet("name"), true));
-				fragment.add(new ModalLink("edit") {
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					new SideFloating(target, SideFloating.Placement.RIGHT) {
 
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						sideFloating.close();
-						return new StateEditPanel(id, index) {
+						private StateSpec getState() {
+							return getSetting().getStateSpecs().get(index);
+						}
+						
+						@Override
+						protected String getTitle() {
+							return getState().getName();
+						}
 
-							@Override
-							protected void onSave(AjaxRequestTarget target) {
-								target.add(statesTable);
-								modal.close();
-							}
+						@Override
+						protected void onInitialize() {
+							super.onInitialize();
+							add(AttributeAppender.append("class", "state-spec def-detail"));
+						}
 
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
+						@Override
+						protected Component newBody(String id) {
+							SideFloating sideFloating = this;
+							Fragment fragment = new Fragment(id, "viewStateFrag", IssueStateListPage.this);
+							fragment.add(BeanContext.view("viewer", getState(), Sets.newHashSet("name"), true));
+							fragment.add(new ModalLink("edit") {
 
-							@Override
-							protected GlobalIssueSetting getSetting() {
-								return IssueStateListPage.this.getSetting();
-							}
+								@Override
+								protected Component newContent(String id, ModalPanel modal) {
+									sideFloating.close();
+									return new StateEditPanel(id, index) {
 
-						};
-					}
-					
-				});
-				fragment.add(new AjaxLink<Void>("delete") {
+										@Override
+										protected void onSave(AjaxRequestTarget target) {
+											target.add(statesTable);
+											modal.close();
+										}
 
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this state?"));
-					}
+										@Override
+										protected void onCancel(AjaxRequestTarget target) {
+											modal.close();
+										}
 
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						StateSpec state = getState();
-						getSetting().getStateSpecs().remove(index);
-						getSetting().onDeleteState(state.getName());
-						getSetting().setReconciled(false);
-						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-						target.add(statesTable);
-						close();
-					}
-					
-				});
+										@Override
+										protected GlobalIssueSetting getSetting() {
+											return IssueStateListPage.this.getSetting();
+										}
+
+									};
+								}
+								
+							});
+							fragment.add(new AjaxLink<Void>("delete") {
+
+								@Override
+								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+									super.updateAjaxAttributes(attributes);
+									attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this state?"));
+								}
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									StateSpec state = getState();
+									getSetting().getStateSpecs().remove(index);
+									getSetting().onDeleteState(state.getName());
+									getSetting().setReconciled(false);
+									OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+									target.add(statesTable);
+									close();
+								}
+								
+							});
+							
+							fragment.add(new NotificationPanel("feedback", fragment));
+							fragment.setOutputMarkupId(true);
+							
+							return fragment;
+						}
+
+					};		
+				}
 				
-				fragment.add(new NotificationPanel("feedback", fragment));
-				fragment.setOutputMarkupId(true);
-				
-				return fragment;
-			}
-
-		};		
+			};
+			link.add(newLabel("label"));
+			add(link);
+		}
+		
+		protected abstract Component newLabel(String componentId);
 	}
-	
 }

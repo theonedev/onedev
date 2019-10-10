@@ -19,8 +19,8 @@ import io.onedev.server.git.Contribution;
 import io.onedev.server.git.Contributor;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.Day;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.avatar.AvatarManager;
 

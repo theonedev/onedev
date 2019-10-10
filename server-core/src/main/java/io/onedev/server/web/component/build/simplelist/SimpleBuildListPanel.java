@@ -20,7 +20,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 
 @SuppressWarnings("serial")
 public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
@@ -45,8 +45,11 @@ public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
 			protected void populateItem(ListItem<Build> item) {
 				Build build = item.getModelObject();
 				
+				Link<Void> buildLink = new BookmarkablePageLink<Void>("build", 
+						BuildLogPage.class, BuildLogPage.paramsOf(build, null));
+				
 				Long buildId = build.getId();
-				item.add(new BuildStatusIcon("status", new LoadableDetachableModel<Status>() {
+				buildLink.add(new BuildStatusIcon("status", new LoadableDetachableModel<Status>() {
 
 					@Override
 					protected Status load() {
@@ -55,13 +58,10 @@ public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
 					
 				}));
 
-				Link<Void> buildLink = new BookmarkablePageLink<Void>("title", 
-						BuildLogPage.class, BuildLogPage.paramsOf(build, null));
-
 				StringBuilder builder = new StringBuilder("#" + build.getNumber());
 				if (build.getVersion() != null)
 					builder.append(" (" + build.getVersion() + ")");
-				buildLink.add(new Label("label", builder.toString())); 
+				buildLink.add(new Label("title", builder.toString())); 
 				item.add(buildLink);
 			}
 			

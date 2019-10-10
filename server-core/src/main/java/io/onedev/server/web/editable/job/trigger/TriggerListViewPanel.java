@@ -152,7 +152,7 @@ class TriggerListViewPanel extends Panel {
 
 						@Override
 						protected String getTitle() {
-							return EditableUtils.getDisplayName(triggers.get(index).getClass());
+							return "Trigger (type: " + EditableUtils.getDisplayName(triggers.get(index).getClass()) + ")";
 						}
 
 						@Override

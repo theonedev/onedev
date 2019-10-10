@@ -60,7 +60,7 @@ import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.component.branch.BranchLink;
@@ -170,8 +170,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		if (pullRequestRef.get() == null) {
 			ObjectId baseCommitId = GitUtils.getMergeBase(
 					target.getProject().getRepository(), target.getObjectId(), 
-					source.getProject().getRepository(), source.getObjectId(), 
-					GitUtils.branch2ref(source.getBranch()));
+					source.getProject().getRepository(), source.getObjectId());
 			if (baseCommitId != null) {
 				PullRequest request = new PullRequest();
 				request.setTitle(StringUtils.capitalize(source.getBranch().replace('-', ' ').replace('_', ' ').toLowerCase()));
@@ -196,11 +195,14 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				update.setMergeBaseCommitHash(request.getBaseCommitHash());
 
 				OneDev.getInstance(PullRequestManager.class).checkQuality(request);
-				
-				if (request.isAllReviewsApproved())
-					request.setMergeStrategy(MergeStrategy.DO_NOT_MERGE);
-				else
-					request.setMergeStrategy(MergeStrategy.CREATE_MERGE_COMMIT);
+
+				if (SecurityUtils.canWriteCode(getProject().getFacade()) && request.getReviews().isEmpty()) {
+					PullRequestReview review = new PullRequestReview();
+					review.setRequest(request);
+					review.setUser(SecurityUtils.getUser());
+					request.getReviews().add(review);
+				}
+				request.setMergeStrategy(MergeStrategy.CREATE_MERGE_COMMIT);
 			}
 			
 			requestModel = new LoadableDetachableModel<PullRequest>() {
@@ -680,12 +682,6 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			}
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().getMergeStrategy() != MergeStrategy.DO_NOT_MERGE);
-			}
-
-			@Override
 			public Component getLazyLoadComponent(String componentId) {
 				PullRequest request = getPullRequest();
 				MergePreview mergePreview = new MergePreview(request.getTarget().getObjectName(), 
@@ -715,18 +711,6 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				component.add(AttributeAppender.append("class", "calculating"));
 				component.setEscapeModelStrings(false);
 				return component;
-			}
-			
-		});
-		
-		container.add(new Label("mergeWithoutReviewNote", "This pull request will be merged into target branch automatically "
-				+ "as it is submitted by qualified user. Use strategy \"Do Not Merge\" if you want to review without "
-				+ "merging now") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getPullRequest().isAllReviewsApproved() && getPullRequest().getMergeStrategy() != MergeStrategy.DO_NOT_MERGE);
 			}
 			
 		});

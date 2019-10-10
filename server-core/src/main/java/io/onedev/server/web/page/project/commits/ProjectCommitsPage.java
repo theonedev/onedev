@@ -19,7 +19,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.search.commit.CommitQuery;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;

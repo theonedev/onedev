@@ -55,8 +55,8 @@ public abstract class AbstractGitTest extends AppLoaderMocker {
 			
 		});
 		
-	    Assert.assertTrue(GitCommand.checkError("git") == null);
-		
+		String gitError = GitCommand.checkError("git");
+	    Assert.assertTrue(gitError, gitError == null);
 	}
 
 	@Override

@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.validation.ValidationException;
-
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxRequestAttributes;
@@ -20,18 +18,19 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.util.IssueConstants;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.model.support.inputspec.InputSpec;
+import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.Choice;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
-import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.Path;
+import io.onedev.server.web.editable.PathNode;
 
 @SuppressWarnings("serial")
 abstract class FieldEditPanel extends Panel implements InputContext {
@@ -88,23 +87,21 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 
-				InputSpec field = bean.getField();
+				FieldSpec field = bean.getField();
 				if (fieldIndex != -1) { 
-					InputSpec oldField = getSetting().getFieldSpecs().get(fieldIndex);
+					FieldSpec oldField = getSetting().getFieldSpecs().get(fieldIndex);
 					if (!field.getName().equals(oldField.getName()) && getSetting().getFieldSpec(field.getName()) != null) {
-						editor.getErrorContext(new PathElement.Named("field"))
-								.getErrorContext(new PathElement.Named("name"))
-								.addError("This name has already been used by another field");
+						editor.error(new Path(new PathNode.Named("field"), new PathNode.Named("name")),
+								"This name has already been used by another field");
 					}
 				} else if (getSetting().getFieldSpec(field.getName()) != null) {
-					editor.getErrorContext(new PathElement.Named("field"))
-							.getErrorContext(new PathElement.Named("name"))
-							.addError("This name has already been used by another field");
+					editor.error(new Path(new PathNode.Named("field"), new PathNode.Named("name")),
+							"This name has already been used by another field");
 				}
 
-				if (!editor.hasErrors(true)) {
+				if (editor.isValid()) {
 					if (fieldIndex != -1) {
-						InputSpec oldField = getSetting().getFieldSpecs().get(fieldIndex);
+						FieldSpec oldField = getSetting().getFieldSpecs().get(fieldIndex);
 						getSetting().getFieldSpecs().set(fieldIndex, field);
 						getSetting().getDefaultPromptFieldsUponIssueOpen().remove(oldField.getName());
 						getSetting().getDefaultListFields().remove(oldField.getName());
@@ -112,9 +109,9 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 							getSetting().onRenameField(oldField.getName(), field.getName());
 							getSetting().setReconciled(false);
 						}
-						if (oldField instanceof ChoiceInput && field instanceof ChoiceInput) {
-							ChoiceInput oldChoiceInput = (ChoiceInput) oldField;
-							ChoiceInput choiceInput = (ChoiceInput) field;
+						if (oldField instanceof ChoiceField && field instanceof ChoiceField) {
+							ChoiceField oldChoiceInput = (ChoiceField) oldField;
+							ChoiceField choiceInput = (ChoiceField) field;
 							if (oldChoiceInput.getChoiceProvider() instanceof SpecifiedChoices 
 									&& choiceInput.getChoiceProvider() instanceof SpecifiedChoices) {
 								SpecifiedChoices oldChoices = (SpecifiedChoices) oldChoiceInput.getChoiceProvider();
@@ -194,7 +191,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	public List<String> getInputNames() {
 		List<String> inputNames = new ArrayList<>();
 		int currentIndex = 0;
-		for (InputSpec field: getSetting().getFieldSpecs()) {
+		for (FieldSpec field: getSetting().getFieldSpecs()) {
 			if (currentIndex != fieldIndex)
 				inputNames.add(field.getName());
 			currentIndex++;
@@ -206,11 +203,5 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 	public InputSpec getInputSpec(String inputName) {
 		return getSetting().getFieldSpec(inputName);
 	}
-	
-	@Override
-	public void validateName(String inputName) {
-		if (IssueConstants.ALL_FIELDS.contains(inputName))
-			throw new ValidationException("'" + inputName + "' is reserved");
-	}
-	
+
 }

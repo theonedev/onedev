@@ -6,7 +6,7 @@ import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.Constants;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 

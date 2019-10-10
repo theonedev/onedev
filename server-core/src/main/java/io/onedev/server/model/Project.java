@@ -14,8 +14,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.stream.Collectors;
 
@@ -31,13 +31,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
-import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TagCommand;
@@ -71,18 +67,14 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.MatrixRunner;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
-import io.onedev.commons.utils.stringmatch.Matcher;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.DefaultCISpecProvider;
-import io.onedev.server.ci.job.Job;
-import io.onedev.server.ci.job.param.JobParam;
-import io.onedev.server.ci.job.trigger.BranchUpdateTrigger;
-import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
 import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
@@ -106,6 +98,7 @@ import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
+import io.onedev.server.model.support.BuildSetting;
 import io.onedev.server.model.support.CommitMessageTransform;
 import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
@@ -113,32 +106,31 @@ import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.Secret;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
-import io.onedev.server.model.support.build.BuildSetting;
 import io.onedev.server.model.support.issue.IssueSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.DefaultPrivilege;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatcher.UserMatcher;
-import io.onedev.server.util.validation.Validatable;
-import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.util.ProjectAware;
+import io.onedev.server.web.util.WicketUtils;
 
 @Entity
 @Table(indexes={@Index(columnList="o_forkedFrom_id"), @Index(columnList="name")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 @DynamicUpdate
-@ClassValidating
 @Editable
-public class Project extends AbstractEntity implements Validatable {
+public class Project extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -146,6 +138,23 @@ public class Project extends AbstractEntity implements Validatable {
 	
 	public static final int MAX_UPLOAD_SIZE = 10; // In mega bytes
 	
+	static ThreadLocal<Stack<Project>> stack =  new ThreadLocal<Stack<Project>>() {
+
+		@Override
+		protected Stack<Project> initialValue() {
+			return new Stack<Project>();
+		}
+	
+	};
+	
+	public static void push(Project project) {
+		stack.get().push(project);
+	}
+
+	public static void pop() {
+		stack.get().pop();
+	}
+
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
 	private Project forkedFrom;
@@ -333,7 +342,7 @@ public class Project extends AbstractEntity implements Validatable {
     
 	private transient List<Milestone> sortedMilestones;
 	
-	private transient Map<String, Secret> secretMap;
+	private transient List<String> jobNames;
 	
 	@Editable(order=100)
 	@ProjectName
@@ -356,8 +365,7 @@ public class Project extends AbstractEntity implements Validatable {
 		this.description = description;
 	}
 
-	@Editable(order=300, description="Optionally specify default privilege for users not "
-			+ "joining any teams of the project")
+	@Editable(order=300, description="Optionally specify default privilege of the project")
 	@NameOfEmptyValue("No default privilege")
 	@Nullable
 	public DefaultPrivilege getDefaultPrivilege() {
@@ -733,11 +741,17 @@ public class Project extends AbstractEntity implements Validatable {
 	}
 	
 	public List<String> getJobNames() {
-		CISpec ciSpec = getCISpec(getObjectId(getDefaultBranch(), true));
-		if (ciSpec != null)
-			return new ArrayList<>(ciSpec.getJobMap().keySet());
-		else 
-			return new ArrayList<>();
+		if (jobNames == null) {
+			Set<String> jobNameSet = new HashSet<>();
+			for (RefInfo refInfo: getBranches()) {
+				CISpec ciSpec = getCISpec(refInfo.getPeeledObj());
+				if (ciSpec != null)
+					jobNameSet.addAll(ciSpec.getJobMap().keySet());
+			}
+			jobNames = new ArrayList<>(jobNameSet);
+			Collections.sort(jobNames);
+		}
+		return jobNames;
 	}
 	
 	public LastCommitsOfChildren getLastCommitsOfChildren(String revision, @Nullable String path) {
@@ -925,7 +939,6 @@ public class Project extends AbstractEntity implements Validatable {
 			String refName = GitUtils.branch2ref(branchName); 
 			cacheObjectId(refName, commit);
 			
-	    	Subject subject = SecurityUtils.getSubject();
 	    	ObjectId commitId = commit.copy();
 	    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
 
@@ -935,17 +948,12 @@ public class Project extends AbstractEntity implements Validatable {
 
 						@Override
 						public void run() {
-							ThreadContext.bind(subject);
-							try {
-								Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-								OneDev.getInstance(ListenerRegistry.class).post(
-										new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
-							} finally {
-								ThreadContext.unbindSubject();
-							}
+							Project project = OneDev.getInstance(ProjectManager.class).load(getId());
+							OneDev.getInstance(ListenerRegistry.class).post(
+									new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
 						}
 			    		
-			    	});
+			    	}, SecurityUtils.getSubject());
 				}
 	    		
 	    	});			
@@ -967,7 +975,6 @@ public class Project extends AbstractEntity implements Validatable {
 			String refName = GitUtils.tag2ref(tagName);
 			cacheObjectId(refName, tag.getObjectId());
 			
-	    	Subject subject = SecurityUtils.getSubject();
 	    	ObjectId commitId = tag.getObjectId().copy();
 	    	OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
 
@@ -977,17 +984,12 @@ public class Project extends AbstractEntity implements Validatable {
 
 						@Override
 						public void run() {
-							ThreadContext.bind(subject);
-							try {
-								Project project = OneDev.getInstance(ProjectManager.class).load(getId());
-								OneDev.getInstance(ListenerRegistry.class).post(
-										new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
-							} finally {
-								ThreadContext.unbindSubject();
-							}
+							Project project = OneDev.getInstance(ProjectManager.class).load(getId());
+							OneDev.getInstance(ListenerRegistry.class).post(
+									new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
 						}
 			    		
-			    	});
+			    	}, SecurityUtils.getSubject());
 				}
 	    		
 	    	});			
@@ -1230,21 +1232,12 @@ public class Project extends AbstractEntity implements Validatable {
 		this.secrets = secrets;
 	}
 	
-	public Map<String, Secret> getSecretMap() {
-		if (secretMap == null) {
-			secretMap = new HashMap<>();
-			for (Secret secret: getSecrets())
-				secretMap.put(secret.getName(), secret);
-		}
-		return secretMap;
-	}
-
 	@Nullable
 	public TagProtection getTagProtection(String tagName, User user) {
 		for (TagProtection protection: tagProtections) {
 			if (protection.isEnabled() 
 					&& UserMatcher.fromString(protection.getUser()).matches(this, user)
-					&& PatternSet.fromString(protection.getTags()).matches(new ChildAwareMatcher(), tagName)) {
+					&& PatternSet.fromString(protection.getTags()).matches(new PathMatcher(), tagName)) {
 				return protection;
 			}
 		}
@@ -1256,7 +1249,7 @@ public class Project extends AbstractEntity implements Validatable {
 		for (BranchProtection protection: branchProtections) {
 			if (protection.isEnabled() 
 					&& UserMatcher.fromString(protection.getUser()).matches(this, user) 
-					&& PatternSet.fromString(protection.getBranches()).matches(new ChildAwareMatcher(), branchName)) {
+					&& PatternSet.fromString(protection.getBranches()).matches(new PathMatcher(), branchName)) {
 				return protection;
 			}
 		}
@@ -1419,7 +1412,7 @@ public class Project extends AbstractEntity implements Validatable {
 		Collection<ObjectId> descendants = commitInfoManager.getDescendants(this, Sets.newHashSet(commitId));
 		descendants.add(commitId);
 	
-		Matcher matcher = new ChildAwareMatcher();
+		Matcher matcher = new PathMatcher();
 		PatternSet branchPatterns = PatternSet.fromString(branches);
 		for (RefInfo ref: getBranches()) {
 			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
@@ -1441,117 +1434,51 @@ public class Project extends AbstractEntity implements Validatable {
 	}
 	
 	public boolean isReviewRequiredForModification(User user, String branch, @Nullable String file) {
-		BranchProtection branchProtection = getBranchProtection(branch, user);
-		if (branchProtection != null) 
-			return branchProtection.isReviewRequiredForModification(user, this, branch, file);
+		BranchProtection protection = getBranchProtection(branch, user);
+		if (protection != null) 
+			return protection.isReviewRequiredForModification(user, this, branch, file);
 		else
 			return false;
 	}
 
 	public boolean isReviewRequiredForPush(User user, String branch, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
-		BranchProtection branchProtection = getBranchProtection(branch, user);
-		if (branchProtection != null) { 		
-			return branchProtection.isReviewRequiredForPush(user, this, branch, oldObjectId, newObjectId, gitEnvs);
-		} else {
-			return false;
-		}
+		BranchProtection protection = getBranchProtection(branch, user);
+		return protection != null && protection.isReviewRequiredForPush(user, this, branch, oldObjectId, newObjectId, gitEnvs);
 	}
 	
-	public boolean isBuildRequiredForModification(String branch, @Nullable String file) {
-		// Exclude cispec from build requirement to avoid being locking out
-		if (!CISpec.BLOB_PATH.equals(file)) {
-			try {
-				CISpec ciSpec = getCISpec(getObjectId(branch, true));
-				if (ciSpec != null) {
-					for (Job job: ciSpec.getJobs()) {
-						for (JobTrigger trigger: job.getTriggers()) {
-							if (trigger instanceof BranchUpdateTrigger) {
-								BranchUpdateTrigger branchUpdateTrigger = (BranchUpdateTrigger) trigger;
-								if (branchUpdateTrigger.isRejectIfNotSuccessful() 
-										&& (branchUpdateTrigger.getBranches() == null || PatternSet.fromString(branchUpdateTrigger.getBranches()).matches(new ChildAwareMatcher(), branch))) {
-									return true;
-								}
-							}
-						}
-					}
-				}
-			} catch (Exception e) {
-			}
-		}
-		return false;
+	public boolean isBuildRequiredForModification(User user, String branch, @Nullable String file) {
+		BranchProtection protection = getBranchProtection(branch, user);
+		return protection != null && protection.isBuildRequiredForModification(this, branch, file);
 	}
 	
-	public boolean isBuildRequiredForPush(String branch, ObjectId oldObjectId, ObjectId newObjectId, 
+	public boolean isBuildRequiredForPush(User user, String branch, ObjectId oldObjectId, ObjectId newObjectId, 
 			Map<String, String> gitEnvs) {
-		// Exclude cispec from build requirement to avoid being locking out
-		if (!getChangedFiles(oldObjectId, newObjectId, gitEnvs).contains(CISpec.BLOB_PATH)) {
-			Collection<Build> builds = OneDev.getInstance(BuildManager.class).query(this, newObjectId);
-			try {
-				CISpec ciSpec = getCISpec(oldObjectId);
-				if (ciSpec != null) {
-					for (Job job: ciSpec.getJobs()) {
-						for (JobTrigger trigger: job.getTriggers()) {
-							if (trigger instanceof BranchUpdateTrigger) {
-								BranchUpdateTrigger branchUpdateTrigger = (BranchUpdateTrigger) trigger;
-								if (branchUpdateTrigger.isRejectIfNotSuccessful() 
-										&& (branchUpdateTrigger.getBranches() == null || PatternSet.fromString(branchUpdateTrigger.getBranches()).matches(new ChildAwareMatcher(), branch))) {
-									Map<String, List<List<String>>> paramMatrix = new HashMap<>();
-									Set<String> secretParamNames = new HashSet<>();
-									for (JobParam param: trigger.getParams()) { 
-										paramMatrix.put(param.getName(), param.getValuesProvider().getValues());
-										if (param.isSecret())
-											secretParamNames.add(param.getName());
-									}
-									
-									AtomicReference<Build> buildRef = new AtomicReference<>(null);
-									new MatrixRunner<List<String>>(paramMatrix) {
-										
-										@Override
-										public void run(Map<String, List<String>> params) {
-											for (Build build: builds) {
-												Map<String, List<String>> paramsWithoutSecrets = new HashMap<>(params);
-												Map<String, List<String>> buildParamsWithoutSecrets = new HashMap<>(build.getParamMap());
-												paramsWithoutSecrets.keySet().removeAll(secretParamNames);
-												buildParamsWithoutSecrets.keySet().removeAll(secretParamNames);
-												if (build.getJobName().equals(job.getName()) 
-														&& buildParamsWithoutSecrets.equals(paramsWithoutSecrets)) {
-													buildRef.set(build);
-													break;
-												}
-											}
-										}
-										
-									}.run();
-									
-									Build build = buildRef.get();
-									if (build == null || build.getStatus() != Build.Status.SUCCESSFUL)
-										return true;
-								}
-							}
-						}
-					}
-				}
-			} catch (Exception e) {
-			}
-		}
-		return false;		
+		BranchProtection protection = getBranchProtection(branch, user);
+		return protection != null && protection.isBuildRequiredForPush(this, branch, oldObjectId, newObjectId, gitEnvs);
 	}
 	
-	@Override
-	public boolean isValid(ConstraintValidatorContext context) {
-		boolean isValid = true;
-		try {
-			Secret.validateSecrets(getSecrets());
-		} catch (ValidationException e) {
-			isValid = false;
-			context.buildConstraintViolationWithTemplate(e.getMessage()).addPropertyNode("secrets").addConstraintViolation();
+	public String getSecretValue(String secretName, ObjectId commitId) {
+		for (Secret secret: getSecrets()) {
+			if (secret.getName().equals(secretName) && secret.isAuthorized(this, commitId))
+				return secret.getValue();
 		}
-
-		if (!isValid)
-			context.disableDefaultConstraintViolation();
-		
-		return isValid;
+		throw new OneException("No authorized secret found: " + secretName);
 	}
-
+	
+	@Nullable
+	public static Project get() {
+		if (!stack.get().isEmpty()) { 
+			return stack.get().peek();
+		} else {
+			ComponentContext componentContext = ComponentContext.get();
+			if (componentContext != null) {
+				ProjectAware projectAware = WicketUtils.findInnermost(componentContext.getComponent(), ProjectAware.class);
+				if (projectAware != null) 
+					return projectAware.getProject();
+			}
+			return null;
+		}
+	}
+	
 }

@@ -13,10 +13,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -117,11 +117,6 @@ abstract class TransitionEditPanel extends Panel implements InputContext {
 	@Override
 	public InputSpec getInputSpec(String inputName) {
 		return getIssueSetting().getFieldSpec(inputName);
-	}
-	
-	@Override
-	public void validateName(String inputName) {
-		throw new UnsupportedOperationException();
 	}
 	
 	protected abstract void onChanged(AjaxRequestTarget target);

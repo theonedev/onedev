@@ -1,7 +1,5 @@
 package io.onedev.server.ci;
 
-import static java.util.stream.Collectors.toSet;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,16 +10,15 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
+import javax.validation.Valid;
 import javax.validation.ValidationException;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.DependencyAware;
-import io.onedev.commons.utils.DependencyUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.JobDependency;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.migration.VersionedDocument;
@@ -36,14 +33,13 @@ public class CISpec implements Serializable, Validatable {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String BLOB_PATH = "onedev-ci.xml";
-
+	
 	private List<Job> jobs = new ArrayList<>();
 	
 	private transient Map<String, Job> jobMap;
 	
-	private transient List<Job> sortedJobs;
-
 	@Editable
+	@Valid
 	public List<Job> getJobs() {
 		return jobs;
 	}
@@ -61,37 +57,6 @@ public class CISpec implements Serializable, Validatable {
 		return jobMap;
 	}
 	
-	/**
-	 * Get jobs sorted by dependencies
-	 * 
-	 * @return
-	 */
-	public List<Job> getSortedJobs() {
-		if (sortedJobs == null) {
-			sortedJobs = new ArrayList<>();
-			
-			Map<String, DependencyAware<String>> dependencyMap = new LinkedHashMap<>();
-			for (Job job: jobs) {
-				dependencyMap.put(job.getName(), new DependencyAware<String>() {
-
-					@Override
-					public String getId() {
-						return job.getName();
-					}
-
-					@Override
-					public Set<String> getDependencies() {
-						return job.getDependencies().stream().map(it->it.getJobName()).collect(toSet());
-					}
-					
-				});
-			}
-			for (String jobName: DependencyUtils.sortDependencies(dependencyMap)) 
-				sortedJobs.add(Preconditions.checkNotNull(getJobMap().get(jobName)));
-		}
-		return sortedJobs;
-	}
-
 	@Override
 	public boolean isValid(ConstraintValidatorContext context) {
 		boolean valid = true;
@@ -107,7 +72,7 @@ public class CISpec implements Serializable, Validatable {
 
 		for (int i=0; i<jobs.size(); i++) {
 			Job job = jobs.get(i);
-			for (JobDependency dependency: job.getDependencies()) {
+			for (JobDependency dependency: job.getJobDependencies()) {
 				Job dependencyJob = getJobMap().get(dependency.getJobName());
 				if (dependencyJob != null) {
 					try {
@@ -167,7 +132,7 @@ public class CISpec implements Serializable, Validatable {
 			dependencyChain.add(jobName);
 			Job job = getJobMap().get(jobName);
 			if (job != null) {
-				for (JobDependency dependency: job.getDependencies()) {
+				for (JobDependency dependency: job.getJobDependencies()) {
 					if (hasCircularDependencies(new ArrayList<>(dependencyChain), dependency.getJobName()))
 						return true;
 				}
@@ -189,5 +154,5 @@ public class CISpec implements Serializable, Validatable {
 			return null;
 		}
 	}
-	
+
 }

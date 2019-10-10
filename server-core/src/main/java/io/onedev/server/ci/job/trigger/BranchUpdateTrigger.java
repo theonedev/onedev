@@ -6,15 +6,14 @@ import java.util.List;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.PathUtils;
-import io.onedev.commons.utils.stringmatch.ChildAwareMatcher;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.web.editable.annotation.BranchPatterns;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
@@ -29,12 +28,10 @@ public class BranchUpdateTrigger extends JobTrigger {
 	
 	private String paths;
 	
-	private boolean rejectIfNotSuccessful;
-	
 	@Editable(name="Branches", order=100, 
 			description="Optionally specify space-separated branches to check. Use * or ? for wildcard match. "
 					+ "Leave empty to match all branches")
-	@BranchPatterns
+	@Patterns(suggester = "suggestBranches")
 	@NameOfEmptyValue("Any branch")
 	public String getBranches() {
 		return branches;
@@ -44,10 +41,15 @@ public class BranchUpdateTrigger extends JobTrigger {
 		this.branches = branches;
 	}
 
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestBranches(String matchWith) {
+		return SuggestionUtils.suggestBranches(Project.get(), matchWith);
+	}
+	
 	@Editable(name="Touched Files", order=200, 
 			description="Optionally specify space-separated files to check. Use * or ? for wildcard match. "
 					+ "Leave empty to match all files")
-	@Patterns("getPathSuggestions")
+	@Patterns(suggester = "getPathSuggestions")
 	@NameOfEmptyValue("Any file")
 	public String getPaths() {
 		return paths;
@@ -57,19 +59,9 @@ public class BranchUpdateTrigger extends JobTrigger {
 		this.paths = paths;
 	}
 
-	@Editable(order=300, description="If checked, branch updating will be rejected if the triggering is not successful. "
-			+ "It also tells pull requests to require successful triggering of the job before merging")
-	public boolean isRejectIfNotSuccessful() {
-		return rejectIfNotSuccessful;
-	}
-
-	public void setRejectIfNotSuccessful(boolean rejectIfNotSuccessful) {
-		this.rejectIfNotSuccessful = rejectIfNotSuccessful;
-	}
-
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> getPathSuggestions(String matchWith) {
-		return SuggestionUtils.suggestBlobs(OneContext.get().getProject(), matchWith);
+		return SuggestionUtils.suggestBlobs(Project.get(), matchWith);
 	}
 
 	private boolean touchedFile(RefUpdated refUpdated) {
@@ -81,8 +73,10 @@ public class BranchUpdateTrigger extends JobTrigger {
 			} else {
 				Collection<String> changedFiles = GitUtils.getChangedFiles(refUpdated.getProject().getRepository(), 
 						refUpdated.getOldCommitId(), refUpdated.getNewCommitId());
+				PatternSet patternSet = PatternSet.fromString(getPaths());
+				Matcher matcher = new PathMatcher();
 				for (String changedFile: changedFiles) {
-					if (PathUtils.matchChildAware(getPaths(), changedFile))
+					if (patternSet.matches(matcher, changedFile))
 						return true;
 				}
 				return false;
@@ -98,7 +92,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 			RefUpdated refUpdated = (RefUpdated) event;
 			String branch = GitUtils.ref2branch(refUpdated.getRefName());
 			if (branch != null) {
-				if ((getBranches() == null || PatternSet.fromString(getBranches()).matches(new ChildAwareMatcher(), branch)) 
+				if ((getBranches() == null || PatternSet.fromString(getBranches()).matches(new PathMatcher(), branch)) 
 						&& touchedFile(refUpdated)) {
 					return true;
 				}
@@ -118,8 +112,6 @@ public class BranchUpdateTrigger extends JobTrigger {
 			description = String.format("When touch files '%s'", getBranches());
 		else
 			description = "When update branches";
-		if (rejectIfNotSuccessful)
-			description += " (reject if not successful)";
 		return description;
 	}
 

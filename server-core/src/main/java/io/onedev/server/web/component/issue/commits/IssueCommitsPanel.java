@@ -18,7 +18,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Issue;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;

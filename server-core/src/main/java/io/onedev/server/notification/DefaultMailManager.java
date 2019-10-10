@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.setting.MailSetting;
+import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 
@@ -48,7 +48,7 @@ public class DefaultMailManager implements MailManager {
 				}		
 			}
 			
-		});
+		}, null);
 	}
 
 	@Override

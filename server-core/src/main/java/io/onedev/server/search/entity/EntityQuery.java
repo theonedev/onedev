@@ -9,10 +9,11 @@ import javax.persistence.criteria.Path;
 
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
-import org.unbescape.java.JavaEscape;
 
 import com.google.common.base.Splitter;
 
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -36,11 +37,10 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 
 	public abstract List<EntitySort> getSorts();
 	
-	public static String getValue(String tokenText) {
-		String value = tokenText.substring(1);
-		return JavaEscape.unescapeJava(value.substring(0, value.length()-1));
+	public static String getValue(String token) {
+		return StringUtils.unescape(FenceAware.unfence(token));
 	}
-
+	
 	public static int getIntValue(String value) {
 		try {
 			return Integer.parseInt(value);
@@ -145,7 +145,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 	}
 	
 	public static String quote(String value) {
-		return "\"" + JavaEscape.escapeJava(value) + "\"";
+		return "\"" + StringUtils.escape(value, "\"") + "\"";
 	}
 	
 	public static <T> Path<T> getPath(Path<?> root, String pathName) {

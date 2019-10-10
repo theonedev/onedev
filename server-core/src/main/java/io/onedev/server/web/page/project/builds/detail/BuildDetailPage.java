@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.persistence.EntityNotFoundException;
@@ -33,17 +34,21 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
+import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.scriptidentity.JobIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -64,13 +69,17 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
+import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
+import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
+import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
 
 @SuppressWarnings("serial")
-public abstract class BuildDetailPage extends ProjectPage implements InputContext {
+public abstract class BuildDetailPage extends ProjectPage implements InputContext, ScriptIdentityAware {
 
 	public static final String PARAM_BUILD = "build";
 	
@@ -372,6 +381,18 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 					}
 					
 				});
+				
+				LockUtils.read(getBuild().getArtifactsLockKey(), new Callable<Void>() {
+
+					@Override
+					public Void call() throws Exception {
+						if (getBuild().getArtifactsDir().exists()) 
+							tabs.add(new BuildTab("Artifacts", BuildArtifactsPage.class));
+						return null;
+					}
+					
+				});
+				
 				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class));
 				tabs.add(new BuildTab("Changes", BuildChangesPage.class));
 				
@@ -485,13 +506,13 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 	}
 
 	@Override
-	public InputSpec getInputSpec(String inputName) {
-		return Preconditions.checkNotNull(getBuild().getJob().getParamSpecMap().get(inputName));
+	public ParamSpec getInputSpec(String paramName) {
+		return Preconditions.checkNotNull(getBuild().getJob().getParamSpecMap().get(paramName));
 	}
 
 	@Override
-	public void validateName(String inputName) {
-		throw new UnsupportedOperationException();
+	public ScriptIdentity getScriptIdentity() {
+		return new JobIdentity(getBuild().getProject(), getBuild().getCommitId());
 	}
-	
+
 }

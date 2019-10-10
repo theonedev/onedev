@@ -2,9 +2,6 @@ package io.onedev.server.web.component.build.status;
 
 import java.util.Collection;
 
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -44,10 +41,6 @@ public class BuildStatusIcon extends GenericPanel<Status> {
 				if (status == Status.RUNNING)
 					cssClass += " fa-spin";
 				tag.put("class", cssClass);
-				
-				String title = getTooltip(status);
-				if (title != null)
-					tag.put("title", title);
 			}
 			
 		});
@@ -80,20 +73,6 @@ public class BuildStatusIcon extends GenericPanel<Status> {
 	
 	protected Collection<String> getWebSocketObservables() {
 		return Sets.newHashSet();
-	}
-	
-	@Nullable
-	protected String getTooltip(@Nullable Status status) {
-		String title;
-		if (status == Status.WAITING) 
-			title = "Waiting for completion of dependency builds";
-		else if (status == Status.PENDING) 
-			title = "Pending (preparing environments and/or waiting for resources)";
-		else if (status != null)
-			title = StringUtils.capitalize(status.getDisplayName().toLowerCase());
-		else
-			title = null;
-		return title;
 	}
 	
 	@Override

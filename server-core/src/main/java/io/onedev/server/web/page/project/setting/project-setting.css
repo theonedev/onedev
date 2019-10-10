@@ -82,3 +82,7 @@ body.BranchProtectionPage, body.WebHooksPage {
 #project-setting .commit-message-transforms th {
 	font-weight: normal;
 }
+
+body.SecretListPage .help-block {
+	margin: 0 0 16px 0;
+}

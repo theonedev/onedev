@@ -110,7 +110,14 @@ public class Upgrade extends DefaultPersistManager {
 			System.exit(1);
 		}
 		
-		if (upgradeDir.list().length != 0) {
+		boolean isEmpty = true;
+		for (File file: upgradeDir.listFiles()) {
+			if (!file.getName().equals("lost+found")) {
+				isEmpty = false;
+				break;
+			}
+		}
+		if (!isEmpty) {
 			if (!new File(upgradeDir, "boot/bootstrap.keys").exists()) {
 				logger.error("Invalid OneDev installation directory: {}, make sure you are specifying the top level "
 						+ "installation directory (it contains sub directories such as \"bin\", \"boot\", \"conf\", etc)", 

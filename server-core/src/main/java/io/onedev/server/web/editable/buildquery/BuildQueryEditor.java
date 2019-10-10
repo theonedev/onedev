@@ -10,8 +10,6 @@ import org.apache.wicket.util.convert.ConversionException;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -54,11 +52,6 @@ public class BuildQueryEditor extends PropertyEditor<String> {
 			}
 			
 		});
-	}
-
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
 	}
 
 	@Override

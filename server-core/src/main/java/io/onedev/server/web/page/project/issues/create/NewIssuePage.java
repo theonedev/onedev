@@ -15,11 +15,14 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
+import io.onedev.server.util.scriptidentity.SiteAdministrator;
 import io.onedev.server.web.component.issue.create.NewIssueEditor;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
@@ -27,7 +30,7 @@ import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowChangeAl
 import io.onedev.server.web.page.security.LoginPage;
 
 @SuppressWarnings("serial")
-public class NewIssuePage extends ProjectPage implements InputContext {
+public class NewIssuePage extends ProjectPage implements InputContext, ScriptIdentityAware {
 
 	private static final String PARAM_QUERY = "query";
 	
@@ -119,8 +122,8 @@ public class NewIssuePage extends ProjectPage implements InputContext {
 	}
 
 	@Override
-	public void validateName(String inputName) {
-		throw new UnsupportedOperationException();
+	public ScriptIdentity getScriptIdentity() {
+		return new SiteAdministrator();
 	}
 
 	public static PageParameters paramsOf(Project project, String query) {

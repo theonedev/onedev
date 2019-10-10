@@ -1,0 +1,10 @@
+namespace: onedev
+bases:
+- ../base
+commonLabels:
+  app: onedev
+patchesStrategicMerge:
+- node-selectors.yaml
+- cpu-settings.yaml
+- memory-settings.yaml
+- disk-settings.yaml

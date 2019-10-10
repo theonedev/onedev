@@ -68,7 +68,7 @@ import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
-import io.onedev.commons.utils.ClassUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.schedule.DefaultTaskScheduler;
 import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.cache.BuildInfoManager;
@@ -82,7 +82,6 @@ import io.onedev.server.cache.DefaultCommitInfoManager;
 import io.onedev.server.cache.DefaultUserInfoManager;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.ci.job.DefaultJobManager;
-import io.onedev.server.ci.job.DependencyPopulator;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.log.DefaultJobLogManager;
 import io.onedev.server.ci.job.log.JobLogManager;
@@ -167,8 +166,9 @@ import io.onedev.server.maintenance.RestoreDatabase;
 import io.onedev.server.maintenance.Upgrade;
 import io.onedev.server.migration.JpaConverter;
 import io.onedev.server.migration.PersistentBagConverter;
-import io.onedev.server.model.support.DiscoveredJobExecutor;
-import io.onedev.server.model.support.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.notification.CodeCommentNotificationManager;
 import io.onedev.server.notification.CommitNotificationManager;
 import io.onedev.server.notification.DefaultMailManager;
@@ -363,7 +363,6 @@ public class CoreModule extends AbstractPluginModule {
 
 		contribute(ObjectMapperConfigurator.class, GitObjectMapperConfigurator.class);
 	    contribute(ObjectMapperConfigurator.class, HibernateObjectMapperConfigurator.class);
-	    contributeFromPackage(DependencyPopulator.class, DependencyPopulator.class);
 	    
 	    contribute(PersistListener.class, PullRequestNotificationManager.class);
 	    
@@ -391,12 +390,12 @@ public class CoreModule extends AbstractPluginModule {
 
 			@Override
 			public Class<?> getAbstractClass() {
-				return DiscoveredJobExecutor.class;
+				return JobExecutor.class;
 			}
 
 			@Override
 			public Collection<Class<?>> getImplementations() {
-				return Sets.newHashSet(DiscoveredJobExecutor.class);
+				return Sets.newHashSet(AutoDiscoveredJobExecutor.class);
 			}
 			
 		});
@@ -615,13 +614,14 @@ public class CoreModule extends AbstractPluginModule {
 										field.getAnnotation(Version.class) == null;
 							}
 							
-							@SuppressWarnings("unchecked")
 							@Override
 							public String serializedClass(Class type) {
 								if (type == PersistentBag.class)
 									return super.serializedClass(ArrayList.class);
-								else if (type != null)
-									return super.serializedClass(ClassUtils.unproxy(type));
+								else if (type == null)
+									return super.serializedClass(type);
+								else if (type.getName().contains("$HibernateProxy$"))
+									return StringUtils.substringBefore(type.getName(), "$HibernateProxy$");
 								else
 									return super.serializedClass(type);
 							}
@@ -630,6 +630,8 @@ public class CoreModule extends AbstractPluginModule {
 					}
 					
 				};
+				XStream.setupDefaultSecurity(xstream);
+				xstream.allowTypesByWildcard(new String[] {"**"});				
 				
 				// register NullConverter as highest; otherwise NPE when unmarshal a map 
 				// containing an entry with value set to null.

@@ -25,7 +25,7 @@ import io.onedev.server.util.validation.CurrentPasswordValidator;
 @Constraint(validatedBy=CurrentPasswordValidator.class) 
 public @interface CurrentPassword {
 
-	String message() default "Old password does not match";
+	String message() default "Current password does not match";
 	
 	Class<?>[] groups() default {};
 

@@ -102,7 +102,6 @@ onedev.server.markdown = {
 			$splitLink.addClass("active");
 			onLayoutChange();
 			callback("render", $input.val());
-			console.log(onedev.server.markdown.getCookiePrefix($container)+".split");
 			Cookies.set(onedev.server.markdown.getCookiePrefix($container)+".split", true, {expires: Infinity});
 		});
 		

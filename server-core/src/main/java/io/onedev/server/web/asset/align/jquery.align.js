@@ -59,9 +59,14 @@
         		if (alignment.target.index != undefined) {
     				var coord = getCaretCoordinates(alignment.target.element, alignment.target.index);
         			targetLeft = coord.left + $targetEl.offset().left;
-        			targetWidth = 0;
-        			targetTop = coord.top + $targetEl.offset().top;
-        			targetHeight = textHeight;
+					targetWidth = 0;
+					if ($targetEl.is("textarea")) {
+						targetTop = coord.top + $targetEl.offset().top;
+						targetHeight = textHeight;
+					} else {
+						targetTop = $targetEl.offset().top;
+						targetHeight = $targetEl.outerHeight();
+					}
         		} else {
             		targetLeft = $targetEl.offset().left;
             		targetTop = $targetEl.offset().top;

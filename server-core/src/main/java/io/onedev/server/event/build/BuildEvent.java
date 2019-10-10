@@ -4,10 +4,10 @@ import java.util.Date;
 
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.server.event.BuildCommitAware;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
+import io.onedev.server.util.BuildCommitAware;
 
 public class BuildEvent extends ProjectEvent implements BuildCommitAware {
 

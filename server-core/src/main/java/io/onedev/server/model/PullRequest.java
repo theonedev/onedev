@@ -51,11 +51,11 @@ import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.Referenceable;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.jackson.RestView;
@@ -824,9 +824,9 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return true;
 	}
 	
-	public boolean isAllBuildsSuccessful() {
-		for (PullRequestBuild requirement: getPullRequestBuilds()) {
-			if (requirement.getBuild().getStatus() != Build.Status.SUCCESSFUL)
+	public boolean isRequiredBuildsSuccessful() {
+		for (PullRequestBuild pullRequestBuild: getPullRequestBuilds()) {
+			if (pullRequestBuild.isRequired() && pullRequestBuild.getBuild().getStatus() != Build.Status.SUCCESSFUL)
 				return false;
 		}
 		return true;

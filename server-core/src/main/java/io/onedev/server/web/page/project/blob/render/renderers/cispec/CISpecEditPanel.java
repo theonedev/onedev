@@ -36,11 +36,10 @@ import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
-import io.onedev.server.web.editable.PathElement.Indexed;
-import io.onedev.server.web.editable.PathElement.Named;
-import io.onedev.server.web.editable.ValuePath;
+import io.onedev.server.web.editable.PathNode;
+import io.onedev.server.web.editable.PathNode.Indexed;
+import io.onedev.server.web.editable.PathNode.Named;
+import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -189,27 +188,25 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 						CISpec ciSpec = (CISpec) parseResult;
 						Validator validator = AppLoader.getInstance(Validator.class);
 						for (ConstraintViolation<CISpec> violation: validator.validate(ciSpec)) {
-							ValuePath path = new ValuePath(violation.getPropertyPath());
-							if (path.getElements().isEmpty()) {
+							Path path = new Path(violation.getPropertyPath());
+							if (path.getNodes().isEmpty()) {
 								error(violation.getMessage());
 							} else {
-								PathElement.Named named = (Named) path.getElements().iterator().next();
+								PathNode.Named named = (Named) path.getNodes().iterator().next();
 								switch (named.getName()) {
 								case "jobs":
-									path = new ValuePath(path.getElements().subList(1, path.getElements().size()));
-									if (path.getElements().isEmpty()) {
+									path = new Path(path.getNodes().subList(1, path.getNodes().size()));
+									if (path.getNodes().isEmpty()) {
 										error("Jobs: " + violation.getMessage());
 									} else {
-										PathElement.Indexed indexed = (Indexed) path.getElements().iterator().next();
-										path = new ValuePath(path.getElements().subList(1, path.getElements().size()));
-										if (path.getElements().isEmpty()) {
+										PathNode.Indexed indexed = (Indexed) path.getNodes().iterator().next();
+										path = new Path(path.getNodes().subList(1, path.getNodes().size()));
+										if (path.getNodes().isEmpty()) {
 											error("Job '" + ciSpec.getJobs().get(indexed.getIndex()).getName() + "': " + violation.getMessage());
 										} else {
 											@SuppressWarnings("deprecation")
 											BeanEditor editor = (BeanEditor) jobContents.get(indexed.getIndex());
-											ErrorContext errorContext = editor.getErrorContext(path);
-											if (errorContext != null)
-												errorContext.addError(violation.getMessage());
+											editor.error(path, violation.getMessage());
 										}
 									}
 									break;

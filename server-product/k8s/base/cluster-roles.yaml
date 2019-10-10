@@ -1,0 +1,14 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: onedev
+rules:
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["get", "list", "create", "delete"]
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "list", "patch"]
+- apiGroups: [""]
+  resources: ["services", "pods", "pods/log", "pods/exec", "secrets", "configmaps", "events"]
+  verbs: ["get", "list", "watch", "create", "delete"]

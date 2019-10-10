@@ -42,13 +42,13 @@ import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.Referenceable;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.IssueFacade;
-import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -325,7 +325,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			}
 			fieldsOfName.add(field);
 		}
-		for (InputSpec fieldSpec: getIssueSetting().getFieldSpecs()) {
+		for (FieldSpec fieldSpec: getIssueSetting().getFieldSpecs()) {
 			String fieldName = fieldSpec.getName();
 			List<IssueField> fields = fieldMap.get(fieldName);
 			if (fields != null) {
@@ -369,7 +369,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	public long getFieldOrdinal(String fieldName, Object fieldValue) {
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		InputSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
+		FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
 		if (fieldSpec != null) 
 			return fieldSpec.getOrdinal(fieldValue);
 		else 
@@ -384,7 +384,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			for (PropertyDescriptor property: groupProperties) {
 				Input input = getFieldInputs().get(property.getDisplayName());
 				if (input != null) {
-					InputSpec fieldSpec = getIssueSetting().getFieldSpec(input.getName());
+					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(input.getName());
 					property.setPropertyValue(fieldBean, input.getTypedValue(fieldSpec));
 				} else if (!withDefaultValue) {
 					property.setPropertyValue(fieldBean, null);
@@ -412,7 +412,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 				it.remove();
 		}
 		
-		InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
+		FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec != null) {
 			long ordinal = getFieldOrdinal(fieldName, fieldValue);
 
@@ -446,7 +446,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 		if (!checkedFieldNames.add(fieldName))
 			return false;
 		
-		InputSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
+		FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec != null) {
 			if (fieldSpec.getShowCondition() != null) {
 				Input dependentInput = getFieldInputs().get(fieldSpec.getShowCondition().getInputName());

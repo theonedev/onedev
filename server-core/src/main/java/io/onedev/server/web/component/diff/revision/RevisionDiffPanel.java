@@ -61,11 +61,11 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
-import io.onedev.commons.utils.PathComparator;
 import io.onedev.commons.utils.LinearRange;
+import io.onedev.commons.utils.PathComparator;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.stringmatch.Matcher;
-import io.onedev.commons.utils.stringmatch.WildcardUtils;
+import io.onedev.commons.utils.match.Matcher;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.Blob;
@@ -80,7 +80,7 @@ import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.model.support.ProjectAndRevision;
 import io.onedev.server.search.code.IndexManager;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.util.patternset.PatternSet;
@@ -205,17 +205,7 @@ public class RevisionDiffPanel extends Panel {
     		if (StringUtils.isNotBlank(patternSetString)) {
     			try {
     				PatternSet patternSet = PatternSet.fromString(patternSetString);
-    				Matcher matcher = new Matcher() {
-
-						@Override
-						public boolean matches(String pattern, String value) {
-							pattern = pattern.toLowerCase();
-	    	    			pattern = StringUtils.stripStart(pattern, "/");
-	    	    			pattern = StringUtils.stripEnd(pattern, "/");
-	    	    			return pattern.equals(value) || value.startsWith(pattern + "/") || WildcardUtils.matchString(pattern, value);
-						}
-    					
-    				};
+    				Matcher matcher = new PathMatcher();
     				for (BlobChange change: changes) {
 	        			String oldPath = change.getOldBlobIdent().path;
 	        			if (oldPath == null)

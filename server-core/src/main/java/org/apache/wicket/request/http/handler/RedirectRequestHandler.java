@@ -21,6 +21,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.wicket.request.IRequestCycle;
 import org.apache.wicket.request.IRequestHandler;
 import org.apache.wicket.request.Url;
+import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
 import org.apache.wicket.util.lang.Args;
 
@@ -105,7 +106,15 @@ public class RedirectRequestHandler implements IRequestHandler
 		else
 		{
 			response.setStatus(status);
-			response.setHeader("Location", location);
+
+			if (((WebRequest)requestCycle.getRequest()).isAjax())
+			{
+				response.setHeader("Ajax-Location", location);
+			}
+			else
+			{
+				response.setHeader("Location", location);
+			}
 		}
 	}
 }

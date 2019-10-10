@@ -1,0 +1,15 @@
+namespace: onedev
+commonLabels:
+  app: onedev
+secretGenerator:
+- name: mysql
+  literals:
+  - password=changeit
+resources:
+- namespaces.yaml
+- service-accounts.yaml
+- cluster-roles.yaml
+- cluster-role-bindings.yaml
+- services.yaml
+- deployments.yaml
+- persistent-volume-claims.yaml

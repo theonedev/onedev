@@ -134,13 +134,11 @@ ul>li>a.code-comments.new .fa-circle {
 	padding-top: 0;
 }
 #request-detail>.side-info>.content>.jobs>.body>.job {
-    margin-bottom: 4px;
+	margin-right: 8px;
+	margin-bottom: 8px;
 }
-#request-detail>.side-info>.content>.jobs>.body>.job:last-child {
-    margin-bottom: 0;
-}
-#request-detail>.side-info>.content>.jobs>.body>.job>.name {
-    margin: -3px 0 0 4px;
+#request-detail>.side-info>.content>.jobs>.body {
+	margin-bottom: -8px;
 }
 
 .floating>.content>.instruction {

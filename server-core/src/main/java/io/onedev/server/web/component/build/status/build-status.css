@@ -1,9 +1,3 @@
-.build-status {
-    font-size: 16px;
-}
-.build-status-running {
-    font-size: 14px;
-}
 .build-status-successful:before {
 	content: "\f058";
 }
@@ -20,7 +14,7 @@
     content: "\f017";
 }
 .build-status-running:before {
-    content: "\f1ce";
+    content: "\f021";
 }
 .build-status-waiting:before {
     content: "\f28c";

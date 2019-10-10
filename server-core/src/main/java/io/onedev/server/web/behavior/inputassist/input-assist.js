@@ -192,9 +192,9 @@ onedev.server.inputassist = {
 	
 	updateHelp: function($dropdown) {
 		if ($dropdown.find("tr.active").length != 0) {
-			$dropdown.find(".help>.complete").empty().append("Press 'enter' to complete selected item");
+			$dropdown.find(".help .complete").empty().append("Tab or &crarr; to select active item.");
 		} else {
-			$dropdown.find(".help>.complete").empty().append("Press 'tab' to complete first item");
+			$dropdown.find(".help .complete").empty().append("Tab to select first item.");
 		}
 	}
 };

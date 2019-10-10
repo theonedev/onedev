@@ -2,9 +2,7 @@ package io.onedev.server.web.behavior;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
@@ -34,12 +32,6 @@ import io.onedev.server.web.util.SuggestionUtils;
 @SuppressWarnings("serial")
 public class BuildQueryBehavior extends ANTLRAssistBehavior {
 
-	private static final String VALUE_OPEN = "\"";
-	
-	private static final String VALUE_CLOSE = "\"";
-	
-	private static final String ESCAPE_CHARS = "\"\\";
-	
 	private final IModel<Project> projectModel;
 	
 	private final boolean noLoginSupport;
@@ -60,10 +52,6 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		return projectModel.getObject();
 	}
 	
-	private List<InputSuggestion> escape(List<InputSuggestion> suggestions) {
-		return suggestions.stream().map(it->it.escape(ESCAPE_CHARS)).collect(Collectors.toList());
-	}
-	
 	private CacheManager getCacheManager() {
 		return OneDev.getInstance(CacheManager.class);
 	}
@@ -73,22 +61,19 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Quoted")) {
-				return new FenceAware(codeAssist.getGrammar(), VALUE_OPEN, VALUE_CLOSE) {
+				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						String unfencedLowerCaseMatchWith = unfencedMatchWith.toLowerCase();
-						List<InputSuggestion> suggestions = new ArrayList<>();
+					protected List<InputSuggestion> match(String matchWith) {
 						Project project = getProject();
-
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = new ArrayList<>(BuildConstants.QUERY_FIELDS);
 							List<String> paramNames = new ArrayList<>(getCacheManager().getBuildParamNames());
 							Collections.sort(paramNames);
 							fields.addAll(paramNames);
-							suggestions.addAll(escape(SuggestionUtils.suggest(fields, unfencedLowerCaseMatchWith)));
+							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							suggestions.addAll(escape(SuggestionUtils.suggest(new ArrayList<>(BuildConstants.ORDER_FIELDS.keySet()), unfencedLowerCaseMatchWith)));
+							return SuggestionUtils.suggest(new ArrayList<>(BuildConstants.ORDER_FIELDS.keySet()), matchWith);
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
@@ -97,13 +82,13 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 							int operator = BuildQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
 								if (operator == BuildQueryLexer.SubmittedBy || operator == BuildQueryLexer.CancelledBy)
-									suggestions.addAll(escape(SuggestionUtils.suggestUsers(unfencedLowerCaseMatchWith)));
+									return SuggestionUtils.suggestUsers(matchWith);
 								else if (operator == BuildQueryLexer.DependsOn || operator == BuildQueryLexer.DependenciesOf)
-									suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedLowerCaseMatchWith)));
+									return SuggestionUtils.suggestBuilds(project, matchWith);
 								else if (operator == BuildQueryLexer.FixedIssue)
-									suggestions.addAll(escape(SuggestionUtils.suggestIssues(project, unfencedLowerCaseMatchWith)));
+									return SuggestionUtils.suggestIssues(project, matchWith);
 								else 
-									suggestions.addAll(escape(SuggestionUtils.suggestPullRequests(project, unfencedLowerCaseMatchWith)));
+									return SuggestionUtils.suggestPullRequests(project, matchWith);
 							} else {
 								String fieldName = BuildQuery.getValue(fieldElements.get(0).getMatchedText());
  								try {
@@ -112,24 +97,23 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 											|| fieldName.equals(BuildConstants.FIELD_QUEUEING_DATE)
 											|| fieldName.equals(BuildConstants.FIELD_RUNNING_DATE)
 											|| fieldName.equals(BuildConstants.FIELD_FINISH_DATE)) {
-										suggestions.addAll(SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, 
-												unfencedLowerCaseMatchWith));
-										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
+										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
+										return !suggestions.isEmpty()? suggestions: null;
 									} else if (fieldName.equals(BuildConstants.FIELD_JOB)) {
-										suggestions.addAll(escape(SuggestionUtils.suggestJobs(projectModel.getObject(), unfencedLowerCaseMatchWith)));
+										return SuggestionUtils.suggestJobs(projectModel.getObject(), matchWith);
 									} else if (fieldName.equals(BuildConstants.FIELD_NUMBER)) {
-										suggestions.addAll(escape(SuggestionUtils.suggestBuilds(project, unfencedLowerCaseMatchWith)));
+										return SuggestionUtils.suggestBuilds(project, matchWith);
 									} else {
 										List<String> paramValues = new ArrayList<>(getCacheManager().getBuildParamValues(fieldName));
 										Collections.sort(paramValues);
-										suggestions.addAll(SuggestionUtils.suggest(paramValues, unfencedMatchWith));
-										CollectionUtils.addIgnoreNull(suggestions, suggestToFence(terminalExpect, unfencedMatchWith));
+										List<InputSuggestion> suggestions = SuggestionUtils.suggest(paramValues, matchWith);
+										return !suggestions.isEmpty()? suggestions: null;
 									}
 								} catch (OneException ex) {
 								}
 							}
 						}
-						return suggestions;
+						return new ArrayList<>();
 					}
 					
 					@Override

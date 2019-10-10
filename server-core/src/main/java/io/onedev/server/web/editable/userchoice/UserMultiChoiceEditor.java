@@ -18,12 +18,10 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cache.CacheManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.user.choice.UserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserMultiChoice;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.UserChoice;
@@ -45,9 +43,9 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		OneContext oneContext = new OneContext(this);
+		ComponentContext componentContext = new ComponentContext(this);
 		
-		OneContext.push(oneContext);
+		ComponentContext.push(componentContext);
 		try {
 			UserChoice userChoice = descriptor.getPropertyGetter().getAnnotation(UserChoice.class);
 			Preconditions.checkNotNull(userChoice);
@@ -58,7 +56,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 				choices.addAll(OneDev.getInstance(CacheManager.class).getUsers().values());
 			}
 		} finally {
-			OneContext.pop();
+			ComponentContext.pop();
 		}
 
 		List<UserFacade> users = new ArrayList<>();
@@ -94,11 +92,6 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 		});
 		
         add(input);
-	}
-
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
 	}
 
 	@Override

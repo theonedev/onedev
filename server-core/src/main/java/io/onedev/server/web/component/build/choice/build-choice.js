@@ -7,7 +7,7 @@ onedev.server.buildChoiceFormatter = {
         if (build.version)
             return "<div class='build'>#" + build.number + " (" + build.version + ") : " + build.jobName + "</div>";
         else
-            return "<div class='build'>#" + build.number + " (" + build.version + ")</div>";
+            return "<div class='build'>#" + build.number + " : " + build.jobName + "</div>";
 	},
 	escapeMarkup: function(m) {
 		return m;

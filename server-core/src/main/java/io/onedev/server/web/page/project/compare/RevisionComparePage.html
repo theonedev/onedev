@@ -7,9 +7,13 @@
 					<div class="title clearfix">
 						<label class="pull-left">Base</label>
 						<wicket:enclosure child="compareWithMergeBase">
-							<input wicket:id="compareWithMergeBase" type="checkbox" class="pull-left">
-							<span class="pull-left">common ancestor</span>
-							<span wicket:id="mergeBaseTooltip" class="pull-left"><i class="fa fa-question-circle"></i></span>
+						<div class="pull-left checkbox">
+							<label>
+								<input wicket:id="compareWithMergeBase" type="checkbox">
+								common ancestor
+								<span wicket:id="mergeBaseTooltip"><i class="fa fa-question-circle"></i></span>
+							</label>
+						</div>
 						</wicket:enclosure>
 					</div>
 					<div wicket:id="leftRevSelector" class="selector"></div>

@@ -6,7 +6,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.stringmatch.WildcardUtils;
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Project;

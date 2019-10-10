@@ -33,8 +33,6 @@ import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
@@ -113,8 +111,25 @@ class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
-				Fragment fragment = new Fragment(componentId, "descriptionColumnFrag", TriggerListEditPanel.this);
-				ModalLink link = new ModalLink("link") {
+				cellItem.add(new Label(componentId, rowModel.getObject().getDescription()));
+			}
+		});		
+		
+		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("#Params")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
+				cellItem.add(new Label(componentId, rowModel.getObject().getParams().size()));
+			}
+			
+		});		
+		
+		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
+
+			@Override
+			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
+				Fragment fragment = new Fragment(componentId, "actionColumnFrag", TriggerListEditPanel.this);
+				fragment.add(new ModalLink("edit") {
 
 					@Override
 					protected Component newContent(String id, ModalPanel modal) {
@@ -141,28 +156,7 @@ class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 						};
 					}
 					
-				};
-				link.add(new Label("label", rowModel.getObject().getDescription()));
-				fragment.add(link);
-				
-				cellItem.add(fragment);
-			}
-		});		
-		
-		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("#Params")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getParams().size()));
-			}
-			
-		});		
-		
-		columns.add(new AbstractColumn<JobTrigger, Void>(Model.of("")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<JobTrigger>> cellItem, String componentId, IModel<JobTrigger> rowModel) {
-				Fragment fragment = new Fragment(componentId, "actionColumnFrag", TriggerListEditPanel.this);
+				});
 				fragment.add(new AjaxLink<Void>("delete") {
 
 					@Override
@@ -240,11 +234,6 @@ class TriggerListEditPanel extends PropertyEditor<List<Serializable>> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new TriggerCssResourceReference()));
-	}
-	
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
 	}
 	
 }

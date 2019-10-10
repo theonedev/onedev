@@ -8,8 +8,6 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
@@ -37,11 +35,6 @@ public class MarkdownPropertyEditor extends PropertyEditor<String> {
 			}
 			
 		});
-	}
-
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
 	}
 
 	@Override

@@ -150,6 +150,11 @@ a.wicket_orderDown:AFTER {
 .pagination a.first, .pagination a.prev, .pagination a.next, .pagination a.last {
 	font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
 }
+.table>thead+tfoot>tr>td.norecords-td>div {
+    border-top: 2px solid #DDD;
+    margin-top: -10px;
+    padding-top: 10px;
+}
 .norecords-td {
 	font-style: italic;
 }
@@ -229,8 +234,8 @@ a.tree-junction {
 }
     
 /* WEB SOCKET ERROR */
-#websocket-error {
-	z-index: 1000;
+.websocket-error {
+	z-index: 1050;
 	display: none;
 	position: fixed; 
 	left: 50%; 
@@ -241,8 +246,11 @@ a.tree-junction {
 	padding: 4px 8px; 
 	margin-left: -120px;
 }	
-#websocket-error span {
+.websocket-error span {
 	color: #F54D4D;
+}
+.websocket-error.websocket-client-error {
+	margin-left: -240px;
 }
 
 /* FILE INPUT */
@@ -571,23 +579,16 @@ a.disabled, a[disabled="disabled"] {
 .def-list table td.norecords-td {
 	padding: 5px;
 }
+.def-list table>tfoot>tr>td.norecords-td>div {
+    margin-top: -7px;
+    padding-top: 7px;
+}
+
 .def-list table a {
 	display: block;
 	color: #666;
 	text-decoration: none;
 	padding: 8px;
-}
-.def-list table>tbody>tr>td:first-child>div {
-	position: relative;
-	top: 0;
-}
-.def-list table>tbody>tr>td:first-child>div>.drag-indicator {
-	position: absolute;
-	left: 6px;
-	top: 10px;
-}
-.def-list table>tbody>tr>td:first-child>div>a {
-	margin-left: 16px;
 }
 
 .floating.side.def-detail {
@@ -640,6 +641,11 @@ td.ellipsis {
 	border-color: #ADADAD;
 }
 
-.panel-list .disabled .panel {
+.panel-list .disabled .panel, .panel-list .disabled .panel span, .panel-list .disabled .panel a {
 	color: #999;
+}
+
+.panel-heading .checkbox {
+	display: inline-block;
+	margin: 0;
 }

@@ -22,8 +22,8 @@ public class PatternsEditSupport implements EditSupport {
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Method propertyGetter = descriptor.getPropertyGetter();
-		Patterns pathPatterns = propertyGetter.getAnnotation(Patterns.class);
-        if (pathPatterns != null) {
+		Patterns patterns = propertyGetter.getAnnotation(Patterns.class);
+        if (patterns != null) {
         	if (propertyGetter.getReturnType() == String.class) {
         		return new PropertyContext<String>(descriptor) {
 
@@ -43,7 +43,7 @@ public class PatternsEditSupport implements EditSupport {
 									@SuppressWarnings("unchecked")
 									@Override
 									protected List<InputSuggestion> suggest(String matchWith) {
-										String suggestionMethod = pathPatterns.value();
+										String suggestionMethod = patterns.suggester();
 										if (suggestionMethod.length() != 0) {
 											return (List<InputSuggestion>) ReflectionUtils.invokeStaticMethod(
 													descriptor.getBeanClass(), suggestionMethod, new Object[] {matchWith});

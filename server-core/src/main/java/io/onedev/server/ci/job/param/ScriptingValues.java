@@ -13,7 +13,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.util.GroovyUtils;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Script;
+import io.onedev.server.web.editable.annotation.ScriptChoice;
 
 @Editable
 public class ScriptingValues implements ValuesProvider {
@@ -24,17 +24,17 @@ public class ScriptingValues implements ValuesProvider {
 	
 	public static final String SECRET_DISPLAY_NAME = "Evaluate script to get secrets";
 	
-	private String script;
+	private String scriptName;
 	
 	@Editable
+	@ScriptChoice
 	@NotEmpty
-	@Script(Script.GROOVY)
-	public String getScript() {
-		return script;
+	public String getScriptName() {
+		return scriptName;
 	}
 
-	public void setScript(String script) {
-		this.script = script;
+	public void setScriptName(String scriptName) {
+		this.scriptName = scriptName;
 	}
 
 	@Override
@@ -45,14 +45,14 @@ public class ScriptingValues implements ValuesProvider {
 			return true;
 		ScriptingValues otherScriptingValues = (ScriptingValues) other;
 		return new EqualsBuilder()
-			.append(script, otherScriptingValues.script)
+			.append(scriptName, otherScriptingValues.scriptName)
 			.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37)
-			.append(script)
+			.append(scriptName)
 			.toHashCode();
 	}		
 	
@@ -61,7 +61,7 @@ public class ScriptingValues implements ValuesProvider {
 	public List<List<String>> getValues() {
 		Map<String, Object> variables = new HashMap<>();
 		List<List<String>> values = new ArrayList<>();
-		for (Object each: (List<Object>) GroovyUtils.evalScript(getScript(), variables)) {
+		for (Object each: (List<Object>) GroovyUtils.evalScriptByName(scriptName, variables)) {
 			List<String> strings = new ArrayList<>();
 			if (each instanceof Collection) { 
 				strings.addAll((Collection<? extends String>) each);

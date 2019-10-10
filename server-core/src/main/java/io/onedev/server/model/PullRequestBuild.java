@@ -20,6 +20,8 @@ public class PullRequestBuild extends AbstractEntity {
 		
 	public static final String ATTR_REQUEST = "request";
 	
+	public static final String ATTR_REQUIRED = "required";
+	
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private PullRequest request;
@@ -27,6 +29,8 @@ public class PullRequestBuild extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private Build build;
+	
+	private boolean required;
 	
 	public Build getBuild() {
 		return build;
@@ -42,6 +46,14 @@ public class PullRequestBuild extends AbstractEntity {
 
 	public void setRequest(PullRequest request) {
 		this.request = request;
+	}
+
+	public boolean isRequired() {
+		return required;
+	}
+
+	public void setRequired(boolean required) {
+		this.required = required;
 	}
 
 }

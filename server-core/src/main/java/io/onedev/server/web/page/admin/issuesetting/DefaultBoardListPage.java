@@ -26,13 +26,14 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.BoardSpec;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -41,7 +42,6 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
-import com.google.common.collect.Sets;
 
 @SuppressWarnings("serial")
 public class DefaultBoardListPage extends GlobalIssueSettingPage {
@@ -93,21 +93,16 @@ public class DefaultBoardListPage extends GlobalIssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<BoardSpec>> cellItem, String componentId, IModel<BoardSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "nameColumnFrag", DefaultBoardListPage.this);
 				BoardSpec board = rowModel.getObject();
-				int index = getBoardSpecIndex(board.getName());
-				Preconditions.checkState(index != -1);
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				cellItem.add(new ColumnFragment(componentId, board) {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
-						newBoardDetail(target, index);
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, "<span class=\"drag-indicator fa fa-reorder\"></span> " 
+								+ HtmlEscape.escapeHtml5(board.getName())).setEscapeModelStrings(false);
 					}
 					
-				};
-				link.add(new Label("label", board.getName()));
-				fragment.add(link);
-				cellItem.add(fragment);
+				});
 			}
 		});		
 		
@@ -115,21 +110,15 @@ public class DefaultBoardListPage extends GlobalIssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<BoardSpec>> cellItem, String componentId, IModel<BoardSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "otherColumnFrag", DefaultBoardListPage.this);
 				BoardSpec board = rowModel.getObject();
-				int index = getBoardSpecIndex(board.getName());				
-				Preconditions.checkState(index != -1);
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
+				cellItem.add(new ColumnFragment(componentId, board) {
 
 					@Override
-					public void onClick(AjaxRequestTarget target) {
-						newBoardDetail(target, index);
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, board.getIdentifyField());
 					}
 					
-				};
-				link.add(new Label("label", rowModel.getObject().getIdentifyField()));
-				fragment.add(link);
-				cellItem.add(fragment);
+				});
 			}
 			
 		});		
@@ -138,32 +127,26 @@ public class DefaultBoardListPage extends GlobalIssueSettingPage {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<BoardSpec>> cellItem, String componentId, IModel<BoardSpec> rowModel) {
-				Fragment fragment = new Fragment(componentId, "otherColumnFrag", DefaultBoardListPage.this);
 				BoardSpec board = rowModel.getObject();
-				int index = getBoardSpecIndex(board.getName());				
-				Preconditions.checkState(index != -1);
-				AjaxLink<Void> link = new AjaxLink<Void>("link") {
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						newBoardDetail(target, index);
-					}
-					
-				};
 				List<String> columnsForDisplay = new ArrayList<>();
 				for (String column: rowModel.getObject().getColumns()) {
 					if (column == null) {
 						GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-						InputSpec field = issueSetting.getFieldSpec(board.getIdentifyField());
+						FieldSpec field = issueSetting.getFieldSpec(board.getIdentifyField());
 						if (field != null)
 							columnsForDisplay.add("<i>" + HtmlEscape.escapeHtml5(field.getNameOfEmptyValue()) + "</i>");
 					} else {
 						columnsForDisplay.add(HtmlEscape.escapeHtml5(column));
 					}
 				}
-				link.add(new Label("label", StringUtils.join(columnsForDisplay)).setEscapeModelStrings(false));
-				fragment.add(link);
-				cellItem.add(fragment);
+				cellItem.add(new ColumnFragment(componentId, board) {
+
+					@Override
+					protected Component newLabel(String componentId) {
+						return new Label(componentId, StringUtils.join(columnsForDisplay)).setEscapeModelStrings(false);
+					}
+					
+				});
 			}
 			
 		});		
@@ -203,76 +186,102 @@ public class DefaultBoardListPage extends GlobalIssueSettingPage {
 		}.sortable("tbody"));
 	}
 	
-	private void newBoardDetail(AjaxRequestTarget target, int index) {
-		new SideFloating(target, SideFloating.Placement.RIGHT) {
+	private abstract class ColumnFragment extends Fragment {
 
-			private BoardSpec getBoard() {
-				return getSetting().getDefaultBoardSpecs().get(index);
+		private final BoardSpec board;
+		
+		public ColumnFragment(String id, BoardSpec board) {
+			super(id, "columnFrag", DefaultBoardListPage.this);
+			this.board = board;
+		}
+
+		@Override
+		protected void onInitialize() {
+			super.onInitialize();
+			
+			int index = getBoardSpecIndex(board.getName());				
+			Preconditions.checkState(index != -1);
+			AjaxLink<Void> link = new AjaxLink<Void>("link") {
+
+				@Override
+				public void onClick(AjaxRequestTarget target) {
+					new SideFloating(target, SideFloating.Placement.RIGHT) {
+
+						private BoardSpec getBoard() {
+							return getSetting().getDefaultBoardSpecs().get(index);
+							
+						}
+						@Override
+						protected String getTitle() {
+							return getBoard().getName();
+						}
+
+						@Override
+						protected void onInitialize() {
+							super.onInitialize();
+							add(AttributeAppender.append("class", "board-spec def-detail"));
+						}
+
+						@Override
+						protected Component newBody(String id) {
+							SideFloating sideFloating = this;
+							Fragment fragment = new Fragment(id, "viewBoardFrag", DefaultBoardListPage.this);
+							fragment.add(BeanContext.view("viewer", getBoard(), Sets.newHashSet("name"), true));
+							fragment.add(new ModalLink("edit") {
+
+								@Override
+								protected Component newContent(String id, ModalPanel modal) {
+									sideFloating.close();
+									return new BoardEditPanel(id, getSetting().getDefaultBoardSpecs(), index) {
+
+										@Override
+										protected void onBoardSaved(AjaxRequestTarget target, BoardSpec board) {
+											target.add(boardsTable);
+											modal.close();
+											OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+										}
+
+										@Override
+										protected void onCancel(AjaxRequestTarget target) {
+											modal.close();
+										}
+
+									};
+								}
+								
+							});
+							fragment.add(new AjaxLink<Void>("delete") {
+
+								@Override
+								protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
+									super.updateAjaxAttributes(attributes);
+									attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this board?"));
+								}
+
+								@Override
+								public void onClick(AjaxRequestTarget target) {
+									getSetting().getDefaultBoardSpecs().remove(index);
+									OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
+									target.add(boardsTable);
+									close();
+								}
+								
+							});
+							
+							fragment.setOutputMarkupId(true);
+							
+							return fragment;
+						}
+
+					};	
+				}
 				
-			}
-			@Override
-			protected String getTitle() {
-				return getBoard().getName();
-			}
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(AttributeAppender.append("class", "board-spec def-detail"));
-			}
-
-			@Override
-			protected Component newBody(String id) {
-				SideFloating sideFloating = this;
-				Fragment fragment = new Fragment(id, "viewBoardFrag", DefaultBoardListPage.this);
-				fragment.add(BeanContext.view("viewer", getBoard(), Sets.newHashSet("name"), true));
-				fragment.add(new ModalLink("edit") {
-
-					@Override
-					protected Component newContent(String id, ModalPanel modal) {
-						sideFloating.close();
-						return new BoardEditPanel(id, getSetting().getDefaultBoardSpecs(), index) {
-
-							@Override
-							protected void onBoardSaved(AjaxRequestTarget target, BoardSpec board) {
-								target.add(boardsTable);
-								modal.close();
-								OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-							}
-
-							@Override
-							protected void onCancel(AjaxRequestTarget target) {
-								modal.close();
-							}
-
-						};
-					}
-					
-				});
-				fragment.add(new AjaxLink<Void>("delete") {
-
-					@Override
-					protected void updateAjaxAttributes(AjaxRequestAttributes attributes) {
-						super.updateAjaxAttributes(attributes);
-						attributes.getAjaxCallListeners().add(new ConfirmListener("Do you really want to delete this board?"));
-					}
-
-					@Override
-					public void onClick(AjaxRequestTarget target) {
-						getSetting().getDefaultBoardSpecs().remove(index);
-						OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
-						target.add(boardsTable);
-						close();
-					}
-					
-				});
-				
-				fragment.setOutputMarkupId(true);
-				
-				return fragment;
-			}
-
-		};		
+			};
+			link.add(newLabel("label"));
+			add(link);
+		}
+		
+		protected abstract Component newLabel(String componentId);
 	}
 	
 }

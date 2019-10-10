@@ -2,8 +2,8 @@ package io.onedev.server.ci.job.trigger;
 
 import java.util.List;
 
-import io.onedev.server.ci.JobDependency;
 import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.JobDependency;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.build.BuildFinished;
@@ -22,7 +22,7 @@ public class DependencyBuiltTrigger extends JobTrigger {
 			BuildFinished buildFinished = (BuildFinished) event;
 			Build build = buildFinished.getBuild();
 			if (build.getStatus() == Status.SUCCESSFUL) {
-				for (JobDependency dependency: job.getDependencies()) {
+				for (JobDependency dependency: job.getJobDependencies()) {
 					if (dependency.getJobName().equals(build.getJobName())) {
 						for (JobParam param: dependency.getJobParams()) {
 							if (!param.isSecret()) {

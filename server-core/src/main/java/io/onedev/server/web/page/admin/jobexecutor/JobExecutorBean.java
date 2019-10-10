@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.model.support.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable

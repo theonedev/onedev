@@ -314,7 +314,7 @@ public class DefaultIndexManager implements IndexManager {
 						ObjectId commitId = ((IndexWork) works.iterator().next()).getCommitId();
 												
 						if (!forkRootId.equals(projectId) && !forkRoot.getRepository().hasObject(commitId))
-							GitUtils.fetch(project.getRepository(), commitId, forkRoot.getRepository(), null);
+							GitUtils.fetch(project.getRepository(), commitId, forkRoot.getRepository());
 						doIndex(forkRoot, commitId);
 						
 						listenerRegistry.post(new CommitIndexed(project, commitId.copy()));

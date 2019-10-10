@@ -33,8 +33,8 @@ import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.jetty.JettyRunner;
-import io.onedev.server.util.serverconfig.ServerConfig;
 
 public class OneDev extends AbstractPlugin implements Serializable {
 
@@ -81,6 +81,8 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	@Override
 	public void start() {
+		System.setProperty("hsqldb.reconfig_logging", "false");
+		
 		jettyRunner.start();
 		
 		if (Bootstrap.command == null) {
@@ -127,7 +129,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		if (serverConfig.getHttpPort() != 0)
 			serverUrl = "http://" + hostName + ":" + serverConfig.getHttpPort();
 		else 
-			serverUrl = "https://" + hostName + ":" + serverConfig.getSslConfig().getPort();
+			serverUrl = "https://" + hostName + ":" + serverConfig.getHttpsPort();
 
 		return StringUtils.stripEnd(serverUrl, "/");
 	}

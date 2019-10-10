@@ -62,9 +62,6 @@
 						</wicket:enclosure>
 					</div>
 				</div>
-				<div wicket:id="doNotMerge" class="do-not-merge alert alert-warning">
-					<i class="fa fa-info-circle"></i> This pull request is for review only and does not need to be merged
-				</div>
 				<div wicket:id="operations" class="operations">
 					<div class="buttons">
 						<a wicket:id="approve" class="btn btn-primary">Approve</a>
@@ -104,11 +101,14 @@
 		</wicket:enclosure>
 		<wicket:enclosure child="jobs">
 		<div class="jobs">
-			<div class="head">Builds</div> 
-			<div class="body">
-				<div wicket:id="jobs" class="job clearfix">
-                    <a wicket:id="status" class="status pull-left"><span wicket:id="icon"></span></a>
-                    <a wicket:id="name" class="name pull-left"><span wicket:id="label"></span></a>
+			<div class="head">Jobs</div> 
+			<div class="body clearfix">
+				<div wicket:id="jobs" class="job pull-left">
+					<a wicket:id="job" class="btn btn-default">
+						<span wicket:id="status" class="status"></span>
+						<b wicket:id="name" class="name"></b>
+						<i class="fa fa-angle-down"></i>
+					</a>
                 </div>
 			</div>
 		</div>

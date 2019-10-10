@@ -27,11 +27,11 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.inputspec.InputContext;
+import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.FixedIssueCriteria;
-import io.onedev.server.security.SecurityUtils;
-import io.onedev.server.util.inputspec.InputContext;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.component.build.list.BuildListPanel;
@@ -271,11 +271,6 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public void validateName(String inputName) {
-		throw new UnsupportedOperationException();
-	}
-	
 	@Override
 	public InputSpec getInputSpec(String inputName) {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpec(inputName);

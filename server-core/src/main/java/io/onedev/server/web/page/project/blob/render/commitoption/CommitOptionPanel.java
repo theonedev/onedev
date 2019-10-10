@@ -58,7 +58,6 @@ import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
@@ -319,11 +318,11 @@ public class CommitOptionPanel extends Panel {
 			if (newContentProvider != null) {
 				String revision = context.getBlobIdent().revision;
 				String newPath = context.getNewPath();
-				if (context.getProject().isReviewRequiredForModification(SecurityUtils.getUser(), revision, newPath)) {
+				if (context.getProject().isReviewRequiredForModification(user, revision, newPath)) {
 					CommitOptionPanel.this.error("Review required for this change. Please submit pull request instead");
 					target.add(feedback);
 					return false;
-				} else if (context.getProject().isBuildRequiredForModification(revision, newPath)) {
+				} else if (context.getProject().isBuildRequiredForModification(user, revision, newPath)) {
 					CommitOptionPanel.this.error("Build required for this change. Please submit pull request instead");
 					target.add(feedback);
 					return false;

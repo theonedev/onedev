@@ -9,7 +9,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.progress.ProgressBar;
 import de.agilecoders.wicket.core.markup.html.bootstrap.components.progress.ProgressBar.Type;
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
@@ -35,7 +34,7 @@ public class ServerInformationPage extends AdministrationPage {
 
 			@Override
 			protected String load() {
-				return FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory());
+				return String.valueOf(Runtime.getRuntime().maxMemory() / 1024 / 1024) + " MB";
 			}
 			
 		}));
@@ -43,8 +42,7 @@ public class ServerInformationPage extends AdministrationPage {
 
 			@Override
 			protected String load() {
-				return FileUtils.byteCountToDisplaySize(
-						Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+				return String.valueOf((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024) + " MB";
 			}
 			
 		}));

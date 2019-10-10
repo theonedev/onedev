@@ -8,7 +8,9 @@ import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.OneContext;
+import com.google.common.base.Preconditions;
+
+import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -46,7 +48,7 @@ public class TransitionPrerequisite implements Serializable {
 
 	@SuppressWarnings("unused")
 	private static List<String> getFieldNameChoices() {
-		return new ArrayList<>(OneContext.get().getInputContext().getInputNames());
+		return new ArrayList<>(Preconditions.checkNotNull(InputContext.get()).getInputNames());
 	}
 	
 	public boolean matches(List<String> values) {

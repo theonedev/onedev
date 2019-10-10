@@ -9,8 +9,6 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 
@@ -51,11 +49,6 @@ public class NullableBooleanPropertyEditor extends PropertyEditor<Boolean> {
 			}
 			
 		});
-	}
-
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
 	}
 
 	@Override

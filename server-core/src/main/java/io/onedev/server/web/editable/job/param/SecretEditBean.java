@@ -1,14 +1,16 @@
 package io.onedev.server.web.editable.job.param;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.OneContext;
+import io.onedev.server.model.support.Secret;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.page.project.blob.ProjectBlobPage;
+import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 public class SecretEditBean implements Serializable {
@@ -30,7 +32,13 @@ public class SecretEditBean implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getSecretChoices() {
-		return OneContext.get().getProject().getSecrets().stream().map(it->it.getName()).collect(Collectors.toList());
+		List<String> secretNames = new ArrayList<>();
+		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
+		for (Secret secret: page.getProject().getSecrets()) {
+			if (!secretNames.contains(secret.getName()) && secret.isAuthorized(page.getProject(), page.getCommit()))
+				secretNames.add(secret.getName());
+		}
+		return secretNames;
 	}
 	
 }

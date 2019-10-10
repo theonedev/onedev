@@ -17,20 +17,11 @@ onedev.server.editable = {
     },
 	onBeanEditorPropertyContainerDomReady: function(containerId) {
 		var $container = $("#" + containerId);
-		$container.find(".value>input[type=checkbox]").each(function() {
-			var $input = $(this);
-			$input.css("margin-right", "8px");
-			$input.css("vertical-align", "text-top");
-			var $label = $input.parent().prev("label.name");
-			$label.attr("for", $input.attr("id")).insertAfter($input);
-		});
-		
-		$container.find(".value>div>input[type=checkbox]").each(function() {
-			var $input = $(this);
-			$input.css("margin-right", "8px");
-			$input.css("vertical-align", "text-top");
-			$label = $input.parent().parent().prev("label.name");
-			$label.attr("for", $input.attr("id")).insertAfter($input);
+		$container.find("div.value>.checkbox").each(function() {
+			var $checkbox = $(this);
+			var $label = $checkbox.parent().prev("label.name");
+			$checkbox.children("label").append($label.children("span").text());
+			$label.remove();
 		});
 	}
 }

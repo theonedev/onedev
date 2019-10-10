@@ -177,7 +177,7 @@ public class DefaultPersistManager implements PersistManager {
         		if (tempFile != null)
         			tempFile.delete();
         	}
-
+        	
         	sessionFactory = buildSessionFactory(metadata);
 
     		idManager.init();

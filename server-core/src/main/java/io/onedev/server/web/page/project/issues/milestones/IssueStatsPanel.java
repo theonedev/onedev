@@ -9,8 +9,8 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Milestone;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.web.component.milestone.progress.MilestoneProgressBar;
 

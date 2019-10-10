@@ -21,11 +21,12 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
-import io.onedev.server.security.SecurityUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathElement;
+import io.onedev.server.web.editable.PathNode;
+import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.util.ConfirmOnClick;
 
 @SuppressWarnings("serial")
@@ -84,10 +85,10 @@ public class GroupProfilePage extends GroupPage {
 					GroupManager groupManager = OneDev.getInstance(GroupManager.class);
 					Group groupWithSameName = groupManager.find(group.getName());
 					if (groupWithSameName != null && !groupWithSameName.equals(group)) {
-						editor.getErrorContext(new PathElement.Named("name"))
-								.addError("This name has already been used by another group.");
+						editor.error(new Path(new PathNode.Named("name")),
+								"This name has already been used by another group.");
 					} 
-					if (!editor.hasErrors(true)) {
+					if (editor.isValid()) {
 						groupManager.save(group, oldName);
 						setResponsePage(GroupProfilePage.class, GroupProfilePage.paramsOf(group));
 						Session.get().success("Profile updated");

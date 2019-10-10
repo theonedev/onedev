@@ -1,81 +1,119 @@
 package io.onedev.server.product;
 
 import java.io.File;
+import java.io.IOException;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.glassfish.jersey.internal.guava.Preconditions;
+
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.util.serverconfig.ServerConfig;
-import io.onedev.server.util.serverconfig.SslConfig;
+import io.onedev.commons.utils.FileUtils;
+import io.onedev.server.OneException;
+import io.onedev.server.util.ServerConfig;
 
 @Singleton
 public class DefaultServerConfig implements ServerConfig {
 
-	private static final String PROP_HTTPPORT = "httpPort";
+	private static final String PROP_HTTPPORT = "http_port";
 	
-	private static final String PROP_HTTPSPORT = "httpsPort";
+	private static final String PROP_HTTPSPORT = "https_port";
 	
-	private static final String PROP_KEYSTOREPATH = "keystorePath";
+	private static final String PROP_KEYSTORE = "keystore";
 	
-	private static final String PROP_KEYSTOREPASSWORD = "keystorePassword";
+	private static final String PROP_TRUST_CERTS = "trust_certs";
 	
-	private static final String PROP_KEYSTOREKEYPASSWORD = "keystoreKeyPassword";
+	private static final String PROP_KEYSTORE_ENCODING = "keystore_encoding";
+	
+	private static final String PROP_KEYSTOREPASSWORD = "keystore_password";
+	
+	private static final String PROP_SESSION_TIMEOUT = "session_timeout";
 	
 	private int httpPort;
 	
-	private int sessionTimeout = 1800;
+	private int sessionTimeout;
 	
-	private SslConfig sslConfig;
+	private int httpsPort;
+	
+	private File trustCertsDir;
+	
+	private File keystoreFile;
+	
+	private String keystorePassword;
 	
 	@Inject
 	public DefaultServerConfig(ServerProperties props) {
-		String httpPortStr = props.getProperty(PROP_HTTPPORT);
+		String httpPortStr = System.getenv(PROP_HTTPPORT);
+		if (StringUtils.isBlank(httpPortStr))
+			httpPortStr = props.getProperty(PROP_HTTPPORT);
 		if (StringUtils.isNotBlank(httpPortStr)) 
 			httpPort = Integer.parseInt(httpPortStr.trim());
+
+		String httpsPortStr = System.getenv(PROP_HTTPSPORT);
+		if (StringUtils.isBlank(httpsPortStr))
+			httpsPortStr = props.getProperty(PROP_HTTPSPORT);
+		if (StringUtils.isNotBlank(httpsPortStr))
+			httpsPort = Integer.parseInt(httpsPortStr.trim());
 		
-		String httpsPortStr = props.getProperty(PROP_HTTPSPORT);
+		if (httpPort == 0 && httpsPort == 0)
+			throw new RuntimeException("Either " + PROP_HTTPPORT + " or " + PROP_HTTPSPORT + " or both should be enabled");
 		
-		if (StringUtils.isNotBlank(httpsPortStr)) {
-			SslConfigBean sslConfigBean = new SslConfigBean();
-			sslConfigBean.setPort(Integer.parseInt(httpsPortStr.trim()));
-			
-			String keystorePath = props.getProperty(PROP_KEYSTOREPATH);
-			if (StringUtils.isBlank(keystorePath))
-				keystorePath = "sample.keystore";
-			else
-				keystorePath = keystorePath.trim();
-			
-			String keystorePassword = props.getProperty(PROP_KEYSTOREPASSWORD);
-			if (StringUtils.isBlank(keystorePassword))
-				keystorePassword = "123456";
-			else
-				keystorePassword = keystorePassword.trim();
-			
-			String keystoreKeyPassword = props.getProperty(PROP_KEYSTOREKEYPASSWORD);
-			if (StringUtils.isBlank(keystoreKeyPassword))
-				keystoreKeyPassword = "123456";
-			else
-				keystoreKeyPassword = keystoreKeyPassword.trim();
-			
-			File keystoreFile = new File(keystorePath);
+		String keystore = System.getenv(PROP_KEYSTORE); 
+		if (StringUtils.isBlank(keystore))
+			keystore = props.getProperty(PROP_KEYSTORE);
+		if (StringUtils.isNotBlank(keystore)) {
+			keystoreFile = new File(keystore.trim());
 			if (!keystoreFile.isAbsolute())
-				keystoreFile = new File(Bootstrap.getConfDir(), keystorePath);
+				keystoreFile = new File(Bootstrap.getConfDir(), keystore);
 			
-			sslConfigBean.setKeyStorePath(keystoreFile.getAbsolutePath());
-			sslConfigBean.setKeyStorePassword(keystorePassword);
-			sslConfigBean.setKeyStoreKeyPassword(keystoreKeyPassword);
+			Preconditions.checkState(keystoreFile.exists(), 
+					"Keystore file not exist: " + keystoreFile.getAbsolutePath());
 			
-			sslConfig = sslConfigBean;
+			String keystoreEncoding = System.getenv(PROP_KEYSTORE_ENCODING);
+			if (keystoreEncoding == null)
+				keystoreEncoding = props.getProperty(PROP_KEYSTORE_ENCODING);
+			if (keystoreEncoding != null)
+				keystoreEncoding = keystoreEncoding.trim();
+			if ("base64".equals(keystoreEncoding)) {
+				try {
+					String content = FileUtils.readFileToString(keystoreFile);
+					keystoreFile = File.createTempFile("keystore", "pfx");
+					FileUtils.writeByteArrayToFile(keystoreFile, Base64.decodeBase64(content));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			} 
+		} else if (httpsPort != 0) {
+			throw new OneException(PROP_KEYSTORE + " is required for https support");
 		}
 		
-		if (httpPort == 0 && sslConfig == null)
-			throw new RuntimeException("Either httpPort or httpsPort or both should be enabled.");
+		keystorePassword = System.getenv(PROP_KEYSTOREPASSWORD);
+		if (keystorePassword == null)
+			keystorePassword = props.getProperty(PROP_KEYSTOREPASSWORD);
+		if (keystorePassword == null)
+			keystorePassword = "";
+
+		String trustCerts = System.getenv(PROP_TRUST_CERTS);
+		if (StringUtils.isBlank(trustCerts))
+			trustCerts = props.getProperty(PROP_TRUST_CERTS);
+		if (StringUtils.isNotBlank(trustCerts)) {
+			trustCertsDir = new File(trustCerts.trim());
+			if (!trustCertsDir.isAbsolute())
+				trustCertsDir = new File(Bootstrap.getConfDir(), trustCerts);
+			Preconditions.checkState(trustCertsDir.exists(), 
+					"Trust certs directory not exist: " + trustCertsDir.getAbsolutePath());
+		}
 		
-		String sessionTimeoutStr = props.getProperty("sessionTimeout");
+		String sessionTimeoutStr = System.getenv(PROP_SESSION_TIMEOUT);
+		if (StringUtils.isBlank(sessionTimeoutStr))
+			sessionTimeoutStr = props.getProperty(PROP_SESSION_TIMEOUT);
 		if (StringUtils.isNotBlank(sessionTimeoutStr))
 			sessionTimeout = Integer.parseInt(sessionTimeoutStr.trim());
+		else
+			throw new RuntimeException(PROP_SESSION_TIMEOUT + " should be specified");
 	}
 	
 	@Override
@@ -84,13 +122,28 @@ public class DefaultServerConfig implements ServerConfig {
 	}
 
 	@Override
-	public SslConfig getSslConfig() {
-		return sslConfig;
-	}
-
-	@Override
 	public int getSessionTimeout() {
 		return sessionTimeout;
 	}
 
+	@Override
+	public int getHttpsPort() {
+		return httpsPort;
+	}
+
+	@Override
+	public File getKeystoreFile() {
+		return keystoreFile;
+	}
+
+	@Override
+	public String getKeystorePassword() {
+		return keystorePassword;
+	}
+
+	@Override
+	public File getTrustCertsDir() {
+		return trustCertsDir;
+	}
+	
 }

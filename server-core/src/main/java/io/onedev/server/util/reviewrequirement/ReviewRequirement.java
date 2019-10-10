@@ -16,6 +16,8 @@ import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.GroupManager;
@@ -46,7 +48,7 @@ public class ReviewRequirement {
 			
 			for (CriteriaContext criteria: requirement.criteria()) {
 				if (criteria.userCriteria() != null) {
-					String userName = getBracedValue(criteria.userCriteria().Value());
+					String userName = getValue(criteria.userCriteria().Value());
 					User user = OneDev.getInstance(UserManager.class).findByName(userName);
 					if (user != null) {
 						if (!users.contains(user)) { 
@@ -58,7 +60,7 @@ public class ReviewRequirement {
 						throw new OneException("Unable to find user '" + userName + "'");
 					}
 				} else if (criteria.groupCriteria() != null) {
-					String groupName = getBracedValue(criteria.groupCriteria().Value());
+					String groupName = getValue(criteria.groupCriteria().Value());
 					Group group = OneDev.getInstance(GroupManager.class).find(groupName);
 					if (group != null) {
 						if (!groups.containsKey(group)) {
@@ -104,9 +106,8 @@ public class ReviewRequirement {
 		return parser.requirement();
 	}
 	
-	private static String getBracedValue(TerminalNode terminal) {
-		String value = terminal.getText().substring(1);
-		return value.substring(0, value.length()-1).trim();
+	private static String getValue(TerminalNode terminal) {
+		return StringUtils.unescape(FenceAware.unfence(terminal.getText()));
 	}
 	
 	public List<User> getUsers() {
@@ -135,7 +136,7 @@ public class ReviewRequirement {
 	}
 	
 	@Nullable
-	public static String onRenameGroup(String reviewRequirementString, String oldName, String newName) {
+	public static String onRenameGroup(@Nullable String reviewRequirementString, String oldName, String newName) {
 		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
 		for (Group group: reviewRequirement.getGroups().keySet()) {
 			if (group.getName().equals(oldName))
@@ -144,7 +145,7 @@ public class ReviewRequirement {
 		return reviewRequirement.toString();
 	}
 
-	public static String onRenameUser(String reviewRequirementString, String oldName, String newName) {
+	public static String onRenameUser(@Nullable String reviewRequirementString, String oldName, String newName) {
 		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
 		for (User user: reviewRequirement.getUsers()) {
 			if (user.getName().equals(oldName))
@@ -153,7 +154,7 @@ public class ReviewRequirement {
 		return reviewRequirement.toString();
 	}
 	
-	public static boolean isUsingUser(String reviewRequirementString, String userName) {
+	public static boolean isUsingUser(@Nullable String reviewRequirementString, String userName) {
 		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
 		for (User user: reviewRequirement.getUsers()) {
 			if (user.getName().equals(userName))
@@ -162,7 +163,7 @@ public class ReviewRequirement {
 		return false;
 	}
 	
-	public static boolean isUsingGroup(String reviewRequirementString, String groupName) {
+	public static boolean isUsingGroup(@Nullable String reviewRequirementString, String groupName) {
 		ReviewRequirement reviewRequirement = fromString(reviewRequirementString);
 		for (Group group: reviewRequirement.getGroups().keySet()) {
 			if (group.getName().equals(groupName))
@@ -176,9 +177,9 @@ public class ReviewRequirement {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		for (User user: users)
-			builder.append("user(").append(user.getName()).append(") ");
+			builder.append("user(").append(StringUtils.escape(user.getName(), "()")).append(") ");
 		for (Map.Entry<Group, Integer> entry: groups.entrySet()) {
-			builder.append("group(").append(entry.getKey().getName()).append(")");
+			builder.append("group(").append(StringUtils.escape(entry.getKey().getName(), "()")).append(")");
 			if (entry.getValue() == 0)
 				builder.append(":all");
 			else if (entry.getValue() != 1)

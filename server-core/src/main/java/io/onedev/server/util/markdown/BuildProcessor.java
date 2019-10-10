@@ -5,7 +5,7 @@ import org.jsoup.nodes.Document;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 
 public class BuildProcessor extends BuildParser implements MarkdownProcessor {
 	

@@ -6,7 +6,6 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -14,6 +13,7 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyViewer;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.util.LocaleUtils;
 
 @SuppressWarnings("serial")
 public class BooleanEditSupport implements EditSupport {
@@ -33,7 +33,7 @@ public class BooleanEditSupport implements EditSupport {
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
 							if (model.getObject() != null) {
-								return new Label(id, StringUtils.describe(model.getObject()));
+								return new Label(id, LocaleUtils.describe(model.getObject()));
 							} else {
 								NameOfEmptyValue nameOfEmptyValue = propertyDescriptor.getPropertyGetter().getAnnotation(NameOfEmptyValue.class);
 								if (nameOfEmptyValue != null)

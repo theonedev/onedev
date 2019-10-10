@@ -174,6 +174,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		List<Build> builds = new ArrayList<>();
 
 		EntityCriteria<Build> criteria = newCriteria();
+		criteria.add(Restrictions.eq("project", project));
 		
 		if (StringUtils.isNotBlank(term)) {
 			if (term.startsWith("#")) {
@@ -184,13 +185,11 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 				} catch (NumberFormatException e) {
 					criteria.add(Restrictions.ilike("version", "#" + term, MatchMode.ANYWHERE));
 				}
-			} else {
-				try {
-					long buildNumber = Long.parseLong(term);
-					criteria.add(Restrictions.eq("number", buildNumber));
-				} catch (NumberFormatException e) {
-					criteria.add(Restrictions.ilike("version", term, MatchMode.ANYWHERE));
-				}
+			} else try {
+				long buildNumber = Long.parseLong(term);
+				criteria.add(Restrictions.eq("number", buildNumber));
+			} catch (NumberFormatException e) {
+				criteria.add(Restrictions.ilike("version", term, MatchMode.ANYWHERE));
 			}
 		}
 		

@@ -1,0 +1,13 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onedev
+spec:
+  template:
+    metadata:
+      name: onedev
+    spec:
+      containers:
+      - name: onedev
+        image: 1dev/server
+        command: ["/root/bin/idle.sh"]

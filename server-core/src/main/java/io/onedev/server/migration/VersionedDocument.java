@@ -34,6 +34,7 @@ import org.dom4j.XPath;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
+import org.hibernate.proxy.HibernateProxyHelper;
 import org.xml.sax.EntityResolver;
 
 import com.google.common.base.Charsets;
@@ -45,7 +46,6 @@ import com.thoughtworks.xstream.io.xml.Dom4JWriter;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 
 import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.utils.ClassUtils;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 
@@ -426,7 +426,7 @@ public final class VersionedDocument implements Document, Externalizable {
 		AppLoader.getInstance(XStream.class).marshal(bean, new Dom4JWriter(dom));
 		VersionedDocument versionedDom = new VersionedDocument(dom);
 		if (bean != null) {
-			versionedDom.setVersion(MigrationHelper.getVersion(ClassUtils.unproxy(bean.getClass())));
+			versionedDom.setVersion(MigrationHelper.getVersion(HibernateProxyHelper.getClassWithoutInitializingProxy(bean)));
 		}
 		return versionedDom;
 	}

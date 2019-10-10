@@ -6,9 +6,6 @@
 table.project-list td:not(.project) a {
 	color: #444;
 }
-table.project-list td.project img.project-avatar {
-	vertical-align: text-top;
-}
 table.project-list td.project, table.project-list td.author {
 	white-space: nowrap;
 } 

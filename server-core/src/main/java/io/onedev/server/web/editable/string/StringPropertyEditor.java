@@ -18,8 +18,6 @@ import org.apache.wicket.util.convert.ConversionException;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.editable.ErrorContext;
-import io.onedev.server.web.editable.PathElement;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.Multiline;
@@ -70,11 +68,6 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 		
 		if (getter.getAnnotation(OmitName.class) != null)
 			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(getter)));
-	}
-
-	@Override
-	public ErrorContext getErrorContext(PathElement element) {
-		return null;
 	}
 
 	@Override

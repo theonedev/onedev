@@ -1,6 +1,7 @@
 package io.onedev.server.util;
 
 import java.util.Collection;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.commons.utils.Transformer;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -30,7 +30,7 @@ import io.onedev.server.model.support.CommitMessageTransform;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
-public class CommitMessageTransformer implements Transformer<String> {
+public class CommitMessageTransformer implements Function<String, String> {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitMessageTransformer.class);
 	
@@ -59,7 +59,7 @@ public class CommitMessageTransformer implements Transformer<String> {
 	}
 	
 	@Override
-	public String transform(String commitMessage) {
+	public String apply(String commitMessage) {
 		commitMessage = transform(commitMessage, project.getCommitMessageTransforms());
 		
 		commitMessage = linkEntities(project, commitMessage, new EntityInfoProvider() {

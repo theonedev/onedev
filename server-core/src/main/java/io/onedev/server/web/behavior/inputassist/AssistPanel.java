@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
@@ -17,7 +18,7 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 
 @SuppressWarnings("serial")
-class AssistPanel extends Panel {
+abstract class AssistPanel extends Panel {
 
 	private static final int PAGE_SIZE = 25;
 	
@@ -85,27 +86,37 @@ class AssistPanel extends Panel {
 		for (String hint: hints) 
 			hintsView.add(new Label(hintsView.newChildId(), hint).setEscapeModelStrings(false));
 		
+		add(new AjaxLink<Void>("close") {
+
+			@Override
+			public void onClick(AjaxRequestTarget target) {
+				onClose(target);
+			}
+			
+		});
 		setOutputMarkupId(true);
 	}
 	
+	protected abstract void onClose(AjaxRequestTarget target);
+	
 	private Component newSuggestionItem(String itemId, InputCompletion suggestion) {
 		WebMarkupContainer item = new WebMarkupContainer(itemId);
-		WebMarkupContainer link = new WebMarkupContainer("link");
 		LinearRange match = suggestion.getMatch();
 		String label = suggestion.getLabel();
 		if (match != null) {
 			String prefix = StringEscapeUtils.escapeHtml4(label.substring(0, match.getFrom()));
 			String suffix = StringEscapeUtils.escapeHtml4(label.substring(match.getTo()));
 			String matched = StringEscapeUtils.escapeHtml4(label.substring(match.getFrom(), match.getTo()));
-			link.add(new Label("label", prefix + "<b>" + matched + "</b>" + suffix).setEscapeModelStrings(false));
+			item.add(new Label("content", prefix + "<b>" + matched + "</b>" + suffix).setEscapeModelStrings(false));
 		} else {
-			link.add(new Label("label", label));
+			item.add(new Label("content", label));
 		}
-		item.add(link);
+		
 		if (suggestion.getDescription() != null)
 			item.add(new Label("description", suggestion.getDescription()));
 		else
 			item.add(new Label("description"));
+		
 		String content = suggestion.getContent();
 		item.add(AttributeAppender.append("data-content", content));
 		item.add(AttributeAppender.append("data-caret", suggestion.getCaret()));

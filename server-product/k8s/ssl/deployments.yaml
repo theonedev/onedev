@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onedev
+spec:
+  template:
+    metadata:
+      name: onedev
+    spec:
+      containers:
+      - name: onedev
+        env:
+        - name: https_port
+          value: "6643"
+        - name: keystore
+          value: /root/config/keystore
+        - name: keystore_encoding
+          value: base64
+        - name: keystore_password 
+          valueFrom:
+            secretKeyRef:
+              name: keystore
+              key: password
+        volumeMounts:
+        - name: keystore
+          mountPath: /root/config
+        ports:
+        - containerPort: 6643
+      volumes:
+      - name: keystore
+        configMap:
+          name: keystore

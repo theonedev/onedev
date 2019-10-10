@@ -45,10 +45,10 @@ public class PageStoreManager extends AbstractPageManager
 	 * Web containers intercept
 	 * {@link javax.servlet.http.HttpSession#setAttribute(String, Object)} to detect changes and
 	 * replicate the session. If the attribute has been already bound in the session then
-	 * {@link #valueUnbound(HttpSessionBindingEvent)} might get called - this flag
+	 * {@link SessionEntry#valueUnbound(HttpSessionBindingEvent)} might get called - this flag
 	 * helps us to ignore the invocation in that case.
 	 * 
-	 * @see #valueUnbound(HttpSessionBindingEvent)
+	 * @see SessionEntry#valueUnbound(HttpSessionBindingEvent)
 	 */
 	private static final ThreadLocal<Boolean> STORING_TOUCHED_PAGES = new ThreadLocal<Boolean>()
 	{
@@ -171,14 +171,7 @@ public class PageStoreManager extends AbstractPageManager
 				// triggered by #storeTouchedPages(), so do not remove the data
 				return;
 			}
-			
-			// WICKET-5164 use the original sessionId
-			IPageStore store = getPageStore();
-			// store might be null if destroyed already
-			if (store != null)
-			{
-				store.unbind(sessionId);
-			}
+			clear();
 		}
 
 		@Override
@@ -186,6 +179,17 @@ public class PageStoreManager extends AbstractPageManager
 		{
 			// see https://issues.apache.org/jira/browse/WICKET-5390
 			return false;
+		}
+		
+		public void clear()
+		{
+			// WICKET-5164 use the original sessionId
+			IPageStore store = getPageStore();
+			// store might be null if destroyed already
+			if (store != null)
+			{
+				store.unbind(sessionId);
+			}
 		}
 	}
 
@@ -302,11 +306,12 @@ public class PageStoreManager extends AbstractPageManager
 	public void clear()
 	{
 		RequestAdapter requestAdapter = getRequestAdapter();
+		requestAdapter.clear();
 		String sessionEntryAttributeName = getAttributeName();
 		Serializable sessionEntry = requestAdapter.getSessionAttribute(sessionEntryAttributeName);
 		if (sessionEntry instanceof SessionEntry)
 		{
-			((SessionEntry)sessionEntry).valueUnbound(null);
+			((SessionEntry)sessionEntry).clear();
 		}
 	}
 

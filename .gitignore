@@ -1,9 +1,12 @@
+server-product/docker/build/
+server-product/docker/onedev-*/
 **/target/
 **/.classpath
 **/.gitignore
 **/.settings
 **/.project
 **/.vscode
+**/.idea
 release.properties
 pom.xml.releaseBackup
 

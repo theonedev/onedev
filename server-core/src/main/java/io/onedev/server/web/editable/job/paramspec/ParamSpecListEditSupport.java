@@ -7,7 +7,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.utils.ReflectionUtils;
-import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;
@@ -22,7 +22,7 @@ public class ParamSpecListEditSupport implements EditSupport {
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		if (List.class.isAssignableFrom(descriptor.getPropertyClass())) {
 			Class<?> elementClass = ReflectionUtils.getCollectionElementType(descriptor.getPropertyGetter().getGenericReturnType());
-			if (elementClass == InputSpec.class) {
+			if (elementClass == ParamSpec.class) {
 				return new PropertyContext<List<Serializable>>(descriptor) {
 
 					@Override

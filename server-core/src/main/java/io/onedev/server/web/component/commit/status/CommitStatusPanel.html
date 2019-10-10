@@ -1,15 +1,15 @@
 <wicket:panel>
-    <a wicket:id="link" class="commit-status"><span wicket:id="icon"></span></a>
+	<a wicket:id="status" class="commit-status"><span wicket:id="icon"></span> <i class="fa fa-angle-down"></i></a>
     <wicket:fragment wicket:id="detailFrag">
         <div class="commit-status-detail">
             <div wicket:id="jobs" class="job">
                 <div class="head clearfix">
-                    <a wicket:id="jobDetailToggle" class="detail pull-left"><span wicket:id="icon"></span></a>
-                    <a wicket:id="jobDef" class="def pull-left" title="Goto job definition"><span wicket:id="label"></span></a>
-                    <a wicket:id="runJob" class="run pull-right" title="Run this job"><i class="fa fa-play"></i></a>
+                    <a wicket:id="name" class="name pull-left"><b wicket:id="label"></b></a>
+                    <a wicket:id="run" class="run pull-right" title="Run this job"><i class="fa fa-play"></i></a>
                     <a wicket:id="showInList" class="show-in-list pull-right" title="Show in build list"><i class="fa fa-list-ul"></i></a>
                 </div>
-                <div wicket:id="jobDetail" class="body"></div>
+                <div wicket:id="detail" class="body"></div>
+                <div wicket:id="noBuilds" class="body"><i>No builds</i></div>
             </div>
         </div>
     </wicket:fragment>

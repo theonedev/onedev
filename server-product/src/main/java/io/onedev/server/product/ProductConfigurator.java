@@ -9,9 +9,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 
+import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.jetty.ServerConfigurator;
-import io.onedev.server.util.serverconfig.ServerConfig;
-import io.onedev.server.util.serverconfig.SslConfig;
 
 public class ProductConfigurator implements ServerConfigurator {
 
@@ -31,15 +30,14 @@ public class ProductConfigurator implements ServerConfigurator {
 			server.addConnector(connector);
 		}
 
-		SslConfig sslConfig = serverConfig.getSslConfig();
-		if (sslConfig != null) {
+		if (serverConfig.getHttpsPort() != 0) {
 			SslContextFactory sslContextFactory = new SslContextFactory();
-			sslContextFactory.setKeyStorePath(sslConfig.getKeystorePath());
-			sslContextFactory.setKeyStorePassword(sslConfig.getKeystorePassword());
-			sslContextFactory.setKeyManagerPassword(sslConfig.getKeystoreKeyPassword());
+			sslContextFactory.setKeyStoreType("pkcs12");
+			sslContextFactory.setKeyStorePath(serverConfig.getKeystoreFile().getAbsolutePath());
+			sslContextFactory.setKeyStorePassword(serverConfig.getKeystorePassword());
 			
 			ServerConnector connector = new ServerConnector(server, sslContextFactory);
-			connector.setPort(sslConfig.getPort());
+			connector.setPort(serverConfig.getHttpsPort());
 			
 			HttpConfiguration configuration = new HttpConfiguration();
 			configuration.addCustomizer(new SecureRequestCustomizer());

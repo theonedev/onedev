@@ -1,18 +1,26 @@
 package io.onedev.server.model.support;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.validation.ConstraintValidatorContext;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.model.Project;
+import io.onedev.server.util.validation.Validatable;
+import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.JobChoice;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
-public class FileProtection implements Serializable {
+@ClassValidating
+public class FileProtection implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -20,8 +28,10 @@ public class FileProtection implements Serializable {
 	
 	private String reviewRequirement;
 	
+	private List<String> jobNames = new ArrayList<>();
+	
 	@Editable(order=100, description="Specify space-separated paths to be protected. Use * or ? for wildcard match")
-	@Patterns("getPathSuggestions")
+	@Patterns(suggester = "getPathSuggestions")
 	@NotEmpty
 	public String getPaths() {
 		return paths;
@@ -33,19 +43,41 @@ public class FileProtection implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> getPathSuggestions(String matchWith) {
-		return SuggestionUtils.suggestBlobs(OneContext.get().getProject(), matchWith);
+		return SuggestionUtils.suggestBlobs(Project.get(), matchWith);
 	}
 
 	@Editable(order=200, name="Reviewers", description="Specify required reviewers if specified path is "
 			+ "changed. Note that the user submitting the change is considered to reviewed the change automatically")
 	@io.onedev.server.web.editable.annotation.ReviewRequirement
-	@NotEmpty
 	public String getReviewRequirement() {
 		return reviewRequirement;
 	}
 
 	public void setReviewRequirement(String reviewRequirement) {
 		this.reviewRequirement = reviewRequirement;
+	}
+	
+	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")
+	@JobChoice
+	@NameOfEmptyValue("No any")
+	public List<String> getJobNames() {
+		return jobNames;
+	}
+
+	public void setJobNames(List<String> jobNames) {
+		this.jobNames = jobNames;
+	}
+
+	@Override
+	public boolean isValid(ConstraintValidatorContext context) {
+		if (getJobNames().isEmpty() && getReviewRequirement() == null) {
+			context.disableDefaultConstraintViolation();
+			String message = "Either reviewer or required builds should be specified";
+			context.buildConstraintViolationWithTemplate(message).addConstraintViolation();
+			return false;
+		} else {
+			return true;
+		}
 	}
 	
 }

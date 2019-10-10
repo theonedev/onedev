@@ -15,7 +15,7 @@ import io.onedev.server.util.validation.ReviewRequirementValidator;
 @Constraint(validatedBy=ReviewRequirementValidator.class) 
 public @interface ReviewRequirement {
 
-	String message() default "Malformed review requirement spec"; 
+	String message() default ""; 
 	
 	Class<?>[] groups() default {};
 

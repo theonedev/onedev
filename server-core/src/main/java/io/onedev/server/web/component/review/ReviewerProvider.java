@@ -11,8 +11,8 @@ import io.onedev.commons.utils.matchscore.MatchScoreProvider;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.security.SecurityUtils;
 import io.onedev.server.security.permission.ProjectPrivilege;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.Response;
@@ -37,7 +37,6 @@ public class ReviewerProvider extends AbstractUserChoiceProvider {
 			if (review.getExcludeDate() == null && review.getResult() == null)
 				users.remove(review.getUser().getFacade());
 		}
-		users.remove(SecurityUtils.getUser().getFacade());
 		
 		List<UserFacade> reviewers = new ArrayList<>(users);
 

@@ -1,0 +1,9 @@
+namespace: onedev
+bases:
+- ../production
+configMapGenerator:
+- name: trust-certs
+  files:
+  - changeme.pem
+patchesStrategicMerge:
+- deployments.yaml

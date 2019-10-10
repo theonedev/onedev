@@ -19,6 +19,8 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.onedev.commons.codeassist.FenceAware;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
@@ -147,13 +149,8 @@ public class CommitQuery implements Serializable {
 		return criterias.stream().anyMatch(it->it.needsLogin());
 	}
 	
-	private static String getValue(TerminalNode terminalNode) {
-		String value = terminalNode.getText();
-		if (value.startsWith("("))
-			value = value.substring(1);
-		if (value.endsWith(")"))
-			value = value.substring(0, value.length()-1);
-		return value.replace("\\(", "(").replace("\\)", ")").replace("\\\\", "\\");
+	private static String getValue(TerminalNode valueNode) {
+		return StringUtils.unescape(FenceAware.unfence(valueNode.getText())); 
 	}
 	
 	public boolean matches(RefUpdated event, User user) {

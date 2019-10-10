@@ -18,6 +18,8 @@ import io.onedev.server.util.validation.PathValidator;
 @Constraint(validatedBy=PathValidator.class) 
 public @interface Path {
 
+	boolean interpolative() default false;
+	
 	String message() default "Invalid path";
 	
 	Class<?>[] groups() default {};

@@ -16,7 +16,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.IssueConstants;
 
 public abstract class FieldCriteria extends IssueCriteria {

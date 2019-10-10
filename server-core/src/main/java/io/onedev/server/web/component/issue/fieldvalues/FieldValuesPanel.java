@@ -16,6 +16,7 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.utils.ColorUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -25,21 +26,21 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.SecretInput;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.OneContext;
 import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.util.inputspec.InputSpec;
-import io.onedev.server.util.inputspec.SecretInput;
-import io.onedev.server.util.inputspec.choiceinput.ChoiceInput;
-import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.builds.detail.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
@@ -67,10 +68,10 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 				@Override
 				protected void populateItem(ListItem<String> item) {
 					String value = item.getModelObject();
-					if (getField().getType().equals(InputSpec.USER)) {
+					if (getField().getType().equals(FieldSpec.USER)) {
 						UserIdent userIdent = UserIdent.of(UserFacade.of(OneDev.getInstance(UserManager.class).findByName(value)), value);
 						item.add(new UserIdentPanel("value", userIdent, Mode.AVATAR_AND_NAME));
-					} else if (getField().getType().equals(InputSpec.ISSUE)) {
+					} else if (getField().getType().equals(FieldSpec.ISSUE)) {
 						Issue issue = OneDev.getInstance(IssueManager.class).find(project, Long.valueOf(value));
 						if (issue != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
@@ -81,7 +82,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						} else {
 							item.add(new Label("value", "#" + value));
 						}
-					} else if (getField().getType().equals(InputSpec.BUILD)) {
+					} else if (getField().getType().equals(FieldSpec.BUILD)) {
 						Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(value));
 						if (build != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
@@ -92,7 +93,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						} else {
 							item.add(new Label("value", "#" + value));
 						}
-					} else if (getField().getType().equals(InputSpec.PULLREQUEST)) {
+					} else if (getField().getType().equals(FieldSpec.PULLREQUEST)) {
 						PullRequest request = OneDev.getInstance(PullRequestManager.class).find(project, Long.valueOf(value));
 						if (request != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
@@ -105,15 +106,15 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						}
 					} else {
 						Label label;
-						if (getField().getType().equals(InputSpec.SECRET))
+						if (getField().getType().equals(ParamSpec.SECRET))
 							label = new Label("value", SecretInput.MASK);
 						else
 							label = new Label("value", value);
 						
-						InputSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
-						if (fieldSpec != null && fieldSpec instanceof ChoiceInput) {
-							ChoiceProvider choiceProvider = ((ChoiceInput)fieldSpec).getChoiceProvider();
-							OneContext.push(new OneContext(this));
+						FieldSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
+						if (fieldSpec != null && fieldSpec instanceof ChoiceField) {
+							ChoiceProvider choiceProvider = ((ChoiceField)fieldSpec).getChoiceProvider();
+							ComponentContext.push(new ComponentContext(this));
 							try {
 								String backgroundColor = choiceProvider.getChoices(false).get(value);
 								if (backgroundColor != null) {
@@ -126,7 +127,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 									item.add(AttributeAppender.append("class", "has-color"));
 								}
 							} finally {
-								OneContext.pop();
+								ComponentContext.pop();
 							}
 						} 
 						item.add(label);
@@ -137,7 +138,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 			});
 			add(fragment);
 		} else {
-			InputSpec fieldSpec = null;
+			FieldSpec fieldSpec = null;
 			if (getField() != null)
 				fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
 			String displayValue;
@@ -153,7 +154,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 	@Override
 	public Object getInputValue(String name) {
 		Input field = getIssue().getFieldInputs().get(name);
-		InputSpec fieldSpec = getIssueSetting().getFieldSpec(name);
+		FieldSpec fieldSpec = getIssueSetting().getFieldSpec(name);
 		if (field != null && fieldSpec != null && field.getType().equals(EditableUtils.getDisplayName(fieldSpec.getClass()))) {
 			return fieldSpec.convertToObject(field.getValues());
 		} else {

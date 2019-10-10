@@ -14,7 +14,10 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.setting.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
+import io.onedev.server.util.scriptidentity.SiteAdministrator;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
@@ -30,7 +33,7 @@ import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
 import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowChangeAlertPanel;
 
 @SuppressWarnings("serial")
-public abstract class ProjectIssuesPage extends ProjectPage {
+public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIdentityAware {
 
 	public ProjectIssuesPage(PageParameters params) {
 		super(params);
@@ -109,6 +112,11 @@ public abstract class ProjectIssuesPage extends ProjectPage {
 			};
 		}
 		
+	}
+
+	@Override
+	public ScriptIdentity getScriptIdentity() {
+		return new SiteAdministrator();
 	}
 
 	@Override

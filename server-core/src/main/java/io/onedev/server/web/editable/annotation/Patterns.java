@@ -17,7 +17,9 @@ public @interface Patterns {
 
 	String message() default "Malformed patterns";
 	
-	String value() default "";
+	boolean interpolative() default false;
+	
+	String suggester() default "";
 	
 	Class<?>[] groups() default {};
 

@@ -1,16 +1,20 @@
 package io.onedev.server.model.support;
 
 import java.io.Serializable;
+import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatcher.Anyone;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
-import io.onedev.server.web.editable.annotation.TagPatterns;
+import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
 @Horizontal
@@ -39,7 +43,7 @@ public class TagProtection implements Serializable {
 	}
 
 	@Editable(order=100, description="Specify space-separated tags to be protected. Use * or ? for wildcard match")
-	@TagPatterns
+	@Patterns(suggester = "suggestTags")
 	@NotEmpty
 	public String getTags() {
 		return tags;
@@ -49,6 +53,11 @@ public class TagProtection implements Serializable {
 		this.tags = tags;
 	}
 
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestTags(String matchWith) {
+		return SuggestionUtils.suggestTags(Project.get(), matchWith);
+	}
+	
 	@Editable(order=150, name="Applicable Users", description="Rule will apply only if the user changing the tag matches criteria specified here")
 	@io.onedev.server.web.editable.annotation.UserMatcher
 	@NotEmpty(message="may not be empty")

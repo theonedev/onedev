@@ -7,7 +7,7 @@ import java.util.List;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.Milestone;
-import io.onedev.server.util.OneContext;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -59,14 +59,14 @@ public class MilestoneCloseOption implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static boolean isNewMilestoneVisible() {
-		return (Boolean) OneContext.get().getEditContext().getInputValue("moveOpenIssuesToAnotherMilestone");
+		return (Boolean) EditContext.get().getInputValue("moveOpenIssuesToAnotherMilestone");
 	}
 	
 	@SuppressWarnings("unused")
 	private static List<String> getNewMilestoneChoices() {
 		List<String> choices = new ArrayList<>();
 		ProjectPage page = (ProjectPage) WicketUtils.getPage();
-		Object milestoneToDelete = OneContext.get().getEditContext().getInputValue("milestoneToClose");
+		Object milestoneToDelete = EditContext.get().getInputValue("milestoneToClose");
 		for (Milestone milestone: page.getProject().getMilestones()) {
 			if (!milestone.isClosed() && !milestone.getName().equals(milestoneToDelete))
 				choices.add(milestone.getName());

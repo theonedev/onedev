@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.antlr.v4.runtime.Token;
-import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.base.Optional;
 
@@ -16,7 +15,7 @@ import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.patternset.PatternSetLexer;
 import io.onedev.server.util.patternset.PatternSetParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
@@ -36,23 +35,20 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 			Set<String> matches = new HashSet<>();
 			for (Token token: terminalExpect.getRoot().getState().getMatchedTokens()) {
 				if (token.getType() == PatternSetLexer.Quoted)
-					matches.add(PatternSet.unescape(token.getText()));
-				else if (token.getType() == PatternSetLexer.NQuoted)
-					matches.add(token.getText());
+					matches.add(StringUtils.unescape(FenceAware.unfence(token.getText())));
+				else
+					matches.add(StringUtils.unescape(token.getText()));
 			}
 
 			String unmatched = terminalExpect.getUnmatchedText();
 			if (spec.getRuleName().equals("NQuoted")) {
 				List<InputSuggestion> suggestions = suggest(unmatched);
-				int index = "*".indexOf(unmatched);
-				if (index != -1)
-					suggestions.add(new InputSuggestion("*", "all", new LinearRange(index, unmatched.length())));
 				return suggestions
 						.stream()
 						.filter(it->!matches.contains(it.getContent()))
 						.map(it->{
-							if (StringUtils.containsAny(it.getContent(), " \"") || it.getContent().startsWith("-")) {
-								InputSuggestion suggestion = it.escape(PatternSet.ESCAPE_CHARS);
+							if (it.getContent().contains(" ") || it.getContent().startsWith("-")) {
+								InputSuggestion suggestion = it.escape("\"");
 								suggestion = new InputSuggestion("\"" + suggestion.getContent() + "\"", 
 										suggestion.getCaret()!=-1? suggestion.getCaret()+1: -1,
 										suggestion.getDescription(), 
@@ -63,22 +59,23 @@ public abstract class PatternSetAssistBehavior extends ANTLRAssistBehavior {
 							}
 						})
 						.collect(Collectors.toList());
-			} else if (spec.getRuleName().equals("Quoted") && unmatched.startsWith("\"")) {
-				return new FenceAware(codeAssist.getGrammar(), "\"", "\"") {
+			} else if (spec.getRuleName().equals("Quoted") && unmatched.startsWith("\"")) { 
+				/*
+				 *  provide this suggestion only when we typed quote as otherwise we will have duplicated suggestions
+				 *  (one for nquoted, and one for quoted) 
+				 */
+				return new FenceAware(codeAssist.getGrammar(), '"', '"') {
 
 					@Override
-					protected List<InputSuggestion> match(String unfencedMatchWith) {
-						List<InputSuggestion> suggestions = PatternSetAssistBehavior.this.suggest(unfencedMatchWith)
+					protected List<InputSuggestion> match(String matchWith) {
+						List<InputSuggestion> suggestions = PatternSetAssistBehavior.this.suggest(matchWith)
 								.stream()
-								.filter(it->!matches.contains(it.getContent()))
+								.filter(it -> !matches.contains(it.getContent()))
 								.collect(Collectors.toList());
-						if (unfencedMatchWith.length() != 0 
-								&& !matches.contains(unfencedMatchWith) 
-								&& suggestions.isEmpty()) {
+						if (!suggestions.isEmpty() || matches.contains(matchWith) || matchWith.length() == 0) 
+							return suggestions;
+						else 
 							return null;
-						} else {
-							return suggestions.stream().map(it->it.escape(PatternSet.ESCAPE_CHARS)).collect(Collectors.toList());
-						}
 					}
 
 					@Override

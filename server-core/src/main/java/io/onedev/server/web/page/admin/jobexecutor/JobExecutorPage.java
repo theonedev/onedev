@@ -14,7 +14,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.JobExecutor;
+import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -84,7 +84,7 @@ public class JobExecutorPage extends AdministrationPage {
 				target.add(container);
 			}
 			
-		}.items("li.executor"));
+		}.items("li.executor").handle(".panel-heading"));
 		
 		container.add(newAddNewFrag());
 	}

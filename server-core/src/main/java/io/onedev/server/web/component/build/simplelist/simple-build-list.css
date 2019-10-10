@@ -1,5 +1,5 @@
 .simple-build-list>.head {
-    padding: 8px 16px;
+    padding: 8px;
     border-bottom: 1px solid #DDD;
     margin-bottom: 4px;
     min-width: 100px;
@@ -14,20 +14,20 @@
     color: #666;
 }
 
-.simple-build-list>.body>.build {
-    padding: 4px 16px;
+.simple-build-list>.body {
+	padding: 0 8px;
 }
-.simple-build-list>.body>.build>.title {
-    margin: -2px 0 0 8px;
+.simple-build-list>.body>div>.build {
+	padding: 4px 0;
+	display: block;
 }
-.simple-build-list>.body>div:hover {
+.simple-build-list>.body>div>.build>.title {
+    margin-left: 8px;
+}
+.simple-build-list>.body>div>.build:hover {
     background: #F0F0F0;
 }
 .simple-build-list>.body>.no-builds {
     font-style: italic;
     padding: 12px;
-}
-
-.commit-status, .commit-status>.job {
-    display: inline-block;
 }
