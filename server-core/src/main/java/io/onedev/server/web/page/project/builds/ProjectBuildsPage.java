@@ -52,7 +52,7 @@ public class ProjectBuildsPage extends ProjectPage {
 			query = null;
 			for (String each: queries) {
 				try {
-					if (SecurityUtils.getUser() != null || !BuildQuery.parse(getProject(), each, true).needsLogin()) {  
+					if (SecurityUtils.getUser() != null || !BuildQuery.parse(getProject(), each).needsLogin()) {  
 						query = each;
 						break;
 					}
@@ -85,7 +85,7 @@ public class ProjectBuildsPage extends ProjectPage {
 
 			@Override
 			protected boolean needsLogin(NamedBuildQuery namedQuery) {
-				return BuildQuery.parse(getProject(), namedQuery.getQuery(), true).needsLogin();
+				return BuildQuery.parse(getProject(), namedQuery.getQuery()).needsLogin();
 			}
 
 			@Override

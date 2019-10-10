@@ -25,6 +25,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.ci.job.retry.JobRetry;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Project;
@@ -84,6 +85,8 @@ public class Job implements Serializable, Validatable {
 	private String memoryRequirement = "128m";
 	
 	private long timeout = 3600;
+	
+	private JobRetry retry;
 	
 	private transient Map<String, ParamSpec> paramSpecMap;
 	
@@ -300,6 +303,16 @@ public class Job implements Serializable, Validatable {
 		this.timeout = timeout;
 	}
 
+	@Editable(order=10600, name="Retry When Failed", group="More Settings", description="Check to re-run the job upon build failure")
+	@NameOfEmptyValue("Do not retry")
+	public JobRetry getRetry() {
+		return retry;
+	}
+	
+	public void setRetry(JobRetry retry) {
+		this.retry = retry;
+	}
+	
 	public JobTrigger getMatchedTrigger(ProjectEvent event) {
 		for (JobTrigger trigger: getTriggers()) {
 			if (trigger.matches(event, this))

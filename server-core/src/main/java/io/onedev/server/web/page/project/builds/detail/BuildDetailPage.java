@@ -89,6 +89,8 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 	
 	private final QueryPosition position;
 	
+	private int retried;
+	
 	public BuildDetailPage(PageParameters params) {
 		super(params);
 		
@@ -122,8 +124,12 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				handler.add(component);
-				handler.appendJavaScript("$(window).resize();");
+				if (getBuild().getRetried() != retried) {
+					setResponsePage(getPage().getClass(), paramsOf(getBuild(), position));
+				} else {
+					handler.add(component);
+					handler.appendJavaScript("$(window).resize();");
+				}
 			}
 			
 			@Override
@@ -143,6 +149,8 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		retried = getBuild().getRetried();
 		
 		WebMarkupContainer summary = new WebMarkupContainer("summary");
 		summary.add(newBuildObserver(getBuild().getId()));

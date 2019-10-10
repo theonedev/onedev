@@ -42,7 +42,6 @@ import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
-import io.onedev.server.event.build.BuildSubmitted;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.Build;
@@ -279,12 +278,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	
-	@Listen
-	public void on(BuildSubmitted event) {
-		Build build = event.getBuild();
-		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getNumber()));
-	}
-
 	@Sessional
 	@Override
 	public Map<ObjectId, Map<String, Status>> queryStatus(Project project, Collection<ObjectId> commitIds) {
@@ -361,7 +354,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 					if (query == null) {
 						try {
 							String queryString = project.getBuildSetting().getBuildsToPreserve();
-							query = Optional.of(BuildQuery.parse(project, queryString, true));
+							query = Optional.of(BuildQuery.parse(project, queryString));
 							if (query.get().needsLogin())
 								throw new OneException("This query needs login which is not supported here");
 						} catch (Exception e) {

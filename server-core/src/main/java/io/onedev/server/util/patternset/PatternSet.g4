@@ -9,6 +9,3 @@ NQuoted: ('\\'.|~[-\\" ])('\\'.|~[\\" ])*;
 Excluded: '-';
 
 WS: ' ';
-
-fragment
-ESCAPE: '\\'[\\"];

@@ -23,7 +23,7 @@ public class CodeCommentQueryValidator implements ConstraintValidator<CodeCommen
 		} else {
 			Project project = Project.get();
 			try {
-				io.onedev.server.search.entity.codecomment.CodeCommentQuery.parse(project, value, true);
+				io.onedev.server.search.entity.codecomment.CodeCommentQuery.parse(project, value);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

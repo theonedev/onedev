@@ -52,9 +52,9 @@ import io.onedev.server.util.JobLogger;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @Singleton
-public class DefaultJobLogManager implements JobLogManager {
+public class DefaultLogManager implements LogManager {
 
-	private static final Logger logger = LoggerFactory.getLogger(DefaultJobLogManager.class);
+	private static final Logger logger = LoggerFactory.getLogger(DefaultLogManager.class);
 	
 	private static final int MIN_CACHE_ENTRIES = 5000;
 
@@ -75,7 +75,7 @@ public class DefaultJobLogManager implements JobLogManager {
 	private final Map<Long, LogSnippet> recentSnippets = new ConcurrentHashMap<>();
 	
 	@Inject
-	public DefaultJobLogManager(StorageManager storageManager, WebSocketManager webSocketManager, 
+	public DefaultLogManager(StorageManager storageManager, WebSocketManager webSocketManager, 
 			BuildManager buildManager) {
 		this.storageManager = storageManager;
 		this.webSocketManager = webSocketManager;
@@ -188,6 +188,39 @@ public class DefaultJobLogManager implements JobLogManager {
 		return "build-log: " + buildId;
 	}
 
+	@Override
+	public boolean matches(Build build, Pattern pattern) {
+		Lock lock = LockUtils.getReadWriteLock(getLockKey(build.getId())).readLock();
+		lock.lock();
+		try {
+			LogSnippet snippet = recentSnippets.get(build.getId());
+			if (snippet != null) {
+				for (JobLogEntry entry: snippet.entries) {
+					if (pattern.matcher(entry.getMessage()).find())
+						return true;
+				}
+			}
+			
+			File logFile = getLogFile(build.getProject().getId(), build.getNumber());
+			
+			if (logFile.exists()) {
+				try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)))) {
+					while (true) {
+						JobLogEntry entry  = (JobLogEntry) ois.readObject();
+						if (pattern.matcher(entry.getMessage()).find())
+							return true;
+					}
+				} catch (EOFException e) {
+				} catch (IOException|ClassNotFoundException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			return false;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
 	private List<JobLogEntry> readLogEntries(File logFile, int from, int count) {
 		List<JobLogEntry> entries = new ArrayList<>();
 		if (logFile.exists()) {

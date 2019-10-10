@@ -33,6 +33,7 @@ import org.antlr.v4.runtime.Recognizer;
 import org.eclipse.jgit.errors.RevisionSyntaxException;
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SettingManager;
@@ -436,11 +437,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 	}
 	
 	public static String getRuleName(int rule) {
-		return getLexerRuleName(IssueQueryLexer.ruleNames, rule);
+		return AntlrUtils.getLexerRuleName(IssueQueryLexer.ruleNames, rule);
 	}
 	
 	public static int getOperator(String operatorName) {
-		return getLexerRule(IssueQueryLexer.ruleNames, operatorName);
+		return AntlrUtils.getLexerRule(IssueQueryLexer.ruleNames, operatorName);
 	}
 	
 	@Override

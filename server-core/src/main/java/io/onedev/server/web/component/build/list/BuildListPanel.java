@@ -89,7 +89,7 @@ public abstract class BuildListPanel extends Panel {
 		@Override
 		protected BuildQuery load() {
 			try {
-				BuildQuery additionalQuery = BuildQuery.parse(getProject(), query, true);
+				BuildQuery additionalQuery = BuildQuery.parse(getProject(), query);
 				if (SecurityUtils.getUser() == null && additionalQuery.needsLogin()) { 
 					error("Please login to perform this query");
 				} else { 

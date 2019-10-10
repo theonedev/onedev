@@ -76,7 +76,7 @@ public abstract class CodeCommentListPanel extends Panel {
 		@Override
 		protected CodeCommentQuery load() {
 			try {
-				CodeCommentQuery parsedQuery = CodeCommentQuery.parse(getProject(), query, true);
+				CodeCommentQuery parsedQuery = CodeCommentQuery.parse(getProject(), query);
 				if (SecurityUtils.getUser() == null && parsedQuery.needsLogin())  
 					error("Please login to perform this query");
 				else

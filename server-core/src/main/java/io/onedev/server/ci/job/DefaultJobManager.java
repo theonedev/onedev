@@ -53,10 +53,11 @@ import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.job.log.JobLogManager;
+import io.onedev.server.ci.job.log.LogManager;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.paramspec.SecretParam;
+import io.onedev.server.ci.job.retry.JobRetry;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -118,7 +119,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	private final SessionManager sessionManager;
 	
-	private final JobLogManager logManager;
+	private final LogManager logManager;
 	
 	private final UserManager userManager;
 	
@@ -136,7 +137,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Inject
 	public DefaultJobManager(BuildManager buildManager, UserManager userManager, ListenerRegistry listenerRegistry, 
-			SettingManager settingManager, TransactionManager transactionManager, JobLogManager logManager, 
+			SettingManager settingManager, TransactionManager transactionManager, LogManager logManager, 
 			ExecutorService executorService, SessionManager sessionManager, BuildParamManager buildParamManager, 
 			ProjectManager projectManager, PasswordService passwordService) {
 		this.settingManager = settingManager;
@@ -720,10 +721,54 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 	
 	@Listen
+	public void on(BuildSubmitted event) {
+		Build build = event.getBuild();
+		FileUtils.deleteDir(build.getPublishDir());
+	}
+
+	@Transactional
+	@Listen
 	public void on(BuildFinished event) {
-		for (BuildParam param: event.getBuild().getParams()) {
-			if (param.getType().equals(ParamSpec.SECRET)) 
-				param.setValue(null);
+		Build build = event.getBuild();
+		JobRetry retry = build.getJob().getRetry();
+		if (build.willRetry()) {
+			Long buildId = build.getId();
+			int retried = build.getRetried();
+			transactionManager.runAsyncAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					try {						
+						Thread.sleep(retry.getRetryDelay() * (long)(Math.pow(2, retried)) * 1000L);
+					} catch (InterruptedException e) {
+						throw new RuntimeException(e);
+					}
+					transactionManager.run(new Runnable() {
+
+						@Override
+						public void run() {
+							Build build = buildManager.load(buildId);
+							logger.info("Retrying build (project: {}, build number: {})...", 
+									build.getProject().getName(), build.getNumber());
+							build.setRetried(retried + 1);
+							build.setStatus(Build.Status.WAITING);
+							build.setFinishDate(null);
+							build.setPendingDate(null);
+							build.setRunningDate(null);
+							build.setSubmitDate(new Date());
+							buildManager.save(build);
+							listenerRegistry.post(new BuildSubmitted(build));			
+						}
+						
+					});
+				}
+				
+			}, SecurityUtils.getSubject());
+		} else {
+			for (BuildParam param: build.getParams()) {
+				if (param.getType().equals(ParamSpec.SECRET)) 
+					param.setValue(null);
+			}
 		}
 	}
 	

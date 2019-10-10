@@ -3,11 +3,12 @@ package io.onedev.server.ci.job.log;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.util.JobLogger;
 
-public interface JobLogManager {
+public interface LogManager {
 	
 	JobLogger getLogger(Build build, Collection<String> jobSecrets);
 	
@@ -26,6 +27,8 @@ public interface JobLogManager {
 	 * 			enough log entries
 	 */
 	List<JobLogEntry> readLogEntries(Build build, int offset, int count);
+	
+	boolean matches(Build build, Pattern pattern);
 	
 	/**
 	 * Read specified number of log entries starting from end of the log

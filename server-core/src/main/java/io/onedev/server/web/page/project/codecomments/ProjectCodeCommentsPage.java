@@ -52,7 +52,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 				queries.add(namedQuery.getQuery());
 			for (String each: queries) {
 				try {
-					if (SecurityUtils.getUser() != null || !CodeCommentQuery.parse(getProject(), each, true).needsLogin()) {  
+					if (SecurityUtils.getUser() != null || !CodeCommentQuery.parse(getProject(), each).needsLogin()) {  
 						query = each;
 						break;
 					}
@@ -80,7 +80,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 
 			@Override
 			protected boolean needsLogin(NamedCodeCommentQuery namedQuery) {
-				return CodeCommentQuery.parse(getProject(), namedQuery.getQuery(), true).needsLogin();
+				return CodeCommentQuery.parse(getProject(), namedQuery.getQuery()).needsLogin();
 			}
 
 			@Override

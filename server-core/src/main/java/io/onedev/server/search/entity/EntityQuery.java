@@ -14,7 +14,6 @@ import com.google.common.base.Splitter;
 
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
@@ -160,17 +159,4 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		}
 	}
 	
-	public static String getLexerRuleName(String[] lexerRuleNames, int rule) {
-		return WordUtils.uncamel(lexerRuleNames[rule-1]).toLowerCase();
-	}
-	
-	public static int getLexerRule(String[] lexerRuleNames, String lexerRuleName) {
-		for (int i=0; i<lexerRuleNames.length; i++) {
-			String each = lexerRuleNames[i];
-			if (WordUtils.uncamel(each).toLowerCase().equals(lexerRuleName))
-				return i+1;
-		}
-		throw new OneException("Unable to find lexer rule: " + lexerRuleName);
-	}
-		
 }

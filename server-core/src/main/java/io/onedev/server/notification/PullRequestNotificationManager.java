@@ -94,7 +94,7 @@ public class PullRequestNotificationManager implements PersistListener {
 
 			@Override
 			protected EntityQuery<PullRequest> parse(String queryString) {
-				return PullRequestQuery.parse(request.getTargetProject(), queryString, true);
+				return PullRequestQuery.parse(request.getTargetProject(), queryString);
 			}
 
 			@Override

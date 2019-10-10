@@ -85,7 +85,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 		@Override
 		protected PullRequestQuery load() {
 			try {
-				PullRequestQuery parsedQuery = PullRequestQuery.parse(getProject(), query, true);
+				PullRequestQuery parsedQuery = PullRequestQuery.parse(getProject(), query);
 				if (SecurityUtils.getUser() == null && parsedQuery.needsLogin())  
 					error("Please login to perform this query");
 				else
@@ -117,7 +117,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 				queries.add(namedQuery.getQuery());
 			for (String each: queries) {
 				try {
-					if (SecurityUtils.getUser() != null || !PullRequestQuery.parse(getProject(), each, true).needsLogin()) {  
+					if (SecurityUtils.getUser() != null || !PullRequestQuery.parse(getProject(), each).needsLogin()) {  
 						query = each;
 						break;
 					}
@@ -155,7 +155,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 			@Override
 			protected boolean needsLogin(NamedPullRequestQuery namedQuery) {
-				return PullRequestQuery.parse(getProject(), namedQuery.getQuery(), true).needsLogin();
+				return PullRequestQuery.parse(getProject(), namedQuery.getQuery()).needsLogin();
 			}
 
 			@Override

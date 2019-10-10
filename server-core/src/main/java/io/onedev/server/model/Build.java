@@ -57,6 +57,8 @@ import io.onedev.server.ci.job.VariableInterpolator;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.paramspec.SecretParam;
+import io.onedev.server.ci.job.retry.JobRetry;
+import io.onedev.server.ci.job.retry.RetryCondition;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.support.inputspec.SecretInput;
@@ -149,6 +151,8 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	private Date finishDate;
 	
+	private int retried;
+	
 	@Column(length=MAX_STATUS_MESSAGE_LEN)
 	private String statusMessage;
 
@@ -174,6 +178,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	private transient CISpec ciSpec;
 	
 	private transient Job job;
+	
+	private transient Boolean willRetry;
 	
 	public Project getProject() {
 		return project;
@@ -305,6 +311,14 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public void setFinishDate(Date finishDate) {
 		this.finishDate = finishDate;
+	}
+
+	public int getRetried() {
+		return retried;
+	}
+
+	public void setRetried(int retried) {
+		this.retried = retried;
 	}
 
 	public Collection<BuildParam> getParams() {
@@ -650,4 +664,14 @@ public class Build extends AbstractEntity implements Referenceable {
 		return Build.class.getName() + ":" + buildId;
 	}
 
+	public boolean willRetry() {
+		if (willRetry == null) {
+			JobRetry retry = getJob().getRetry();
+			willRetry = getStatus() == Build.Status.FAILED
+					&& retry != null 
+					&& getRetried() < retry.getMaxRetries() 
+					&& RetryCondition.parse(retry.getRetryCondition()).satisfied(this);
+		}
+		return willRetry;
+	}
 }

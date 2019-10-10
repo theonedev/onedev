@@ -14,6 +14,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
+import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -52,7 +53,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		this(null, new ArrayList<>());
 	}
 	
-	public static PullRequestQuery parse(Project project, @Nullable String queryString, boolean validate) {
+	public static PullRequestQuery parse(Project project, @Nullable String queryString) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			PullRequestQueryLexer lexer = new PullRequestQueryLexer(is);
@@ -151,8 +152,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
-						if (validate)
-							checkField(project, fieldName, operator);
+						checkField(project, fieldName, operator);
 						
 						switch (operator) {
 						case PullRequestQueryLexer.IsBefore:
@@ -243,7 +243,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 			List<EntitySort> requestSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (validate && !PullRequestConstants.ORDER_FIELDS.containsKey(fieldName))
+				if (!PullRequestConstants.ORDER_FIELDS.containsKey(fieldName))
 					throw new OneException("Can not order by field: " + fieldName);
 				
 				EntitySort requestSort = new EntitySort();
@@ -303,11 +303,11 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 	}
 	
 	public static String getRuleName(int rule) {
-		return getLexerRuleName(PullRequestQueryLexer.ruleNames, rule);
+		return AntlrUtils.getLexerRuleName(PullRequestQueryLexer.ruleNames, rule);
 	}
 	
 	public static int getOperator(String operatorName) {
-		return getLexerRule(PullRequestQueryLexer.ruleNames, operatorName);
+		return AntlrUtils.getLexerRule(PullRequestQueryLexer.ruleNames, operatorName);
 	}
 	
 	@Override

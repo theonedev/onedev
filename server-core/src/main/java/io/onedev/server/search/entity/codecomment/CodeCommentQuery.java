@@ -21,6 +21,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
+import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.server.OneException;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
@@ -60,7 +61,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 		this(null, new ArrayList<>());
 	}
 	
-	public static CodeCommentQuery parse(Project project, @Nullable String queryString, boolean validate) {
+	public static CodeCommentQuery parse(Project project, @Nullable String queryString) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			CodeCommentQueryLexer lexer = new CodeCommentQueryLexer(is);
@@ -117,8 +118,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
-						if (validate)
-							checkField(project, fieldName, operator);
+						checkField(project, fieldName, operator);
 						
 						switch (operator) {
 						case CodeCommentQueryLexer.IsBefore:
@@ -187,7 +187,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 			List<EntitySort> commentSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (validate && !CodeCommentConstants.ORDER_FIELDS.containsKey(fieldName)) 
+				if (!CodeCommentConstants.ORDER_FIELDS.containsKey(fieldName)) 
 					throw new OneException("Can not order by field: " + fieldName);
 				
 				EntitySort commentSort = new EntitySort();
@@ -235,11 +235,11 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 	}
 	
 	public static String getRuleName(int rule) {
-		return getLexerRuleName(CodeCommentQueryLexer.ruleNames, rule);
+		return AntlrUtils.getLexerRuleName(CodeCommentQueryLexer.ruleNames, rule);
 	}
 	
 	public static int getOperator(String operatorName) {
-		return getLexerRule(CodeCommentQueryLexer.ruleNames, operatorName);
+		return AntlrUtils.getLexerRule(CodeCommentQueryLexer.ruleNames, operatorName);
 	}
 	
 	@Override

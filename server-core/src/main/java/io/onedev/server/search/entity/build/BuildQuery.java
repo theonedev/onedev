@@ -24,6 +24,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
+import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.CacheManager;
@@ -65,7 +66,7 @@ public class BuildQuery extends EntityQuery<Build> {
 		this(null, new ArrayList<>());
 	}
 	
-	public static BuildQuery parse(Project project, @Nullable String queryString, boolean validate) {
+	public static BuildQuery parse(Project project, @Nullable String queryString) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			BuildQueryLexer lexer = new BuildQueryLexer(is);
@@ -157,8 +158,7 @@ public class BuildQuery extends EntityQuery<Build> {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
-						if (validate)
-							checkField(project, fieldName, operator);
+						checkField(project, fieldName, operator);
 						
 						switch (operator) {
 						case BuildQueryLexer.IsBefore:
@@ -224,7 +224,7 @@ public class BuildQuery extends EntityQuery<Build> {
 			List<EntitySort> buildSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (validate && !BuildConstants.ORDER_FIELDS.containsKey(fieldName)) 
+				if (!BuildConstants.ORDER_FIELDS.containsKey(fieldName)) 
 					throw new OneException("Can not order by field: " + fieldName);
 				
 				EntitySort commentSort = new EntitySort();
@@ -274,11 +274,11 @@ public class BuildQuery extends EntityQuery<Build> {
 	}
 	
 	public static String getRuleName(int rule) {
-		return getLexerRuleName(BuildQueryLexer.ruleNames, rule);
+		return AntlrUtils.getLexerRuleName(BuildQueryLexer.ruleNames, rule);
 	}
 	
 	public static int getOperator(String operatorName) {
-		return getLexerRule(BuildQueryLexer.ruleNames, operatorName);
+		return AntlrUtils.getLexerRule(BuildQueryLexer.ruleNames, operatorName);
 	}
 	
 	@Override
