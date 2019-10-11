@@ -42,7 +42,7 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.util.LocaleUtils;
+import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
 public class GroovyScriptListPage extends AdministrationPage {
@@ -134,7 +134,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, LocaleUtils.describe(script.getJobAuthorization() != null));
+						return new Label(componentId, TextUtils.describe(script.getJobAuthorization() != null));
 					}
 					
 				});

@@ -34,6 +34,8 @@ public class BuildDependence extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Build dependency;
 
+	private boolean requireSuccessful;
+	
 	private String artifacts;
 	
 	public Build getDependent() {
@@ -50,6 +52,14 @@ public class BuildDependence extends AbstractEntity {
 
 	public void setDependency(Build dependency) {
 		this.dependency = dependency;
+	}
+
+	public boolean isRequireSuccessful() {
+		return requireSuccessful;
+	}
+
+	public void setRequireSuccessful(boolean requireSuccessful) {
+		this.requireSuccessful = requireSuccessful;
 	}
 
 	@Nullable

@@ -235,6 +235,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							BuildDependence dependence = new BuildDependence();
 							dependence.setDependency(dependencyBuild);
 							dependence.setDependent(build);
+							dependence.setRequireSuccessful(dependency.isRequireSuccessful());
 							dependence.setArtifacts(dependency.getArtifacts());
 							build.getDependencies().add(dependence);
 						}
@@ -648,23 +649,11 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									markBuildError(build, "Stopped for unknown reason");
 								}
 							} else if (build.getStatus() == Build.Status.WAITING) {
-								boolean hasUnsuccessful = false;
-								boolean hasUnfinished = false;
-								
-								for (BuildDependence dependence: build.getDependencies()) {
-									Build dependency = dependence.getDependency();
-									
-									if (dependency.getStatus() == Build.Status.SUCCESSFUL)
-										continue;
-									else if (dependency.isFinished())
-										hasUnsuccessful = true;
-									else
-										hasUnfinished = true;
-								}
-								
-								if (hasUnsuccessful) {
-									markBuildError(build, "There are failed dependencies");
-								} else if (!hasUnfinished) {
+								if (build.getDependencies().stream().anyMatch(it -> it.isRequireSuccessful() 
+										&& it.getDependency().isFinished() 
+										&& it.getDependency().getStatus() != Build.Status.SUCCESSFUL)) {
+									markBuildError(build, "Some dependencies are required to be successful but failed");
+								} else if (build.getDependencies().stream().allMatch(it->it.getDependency().isFinished())) {
 									build.setStatus(Build.Status.PENDING);
 									build.setPendingDate(new Date());
 									listenerRegistry.post(new BuildPending(build));

@@ -38,6 +38,7 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
+import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
 class JobDependencyListEditPanel extends PropertyEditor<List<Serializable>> {
@@ -139,15 +140,12 @@ class JobDependencyListEditPanel extends PropertyEditor<List<Serializable>> {
 			
 		});		
 		
-		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Artifacts to Retrieve")) {
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Require Successful")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
 				JobDependency dependency = rowModel.getObject();
-				if (dependency.getArtifacts() != null) 
-					cellItem.add(new Label(componentId, dependency.getArtifacts()));
-				else  
-					cellItem.add(new Label(componentId, "<i>Do not retrieve</i>").setEscapeModelStrings(false));
+				cellItem.add(new Label(componentId, TextUtils.describe(dependency.isRequireSuccessful())));
 			}
 		});		
 		

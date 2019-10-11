@@ -40,7 +40,7 @@ import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
-import io.onedev.server.web.util.LocaleUtils;
+import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
 public class IssueFieldListPage extends GlobalIssueSettingPage {
@@ -146,7 +146,7 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, LocaleUtils.describe(getSetting().getDefaultListFields().contains(field.getName())));
+						return new Label(componentId, TextUtils.describe(getSetting().getDefaultListFields().contains(field.getName())));
 					}
 					
 				});

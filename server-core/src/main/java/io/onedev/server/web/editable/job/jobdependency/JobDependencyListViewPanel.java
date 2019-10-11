@@ -29,6 +29,7 @@ import io.onedev.server.ci.job.JobDependency;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.page.layout.SideFloating.Placement;
+import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
 class JobDependencyListViewPanel extends Panel {
@@ -78,7 +79,7 @@ class JobDependencyListViewPanel extends Panel {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Artifacts to Retrieve")) {
+		columns.add(new AbstractColumn<JobDependency, Void>(Model.of("Require Successful")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<JobDependency>> cellItem, String componentId, IModel<JobDependency> rowModel) {
@@ -87,10 +88,7 @@ class JobDependencyListViewPanel extends Panel {
 					@Override
 					protected Component newLabel(String componentId) {
 						JobDependency dependency = rowModel.getObject();
-						if (dependency.getArtifacts() != null) 
-							return new Label(componentId, dependency.getArtifacts());
-						else
-							return new Label(componentId, "<i>Do not retrieve</i>").setEscapeModelStrings(false);
+						return new Label(componentId, TextUtils.describe(dependency.isRequireSuccessful()));
 					}
 					
 				});

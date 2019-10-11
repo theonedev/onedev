@@ -30,6 +30,8 @@ public class JobDependency implements Serializable {
 
 	private String jobName;
 	
+	private boolean requireSuccessful = true;
+	
 	private List<JobParam> jobParams = new ArrayList<>();
 	
 	private String artifacts = "**";
@@ -44,6 +46,15 @@ public class JobDependency implements Serializable {
 
 	public void setJobName(String jobName) {
 		this.jobName = jobName;
+	}
+
+	@Editable(order=150, description="Whether or not to require this dependency to be successful")
+	public boolean isRequireSuccessful() {
+		return requireSuccessful;
+	}
+
+	public void setRequireSuccessful(boolean requireSuccessful) {
+		this.requireSuccessful = requireSuccessful;
 	}
 
 	@Editable(order=200)
