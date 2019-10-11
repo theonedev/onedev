@@ -72,6 +72,8 @@ public class BuildConstants {
 	
 	public static final String ATTR_PULL_REQUEST_BUILDS = "pullRequestBuilds";
 	
+	public static final String ATTR_WILL_RETRY = "willRetry";
+	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			FIELD_NUMBER, FIELD_JOB, FIELD_STATUS, FIELD_SUBMITTER, FIELD_CANCELLER, 
 			FIELD_SUBMIT_DATE, FIELD_QUEUEING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE, 

@@ -121,6 +121,8 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new SubmittedByMeCriteria();
 						case BuildQueryLexer.CancelledByMe:
 							return new CancelledByMeCriteria();
+						case BuildQueryLexer.WillRetry:
+							return new WillRetryCriteria();
 						default:
 							throw new OneException("Unexpected operator: " + ctx.operator.getText());
 						}

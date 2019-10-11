@@ -58,6 +58,7 @@ import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.paramspec.SecretParam;
 import io.onedev.server.ci.job.retry.JobRetry;
+import io.onedev.server.ci.job.retry.RetryCondition;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -731,7 +732,12 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	public void on(BuildFinished event) {
 		Build build = event.getBuild();
 		JobRetry retry = build.getJob().getRetry();
-		if (build.willRetry()) {
+		build.setWillRetry(build.getStatus() == Build.Status.FAILED
+				&& retry != null 
+				&& build.getRetried() < retry.getMaxRetries() 
+				&& RetryCondition.parse(retry.getRetryCondition()).satisfied(build));
+		
+		if (build.isWillRetry()) {
 			Long buildId = build.getId();
 			int retried = build.getRetried();
 			transactionManager.runAsyncAfterCommit(new Runnable() {
