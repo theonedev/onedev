@@ -162,7 +162,6 @@ public abstract class TaskButton extends AjaxButton {
 	@Override
 	protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 		super.onSubmit(target, form);
-		target.add(form);
 		target.focusComponent(null);
 		submitTask(target);
 	}
