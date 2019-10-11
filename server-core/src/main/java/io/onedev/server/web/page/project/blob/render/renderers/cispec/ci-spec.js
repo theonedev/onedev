@@ -22,14 +22,19 @@ onedev.server.ciSpec = {
 
         onedev.server.ciSpec.showJob(activeJobIndex);
 
-        $body.find(".side>.navs>.nav>.select").click(onedev.server.ciSpec.selectJob);
+        // use mouseup together with ui-sortable-helper (see selectJob method) class check 
+        // to avoid the issue that sortable will fire onclick event in firefox (hence cause 
+        // the job being selected while sorting
+        $body.find(".side>.navs>.nav>.select").mouseup(onedev.server.ciSpec.selectJob);
     },
     selectJob: function() {
         var $nav = $(this).parent();
-        onedev.server.ciSpec.showJob($nav.index());
-        var $body = $(".ci-spec>.valid>.jobs>.body");
-        if ($body.data("callback"))
-            $body.data("callback")("jobs/" + $nav.data("name"));
+        if (!$nav.hasClass("ui-sortable-helper")) {
+            onedev.server.ciSpec.showJob($nav.index());
+            var $body = $(".ci-spec>.valid>.jobs>.body");
+            if ($body.data("callback"))
+                $body.data("callback")("jobs/" + $nav.data("name"));
+        }
     },
     showJob: function(index) {
         var $body = $(".ci-spec>.valid>.jobs>.body");

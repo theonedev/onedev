@@ -101,6 +101,9 @@
 .ci-spec>.valid .bean-properties>table>tbody>tr>td.name {
     width: 200px;
 }
+.ci-spec>.valid .bean-properties>table>tbody>tr.property-retry td.name {
+	width: 100px;
+}
 .ci-spec>.valid .bean-properties>table>tbody>tr>td.value .form-control {
     height: 32px;
     font-size: 13px;
