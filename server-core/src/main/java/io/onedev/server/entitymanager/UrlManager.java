@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Issue;
@@ -27,6 +28,8 @@ public interface UrlManager {
 	String urlFor(PullRequestChange change);
 	
 	String urlFor(Issue issue);
+	
+	String urlFor(Build build);
 	
 	String urlFor(IssueComment comment);
 	

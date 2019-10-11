@@ -13,6 +13,7 @@ import com.google.common.base.Splitter;
 
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Issue;
@@ -98,9 +99,14 @@ public class DefaultUrlManager implements UrlManager {
 
 	@Override
 	public String urlFor(Issue issue) {
-		return urlFor(issue.getProject()) + "/issues/" + issue.getNumber() + "/activities";
+		return urlFor(issue.getProject()) + "/issues/" + issue.getNumber();
 	}
 
+	@Override
+	public String urlFor(Build build) {
+		return urlFor(build.getProject()) + "/builds/" + build.getNumber();
+	}
+	
 	@Override
 	public String urlFor(IssueComment comment) {
 		return urlFor(comment.getIssue()) + "#" + comment.getAnchor();

@@ -1,6 +1,7 @@
 package io.onedev.server.model;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -38,6 +39,14 @@ public class BuildQuerySetting extends QuerySetting<NamedBuildQuery> {
 	@Column(nullable=false, length=65535)
 	private ArrayList<NamedBuildQuery> userQueries = new ArrayList<>();
 
+	@Lob
+	@Column(nullable=false, length=65535)
+	private LinkedHashSet<String> userQuerySubscriptions = new LinkedHashSet<>();
+	
+	@Lob
+	@Column(nullable=false, length=65535)
+	private LinkedHashSet<String> projectQuerySubscriptions = new LinkedHashSet<>();
+	
 	@Override
 	public Project getProject() {
 		return project;
@@ -73,7 +82,19 @@ public class BuildQuerySetting extends QuerySetting<NamedBuildQuery> {
 
 	@Override
 	public QuerySubscriptionSupport<NamedBuildQuery> getQuerySubscriptionSupport() {
-		return null;
+		return new QuerySubscriptionSupport<NamedBuildQuery>() {
+
+			@Override
+			public LinkedHashSet<String> getUserQuerySubscriptions() {
+				return userQuerySubscriptions;
+			}
+
+			@Override
+			public LinkedHashSet<String> getProjectQuerySubscriptions() {
+				return projectQuerySubscriptions;
+			}
+			
+		};
 	}
 	
 }

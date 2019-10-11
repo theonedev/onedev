@@ -57,8 +57,6 @@ import io.onedev.server.ci.job.log.LogManager;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.paramspec.SecretParam;
-import io.onedev.server.ci.job.retry.JobRetry;
-import io.onedev.server.ci.job.retry.RetryCondition;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -554,6 +552,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setRunningDate(null);
 			build.setSubmitDate(new Date());
 			build.setSubmitter(submitter);
+			build.setRetried(0);
 			buildParamManager.deleteParams(build);
 			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 				ParamSpec paramSpec = build.getJob().getParamSpecMap().get(entry.getKey());
@@ -724,6 +723,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Listen
 	public void on(BuildSubmitted event) {
 		Build build = event.getBuild();
+		build.setWillRetry(false);
 		FileUtils.deleteDir(build.getPublishDir());
 	}
 
@@ -731,21 +731,17 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Listen
 	public void on(BuildFinished event) {
 		Build build = event.getBuild();
-		JobRetry retry = build.getJob().getRetry();
-		build.setWillRetry(build.getStatus() == Build.Status.FAILED
-				&& retry != null 
-				&& build.getRetried() < retry.getMaxRetries() 
-				&& RetryCondition.parse(retry.getRetryCondition()).satisfied(build));
-		
-		if (build.isWillRetry()) {
+		build.setWillRetry(build.willRetryNow());
+		if (build.willRetryNow()) {
 			Long buildId = build.getId();
 			int retried = build.getRetried();
+			int retryDelay = build.getJob().getRetry().getRetryDelay();
 			transactionManager.runAsyncAfterCommit(new Runnable() {
 
 				@Override
 				public void run() {
 					try {						
-						Thread.sleep(retry.getRetryDelay() * (long)(Math.pow(2, retried)) * 1000L);
+						Thread.sleep(retryDelay * (long)(Math.pow(2, retried)) * 1000L);
 					} catch (InterruptedException e) {
 						throw new RuntimeException(e);
 					}
@@ -762,6 +758,8 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							build.setPendingDate(null);
 							build.setRunningDate(null);
 							build.setSubmitDate(new Date());
+							build.setCanceller(null);
+							build.setCancellerName(null);
 							buildManager.save(build);
 							listenerRegistry.post(new BuildSubmitted(build));			
 						}

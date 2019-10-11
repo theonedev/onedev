@@ -1,5 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -35,7 +37,11 @@ public class DefaultBuildQuerySettingManager extends AbstractEntityManager<Build
 	@Transactional
 	@Override
 	public void save(BuildQuerySetting setting) {
-		if (setting.getUserQueries().isEmpty()) {
+		setting.getQuerySubscriptionSupport().getUserQuerySubscriptions().retainAll(
+				setting.getUserQueries().stream().map(it->it.getName()).collect(Collectors.toSet()));
+		setting.getQuerySubscriptionSupport().getProjectQuerySubscriptions().retainAll(
+				setting.getProject().getSavedBuildQueries().stream().map(it->it.getName()).collect(Collectors.toSet()));
+		if (setting.getQuerySubscriptionSupport().getProjectQuerySubscriptions().isEmpty() && setting.getUserQueries().isEmpty()) {
 			if (!setting.isNew())
 				delete(setting);
 		} else {

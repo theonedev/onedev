@@ -298,6 +298,7 @@ public class Project extends AbstractEntity {
 		savedBuildQueries.add(new NamedBuildQuery("All", "all"));
 		savedBuildQueries.add(new NamedBuildQuery("Successful", "successful"));
 		savedBuildQueries.add(new NamedBuildQuery("Failed", "failed"));
+		savedBuildQueries.add(new NamedBuildQuery("Failed eventually", "failed and not(will retry)"));
 		savedBuildQueries.add(new NamedBuildQuery("In error", "in error"));
 		savedBuildQueries.add(new NamedBuildQuery("Cancelled", "cancelled"));
 		savedBuildQueries.add(new NamedBuildQuery("Timed out", "timed out"));

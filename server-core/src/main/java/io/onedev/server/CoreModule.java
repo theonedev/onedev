@@ -169,6 +169,7 @@ import io.onedev.server.migration.PersistentBagConverter;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
+import io.onedev.server.notification.BuildNotificationManager;
 import io.onedev.server.notification.CodeCommentNotificationManager;
 import io.onedev.server.notification.CommitNotificationManager;
 import io.onedev.server.notification.DefaultMailManager;
@@ -340,6 +341,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(WorkExecutor.class).to(DefaultWorkExecutor.class);
 		bind(PullRequestNotificationManager.class);
 		bind(CommitNotificationManager.class);
+		bind(BuildNotificationManager.class);
 		bind(IssueNotificationManager.class);
 		bind(EntityReferenceManager.class);
 		bind(CodeCommentNotificationManager.class);

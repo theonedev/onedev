@@ -23,7 +23,7 @@ public class WillRetryCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return build.isWillRetry();
+		return build.willRetryNow();
 	}
 
 	@Override

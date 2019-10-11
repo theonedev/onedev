@@ -57,6 +57,8 @@ import io.onedev.server.ci.job.VariableInterpolator;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.paramspec.SecretParam;
+import io.onedev.server.ci.job.retry.JobRetry;
+import io.onedev.server.ci.job.retry.RetryCondition;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.support.inputspec.SecretInput;
@@ -152,6 +154,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	private int retried;
 
 	private boolean willRetry;
+	
+	private transient Boolean willRetryNow;
 	
 	@Column(length=MAX_STATUS_MESSAGE_LEN)
 	private String statusMessage;
@@ -325,6 +329,17 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	public void setWillRetry(boolean willRetry) {
 		this.willRetry = willRetry;
+	}
+	
+	public boolean willRetryNow() {
+		if (willRetryNow == null) {
+			JobRetry retry = getJob().getRetry();
+			willRetryNow = getStatus() == Build.Status.FAILED
+					&& retry != null 
+					&& getRetried() < retry.getMaxRetries() 
+					&& RetryCondition.parse(retry.getRetryCondition()).satisfied(this);
+		}
+		return willRetryNow;
 	}
 
 	public Collection<BuildParam> getParams() {
