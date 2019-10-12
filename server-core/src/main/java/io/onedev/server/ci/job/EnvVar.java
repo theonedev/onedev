@@ -22,7 +22,7 @@ public class EnvVar implements Serializable {
 	@Editable(order=100, description="Specify name of the environment variable. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@VariableName
+	@VariableName(interpolative = true)
 	@NotEmpty
 	public String getName() {
 		return name;

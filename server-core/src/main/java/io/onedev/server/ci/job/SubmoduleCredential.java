@@ -15,7 +15,8 @@ public class SubmoduleCredential extends Authentication {
 
 	private String url;
 	
-	@Editable(order=100, description="Specify submodule url. <b>Note:</b> Input '@' to start inserting variable")
+	@Editable(order=100, description="Specify submodule url. Note: Input '@' to start inserting variable. "
+			+ "Use \\ to escape normal occurrences of @ or \\")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getUrl() {

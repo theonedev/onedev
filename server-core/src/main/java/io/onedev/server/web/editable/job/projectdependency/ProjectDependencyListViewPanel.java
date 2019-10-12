@@ -71,7 +71,7 @@ class ProjectDependencyListViewPanel extends Panel {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, "#" + rowModel.getObject().getBuildNumber());
+						return new Label(componentId, rowModel.getObject().getBuildNumber());
 					}
 					
 				});

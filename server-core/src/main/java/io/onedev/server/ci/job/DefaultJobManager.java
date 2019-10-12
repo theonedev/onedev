@@ -63,6 +63,7 @@ import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.Event;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.build.BuildPending;
@@ -225,22 +226,27 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					}
 				}
 				
-				for (JobDependency dependency: build.getJob().getJobDependencies()) {
-					new MatrixRunner<List<String>>(JobParam.getParamMatrix(dependency.getJobParams())) {
-						
-						@Override
-						public void run(Map<String, List<String>> params) {
-							Build dependencyBuild = submit(project, commitId, dependency.getJobName(), 
-									params, submitter, new LinkedHashSet<>(checkedJobNames));
-							BuildDependence dependence = new BuildDependence();
-							dependence.setDependency(dependencyBuild);
-							dependence.setDependent(build);
-							dependence.setRequireSuccessful(dependency.isRequireSuccessful());
-							dependence.setArtifacts(dependency.getArtifacts());
-							build.getDependencies().add(dependence);
-						}
-						
-					}.run();
+				Build.push(build);
+				try {
+					for (JobDependency dependency: build.getJob().getJobDependencies()) {
+						new MatrixRunner<List<String>>(JobParam.getParamMatrix(dependency.getJobParams())) {
+							
+							@Override
+							public void run(Map<String, List<String>> params) {
+								Build dependencyBuild = submit(project, commitId, dependency.getJobName(), 
+										params, submitter, new LinkedHashSet<>(checkedJobNames));
+								BuildDependence dependence = new BuildDependence();
+								dependence.setDependency(dependencyBuild);
+								dependence.setDependent(build);
+								dependence.setRequireSuccessful(dependency.isRequireSuccessful());
+								dependence.setArtifacts(build.interpolate(dependency.getArtifacts()));
+								build.getDependencies().add(dependence);
+							}
+							
+						}.run();
+					}
+				} finally {
+					Build.pop();
 				}
 				
 				for (ProjectDependency dependency: build.getJob().getProjectDependencies()) {
@@ -271,16 +277,20 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								+ dependency.getProjectName() + "': permission denied");
 					}
 					
-					Build dependencyBuild = buildManager.find(dependencyProject, Long.parseLong(dependency.getBuildNumber()));
+					String buildNumberStr = build.interpolate(dependency.getBuildNumber());
+					if (buildNumberStr.startsWith("#"))
+						buildNumberStr = buildNumberStr.substring(1);
+					Long buildNumber = Long.parseLong(buildNumberStr);
+					Build dependencyBuild = buildManager.find(dependencyProject, buildNumber);
 					if (dependencyBuild == null) {
 						String errorMessage = String.format("Unable to find dependency build (project: %s, build number: %d)", 
-								dependency.getProjectName(), dependency.getBuildNumber());
+								dependency.getProjectName(), buildNumber);
 						throw new OneException(errorMessage);
 					}
 					BuildDependence dependence = new BuildDependence();
 					dependence.setDependency(dependencyBuild);
 					dependence.setDependent(build);
-					dependence.setArtifacts(dependency.getArtifacts());
+					dependence.setArtifacts(build.interpolate(dependency.getArtifacts()));
 					build.getDependencies().add(dependence);
 				}
 	
@@ -493,53 +503,58 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Sessional
 	@Listen
 	public void on(ProjectEvent event) {
-		if (event instanceof BuildCommitAware) {
-			ObjectId commitId = ((BuildCommitAware) event).getBuildCommit();
-			if (!commitId.equals(ObjectId.zeroId())) {
-				ScriptIdentity.push(new JobIdentity(event.getProject(), commitId));
-				try {
-					CISpec ciSpec = event.getProject().getCISpec(commitId);
-					if (ciSpec != null) {
-						for (Job job: ciSpec.getJobs()) {
-							JobTrigger trigger = job.getMatchedTrigger(event);
-							if (trigger != null) {
-								Map<String, List<List<String>>> paramMatrix = JobParam.getParamMatrix(trigger.getParams());						
-								Long projectId = event.getProject().getId();
-								
-								// run asynchrously as session may get closed due to exception
-								sessionManager.runAsync(new Runnable() {
-
-									@Override
-									public void run() {
-										Project project = projectManager.load(projectId);
-										try {
-											new MatrixRunner<List<String>>(paramMatrix) {
-												
-												@Override
-												public void run(Map<String, List<String>> paramMap) {
-													submit(project, commitId, job.getName(), paramMap, null); 
-												}
-												
-											}.run();
-										} catch (Exception e) {
-											String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)", 
-													project.getName(), commitId.name(), job.getName());
-											logger.error(message, e);
-										}
-									}
+		Event.push(event);
+		try {
+			if (event instanceof BuildCommitAware) {
+				ObjectId commitId = ((BuildCommitAware) event).getBuildCommit();
+				if (!commitId.equals(ObjectId.zeroId())) {
+					ScriptIdentity.push(new JobIdentity(event.getProject(), commitId));
+					try {
+						CISpec ciSpec = event.getProject().getCISpec(commitId);
+						if (ciSpec != null) {
+							for (Job job: ciSpec.getJobs()) {
+								JobTrigger trigger = job.getMatchedTrigger(event);
+								if (trigger != null) {
+									Map<String, List<List<String>>> paramMatrix = JobParam.getParamMatrix(trigger.getParams());						
+									Long projectId = event.getProject().getId();
 									
-								}, SecurityUtils.getSubject());
+									// run asynchrously as session may get closed due to exception
+									sessionManager.runAsync(new Runnable() {
+	
+										@Override
+										public void run() {
+											Project project = projectManager.load(projectId);
+											try {
+												new MatrixRunner<List<String>>(paramMatrix) {
+													
+													@Override
+													public void run(Map<String, List<String>> paramMap) {
+														submit(project, commitId, job.getName(), paramMap, null); 
+													}
+													
+												}.run();
+											} catch (Exception e) {
+												String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)", 
+														project.getName(), commitId.name(), job.getName());
+												logger.error(message, e);
+											}
+										}
+										
+									}, SecurityUtils.getSubject());
+								}
 							}
 						}
+					} catch (Exception e) {
+						String message = String.format("Error checking job triggers (project: %s, commit: %s)", 
+								event.getProject().getName(), commitId.name());
+						logger.error(message, e);
+					} finally {
+						ScriptIdentity.pop();
 					}
-				} catch (Exception e) {
-					String message = String.format("Error checking job triggers (project: %s, commit: %s)", 
-							event.getProject().getName(), commitId.name());
-					logger.error(message, e);
-				} finally {
-					ScriptIdentity.pop();
 				}
 			}
+		} finally {
+			Event.pop();
 		}
 	}
 	

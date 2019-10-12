@@ -73,6 +73,7 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.event.Event;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.event.entity.EntityRemoved;
@@ -739,32 +740,37 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 							if (trigger instanceof PullRequestTrigger) {
 								PullRequestTrigger pullRequestTrigger = (PullRequestTrigger) trigger;
 								PullRequestMergePreviewCalculated pullRequestMergePreviewCalculated = new PullRequestMergePreviewCalculated(request);
-								if (pullRequestTrigger.matches(pullRequestMergePreviewCalculated, job)) {
-									boolean required = requiredJobNames.contains(job.getName());
-									new MatrixRunner<List<String>>(JobParam.getParamMatrix(trigger.getParams())) {
-										
-										@Override
-										public void run(Map<String, List<String>> paramMap) {
-											Build build = jobManager.submit(request.getTargetProject(), 
-													commitId, job.getName(), paramMap, null);
-											PullRequestBuild pullRequestBuild = null;
-											for (PullRequestBuild prevPullRequestBuild: prevPullRequestBuilds) {
-												if (prevPullRequestBuild.getBuild().equals(build)) {
-													pullRequestBuild = prevPullRequestBuild;
-													break;
+								Event.push(pullRequestMergePreviewCalculated);
+								try {
+									if (pullRequestTrigger.matches(pullRequestMergePreviewCalculated, job)) {
+										boolean required = requiredJobNames.contains(job.getName());
+										new MatrixRunner<List<String>>(JobParam.getParamMatrix(trigger.getParams())) {
+											
+											@Override
+											public void run(Map<String, List<String>> paramMap) {
+												Build build = jobManager.submit(request.getTargetProject(), 
+														commitId, job.getName(), paramMap, null);
+												PullRequestBuild pullRequestBuild = null;
+												for (PullRequestBuild prevPullRequestBuild: prevPullRequestBuilds) {
+													if (prevPullRequestBuild.getBuild().equals(build)) {
+														pullRequestBuild = prevPullRequestBuild;
+														break;
+													}
 												}
+												if (pullRequestBuild == null) {
+													pullRequestBuild = new PullRequestBuild();
+													pullRequestBuild.setRequest(request);
+													pullRequestBuild.setBuild(build);
+												}
+												pullRequestBuild.setRequired(required);
+												request.getPullRequestBuilds().add(pullRequestBuild);
 											}
-											if (pullRequestBuild == null) {
-												pullRequestBuild = new PullRequestBuild();
-												pullRequestBuild.setRequest(request);
-												pullRequestBuild.setBuild(build);
-											}
-											pullRequestBuild.setRequired(required);
-											request.getPullRequestBuilds().add(pullRequestBuild);
-										}
-										
-									}.run();
-									requiredJobNames.remove(job.getName());
+											
+										}.run();
+										requiredJobNames.remove(job.getName());
+									}
+								} finally {
+									Event.pop();
 								}
 							}
 						}

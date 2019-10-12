@@ -112,7 +112,7 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 
 			@Override
 			public void populateItem(Item<ICellPopulator<ProjectDependency>> cellItem, String componentId, IModel<ProjectDependency> rowModel) {
-				cellItem.add(new Label(componentId, "#" + rowModel.getObject().getBuildNumber()));
+				cellItem.add(new Label(componentId, rowModel.getObject().getBuildNumber()));
 			}
 			
 		});		

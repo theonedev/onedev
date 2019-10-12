@@ -33,7 +33,7 @@ public class JobService implements Serializable {
 	@Editable(order=100, description="Specify name of the service, which can be used to access "
 			+ "the service. <b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@VariableName
+	@VariableName(interpolative = true)
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -80,6 +80,7 @@ public class JobService implements Serializable {
 			+ "be interpretated by cmd.exe on Windows images, and by shell on Linux images. It will be "
 			+ "executed repeatedly until a zero code is returned to indicate service ready. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getReadinessCheckCommand() {
 		return readinessCheckCommand;
@@ -90,7 +91,9 @@ public class JobService implements Serializable {
 	}
 	
 	@Editable(order=10000, name="CPU Requirement", group="More Settings", description="Specify CPU requirement of the job. "
-			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details")
+			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details. "
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getCpuRequirement() {
 		return cpuRequirement;
@@ -101,7 +104,9 @@ public class JobService implements Serializable {
 	}
 
 	@Editable(order=10100, group="More Settings", description="Specify memory requirement of the job. "
-			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory' target='_blank'>kubernetes documentation</a> for details")
+			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-memory' target='_blank'>kubernetes documentation</a> for details. "
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getMemoryRequirement() {
 		return memoryRequirement;

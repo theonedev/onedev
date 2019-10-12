@@ -10,13 +10,15 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
+import io.onedev.server.ci.CISpecAware;
+import io.onedev.server.ci.job.JobAware;
 import io.onedev.server.ci.job.JobReport;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
 @SuppressWarnings("serial")
-abstract class ReportEditPanel extends Panel {
+abstract class ReportEditPanel extends Panel implements CISpecAware, JobAware {
 
 	private final List<JobReport> reports;
 	

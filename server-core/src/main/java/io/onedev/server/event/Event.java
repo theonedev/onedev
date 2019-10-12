@@ -1,6 +1,7 @@
 package io.onedev.server.event;
 
 import java.util.Date;
+import java.util.Stack;
 
 import javax.annotation.Nullable;
 
@@ -11,6 +12,15 @@ import io.onedev.server.model.User;
 
 @JsonTypeInfo(property="@class", use = Id.CLASS)
 public abstract class Event {
+	
+	private static ThreadLocal<Stack<Event>> stack =  new ThreadLocal<Stack<Event>>() {
+
+		@Override
+		protected Stack<Event> initialValue() {
+			return new Stack<Event>();
+		}
+	
+	};
 	
 	private final User user;
 	
@@ -28,6 +38,22 @@ public abstract class Event {
 
 	public Date getDate() {
 		return date;
+	}
+	
+	public static void push(ProjectEvent event) {
+		stack.get().push(event);
+	}
+
+	public static void pop() {
+		stack.get().pop();
+	}
+	
+	@Nullable
+	public static Event get() {
+		if (!stack.get().isEmpty()) 
+			return stack.get().peek();
+		else 
+			return null;
 	}
 	
 }

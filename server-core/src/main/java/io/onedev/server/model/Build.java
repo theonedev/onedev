@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
@@ -89,6 +90,15 @@ public class Build extends AbstractEntity implements Referenceable {
 	private static final long serialVersionUID = 1L;
 	
 	private static final Logger logger = LoggerFactory.getLogger(Build.class);
+	
+	private static ThreadLocal<Stack<Build>> stack =  new ThreadLocal<Stack<Build>>() {
+
+		@Override
+		protected Stack<Build> initialValue() {
+			return new Stack<Build>();
+		}
+	
+	};
 	
 	public static final String STATUS = "status";
 	
@@ -683,6 +693,22 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public static String getWebSocketObservable(Long buildId) {
 		return Build.class.getName() + ":" + buildId;
+	}
+	
+	public static void push(Build build) {
+		stack.get().push(build);
+	}
+
+	public static void pop() {
+		stack.get().pop();
+	}
+	
+	@Nullable
+	public static Build get() {
+		if (!stack.get().isEmpty()) 
+			return stack.get().peek();
+		else 
+			return null;
 	}
 	
 }

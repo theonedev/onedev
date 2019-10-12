@@ -24,6 +24,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.CISpecAware;
+import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.JobAware;
 import io.onedev.server.ci.job.JobReport;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -67,6 +71,16 @@ class ReportListEditPanel extends PropertyEditor<List<Serializable>> {
 						modal.close();
 						onPropertyUpdating(target);
 						target.add(ReportListEditPanel.this);
+					}
+
+					@Override
+					public CISpec getCISpec() {
+						return ReportListEditPanel.this.getCISpec();
+					}
+
+					@Override
+					public Job getJob() {
+						return ReportListEditPanel.this.getJob();
 					}
 
 				};
@@ -130,6 +144,16 @@ class ReportListEditPanel extends PropertyEditor<List<Serializable>> {
 								target.add(ReportListEditPanel.this);
 							}
 
+							@Override
+							public CISpec getCISpec() {
+								return ReportListEditPanel.this.getCISpec();
+							}
+
+							@Override
+							public Job getJob() {
+								return ReportListEditPanel.this.getJob();
+							}
+
 						};
 					}
 					
@@ -189,6 +213,22 @@ class ReportListEditPanel extends PropertyEditor<List<Serializable>> {
 		}.sortable("tbody"));
 	}
 
+	private CISpec getCISpec() {
+		CISpecAware ciSpecAware = findParent(CISpecAware.class);
+		if (ciSpecAware != null)
+			return ciSpecAware.getCISpec();
+		else
+			return null;
+	}
+
+	private Job getJob() {
+		JobAware jobAware = findParent(JobAware.class);
+		if (jobAware != null)
+			return jobAware.getJob();
+		else
+			return null;
+	}
+	
 	@Override
 	public void onEvent(IEvent<?> event) {
 		super.onEvent(event);

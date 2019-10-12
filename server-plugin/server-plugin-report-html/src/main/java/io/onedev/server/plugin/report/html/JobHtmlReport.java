@@ -58,7 +58,7 @@ public class JobHtmlReport extends JobReport {
 	}
 
 	@SuppressWarnings("unused")
-	private List<InputSuggestion> suggestVariables(String matchWith) {
+	private static List<InputSuggestion> suggestVariables(String matchWith) {
 		return Job.suggestVariables(matchWith);
 	}
 
