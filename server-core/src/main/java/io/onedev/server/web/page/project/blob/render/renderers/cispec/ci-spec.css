@@ -22,8 +22,8 @@
 }
 .ci-spec>.valid>div>.head {
     font-weight: bold;
-    font-size: 18px;
-    margin-bottom: 20px;
+    font-size: 16px;
+    margin-bottom: 16px;
 }
 .ci-spec>.valid>div>.body {
     position: relative;
