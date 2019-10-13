@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.edit;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.ajax.AbstractDefaultAjaxBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.AjaxCallListener;
@@ -14,7 +16,9 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
+import org.apache.wicket.markup.html.form.HiddenField;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.model.PropertyModel;
 
 import io.onedev.commons.utils.Provider;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -42,6 +46,8 @@ public abstract class BlobEditPanel extends Panel {
 	private Tab currentTab = Tab.EDIT;
 	
 	private byte[] editingContent;
+	
+	private String position;
 		
 	public BlobEditPanel(String id, BlobRenderContext context) {
 		super(id);
@@ -83,8 +89,9 @@ public abstract class BlobEditPanel extends Panel {
 						super.onSubmit(target, form);
 						if (currentTab == Tab.EDIT && tab == Tab.EDIT_PLAIN 
 								|| currentTab == Tab.EDIT_PLAIN && tab == Tab.EDIT
-								|| tab == Tab.SAVE) 
+								|| tab == Tab.SAVE) {
 							editingContent = editor.getModelObject();
+						}
 						if (tab != Tab.SAVE) {
 							if (tab == Tab.EDIT)
 								editor = newEditor("editor", editingContent);
@@ -139,6 +146,7 @@ public abstract class BlobEditPanel extends Panel {
 				add(newSubmitLink("edit", Tab.EDIT));
 				add(newSubmitLink("editPlain", Tab.EDIT_PLAIN));
 				add(newSubmitLink("save", Tab.SAVE));
+				add(new HiddenField<String>("position", new PropertyModel<String>(BlobEditPanel.this, "position")));
 				
 				setOutputMarkupId(true);
 			}
@@ -152,7 +160,14 @@ public abstract class BlobEditPanel extends Panel {
 				return editingContent;
 			}
 			
-		}));
+		}) {
+
+			@Override
+			protected String getPosition() {
+				return BlobEditPanel.this.getPosition();
+			}
+			
+		});
 		
 		add(recreateBehavior = new AbstractPostAjaxBehavior() {
 			
@@ -208,4 +223,9 @@ public abstract class BlobEditPanel extends Panel {
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
+	@Nullable
+	protected String getPosition() {
+		return position;
+	}
+	
 }

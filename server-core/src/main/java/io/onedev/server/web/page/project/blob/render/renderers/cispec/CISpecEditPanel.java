@@ -91,7 +91,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 			public void renderHead(Component component, IHeaderResponse response) {
 				super.renderHead(component, response);
 				int index = WicketUtils.getChildIndex(jobContents, content);
-				String script = String.format("onedev.server.ciSpec.edit.trackJobNameChange(%d);", index);
+				String script = String.format("onedev.server.ciSpec.trackJobNameChange(%d);", index);
 				response.render(OnDomReadyHeaderItem.forScript(script));
 			}
 			
@@ -165,7 +165,7 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 							jobContents.swap(fromIndex-i, fromIndex-i-1);
 						}
 					}
-					target.appendJavaScript(String.format("onedev.server.ciSpec.edit.swapJobs(%d, %d)", fromIndex, toIndex));
+					target.appendJavaScript(String.format("onedev.server.ciSpec.swapJobs(%d, %d)", fromIndex, toIndex));
 				}
 				
 			}.sortable(".jobs>.body>.side>.navs"));
@@ -277,4 +277,6 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 		}
 		
 	}
+
+	
 }

@@ -410,7 +410,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 
 									@Override
 									void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated) {
-										ProjectBlobPage.this.onCommitted(target, refUpdated);
+										ProjectBlobPage.this.onCommitted(target, refUpdated, null);
 										modal.close();
 									}
 									
@@ -1023,7 +1023,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	}
 
 	@Override
-	public void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated) {
+	public void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated, @Nullable String position) {
 		Project project = getProject();
 		String branch = state.blobIdent.revision;
 		getProject().cacheObjectId(branch, refUpdated.getNewCommitId());
@@ -1078,7 +1078,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			
 			if (newBlobIdent != null) {
 				state.blobIdent = newBlobIdent;
-				state.position = null;
+				state.position = position;
 				state.commentId = null;
 				state.mode = Mode.VIEW;
 				onResolvedRevisionChange(target);

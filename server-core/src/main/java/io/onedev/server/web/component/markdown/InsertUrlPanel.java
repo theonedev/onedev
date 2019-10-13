@@ -442,7 +442,7 @@ abstract class InsertUrlPanel extends Panel {
 
 					try {
 						String directory = WebSession.get().getMetaData(UPLOAD_DIRECTORY);
-						context.onCommitted(null, context.uploadFiles(uploads, directory, commitMessage));
+						context.onCommitted(null, context.uploadFiles(uploads, directory, commitMessage), null);
 						
 						String fileName = uploads.iterator().next().getClientFileName();
 						String url;

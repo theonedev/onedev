@@ -70,7 +70,7 @@ import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
 
 @SuppressWarnings("serial")
-public class CommitOptionPanel extends Panel {
+public abstract class CommitOptionPanel extends Panel {
 
 	private final BlobRenderContext context;
 	
@@ -250,7 +250,7 @@ public class CommitOptionPanel extends Panel {
 			@Override
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
-				if (save(target, feedback)) {
+				if (save(target, feedback, getPosition())) {
 					String script = String.format(""
 							+ "$('#%s').attr('disabled', 'disabled').val('Please wait...');"
 							+ "onedev.server.form.markClean($('form'));", getMarkupId());
@@ -293,7 +293,7 @@ public class CommitOptionPanel extends Panel {
 				|| !Objects.equal(context.getBlobIdent().path, context.getNewPath());
 	}
 	
-	private boolean save(AjaxRequestTarget target, FeedbackPanel feedback) {
+	private boolean save(AjaxRequestTarget target, FeedbackPanel feedback, @Nullable String position) {
 		change = null;
 		
 		if (newContentProvider != null && StringUtils.isBlank(context.getNewPath())) {
@@ -396,7 +396,7 @@ public class CommitOptionPanel extends Panel {
 			}
 			if (newCommitId != null) {
 				RefUpdated refUpdated = new RefUpdated(context.getProject(), refName, prevCommitId, newCommitId);
-				context.onCommitted(target, refUpdated);
+				context.onCommitted(target, refUpdated, position);
 				if (autosaveKey != null)
 					target.appendJavaScript(String.format("localStorage.removeItem('%s');", autosaveKey));
 				return true;
@@ -469,4 +469,6 @@ public class CommitOptionPanel extends Panel {
 		partialPageRequestHandler.appendJavaScript(script);
 	}
 
+	protected abstract String getPosition();
+	
 }

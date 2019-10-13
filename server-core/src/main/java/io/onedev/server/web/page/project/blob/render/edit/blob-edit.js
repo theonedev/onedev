@@ -16,7 +16,10 @@ onedev.server.blobEdit = {
             }
 	    });
 	    $head.find(".save>a").click(function() {
-        		$body.find(">.content>.save.submit").click();
+	    	var $content = $body.find(">.content");
+	    	var position = $content.find(".position-aware").data("getPosition")();
+	    	$content.children(".position").val(position);
+        	$content.children(".save.submit").click();
 	    });
 
 	    if ($body.find(".autofit:visible").length != 0)

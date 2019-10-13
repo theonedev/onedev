@@ -24,5 +24,5 @@ public class CISpecBlobEditPanel extends BlobEditPanel implements PlainEditSuppo
 	public FormComponentPanel<byte[]> newPlainEditor(String componentId, byte[] initialContent) {
 		return new PlainEditPanel(componentId, CISpec.BLOB_PATH, initialContent);
 	}
-			
+
 }

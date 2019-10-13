@@ -23,11 +23,15 @@ onedev.server.ciSpec = {
 
         onedev.server.ciSpec.showJob(activeJobIndex);
 
+        var $navs = $body.find(".side>.navs");
+        $navs.data("getPosition", function() {
+        	return "cispec-jobs/" + $navs.children(".active").data("name");
+        });
         // use mouseup together with ui-sortable-helper (see selectJob method) class check 
         // to avoid the issue that sortable will fire onclick event in firefox (hence cause 
         // the job being selected while sorting
         $body.find(".side>.navs>.nav>.select").mouseup(onedev.server.ciSpec.selectJob);
-        $body.find(".side>.navs>.nav>.delete").mouseup(onedev.server.ciSpec.edit.deleteJob);
+        $body.find(".side>.navs>.nav>.delete").mouseup(onedev.server.ciSpec.deleteJob);
     },
     selectJob: function() {
         var $nav = $(this).parent();
@@ -51,56 +55,55 @@ onedev.server.ciSpec = {
         $(window).resize();
         onedev.server.focus.doFocus($content);
     },
-    edit: {
-        deleteJob: function() {
-            var $nav = $(this).parent();
-            if (!$nav.hasClass("ui-sortable-helper")) {
-                var $body = $(".ci-spec-edit .jobs>.body");
-                var $navs = $body.find(">.side>.navs");
-                var $contents = $body.children(".contents");
-                var index = $nav.index();
-                var $nav = $navs.children().eq(index);
-                $nav.remove();
-                $contents.children().eq(index).remove();
-
-                if ($nav.hasClass("active")) 
-                    onedev.server.ciSpec.showJob(0);
-                
-                $body.data("deleteCallback")(index);
-            }
-        }, 
-        swapJobs: function(index1, index2) {
-            var $contents = $(".ci-spec-edit .jobs>.body>.contents");
-
-            if (index1 < index2) {
-                for (var i = 0; i < index2-index1; i++) 
-                    $contents.children().eq(index1+i).before($contents.children().eq(index1+i+1));
-            } else {
-                for (var i = 0; i < index1-index2; i++) 
-                    $contents.children().eq(index1-i).after($contents.children().eq(index1-i-1));
-            }
-        },
-        trackJobNameChange: function(index) {
+    deleteJob: function() {
+        var $nav = $(this).parent();
+        if (!$nav.hasClass("ui-sortable-helper")) {
             var $body = $(".ci-spec-edit .jobs>.body");
             var $navs = $body.find(">.side>.navs");
-            var $nav = $navs.children().eq(index);
             var $contents = $body.children(".contents");
-            var $content = $contents.children().eq(index);
-            
-            var $input = $content.find(">div>table>tbody>tr.property-name>td input");
+            var index = $nav.index();
+            var $nav = $navs.children().eq(index);
+            $nav.remove();
+            $contents.children().eq(index).remove();
 
-            function syncName() {
-                var name = $input.val().trim();
-                var $name = $nav.find("a.select>.name");
-                if (name.length != 0) 
-                    $name.text(name);
-                else
-                    $name.html("<i>Name not specified</i>");
-            }
-
-            $input.on("input", syncName);
+            if ($nav.hasClass("active")) 
+                onedev.server.ciSpec.showJob(0);
             
-            syncName();
+            $body.data("deleteCallback")(index);
         }
+    }, 
+    swapJobs: function(index1, index2) {
+        var $contents = $(".ci-spec-edit .jobs>.body>.contents");
+
+        if (index1 < index2) {
+            for (var i = 0; i < index2-index1; i++) 
+                $contents.children().eq(index1+i).before($contents.children().eq(index1+i+1));
+        } else {
+            for (var i = 0; i < index1-index2; i++) 
+                $contents.children().eq(index1-i).after($contents.children().eq(index1-i-1));
+        }
+    },
+    trackJobNameChange: function(index) {
+        var $body = $(".ci-spec-edit .jobs>.body");
+        var $navs = $body.find(">.side>.navs");
+        var $nav = $navs.children().eq(index);
+        var $contents = $body.children(".contents");
+        var $content = $contents.children().eq(index);
+        
+        var $input = $content.find(">div>table>tbody>tr.property-name>td input");
+
+        function syncName() {
+            var name = $input.val().trim();
+            var $name = $nav.find("a.select>.name");
+            if (name.length != 0) 
+                $name.text(name);
+            else
+                $name.html("<i>Name not specified</i>");
+            $name.closest(".nav").data("name", name);
+        }
+
+        $input.on("input", syncName);
+        
+        syncName();
     }
 }
