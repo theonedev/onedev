@@ -15,6 +15,8 @@ import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.HeadersToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
+import org.apache.wicket.markup.head.CssHeaderItem;
+import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.Item;
@@ -31,6 +33,7 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.InputSpecCssResourceReference;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
@@ -215,6 +218,12 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 		}.sortable("tbody"));
 	}
 	
+	@Override
+	public void renderHead(IHeaderResponse response) {
+		super.renderHead(response);
+		response.render(CssHeaderItem.forReference(new InputSpecCssResourceReference()));
+	}
+
 	private int getFieldSpecIndex(String fieldName) {
 		for (int i=0; i<getSetting().getFieldSpecs().size(); i++) {
 			if (getSetting().getFieldSpecs().get(i).getName().equals(fieldName))
@@ -255,7 +264,7 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "field-spec def-detail"));
+							add(AttributeAppender.append("class", "field-spec input-spec def-detail"));
 						}
 
 						@Override

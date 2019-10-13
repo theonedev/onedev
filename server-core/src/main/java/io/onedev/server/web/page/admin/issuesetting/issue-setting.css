@@ -1,27 +1,3 @@
-.floating.field-spec>.content>.body>div>.bean-viewer>.bean-properties>table>tbody>tr>td.name {
-	min-width: 150px;
-} 
-.floating.field-spec .bean-viewer+.bean-viewer table>tbody>tr:first-child>td {
-    padding-top: 16px;
-}
-
-.floating.field-spec .property-showCondition .property-inputName td.name, 
-.floating.field-spec .property-choicesProvider .property-inputName td.name,
-.floating.field-spec .property-defaultValueProvider .property-inputName td.name {
-	border-right: none;
-	text-align: left;
-}
-
-.field-spec .property-showCondition .property-inputName td.name, 
-.field-spec-edit .property-showCondition .property-inputName label.name, 
-.field-spec-edit .property-choiceProvider>.value label.name,
-.field-spec-edit .property-choiceProvider>.value .bean.list thead th,
-.field-spec-edit .property-nameOfEmptyValue .control-label {
-	font-weight: normal;
-}
-.floating.field-spec .property-uuid, .field-spec-edit .property-uuid {
-	display: none;
-}
 #issue-setting .issue-states table>tbody>tr>td:first-child a span {
 	border-radius: 3px;
 	padding: 2px 6px;
@@ -36,6 +12,10 @@
 #issue-setting .default-queries th.property-name {
 	width: 30%;
 }
+.field-spec-edit .property-nameOfEmptyValue .control-label {
+	font-weight: normal;
+}
+
 @media(max-width: 991px) {
 	#issue-setting .display-in-issue-list, .field-spec .property-displayInIssueList, 
 	.field-spec-edit .property-displayInIssueList {

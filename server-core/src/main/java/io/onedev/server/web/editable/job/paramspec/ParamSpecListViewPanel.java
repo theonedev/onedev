@@ -29,6 +29,7 @@ import org.apache.wicket.model.Model;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.model.support.inputspec.InputSpecCssResourceReference;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.layout.SideFloating;
@@ -147,7 +148,7 @@ class ParamSpecListViewPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ParamSpecCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new InputSpecCssResourceReference()));
 	}
 	
 	private abstract class ColumnFragment extends Fragment {
@@ -179,7 +180,7 @@ class ParamSpecListViewPanel extends Panel {
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "job-param-spec def-detail"));
+							add(AttributeAppender.append("class", "param-spec input-spec def-detail"));
 						}
 
 						@Override

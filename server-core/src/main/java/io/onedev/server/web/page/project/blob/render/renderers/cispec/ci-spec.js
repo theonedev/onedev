@@ -87,7 +87,7 @@ onedev.server.ciSpec = {
             var $contents = $body.children(".contents");
             var $content = $contents.children().eq(index);
             
-            var $input = $content.find(">div>table>tbody>tr>td.property-name input");
+            var $input = $content.find(">div>table>tbody>tr.property-name>td input");
 
             function syncName() {
                 var name = $input.val().trim();

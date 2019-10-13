@@ -5,9 +5,11 @@ import java.io.Serializable;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.RetryCondition;
 
 @Editable
+@Horizontal
 public class JobRetry implements Serializable {
 
 	private static final long serialVersionUID = 1L;

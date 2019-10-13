@@ -187,8 +187,6 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				valueContainer.add(descriptionLabel);
 				
 				valueContainer.add(new FencedFeedbackPanel("feedback", propertyEditor));
-				
-				valueContainer.add(AttributeAppender.append("class", "property-" + property.getPropertyName()));
 			}
 
 			@Override
@@ -232,6 +230,8 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			}
 
 		};
+		
+		item.add(AttributeAppender.append("class", "property-" + property.getPropertyName()));
 
 		return item;
 	}
