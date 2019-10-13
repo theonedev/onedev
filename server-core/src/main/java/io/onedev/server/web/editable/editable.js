@@ -5,7 +5,7 @@ onedev.server.editable = {
         $group.children("a").click(function() {
             $(this).parent().toggleClass("expanded");
         });
-        $container.find(".feedbackPanelERROR").closest(".group.bean-properties").addClass("expanded");
+        $container.find(".feedbackPanelERROR").parents(".group.bean-properties").addClass("expanded");
     },
     onBeanViewerDomReady: function(containerId) {
 		var $container = $("#" + containerId);
