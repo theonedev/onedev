@@ -1,8 +1,9 @@
 onedev.server.ciSpec = {
-    onDomReady: function(selection, callback) {
+    onDomReady: function(selection, selectCallback, deleteCallback) {
         var activeJobIndex = -1; 
         var $body = $(".ci-spec>.valid>.jobs>.body");
-        $body.data("callback", callback);
+        $body.data("selectCallback", selectCallback);
+        $body.data("deleteCallback", deleteCallback);
 
         $body.find(">.contents>.content").each(function() {
             var $this = $(this);
@@ -26,14 +27,15 @@ onedev.server.ciSpec = {
         // to avoid the issue that sortable will fire onclick event in firefox (hence cause 
         // the job being selected while sorting
         $body.find(".side>.navs>.nav>.select").mouseup(onedev.server.ciSpec.selectJob);
+        $body.find(".side>.navs>.nav>.delete").mouseup(onedev.server.ciSpec.edit.deleteJob);
     },
     selectJob: function() {
         var $nav = $(this).parent();
         if (!$nav.hasClass("ui-sortable-helper")) {
             onedev.server.ciSpec.showJob($nav.index());
             var $body = $(".ci-spec>.valid>.jobs>.body");
-            if ($body.data("callback"))
-                $body.data("callback")("jobs/" + $nav.data("name"));
+            if ($body.data("selectCallback"))
+                $body.data("selectCallback")("jobs/" + $nav.data("name"));
         }
     },
     showJob: function(index) {
@@ -50,17 +52,22 @@ onedev.server.ciSpec = {
         onedev.server.focus.doFocus($content);
     },
     edit: {
-        deleteJob: function(index) {
-            var $body = $(".ci-spec-edit .jobs>.body");
-            var $navs = $body.find(">.side>.navs");
-            var $contents = $body.children(".contents");
+        deleteJob: function() {
+            var $nav = $(this).parent();
+            if (!$nav.hasClass("ui-sortable-helper")) {
+                var $body = $(".ci-spec-edit .jobs>.body");
+                var $navs = $body.find(">.side>.navs");
+                var $contents = $body.children(".contents");
+                var index = $nav.index();
+                var $nav = $navs.children().eq(index);
+                $nav.remove();
+                $contents.children().eq(index).remove();
 
-            var $nav = $navs.children().eq(index);
-            $nav.remove();
-            $contents.children().eq(index).remove();
-
-            if ($nav.hasClass("active")) 
-                onedev.server.ciSpec.showJob(0);
+                if ($nav.hasClass("active")) 
+                    onedev.server.ciSpec.showJob(0);
+                
+                $body.data("deleteCallback")(index);
+            }
         }, 
         swapJobs: function(index1, index2) {
             var $contents = $(".ci-spec-edit .jobs>.body>.contents");

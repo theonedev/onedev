@@ -29,7 +29,7 @@ import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 @SuppressWarnings("serial")
 public class CISpecBlobViewPanel extends BlobViewPanel {
 
-	private AbstractPostAjaxBehavior behavior;
+	private AbstractPostAjaxBehavior selectBehavior;
 	
 	public CISpecBlobViewPanel(String id, BlobRenderContext context) {
 		super(id, context);
@@ -74,7 +74,7 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 			add(invalidFrag);
 		}
 		
-		add(behavior = new AbstractPostAjaxBehavior() {
+		add(selectBehavior = new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
@@ -94,7 +94,7 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 		String selection = CISpecRendererProvider.getSelection(context.getPosition());
 		String script = String.format("onedev.server.ciSpec.onDomReady(%s, %s);", 
 				selection!=null? "'" + JavaScriptEscape.escapeJavaScript(selection) + "'": "undefined", 
-				behavior.getCallbackFunction(CallbackParameter.explicit("selection")));
+				selectBehavior.getCallbackFunction(CallbackParameter.explicit("selection")));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

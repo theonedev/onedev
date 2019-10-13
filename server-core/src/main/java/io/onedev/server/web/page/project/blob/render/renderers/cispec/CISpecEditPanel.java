@@ -7,6 +7,7 @@ import javax.validation.Validator;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
+import org.apache.wicket.ajax.attributes.CallbackParameter;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.behavior.Behavior;
@@ -18,6 +19,7 @@ import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.unbescape.javascript.JavaScriptEscape;
@@ -31,15 +33,16 @@ import io.onedev.server.ci.CISpecAware;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobAware;
 import io.onedev.server.migration.VersionedDocument;
+import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
+import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.PathNode.Indexed;
 import io.onedev.server.web.editable.PathNode.Named;
-import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -53,6 +56,8 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 	private RepeatingView jobNavs;
 	
 	private RepeatingView jobContents;
+	
+	private AbstractPostAjaxBehavior deleteBehavior;
 	
 	public CISpecEditPanel(String id, BlobRenderContext context, byte[] initialContent) {
 		super(id, Model.of(initialContent));
@@ -73,23 +78,8 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 
 	private Component newJobNav(Job job) {
 		WebMarkupContainer nav = new WebMarkupContainer(jobNavs.newChildId());
-		
-		nav.add(new AjaxLink<Void>("delete") {
-
-			@SuppressWarnings("deprecation")
-			@Override
-			public void onClick(AjaxRequestTarget target) {
-				int index = WicketUtils.getChildIndex(jobNavs, nav);
-				jobNavs.remove(nav);
-				jobContents.remove(jobContents.get(index));
-				target.appendJavaScript(String.format("onedev.server.ciSpec.edit.deleteJob(%d);", index));
-			}
-			
-		});
 		nav.add(AttributeAppender.append("data-name", job.getName()));
-		
 		jobNavs.add(nav.setOutputMarkupId(true));
-		
 		return nav;
 	}
 	
@@ -114,11 +104,11 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 	protected void onInitialize() {
 		super.onInitialize();
 
-		Fragment validFrag;
+		Fragment content;
 		if (parseResult instanceof CISpec) {
 			CISpec ciSpec = (CISpec) parseResult;
 
-			validFrag = new Fragment("content", "validFrag", this);
+			content = new Fragment("content", "validFrag", this);
 			
 			jobNavs = new RepeatingView("navs");
 			jobContents = new RepeatingView("contents");
@@ -126,10 +116,10 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 				newJobNav(job);
 				newJobContent(job);
 			}
-			validFrag.add(jobNavs);
-			validFrag.add(jobContents);
+			content.add(jobNavs);
+			content.add(jobContents);
 			
-			validFrag.add(new AjaxLink<Void>("add") {
+			content.add(new AjaxLink<Void>("add") {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
@@ -149,14 +139,15 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 					
 					script = String.format(""
 							+ "onedev.server.ciSpec.showJob(%d); "
-							+ "$('#%s .select').click(onedev.server.ciSpec.selectJob);", 
-							jobNavs.size() - 1, nav.getMarkupId());
+							+ "$('#%s .select').mouseup(onedev.server.ciSpec.selectJob);" 
+							+ "$('#%s .delete').mouseup(onedev.server.ciSpec.deleteJob);", 
+							jobNavs.size() - 1, nav.getMarkupId(), nav.getMarkupId());
 					target.appendJavaScript(script);
 				}
 				
 			});
 			
-			validFrag.add(new SortBehavior() {
+			content.add(new SortBehavior() {
 
 				@SuppressWarnings("deprecation")
 				@Override
@@ -220,10 +211,22 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 				
 			});
 		} else {
-			validFrag = new Fragment("content", "invalidFrag", this);
-			validFrag.add(new MultilineLabel("errorMessage", Throwables.getStackTraceAsString((Throwable) parseResult)));
+			content = new Fragment("content", "invalidFrag", this);
+			content.add(new MultilineLabel("errorMessage", Throwables.getStackTraceAsString((Throwable) parseResult)));
 		}
-		add(validFrag);
+		add(content);
+		
+		add(deleteBehavior = new AbstractPostAjaxBehavior() {
+
+			@SuppressWarnings("deprecation")
+			@Override
+			protected void respond(AjaxRequestTarget target) {
+				int index = RequestCycle.get().getRequest().getRequestParameters().getParameterValue("index").toInt();
+				jobNavs.remove(jobNavs.get(index));
+				jobContents.remove(jobContents.get(index));
+			}
+			
+		});
 	}
 
 	@Override
@@ -241,8 +244,10 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 		super.renderHead(response);
 		response.render(JavaScriptHeaderItem.forReference(new CISpecResourceReference()));
 		String selection = CISpecRendererProvider.getSelection(context.getPosition());
-		String script = String.format("onedev.server.ciSpec.onDomReady(%s);", 
-				selection!=null? "'" + JavaScriptEscape.escapeJavaScript(selection) + "'": "undefined");
+		
+		String script = String.format("onedev.server.ciSpec.onDomReady(%s, undefined, %s);", 
+				selection!=null? "'" + JavaScriptEscape.escapeJavaScript(selection) + "'": "undefined", 
+				deleteBehavior.getCallbackFunction(CallbackParameter.explicit("index")));
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
