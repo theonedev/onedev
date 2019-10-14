@@ -83,25 +83,6 @@ class ParamSpecListViewPanel extends Panel {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("Description")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<ParamSpec>> cellItem, String componentId, IModel<ParamSpec> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						String description = rowModel.getObject().getDescription();
-						if (description != null)
-							return new Label(componentId, description);
-						else
-							return new Label(componentId, "<i>No description</i>").setEscapeModelStrings(false);
-					}
-					
-				});
-			}
-		});		
-		
 		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("")) {
 
 			@Override

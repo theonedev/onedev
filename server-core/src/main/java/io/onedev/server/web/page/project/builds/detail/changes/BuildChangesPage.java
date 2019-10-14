@@ -1,21 +1,17 @@
 package io.onedev.server.web.page.project.builds.detail.changes;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.BuildInfoManager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
@@ -40,33 +36,26 @@ public class BuildChangesPage extends BuildDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		BuildInfoManager buildInfoManager = OneDev.getInstance(BuildInfoManager.class);
-		Collection<ObjectId> prevCommitIds = buildInfoManager.getPrevCommits(getProject(), getBuild().getId());
-		if (prevCommitIds != null) {
-			Fragment fragment = new Fragment("content", "availableFrag", this);
-			fragment.add(new Label("jobName", getBuild().getJobName()));
-			fragment.add(new CommitListPanel("commits", getProject(), query) {
+		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+		Build prevBuild = buildManager.findStreamlinePrev(getBuild(), null);
+		add(new CommitListPanel("commits", getProject(), query) {
 
-				@Override
-				protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-					setResponsePage(BuildChangesPage.class, BuildChangesPage.paramsOf(getBuild(), getPosition(), query));
-				}
-				
-				@Override
-				protected CommitQuery getBaseQuery() {
-					List<Revision> revisions = new ArrayList<>();
+			@Override
+			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
+				setResponsePage(BuildChangesPage.class, BuildChangesPage.paramsOf(getBuild(), getPosition(), query));
+			}
+			
+			@Override
+			protected CommitQuery getBaseQuery() {
+				List<Revision> revisions = new ArrayList<>();
 
-					for (ObjectId prevCommitId: prevCommitIds)
-						revisions.add(new Revision(prevCommitId.name(), Revision.Scope.SINCE));
-					revisions.add(new Revision(getBuild().getCommitHash(), Revision.Scope.UNTIL));
-					return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
-				}
-				
-			});
-			add(fragment);
-		} else {
-			add(new Fragment("content", "notAvailableFrag", this));
-		}
+				if (prevBuild != null)
+					revisions.add(new Revision(prevBuild.getCommitHash(), Revision.Scope.SINCE));
+				revisions.add(new Revision(getBuild().getCommitHash(), Revision.Scope.UNTIL));
+				return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
+			}
+			
+		});
 	}
 
 	public static PageParameters paramsOf(Build build, @Nullable QueryPosition position, @Nullable String query) {

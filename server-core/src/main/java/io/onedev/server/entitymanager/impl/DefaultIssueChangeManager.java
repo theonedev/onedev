@@ -1,12 +1,9 @@
 package io.onedev.server.entitymanager.impl;
 
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -19,7 +16,6 @@ import com.google.common.base.Optional;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
-import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
@@ -50,7 +46,6 @@ import io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequest;
 import io.onedev.server.model.support.issue.transitiontrigger.PullRequestTrigger;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
-import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
@@ -66,23 +61,13 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	
 	private final ListenerRegistry listenerRegistry;
 	
-	private final SessionManager sessionManager;
-	
-	private final ExecutorService executorService;
-	
-	private final BuildManager buildManager;
-	
 	@Inject
-	public DefaultIssueChangeManager(Dao dao, IssueManager issueManager, SessionManager sessionManager,
-			IssueFieldManager issueFieldManager, ListenerRegistry listenerRegistry, 
-			ExecutorService executorService, BuildManager buildManager) {
+	public DefaultIssueChangeManager(Dao dao, IssueManager issueManager, 
+			IssueFieldManager issueFieldManager, ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
 		this.listenerRegistry = listenerRegistry;
-		this.sessionManager = sessionManager;
-		this.executorService = executorService;
-		this.buildManager = buildManager;
 	}
 
 	@Transactional
@@ -216,49 +201,14 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 				if (trigger.getJobName().equals(event.getBuild().getJobName()) 
 						&& event.getBuild().getStatus() == Build.Status.SUCCESSFUL
 						&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
-					Long buildId = event.getBuild().getId();
-					
-					/* 
-					 * Below logic is carefully written to make sure database connection is not occupied 
-					 * while waiting to avoid deadlocks
-					 */
-					executorService.execute(new Runnable() {
-
-						@Override
-						public void run() {
-							while (true) {
-								if (sessionManager.call(new Callable<Boolean>() {
-
-									@Override
-									public Boolean call() {
-										Build build = buildManager.load(buildId);
-										Collection<Long> fixedIssueNumbers = build.getFixedIssueNumbers();
-										if (fixedIssueNumbers != null) {
-											for (Long issueNumber: fixedIssueNumbers) {
-												Issue issue = issueManager.find(build.getProject(), issueNumber);
-												if (issue != null && transition.getFromStates().contains(issue.getState())) { 
-													issue.removeFields(transition.getRemoveFields());
-													changeState(issue, transition.getToState(), new HashMap<>(), null, null);
-												}
-											}
-											return true;
-										} else {
-											return false;
-										}
-									}
-									
-								})) {
-									break;
-								} else {
-									try {
-										Thread.sleep(1000);
-									} catch (InterruptedException e) {
-									}
-								}
-							}
+					Build build = event.getBuild();
+					for (Long issueNumber: build.getFixedIssueNumbers()) {
+						Issue issue = issueManager.find(build.getProject(), issueNumber);
+						if (issue != null && transition.getFromStates().contains(issue.getState())) { 
+							issue.removeFields(transition.getRemoveFields());
+							changeState(issue, transition.getToState(), new HashMap<>(), null, null);
 						}
-						
-					});
+					}
 				}
 			}
 		}

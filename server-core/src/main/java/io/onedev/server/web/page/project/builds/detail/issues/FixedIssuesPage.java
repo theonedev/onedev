@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Build;
@@ -35,45 +33,38 @@ public class FixedIssuesPage extends BuildDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		if (getBuild().getFixedIssueNumbers() != null) {
-			Fragment fragment = new Fragment("content", "availableFrag", this);
-			fragment.add(new Label("jobName", getBuild().getJobName()));
-			fragment.add(new IssueListPanel("issues", getProject(), query) {
+		add(new IssueListPanel("issues", getProject(), query) {
 
-				@Override
-				protected IssueQuery getBaseQuery() {
-					return new IssueQuery(new FixedInCriteria(getBuild()), new ArrayList<>());
-				}
-				
-				@Override
-				protected PagingHistorySupport getPagingHistorySupport() {
-					return new PagingHistorySupport() {
-						
-						@Override
-						public PageParameters newPageParameters(int currentPage) {
-							PageParameters params = paramsOf(getBuild(), getPosition(), query);
-							params.add(PARAM_CURRENT_PAGE, currentPage+1);
-							return params;
-						}
-						
-						@Override
-						public int getCurrentPage() {
-							return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
-						}
-						
-					};
-				}
+			@Override
+			protected IssueQuery getBaseQuery() {
+				return new IssueQuery(new FixedInCriteria(getBuild()), new ArrayList<>());
+			}
+			
+			@Override
+			protected PagingHistorySupport getPagingHistorySupport() {
+				return new PagingHistorySupport() {
+					
+					@Override
+					public PageParameters newPageParameters(int currentPage) {
+						PageParameters params = paramsOf(getBuild(), getPosition(), query);
+						params.add(PARAM_CURRENT_PAGE, currentPage+1);
+						return params;
+					}
+					
+					@Override
+					public int getCurrentPage() {
+						return getPageParameters().get(PARAM_CURRENT_PAGE).toInt(1)-1;
+					}
+					
+				};
+			}
 
-				@Override
-				protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-					setResponsePage(FixedIssuesPage.class, FixedIssuesPage.paramsOf(getBuild(), getPosition(), query));
-				}
-				
-			});
-			add(fragment);
-		} else {
-			add(new Fragment("content", "notAvailableFrag", this));
-		}
+			@Override
+			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
+				setResponsePage(FixedIssuesPage.class, FixedIssuesPage.paramsOf(getBuild(), getPosition(), query));
+			}
+			
+		});
 	}
 
 	public static PageParameters paramsOf(Build build, @Nullable QueryPosition position, @Nullable String query) {

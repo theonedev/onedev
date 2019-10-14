@@ -17,8 +17,11 @@ onedev.server.blobEdit = {
 	    });
 	    $head.find(".save>a").click(function() {
 	    	var $content = $body.find(">.content");
-	    	var position = $content.find(".position-aware").data("getPosition")();
-	    	$content.children(".position").val(position);
+	    	var $positionAware = $content.find(".position-aware");
+	    	if ($positionAware.length != 0) {
+		    	var position = $positionAware.data("getPosition")();
+		    	$content.children(".position").val(position);
+	    	}
         	$content.children(".save.submit").click();
 	    });
 

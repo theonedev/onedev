@@ -117,15 +117,6 @@ class ProjectDependencyListEditPanel extends PropertyEditor<List<Serializable>> 
 			
 		});		
 		
-		columns.add(new AbstractColumn<ProjectDependency, Void>(Model.of("Artifacts to Retrieve")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<ProjectDependency>> cellItem, String componentId, IModel<ProjectDependency> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().getArtifacts()));
-			}
-			
-		});		
-		
 		columns.add(new AbstractColumn<ProjectDependency, Void>(Model.of("")) {
 
 			@Override

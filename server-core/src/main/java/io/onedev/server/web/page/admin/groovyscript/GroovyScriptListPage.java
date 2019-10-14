@@ -105,26 +105,6 @@ public class GroovyScriptListPage extends AdministrationPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<GroovyScript, Void>(Model.of("Description")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<GroovyScript>> cellItem, String componentId, IModel<GroovyScript> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(LoopItem.class).getIndex()) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						String description = rowModel.getObject().getDescription();
-						if (description != null)
-							return new Label(componentId, description);
-						else
-							return new Label(componentId, "<i>No description<i>").setEscapeModelStrings(false);
-					}
-					
-				});
-			}
-			
-		});		
-		
 		columns.add(new AbstractColumn<GroovyScript, Void>(Model.of("Can be Used by Jobs")) {
 
 			@Override

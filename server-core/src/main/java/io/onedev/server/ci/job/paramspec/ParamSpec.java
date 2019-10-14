@@ -74,5 +74,5 @@ public abstract class ParamSpec extends InputSpec {
 	public void setAllowEmpty(boolean allowEmpty) {
 		super.setAllowEmpty(allowEmpty);
 	}
-	
+
 }

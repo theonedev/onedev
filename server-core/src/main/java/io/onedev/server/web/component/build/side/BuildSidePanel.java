@@ -24,6 +24,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
 import org.eclipse.jgit.revwalk.RevCommit;
 
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
@@ -227,7 +228,7 @@ public abstract class BuildSidePanel extends Panel {
 				if (param.getType().equals(ParamSpec.SECRET))
 					item.add(new Label("value", SecretInput.MASK));
 				else
-					item.add(new Label("value", param.getValue()));
+					item.add(new Label("value", HtmlUtils.formatAsHtml(param.getValue())).setEscapeModelStrings(false));
 			}
 
 			@Override

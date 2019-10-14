@@ -12,7 +12,7 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=500, name="When dependency jobs finished")
-public class DependencyBuiltTrigger extends JobTrigger {
+public class DependencyFinishedTrigger extends JobTrigger {
 
 	private static final long serialVersionUID = 1L;
 

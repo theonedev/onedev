@@ -120,26 +120,6 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Description")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<FieldSpec>> cellItem, String componentId, IModel<FieldSpec> rowModel) {
-				FieldSpec field = rowModel.getObject();
-				cellItem.add(new ColumnFragment(componentId, field) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						String description = field.getDescription();
-						if (description != null)
-							return new Label(componentId, description);
-						else
-							return new Label(componentId, "<i>No description</i>").setEscapeModelStrings(false);
-					}
-					
-				});
-			}
-		});		
-		
 		columns.add(new AbstractColumn<FieldSpec, Void>(Model.of("Display in Issue List")) {
 
 			@Override

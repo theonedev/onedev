@@ -1,5 +1,6 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,7 +21,10 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -132,26 +136,27 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
 		
-		List<Predicate> restrictions = new ArrayList<>();
-		restrictions.add(builder.equal(root.get("project"), project));
-		restrictions.add(builder.equal(root.get("commitHash"), commitId.name()));
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(builder.equal(root.get("project"), project));
+		predicates.add(builder.equal(root.get("commitHash"), commitId.name()));
 		if (jobName != null)
-			restrictions.add(builder.equal(root.get("jobName"), jobName));
+			predicates.add(builder.equal(root.get("jobName"), jobName));
 		
 		for (Map.Entry<String, List<String>> entry: params.entrySet()) {
 			if (!entry.getValue().isEmpty()) {
 				for (String value: entry.getValue()) {
 					Join<?, ?> join = root.join(BuildConstants.ATTR_PARAMS, JoinType.INNER);
-					restrictions.add(builder.equal(join.get(BuildParam.ATTR_NAME), entry.getKey()));
-					restrictions.add(builder.equal(join.get(BuildParam.ATTR_VALUE), value));
+					predicates.add(builder.equal(join.get(BuildParam.ATTR_NAME), entry.getKey()));
+					predicates.add(builder.equal(join.get(BuildParam.ATTR_VALUE), value));
 				}
 			} else {
 				Join<?, ?> join = root.join(BuildConstants.ATTR_PARAMS, JoinType.INNER);
-				restrictions.add(builder.equal(join.get(BuildParam.ATTR_NAME), entry.getKey()));
-				restrictions.add(builder.isNull(join.get(BuildParam.ATTR_VALUE)));
+				predicates.add(builder.equal(join.get(BuildParam.ATTR_NAME), entry.getKey()));
+				predicates.add(builder.isNull(join.get(BuildParam.ATTR_VALUE)));
 			}
 		}
-		query.where(restrictions.toArray(new Predicate[0]));
+		
+		query.where(predicates.toArray(new Predicate[0]));
 		return getSession().createQuery(query).list();
 	}
 
@@ -390,6 +395,45 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Listen
 	public void on(SystemStopping event) {
 		taskScheduler.unschedule(taskId);
+	}
+
+	@Sessional
+	@Override
+	public Build findStreamlinePrev(Build build, Status status) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
+		Root<Build> root = query.from(Build.class);
+		
+		List<Predicate> predicates = new ArrayList<>();
+		predicates.add(builder.equal(root.get("project"), build.getProject()));
+		predicates.add(builder.equal(root.get("jobName"), build.getJobName()));
+		if (status != null)
+			predicates.add(builder.equal(root.get("status"), status));
+		predicates.add(builder.lessThan(root.get("number"), build.getNumber()));
+		
+		query.where(predicates.toArray(new Predicate[0]));
+		
+		Map<ObjectId, Long> buildIds = new HashMap<>();
+		for (Object[] fields: getSession().createQuery(query.multiselect(root.get("commitHash"), root.get("id"))).list()) {
+			buildIds.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
+		}
+		
+		try (RevWalk revWalk = new RevWalk(build.getProject().getRepository())) {
+			RevCommit current = revWalk.lookupCommit(build.getCommitId());
+			revWalk.parseHeaders(current);
+			while (current.getParentCount() != 0) {
+				RevCommit firstParent = current.getParent(0);
+				Long buildId = buildIds.get(firstParent);
+				if (buildId != null)
+					return load(buildId);
+				current = firstParent;
+				revWalk.parseHeaders(current);
+			} 
+		} catch (MissingObjectException e) {
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return null;
 	}
 	
 }

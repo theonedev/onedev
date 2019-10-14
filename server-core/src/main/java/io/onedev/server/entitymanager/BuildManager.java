@@ -21,6 +21,8 @@ public interface BuildManager extends EntityManager<Build> {
     @Nullable
     Build find(Project project, long number);
     
+	Build findStreamlinePrev(Build build, @Nullable Build.Status status);
+
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, Map<String, List<String>> params); 
 	
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName); 
@@ -40,5 +42,5 @@ public interface BuildManager extends EntityManager<Build> {
 	List<Build> query(Project project, User user, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
 	
 	int count(Project project, User user, EntityCriteria<Build> buildCriteria);
-
+	
 }

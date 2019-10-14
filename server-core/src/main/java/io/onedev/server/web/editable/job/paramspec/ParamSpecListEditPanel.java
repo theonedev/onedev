@@ -110,19 +110,6 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("Description")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<ParamSpec>> cellItem, String componentId, IModel<ParamSpec> rowModel) {
-				String description = rowModel.getObject().getDescription();
-				if (description != null)
-					cellItem.add(new Label(componentId, description));
-				else
-					cellItem.add(new Label(componentId, "<i>No description</i>").setEscapeModelStrings(false));
-			}
-			
-		});		
-		
 		columns.add(new AbstractColumn<ParamSpec, Void>(Model.of("")) {
 
 			@Override

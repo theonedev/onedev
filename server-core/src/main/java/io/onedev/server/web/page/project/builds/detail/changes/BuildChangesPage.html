@@ -1,10 +1,6 @@
 <wicket:extend>
-    <div wicket:id="content" class="changes"></div>
-    <wicket:fragment wicket:id="availableFrag">
+    <div class="changes">
         <div wicket:id="commits"></div>
-        <div class="help-block"><i class="fa fa-info-circle"></i> This page lists changes since all previous builds in job '<span wicket:id="jobName"></span>'</div>
-    </wicket:fragment>
-    <wicket:fragment wicket:id="notAvailableFrag">
-        <div class="alert alert-warning">Changes not calcualted yet, please wait a while and refresh again</div>
-    </wicket:fragment>
+        <div class="help-block"><i class="fa fa-info-circle"></i> This page lists changes since previous build on <a href="https://github.com/theonedev/onedev/wiki/Build-Stream">same stream</a></div>
+    </div>
 </wicket:extend>

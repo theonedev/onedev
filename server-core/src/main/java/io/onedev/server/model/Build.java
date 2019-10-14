@@ -40,7 +40,6 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
@@ -50,7 +49,6 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
-import io.onedev.server.cache.BuildInfoManager;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
@@ -60,6 +58,7 @@ import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.paramspec.SecretParam;
 import io.onedev.server.ci.job.retry.JobRetry;
 import io.onedev.server.ci.job.retry.RetryCondition;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.support.inputspec.SecretInput;
@@ -187,7 +186,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private transient Map<String, List<String>> paramMap;
 	
-	private transient Optional<Collection<Long>> fixedIssueNumbers;
+	private transient Collection<Long> fixedIssueNumbers;
 	
 	private transient CISpec ciSpec;
 	
@@ -420,32 +419,26 @@ public class Build extends AbstractEntity implements Referenceable {
 	/**
 	 * Get fixed issue numbers
 	 * 
-	 * @return
-	 * 			<tt>null</tt> if fixed issue numbers information is not available yet 
 	 */
-	@Nullable
 	public Collection<Long> getFixedIssueNumbers() {
 		if (fixedIssueNumbers == null) {
-			Collection<ObjectId> prevCommits = OneDev.getInstance(BuildInfoManager.class).getPrevCommits(project, getId());
-			if (prevCommits != null) {
-				fixedIssueNumbers = Optional.of(new HashSet<>());
+			fixedIssueNumbers = new HashSet<>();
+			Build prevBuild = OneDev.getInstance(BuildManager.class).findStreamlinePrev(this, null);
+			if (prevBuild != null) {
 				Repository repository = project.getRepository();
 				try (RevWalk revWalk = new RevWalk(repository)) {
 					revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommitHash())));
-					for (ObjectId prevCommit: prevCommits)
-						revWalk.markUninteresting(revWalk.parseCommit(prevCommit));
+					revWalk.markUninteresting(revWalk.parseCommit(prevBuild.getCommitId()));
 
 					RevCommit commit;
 					while ((commit = revWalk.next()) != null) 
-						fixedIssueNumbers.get().addAll(IssueUtils.parseFixedIssues(project, commit.getFullMessage()));
+						fixedIssueNumbers.addAll(IssueUtils.parseFixedIssues(project, commit.getFullMessage()));
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
-			} else {
-				fixedIssueNumbers = Optional.absent();
-			}
+			} 
 		}
-		return fixedIssueNumbers.orNull();
+		return fixedIssueNumbers;
 	}
 	
 	public Map<String, Input> getParamInputs() {

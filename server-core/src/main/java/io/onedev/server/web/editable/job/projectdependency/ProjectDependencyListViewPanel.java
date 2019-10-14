@@ -78,21 +78,6 @@ class ProjectDependencyListViewPanel extends Panel {
 			}
 		});		
 		
-		columns.add(new AbstractColumn<ProjectDependency, Void>(Model.of("Artifacts to Retrieve")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<ProjectDependency>> cellItem, String componentId, IModel<ProjectDependency> rowModel) {
-				cellItem.add(new ColumnFragment(componentId, cellItem.findParent(Item.class).getIndex()) {
-
-					@Override
-					protected Component newLabel(String componentId) {
-						return new Label(componentId, rowModel.getObject().getArtifacts());
-					}
-					
-				});
-			}
-		});		
-		
 		columns.add(new AbstractColumn<ProjectDependency, Void>(Model.of("")) {
 
 			@Override

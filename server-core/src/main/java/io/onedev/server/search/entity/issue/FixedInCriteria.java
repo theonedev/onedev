@@ -25,7 +25,7 @@ public class FixedInCriteria extends IssueCriteria {
 	@Override
 	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
 		Collection<Long> fixedIssueNumbers = build.getFixedIssueNumbers();
-		if (fixedIssueNumbers != null && !fixedIssueNumbers.isEmpty())
+		if (!fixedIssueNumbers.isEmpty())
 			return root.get(IssueConstants.ATTR_NUMBER).in(fixedIssueNumbers);
 		else
 			return builder.disjunction();
@@ -33,7 +33,7 @@ public class FixedInCriteria extends IssueCriteria {
 
 	@Override
 	public boolean matches(Issue issue, User user) {
-		return build.getFixedIssueNumbers() != null && build.getFixedIssueNumbers().contains(issue.getNumber());
+		return build.getFixedIssueNumbers().contains(issue.getNumber());
 	}
 
 	@Override

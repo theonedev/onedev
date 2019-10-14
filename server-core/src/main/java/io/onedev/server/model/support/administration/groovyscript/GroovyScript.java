@@ -22,8 +22,6 @@ public class GroovyScript implements Serializable {
 
 	private String name;
 	
-	private String description;
-	
 	private List<String> content;
 	
 	private JobAuthorization jobAuthorization = new JobAuthorization();
@@ -39,15 +37,6 @@ public class GroovyScript implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200)
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	
 	@Editable(order=300)
 	@Code(language = Code.GROOVY)
 	@Size(min=1, message="May not be empty")
