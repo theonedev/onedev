@@ -326,7 +326,7 @@ public class TextDiffPanel extends Panel implements SourceAware {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				switch (params.getParameterValue("action").toString()) {
+				switch (params.getParameterValue("action").toString("")) {
 				case "expand":
 					if (blameInfo != null) {
 						blameInfo.lastCommitHash = null;

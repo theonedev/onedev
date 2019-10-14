@@ -205,7 +205,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				String action = params.getParameterValue("action").toString(); 
+				String action = params.getParameterValue("action").toString("");
 				switch (action) {
 				case "render":
 					String markdown = params.getParameterValue("param1").toString();

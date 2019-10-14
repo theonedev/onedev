@@ -60,8 +60,13 @@ public class GroovyUtils {
     
     public static Object evalScriptByName(String scriptName, Map<String, Object> variables) {
     	for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
-    		if (script.getName().equals(scriptName) && script.isAuthorized(ScriptIdentity.get()))
-    			return evalScript(StringUtils.join(script.getContent(), "\n"), variables);
+    		if (script.getName().equals(scriptName) && script.isAuthorized(ScriptIdentity.get())) {
+    			try {
+    				return evalScript(StringUtils.join(script.getContent(), "\n"), variables);
+    			} catch (Exception e) {
+    				throw new OneException("Error evaluating named groovy script: " + scriptName, e);
+    			}
+    		}
     	}
     	throw new OneException("No authorized groovy script found: " + scriptName);
     }

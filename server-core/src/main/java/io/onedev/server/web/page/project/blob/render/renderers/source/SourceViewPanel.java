@@ -397,7 +397,7 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				switch(params.getParameterValue("action").toString()) {
+				switch(params.getParameterValue("action").toString("")) {
 				case "openSelectionPopover": 
 					PlanarRange mark = getMark(params, "param1", "param2", "param3", "param4");
 					String unableCommentMessage = null;

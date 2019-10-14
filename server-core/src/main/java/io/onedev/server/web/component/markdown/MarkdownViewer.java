@@ -129,7 +129,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
-				String referenceType = params.getParameterValue(REFERENCE_TYPE).toString();
+				String referenceType = params.getParameterValue(REFERENCE_TYPE).toString("");
 				String referenceId = params.getParameterValue(REFERENCE_ID).toString();
 				switch (referenceType) {
 				case "issue":

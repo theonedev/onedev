@@ -264,7 +264,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters(); 
-				String action = params.getParameterValue("action").toString();
+				String action = params.getParameterValue("action").toString("");
 				switch (action) {
 				case "quickSearch": 
 					new ModalPanel(target) {
