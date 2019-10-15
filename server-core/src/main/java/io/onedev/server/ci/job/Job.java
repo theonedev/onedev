@@ -23,6 +23,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.CISpecAware;
+import io.onedev.server.ci.job.action.PostBuildAction;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.retry.JobRetry;
@@ -85,6 +88,8 @@ public class Job implements Serializable, Validatable {
 	private String memoryRequirement = "128m";
 	
 	private long timeout = 3600;
+	
+	private List<PostBuildAction> postBuildActions = new ArrayList<>();
 	
 	private JobRetry retry;
 	
@@ -305,12 +310,23 @@ public class Job implements Serializable, Validatable {
 
 	@Editable(order=10600, name="Retry When Failed", group="More Settings", description="Check to re-run the job upon build failure")
 	@NameOfEmptyValue("Do not retry")
+	@Valid
 	public JobRetry getRetry() {
 		return retry;
 	}
 	
 	public void setRetry(JobRetry retry) {
 		this.retry = retry;
+	}
+	
+	@Editable(order=10600, name="Post Build Actions", group="More Settings")
+	@Valid
+	public List<PostBuildAction> getPostBuildActions() {
+		return postBuildActions;
+	}
+	
+	public void setPostBuildActions(List<PostBuildAction> postBuildActions) {
+		this.postBuildActions = postBuildActions;
 	}
 	
 	public JobTrigger getMatchedTrigger(ProjectEvent event) {
@@ -399,6 +415,28 @@ public class Job implements Serializable, Validatable {
 				+ quote(FIELD_COMMIT) + " " + getRuleName(Is) + " " + quote(commitId.name()) 
 				+ " " + getRuleName(And) + " "
 				+ quote(FIELD_JOB) + " " + getRuleName(Is) + " " + quote(jobName);
+	}
+	
+	public static List<String> getChoices() {
+		List<String> choices = new ArrayList<>();
+		Component component = ComponentContext.get().getComponent();
+		CISpecAware ciSpecAware = WicketUtils.findInnermost(component, CISpecAware.class);
+		if (ciSpecAware != null) {
+			CISpec ciSpec = ciSpecAware.getCISpec();
+			if (ciSpec != null) {
+				for (Job eachJob: ciSpec.getJobs()) {
+					if (eachJob.getName() != null)
+						choices.add(eachJob.getName());
+				}
+			}
+			JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
+			if (jobAware != null) {
+				Job job = jobAware.getJob();
+				if (job != null)
+					choices.remove(job.getName());
+			}
+		}
+		return choices;
 	}
 	
 }

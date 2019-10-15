@@ -1,14 +1,13 @@
-package io.onedev.server.ci.job.retry;
+package io.onedev.server.ci.job.retry.condition;
 
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.ci.job.log.LogManager;
 import io.onedev.server.model.Build;
 
-public class LogCriteria extends Criteria {
-
-	private static final long serialVersionUID = 1L;
+public class LogCriteria implements Predicate<Build> {
 
 	private final String value;
 	
@@ -17,7 +16,7 @@ public class LogCriteria extends Criteria {
 	}
 	
 	@Override
-	public boolean satisfied(Build build) {
+	public boolean test(Build build) {
 		Pattern pattern = Pattern.compile(value);
 		return OneDev.getInstance(LogManager.class).matches(build, pattern);
 	}

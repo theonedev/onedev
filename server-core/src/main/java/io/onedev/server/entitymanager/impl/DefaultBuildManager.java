@@ -399,7 +399,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 	@Sessional
 	@Override
-	public Build findStreamlinePrev(Build build, Status status) {
+	public Build findStreamPrevious(Build build, Status status) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
 		Root<Build> root = query.from(Build.class);

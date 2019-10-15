@@ -19,6 +19,7 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobDependency;
+import io.onedev.server.ci.job.action.PostBuildAction;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.migration.VersionedDocument;
@@ -72,13 +73,15 @@ public class CISpec implements Serializable, Validatable {
 
 		for (int i=0; i<jobs.size(); i++) {
 			Job job = jobs.get(i);
+			
+			int j=1;
 			for (JobDependency dependency: job.getJobDependencies()) {
 				Job dependencyJob = getJobMap().get(dependency.getJobName());
 				if (dependencyJob != null) {
 					try {
 						JobParam.validateParams(dependencyJob.getParamSpecs(), dependency.getJobParams());
 					} catch (ValidationException e) {
-						String message = "Error validating job parameters of dependency '" 
+						String message = "Item #" + j + ": Error validating parameters of dependency job '" 
 								+ dependencyJob.getName() + "': " + e.getMessage();
 						context.buildConstraintViolationWithTemplate(message)
 								.addPropertyNode("jobs").addPropertyNode("dependencies")
@@ -101,18 +104,36 @@ public class CISpec implements Serializable, Validatable {
 							.addConstraintViolation();
 					valid = false;
 				}
+				j++;
 			}
+			
+			j=1;
 			for (JobTrigger trigger: job.getTriggers()) {
 				try {
 					JobParam.validateParams(job.getParamSpecs(), trigger.getParams());
 				} catch (Exception e) {
-					String message = "Error validating job parameters: " + e.getMessage();
+					String message = "Item #" + j + ": Error validating job parameters: " + e.getMessage();
 					context.buildConstraintViolationWithTemplate(message)
 							.addPropertyNode("jobs").addPropertyNode("triggers")
 								.inIterable().atIndex(i)
 							.addConstraintViolation();
 					valid = false;
 				}
+				j++;
+			}
+			
+			j=1;
+			for (PostBuildAction action: job.getPostBuildActions()) {
+				try {
+					action.validateWithContext(this, job);
+				} catch (Exception e) {
+					context.buildConstraintViolationWithTemplate("Item #" + j + ": " + e.getMessage())
+							.addPropertyNode("jobs").addPropertyNode("postBuildActions")
+								.inIterable().atIndex(i)
+							.addConstraintViolation();
+					valid = false;
+				}
+				j++;
 			}
 		}
 		

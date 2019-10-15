@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.retrycondition;
+package io.onedev.server.web.editable;
 
 import java.lang.reflect.Method;
 
@@ -6,23 +6,20 @@ import org.apache.wicket.Component;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.web.editable.EditSupport;
-import io.onedev.server.web.editable.EmptyValueLabel;
-import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.editable.PropertyDescriptor;
-import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.PropertyViewer;
-import io.onedev.server.web.editable.annotation.RetryCondition;
+import io.onedev.server.web.behavior.ActionConditionBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
+import io.onedev.server.web.editable.annotation.ActionCondition;
+import io.onedev.server.web.editable.string.StringPropertyEditor;
 
 @SuppressWarnings("serial")
-public class RetryConditionEditSupport implements EditSupport {
+public class ActionConditionEditSupport implements EditSupport {
 
 	@Override
 	public PropertyContext<?> getEditContext(PropertyDescriptor descriptor) {
 		Method propertyGetter = descriptor.getPropertyGetter();
-        if (propertyGetter.getAnnotation(RetryCondition.class) != null) {
+        if (propertyGetter.getAnnotation(ActionCondition.class) != null) {
         	if (propertyGetter.getReturnType() != String.class) {
-	    		throw new RuntimeException("Annotation 'RetryCondition' should be applied to property "
+	    		throw new RuntimeException("Annotation 'ActionCondition' should be applied to property "
 	    				+ "with type 'String'");
         	}
     		return new PropertyContext<String>(descriptor) {
@@ -46,7 +43,14 @@ public class RetryConditionEditSupport implements EditSupport {
 
 				@Override
 				public PropertyEditor<String> renderForEdit(String componentId, IModel<String> model) {
-		        	return new RetryConditionEditor(componentId, descriptor, model);
+		        	return new StringPropertyEditor(componentId, descriptor, model) {
+
+						@Override
+						protected InputAssistBehavior getInputAssistBehavior() {
+							return new ActionConditionBehavior();
+						}
+		        		
+		        	};
 				}
     			
     		};

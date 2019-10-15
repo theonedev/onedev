@@ -123,6 +123,10 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new CancelledByMeCriteria();
 						case BuildQueryLexer.WillRetry:
 							return new WillRetryCriteria();
+						case BuildQueryLexer.AssociatedWithPullRequests:
+							return new AssociatedWithPullRequestsCriteria();
+						case BuildQueryLexer.RequiredByPullRequests:
+							return new RequiredByPullRequestsCriteria();
 						default:
 							throw new OneException("Unexpected operator: " + ctx.operator.getText());
 						}

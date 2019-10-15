@@ -25,7 +25,7 @@ public class MarkdownPropertyEditor extends PropertyEditor<String> {
 		super.onInitialize();
 		
 		add(input = new MarkdownEditor("input", Model.of(getModelObject()), false, null));
-        input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+        input.setLabel(Model.of(getDescriptor().getDisplayName()));
 
 		input.add(new OnTypingDoneBehavior() {
 

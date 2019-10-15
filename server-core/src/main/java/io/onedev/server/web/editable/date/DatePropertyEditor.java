@@ -41,7 +41,7 @@ public class DatePropertyEditor extends PropertyEditor<Date> {
 		if (propertyGetter.getAnnotation(OmitName.class) != null)
 			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(propertyGetter)));
 
-		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName()));
 		add(input);
 		
 		input.add(new OnTypingDoneBehavior() {

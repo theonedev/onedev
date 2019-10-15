@@ -32,7 +32,7 @@ public class AssociatedWithPullRequestCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return build.getPullRequestBuilds().stream().anyMatch(it -> it.getRequest().equals(value) && it.isRequired());
+		return build.getPullRequestBuilds().stream().anyMatch(it -> it.getRequest().equals(value));
 	}
 
 	@Override

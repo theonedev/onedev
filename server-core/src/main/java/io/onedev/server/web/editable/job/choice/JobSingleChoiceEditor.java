@@ -24,7 +24,7 @@ public class JobSingleChoiceEditor extends PropertyEditor<String> {
 		
 		input = new JobSingleChoice("input", Model.of(getModelObject()));
         input.setConvertEmptyInputStringToNull(true);
-        input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+        input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
         add(input);
 	}

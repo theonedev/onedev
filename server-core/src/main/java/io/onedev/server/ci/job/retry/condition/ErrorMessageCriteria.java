@@ -1,21 +1,20 @@
-package io.onedev.server.ci.job.retry;
+package io.onedev.server.ci.job.retry.condition;
 
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import io.onedev.server.model.Build;
 
-public class ErrorMessageCriteria extends Criteria {
-
-	private static final long serialVersionUID = 1L;
+public class ErrorMessageCriteria implements Predicate<Build> {
 
 	private final String value;
 	
 	public ErrorMessageCriteria(String value) {
 		this.value = value;
 	}
-	
+
 	@Override
-	public boolean satisfied(Build build) {
+	public boolean test(Build build) {
 		return Pattern.compile(value).matcher(build.getStatusMessage()).find();
 	}
 

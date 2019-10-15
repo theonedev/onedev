@@ -31,13 +31,13 @@ public class ConfirmativePasswordPropertyEditor extends PropertyEditor<String> {
 		input = new PasswordTextField("input", Model.of(getModelObject()));
 		input.setResetPassword(true);
 		input.setRequired(false);
-		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName()));
 		add(input);
 		
 		inputAgain = new PasswordTextField("inputAgain", Model.of(getModelObject()));
 		inputAgain.setResetPassword(true);
 		inputAgain.setRequired(false);
-		inputAgain.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+		inputAgain.setLabel(Model.of(getDescriptor().getDisplayName()));
 		add(inputAgain);
 		
 		Password password = getDescriptor().getPropertyGetter().getAnnotation(Password.class);

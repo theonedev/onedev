@@ -34,7 +34,7 @@ public class JobMultiChoiceEditor extends PropertyEditor<List<String>> {
 		
 		input = new JobMultiChoice("input", Model.of(jobNames));
         input.setConvertEmptyInputStringToNull(true);
-        input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+        input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
         add(input);
 	}

@@ -57,7 +57,7 @@ import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.paramspec.SecretParam;
 import io.onedev.server.ci.job.retry.JobRetry;
-import io.onedev.server.ci.job.retry.RetryCondition;
+import io.onedev.server.ci.job.retry.condition.RetryCondition;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -188,9 +188,13 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private transient Collection<Long> fixedIssueNumbers;
 	
+	private transient Map<Build.Status, Collection<RevCommit>> commitsCache;
+	
 	private transient CISpec ciSpec;
 	
 	private transient Job job;
+	
+	private transient Map<Build.Status, Build> streamPreviousCache = new HashMap<>();
 	
 	public Project getProject() {
 		return project;
@@ -346,7 +350,7 @@ public class Build extends AbstractEntity implements Referenceable {
 			willRetryNow = getStatus() == Build.Status.FAILED
 					&& retry != null 
 					&& getRetried() < retry.getMaxRetries() 
-					&& RetryCondition.parse(retry.getRetryCondition()).satisfied(this);
+					&& RetryCondition.parse(retry.getCondition()).test(this);
 		}
 		return willRetryNow;
 	}
@@ -423,7 +427,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	public Collection<Long> getFixedIssueNumbers() {
 		if (fixedIssueNumbers == null) {
 			fixedIssueNumbers = new HashSet<>();
-			Build prevBuild = OneDev.getInstance(BuildManager.class).findStreamlinePrev(this, null);
+			Build prevBuild = getStreamPrevious(null);
 			if (prevBuild != null) {
 				Repository repository = project.getRepository();
 				try (RevWalk revWalk = new RevWalk(repository)) {
@@ -439,6 +443,30 @@ public class Build extends AbstractEntity implements Referenceable {
 			} 
 		}
 		return fixedIssueNumbers;
+	}
+	
+	public Collection<RevCommit> getCommits(@Nullable Build.Status sincePrevStatus) {
+		if (commitsCache == null) 
+			commitsCache = new HashMap<>();
+		if (!commitsCache.containsKey(sincePrevStatus)) {
+			Collection<RevCommit> commits = new ArrayList<>();
+			Build prevBuild = getStreamPrevious(sincePrevStatus);
+			if (prevBuild != null) {
+				Repository repository = project.getRepository();
+				try (RevWalk revWalk = new RevWalk(repository)) {
+					revWalk.markStart(revWalk.parseCommit(ObjectId.fromString(getCommitHash())));
+					revWalk.markUninteresting(revWalk.parseCommit(prevBuild.getCommitId()));
+
+					RevCommit commit;
+					while ((commit = revWalk.next()) != null) 
+						commits.add(commit);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			} 
+			commitsCache.put(sincePrevStatus, commits);
+		}
+		return commitsCache.get(sincePrevStatus);
 	}
 	
 	public Map<String, Input> getParamInputs() {
@@ -596,6 +624,15 @@ public class Build extends AbstractEntity implements Referenceable {
 			}
 			
 		});
+	}
+	
+	@Nullable
+	public Build getStreamPrevious(@Nullable Status status) {
+		if (streamPreviousCache == null) 
+			streamPreviousCache = new HashMap<>();
+		if (!streamPreviousCache.containsKey(status)) 
+			streamPreviousCache.put(status, OneDev.getInstance(BuildManager.class).findStreamPrevious(this, status));
+		return streamPreviousCache.get(status);
 	}
 	
 	public void retrieveArtifacts(Build dependency, String artifacts, File workspaceDir) {

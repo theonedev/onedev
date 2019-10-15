@@ -80,7 +80,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 		};
         input.setConvertEmptyInputStringToNull(true);
         input.setRequired(descriptor.isPropertyRequired());
-        input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+        input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

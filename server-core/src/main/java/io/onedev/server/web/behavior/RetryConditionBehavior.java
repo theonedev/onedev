@@ -9,8 +9,8 @@ import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.ci.job.retry.RetryCondition;
-import io.onedev.server.ci.job.retry.RetryConditionParser;
+import io.onedev.server.ci.job.retry.condition.RetryConditionParser;
+import io.onedev.server.ci.job.retry.condition.RetryCondition;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 

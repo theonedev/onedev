@@ -90,7 +90,7 @@ public class BuildChoiceEditor extends PropertyEditor<Long> {
         
         // add this to control allowClear flag of select2
     	input.setRequired(descriptor.isPropertyRequired());
-        input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+        input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
 		input.add(new AjaxFormComponentUpdatingBehavior("change"){
 

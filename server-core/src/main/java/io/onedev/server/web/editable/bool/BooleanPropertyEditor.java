@@ -33,7 +33,7 @@ public class BooleanPropertyEditor extends PropertyEditor<Boolean> {
 			}
 			
 		});
-		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName()));
 	}
 
 	@Override

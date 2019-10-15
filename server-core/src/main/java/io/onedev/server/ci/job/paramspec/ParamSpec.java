@@ -6,7 +6,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.showcondition.ShowCondition;
-import io.onedev.server.util.validation.annotation.FieldName;
+import io.onedev.server.util.validation.annotation.ParamName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
@@ -16,7 +16,7 @@ public abstract class ParamSpec extends InputSpec {
 	private static final long serialVersionUID = 1L;
 	
 	@Editable(order=10)
-	@FieldName
+	@ParamName
 	@NotEmpty
 	@Override
 	public String getName() {

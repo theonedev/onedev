@@ -37,7 +37,7 @@ public class CodeCommentQueryEditor extends PropertyEditor<String> {
     		
     	}));
         
-		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
         add(input);
 		input.add(new OnTypingDoneBehavior() {

@@ -44,6 +44,20 @@ public class BuildNotificationManager {
 		}
 	}
 	
+	public void notify(Build build, Collection<String> emails) {
+		String subject;
+		if (build.getVersion() != null) {
+			subject = String.format("Build %s/%s/#%s (%s) is %s", build.getProject().getName(), build.getJobName(), 
+					build.getNumber(), build.getVersion(), build.getStatus().getDisplayName().toLowerCase());
+		} else {
+			subject = String.format("Build %s/%s/#%s is %s", build.getProject().getName(), build.getJobName(), 
+					build.getNumber(), build.getStatus().getDisplayName().toLowerCase());
+		}
+		String url = urlManager.urlFor(build);
+		String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+		mailManager.sendMailAsync(emails, subject, body.toString());
+	}
+	
 	@Sessional
 	@Listen
 	public void on(BuildEvent event) {
@@ -70,18 +84,7 @@ public class BuildNotificationManager {
 				}
 			}
 		}
-
-		String subject;
-		if (build.getVersion() != null) {
-			subject = String.format("Build %s/%s/#%s (%s) is %s", build.getProject().getName(), build.getJobName(), 
-					build.getNumber(), build.getVersion(), build.getStatus().getDisplayName().toLowerCase());
-		} else {
-			subject = String.format("Build %s/%s/#%s is %s", build.getProject().getName(), build.getJobName(), 
-					build.getNumber(), build.getStatus().getDisplayName().toLowerCase());
-		}
-		String url = urlManager.urlFor(build);
-		String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-		mailManager.sendMailAsync(notifyEmails, subject, body.toString());
+		notify(build, notifyEmails);
 	}
 	
 }

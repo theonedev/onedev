@@ -57,7 +57,7 @@ public class JobDependency implements Serializable {
 		this.requireSuccessful = requireSuccessful;
 	}
 
-	@Editable(order=200)
+	@Editable(order=200, name="Job Parameters")
 	@ParamSpecProvider("getParamSpecs")
 	@OmitName
 	public List<JobParam> getJobParams() {
@@ -89,25 +89,7 @@ public class JobDependency implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getJobChoices() {
-		List<String> choices = new ArrayList<>();
-		Component component = ComponentContext.get().getComponent();
-		CISpecAware ciSpecAware = WicketUtils.findInnermost(component, CISpecAware.class);
-		if (ciSpecAware != null) {
-			CISpec ciSpec = ciSpecAware.getCISpec();
-			if (ciSpec != null) {
-				for (Job eachJob: ciSpec.getJobs()) {
-					if (eachJob.getName() != null)
-						choices.add(eachJob.getName());
-				}
-			}
-			JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
-			if (jobAware != null) {
-				Job job = jobAware.getJob();
-				if (job != null)
-					choices.remove(job.getName());
-			}
-		}
-		return choices;
+		return Job.getChoices();
 	}
 	
 	@SuppressWarnings("unused")

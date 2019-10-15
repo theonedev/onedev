@@ -110,10 +110,6 @@ public abstract class PropertyContext<T> implements Serializable {
 		return registry.getPropertyEditContext(propertyDescriptor);
 	}
 	
-	public String getDisplayName(Component component) {
-		return descriptor.getDisplayName(component);
-	}
-	
 	public String getDisplayName() {
 		return descriptor.getDisplayName();
 	}

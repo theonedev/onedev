@@ -29,7 +29,7 @@ public class PasswordPropertyEditor extends PropertyEditor<String> {
 		input = new PasswordTextField("input", Model.of(getModelObject()));
 		input.setRequired(false);
 		input.setResetPassword(false);
-		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName()));
 		add(input);
 
 		Password password = getDescriptor().getPropertyGetter().getAnnotation(Password.class);

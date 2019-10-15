@@ -1,6 +1,6 @@
 grammar ReviewRequirement;
 
-requirement: ' '* criteria (' '+ criteria)* ' '* EOF;
+requirement: WS* criteria (WS+ 'and' WS+ criteria)* WS* EOF;
 
 criteria: userCriteria | groupCriteria;
 
@@ -13,5 +13,7 @@ DIGIT: [1-9][0-9]*;
 
 USER: 'user';
 GROUP: 'group';
+
+WS: ' ';
 
 Value: '(' ('\\'.|~[\\()])+? ')';

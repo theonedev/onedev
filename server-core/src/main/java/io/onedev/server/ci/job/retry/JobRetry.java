@@ -14,7 +14,7 @@ public class JobRetry implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String retryCondition;
+	private String condition;
 	
 	private int maxRetries = 3;
 	
@@ -23,12 +23,12 @@ public class JobRetry implements Serializable {
 	@Editable(order=100, description="Specify the condition to retry the failed build")
 	@NotEmpty
 	@RetryCondition
-	public String getRetryCondition() {
-		return retryCondition;
+	public String getCondition() {
+		return condition;
 	}
 
-	public void setRetryCondition(String retryCondition) {
-		this.retryCondition = retryCondition;
+	public void setCondition(String condition) {
+		this.condition = condition;
 	}
 
 	@Editable(order=200, description="Maximum of retries before giving up")

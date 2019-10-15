@@ -136,7 +136,7 @@ public class BeanEditor extends ValueEditor<Serializable> {
 					nameContainer = this;
 					valueContainer = this;
 				}
-				Label nameLabel = new Label("name", property.getDescriptor().getDisplayName(this));
+				Label nameLabel = new Label("name", property.getDescriptor().getDisplayName());
 				nameContainer.add(nameLabel);
 				
 				OmitName omitName = property.getPropertyGetter().getAnnotation(OmitName.class);

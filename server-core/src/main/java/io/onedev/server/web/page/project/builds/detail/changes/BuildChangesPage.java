@@ -37,7 +37,7 @@ public class BuildChangesPage extends BuildDetailPage {
 		super.onInitialize();
 
 		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-		Build prevBuild = buildManager.findStreamlinePrev(getBuild(), null);
+		Build prevBuild = buildManager.findStreamPrevious(getBuild(), null);
 		add(new CommitListPanel("commits", getProject(), query) {
 
 			@Override

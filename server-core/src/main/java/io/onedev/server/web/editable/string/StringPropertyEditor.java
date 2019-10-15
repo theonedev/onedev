@@ -48,7 +48,7 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 			input.setType(getDescriptor().getPropertyClass());
 			add(fragment);
 		}
-		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));		
+		input.setLabel(Model.of(getDescriptor().getDisplayName()));		
 		
 		InputAssistBehavior inputAssistBehavior = getInputAssistBehavior();
 		if (inputAssistBehavior != null) {

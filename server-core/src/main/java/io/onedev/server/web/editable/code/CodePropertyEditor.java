@@ -53,7 +53,7 @@ public class CodePropertyEditor extends PropertyEditor<List<String>> {
 		add(container);
 		
 		container.add(input = new TextArea<String>("input", Model.of(StringUtils.join(getModelObject(), "\n"))));
-		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));		
+		input.setLabel(Model.of(getDescriptor().getDisplayName()));		
 		input.setOutputMarkupId(true);
 
 		input.add(new OnTypingDoneBehavior() {

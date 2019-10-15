@@ -26,7 +26,7 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 		input = new TextField<Number>("input", Model.of(getModelObject()));
 		input.setType(getDescriptor().getPropertyClass());
 		add(input);
-		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName()));
 		
 		input.add(new OnTypingDoneBehavior() {
 

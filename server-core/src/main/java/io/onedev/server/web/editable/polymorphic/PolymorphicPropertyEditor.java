@@ -156,7 +156,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 		
 		typeSelector.setNullValid(!getDescriptor().isPropertyRequired());
 		
-		typeSelector.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+		typeSelector.setLabel(Model.of(getDescriptor().getDisplayName()));
 		
 		typeSelector.add(new AjaxFormComponentUpdatingBehavior("change"){
 

@@ -408,7 +408,7 @@ public final class Settings implements Serializable {
 		if (propertyDescriptor.isPropertyRequired()) {
 			Method getter = propertyDescriptor.getPropertyGetter();
 			if (getter.getAnnotation(OmitName.class) != null)
-				setPlaceholder("Select " + propertyDescriptor.getDisplayName(component).toLowerCase() + "...");
+				setPlaceholder("Select " + propertyDescriptor.getDisplayName().toLowerCase() + "...");
 		} else if (propertyDescriptor.getNameOfEmptyValue() != null) {
 			setPlaceholder(propertyDescriptor.getNameOfEmptyValue());
 		}

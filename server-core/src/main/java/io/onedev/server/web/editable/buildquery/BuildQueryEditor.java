@@ -41,7 +41,7 @@ public class BuildQueryEditor extends PropertyEditor<String> {
     		
     	}, noLoginSupport));
         
-		input.setLabel(Model.of(getDescriptor().getDisplayName(this)));
+		input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
         add(input);
 		input.add(new OnTypingDoneBehavior() {

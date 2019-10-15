@@ -1,4 +1,4 @@
-package io.onedev.server.ci.job.retry;
+package io.onedev.server.ci.job.retry.condition;
 
 import java.io.Serializable;
 

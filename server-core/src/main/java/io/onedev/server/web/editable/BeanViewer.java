@@ -91,7 +91,7 @@ public class BeanViewer extends Panel {
 				WebMarkupContainer valueTd = new WebMarkupContainer("value");
 				propertyItem.add(valueTd);
 				
-				String displayName = property.getDisplayName(this);
+				String displayName = property.getDisplayName();
 				Component content = new Label("content", displayName);
 				nameTd.add(content);
 				OmitName omitName = propertyGetter.getAnnotation(OmitName.class);

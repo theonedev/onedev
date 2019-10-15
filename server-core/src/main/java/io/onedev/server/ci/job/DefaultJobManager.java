@@ -53,6 +53,8 @@ import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.CISpec;
+import io.onedev.server.ci.job.action.PostBuildAction;
+import io.onedev.server.ci.job.action.condition.ActionCondition;
 import io.onedev.server.ci.job.log.LogManager;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
@@ -519,28 +521,35 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									Long projectId = event.getProject().getId();
 									
 									// run asynchrously as session may get closed due to exception
-									sessionManager.runAsync(new Runnable() {
-	
+									OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
+
 										@Override
 										public void run() {
-											Project project = projectManager.load(projectId);
-											try {
-												new MatrixRunner<List<String>>(paramMatrix) {
-													
-													@Override
-													public void run(Map<String, List<String>> paramMap) {
-														submit(project, commitId, job.getName(), paramMap, null); 
+											sessionManager.runAsync(new Runnable() {
+												
+												@Override
+												public void run() {
+													Project project = projectManager.load(projectId);
+													try {
+														new MatrixRunner<List<String>>(paramMatrix) {
+															
+															@Override
+															public void run(Map<String, List<String>> paramMap) {
+																submit(project, commitId, job.getName(), paramMap, null); 
+															}
+															
+														}.run();
+													} catch (Exception e) {
+														String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)", 
+																project.getName(), commitId.name(), job.getName());
+														logger.error(message, e);
 													}
-													
-												}.run();
-											} catch (Exception e) {
-												String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)", 
-														project.getName(), commitId.name(), job.getName());
-												logger.error(message, e);
-											}
+												}
+												
+											}, SecurityUtils.getSubject());
 										}
 										
-									}, SecurityUtils.getSubject());
+									});
 								}
 							}
 						}
@@ -772,7 +781,18 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				}
 				
 			}, SecurityUtils.getSubject());
-		} else {
+		} 
+		
+		try {
+			for (PostBuildAction action: build.getJob().getPostBuildActions()) {
+				if (ActionCondition.parse(action.getCondition()).test(build))
+					action.execute(build);
+			}
+		} catch (Exception e) {
+			logger.error("Error processing post build actions", e);
+		}
+		
+		if (!build.willRetryNow()) {
 			for (BuildParam param: build.getParams()) {
 				if (param.getType().equals(ParamSpec.SECRET)) 
 					param.setValue(null);
