@@ -32,7 +32,6 @@ import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 
 import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.PathNode.Named;
@@ -119,8 +118,6 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	private WebMarkupContainer newItem(String id, PropertyContext<Serializable> property) {
 		WebMarkupContainer item = new PropertyContainer(id, property) {
 
-			private Label descriptionLabel;
-			
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
@@ -173,27 +170,12 @@ public class BeanEditor extends ValueEditor<Serializable> {
 				PropertyEditor<Serializable> propertyEditor = property.renderForEdit("value", Model.of(propertyValue)); 
 				valueContainer.add(propertyEditor);
 				
-				descriptionLabel = new Label("description", property.getDescriptor().getDescription(this)) {
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setVisible(StringUtils.isNotBlank(getModelValue()));
-					}
-					
-				};
+				Label descriptionLabel = new Label("description", property.getDescriptor().getDescription());
 				descriptionLabel.setEscapeModelStrings(false);
 				descriptionLabel.setOutputMarkupPlaceholderTag(true);
 				valueContainer.add(descriptionLabel);
 				
 				valueContainer.add(new FencedFeedbackPanel("feedback", propertyEditor));
-			}
-
-			@Override
-			public void onEvent(IEvent<?> event) {
-				super.onEvent(event);
-				if (event.getPayload() instanceof PropertyUpdating)
-					((PropertyUpdating)event.getPayload()).getHandler().add(descriptionLabel);
 			}
 
 			@Override

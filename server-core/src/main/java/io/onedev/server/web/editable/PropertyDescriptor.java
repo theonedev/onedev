@@ -10,17 +10,12 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.apache.wicket.Application;
-import org.apache.wicket.Component;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.BeanUtils;
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.ReflectionUtils;
-import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
@@ -172,20 +167,5 @@ public class PropertyDescriptor implements Serializable {
 	public String getDescription() {
 		return EditableUtils.getDescription(getPropertyGetter());
 	}
-	
-	public String getDescription(Component component) {
-		String description = getDescription();
-		if (description != null) {
-			ComponentContext.push(new ComponentContext(component));
-			try {
-				description = Application.get().getResourceSettings().getLocalizer().getString(description, component, description);
-				description = StringUtils.replace(description, "$docRoot", OneDev.getInstance().getDocRoot());
-				return HtmlUtils.clean(description).body().html();
-			} finally {
-				ComponentContext.pop();
-			}
-		} else {
-			return null;
-		}
-	}
+
 }
