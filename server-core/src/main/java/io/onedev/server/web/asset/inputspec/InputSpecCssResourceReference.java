@@ -1,4 +1,4 @@
-package io.onedev.server.model.support.inputspec;
+package io.onedev.server.web.asset.inputspec;
 
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 

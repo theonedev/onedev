@@ -27,7 +27,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.ci.job.paramspec.ParamSpec;
-import io.onedev.server.model.support.inputspec.InputSpecCssResourceReference;
+import io.onedev.server.web.asset.inputspec.InputSpecCssResourceReference;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -215,6 +215,7 @@ class ParamSpecListEditPanel extends PropertyEditor<List<Serializable>> {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(CssHeaderItem.forReference(new InputSpecCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new ParamSpecCssResourceReference()));
 	}
 	
 }
