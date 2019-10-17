@@ -7,8 +7,8 @@ import org.apache.wicket.Component;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.web.PrioritizedComponentRenderer;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext.Mode;
+import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 
 public class SourceRendererProvider implements BlobRendererContribution {
 

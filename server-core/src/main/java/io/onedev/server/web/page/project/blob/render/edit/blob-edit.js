@@ -16,6 +16,7 @@ onedev.server.blobEdit = {
             }
 	    });
 	    $head.find(".save>a").click(function() {
+    		onedev.server.viewState.getFromViewAndSetToHistory();
 	    	var $content = $body.find(">.content");
 	    	var $positionAware = $content.find(".position-aware");
 	    	if ($positionAware.length != 0) {
@@ -66,8 +67,6 @@ onedev.server.blobEdit = {
 
 	},
 	selectTab: function($tab) {
-		onedev.server.viewState.getFromViewAndSetToHistory();
-        
     	var $active = $tab.parent().find(".tab.active");
     	$active.removeClass("active");
     	$tab.addClass("active");
@@ -89,6 +88,9 @@ onedev.server.blobEdit = {
         }
 
         $(window).resize();
+        
+        if (!$tab.hasClass("save"))
+        	onedev.server.viewState.getFromHistoryAndSetToView();        	
 	},
 	onNameChanging: function(containerId, addingFile, recreateCallback) {
 		var $body = $("#" + containerId + ">.blob-edit>.body");
