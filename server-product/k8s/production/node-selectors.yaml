@@ -6,14 +6,14 @@ spec:
   template:
     spec:
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: onedev
+  name: mysql
 spec:
   template:
     spec:
       nodeSelector:
-        kubernetes.io/os: linux
+        beta.kubernetes.io/os: linux
