@@ -136,8 +136,14 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 	}
 	
 	public static void fillParams(PageParameters params, State state) {
-		params.add(PARAM_LEFT, state.leftSide.toString());
-		params.add(PARAM_RIGHT, state.rightSide.toString());
+		if (state.leftSide.getRevision() != null)
+			params.add(PARAM_LEFT, state.leftSide.toString());
+		else
+			params.add(PARAM_LEFT, state.leftSide.getProjectId());
+		if (state.rightSide.getRevision() != null)
+			params.add(PARAM_RIGHT, state.rightSide.toString());
+		else
+			params.add(PARAM_RIGHT, state.rightSide.getProjectId());
 		params.add(PARAM_COMPARE_WITH_MERGE_BASE, state.compareWithMergeBase);
 		if (state.whitespaceOption != WhitespaceOption.DEFAULT)
 			params.add(PARAM_WHITESPACE_OPTION, state.whitespaceOption.name());
@@ -163,20 +169,26 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		super(params);
 		
 		String str = params.get(PARAM_LEFT).toString();
-		if (str != null) {
+		if (str != null) 
 			state.leftSide = new ProjectAndRevision(str);
-		} else {
+		else if (getProject().getDefaultBranch() != null) 
 			state.leftSide = new ProjectAndRevision(getProject(), getProject().getDefaultBranch());
-		}
-		leftCommitId = state.leftSide.getCommit().copy();
+		else
+			state.leftSide = new ProjectAndRevision(getProject(), null);
+		
+		if (state.leftSide.getRevision() != null)
+			leftCommitId = state.leftSide.getCommit().copy();
 		
 		str = params.get(PARAM_RIGHT).toString();
-		if (str != null) {
+		if (str != null) 
 			state.rightSide = new ProjectAndRevision(str);
-		} else {
+		else if (getProject().getDefaultBranch() != null) 
 			state.rightSide = new ProjectAndRevision(getProject(), getProject().getDefaultBranch());
-		}
-		rightCommitId = state.rightSide.getCommit().copy();
+		else
+			state.rightSide = new ProjectAndRevision(getProject(), null);
+		
+		if (state.rightSide.getRevision() != null)
+			rightCommitId = state.rightSide.getCommit().copy();
 		
 		state.compareWithMergeBase = params.get(PARAM_COMPARE_WITH_MERGE_BASE).toBoolean(true);
 		
@@ -187,9 +199,8 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		 * merge base commit and right side revision are guaranteed to be both in right side 
 		 * project  
 		 */
-		if (!state.compareWithMergeBase && !state.leftSide.getProject().equals(state.rightSide.getProject())) {
+		if (!state.compareWithMergeBase && !state.leftSide.getProject().equals(state.rightSide.getProject())) 
 			throw new IllegalArgumentException("Can only compare with common ancestor when different projects are involved");
-		}
 		
 		state.pathFilter = params.get(PARAM_PATH_FILTER).toString();
 		state.blameFile = params.get(PARAM_BLAME_FILE).toString();
@@ -215,9 +226,11 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 			
 		};
 
-		mergeBase = GitUtils.getMergeBase(
-				state.leftSide.getProject().getRepository(), leftCommitId, 
-				state.rightSide.getProject().getRepository(), rightCommitId);
+		if (leftCommitId != null && rightCommitId != null) {
+			mergeBase = GitUtils.getMergeBase(
+					state.leftSide.getProject().getRepository(), leftCommitId, 
+					state.rightSide.getProject().getRepository(), rightCommitId);
+		}
 	}
 	
 	@Override
@@ -297,15 +310,27 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 		
 		add(new WebMarkupContainer("mergeBaseTooltip").add(AttributeAppender.append("title", tooltip)));
 
-		PageParameters params = CommitDetailPage.paramsOf(state.leftSide.getProject(), state.leftSide.getCommit().name());
-		Link<Void> leftCommitLink = new ViewStateAwarePageLink<Void>("leftCommitLink", CommitDetailPage.class, params);
-		leftCommitLink.add(new Label("message", state.leftSide.getCommit().getShortMessage()));
-		add(leftCommitLink);
-		
-		params = CommitDetailPage.paramsOf(state.rightSide.getProject(), state.rightSide.getCommit().name());
-		Link<Void> rightCommitLink = new ViewStateAwarePageLink<Void>("rightCommitLink", CommitDetailPage.class, params);
-		rightCommitLink.add(new Label("message", state.rightSide.getCommit().getShortMessage()));
-		add(rightCommitLink);
+		if (state.leftSide.getRevision() != null) {
+			PageParameters params = CommitDetailPage.paramsOf(state.leftSide.getProject(), state.leftSide.getCommit().name());
+			Link<Void> leftCommitLink = new ViewStateAwarePageLink<Void>("leftCommitLink", CommitDetailPage.class, params);
+			leftCommitLink.add(new Label("message", state.leftSide.getCommit().getShortMessage()));
+			add(leftCommitLink);
+		} else {
+			WebMarkupContainer leftCommitLink = new WebMarkupContainer("leftCommitLink");
+			leftCommitLink.add(new WebMarkupContainer("message"));
+			add(leftCommitLink.setVisible(false));
+		}
+
+		if (state.rightSide.getRevision() != null) {
+			PageParameters params = CommitDetailPage.paramsOf(state.rightSide.getProject(), state.rightSide.getCommit().name());
+			Link<Void> rightCommitLink = new ViewStateAwarePageLink<Void>("rightCommitLink", CommitDetailPage.class, params);
+			rightCommitLink.add(new Label("message", state.rightSide.getCommit().getShortMessage()));
+			add(rightCommitLink);
+		} else {
+			WebMarkupContainer rightCommitLink = new WebMarkupContainer("rightCommitLink");
+			rightCommitLink.add(new WebMarkupContainer("message"));
+			add(rightCommitLink.setVisible(false));
+		}
 		
 		add(new AffinalRevisionPicker("rightRevSelector", 
 				state.rightSide.getProjectId(), state.rightSide.getRevision()) { 
@@ -428,12 +453,22 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 			
 		});
 		
+		add(new WebMarkupContainer("revisionNotSpecified") {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(leftCommitId == null || rightCommitId == null);
+			}
+			
+		});
+		
 		add(new WebMarkupContainer("unrelatedHistory") {
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(mergeBase == null);
+				setVisible(leftCommitId != null && rightCommitId != null && mergeBase == null);
 			}
 			
 		});
@@ -619,7 +654,8 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 	
 	@Override
 	protected void onDetach() {
-		requestModel.detach();
+		if (getProject().getDefaultBranch() != null)
+			requestModel.detach();
 		super.onDetach();
 	}
 
@@ -749,13 +785,15 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 	@Override
 	public Collection<String> getWebSocketObservables() {
 		Collection<String> observables = super.getWebSocketObservables();
-		if (state.compareWithMergeBase) 
-			observables.add(CommitIndexed.getWebSocketObservable(mergeBase.name()));
-		else
-			observables.add(CommitIndexed.getWebSocketObservable(state.leftSide.getCommit().name()));
-		observables.add(CommitIndexed.getWebSocketObservable(state.rightSide.getCommit().name()));
-		if (state.commentId != null)
-			observables.add(CodeComment.getWebSocketObservable(state.commentId));
+		if (getProject().getDefaultBranch() != null) {
+			if (state.compareWithMergeBase) 
+				observables.add(CommitIndexed.getWebSocketObservable(mergeBase.name()));
+			else
+				observables.add(CommitIndexed.getWebSocketObservable(state.leftSide.getCommit().name()));
+			observables.add(CommitIndexed.getWebSocketObservable(state.rightSide.getCommit().name()));
+			if (state.commentId != null)
+				observables.add(CodeComment.getWebSocketObservable(state.commentId));
+		}
 		return observables;
 	}
 

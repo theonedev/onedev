@@ -155,7 +155,10 @@ public class BlobNavigator extends Panel {
 
 							@Override
 							public Iterator<? extends BlobIdent> getRoots() {
-								return context.getProject().getChildren(blobIdent, BlobIdentFilter.ALL).iterator();
+								if (blobIdent.revision != null)
+									return context.getProject().getChildren(blobIdent, BlobIdentFilter.ALL).iterator();
+								else
+									return new ArrayList<BlobIdent>().iterator();
 							}
 
 							@Override

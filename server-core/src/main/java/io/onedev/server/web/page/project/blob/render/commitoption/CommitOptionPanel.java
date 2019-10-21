@@ -308,21 +308,26 @@ public abstract class CommitOptionPanel extends Panel {
 				commitMessage += "\n\n" + commitDetail;
 			User user = Preconditions.checkNotNull(OneDev.getInstance(UserManager.class).getCurrent());
 
-			String refName = GitUtils.branch2ref(context.getBlobIdent().revision);
-			ObjectId prevCommitId = context.getProject().getObjectId(context.getBlobIdent().revision, true);
+			String revision = context.getBlobIdent().revision;
+
+			String refName = revision!=null?GitUtils.branch2ref(revision):"refs/heads/master";
+			ObjectId prevCommitId;
+			if (revision != null)
+				prevCommitId = context.getProject().getObjectId(revision, true);
+			else
+				prevCommitId = ObjectId.zeroId();
 			
 			Repository repository = context.getProject().getRepository();
 			ObjectId newCommitId = null;
 
 			Map<String, BlobContent> newBlobs = new HashMap<>();
 			if (newContentProvider != null) {
-				String revision = context.getBlobIdent().revision;
 				String newPath = context.getNewPath();
-				if (context.getProject().isReviewRequiredForModification(user, revision, newPath)) {
+				if (revision != null && context.getProject().isReviewRequiredForModification(user, revision, newPath)) {
 					CommitOptionPanel.this.error("Review required for this change. Please submit pull request instead");
 					target.add(feedback);
 					return false;
-				} else if (context.getProject().isBuildRequiredForModification(user, revision, newPath)) {
+				} else if (revision != null && context.getProject().isBuildRequiredForModification(user, revision, newPath)) {
 					CommitOptionPanel.this.error("Build required for this change. Please submit pull request instead");
 					target.add(feedback);
 					return false;
@@ -362,14 +367,15 @@ public abstract class CommitOptionPanel extends Panel {
 					break;
 				} catch (ObsoleteCommitException e) {
 					try (RevWalk revWalk = new RevWalk(repository)) {
-						RevCommit prevCommit = revWalk.parseCommit(prevCommitId);
+						ObjectId lastPrevCommitId = prevCommitId;
 						send(this, Broadcast.BUBBLE, new RevisionResolved(target, e.getOldCommitId()));
-						RevCommit currentCommit = revWalk.parseCommit(e.getOldCommitId());
 						prevCommitId = e.getOldCommitId();
+						RevCommit prevCommit = revWalk.parseCommit(prevCommitId);
 
 						if (!oldPaths.isEmpty()) {
+							RevCommit lastPrevCommit = revWalk.parseCommit(lastPrevCommitId);
 							TreeWalk treeWalk = TreeWalk.forPath(repository, oldPaths.iterator().next(), 
-									prevCommit.getTree().getId(), currentCommit.getTree().getId());
+									lastPrevCommit.getTree().getId(), prevCommit.getTree().getId());
 							Preconditions.checkNotNull(treeWalk);
 							if (!treeWalk.getObjectId(0).equals(treeWalk.getObjectId(1)) 
 									|| !treeWalk.getFileMode(0).equals(treeWalk.getFileMode(1))) {
@@ -378,13 +384,13 @@ public abstract class CommitOptionPanel extends Panel {
 								if (treeWalk.getObjectId(1).equals(ObjectId.zeroId())) {
 									if (newContentProvider != null) {
 										oldPaths.clear();
-										change = getChange(treeWalk, prevCommit, currentCommit);
+										change = getChange(treeWalk, lastPrevCommit, prevCommit);
 										break;
 									} else {
 										newCommitId = e.getOldCommitId();
 									}
 								} else {
-									change = getChange(treeWalk, prevCommit, currentCommit);
+									change = getChange(treeWalk, lastPrevCommit, prevCommit);
 									break;
 								}
 							} 

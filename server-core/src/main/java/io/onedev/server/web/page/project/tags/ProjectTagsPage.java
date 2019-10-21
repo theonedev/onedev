@@ -228,6 +228,10 @@ public class ProjectTagsPage extends ProjectPage {
 							form.error("Tag name is required.");
 							target.focusComponent(nameInput);
 							target.add(form);
+						} else if (tagRevision == null) {
+							form.error("Create from is required.");
+							target.focusComponent(nameInput);
+							target.add(form);
 						} else if (!Repository.isValidRefName(Constants.R_HEADS + tagName)) {
 							form.error("Invalid tag name.");
 							target.focusComponent(nameInput);

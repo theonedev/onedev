@@ -3,10 +3,9 @@ body.SourceLinesPage {
 }
 #project-contribs .options {
 	margin-bottom: 20px;
-	padding-bottom: 8px;
-	border-bottom: 1px solid #EEE;
 }
 #project-stats .note {
+	border-top: 1px solid #EEE;
 	margin-bottom: 20px;
 	color: #666;
 	font-size: 16px;
@@ -25,8 +24,9 @@ body.SourceLinesPage {
 }
 #project-contribs .overall .no-data {
 	text-align: center;
-	font-size: 36px;
-	font-style: italic;
+	font-size: 24px;
+	margin-top: 20px;
+	font-weight: bold;
 }
 #project-contribs .top-contributors .loading {
 	text-align: center;

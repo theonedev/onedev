@@ -52,9 +52,16 @@
 		</div>		
 	</wicket:fragment>
 	<wicket:fragment wicket:id="unrelatedHistoryFrag">
-		<div class="alert alert-danger">
+		<div class="alert alert-warning">
 			<div class="summary">
-				<span>History of target branch and source branch is unrelated.</span>
+				<span>History of target branch and source branch is unrelated</span>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="branchNotSpecifiedFrag">
+		<div class="alert alert-warning">
+			<div class="summary">
+				<span>Please select branches to create pull request</span>
 			</div>
 		</div>
 	</wicket:fragment>

@@ -172,7 +172,7 @@ public abstract class QuickSearchPanel extends Panel {
 
 				if (key.equals("input")) {
 					searchInput = params.getParameterValue("param").toString();
-					if (StringUtils.isNotBlank(searchInput)) {
+					if (StringUtils.isNotBlank(searchInput) && revisionModel.getObject() != null) {
 						symbolHits = querySymbols(searchInput, MAX_QUERY_ENTRIES);
 					} else {
 						symbolHits = new ArrayList<>();

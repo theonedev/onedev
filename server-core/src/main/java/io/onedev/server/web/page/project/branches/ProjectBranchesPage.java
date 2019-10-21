@@ -256,7 +256,7 @@ public class ProjectBranchesPage extends ProjectPage {
 		
 		baseBranch = params.get(PARAM_BASE).toString();
 		if (baseBranch == null)
-			baseBranch = Preconditions.checkNotNull(getProject().getDefaultBranch());
+			baseBranch = getProject().getDefaultBranch();
 		query = params.get(PARAM_QUERY).toString();
 		
 		pagingHistorySupport = new PagingHistorySupport() {
@@ -386,6 +386,10 @@ public class ProjectBranchesPage extends ProjectPage {
 						
 						if (branchName == null) {
 							form.error("Branch name is required.");
+							target.focusComponent(nameInput);
+							target.add(form);
+						} else if (branchRevision == null) {
+							form.error("Create from is required.");
 							target.focusComponent(nameInput);
 							target.add(form);
 						} else if (!Repository.isValidRefName(Constants.R_HEADS + branchName)) {

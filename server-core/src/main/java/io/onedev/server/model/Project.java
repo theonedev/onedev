@@ -522,19 +522,16 @@ public class Project extends AbstractEntity {
 	 */
 	public List<Project> getForkDescendants() {
 		List<Project> descendants = new ArrayList<>();
-		if (getDefaultBranch() != null)
-			descendants.add(this);
-		for (Project fork: getForks()) { 
+		descendants.add(this);
+		for (Project fork: getForks())  
 			descendants.addAll(fork.getForkDescendants());
-		}
 		
 		return descendants;
 	}
 	
 	public Repository getRepository() {
-		if (repository == null) {
+		if (repository == null) 
 			repository = OneDev.getInstance(ProjectManager.class).getRepository(this);
-		}
 		return repository;
 	}
 	

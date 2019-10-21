@@ -172,7 +172,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		if (modeStr != null)
 			state.mode = Mode.valueOf(modeStr.toUpperCase());
 
-		resolvedRevision = getProject().getObjectId(state.blobIdent.revision, true);
+		if (state.blobIdent.revision != null)
+			resolvedRevision = getProject().getObjectId(state.blobIdent.revision, true);
 		
 		state.position = params.get(PARAM_POSITION).toString();
 		
@@ -222,11 +223,15 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			protected void onConfigure() {
 				super.onConfigure();
 
-				RevCommit commit = getProject().getRevCommit(resolvedRevision, true);
-				IndexManager indexManager = OneDev.getInstance(IndexManager.class);
-				if (!indexManager.isIndexed(getProject(), commit)) {
-					OneDev.getInstance(IndexManager.class).indexAsync(getProject(), commit);
-					setVisible(true);
+				if (resolvedRevision != null) {
+					RevCommit commit = getProject().getRevCommit(resolvedRevision, true);
+					IndexManager indexManager = OneDev.getInstance(IndexManager.class);
+					if (!indexManager.isIndexed(getProject(), commit)) {
+						OneDev.getInstance(IndexManager.class).indexAsync(getProject(), commit);
+						setVisible(true);
+					} else {
+						setVisible(false);
+					}
 				} else {
 					setVisible(false);
 				}
@@ -343,14 +348,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		
 		AtomicBoolean reviewRequired = new AtomicBoolean(true);
 		try {
-			reviewRequired.set(getProject().isReviewRequiredForModification(getLoginUser(), revision, null)); 
+			reviewRequired.set(revision!=null && getProject().isReviewRequiredForModification(getLoginUser(), revision, null)); 
 		} catch (Exception e) {
 			logger.error("Error checking review requirement", e);
 		}
 		
 		AtomicBoolean buildRequired = new AtomicBoolean(true);
 		try {
-			buildRequired.set(getProject().isBuildRequiredForModification(getLoginUser(), revision, null));
+			buildRequired.set(revision!=null && getProject().isBuildRequiredForModification(getLoginUser(), revision, null));
 		} catch (Exception e) {
 			logger.error("Error checking build requirement", e);
 		}
@@ -539,17 +544,17 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				
 				return menuItems;
 			}
-			
+
 		});
 		
-		String compareWith = resolvedRevision.name();
+		String compareWith = resolvedRevision!=null?resolvedRevision.name():null;
 		String query;
 		if (state.blobIdent.path != null)
-			query = String.format("path(%s)", ProjectBlobPage.this.state.blobIdent.path);
+			query = String.format("path(%s)", state.blobIdent.path);
 		else
 			query = null;
 		blobOperations.add(new ViewStateAwarePageLink<Void>("history", ProjectCommitsPage.class, 
-				ProjectCommitsPage.paramsOf(getProject(), query, compareWith)));
+				ProjectCommitsPage.paramsOf(getProject(), query, compareWith)).setVisible(resolvedRevision!=null));
 		
 		blobOperations.add(new ArchiveMenuLink("download", projectModel) {
 
@@ -561,7 +566,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(state.blobIdent.path == null);
+				setVisible(state.blobIdent.revision != null && state.blobIdent.path == null);
 			}
 
 		});
@@ -673,8 +678,17 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	}
 	
 	private void newRevisionPicker(@Nullable AjaxRequestTarget target) {
-		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, projectModel, state.blobIdent.revision, true) {
-
+		String revision = state.blobIdent.revision;
+		boolean canCreateRef;
+		if (revision == null) {
+			revision = "master";
+			canCreateRef = false;
+		} else {
+			canCreateRef = true;
+		}
+		
+		Component revisionPicker = new RevisionPicker(REVISION_PICKER_ID, projectModel, revision, canCreateRef) {
+	
 			@Override
 			protected String getRevisionUrl(String revision) {
 				BlobIdent blobIdent = new BlobIdent(revision, null, FileMode.TREE.getBits());
@@ -952,7 +966,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	
 	@Override
 	public boolean isOnBranch() {
-		return getProject().getBranchRef(state.blobIdent.revision) != null;
+		return state.blobIdent.revision == null || getProject().getBranchRef(state.blobIdent.revision) != null;
 	}
 
 	@Override
@@ -963,7 +977,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	@Override
 	public Collection<String> getWebSocketObservables() {
 		Collection<String> observables = super.getWebSocketObservables();
-		observables.add(CommitIndexed.getWebSocketObservable(getProject().getRevCommit(resolvedRevision, true).name()));
+		if (resolvedRevision != null)
+			observables.add(CommitIndexed.getWebSocketObservable(getProject().getRevCommit(resolvedRevision, true).name()));
 		if (state.requestId != null)
 			observables.add(PullRequest.getWebSocketObservable(state.requestId));
 		if (state.commentId != null)
@@ -1025,7 +1040,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	@Override
 	public void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated, @Nullable String position) {
 		Project project = getProject();
+		if (state.blobIdent.revision == null) {
+			state.blobIdent.revision = "master";
+			project.setDefaultBranch("master");
+		}
 		String branch = state.blobIdent.revision;
+		
 		getProject().cacheObjectId(branch, refUpdated.getNewCommitId());
 
 		Long projectId = project.getId();
@@ -1210,9 +1230,13 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		}
 
 		BlobEdits blobEdits = new BlobEdits(Sets.newHashSet(), newBlobs);
-		String refName = GitUtils.branch2ref(blobIdent.revision);
+		String refName = blobIdent.revision!=null?GitUtils.branch2ref(blobIdent.revision):"refs/heads/master";
 
-		ObjectId prevCommitId = getProject().getObjectId(blobIdent.revision, true);
+		ObjectId prevCommitId;
+		if (blobIdent.revision != null)
+			prevCommitId = getProject().getObjectId(blobIdent.revision, true);
+		else
+			prevCommitId = ObjectId.zeroId();
 
 		while (true) {
 			try {

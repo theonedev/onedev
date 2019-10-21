@@ -152,10 +152,14 @@ public abstract class AdvancedSearchPanel extends Panel {
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
 						List<QueryHit> hits;
-						try {
-							hits = option.query(AdvancedSearchPanel.this);
-						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
+						if (revisionModel.getObject() != null) {
+							try {
+								hits = option.query(AdvancedSearchPanel.this);
+							} catch (InterruptedException e) {
+								throw new RuntimeException(e);
+							}
+						} else {
+							hits = new ArrayList<>();
 						}
 						
 						HashMap<Class<?>, SearchOption> savedOptions = getSavedOptions();

@@ -6,7 +6,6 @@ import java.util.Map;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,9 +31,11 @@ public class SourceLinesPage extends ProjectStatsPage {
 			data.put(entry.getKey().getDate().getTime(), entry.getValue());
 		}
 		try {
-			String jsonOfData = OneDev.getInstance(ObjectMapper.class).writeValueAsString(data);
-			String script = String.format("onedev.server.stats.sourceLines.onDomReady(%s, '%s');", 
-					jsonOfData, JavaScriptEscape.escapeJavaScript(getProject().getDefaultBranch()));
+			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
+			String jsonOfData = mapper.writeValueAsString(data);
+			String jsonOfDefaultBranch = mapper.writeValueAsString(getProject().getDefaultBranch());
+			String script = String.format("onedev.server.stats.sourceLines.onDomReady(%s, %s);", 
+					jsonOfData, jsonOfDefaultBranch);
 			response.render(OnDomReadyHeaderItem.forScript(script));
 		} catch (JsonProcessingException e) {
 			throw new RuntimeException(e);

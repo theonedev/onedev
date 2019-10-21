@@ -51,7 +51,6 @@ import io.onedev.server.web.page.my.MyPasswordPage;
 import io.onedev.server.web.page.my.MyProfilePage;
 import io.onedev.server.web.page.my.MyTokenPage;
 import io.onedev.server.web.page.project.NewProjectPage;
-import io.onedev.server.web.page.project.NoCommitsPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
@@ -263,8 +262,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/settings/build", BuildSettingPage.class));
 		add(new OnePageMapper("projects/${project}/settings/commit-message-transform", CommitMessageTransformPage.class));
 		add(new OnePageMapper("projects/${project}/settings/web-hooks", WebHooksPage.class));
-		
-		add(new OnePageMapper("projects/${project}/no-commits", NoCommitsPage.class));
 	}
 
 }

@@ -108,8 +108,14 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	
 	public static PageParameters paramsOf(Project project, ProjectAndBranch target, ProjectAndBranch source) {
 		PageParameters params = paramsOf(project);
-		params.set("target", target.toString());
-		params.set("source", source.toString());
+		if (target.getBranch() != null)
+			params.set("target", target.toString());
+		else
+			params.set("target", target.getProjectId());
+		if (source.getBranch() != null)
+			params.set("source", source.toString());
+		else
+			params.set("source", source.getProjectId());
 		return params;
 	}
 
@@ -142,13 +148,17 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			target = new ProjectAndBranch(targetParam);
 		} else {
 			suggestedSourceBranch = suggestSourceBranch();
-			if (!suggestedSourceBranch.equals(getProject().getDefaultBranch())) {
-				target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
- 			} else if (getProject().getForkedFrom() != null && SecurityUtils.canReadCode(getProject().getForkedFrom().getFacade())) {
-				target = new ProjectAndBranch(getProject().getForkedFrom(), 
-						getProject().getForkedFrom().getDefaultBranch());
+			if (suggestedSourceBranch != null) {
+				if (!suggestedSourceBranch.equals(getProject().getDefaultBranch())) {
+					target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
+	 			} else if (getProject().getForkedFrom() != null && SecurityUtils.canReadCode(getProject().getForkedFrom().getFacade())) {
+					target = new ProjectAndBranch(getProject().getForkedFrom(), 
+							getProject().getForkedFrom().getDefaultBranch());
+				} else {
+					target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
+				}
 			} else {
-				target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
+				target = new ProjectAndBranch(getProject(), null);
 			}
 		}
 		
@@ -164,13 +174,18 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		PullRequest prevRequest = OneDev.getInstance(PullRequestManager.class).findLatest(getProject(), getLoginUser());
 		if (prevRequest != null && source.equals(prevRequest.getSource()) && target.equals(prevRequest.getTarget()) && prevRequest.isOpen())
 			pullRequestRef.set(prevRequest);
-		else
+		else if (target.getBranch() != null || source.getBranch() != null)
 			pullRequestRef.set(OneDev.getInstance(PullRequestManager.class).findEffective(target, source));
 		
 		if (pullRequestRef.get() == null) {
-			ObjectId baseCommitId = GitUtils.getMergeBase(
-					target.getProject().getRepository(), target.getObjectId(), 
-					source.getProject().getRepository(), source.getObjectId());
+			ObjectId baseCommitId;
+			if (target.getBranch() != null && source.getBranch() != null) {
+				baseCommitId = GitUtils.getMergeBase(
+						target.getProject().getRepository(), target.getObjectId(), 
+						source.getProject().getRepository(), source.getObjectId());
+			} else {
+				baseCommitId = null;
+			}
 			if (baseCommitId != null) {
 				PullRequest request = new PullRequest();
 				request.setTitle(StringUtils.capitalize(source.getBranch().replace('-', ' ').replace('_', ' ').toLowerCase()));
@@ -260,10 +275,18 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			}
 			
 		});
-		PageParameters params = CommitDetailPage.paramsOf(target.getProject(), target.getObjectName());
-		Link<Void> targetCommitLink = new ViewStateAwarePageLink<Void>("targetCommitLink", CommitDetailPage.class, params);
-		targetCommitLink.add(new Label("message", target.getCommit().getShortMessage()));
-		add(targetCommitLink);
+		
+		if (target.getBranch() != null) {
+			PageParameters params = CommitDetailPage.paramsOf(target.getProject(), target.getObjectName());
+			Link<Void> targetCommitLink = new ViewStateAwarePageLink<Void>("targetCommitLink", CommitDetailPage.class, params);
+			targetCommitLink.add(new Label("message", target.getCommit().getShortMessage()));
+			add(targetCommitLink);
+		} else {
+			WebMarkupContainer targetCommitLink = new WebMarkupContainer("targetCommitLink");
+			targetCommitLink.add(new WebMarkupContainer("message"));
+			targetCommitLink.setVisible(false);
+			add(targetCommitLink);
+		}
 		
 		add(new AffinalBranchPicker("source", source.getProjectId(), source.getBranch()) {
 
@@ -278,10 +301,18 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			}
 			
 		});
-		params = CommitDetailPage.paramsOf(source.getProject(), source.getObjectName());
-		Link<Void> sourceCommitLink = new ViewStateAwarePageLink<Void>("sourceCommitLink", CommitDetailPage.class, params);
-		sourceCommitLink.add(new Label("message", source.getCommit().getShortMessage()));
-		add(sourceCommitLink);
+		
+		if (source.getBranch() != null) {
+			PageParameters params = CommitDetailPage.paramsOf(source.getProject(), source.getObjectName());
+			Link<Void> sourceCommitLink = new ViewStateAwarePageLink<Void>("sourceCommitLink", CommitDetailPage.class, params);
+			sourceCommitLink.add(new Label("message", source.getCommit().getShortMessage()));
+			add(sourceCommitLink);
+		} else {
+			WebMarkupContainer sourceCommitLink = new WebMarkupContainer("sourceCommitLink");
+			sourceCommitLink.add(new WebMarkupContainer("message"));
+			sourceCommitLink.setVisible(false);
+			add(sourceCommitLink);
+		}
 		
 		add(new Link<Void>("swap") {
 
@@ -295,17 +326,18 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		
 		Fragment fragment;
 		PullRequest request = getPullRequest();
-		if (request == null) {
+		if (target.getBranch() == null || source.getBranch() == null) 
+			fragment = newBranchNotSpecifiedFrag();
+		else if (request == null) 
 			fragment = newUnrelatedHistoryFrag();
-		} else if (request.getId() != null && (request.isOpen() || !request.isMergeIntoTarget())) {
+		else if (request.getId() != null && (request.isOpen() || !request.isMergeIntoTarget())) 
 			fragment = newEffectiveFrag();
-		} else if (request.getSource().equals(request.getTarget())) {
+		else if (request.getSource().equals(request.getTarget())) 
 			fragment = newSameBranchFrag();
-		} else if (request.isMerged()) {
+		else if (request.isMerged()) 
 			fragment = newAcceptedFrag();
-		} else { 
+		else 
 			fragment = newCanSendFrag();
-		} 
 		add(fragment);
 
 		if (getPullRequest() != null) {
@@ -507,6 +539,10 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	
 	private Fragment newUnrelatedHistoryFrag() {
 		return new Fragment("status", "unrelatedHistoryFrag", this);
+	}
+	
+	private Fragment newBranchNotSpecifiedFrag() {
+		return new Fragment("status", "branchNotSpecifiedFrag", this);
 	}
 	
 	private Fragment newAcceptedFrag() {

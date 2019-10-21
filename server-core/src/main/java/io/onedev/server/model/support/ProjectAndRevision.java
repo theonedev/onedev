@@ -28,12 +28,14 @@ public class ProjectAndRevision implements Serializable {
 	
 	public ProjectAndRevision(Long projectId, String revision) {
 		this.projectId = projectId;
-		this.revision = revision;
+		if (StringUtils.isNotBlank(revision))
+			this.revision = revision;
+		else
+			this.revision = null;
 	}
 
 	public ProjectAndRevision(Project project, String revision) {
-		this.projectId = project.getId();
-		this.revision = revision;
+		this(project.getId(), revision);
 	}
 	
 	public ProjectAndRevision(String projectAndRevision) {

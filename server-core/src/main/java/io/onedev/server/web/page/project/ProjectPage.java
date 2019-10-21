@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.Page;
-import org.apache.wicket.RestartResponseException;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -123,13 +122,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		
 		// we do not need to reload the project this time as we already have that object on hand
 		projectModel.setObject(project);
-		
-		if (!(this instanceof NoCommitsPage) 
-				&& SecurityUtils.canReadCode(getProject().getFacade())
-				&& !(this instanceof ProjectSettingPage) 
-				&& getProject().getDefaultBranch() == null) { 
-			throw new RestartResponseException(NoCommitsPage.class, paramsOf(getProject()));
-		}
 	}
 	
 	protected Map<String, ObjectId> getObjectIdCache() {

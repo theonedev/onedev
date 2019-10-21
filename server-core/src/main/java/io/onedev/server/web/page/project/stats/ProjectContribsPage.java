@@ -46,7 +46,10 @@ public class ProjectContribsPage extends ProjectStatsPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		add(new Label("note", "Contributions to " + getProject().getDefaultBranch() + " branch, excluding merge commits"));
+		if (getProject().getDefaultBranch() != null)
+			add(new Label("note", "Contributions to " + getProject().getDefaultBranch() + " branch, excluding merge commits"));
+		else
+			add(new WebMarkupContainer("note").setVisible(false));
 		add(new WebMarkupContainer(USER_DETAIL_ID).setOutputMarkupId(true));
 		add(userDetailBehavior = new AbstractPostAjaxBehavior() {
 			

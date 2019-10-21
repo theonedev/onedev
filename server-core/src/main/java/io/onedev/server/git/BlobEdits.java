@@ -75,7 +75,7 @@ public class BlobEdits implements Serializable {
 			String parentPath, Set<String> currentOldPaths, Map<String, BlobContent> currentNewBlobs) {
         try {
     		List<TreeFormatterEntry> entries = new ArrayList<>();
-    		while (treeWalk.next()) {
+    		while (revTree != null && treeWalk.next()) {
 				String name = treeWalk.getNameString();
 				if (currentOldPaths.contains(name)) {
 					currentOldPaths.remove(name);
@@ -167,8 +167,12 @@ public class BlobEdits implements Serializable {
 						String path = entry.getKey();
 						if (path.startsWith(topLevelPathSegment + "/"))
 							childNewBlobs.put(path.substring(topLevelPathSegment.length()+1), entry.getValue());
-					}					
-					ObjectId childTreeId = insertTree(revTree, treeWalk, inserter, treeWalk.getPathString(), 
+					}				
+					if (parentPath == null)
+						parentPath = topLevelPathSegment;
+					else
+						parentPath += "/" + topLevelPathSegment;
+					ObjectId childTreeId = insertTree(revTree, treeWalk, inserter, parentPath, 
 							Sets.newHashSet(), childNewBlobs);
 					if (childTreeId != null) 
 						entries.add(new TreeFormatterEntry(topLevelPathSegment, FileMode.TREE, childTreeId));
@@ -226,11 +230,16 @@ public class BlobEdits implements Serializable {
 	        
 	        commit.setAuthor(authorAndCommitter);
 	        commit.setCommitter(authorAndCommitter);
-	        commit.setParentId(parentCommitId);
 	        commit.setMessage(commitMessage);
-	        
-			RevTree revTree = revWalk.parseCommit(parentCommitId).getTree();
-			treeWalk.addTree(revTree);
+
+			RevTree revTree;
+	        if (!parentCommitId.equals(ObjectId.zeroId())) {
+	        	commit.setParentId(parentCommitId);
+				revTree = revWalk.parseCommit(parentCommitId).getTree();
+				treeWalk.addTree(revTree);
+	        } else {
+				revTree = null;
+	        }
 
 			ObjectId treeId = insertTree(revTree, treeWalk, inserter, null, new HashSet<>(oldPaths), 
 					new HashMap<>(newBlobs));

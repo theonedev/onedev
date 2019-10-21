@@ -41,9 +41,11 @@
 		<div>
 			<a wicket:id="createRequest" class="btn btn-primary">Create Pull Request</a>
 		</div>
-		<div wicket:id="unrelatedHistory" class="alert alert-danger">
-			<span class="fa fa-lg fa-warning"></span>
-			<span>History of comparing revisions is unrelated.</span>
+		<div wicket:id="revisionNotSpecified" class="alert alert-warning">
+			<span>Please select revisions to compare</span>
+		</div>
+		<div wicket:id="unrelatedHistory" class="alert alert-warning">
+			<span>History of comparing revisions is unrelated</span>
 		</div>
 		<ul wicket:id="tabs" class="nav nav-tabs"></ul>
 		<div wicket:id="tabPanel" class="tab-panel"></div>

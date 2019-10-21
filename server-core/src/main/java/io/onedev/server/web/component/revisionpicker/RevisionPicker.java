@@ -7,6 +7,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.eclipse.jgit.lib.ObjectId;
+import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
@@ -73,21 +74,31 @@ public abstract class RevisionPicker extends DropdownLink {
 	@Override
 	public IModel<?> getBody() {
 		String iconClass;
-		ProjectAndRevision repoAndRevision = new ProjectAndRevision(projectModel.getObject(), revision);
-		String label = repoAndRevision.getBranch();
-		if (label != null) {
+		String label;
+		if ("master".equals(revision)) { // default to use master branch when project is empty
+			label = "master";
 			iconClass = "fa fa-code-fork";
-		} else {
-			label = repoAndRevision.getTag();
+		} else if (revision != null) {
+			ProjectAndRevision projectAndRevision = new ProjectAndRevision(projectModel.getObject(), revision);
+			label = projectAndRevision.getBranch();
 			if (label != null) {
-				iconClass = "fa fa-tag";
+				iconClass = "fa fa-code-fork";
 			} else {
-				label = revision;
-				if (ObjectId.isId(label))
-					label = GitUtils.abbreviateSHA(label);
-				iconClass = "fa fa-ext fa-commit";
-			}
-		} 
+				label = projectAndRevision.getTag();
+				if (label != null) {
+					iconClass = "fa fa-tag";
+				} else {
+					label = revision;
+					if (ObjectId.isId(label))
+						label = GitUtils.abbreviateSHA(label);
+					iconClass = "fa fa-ext fa-commit";
+				}
+			} 
+			label = HtmlEscape.escapeHtml5(label);
+		} else {
+			label = "<i>choose</i>";
+			iconClass = "fa fa-ext fa-commit";
+		}
 		
 		return Model.of(String.format("<i class='%s'></i> <span>%s</span> <i class='fa fa-caret-down'></i>", iconClass, label));
 	}

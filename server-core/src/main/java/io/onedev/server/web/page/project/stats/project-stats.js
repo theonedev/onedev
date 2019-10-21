@@ -16,7 +16,7 @@ onedev.server.stats = {
 		onDomReady : function(overallContributions, topContributorsDataUrl, userDetailCallback) {
 			var $contribs = $("#project-contribs");
 			var $overall = $contribs.find(".overall");
-			if (overallContributions.length == 0) {
+			if (Object.keys(overallContributions).length === 0) {
 				$overall.html("<div class='no-data'>No data</div>");
 				return;
 			}
@@ -382,9 +382,14 @@ onedev.server.stats = {
 			var chart = echarts.init($chart[0]);
 			
 			var useKilo;
+			var title;
+			if (defaultBranch != null)
+				title = "SLOC on " + defaultBranch;
+			else
+				title = "No default branch";
 			var option = {
 				title: {
-					text: 'SLOC on ' + defaultBranch,
+					text: title,
 					left: 'center',
 					top: 10
 				},

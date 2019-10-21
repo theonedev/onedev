@@ -20,6 +20,9 @@ body.ProjectBlobPage.additionalWidth3 {
 	padding: 0;
 	border-right: 1px solid #E0E0E0;
 }
+#project-blob>.head>.revision-picker:empty {
+	display: none;
+}
 #project-blob>.head>.comment-context {
 	border-right: 1px solid #E0E0E0;
 	padding: 5px 8px 0 8px;
