@@ -108,7 +108,7 @@ public abstract class BlobViewPanel extends Panel {
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						context.onModeChange(target, Mode.EDIT);
+						context.onModeChange(target, Mode.EDIT, null);
 					}
 					
 				};
@@ -143,7 +143,7 @@ public abstract class BlobViewPanel extends Panel {
 				
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					context.onModeChange(target, Mode.DELETE);
+					context.onModeChange(target, Mode.DELETE, null);
 				}
 
 			};
@@ -235,9 +235,9 @@ public abstract class BlobViewPanel extends Panel {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				if (context.getMode() == Mode.VIEW)
-					context.onModeChange(target, Mode.VIEW_PLAIN);
+					context.onModeChange(target, Mode.VIEW_PLAIN, null);
 				else
-					context.onModeChange(target, Mode.VIEW);
+					context.onModeChange(target, Mode.VIEW, null);
 			}
 			
 		}));
@@ -263,9 +263,9 @@ public abstract class BlobViewPanel extends Panel {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				if (context.getMode() == Mode.BLAME)
-					context.onModeChange(target, Mode.VIEW);
+					context.onModeChange(target, Mode.VIEW, null);
 				else
-					context.onModeChange(target, Mode.BLAME);
+					context.onModeChange(target, Mode.BLAME, null);
 			}
 			
 		}));

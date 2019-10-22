@@ -48,7 +48,9 @@ onedev.server.projectBlob = {
 			var headWidth = $head.width();
 
 			// below code moves file navigator to bottom if it is too wide
-			var maxWidth = headWidth - $revisionPicker.outerWidth() - $buildStatus.outerWidth() - $operations.outerWidth();
+			var maxWidth = headWidth - $revisionPicker.outerWidth() - $operations.outerWidth();
+			if ($buildStatus.length != 0)
+				maxWidth -= $buildStatus.outerWidth();
 			var maxHeight = $head.height();
 
 			var $blobNavigator = $head.children(".blob-navigator");
@@ -58,7 +60,7 @@ onedev.server.projectBlob = {
 			} else {
 				$blobNavigator = $("#project-blob>.blob-navigator>div");
 				if ($blobNavigator.outerWidth() <= maxWidth && $blobNavigator.outerHeight() <= maxHeight) {
-					$blobNavigator.insertAfter($buildStatus);
+					$blobNavigator.insertAfter($revisionPicker.next());
 					$("#project-blob>.blob-navigator").hide();
 				}
 			}

@@ -75,7 +75,7 @@ public interface BlobRenderContext extends Serializable {
 	
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);
 	
-	void onModeChange(AjaxRequestTarget target, Mode mode);
+	void onModeChange(AjaxRequestTarget target, Mode mode, @Nullable String newPath);
 	
 	void onCommitted(@Nullable AjaxRequestTarget target, RefUpdated refUpdated, @Nullable String position);
 	

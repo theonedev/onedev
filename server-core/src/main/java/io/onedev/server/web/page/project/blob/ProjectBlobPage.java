@@ -55,6 +55,7 @@ import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
+import io.onedev.server.ci.CISpec;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -241,6 +242,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			
 		});
 
+		newCISupportNote(null);
 		newBlobContent(null);
 
 		add(searchResult = new WebMarkupContainer("searchResult"));
@@ -380,7 +382,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 
 							@Override
 							public void onClick(AjaxRequestTarget target) {
-								onModeChange(target, Mode.ADD);
+								onModeChange(target, Mode.ADD, null);
 								dropdown.close();
 							}
 							
@@ -556,7 +558,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		else
 			query = null;
 		blobOperations.add(new ViewStateAwarePageLink<Void>("history", ProjectCommitsPage.class, 
-				ProjectCommitsPage.paramsOf(getProject(), query, compareWith)).setVisible(resolvedRevision!=null));
+				ProjectCommitsPage.paramsOf(getProject(), query, compareWith)));
 		
 		blobOperations.add(new ArchiveMenuLink("download", projectModel) {
 
@@ -696,6 +698,57 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		}
 	}
 	
+	private void newCISupportNote(@Nullable AjaxRequestTarget target) {
+		Component ciSupportNote = new WebMarkupContainer("ciSupportNote") {
+
+			@Override
+			protected void onInitialize() {
+				super.onInitialize();
+				
+				if (SecurityUtils.canModify(getProject(), state.blobIdent.revision, CISpec.BLOB_PATH)) {
+					add(new ViewStateAwareAjaxLink<Void>("addFile") {
+	
+						@Override
+						public void onClick(AjaxRequestTarget target) {
+							onModeChange(target, Mode.ADD, CISpec.BLOB_PATH);
+						}
+						
+					});
+				} else {
+					add(new WebMarkupContainer("addFile") {
+
+						@Override
+						protected void onComponentTag(ComponentTag tag) {
+							super.onComponentTag(tag);
+							tag.setName("span");
+						}
+						
+					});
+				}
+				setOutputMarkupPlaceholderTag(true);
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				if (resolvedRevision != null && isOnBranch() && state.blobIdent.path == null && state.mode == Mode.VIEW) {
+					BlobIdent blobIdent = new BlobIdent(resolvedRevision.name(), CISpec.BLOB_PATH, FileMode.TYPE_FILE);
+					setVisible(getProject().getBlob(blobIdent, false) == null);
+				} else {
+					setVisible(false);
+				}
+			}
+			
+		};
+		
+		if (target != null) {
+			replace(ciSupportNote);
+			target.add(ciSupportNote);
+		} else {
+			add(ciSupportNote);
+		}
+	}
+	
 	private void newRevisionPicker(@Nullable AjaxRequestTarget target) {
 		String revision = state.blobIdent.revision;
 		boolean canCreateRef;
@@ -771,6 +824,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		target.add(revisionIndexing);
 		newBlobNavigator(target);
 		newBlobOperations(target);
+		newCISupportNote(target);
 		newBlobContent(target);
 		resizeWindow(target);
 	}
@@ -876,6 +930,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			state = popState;
 			newBlobNavigator(target);
 			newBlobOperations(target);
+			newCISupportNote(target);
 			newBlobContent(target);
 			resizeWindow(target);
 		}
@@ -934,6 +989,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			state.commentId = null;
 			newBlobNavigator(target);
 			newBlobOperations(target);
+			newCISupportNote(target);
 			newBlobContent(target);
 			resizeWindow(target);
 			OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
@@ -945,12 +1001,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			} else {
 				state.mode = Mode.VIEW;
 				newBlobOperations(target);
+				newCISupportNote(target);
 				newBlobContent(target);
 				resizeWindow(target);
 			}
 		} else if (prevPosition != null) {
 			state.mode = Mode.VIEW;
 			newBlobOperations(target);
+			newCISupportNote(target);
 			newBlobContent(target);
 			resizeWindow(target);
 		}
@@ -1038,8 +1096,8 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	}
 
 	@Override
-	public void onModeChange(AjaxRequestTarget target, Mode mode) {
-		state.initialNewPath = null;
+	public void onModeChange(AjaxRequestTarget target, Mode mode, @Nullable String newPath) {
+		state.initialNewPath = newPath;
 		
 		/*
 		 * User might be changing blob name when adding a file, and onModeChange will be called. 
@@ -1053,6 +1111,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				newBlobOperations(target);
 			}
 		}			
+		newCISupportNote(target);
 		newBlobContent(target);
 		resizeWindow(target);
 	}

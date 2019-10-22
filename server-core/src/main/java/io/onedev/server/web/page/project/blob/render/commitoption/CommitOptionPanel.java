@@ -278,7 +278,7 @@ public abstract class CommitOptionPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				context.onModeChange(target, Mode.VIEW);
+				context.onModeChange(target, Mode.VIEW, null);
 			}
 			
 		});

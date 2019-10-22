@@ -72,7 +72,7 @@ public abstract class BlobEditPanel extends Panel {
 
 			@Override
 			public void onClick(AjaxRequestTarget target) {
-				context.onModeChange(target, Mode.VIEW);
+				context.onModeChange(target, Mode.VIEW, null);
 			}
 			
 		});
@@ -174,7 +174,7 @@ public abstract class BlobEditPanel extends Panel {
 			@Override
 			protected void respond(AjaxRequestTarget target) {
 				// recreate content editor as different name might be using different editor
-				context.onModeChange(target, Mode.ADD);
+				context.onModeChange(target, Mode.ADD, null);
 			}
 			
 		});

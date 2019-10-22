@@ -6,7 +6,7 @@ body.SourceLinesPage {
 }
 #project-stats .note {
 	border-top: 1px solid #EEE;
-	margin-bottom: 20px;
+	padding: 20px 0;
 	color: #666;
 	font-size: 16px;
 }
