@@ -84,6 +84,7 @@ import io.onedev.server.util.scriptidentity.ScriptIdentity;
 import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
 import io.onedev.server.web.PrioritizedComponentRenderer;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
+import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.ArchiveMenuLink;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
@@ -207,6 +208,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		super.onInitialize();
 
 		newRevisionPicker(null);
+		newCommitStatus(null);
 		newBlobNavigator(null);
 		newBlobOperations(null);
 		
@@ -677,6 +679,23 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		pushState(target, url.toString(), state);
 	}
 	
+	private void newCommitStatus(@Nullable AjaxRequestTarget target) {
+		Component commitStatus;
+		if (resolvedRevision != null)
+			commitStatus = new CommitStatusPanel("buildStatus", getProject(), resolvedRevision);
+		else
+			commitStatus = new WebMarkupContainer("buildStatus");
+		
+		commitStatus.setOutputMarkupPlaceholderTag(true);
+		
+		if (target != null) {
+			replace(commitStatus);
+			target.add(commitStatus);
+		} else {
+			add(commitStatus);
+		}
+	}
+	
 	private void newRevisionPicker(@Nullable AjaxRequestTarget target) {
 		String revision = state.blobIdent.revision;
 		boolean canCreateRef;
@@ -748,6 +767,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		
 		OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
 		newRevisionPicker(target);
+		newCommitStatus(target);
 		target.add(revisionIndexing);
 		newBlobNavigator(target);
 		newBlobOperations(target);

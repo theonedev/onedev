@@ -20,7 +20,18 @@ body.ProjectBlobPage.additionalWidth3 {
 	padding: 0;
 	border-right: 1px solid #E0E0E0;
 }
-#project-blob>.head>.revision-picker:empty {
+#project-blob>.head>.build-status a {
+	padding: 5px 6px 5px 6px;
+	border-right: 1px solid #E0E0E0;
+	color: #333;
+	text-decoration: none;
+	display: block;
+}
+#project-blob>.head>.build-status a:hover {
+	background: #EEE;
+}
+#project-blob>.head>.revision-picker:empty,
+#project-blob>.head>.build-status:empty {
 	display: none;
 }
 #project-blob>.head>.comment-context {

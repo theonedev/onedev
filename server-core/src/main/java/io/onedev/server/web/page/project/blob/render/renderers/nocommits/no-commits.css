@@ -1,5 +1,5 @@
 .no-commits {
-	padding: 20px;
+	margin: 20px;
 }
 .no-commits>.head {
 	font-size: 18px;
@@ -9,9 +9,10 @@
 .no-commits>.body>* {
 	margin-bottom: 20px;
 }
-.no-commits>.body>code {
-	display: block;
-	color: #444;
-	background: #F5F5F5;
-	padding: 8px;
+.no-commits>.body>.instructions {
+	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+	font-size: 14px;
+}
+.no-commits>.body>.help-block {
+	color: inherit;
 }

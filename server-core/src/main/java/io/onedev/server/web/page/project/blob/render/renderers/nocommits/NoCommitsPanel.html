@@ -1,12 +1,12 @@
 <wicket:panel>
-	<div class="no-commits">
+	<div class="no-commits alert alert-warning">
 		<div class="head">Project does not have any commits yet</div>
 		<div class="body">
 			<div>You may initialize code of the project by adding files from right top of the page, or push an existing repository from command prompt:</div>
-			<code>
+			<div class="instructions">
 				<div>git remote add origin <span wicket:id="url1"></span></div>
 				<div>git push -u origin master</div>
-			</code>
+			</div>
 			<div class="help-block"><i class="fa fa-info-circle"></i> In case remote <em>origin</em> already exists, use another name other than <em>origin</em>, or run command <em>git remote set-url origin <span wicket:id="url2"></span></em> instead</div>		
 		</div>
 	</div>

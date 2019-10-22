@@ -41,23 +41,24 @@ onedev.server.projectBlob = {
 				$("body").addClass("additionalWidth" + additionalWidth);
 			
 			var $head = $("#project-blob>.head");
-			var $revisionPicker = $head.find(">.revision-picker");
-			var $operations = $head.find(">.operations");
+			var $revisionPicker = $head.children(".revision-picker");
+			var $buildStatus = $head.children(".build-status");
+			var $operations = $head.children(".operations");
 					
 			var headWidth = $head.width();
 
 			// below code moves file navigator to bottom if it is too wide
-			var maxWidth = headWidth - $revisionPicker.outerWidth() - $operations.outerWidth();
+			var maxWidth = headWidth - $revisionPicker.outerWidth() - $buildStatus.outerWidth() - $operations.outerWidth();
 			var maxHeight = $head.height();
 
-			var $blobNavigator = $head.find(">.blob-navigator");
+			var $blobNavigator = $head.children(".blob-navigator");
 			if ($blobNavigator.length != 0) {
 				if ($blobNavigator.outerWidth() > maxWidth || $blobNavigator.outerHeight() > maxHeight)
 					$("#project-blob>.blob-navigator").show().append($blobNavigator);
 			} else {
 				$blobNavigator = $("#project-blob>.blob-navigator>div");
 				if ($blobNavigator.outerWidth() <= maxWidth && $blobNavigator.outerHeight() <= maxHeight) {
-					$blobNavigator.insertAfter($revisionPicker);
+					$blobNavigator.insertAfter($buildStatus);
 					$("#project-blob>.blob-navigator").hide();
 				}
 			}
