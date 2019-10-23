@@ -24,7 +24,7 @@ public class CacheSpec implements Serializable {
 			+ "Note: Type @ to insert variable, use \\ to escape normal occurrences of @ or \\")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
-	@RegEx(interpolative=true, value="[a-zA-Z0-9\\-_]+", message="Can only contain alphanumeric, dash and underscore")
+	@RegEx(interpolative=true, value="[a-zA-Z0-9\\-_\\.]+", message="Can only contain alphanumeric, dash, dot and underscore")
 	public String getKey() {
 		return key;
 	}

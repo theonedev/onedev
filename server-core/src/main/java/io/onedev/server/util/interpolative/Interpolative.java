@@ -50,10 +50,13 @@ public class Interpolative implements Serializable {
 	public String interpolateWith(Function<String, String> interpolator) {
 		StringBuilder builder = new StringBuilder();
 		for (Segment segment: segments) {
-			if (segment.getType() == Type.LITERAL)
+			if (segment.getType() == Type.LITERAL) {
 				builder.append(segment.getContent());
-			else
-				builder.append(interpolator.apply(segment.getContent()));
+			} else {
+				String interpolated = interpolator.apply(segment.getContent()); 
+				if (interpolated != null)
+					builder.append(interpolated);
+			}
 		}
 		return builder.toString();
 	}

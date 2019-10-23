@@ -1055,8 +1055,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	@Override
 	public Collection<String> getWebSocketObservables() {
 		Collection<String> observables = super.getWebSocketObservables();
-		if (resolvedRevision != null)
+		if (resolvedRevision != null) {
 			observables.add(CommitIndexed.getWebSocketObservable(getProject().getRevCommit(resolvedRevision, true).name()));
+			observables.add("commit-status:" + getProject().getId() + ":" + resolvedRevision.name());
+		}
 		if (state.requestId != null)
 			observables.add(PullRequest.getWebSocketObservable(state.requestId));
 		if (state.commentId != null)

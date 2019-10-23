@@ -180,7 +180,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	}
 	
 	private File getCacheHome() {
-		return new File(Bootstrap.getSiteDir(), "job-cache"); 
+		return new File(Bootstrap.getSiteDir(), "cache"); 
 	}
 
 	private String createNetwork(JobContext jobContext, JobLogger jobLogger) {
@@ -469,7 +469,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				@Override
 				public Void call() {
 					String network = createNetwork(jobContext, jobLogger);
-					jobLogger.log("Executing job with docker under network " + network + "...");
+					jobLogger.log("Executing job (executor: docker, network: " + network + ", image: " + jobContext.getImage() + ")...");
 					try {
 						jobContext.notifyJobRunning();
 						
@@ -492,7 +492,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 						login(jobLogger);
 
 						for (JobService jobService: jobContext.getServices()) {
-							jobLogger.log("Starting service '" + jobService.getName() + "...");
+							jobLogger.log("Starting service (name: " + jobService.getName() + ", image: " + jobService.getImage() + ")...");
 							startService(network, jobService, jobLogger);
 						}
 						

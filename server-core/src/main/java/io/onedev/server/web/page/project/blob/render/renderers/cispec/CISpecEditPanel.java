@@ -1,6 +1,8 @@
 package io.onedev.server.web.page.project.blob.render.renderers.cispec;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -28,15 +30,20 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 
 import io.onedev.commons.launcher.loader.AppLoader;
+import io.onedev.server.OneDev;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.CISpecAware;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobAware;
+import io.onedev.server.ci.job.JobSuggestion;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.menu.MenuItem;
+import io.onedev.server.web.component.menu.MenuLink;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.Path;
@@ -100,6 +107,27 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 		return content;
 	}
 	
+	private void addJob(AjaxRequestTarget target, Job job) {
+		Component nav = newJobNav(job);
+		String script = String.format("$('.ci-spec>.valid>.jobs>.body>.side>.navs').append(\"<div id='%s'></div>\");", 
+				nav.getMarkupId());
+		target.prependJavaScript(script);
+		target.add(nav);
+
+		Component content = newJobContent(job);
+		script = String.format("$('.ci-spec>.valid>.jobs>.body>.contents').append(\"<div id='%s'></div>\");", 
+				content.getMarkupId());
+		target.prependJavaScript(script);
+		target.add(content);
+		
+		script = String.format(""
+				+ "onedev.server.ciSpec.showJob(%d); "
+				+ "$('#%s .select').mouseup(onedev.server.ciSpec.selectJob);" 
+				+ "$('#%s .delete').mouseup(onedev.server.ciSpec.deleteJob);", 
+				jobNavs.size() - 1, nav.getMarkupId(), nav.getMarkupId());
+		target.appendJavaScript(script);
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -119,33 +147,59 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 			content.add(jobNavs);
 			content.add(jobContents);
 			
-			content.add(new AjaxLink<Void>("add") {
+			List<Job> suggestedJobs = new ArrayList<>();
+			for (JobSuggestion suggestion: OneDev.getExtensions(JobSuggestion.class)) 
+				suggestedJobs.addAll(suggestion.suggestJobs(context.getProject(), context.getCommit()));
+
+			AjaxLink<Void> createLink = new AjaxLink<Void>("create") {
 
 				@Override
 				public void onClick(AjaxRequestTarget target) {
-					Job job = new Job();
-
-					Component nav = newJobNav(job);
-					String script = String.format("$(\"#%s\").prev().append(\"<div id='%s'></div>\");", 
-							getMarkupId(), nav.getMarkupId());
-					target.prependJavaScript(script);
-					target.add(nav);
-
-					Component content = newJobContent(job);
-					script = String.format("$(\"#%s\").parent().next().append(\"<div id='%s'></div>\");", 
-							getMarkupId(), content.getMarkupId());
-					target.prependJavaScript(script);
-					target.add(content);
-					
-					script = String.format(""
-							+ "onedev.server.ciSpec.showJob(%d); "
-							+ "$('#%s .select').mouseup(onedev.server.ciSpec.selectJob);" 
-							+ "$('#%s .delete').mouseup(onedev.server.ciSpec.deleteJob);", 
-							jobNavs.size() - 1, nav.getMarkupId(), nav.getMarkupId());
-					target.appendJavaScript(script);
+					addJob(target, new Job());
 				}
 				
-			});
+			};
+			if (suggestedJobs.isEmpty())
+				createLink.add(AttributeAppender.append("class", "no-suggestions"));
+			
+			content.add(createLink);
+			
+			if (!suggestedJobs.isEmpty()) {
+				content.add(new MenuLink("suggestions") {
+
+					@Override
+					protected List<MenuItem> getMenuItems(FloatingPanel dropdown) {
+						List<MenuItem> menuItems = new ArrayList<>();
+						for (Job job: suggestedJobs) {
+							menuItems.add(new MenuItem() {
+
+								@Override
+								public String getLabel() {
+									return job.getName();
+								}
+
+								@Override
+								public WebMarkupContainer newLink(String id) {
+									return new AjaxLink<Void>(id) {
+
+										@Override
+										public void onClick(AjaxRequestTarget target) {
+											dropdown.close();
+											addJob(target, job);
+										}
+										
+									};
+								}
+								
+							});
+						}
+						return menuItems;
+					}
+					
+				});
+			} else {
+				content.add(new WebMarkupContainer("suggestions").setVisible(false));
+			}
 			
 			content.add(new SortBehavior() {
 

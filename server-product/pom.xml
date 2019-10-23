@@ -32,21 +32,6 @@
 		</dependency>
 		<dependency>
 			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-cispec-laravel</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-cispec-rubyonrails</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.onedev</groupId>
-			<artifactId>server-plugin-cispec-django</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>io.onedev</groupId>
 			<artifactId>server-plugin-cispec-gradle</artifactId>
 			<version>${project.version}</version>
 		</dependency>

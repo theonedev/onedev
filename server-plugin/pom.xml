@@ -18,13 +18,10 @@
 	<modules>
 		<module>server-plugin-archetype</module>
 		<module>server-plugin-report-html</module>
-		<module>server-plugin-cispec-maven</module>
 		<module>server-plugin-executor-kubernetes</module>
 		<module>server-plugin-executor-docker</module>
-  		<module>server-plugin-cispec-node</module>
-    	<module>server-plugin-cispec-laravel</module>
-    	<module>server-plugin-cispec-rubyonrails</module>
-    	<module>server-plugin-cispec-django</module>
+		<module>server-plugin-cispec-maven</module>
     	<module>server-plugin-cispec-gradle</module>
+    	<module>server-plugin-cispec-node</module>
     </modules>
 </project>

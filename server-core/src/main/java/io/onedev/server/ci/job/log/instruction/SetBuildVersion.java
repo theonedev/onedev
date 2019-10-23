@@ -6,6 +6,8 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.StringUtils;
+
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.server.event.build.BuildUpdated;
 import io.onedev.server.model.Build;
@@ -29,7 +31,11 @@ public class SetBuildVersion extends LogInstruction {
 	@Transactional
 	@Override
 	public void execute(Build build, Map<String, List<String>> params) {
-		build.setVersion(params.values().iterator().next().iterator().next());
+		String version = params.values().iterator().next().iterator().next();
+		if (StringUtils.isNotBlank(version))
+			build.setVersion(version);
+		else
+			build.setVersion(null);
 		listenerRegistry.post(new BuildUpdated(build));
 	}
 

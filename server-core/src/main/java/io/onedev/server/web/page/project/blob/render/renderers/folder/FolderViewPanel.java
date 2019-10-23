@@ -32,11 +32,13 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
+import org.unbescape.html.HtmlEscape;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.ci.CISpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.util.userident.UserIdent;
@@ -182,6 +184,8 @@ public class FolderViewPanel extends Panel {
 					iconClass = "fa fa-ext fa-folder-submodule-o";
 				else if (blobIdent.isSymbolLink()) 
 					iconClass = "fa fa-ext fa-folder-symbol-link-o";
+				else if (blobIdent.path.equals(CISpec.BLOB_PATH))
+					iconClass = "fa fa-cog";
 				else  
 					iconClass = "fa fa-file-text-o";
 				pathIcon.add(AttributeModifier.append("class", iconClass));
@@ -206,8 +210,10 @@ public class FolderViewPanel extends Panel {
 					
 				}; 
 				
-				if (context.getBlobIdent().path != null)
+				if (context.getBlobIdent().path != null) 
 					pathLink.add(new Label("label", blobIdent.path.substring(context.getBlobIdent().path.length()+1)));
+				else if (blobIdent.path.equals(CISpec.BLOB_PATH))
+					pathLink.add(new Label("label", "<b>" + HtmlEscape.escapeHtml5(blobIdent.path) + "</b>").setEscapeModelStrings(false));
 				else
 					pathLink.add(new Label("label", blobIdent.path));
 				item.add(pathLink);

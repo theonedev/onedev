@@ -477,7 +477,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private void startService(String namespace, JobContext jobContext, JobService jobService, 
 			@Nullable String imagePullSecretName, JobLogger jobLogger) {
-		jobLogger.log("Creating service pod...");
+		jobLogger.log("Creating service pod from image " + jobService.getImage() + "...");
 		
 		List<NodeSelectorEntry> nodeSelector = getNodeSelector();
 		for (ServiceLocator locator: getServiceLocators()) {
@@ -658,13 +658,13 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}).checkReturnCode();
 		
 		String namespace = createNamespace(jobContext, jobLogger);
-		jobLogger.log("Executing job with kubernetes under namespace " + namespace + "...");
+		jobLogger.log("Executing job (executor: kubernetes, namespace: " + namespace + ", image: " + dockerImage + ")...");
 		
 		try {
 			String imagePullSecretName = createImagePullSecret(namespace, jobLogger);
 			if (jobContext != null) {
 				for (JobService jobService: jobContext.getServices()) {
-					jobLogger.log("Starting service '" + jobService.getName() + "'...");
+					jobLogger.log("Starting service (name: " + jobService.getName() + ", image: " + jobService.getImage() + ")...");
 					startService(namespace, jobContext, jobService, imagePullSecretName, jobLogger);
 				}
 			}

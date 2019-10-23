@@ -74,7 +74,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.DefaultCISpecProvider;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
 import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
@@ -717,25 +716,16 @@ public class Project extends AbstractEntity {
 	public CISpec getCISpec(ObjectId commitId) {
 		if (ciSpecCache == null)
 			ciSpecCache = new HashMap<>();
-		Optional<CISpec> ciSpecOpt = ciSpecCache.get(commitId);
-		if (ciSpecOpt == null) {
+		Optional<CISpec> ciSpec = ciSpecCache.get(commitId);
+		if (ciSpec == null) {
 			Blob blob = getBlob(new BlobIdent(commitId.name(), CISpec.BLOB_PATH, FileMode.TYPE_FILE), false);
-			if (blob != null) {
-				ciSpecOpt = Optional.fromNullable(CISpec.parse(blob.getBytes()));
-			} else {				
-				List<DefaultCISpecProvider> providers = new ArrayList<>(OneDev.getExtensions(DefaultCISpecProvider.class));
-				providers.sort(Comparator.comparing(DefaultCISpecProvider::getPriority));
-				CISpec ciSpec = null;
-				for (DefaultCISpecProvider provider: providers) {
-					ciSpec = provider.getDefaultCISpec(this, commitId);
-					if (ciSpec != null) 
-						break;
-				}
-				ciSpecOpt = Optional.fromNullable(ciSpec);
-			}
-			ciSpecCache.put(commitId, ciSpecOpt);
+			if (blob != null) 
+				ciSpec = Optional.fromNullable(CISpec.parse(blob.getBytes()));
+			else
+				ciSpec = Optional.absent();
+			ciSpecCache.put(commitId, ciSpec);
 		}
-		return ciSpecOpt.orNull();
+		return ciSpec.orNull();
 	}
 	
 	public List<String> getJobNames() {

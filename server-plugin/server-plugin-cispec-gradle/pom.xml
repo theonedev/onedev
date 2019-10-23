@@ -7,6 +7,13 @@
 		<artifactId>server-plugin</artifactId>
 		<version>3.0.1</version>
 	</parent>
+	<dependencies>
+		<dependency>
+			<groupId>io.onedev</groupId>
+			<artifactId>server-plugin-report-html</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+	</dependencies>
 	<properties>
 		<moduleClass>org.server.plugin.cispec.gradle.GradleModule</moduleClass>
 	</properties>

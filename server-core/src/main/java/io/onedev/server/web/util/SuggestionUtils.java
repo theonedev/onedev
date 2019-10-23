@@ -26,6 +26,7 @@ import io.onedev.server.cache.CacheManager;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobVariable;
+import io.onedev.server.ci.job.NamedFunction;
 import io.onedev.server.ci.job.VariableInterpolator;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
@@ -111,6 +112,12 @@ public class SuggestionUtils {
 			if (!variables.containsKey(varName) && script.isAuthorized(ScriptIdentity.get()))
 				variables.put(varName, null);
 		}
+		for (NamedFunction function: OneDev.getExtensions(NamedFunction.class)) {
+			String varName = VariableInterpolator.FUNCTIONS_PREFIX + function.getName();
+			if (!variables.containsKey(varName))
+				variables.put(varName, null);
+		}
+		
 		for (Map.Entry<String, String> entry: variables.entrySet()) {
 			int index = entry.getKey().toLowerCase().indexOf(matchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {

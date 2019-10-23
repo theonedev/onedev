@@ -47,6 +47,7 @@ public class ScriptChoiceEditor extends PropertyEditor<String> {
 					if (script.isAuthorized(ScriptIdentity.get())) 
 						choices.put(script.getName(), null);
 				}
+				
 				return choices;
 			}
 			

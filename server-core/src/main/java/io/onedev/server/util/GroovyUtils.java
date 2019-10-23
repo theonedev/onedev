@@ -57,7 +57,7 @@ public class GroovyUtils {
     public static Object evalScriptByName(String scriptName) {
     	return evalScriptByName(scriptName, new HashMap<>());
     }
-    
+
     public static Object evalScriptByName(String scriptName, Map<String, Object> variables) {
     	for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
     		if (script.getName().equals(scriptName) && script.isAuthorized(ScriptIdentity.get())) {

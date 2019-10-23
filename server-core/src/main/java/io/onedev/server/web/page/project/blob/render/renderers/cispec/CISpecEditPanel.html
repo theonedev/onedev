@@ -17,9 +17,12 @@
                             </a>
                             <a title="Delete job" class="delete"><i class="fa fa-trash"></i></a>
                         </div></div>
-                        <a wicket:id="add" class="add btn btn-success btn-block">
-                            <i class="fa fa-plus"></i> Add Job
-                        </a>
+                        <div class="add">
+	                        <a wicket:id="create" class="create btn btn-success">
+	                            <i class="fa fa-plus"></i> Add Job
+	                        </a>
+	                        <a wicket:id="suggestions" class="suggestions btn btn-success" title="Job suggestions"><i class="fa fa-magic"></i></a>
+                        </div>
                     </div>
                     <div class="contents">
                         <div wicket:id="contents" class="content"></div>

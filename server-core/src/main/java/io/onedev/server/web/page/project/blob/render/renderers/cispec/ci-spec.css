@@ -92,6 +92,25 @@
     padding: 8px 8px;
     display: block;
 }
+.ci-spec>.valid>div>.body>.side .add {
+	position: relative;
+}
+.ci-spec>.valid>div>.body>.side .create {
+	display: block;
+	margin-right: 38px;
+	border-radius: 4px 0 0 4px;
+}
+.ci-spec>.valid>div>.body>.side .create.no-suggestions {
+	margin-right: 0;
+	border-radius: 4px;
+}
+.ci-spec>.valid>div>.body>.side .suggestions {
+	position: absolute;
+	right: 0;
+	top: 0;
+	border-radius: 0 4px 4px 0;
+	border-left: none;
+}
 .ci-spec>.valid>div>.body>.contents>.content {
     border-radius: 4px;
     border: 2px solid #666;
