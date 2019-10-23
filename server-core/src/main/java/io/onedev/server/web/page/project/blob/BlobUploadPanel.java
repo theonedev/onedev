@@ -23,7 +23,7 @@ import io.onedev.server.web.component.dropzonefield.DropzoneField;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 
 @SuppressWarnings("serial")
-abstract class BlobUploadPanel extends Panel {
+public abstract class BlobUploadPanel extends Panel {
 
 	private final BlobRenderContext context;
 	
@@ -104,8 +104,8 @@ abstract class BlobUploadPanel extends Panel {
 		});
 	}
 
-	abstract void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated);
+	public abstract void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated);
 	
-	abstract void onCancel(AjaxRequestTarget target);
+	public abstract void onCancel(AjaxRequestTarget target);
 	
 }

@@ -413,12 +413,12 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 								return new BlobUploadPanel(id, ProjectBlobPage.this) {
 
 									@Override
-									void onCancel(AjaxRequestTarget target) {
+									public void onCancel(AjaxRequestTarget target) {
 										modal.close();
 									}
 
 									@Override
-									void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated) {
+									public void onCommitted(AjaxRequestTarget target, RefUpdated refUpdated) {
 										ProjectBlobPage.this.onCommitted(target, refUpdated, null);
 										modal.close();
 									}
