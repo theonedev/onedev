@@ -37,7 +37,7 @@ public class MavenJobSuggestion implements JobSuggestion {
 		Blob blob = project.getBlob(new BlobIdent(commitId.name(), "pom.xml", FileMode.TYPE_FILE), false);
 		if (blob != null) {
 			Job job = new Job();
-			job.setName("maven");
+			job.setName("maven ci");
 
 			job.setImage("@functions." + DETERMINE_DOCKER_IMAGE + "@");
 			/*

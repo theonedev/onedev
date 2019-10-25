@@ -52,7 +52,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 
 		if (content.indexOf("angular/core") != -1) { // Recognize angular projects
 			Job job = new Job();
-			job.setName("angular");
+			job.setName("angular ci");
 			job.setImage("1dev/cispec-node:10.16-alpine-chrome");
 
 			List<String> commands = Lists.newArrayList( 
@@ -104,7 +104,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 		
 		if (content.indexOf("react") != -1) { // Recognize react projects
 			Job job = new Job();
-			job.setName("react");
+			job.setName("react ci");
 			job.setImage("node:10.16-alpine");
 
 			List<String> commands = Lists.newArrayList( 
@@ -152,7 +152,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 		
 		if (content.indexOf("vue") != -1) { // Recognize vue projects
 			Job job = new Job();
-			job.setName("vue");
+			job.setName("vue ci");
 			job.setImage("node:10.16-alpine");
 
 			List<String> commands = Lists.newArrayList( 
@@ -194,7 +194,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 		
 		if (content.indexOf("express") != -1) { // Recognize express projects
 			Job job = new Job();
-			job.setName("express");
+			job.setName("express ci");
 			job.setImage("node:10.16-alpine");
 
 			List<String> commands = Lists.newArrayList( 

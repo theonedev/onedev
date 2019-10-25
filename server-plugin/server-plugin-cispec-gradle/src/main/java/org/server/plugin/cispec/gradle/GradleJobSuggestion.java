@@ -37,7 +37,7 @@ public class GradleJobSuggestion implements JobSuggestion {
 
 		if (gradleBlob != null || kotlinGradleBlob != null) {
 			Job job = new Job();
-			job.setName("gradle");
+			job.setName("gradle ci");
 			job.setImage("@functions." + DETERMINE_DOCKER_IMAGE + "@");
 			job.setCommands(Lists.newArrayList(
 					"set -e",
