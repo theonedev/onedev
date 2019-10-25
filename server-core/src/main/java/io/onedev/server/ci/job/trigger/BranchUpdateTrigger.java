@@ -109,7 +109,7 @@ public class BranchUpdateTrigger extends JobTrigger {
 		else if (getBranches() != null)
 			description = String.format("When update branches '%s'", getBranches());
 		else if (getPaths() != null)
-			description = String.format("When touch files '%s'", getBranches());
+			description = String.format("When touch files '%s'", getPaths());
 		else
 			description = "When update branches";
 		return description;

@@ -104,7 +104,7 @@ public class PullRequestTrigger extends JobTrigger {
 		else if (getBranches() != null)
 			description = String.format("When open/update pull requests targeting branches '%s'", getBranches());
 		else if (getPaths() != null)
-			description = String.format("When open/update pull requests touching files '%s'", getBranches());
+			description = String.format("When open/update pull requests touching files '%s'", getPaths());
 		else
 			description = "When open/update pull requests";
 		return description;
