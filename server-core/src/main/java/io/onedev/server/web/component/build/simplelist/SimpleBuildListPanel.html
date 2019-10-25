@@ -1,16 +1,16 @@
 <wicket:panel>
     <div class="simple-build-list">
         <wicket:enclosure child="showInList">
-            <div class="head clearfix">
-                <span class="pull-left">Builds</span> 
-                <a wicket:id="showInList" class="show-in-list pull-right" title="Show in build list"><i class="fa fa-list-ul"></i></a>
+            <div class="head">
+                <span>Builds</span> 
+                <a wicket:id="showInList" class="show-in-list" title="Show in build list"><i class="fa fa-list-ul"></i></a>
             </div>
         </wicket:enclosure>
         <div class="body">
             <div wicket:id="builds">
-				<a wicket:id="build" class="build clearfix">
-					<span wicket:id="status" class="status pull-left"></span>
-					<span wicket:id="title" class="title pull-right"></span>
+				<a wicket:id="build" class="build">
+					<span wicket:id="status" class="status"></span>
+					<span wicket:id="title" class="title"></span>
 				</a>
             </div>
         </div>
