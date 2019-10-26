@@ -440,24 +440,14 @@ public final class VersionedDocument implements Document, Externalizable {
 	public Object toBean() {
 		return toBean(null);
 	}
-	
-	/**
-	 * Convert this document to bean. Migration will performed if necessary.
-	 * During the migration, content of the document will also get updated 
-	 * to reflect current migration result.
-	 * @return
-	 */
-	public Object toBean(MigrationListener listener) {
-		return toBean(listener, null);
-	}
 
 	/**
-	 * Convert this document to bean. Migration will performed if necessary.
+	 * Convert this document to bean. Migration will be performed if necessary.
 	 * During the migration, content of the document will also get updated 
 	 * to reflect current migration result.
 	 * @return
 	 */
-	public Object toBean(MigrationListener listener, Class<?> beanClass) {	
+	public Object toBean(Class<?> beanClass) {	
 		XStream xstream = AppLoader.getInstance(XStream.class);
 		Dom4JReader domReader = new Dom4JReader(this);
 		Class<?> origBeanClass;
@@ -485,8 +475,6 @@ public final class VersionedDocument implements Document, Externalizable {
 				if (MigrationHelper.migrate(getVersion(), migrator, this)) {
 					setVersion(MigrationHelper.getVersion(migrator.getClass()));
 					Object bean = xstream.unmarshal(domReader);
-					if (listener != null) 
-						listener.afterMigration(bean);
 					return bean;
 				} else {
 					return xstream.unmarshal(domReader);

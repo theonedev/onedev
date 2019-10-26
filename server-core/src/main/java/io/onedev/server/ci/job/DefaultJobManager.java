@@ -328,7 +328,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			// make sure interpolated result passes validation
 			Interpolated.push(true);
 			try {
-				for (ConstraintViolation<?> violation: OneDev.getInstance(Validator.class).validate(this)) {
+				for (ConstraintViolation<?> violation: OneDev.getInstance(Validator.class).validate(job)) {
 					String errorMessage = String.format("Error validating job (property: %s, message: %s)", 
 								new Path(violation.getPropertyPath()).toString(), violation.getMessage());
 					throw new OneException(errorMessage);
