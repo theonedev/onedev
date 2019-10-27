@@ -3,6 +3,7 @@ package io.onedev.server.plugin.executor.kubernetes;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
@@ -21,6 +22,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -749,7 +751,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			}
 			
 			String helperImageVersion;
-			/*
 			try (InputStream is = KubernetesExecutor.class.getClassLoader().getResourceAsStream("k8s-helper-version.properties")) {
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				IOUtils.copy(is, baos);
@@ -757,10 +758,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			*/
-			
-			// TODO: uncomment above for production code
-			helperImageVersion = "latest";
 			
 			Map<Object, Object> sidecarContainerSpec = Maps.newHashMap(
 					"name", "sidecar", 

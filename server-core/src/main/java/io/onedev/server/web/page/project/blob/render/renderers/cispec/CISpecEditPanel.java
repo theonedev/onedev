@@ -148,8 +148,11 @@ public class CISpecEditPanel extends FormComponentPanel<byte[]> implements CISpe
 			content.add(jobContents);
 			
 			List<Job> suggestedJobs = new ArrayList<>();
-			for (JobSuggestion suggestion: OneDev.getExtensions(JobSuggestion.class)) 
-				suggestedJobs.addAll(suggestion.suggestJobs(context.getProject(), context.getCommit()));
+			
+			if (context.getBlobIdent().revision != null) {
+				for (JobSuggestion suggestion: OneDev.getExtensions(JobSuggestion.class)) 
+					suggestedJobs.addAll(suggestion.suggestJobs(context.getProject(), context.getCommit()));
+			}
 
 			AjaxLink<Void> createLink = new AjaxLink<Void>("create") {
 

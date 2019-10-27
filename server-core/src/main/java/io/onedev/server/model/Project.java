@@ -34,6 +34,7 @@ import javax.persistence.Version;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.SerializationUtils;
+import org.dom4j.Element;
 import org.eclipse.jgit.api.CreateBranchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.TagCommand;
@@ -95,6 +96,7 @@ import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.git.command.ListChangedFilesCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.BuildSetting;
@@ -732,9 +734,15 @@ public class Project extends AbstractEntity {
 		if (jobNames == null) {
 			Set<String> jobNameSet = new HashSet<>();
 			for (RefInfo refInfo: getBranches()) {
-				CISpec ciSpec = getCISpec(refInfo.getPeeledObj());
-				if (ciSpec != null)
-					jobNameSet.addAll(ciSpec.getJobMap().keySet());
+				Blob blob = getBlob(new BlobIdent(refInfo.getPeeledObj().name(), CISpec.BLOB_PATH, FileMode.TYPE_FILE), false);
+				if (blob != null && blob.getText() != null) {
+					try {
+						VersionedDocument dom = VersionedDocument.fromXML(blob.getText().getContent());
+						for (Element jobElement: dom.getRootElement().element("jobs").elements())
+							jobNameSet.add(jobElement.elementTextTrim("name"));
+					} catch (Exception e) {
+					}
+				}
 			}
 			jobNames = new ArrayList<>(jobNameSet);
 			Collections.sort(jobNames);
