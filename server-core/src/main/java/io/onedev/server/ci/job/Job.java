@@ -28,7 +28,6 @@ import io.onedev.server.ci.CISpecAware;
 import io.onedev.server.ci.job.action.PostBuildAction;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
-import io.onedev.server.ci.job.retry.JobRetry;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Project;
@@ -42,6 +41,7 @@ import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.Interpolative;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.editable.annotation.RetryCondition;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -63,8 +63,10 @@ public class Job implements Serializable, Validatable {
 	private String image;
 	
 	private List<String> commands;
+
+	private boolean retrieveSource;
 	
-	private boolean retrieveSource = true;
+	private Integer cloneDepth;
 	
 	private List<SubmoduleCredential> submoduleCredentials = new ArrayList<>();
 	
@@ -90,8 +92,12 @@ public class Job implements Serializable, Validatable {
 	
 	private List<PostBuildAction> postBuildActions = new ArrayList<>();
 	
-	private JobRetry retry;
+	private String retryCondition = "never";
 	
+	private int maxRetries = 3;
+	
+	private int retryDelay = 30;
+
 	private transient Map<String, ParamSpec> paramSpecMap;
 	
 	@Editable(order=100, description="Specify name of the job")
@@ -176,7 +182,7 @@ public class Job implements Serializable, Validatable {
 		this.triggers = triggers;
 	}
 
-	@Editable(order=9000, group="Source Retrieval", description="Check this to retrieve files stored in the repository into job workspace")
+	@Editable(order=9000, group="Source Retrieval")
 	public boolean isRetrieveSource() {
 		return retrieveSource;
 	}
@@ -184,11 +190,22 @@ public class Job implements Serializable, Validatable {
 	public void setRetrieveSource(boolean retrieveSource) {
 		this.retrieveSource = retrieveSource;
 	}
+	
+	@Editable(order=9050, group="Source Retrieval", description="Optionally specify depth for a shallow clone in order "
+			+ "to speed up source retrieval")
+	@ShowCondition("isRetrieveSourceEnabled")
+	public Integer getCloneDepth() {
+		return cloneDepth;
+	}
+
+	public void setCloneDepth(Integer cloneDepth) {
+		this.cloneDepth = cloneDepth;
+	}
 
 	@Editable(order=9100, group="Source Retrieval", description="For git submodules accessing via http/https, you will "
 			+ "need to specify credentials here if required")
-	@ShowCondition("isSubmoduleCredentialsVisible")
 	@Valid
+	@ShowCondition("isRetrieveSourceEnabled")
 	public List<SubmoduleCredential> getSubmoduleCredentials() {
 		return submoduleCredentials;
 	}
@@ -196,9 +213,9 @@ public class Job implements Serializable, Validatable {
 	public void setSubmoduleCredentials(List<SubmoduleCredential> submoduleCredentials) {
 		this.submoduleCredentials = submoduleCredentials;
 	}
-	
+
 	@SuppressWarnings("unused")
-	private static boolean isSubmoduleCredentialsVisible() {
+	private static boolean isRetrieveSourceEnabled() {
 		return (boolean) EditContext.get().getInputValue("retrieveSource");
 	}
 
@@ -248,6 +265,37 @@ public class Job implements Serializable, Validatable {
 		this.reports = reports;
 	}
 
+	@Editable(order=9400, group="Job Retry", description="Specify the condition to retry build")
+	@NotEmpty
+	@RetryCondition
+	public String getRetryCondition() {
+		return retryCondition;
+	}
+
+	public void setRetryCondition(String retryCondition) {
+		this.retryCondition = retryCondition;
+	}
+
+	@Editable(order=9410, group="Job Retry", description="Maximum of retries before giving up")
+	public int getMaxRetries() {
+		return maxRetries;
+	}
+
+	public void setMaxRetries(int maxRetries) {
+		this.maxRetries = maxRetries;
+	}
+
+	@Editable(order=9420, group="Job Retry", description="Delay for the first retry in seconds. "
+			+ "Delay of subsequent retries will be calculated using an exponential back-off "
+			+ "based on this delay")
+	public int getRetryDelay() {
+		return retryDelay;
+	}
+
+	public void setRetryDelay(int retryDelay) {
+		this.retryDelay = retryDelay;
+	}
+	
 	@Editable(order=9200, name="CPU Requirement", group="Resource Requirements", description="Specify CPU requirement of the job. "
 			+ "Refer to <a href='https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/#meaning-of-cpu' target='_blank'>kubernetes documentation</a> for details. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
@@ -304,17 +352,6 @@ public class Job implements Serializable, Validatable {
 
 	public void setTimeout(long timeout) {
 		this.timeout = timeout;
-	}
-
-	@Editable(order=10600, name="Retry When Failed", group="More Settings", description="Check to re-run the job upon build failure")
-	@NameOfEmptyValue("Do not retry")
-	@Valid
-	public JobRetry getRetry() {
-		return retry;
-	}
-	
-	public void setRetry(JobRetry retry) {
-		this.retry = retry;
 	}
 	
 	@Editable(order=10600, name="Post Build Actions", group="More Settings")
@@ -382,7 +419,7 @@ public class Job implements Serializable, Validatable {
 		
 		if (retrieveSource) {
 			int index = 0;
-			for (SubmoduleCredential credential: submoduleCredentials) {
+			for (SubmoduleCredential credential: getSubmoduleCredentials()) {
 				if (credential.getUrl() != null 
 						&& !credential.getUrl().startsWith("http://") 
 						&& !credential.getUrl().startsWith("https://")) {

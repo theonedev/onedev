@@ -61,17 +61,16 @@ public class KubernetesResource {
 		Map<String, Object> contextMap = new HashMap<>();
 		contextMap.put("commands", context.getCommands());
 		contextMap.put("retrieveSource", context.isRetrieveSource());
-		if (context.isRetrieveSource()) {
-			List<Map<String, String>> list = new ArrayList<>();
-			for (SubmoduleCredential each: context.getSubmoduleCredentials()) {
-				Map<String, String> map = new HashMap<>();
-				map.put("url", each.getUrl());
-				map.put("userName", each.getUserName());
-				map.put("password", each.getPasswordSecret());
-				list.add(map);
-			}
-			contextMap.put("submoduleCredentials", list);
+		contextMap.put("cloneDepth", context.getCloneDepth());
+		List<Map<String, String>> list = new ArrayList<>();
+		for (SubmoduleCredential each: context.getSubmoduleCredentials()) {
+			Map<String, String> map = new HashMap<>();
+			map.put("url", each.getUrl());
+			map.put("userName", each.getUserName());
+			map.put("password", each.getPasswordSecret());
+			list.add(map);
 		}
+		contextMap.put("submoduleCredentials", list);
 		contextMap.put("projectName", context.getProjectName());
 		contextMap.put("commitHash", context.getCommitId().name());
 		contextMap.put("collectFiles.includes", context.getCollectFiles().getIncludes());

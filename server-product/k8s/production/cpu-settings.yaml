@@ -9,7 +9,7 @@ spec:
       - name: onedev
         resources:
           requests: 
-            cpu: "1"
+            cpu: "2"
 ---
 apiVersion: apps/v1
 kind: Deployment

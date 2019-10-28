@@ -22,6 +22,8 @@ import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
@@ -44,6 +46,8 @@ import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 @SuppressWarnings("serial")
 public class CommitStatusPanel extends Panel {
 
+	private static final Logger logger = LoggerFactory.getLogger(CommitStatusPanel.class);
+	
 	private final IModel<Project> projectModel;
 	
 	private final ObjectId commitId;
@@ -52,11 +56,15 @@ public class CommitStatusPanel extends Panel {
 
 		@Override
 		protected List<Job> load() {
-			CISpec ciSpec = getProject().getCISpec(commitId);
-			if (ciSpec != null)
-				return ciSpec.getJobs();
-			else
-				return new ArrayList<>();
+			try {
+				CISpec ciSpec = getProject().getCISpec(commitId);
+				if (ciSpec != null)
+					return ciSpec.getJobs();
+			} catch (Exception e) {
+				logger.error("Error retrieving CI spec (project: {}, commit: {})", 
+						getProject().getName(), commitId.name(), e);
+			}
+			return new ArrayList<>();
 		}
 		
 	};

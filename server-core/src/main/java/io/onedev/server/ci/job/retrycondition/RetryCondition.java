@@ -1,4 +1,4 @@
-package io.onedev.server.ci.job.retry.condition;
+package io.onedev.server.ci.job.retrycondition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,13 +16,14 @@ import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneException;
-import io.onedev.server.ci.job.retry.condition.RetryConditionParser.AndCriteriaContext;
-import io.onedev.server.ci.job.retry.condition.RetryConditionParser.ConditionContext;
-import io.onedev.server.ci.job.retry.condition.RetryConditionParser.CriteriaContext;
-import io.onedev.server.ci.job.retry.condition.RetryConditionParser.FieldOperatorValueCriteriaContext;
-import io.onedev.server.ci.job.retry.condition.RetryConditionParser.NotCriteriaContext;
-import io.onedev.server.ci.job.retry.condition.RetryConditionParser.OrCriteriaContext;
-import io.onedev.server.ci.job.retry.condition.RetryConditionParser.ParensCriteriaContext;
+import io.onedev.server.ci.job.retrycondition.RetryConditionParser.AndCriteriaContext;
+import io.onedev.server.ci.job.retrycondition.RetryConditionParser.ConditionContext;
+import io.onedev.server.ci.job.retrycondition.RetryConditionParser.CriteriaContext;
+import io.onedev.server.ci.job.retrycondition.RetryConditionParser.FieldOperatorValueCriteriaContext;
+import io.onedev.server.ci.job.retrycondition.RetryConditionParser.NotCriteriaContext;
+import io.onedev.server.ci.job.retrycondition.RetryConditionParser.OperatorCriteriaContext;
+import io.onedev.server.ci.job.retrycondition.RetryConditionParser.OrCriteriaContext;
+import io.onedev.server.ci.job.retrycondition.RetryConditionParser.ParensCriteriaContext;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.NotCriteria;
@@ -77,8 +78,8 @@ public class RetryCondition implements Predicate<Build> {
 
 		Predicate<Build> criteria;
 		
-		if (conditionContext.Always() != null) {
-			criteria = new AlwaysCriteria();
+		if (conditionContext.Never() != null) {
+			criteria = new NeverCriteria();
 		} else {
 			criteria = new RetryConditionBaseVisitor<Predicate<Build>>() {
 	
@@ -87,6 +88,22 @@ public class RetryCondition implements Predicate<Build> {
 					return visit(ctx.criteria());
 				}
 	
+				@Override
+				public Predicate<Build> visitOperatorCriteria(OperatorCriteriaContext ctx) {
+					switch (ctx.operator.getType()) {
+					case RetryConditionLexer.Failed:
+						return new FailedCriteria();
+					case RetryConditionLexer.Cancelled:
+						return new CancelledCriteria();
+					case RetryConditionLexer.TimedOut:
+						return new TimedOutCriteria();
+					case RetryConditionLexer.InError:
+						return new InErrorCriteria();
+					default:
+						throw new OneException("Unexpected operator: " + ctx.operator.getText());
+					}
+				}
+				
 				@Override
 				public Predicate<Build> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 					String fieldName = getValue(ctx.Quoted(0).getText());

@@ -369,6 +369,7 @@ public final class VersionedDocument implements Document, Externalizable {
 			format.setEncoding(Charsets.UTF_8.name());
 			if (pretty) {
 				format.setIndent(true);
+				format.setIndentSize(4);
 		        format.setNewlines(true);
 			} else {
 		        format.setIndent(false);

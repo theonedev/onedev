@@ -21,7 +21,7 @@ public class RetryConditionValidator implements ConstraintValidator<RetryConditi
 			return true;
 		} else {
 			try {
-				io.onedev.server.ci.job.retry.condition.RetryCondition.parse(value);
+				io.onedev.server.ci.job.retrycondition.RetryCondition.parse(value);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

@@ -692,8 +692,10 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 								}								
 								
 								git.clearArgs();
-								git.addArgs("fetch", jobContext.getProjectGitDir().getAbsolutePath(), "--force", "--quiet", 
-										"--depth=1", jobContext.getCommitId().name());
+								git.addArgs("fetch", jobContext.getProjectGitDir().getAbsolutePath(), "--force", "--quiet");
+								if (jobContext.getCloneDepth() != null)
+									git.addArgs("--depth=" + jobContext.getCloneDepth());
+								git.addArgs(jobContext.getCommitId().name());
 								git.execute(new LineConsumer() {
 	
 									@Override

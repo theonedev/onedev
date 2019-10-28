@@ -28,6 +28,8 @@ public abstract class JobContext {
 	
 	private final boolean retrieveSource;
 	
+	private final Integer cloneDepth;
+	
 	private final List<SubmoduleCredential> submoduleCredentials;
 	
 	private final String cpuRequirement;
@@ -51,9 +53,9 @@ public abstract class JobContext {
 	private final Map<String, Integer> cacheCounts = new ConcurrentHashMap<>();
 	
 	public JobContext(String projectName, Long buildNumber, File projectGitDir, String image, 
-			File workspace, List<String> commands, boolean retrieveSource, 
-			List<SubmoduleCredential> submoduleCredentials, String cpuRequirement, 
-			String memoryRequirement, ObjectId commitId, Collection<CacheSpec> caches, 
+			File workspace, List<String> commands, boolean retrieveSource, Integer cloneDepth,
+			List<SubmoduleCredential> submoduleCredentials, String cpuRequirement, String 
+			memoryRequirement, ObjectId commitId, Collection<CacheSpec> caches, 
 			PatternSet collectFiles, int cacheTTL, List<JobService> services, JobLogger logger) {
 		this.projectName = projectName;
 		this.buildNumber = buildNumber;
@@ -62,6 +64,7 @@ public abstract class JobContext {
 		this.serverWorkspace = workspace;
 		this.commands = commands;
 		this.retrieveSource = retrieveSource;
+		this.cloneDepth = cloneDepth;
 		this.submoduleCredentials = submoduleCredentials;
 		this.cpuRequirement = cpuRequirement;
 		this.memoryRequirement = memoryRequirement;
@@ -104,7 +107,11 @@ public abstract class JobContext {
 	public boolean isRetrieveSource() {
 		return retrieveSource;
 	}
-	
+
+	public Integer getCloneDepth() {
+		return cloneDepth;
+	}
+
 	public List<SubmoduleCredential> getSubmoduleCredentials() {
 		return submoduleCredentials;
 	}

@@ -1,4 +1,4 @@
-package io.onedev.server.ci.job.retry.condition;
+package io.onedev.server.ci.job.retrycondition;
 
 import java.util.function.Predicate;
 import java.util.regex.Pattern;

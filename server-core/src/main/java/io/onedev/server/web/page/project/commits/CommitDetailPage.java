@@ -36,6 +36,8 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
@@ -84,6 +86,8 @@ import io.onedev.server.web.page.project.tags.ProjectTagsPage;
 @SuppressWarnings("serial")
 public class CommitDetailPage extends ProjectPage implements CommentSupport {
 
+	private static final Logger logger = LoggerFactory.getLogger(CommitDetailPage.class);
+	
 	private static final String PARAM_REVISION = "revision";
 	
 	// make sure to use a different value from wicket:id according to wicket bug:
@@ -243,11 +247,15 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 
 			@Override
 			protected List<Job> load() {
-				CISpec ciSpec = getProject().getCISpec(getCommit().copy());
-				if (ciSpec != null)
-					return ciSpec.getJobs();
-				else
-					return new ArrayList<>();
+				try {
+					CISpec ciSpec = getProject().getCISpec(getCommit().copy());
+					if (ciSpec != null)
+						return ciSpec.getJobs();
+				} catch (Exception e) {
+					logger.error("Error retrieving CI spec (project: {}, commit: {})", 
+							getProject().getName(), getCommit().name(), e);
+				}
+				return new ArrayList<>();
 			}
 			
 		}) {

@@ -398,10 +398,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							});
 
 							JobContext jobContext = new JobContext(projectName, buildNumber, projectGitDir, job.getImage(), 
-									serverWorkspace, job.getCommands(), job.isRetrieveSource(), submoduleCredentials, 
-									job.getCpuRequirement(), job.getMemoryRequirement(), commitId, job.getCaches(), 
-									new PatternSet(includeFiles, excludeFiles), executor.getCacheTTL(), job.getServices(), 
-									jobLogger) {
+									serverWorkspace, job.getCommands(), job.isRetrieveSource(), job.getCloneDepth(), 
+									job.getSubmoduleCredentials(), job.getCpuRequirement(), job.getMemoryRequirement(), 
+									commitId, job.getCaches(), new PatternSet(includeFiles, excludeFiles), 
+									executor.getCacheTTL(), job.getServices(), jobLogger) {
 
 								@Override
 								public void notifyJobRunning() {
@@ -748,7 +748,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		if (build.willRetryNow()) {
 			Long buildId = build.getId();
 			int retried = build.getRetried();
-			int retryDelay = build.getJob().getRetry().getRetryDelay();
+			int retryDelay = build.getJob().getRetryDelay();
 			transactionManager.runAsyncAfterCommit(new Runnable() {
 
 				@Override
