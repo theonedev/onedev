@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: onedev
+  labels:
+    tier: server
+spec:
+  selector:
+    matchLabels:
+      tier: server
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: onedev
+      labels:
+        tier: server
+    spec:
+      containers:
+      - name: onedev
+        image: 1dev/server
+        volumeMounts:
+        - mountPath: "/opt/onedev"
+          name: onedev
+        ports:
+        - containerPort: 6610
+        env:
+        - name: hibernate_dialect
+          value: org.hibernate.dialect.MySQL5InnoDBDialect
+        - name: hibernate_connection_driver_class
+          value: com.mysql.cj.jdbc.Driver
+        - name: hibernate_connection_url
+          value: jdbc:mysql://mysql:3306/onedev?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
+        - name: hibernate_connection_username
+          value: onedev
+        - name: hibernate_connection_password
+          valueFrom:
+            secretKeyRef:
+              name: mysql
+              key: password
+      initContainers:
+      - name: init
+        image: busybox
+        command: ["sh", "-c", "until nslookup mysql.onedev.svc.cluster.local; do echo waiting for mysql; sleep 2; done;"]
+      serviceAccountName: onedev
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql 
+  labels:
+    tier: database
+spec:
+  selector:
+    matchLabels:
+      tier: database
+  strategy: 
+    type: Recreate
+  template:
+    metadata:
+      name: mysql
+      labels:
+        tier: database
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:5.7
+        args:
+        - "--ignore-db-dir=lost+found"
+        env:
+        - name: MYSQL_RANDOM_ROOT_PASSWORD
+          value: "yes"
+        - name: MYSQL_DATABASE
+          value: onedev
+        - name: MYSQL_USER
+          value: onedev
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql
+              key: password
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: mysql
+          mountPath: /var/lib/mysql
+        readinessProbe:
+          exec:
+            command:
+            - bash 
+            - "-c" 
+            - | 
+              mysql -uonedev -p$MYSQL_PASSWORD -e 'SELECT 1'
+          initialDelaySeconds: 5
+          periodSeconds: 2
+          timeoutSeconds: 1

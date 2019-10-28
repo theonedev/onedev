@@ -1,9 +1,8 @@
 namespace: onedev
+images:
+- name: 1dev/server
+  newTag: ${buildVersion}
 bases:
 - ../base
-commonLabels:
-  app: onedev
 patchesStrategicMerge:
-- node-selectors.yaml
-- memory-settings.yaml
 - disk-settings.yaml
