@@ -9,7 +9,7 @@ spec:
       - name: onedev
         resources:
           requests: 
-            memory: 4Gi
+            memory: 2Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -22,4 +22,4 @@ spec:
       - name: mysql
         resources:
           requests: 
-            memory: 1Gi
+            memory: 500Mi
