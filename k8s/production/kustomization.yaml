@@ -5,6 +5,5 @@ commonLabels:
   app: onedev
 patchesStrategicMerge:
 - node-selectors.yaml
-- cpu-settings.yaml
 - memory-settings.yaml
 - disk-settings.yaml
