@@ -12,4 +12,3 @@ resources:
 - cluster-role-bindings.yaml
 - services.yaml
 - deployments.yaml
-- persistent-volume-claims.yaml

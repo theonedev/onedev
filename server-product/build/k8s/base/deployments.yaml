@@ -32,7 +32,7 @@ spec:
         - name: hibernate_connection_url
           value: jdbc:mysql://mysql:3306/onedev?serverTimezone=UTC&allowPublicKeyRetrieval=true&useSSL=false
         - name: hibernate_connection_username
-          value: onedev
+          value: root
         - name: hibernate_connection_password
           valueFrom:
             secretKeyRef:
@@ -68,13 +68,9 @@ spec:
         args:
         - "--ignore-db-dir=lost+found"
         env:
-        - name: MYSQL_RANDOM_ROOT_PASSWORD
-          value: "yes"
         - name: MYSQL_DATABASE
           value: onedev
-        - name: MYSQL_USER
-          value: onedev
-        - name: MYSQL_PASSWORD
+        - name: MYSQL_ROOT_PASSWORD
           valueFrom:
             secretKeyRef:
               name: mysql
@@ -90,7 +86,7 @@ spec:
             - bash 
             - "-c" 
             - | 
-              mysql -uonedev -p$MYSQL_PASSWORD -e 'SELECT 1'
+              mysql -uroot -p$MYSQL_ROOT_PASSWORD -e 'SELECT 1'
           initialDelaySeconds: 5
           periodSeconds: 2
           timeoutSeconds: 1

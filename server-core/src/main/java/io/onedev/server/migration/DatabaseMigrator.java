@@ -1035,4 +1035,7 @@ public class DatabaseMigrator {
 		}
 	}
 
+	private void migrate25(File dataDir, Stack<Integer> versions) {
+	}
+	
 }

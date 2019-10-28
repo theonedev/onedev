@@ -9,8 +9,9 @@ spec:
       - name: onedev
       volumes:
       - name: onedev
-        persistentVolumeClaim:
-          claimName: onedev
+        gcePersistentDisk:
+          pdName: onedev
+          fsType: ext4
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -23,23 +24,6 @@ spec:
       - name: mysql
       volumes:
       - name: mysql
-        persistentVolumeClaim:
-          claimName: mysql
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: onedev
-spec:
-  resources:
-    requests:
-      storage: 100Gi
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql
-spec:
-  resources:
-    requests:
-      storage: 10Gi
+        gcePersistentDisk:
+          pdName: onedev-database
+          fsType: ext4
