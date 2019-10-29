@@ -42,6 +42,10 @@ spec:
       - name: init
         image: busybox
         command: ["sh", "-c", "until nslookup mysql.onedev.svc.cluster.local; do echo waiting for mysql; sleep 2; done;"]
+      volumes:
+      - name: onedev
+        persistentVolumeClaim:
+          claimName: onedev
       serviceAccountName: onedev
 ---
 apiVersion: apps/v1
@@ -90,3 +94,7 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 2
           timeoutSeconds: 1
+      volumes:
+      - name: mysql
+        persistentVolumeClaim:
+          claimName: mysql

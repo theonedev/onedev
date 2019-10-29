@@ -1,29 +1,17 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
   name: onedev
 spec:
-  template:
-    spec:
-      containers:
-      - name: onedev
-      volumes:
-      - name: onedev
-        hostPath:
-          path: /opt/onedev
-          type: DirectoryOrCreate
+  resources:
+    requests:
+      storage: 1Gi
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: PersistentVolumeClaim
 metadata:
-  name: mysql 
+  name: mysql
 spec:
-  template:
-    spec:
-      containers:
-      - name: mysql
-      volumes:
-      - name: mysql
-        hostPath:
-          path: /opt/onedev-database
-          type: DirectoryOrCreate
+  resources:
+    requests:
+      storage: 512Mi
