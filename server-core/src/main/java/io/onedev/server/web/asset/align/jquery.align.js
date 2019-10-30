@@ -58,10 +58,10 @@
         		var $targetEl = jQuery(alignment.target.element);
         		if (alignment.target.index != undefined) {
     				var coord = getCaretCoordinates(alignment.target.element, alignment.target.index);
-        			targetLeft = coord.left + $targetEl.offset().left;
+        			targetLeft = coord.left + $targetEl.offset().left - $targetEl.scrollLeft();
 					targetWidth = 0;
 					if ($targetEl.is("textarea")) {
-						targetTop = coord.top + $targetEl.offset().top;
+						targetTop = coord.top + $targetEl.offset().top - $targetEl.scrollTop();
 						targetHeight = textHeight;
 					} else {
 						targetTop = $targetEl.offset().top;

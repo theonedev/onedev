@@ -145,10 +145,14 @@ onedev.server.inputassist = {
 				var parentCoord = $parent.offset();
 				var textHeight = 16;
 				var errorHeight = 5;
-				var errorOffset = 9;
 				var minWidth = 5;
-				var left = fromCoord.left + inputCoord.left - parentCoord.left;
-				var top = fromCoord.top + inputCoord.top - parentCoord.top + textHeight; 
+				var textMargin = 10;
+				var left = fromCoord.left + inputCoord.left - parentCoord.left - $input.scrollLeft();
+				if (left < $input.offset().left - $parent.offset().left + textMargin)
+					left = $input.offset().left - $parent.offset().left + textMargin;
+				var top = fromCoord.top + inputCoord.top - parentCoord.top + textHeight - $input.scrollTop(); 
+				if (top < $input.offset().top - $parent.offset().top + textMargin)
+					top = $input.offset().top - $parent.offset().top + textMargin;
 				$error.css({left: left, top: top});
 				$error.outerWidth(Math.max(toCoord.left-fromCoord.left, minWidth));
 				$error.outerHeight(errorHeight);
