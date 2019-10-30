@@ -21,6 +21,7 @@ import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobDependency;
 import io.onedev.server.ci.job.action.PostBuildAction;
 import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.retrycondition.RetryCondition;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.util.validation.Validatable;
@@ -120,6 +121,18 @@ public class CISpec implements Serializable, Validatable {
 					valid = false;
 				}
 				j++;
+			}
+			
+			if (job.getRetryCondition() != null) { 
+				try {
+					RetryCondition.parse(job, job.getRetryCondition());
+				} catch (Exception e) {
+					context.buildConstraintViolationWithTemplate(e.getMessage())
+							.addPropertyNode("jobs").addPropertyNode("retryCondition")
+								.inIterable().atIndex(i)
+							.addConstraintViolation();
+					valid = false;
+				}
 			}
 			
 			j=1;

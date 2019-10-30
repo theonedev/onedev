@@ -109,8 +109,6 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new CancelledCriteria();
 						case BuildQueryLexer.TimedOut:
 							return new TimedOutCriteria();
-						case BuildQueryLexer.InError:
-							return new InErrorCriteria();
 						case BuildQueryLexer.Waiting:
 							return new WaitingCriteria();
 						case BuildQueryLexer.Pending:

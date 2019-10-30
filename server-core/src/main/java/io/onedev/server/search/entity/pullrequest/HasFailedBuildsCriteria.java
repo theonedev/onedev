@@ -26,7 +26,6 @@ public class HasFailedBuildsCriteria extends PullRequestCriteria {
 		Path<?> status = join.get(Build.STATUS);
 		
 		return builder.or(
-				builder.equal(status, Build.Status.IN_ERROR), 
 				builder.equal(status, Build.Status.FAILED), 
 				builder.equal(status, Build.Status.CANCELLED), 
 				builder.equal(status, Build.Status.TIMED_OUT));
@@ -35,8 +34,7 @@ public class HasFailedBuildsCriteria extends PullRequestCriteria {
 	@Override
 	public boolean matches(PullRequest request, User user) {
 		for (PullRequestBuild build: request.getPullRequestBuilds()) {
-			if (build.getBuild().getStatus() == Build.Status.IN_ERROR 
-					|| build.getBuild().getStatus() == Build.Status.FAILED
+			if (build.getBuild().getStatus() == Build.Status.FAILED
 					|| build.getBuild().getStatus() == Build.Status.CANCELLED
 					|| build.getBuild().getStatus() == Build.Status.TIMED_OUT) {
 				return true;

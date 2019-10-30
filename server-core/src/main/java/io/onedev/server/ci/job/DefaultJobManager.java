@@ -497,7 +497,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	}
 	
 	private void markBuildError(Build build, String errorMessage) {
-		build.setStatus(Build.Status.IN_ERROR, errorMessage);
+		build.setStatus(Build.Status.FAILED, errorMessage);
 		build.setFinishDate(new Date());
 		listenerRegistry.post(new BuildFinished(build));
 	}
@@ -785,7 +785,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		
 		try {
 			for (PostBuildAction action: build.getJob().getPostBuildActions()) {
-				if (ActionCondition.parse(action.getCondition()).test(build))
+				if (ActionCondition.parse(build.getJob(), action.getCondition()).test(build))
 					action.execute(build);
 			}
 		} catch (Exception e) {

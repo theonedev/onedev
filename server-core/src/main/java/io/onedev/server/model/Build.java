@@ -106,7 +106,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public enum Status {
 		// Most significant status comes first, refer to getOverallStatus
-		WAITING, PENDING, RUNNING, IN_ERROR, FAILED, CANCELLED, TIMED_OUT, SUCCESSFUL;
+		WAITING, PENDING, RUNNING, FAILED, CANCELLED, TIMED_OUT, SUCCESSFUL;
 		
 		public String getDisplayName() {
 			return StringUtils.capitalize(name().replace('_', ' ').toLowerCase());
@@ -290,7 +290,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public boolean isFinished() {
-		return status == Status.IN_ERROR || status == Status.FAILED 
+		return status == Status.FAILED 
 				|| status == Status.CANCELLED || status == Status.SUCCESSFUL
 				|| status == Status.TIMED_OUT;
 	}
@@ -345,9 +345,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public boolean willRetryNow() {
 		if (willRetryNow == null) {
-			willRetryNow = getStatus() == Build.Status.FAILED
-					&& getRetried() < getJob().getMaxRetries() 
-					&& RetryCondition.parse(getJob().getRetryCondition()).test(this);
+			willRetryNow = getRetried() < getJob().getMaxRetries() 
+					&& RetryCondition.parse(getJob(), getJob().getRetryCondition()).test(this);
 		}
 		return willRetryNow;
 	}

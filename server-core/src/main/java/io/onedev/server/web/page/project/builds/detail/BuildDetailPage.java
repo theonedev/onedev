@@ -317,7 +317,6 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 					public String getObject() {
 						switch (getBuild().getStatus()) {
 						case FAILED:
-						case IN_ERROR:
 						case TIMED_OUT:
 						case CANCELLED:
 							return "alert-danger";

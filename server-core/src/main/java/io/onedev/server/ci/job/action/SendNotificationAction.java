@@ -3,8 +3,6 @@ package io.onedev.server.ci.job.action;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.job.Job;
 import io.onedev.server.model.Build;
 import io.onedev.server.notification.BuildNotificationManager;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -37,10 +35,6 @@ public class SendNotificationAction extends PostBuildAction {
 	@Override
 	public String getDescription() {
 		return "Send notification to " + receivers;
-	}
-
-	@Override
-	public void validateWithContext(CISpec ciSpec, Job job) {
 	}
 
 }

@@ -136,6 +136,8 @@ public class RunJobAction extends PostBuildAction {
 
 	@Override
 	public void validateWithContext(CISpec ciSpec, Job job) {
+		super.validateWithContext(ciSpec, job);
+		
 		Job jobToRun = ciSpec.getJobMap().get(jobName);
 		if (jobToRun != null) {
 			try {

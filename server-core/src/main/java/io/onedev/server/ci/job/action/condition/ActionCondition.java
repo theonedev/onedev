@@ -12,13 +12,11 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
 
+import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.job.Job;
-import io.onedev.server.ci.job.action.condition.ActionConditionBaseVisitor;
-import io.onedev.server.ci.job.action.condition.ActionConditionLexer;
-import io.onedev.server.ci.job.action.condition.ActionConditionParser;
 import io.onedev.server.ci.job.action.condition.ActionConditionParser.AndCriteriaContext;
 import io.onedev.server.ci.job.action.condition.ActionConditionParser.ConditionContext;
 import io.onedev.server.ci.job.action.condition.ActionConditionParser.CriteriaContext;
@@ -29,6 +27,7 @@ import io.onedev.server.ci.job.action.condition.ActionConditionParser.OperatorVa
 import io.onedev.server.ci.job.action.condition.ActionConditionParser.OrCriteriaContext;
 import io.onedev.server.ci.job.action.condition.ActionConditionParser.ParensCriteriaContext;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
@@ -41,7 +40,7 @@ public class ActionCondition implements Predicate<Build> {
 		this.criteria = criteria;
 	}
 
-	private static String getValue(String token) {
+	public static String getValue(String token) {
 		return StringUtils.unescape(FenceAware.unfence(token));
 	}
 	
@@ -49,7 +48,7 @@ public class ActionCondition implements Predicate<Build> {
 		return criteria.test(build);
 	}
 	
-	public static ActionCondition parse(String conditionString) {
+	public static ActionCondition parse(Job job, String conditionString) {
 		CharStream is = CharStreams.fromString(conditionString); 
 		ActionConditionLexer lexer = new ActionConditionLexer(is);
 		lexer.removeErrorListeners();
@@ -99,8 +98,6 @@ public class ActionCondition implements Predicate<Build> {
 						return new CancelledCriteria();
 					case ActionConditionLexer.TimedOut:
 						return new TimedOutCriteria();
-					case ActionConditionLexer.InError:
-						return new InErrorCriteria();
 					case ActionConditionLexer.PreviousIsSuccessful:
 						return new PreviousIsSuccessfulCriteria();
 					case ActionConditionLexer.PreviousIsFailed:
@@ -109,8 +106,6 @@ public class ActionCondition implements Predicate<Build> {
 						return new PreviousIsCancelledCriteria();
 					case ActionConditionLexer.PreviousIsTimedOut:
 						return new PreviousIsTimedOutCriteria();
-					case ActionConditionLexer.PreviousIsInError:
-						return new PreviousInErrorCriteria();
 					case ActionConditionLexer.WillRetry:
 						return new WillRetryCriteria();
 					case ActionConditionLexer.AssociatedWithPullRequests:
@@ -127,8 +122,16 @@ public class ActionCondition implements Predicate<Build> {
 					String fieldName = getValue(ctx.Quoted(0).getText());
 					String fieldValue = getValue(ctx.Quoted(1).getText());
 					int operator = ctx.operator.getType();
-					checkField(Build.get().getJob(), fieldName, operator);
-					return new ParamCriteria(fieldName, fieldValue);
+					checkField(job, fieldName, operator);
+					
+					switch (fieldName) {
+					case BuildConstants.FIELD_LOG:
+						return new LogCriteria(fieldValue);
+					case BuildConstants.FIELD_ERROR_MESSAGE:
+						return new ErrorMessageCriteria(fieldValue);
+					default:
+						return new ParamCriteria(fieldName, fieldValue);
+					}
 				}
 				
 				@Override
@@ -164,8 +167,20 @@ public class ActionCondition implements Predicate<Build> {
 	}
 	
 	public static void checkField(Job job, String fieldName, int operator) {
-		if (!job.getParamSpecMap().containsKey(fieldName))
+		if (fieldName.equals(BuildConstants.FIELD_ERROR_MESSAGE) || fieldName.equals(BuildConstants.FIELD_LOG)) {
+			if (operator != ActionConditionLexer.Contains)
+				throw newOperatorException(fieldName, operator);
+		} else if (job.getParamSpecMap().containsKey(fieldName)) {
+			if (operator != ActionConditionLexer.Is)
+				throw newOperatorException(fieldName, operator);
+		} else {
 			throw new OneException("Param not found: " + fieldName);
+		}
+	}
+	
+	private static OneException newOperatorException(String fieldName, int operator) {
+		return new OneException("Field '" + fieldName + "' is not applicable for operator '" 
+				+ AntlrUtils.getLexerRuleName(ActionConditionLexer.ruleNames, operator) + "'");
 	}
 	
 }

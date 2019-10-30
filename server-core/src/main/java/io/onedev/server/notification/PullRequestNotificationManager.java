@@ -170,8 +170,7 @@ public class PullRequestNotificationManager implements PersistListener {
 			notifiedUsers.add(request.getSubmitter());
 		} else if (event instanceof PullRequestBuildEvent) {
 			Build build = ((PullRequestBuildEvent) event).getPullRequestBuild().getBuild();
-			if (build.getStatus() == Build.Status.IN_ERROR 
-					|| build.getStatus() == Build.Status.FAILED 
+			if (build.getStatus() == Build.Status.FAILED 
 					|| build.getStatus() == Build.Status.CANCELLED
 					|| build.getStatus() == Build.Status.TIMED_OUT) {
 				String subject = String.format("Failed to build pull request #%d - %s", 

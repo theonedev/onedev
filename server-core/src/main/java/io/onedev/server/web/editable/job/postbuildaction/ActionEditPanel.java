@@ -74,11 +74,10 @@ abstract class ActionEditPanel extends Panel implements CISpecAware, JobAware {
 
 				PostBuildAction action = bean.getAction();
 				if (editor.isValid()) {
-					if (actionIndex != -1) {
+					if (actionIndex != -1) 
 						actions.set(actionIndex, action);
-					} else {
+					else 
 						actions.add(action);
-					}
 					onSave(target);
 				} else {
 					target.add(form);

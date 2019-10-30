@@ -16,6 +16,7 @@ import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneException;
+import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser.AndCriteriaContext;
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser.ConditionContext;
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser.CriteriaContext;
@@ -25,15 +26,12 @@ import io.onedev.server.ci.job.retrycondition.RetryConditionParser.OperatorCrite
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser.OrCriteriaContext;
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser.ParensCriteriaContext;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
 
 public class RetryCondition implements Predicate<Build> {
-
-	public static final String FIELD_LOG = "Log";
-	
-	public static final String FIELD_ERROR_MESSAGE = "Error Message";
 
 	private final Predicate<Build> criteria;
 	
@@ -41,7 +39,7 @@ public class RetryCondition implements Predicate<Build> {
 		this.criteria = criteria;
 	}
 
-	private static String getValue(String token) {
+	public static String getValue(String token) {
 		return StringUtils.unescape(FenceAware.unfence(token));
 	}
 	
@@ -49,7 +47,7 @@ public class RetryCondition implements Predicate<Build> {
 		return criteria.test(build);
 	}
 	
-	public static RetryCondition parse(String conditionString) {
+	public static RetryCondition parse(Job job, String conditionString) {
 		CharStream is = CharStreams.fromString(conditionString); 
 		RetryConditionLexer lexer = new RetryConditionLexer(is);
 		lexer.removeErrorListeners();
@@ -97,8 +95,6 @@ public class RetryCondition implements Predicate<Build> {
 						return new CancelledCriteria();
 					case RetryConditionLexer.TimedOut:
 						return new TimedOutCriteria();
-					case RetryConditionLexer.InError:
-						return new InErrorCriteria();
 					default:
 						throw new OneException("Unexpected operator: " + ctx.operator.getText());
 					}
@@ -109,21 +105,17 @@ public class RetryCondition implements Predicate<Build> {
 					String fieldName = getValue(ctx.Quoted(0).getText());
 					String fieldValue = getValue(ctx.Quoted(1).getText());
 					int operator = ctx.operator.getType();
-					checkField(fieldName, operator);
+					checkField(job, fieldName, operator);
 					
-					switch (operator) {
-					case RetryConditionLexer.Contains:
-						switch (fieldName) {
-						case FIELD_LOG:
-							return new LogCriteria(fieldValue);
-						case FIELD_ERROR_MESSAGE:
-							return new ErrorMessageCriteria(fieldValue);
-						default:
-							throw new IllegalStateException();
-						}
+					switch (fieldName) {
+					case BuildConstants.FIELD_LOG:
+						return new LogCriteria(fieldValue);
+					case BuildConstants.FIELD_ERROR_MESSAGE:
+						return new ErrorMessageCriteria(fieldValue);
 					default:
-						throw new IllegalStateException();
+						return new ParamCriteria(fieldName, fieldValue);
 					}
+					
 				}
 				
 				@Override
@@ -152,15 +144,16 @@ public class RetryCondition implements Predicate<Build> {
 		return new RetryCondition(criteria);
 	}
 	
-	public static void checkField(String fieldName, int operator) {
-		if (!fieldName.equals(FIELD_ERROR_MESSAGE) && !fieldName.equals(FIELD_LOG))
-			throw new OneException("Field not found: " + fieldName);
-		switch (operator) {
-		case RetryConditionLexer.Contains:
-			if (!fieldName.equals(FIELD_LOG) && !fieldName.equals(FIELD_ERROR_MESSAGE))
+	public static void checkField(Job job, String fieldName, int operator) {
+		if (fieldName.equals(BuildConstants.FIELD_ERROR_MESSAGE) || fieldName.equals(BuildConstants.FIELD_LOG)) {
+			if (operator != RetryConditionLexer.Contains)
 				throw newOperatorException(fieldName, operator);
-			break;
-		}
+		} else if (job.getParamSpecMap().containsKey(fieldName)) {
+			if (operator != RetryConditionLexer.Is)
+				throw newOperatorException(fieldName, operator);
+		} else {
+			throw new OneException("Param not found: " + fieldName);
+		}				
 	}
 	
 	private static OneException newOperatorException(String fieldName, int operator) {

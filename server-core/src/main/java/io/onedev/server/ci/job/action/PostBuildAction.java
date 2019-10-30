@@ -32,6 +32,15 @@ public abstract class PostBuildAction implements Serializable {
 	
 	public abstract String getDescription();
 	
-	public abstract void validateWithContext(CISpec ciSpec, Job job);
+	public void validateWithContext(CISpec ciSpec, Job job) {
+		try {
+			io.onedev.server.ci.job.action.condition.ActionCondition.parse(job, condition);
+		} catch (Exception e) {
+			String message = "Invalid action condition"; 
+			if (e.getMessage() != null)
+				message += ": " + e.getMessage();
+			throw new RuntimeException(message);
+		}
+	}
 	
 }

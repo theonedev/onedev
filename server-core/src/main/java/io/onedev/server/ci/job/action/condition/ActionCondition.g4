@@ -5,9 +5,9 @@ condition
     ;
 
 criteria
-    : operator=(Successful|Failed|InError|Cancelled|TimedOut|PreviousIsSuccessful|PreviousIsFailed|PreviousIsInError|PreviousIsCancelled|PreviousIsTimedOut|WillRetry|AssociatedWithPullRequests|RequiredByPullRequests) #OperatorCriteria
+    : operator=(Successful|Failed|Cancelled|TimedOut|PreviousIsSuccessful|PreviousIsFailed|PreviousIsCancelled|PreviousIsTimedOut|WillRetry|AssociatedWithPullRequests|RequiredByPullRequests) #OperatorCriteria
     | operator=OnBranch WS+ criteriaValue=Quoted #OperatorValueCriteria
-    | criteriaField=Quoted WS+ operator=Is WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Contains|Is) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria
@@ -26,10 +26,6 @@ Failed
 	: 'failed'
 	;
 	
-InError
-	: 'in' WS+ 'error'
-	;
-	
 Cancelled
 	: 'cancelled'
 	;
@@ -39,15 +35,11 @@ TimedOut
 	;
 	
 PreviousIsSuccessful
-	: 'previous' WS+  'is' WS+ 'successful'
+	: 'previous' WS+ 'is' WS+ 'successful'
 	;
 	
 PreviousIsFailed
 	: 'previous' WS+ 'is' WS+ 'failed'
-	;
-	
-PreviousIsInError
-	: 'previous' WS+ 'is' WS+ 'in' WS+ 'error'
 	;
 	
 PreviousIsCancelled
@@ -74,6 +66,10 @@ RequiredByPullRequests
 	: 'required' WS+ 'by' WS+ 'pull' WS+ 'requests'
 	;
 
+Contains
+	: 'contains'
+	;
+	
 Is
 	: 'is'
 	;

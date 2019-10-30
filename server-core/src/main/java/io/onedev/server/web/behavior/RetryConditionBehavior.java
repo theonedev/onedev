@@ -3,14 +3,23 @@ package io.onedev.server.web.behavior;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 
+import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
+import io.onedev.commons.codeassist.parser.Element;
+import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
+import io.onedev.server.OneException;
+import io.onedev.server.ci.job.Job;
+import io.onedev.server.ci.job.JobAware;
 import io.onedev.server.ci.job.retrycondition.RetryCondition;
+import io.onedev.server.ci.job.retrycondition.RetryConditionLexer;
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser;
+import io.onedev.server.util.BuildConstants;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -32,8 +41,11 @@ public class RetryConditionBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = Lists.newArrayList(
-									RetryCondition.FIELD_LOG, 
-									RetryCondition.FIELD_ERROR_MESSAGE);
+									BuildConstants.FIELD_LOG, 
+									BuildConstants.FIELD_ERROR_MESSAGE);
+							JobAware jobAware = getComponent().findParent(JobAware.class);
+							Job job = jobAware.getJob();
+							fields.addAll(job.getParamSpecMap().keySet());
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else {
 							return null;
@@ -49,6 +61,26 @@ public class RetryConditionBehavior extends ANTLRAssistBehavior {
 			}
 		} 
 		return null;
+	}
+	
+	@Override
+	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
+		parseExpect = parseExpect.findExpectByLabel("operator");
+		if (parseExpect != null) {
+			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
+			if (!fieldElements.isEmpty()) {
+				JobAware jobAware = getComponent().findParent(JobAware.class);
+				Job job = jobAware.getJob();
+				String fieldName = RetryCondition.getValue(fieldElements.iterator().next().getMatchedText());
+				try {
+					RetryCondition.checkField(job, fieldName, 
+							AntlrUtils.getLexerRule(RetryConditionLexer.ruleNames, suggestedLiteral));
+				} catch (OneException e) {
+					return null;
+				}
+			}
+		}
+		return super.describe(parseExpect, suggestedLiteral);
 	}
 	
 	@Override
