@@ -64,7 +64,7 @@ public class Job implements Serializable, Validatable {
 	
 	private List<String> commands;
 
-	private boolean retrieveSource;
+	private boolean retrieveSource = true;
 	
 	private Integer cloneDepth;
 	
