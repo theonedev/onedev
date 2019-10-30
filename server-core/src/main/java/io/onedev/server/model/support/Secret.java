@@ -7,7 +7,9 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -82,4 +84,8 @@ public class Secret implements Serializable {
 		return authorizedBranches == null || project.isCommitOnBranches(commitId, authorizedBranches);
 	}
 	
+	public boolean isAuthorized(Project project, String branch) {
+		return authorizedBranches == null 
+				|| PatternSet.fromString(authorizedBranches).matches(new PathMatcher(), branch);
+	}
 }

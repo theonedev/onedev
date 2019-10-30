@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import javax.annotation.Nullable;
+
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
@@ -91,7 +93,7 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestVariables(Project project, ObjectId commitId, 
+	public static List<InputSuggestion> suggestVariables(Project project, @Nullable ObjectId commitId, 
 			Job job, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
@@ -104,8 +106,10 @@ public class SuggestionUtils {
 			variables.put(VariableInterpolator.PARAMS_PREFIX + paramSpec.getName(), paramSpec.getDescription());
 		for (Secret secret: project.getSecrets()) {
 			String varName = VariableInterpolator.SECRETS_PREFIX + secret.getName();
-			if (!variables.containsKey(varName) && secret.isAuthorized(project, commitId))
+			if (!variables.containsKey(varName) 
+					&& (commitId != null && secret.isAuthorized(project, commitId) || commitId == null && secret.isAuthorized(project, "master"))) {
 				variables.put(varName, null);
+			}
 		}
 		for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
 			String varName = VariableInterpolator.SCRIPTS_PREFIX + script.getName();

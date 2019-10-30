@@ -20,6 +20,7 @@ import javax.validation.constraints.Size;
 
 import org.apache.wicket.Component;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -129,8 +130,15 @@ public class Job implements Serializable, Validatable {
 		JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
 		if (jobAware != null) {
 			Job job = jobAware.getJob();
-			if (job != null)
-				suggestions.addAll(SuggestionUtils.suggestVariables(page.getProject(), page.getCommit(), job, matchWith));
+			if (job != null) {
+				RevCommit commit;
+				if (page.getBlobIdent().revision != null)
+					commit = page.getCommit();
+				else
+					commit = null;
+				suggestions.addAll(SuggestionUtils.suggestVariables(page.getProject(), commit, job, matchWith));
+			
+			}
 		}
 		return suggestions;
 	}
@@ -162,7 +170,7 @@ public class Job implements Serializable, Validatable {
 		return variables;
 	}
 	
-	@Editable(order=130, name="Parameter Specs", description="Define parameter specifications of the job")
+	@Editable(order=130, name="Parameter Specs", description="Optionally define parameter specifications of the job")
 	@Valid
 	public List<ParamSpec> getParamSpecs() {
 		return paramSpecs;
