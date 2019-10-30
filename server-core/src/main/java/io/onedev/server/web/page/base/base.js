@@ -643,7 +643,7 @@ onedev.server = {
 		function installClearer($container) {
 			$container.find(".clearable-wrapper").each(function() {
 				var $wrapper = $(this);
-                var $input = $wrapper.find("input[type=text]:visible, input:not([type]):visible, textarea:visible");
+                var $input = $wrapper.find("input[type=text], input:not([type])");
 				if (!$input.hasClass("clearable")) {
 					$input.addClass("clearable");
 					var $clear = $("<a class='input-clear'>x</a>");
