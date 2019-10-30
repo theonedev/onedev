@@ -42,6 +42,7 @@ onedev.server.inputassist = {
 			var caret = $item.data("caret");
 			if (caret != undefined)
 				$input.caret(caret);
+			$input.blur();
 			$input.focus();
 			$input.trigger("input");
 		});
