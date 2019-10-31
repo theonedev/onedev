@@ -75,13 +75,13 @@ public class Job implements Serializable, Validatable {
 	
 	private List<ProjectDependency> projectDependencies = new ArrayList<>();
 	
+	private List<JobService> services = new ArrayList<>();
+	
 	private String artifacts;
 	
 	private List<JobReport> reports = new ArrayList<>();
 
 	private List<JobTrigger> triggers = new ArrayList<>();
-	
-	private List<JobService> services = new ArrayList<>();
 	
 	private List<CacheSpec> caches = new ArrayList<>();
 
@@ -227,7 +227,7 @@ public class Job implements Serializable, Validatable {
 		return (boolean) EditContext.get().getInputValue("retrieveSource");
 	}
 
-	@Editable(name="Job Dependencies", order=9110, group="Dependencies", description="Job dependencies determines the order and "
+	@Editable(name="Job Dependencies", order=9110, group="Dependencies & Services", description="Job dependencies determines the order and "
 			+ "concurrency when run different jobs. You may also specify artifacts to retrieve from upstream jobs")
 	@Valid
 	public List<JobDependency> getJobDependencies() {
@@ -238,7 +238,7 @@ public class Job implements Serializable, Validatable {
 		this.jobDependencies = jobDependencies;
 	}
 
-	@Editable(name="Project Dependencies", order=9113, group="Dependencies", description="Use project dependency to retrieve "
+	@Editable(name="Project Dependencies", order=9112, group="Dependencies & Services", description="Use project dependency to retrieve "
 			+ "artifacts from other projects")
 	@Valid
 	public List<ProjectDependency> getProjectDependencies() {
@@ -247,6 +247,16 @@ public class Job implements Serializable, Validatable {
 
 	public void setProjectDependencies(List<ProjectDependency> projectDependencies) {
 		this.projectDependencies = projectDependencies;
+	}
+
+	@Editable(order=9114, group="Dependencies & Services", description="Optionally define services used by this job")
+	@Valid
+	public List<JobService> getServices() {
+		return services;
+	}
+
+	public void setServices(List<JobService> services) {
+		this.services = services;
 	}
 
 	@Editable(order=9115, group="Artifacts & Reports", description="Optionally specify files to publish as job artifacts. "
@@ -328,16 +338,6 @@ public class Job implements Serializable, Validatable {
 
 	public void setMemoryRequirement(String memoryRequirement) {
 		this.memoryRequirement = memoryRequirement;
-	}
-
-	@Editable(order=10000, group="More Settings", description="Optionally define services used by this job")
-	@Valid
-	public List<JobService> getServices() {
-		return services;
-	}
-
-	public void setServices(List<JobService> services) {
-		this.services = services;
 	}
 
 	@Editable(order=10100, group="More Settings", description="Cache specific paths to speed up job execution. For instance for node.js "

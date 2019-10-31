@@ -7,7 +7,7 @@ import java.util.List;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.server.util.validation.annotation.VariableName;
+import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
 
@@ -30,10 +30,10 @@ public class JobService implements Serializable {
 	
 	private String memoryRequirement = "128m";
 	
-	@Editable(order=100, description="Specify name of the service, which can be used to access "
+	@Editable(order=100, description="Specify name of the service, which will be used as host name to access "
 			+ "the service. <b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
-	@VariableName(interpolative = true)
+	@DnsName(interpolative = true)
 	@NotEmpty
 	public String getName() {
 		return name;
