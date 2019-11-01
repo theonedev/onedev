@@ -6,7 +6,6 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.SystemUserIdent;
 import io.onedev.server.util.userident.UserIdent;
 
@@ -22,7 +21,7 @@ class IssueChangePanel extends GenericPanel<IssueChange> {
 		super.onInitialize();
 		
 		IssueChange change = getModelObject();
-		UserIdent userIdent = UserIdent.of(UserFacade.of(change.getUser()), change.getUserName());
+		UserIdent userIdent = UserIdent.of(change.getUser(), change.getUserName());
 		add(new Label("user", userIdent.getName()).setVisible(!(userIdent instanceof SystemUserIdent)));
 		add(new Label("description", change.getData().getDescription()));
 		add(new Label("age", DateUtils.formatAge(change.getDate())));

@@ -44,7 +44,6 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -146,7 +145,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		
 		List<String> customFieldNames = new ArrayList<>();
 		for (FieldSpec field: getIssueSetting().getFieldSpecs()) {
-			if (UserMatcher.fromString(field.getCanBeChangedBy()).matches(getProject(), SecurityUtils.getUser()))
+			if (SecurityUtils.canEditIssueField(getProject(), field.getName()))
 				customFieldNames.add(field.getName());
 		}
 		

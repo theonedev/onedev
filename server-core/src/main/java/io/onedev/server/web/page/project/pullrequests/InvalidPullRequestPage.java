@@ -57,7 +57,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canAdministrate(requestModel.getObject().getTargetProject().getFacade()));
+				setVisible(SecurityUtils.canManage(requestModel.getObject().getTargetProject()));
 			}
 			
 		}.add(new ConfirmOnClick("Do you really want to delete pull request #" + requestModel.getObject().getNumber() + "?")));
@@ -77,7 +77,7 @@ public class InvalidPullRequestPage extends ProjectPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 	
 	@Override

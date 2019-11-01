@@ -19,7 +19,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
+import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -70,7 +70,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		
 		Path<Long> attribute = root.get(IssueConstants.ATTR_NUMBER);		
 		if (fixedIssueNumbers.size() > IN_CLAUSE_LIMIT) {
-			Collection<Long> allIssueNumbers = OneDev.getInstance(CacheManager.class).getIssueNumbers(project.getId());
+			Collection<Long> allIssueNumbers = OneDev.getInstance(IssueManager.class).getIssueNumbers(project.getId());
 			return inManyValues(builder, attribute, fixedIssueNumbers, allIssueNumbers);
 		} else if (!fixedIssueNumbers.isEmpty()) {
 			return root.get(IssueConstants.ATTR_NUMBER).in(fixedIssueNumbers);

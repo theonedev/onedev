@@ -25,7 +25,7 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.server.migration.DatabaseMigrator;
+import io.onedev.server.migration.DataMigrator;
 import io.onedev.server.migration.MigrationHelper;
 import io.onedev.server.persistence.DefaultPersistManager;
 import io.onedev.server.persistence.HibernateProperties;
@@ -192,7 +192,7 @@ public class Upgrade extends DefaultPersistManager {
 				System.exit(1);
 			}
 			
-			int newDataVersion = Integer.parseInt(MigrationHelper.getVersion(DatabaseMigrator.class));
+			int newDataVersion = Integer.parseInt(MigrationHelper.getVersion(DataMigrator.class));
 			
 			if (oldDataVersion.get() > newDataVersion) {
 				logger.error("Unable to upgrade as specified installation is more recent");

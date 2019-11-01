@@ -13,8 +13,9 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.util.facade.GroupFacade;
+import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.editable.annotation.ShowCondition;
 
 @Entity
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -30,12 +31,14 @@ public class Group extends AbstractEntity {
 	
 	private boolean administrator;
 	
-	private boolean canCreateProjects = true;
+	private boolean createProjects = true;
 
 	@OneToMany(mappedBy="group", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<GroupAuthorization> authorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="group", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Membership> memberships = new ArrayList<>();
 	
 	private transient Collection<User> members;
@@ -59,7 +62,7 @@ public class Group extends AbstractEntity {
 		this.description = description;
 	}
 
-	@Editable(order=300)
+	@Editable(order=300, name="Site Administrator")
 	public boolean isAdministrator() {
 		return administrator;
 	}
@@ -68,13 +71,19 @@ public class Group extends AbstractEntity {
 		this.administrator = administrator;
 	}
 
-	@Editable(order=400)
-	public boolean isCanCreateProjects() {
-		return canCreateProjects;
+	@SuppressWarnings("unused")
+	private static boolean isAdministratorDisabled() {
+		return !(boolean) EditContext.get().getInputValue("administrator");
+	}
+	
+	@Editable(order=400, description="This permission is required to fork projects")
+	@ShowCondition("isAdministratorDisabled")
+	public boolean isCreateProjects() {
+		return createProjects;
 	}
 
-	public void setCanCreateProjects(boolean canCreateProjects) {
-		this.canCreateProjects = canCreateProjects;
+	public void setCreateProjects(boolean createProjects) {
+		this.createProjects = createProjects;
 	}
 
 	public Collection<GroupAuthorization> getAuthorizations() {
@@ -107,10 +116,6 @@ public class Group extends AbstractEntity {
 	public int compareTo(AbstractEntity entity) {
 		Group group = (Group) entity;
 		return getName().compareTo(group.getName());
-	}
-
-	public GroupFacade getFacade() {
-		return new GroupFacade(this);
 	}
 	
 }

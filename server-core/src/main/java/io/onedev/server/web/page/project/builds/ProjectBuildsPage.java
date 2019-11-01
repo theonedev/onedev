@@ -62,11 +62,6 @@ public class ProjectBuildsPage extends ProjectPage {
 		}
 	}
 
-	@Override
-	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
-	}
-	
 	private BuildQuerySettingManager getBuildQuerySettingManager() {
 		return OneDev.getInstance(BuildQuerySettingManager.class);		
 	}

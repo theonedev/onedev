@@ -23,8 +23,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.storage.StorageManager;
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserFacade;
 import jetbrains.exodus.env.Environment;
 import jetbrains.exodus.env.Store;
 import jetbrains.exodus.env.Transaction;
@@ -79,7 +77,7 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 	}
 
 	@Override
-	public Date getVisitDate(UserFacade user, ProjectFacade project) {
+	public Date getVisitDate(User user, Project project) {
 		Environment env = getEnv(user.getId().toString());
 		Store store = getStore(env, PROJECT_VISIT_STORE);
 		return env.computeInTransaction(new TransactionalComputable<Date>() {

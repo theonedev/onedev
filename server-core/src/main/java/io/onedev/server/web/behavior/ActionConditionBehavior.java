@@ -22,6 +22,7 @@ import io.onedev.server.ci.job.JobAware;
 import io.onedev.server.ci.job.action.condition.ActionCondition;
 import io.onedev.server.ci.job.action.condition.ActionConditionLexer;
 import io.onedev.server.ci.job.action.condition.ActionConditionParser;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
@@ -63,6 +64,15 @@ public class ActionConditionBehavior extends ANTLRAssistBehavior {
 								for (RefInfo refInfo: Project.get().getBranches())
 									branchNames.add(GitUtils.ref2branch(refInfo.getRef().getName()));
 								return SuggestionUtils.suggest(branchNames, matchWith);
+							} else if (operator == ActionConditionLexer.Is) {
+								List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+								Preconditions.checkState(fieldElements.size() == 1);
+								String fieldName = ActionCondition.getValue(fieldElements.get(0).getMatchedText());
+								JobAware jobAware = getComponent().findParent(JobAware.class);
+								Job job = jobAware.getJob();
+								ParamSpec paramSpec = job.getParamSpecMap().get(fieldName);
+								if (paramSpec != null) 
+									return SuggestionUtils.suggest(paramSpec.getPossibleValues(), matchWith);
 							}
 						} 
 						return null;

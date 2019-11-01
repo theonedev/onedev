@@ -28,6 +28,7 @@ import io.onedev.server.util.scriptidentity.ScriptIdentity;
 import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.model.EntityModel;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 
 @SuppressWarnings("serial")
@@ -72,7 +73,7 @@ public class RunJobLink extends AjaxLink<Void> {
 							job, bean, job.getParamSpecMap().keySet());
 					Build build = OneDev.getInstance(JobManager.class).submit(getProject(), 
 							commitId, job.getName(), paramMap, SecurityUtils.getUser());
-					setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(build, null));
+					setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(build, null));
 				}
 
 				@Override
@@ -101,7 +102,7 @@ public class RunJobLink extends AjaxLink<Void> {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(SecurityUtils.canWriteCode(getProject().getFacade()));
+		setVisible(SecurityUtils.canRunJob(getProject(), jobName));
 	}
 
 	@Override

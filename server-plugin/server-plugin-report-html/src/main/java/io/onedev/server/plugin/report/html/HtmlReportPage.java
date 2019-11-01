@@ -1,13 +1,10 @@
 package io.onedev.server.plugin.report.html;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.ComponentTag;
@@ -47,19 +44,19 @@ public class HtmlReportPage extends BuildDetailPage {
 
 			@Override
 			public String call() throws Exception {
-				Map<String, String> startPages;
-				File infoFile = new File(getBuild().getReportDir(JobHtmlReport.DIR), JobHtmlReport.START_PAGES);
-				if (infoFile.exists()) 
-					startPages = SerializationUtils.deserialize(FileUtils.readFileToByteArray(infoFile));
+				File startPageFile = new File(getBuild().getReportDir(JobHtmlReport.DIR), 
+						reportName + "/" + JobHtmlReport.START_PAGE);
+				if (startPageFile.exists())
+					return FileUtils.readFileToString(startPageFile);
 				else
-					startPages = new HashMap<>();
-				return startPages.get(reportName);
+					return null;
 			}
 			
 		});
 		
 		if (startPage != null) {
-			PageParameters params = HtmlReportDownloadResource.paramsOf(getProject(), getBuild().getNumber(), startPage);
+			PageParameters params = HtmlReportDownloadResource.paramsOf(getProject(), getBuild().getNumber(), 
+					reportName, startPage);
 			CharSequence startPageUrl = RequestCycle.get().urlFor(new HtmlReportDownloadResourceReference(), params);
 			add(new WebMarkupContainer("htmlReport") {
 				
@@ -87,7 +84,7 @@ public class HtmlReportPage extends BuildDetailPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canAccessReport(getBuild(), reportName);
 	}
 	
 	public String getReportName() {

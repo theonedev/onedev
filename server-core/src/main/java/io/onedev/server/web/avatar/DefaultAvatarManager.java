@@ -21,10 +21,9 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.EmailAwareIdent;
 import io.onedev.server.util.userident.RemovedUserIdent;
 import io.onedev.server.util.userident.SystemUserIdent;
@@ -59,7 +58,7 @@ public class DefaultAvatarManager implements AvatarManager {
 			EmailAwareIdent emailAwareIdent = (EmailAwareIdent) userIdent;
 			User user = userManager.findByEmail(emailAwareIdent.getEmail());
 			if (user != null) {
-				File uploadedFile = getUploaded(user.getFacade());
+				File uploadedFile = getUploaded(user);
 				if (uploadedFile.exists())
 					return AVATARS_BASE_URL + "uploaded/users/" + user.getId() + ".jpg?version=" + uploadedFile.lastModified();
 			}
@@ -113,13 +112,13 @@ public class DefaultAvatarManager implements AvatarManager {
 	}
 	
 	@Override
-	public File getUploaded(UserFacade user) {
+	public File getUploaded(User user) {
 		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/users/" + user.getId() + ".jpg");
 	}
 
 	@Sessional
 	@Override
-	public void useAvatar(UserFacade user, String avatarData) {
+	public void useAvatar(User user, String avatarData) {
 		Lock avatarLock = LockUtils.getLock("uploaded-user-avatar:" + user.getId());
 		avatarLock.lock();
 		try {
@@ -132,7 +131,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	}
 
 	@Override
-	public String getAvatarUrl(ProjectFacade project) {
+	public String getAvatarUrl(Project project) {
 		File avatarFile = getUploaded(project);
 		if (avatarFile.exists())  
 			return AVATARS_BASE_URL + "uploaded/projects/" + project.getId() + ".jpg?version=" + avatarFile.lastModified();
@@ -141,7 +140,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	}
 
 	@Override
-	public void useAvatar(ProjectFacade project, String avatarData) {
+	public void useAvatar(Project project, String avatarData) {
 		Lock avatarLock = LockUtils.getLock("uploaded-project-avatar:" + project.getId());
 		avatarLock.lock();
 		try {
@@ -154,12 +153,12 @@ public class DefaultAvatarManager implements AvatarManager {
 	}
 
 	@Override
-	public File getUploaded(ProjectFacade project) {
+	public File getUploaded(Project project) {
 		return new File(Bootstrap.getSiteDir(), "avatars/uploaded/projects/" + project.getId() + ".jpg");
 	}
 
 	@Override
-	public void copyAvatar(ProjectFacade from, ProjectFacade to) {
+	public void copyAvatar(Project from, Project to) {
 		Lock avatarLock = LockUtils.getLock("uploaded-project-avatar:" + from.getId());
 		avatarLock.lock();
 		try {

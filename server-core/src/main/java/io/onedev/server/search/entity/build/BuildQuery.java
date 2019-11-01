@@ -2,12 +2,12 @@ package io.onedev.server.search.entity.build;
 
 import static io.onedev.server.util.BuildConstants.FIELD_COMMIT;
 import static io.onedev.server.util.BuildConstants.FIELD_FINISH_DATE;
-import static io.onedev.server.util.BuildConstants.FIELD_VERSION;
 import static io.onedev.server.util.BuildConstants.FIELD_JOB;
 import static io.onedev.server.util.BuildConstants.FIELD_NUMBER;
 import static io.onedev.server.util.BuildConstants.FIELD_QUEUEING_DATE;
 import static io.onedev.server.util.BuildConstants.FIELD_RUNNING_DATE;
 import static io.onedev.server.util.BuildConstants.FIELD_SUBMIT_DATE;
+import static io.onedev.server.util.BuildConstants.FIELD_VERSION;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,7 +27,7 @@ import org.antlr.v4.runtime.Recognizer;
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
-import io.onedev.server.cache.CacheManager;
+import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.AndCriteriaHelper;
@@ -247,7 +247,7 @@ public class BuildQuery extends EntityQuery<Build> {
 	}
 	
 	public static void checkField(Project project, String fieldName, int operator) {
-		Collection<String> paramNames = OneDev.getInstance(CacheManager.class).getBuildParamNames();
+		Collection<String> paramNames = OneDev.getInstance(BuildParamManager.class).getBuildParamNames();
 		if (!BuildConstants.QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {

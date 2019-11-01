@@ -239,7 +239,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				});
 				fragment.add(newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries));
 				
-				if (SecurityUtils.canAdministrate(getProject().getFacade())) {
+				if (SecurityUtils.canManage(getProject())) {
 					tabs.add(new AjaxActionTab(Model.of("For All Users")) {
 
 						@Override

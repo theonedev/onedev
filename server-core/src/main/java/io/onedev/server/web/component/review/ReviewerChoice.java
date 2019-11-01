@@ -11,12 +11,11 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.select2.SelectToAddChoice;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
 
 @SuppressWarnings("serial")
-public class ReviewerChoice extends SelectToAddChoice<UserFacade> {
+public class ReviewerChoice extends SelectToAddChoice<User> {
 
 	private final IModel<PullRequest> requestModel;
 	
@@ -51,7 +50,7 @@ public class ReviewerChoice extends SelectToAddChoice<UserFacade> {
 	}
 
 	@Override
-	protected void onSelect(AjaxRequestTarget target, UserFacade userFacade) {
+	protected void onSelect(AjaxRequestTarget target, User userFacade) {
 		PullRequest request = requestModel.getObject();
 		User user = OneDev.getInstance(UserManager.class).load(userFacade.getId());
 		PullRequestReview review = request.getReview(user);

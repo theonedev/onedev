@@ -2,11 +2,14 @@ package io.onedev.server.entitymanager.impl;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -24,6 +27,8 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
@@ -34,9 +39,11 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQuerySettingManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
+import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.IssueQuerySetting;
@@ -44,10 +51,11 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -62,6 +70,7 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateResolution;
@@ -69,6 +78,8 @@ import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateRe
 @Singleton
 public class DefaultIssueManager extends AbstractEntityManager<Issue> implements IssueManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultIssueManager.class);
+	
 	private final IssueFieldManager issueFieldManager;
 	
 	private final ListenerRegistry listenerRegistry;
@@ -79,18 +90,38 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	
 	private final ProjectManager projectManager;
 	
+	private final TransactionManager transactionManager;
+	
+	private final Map<Long, IssueFacade> issues = new HashMap<>();
+	
+	private final ReadWriteLock issuesLock = new ReentrantReadWriteLock();
+	
 	@Inject
 	public DefaultIssueManager(Dao dao, IssueFieldManager issueFieldManager, 
-			IssueQuerySettingManager issueQuerySettingManager, SettingManager settingManager, 
-			ListenerRegistry listenerRegistry, ProjectManager projectManager) {
+			TransactionManager transactionManager, IssueQuerySettingManager issueQuerySettingManager, 
+			SettingManager settingManager, ListenerRegistry listenerRegistry, ProjectManager projectManager) {
 		super(dao);
 		this.issueFieldManager = issueFieldManager;
 		this.issueQuerySettingManager = issueQuerySettingManager;
 		this.listenerRegistry = listenerRegistry;
 		this.settingManager = settingManager;
 		this.projectManager = projectManager;
+		this.transactionManager = transactionManager;
 	}
 
+	@SuppressWarnings("unchecked")
+	@Sessional
+	@Listen
+	public void on(SystemStarted event) {
+		logger.info("Caching issue info...");
+		
+		Query<?> query = dao.getSession().createQuery("select id, project.id, number from Issue");
+		for (Object[] fields: (List<Object[]>)query.list()) {
+			Long issueId = (Long) fields[0];
+			issues.put(issueId, new IssueFacade(issueId, (Long)fields[1], (Long)fields[2]));
+		}
+	}
+	
 	@Sessional
 	@Override
 	public Issue find(Project project, long number) {
@@ -113,6 +144,27 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		issueFieldManager.saveFields(issue);
 		
 		listenerRegistry.post(new IssueOpened(issue));
+	}
+	
+	@Transactional
+	@Override
+	public void save(Issue issue) {
+		super.save(issue);
+		
+		IssueFacade facade = issue.getFacade();
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				issuesLock.writeLock().lock();
+				try {
+					issues.put(facade.getId(), facade);
+				} finally {
+					issuesLock.writeLock().unlock();
+				}
+			}
+			
+		});
 	}
 
 	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Issue> criteria, Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
@@ -469,4 +521,62 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 	}
 	
+	@Transactional
+	@Override
+	public void delete(Issue issue) {
+		super.delete(issue);
+		
+		Long issueId = issue.getId();
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				issuesLock.writeLock().lock();
+				try {
+					issues.remove(issueId);
+				} finally {
+					issuesLock.writeLock().unlock();
+				}
+			}
+		});
+	}
+
+	@Transactional
+	@Listen
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof Project) {
+			Long projectId = event.getEntity().getId();
+			transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					issuesLock.writeLock().lock();
+					try {
+						for (Iterator<Map.Entry<Long, IssueFacade>> it = issues.entrySet().iterator(); it.hasNext();) {
+							IssueFacade issue = it.next().getValue();
+							if (issue.getProjectId().equals(projectId))
+								it.remove();
+						}
+					} finally {
+						issuesLock.writeLock().unlock();
+					}
+				}
+			});
+		}
+	}
+
+	@Override
+	public Collection<Long> getIssueNumbers(Long projectId) {
+		issuesLock.readLock().lock();
+		try {
+			Collection<Long> issueNumbers = new HashSet<>();
+			for (IssueFacade issue: issues.values()) {
+				if (projectId.equals(issue.getProjectId()))
+					issueNumbers.add(issue.getNumber());
+			}
+			return issueNumbers;
+		} finally {
+			issuesLock.readLock().unlock();
+		}
+	}	
 }

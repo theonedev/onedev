@@ -21,7 +21,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.download.AttachmentDownloadResource;
 import io.onedev.server.web.download.AttachmentDownloadResourceReference;
@@ -75,11 +74,11 @@ public class ProjectAttachmentSupport implements AttachmentSupport {
 		return MAX_FILE_SIZE;
 	}
 
-	private ProjectFacade getProject() {
+	private Project getProject() {
 		SessionManager sessionManager = OneDev.getInstance(SessionManager.class);
 		sessionManager.openSession();
 		try {
-			return OneDev.getInstance(ProjectManager.class).load(projectId).getFacade();
+			return OneDev.getInstance(ProjectManager.class).load(projectId);
 		} finally {
 			sessionManager.closeSession();
 		}

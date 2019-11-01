@@ -7,11 +7,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.usermatcher.Anyone;
 import io.onedev.server.util.validation.annotation.FieldName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.editable.annotation.UserMatcher;
 
 @Editable
 public abstract class FieldSpec extends InputSpec {
@@ -19,8 +17,6 @@ public abstract class FieldSpec extends InputSpec {
 	private static final long serialVersionUID = 1L;
 	
 	private String nameOfEmptyValue;
-	
-	private String canBeChangedBy = new Anyone().toString();
 	
 	@Editable(order=10)
 	@FieldName
@@ -93,17 +89,6 @@ public abstract class FieldSpec extends InputSpec {
 		this.nameOfEmptyValue = nameOfEmptyValue;
 	}
 	
-	@Editable(order=65, description="This setting tells who can change this field")
-	@UserMatcher
-	@NotEmpty
-	public String getCanBeChangedBy() {
-		return canBeChangedBy;
-	}
-
-	public void setCanBeChangedBy(String canBeChangedBy) {
-		this.canBeChangedBy = canBeChangedBy;
-	}
-
 	@SuppressWarnings("unused")
 	private static boolean isNameOfEmptyValueVisible() {
 		return (boolean) EditContext.get().getInputValue("allowEmpty");

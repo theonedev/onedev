@@ -49,4 +49,7 @@ public interface IssueManager extends EntityManager<Issue> {
 	void fixFieldValueOrders();
 	
 	void delete(Issue issue);
+	
+	Collection<Long> getIssueNumbers(Long projectId);
+	
 }

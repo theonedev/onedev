@@ -11,7 +11,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.support.inputspec.groupchoiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.EditContext;
-import io.onedev.server.util.facade.GroupFacade;
+import io.onedev.server.model.Group;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.GroupChoice;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -41,7 +41,7 @@ public class SpecifiedDefaultValue implements DefaultValueProvider {
 	}
 
 	@SuppressWarnings("unused")
-	private static List<GroupFacade> getValueChoices() {
+	private static List<Group> getValueChoices() {
 		ChoiceProvider choiceProvider = (ChoiceProvider) EditContext.get(1).getInputValue("choiceProvider");
 		if (choiceProvider != null && OneDev.getInstance(Validator.class).validate(choiceProvider).isEmpty())
 			return choiceProvider.getChoices(true);

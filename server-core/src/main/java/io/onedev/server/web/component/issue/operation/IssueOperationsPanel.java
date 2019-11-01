@@ -96,7 +96,7 @@ public abstract class IssueOperationsPanel extends Panel {
 		for (TransitionSpec transition: transitions) {
 			if (transition.canTransite(getIssue()) && transition.getTrigger() instanceof PressButtonTrigger) {
 				PressButtonTrigger trigger = (PressButtonTrigger) transition.getTrigger();
-				if (trigger.isAuthorized()) {
+				if (trigger.isAuthorized(getIssue().getProject())) {
 					AjaxLink<Void> link = new AjaxLink<Void>(transitionsView.newChildId()) {
 
 						private String comment;

@@ -146,7 +146,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 		Collection<ObjectId> fixCommits = commitInfoManager.getFixCommits(getProject(), getIssue().getNumber());
 		
 		// Do not calculate fix builds now as it might be slow
-		if (!fixCommits.isEmpty() && SecurityUtils.canReadCode(getProject().getFacade())) 
+		if (!fixCommits.isEmpty()) 
 			tabs.add(new IssueTab("Fixing Builds", FixingBuildsPage.class));
 		
 		add(new Tabbable("issueTabs", tabs).setOutputMarkupId(true));
@@ -196,7 +196,7 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 							
 						};
 						deleteLink.add(new ConfirmOnClick("Do you really want to delete this issue?"));
-						deleteLink.setVisible(SecurityUtils.canAdministrate(getIssue().getProject().getFacade()));
+						deleteLink.setVisible(SecurityUtils.canManageIssues(getIssue().getProject()));
 						return deleteLink;
 					}
 					

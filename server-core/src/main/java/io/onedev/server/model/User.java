@@ -2,7 +2,9 @@ package io.onedev.server.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -28,7 +30,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.validation.annotation.UserName;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -41,7 +43,7 @@ import io.onedev.server.web.editable.annotation.Password;
 public class User extends AbstractEntity implements AuthenticationInfo {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	public static final Long ROOT_ID = 1L;
 	
     @Column(unique=true, nullable=false)
@@ -64,9 +66,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	private long version;
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<UserAuthorization> authorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Membership> memberships = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
@@ -80,6 +84,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
+    
+    private transient Collection<Group> groups;
     
     @Override
     public PrincipalCollection getPrincipals() {
@@ -108,6 +114,13 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     public static Subject asSubject(Long userId) {
     	WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
         return new Subject.Builder(securityManager).principals(asPrincipal(userId)).buildSubject();
+    }
+    
+    public static Subject asSubject(@Nullable User user) {
+    	if (user != null)
+    		return user.asSubject();
+    	else
+    		return User.asSubject(0L);
     }
     
     @Editable(name="Login Name", order=100)
@@ -200,6 +213,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.issueQuerySettings = issueQuerySettings;
 	}
 
+	public Collection<UserAuthorization> getAuthorizations() {
+		return authorizations;
+	}
+
+	public void setAuthorizations(Collection<UserAuthorization> authorizations) {
+		this.authorizations = authorizations;
+	}
+	
 	@Override
 	public int compareTo(AbstractEntity entity) {
 		User user = (User) entity;
@@ -210,8 +231,16 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		}
 	}
 
-	public UserFacade getFacade() {
-		return new UserFacade(this);
+	public double getMatchScore(@Nullable String queryTerm) {
+		double scoreOfName = MatchScoreUtils.getMatchScore(name, queryTerm);
+		double scoreOfFullName = MatchScoreUtils.getMatchScore(fullName, queryTerm);
+		return Math.max(scoreOfName, scoreOfFullName);
 	}
 
+	public Collection<Group> getGroups() {
+		if (groups == null)  
+			groups = getMemberships().stream().map(it->it.getGroup()).collect(Collectors.toList());
+		return groups;
+	}
+	
 }

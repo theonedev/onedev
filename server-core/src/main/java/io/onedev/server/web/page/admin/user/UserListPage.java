@@ -35,7 +35,6 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
@@ -118,7 +117,7 @@ public class UserListPage extends AdministrationPage {
 				User user = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", UserListPage.this);
 				Link<Void> link = new BookmarkablePageLink<Void>("link", UserProfilePage.class, UserProfilePage.paramsOf(user));
-				link.add(new UserAvatar("avatar", UserIdent.of(UserFacade.of(user))));
+				link.add(new UserAvatar("avatar", UserIdent.of(user)));
 				link.add(new Label("name", user.getName()));
 				fragment.add(link);
 				cellItem.add(fragment);
@@ -143,21 +142,11 @@ public class UserListPage extends AdministrationPage {
 			}
 		});
 		
-		columns.add(new AbstractColumn<User, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<User, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", UserListPage.this);
-				
-				fragment.add(new Link<Void>("profile") {
-
-					@Override
-					public void onClick() {
-						PageParameters params = UserPage.paramsOf(rowModel.getObject());
-						setResponsePage(UserProfilePage.class, params);
-					}
-
-				});
 				
 				User user = rowModel.getObject();
 				

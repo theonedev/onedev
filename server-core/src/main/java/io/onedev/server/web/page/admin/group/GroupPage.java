@@ -112,6 +112,11 @@ public abstract class GroupPage extends AdministrationPage {
 		return groupModel.getObject();
 	}
 	
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.isAdministrator();
+	}
+	
 	public static PageParameters paramsOf(Group group) {
 		PageParameters params = new PageParameters();
 		params.add(PARAM_GROUP, group.getId());

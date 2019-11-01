@@ -8,10 +8,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivity;
 import io.onedev.server.web.util.DeleteCallback;
-import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 public class PullRequestChangeActivity implements PullRequestActivity {
@@ -50,7 +49,7 @@ public class PullRequestChangeActivity implements PullRequestActivity {
 
 	@Override
 	public UserIdent getUser() {
-		return UserIdent.of(UserFacade.of(getChange().getUser()), getChange().getUserName());
+		return UserIdent.of(getChange().getUser(), getChange().getUserName());
 	}
 
 }

@@ -8,8 +8,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import io.onedev.server.util.facade.MembershipFacade;
-
 @Entity
 @Table(
 		indexes={@Index(columnList="o_user_id"), @Index(columnList="o_group_id")},
@@ -43,8 +41,4 @@ public class Membership extends AbstractEntity {
 		this.group = group;
 	}
 
-	public MembershipFacade getFacade() {
-		return new MembershipFacade(this);
-	}
-	
 }

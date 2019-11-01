@@ -11,8 +11,8 @@ import javax.persistence.criteria.Root;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
 import io.onedev.server.cache.CommitInfoManager;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
@@ -42,9 +42,9 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 		Collection<String> descendents = new HashSet<>();
 		for (ObjectId each: getCommitInfoManager().getDescendants(project, fixCommits))
 			descendents.add(each.name());
-		CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
-		Collection<Long> inBuildIds = cacheManager.filterBuildIds(project.getId(), descendents);
-		return inManyValues(builder, attribute, inBuildIds, cacheManager.getBuildIdsByProject(project.getId()));
+		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+		Collection<Long> inBuildIds = buildManager.filterBuildIds(project.getId(), descendents);
+		return inManyValues(builder, attribute, inBuildIds, buildManager.getBuildIdsByProject(project.getId()));
 	}
 
 	@Override

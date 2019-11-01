@@ -661,7 +661,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 	
 	public static class State implements Serializable {

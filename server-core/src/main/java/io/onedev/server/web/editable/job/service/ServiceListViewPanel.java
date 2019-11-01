@@ -154,7 +154,7 @@ class ServiceListViewPanel extends Panel {
 						@Override
 						protected void onInitialize() {
 							super.onInitialize();
-							add(AttributeAppender.append("class", "service def-detail"));
+							add(AttributeAppender.append("class", "job-service def-detail"));
 						}
 
 						@Override

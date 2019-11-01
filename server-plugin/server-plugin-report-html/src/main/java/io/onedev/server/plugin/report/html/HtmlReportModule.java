@@ -3,22 +3,19 @@ package io.onedev.server.plugin.report.html;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.protocol.http.WebApplication;
 
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
-import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.ci.job.JobReport;
 import io.onedev.server.model.Build;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;
 import io.onedev.server.web.mapper.OnePageMapper;
 import io.onedev.server.web.mapper.OneResourceMapper;
@@ -54,15 +51,11 @@ public class HtmlReportModule extends AbstractPluginModule {
 
 					@Override
 					public Void call() throws Exception {
-						File startPagesFile = new File(build.getReportDir(JobHtmlReport.DIR), JobHtmlReport.START_PAGES);
-						if (startPagesFile.exists()) { 
-							Map<String, String> startPages;
-							if (startPagesFile.exists()) 
-								startPages = SerializationUtils.deserialize(FileUtils.readFileToByteArray(startPagesFile));
-							else
-								startPages = new HashMap<>();
-							for (String reportName: startPages.keySet()) 
-								tabs.add(new HtmlReportTab(reportName));
+						if (build.getReportDir(JobHtmlReport.DIR).exists()) {
+							for (File reportDir: build.getReportDir(JobHtmlReport.DIR).listFiles()) {
+								if (SecurityUtils.canAccessReport(build, reportDir.getName()))
+									tabs.add(new HtmlReportTab(reportDir.getName()));
+							}
 						}
 						return null;
 					}
@@ -83,7 +76,7 @@ public class HtmlReportModule extends AbstractPluginModule {
 			@Override
 			public void configure(WebApplication application) {
 				application.mount(new OnePageMapper("projects/${project}/builds/${build}/html-reports/${report}", HtmlReportPage.class));
-				application.mount(new OneResourceMapper("downloads/projects/${project}/builds/${build}/html-reports/${path}", 
+				application.mount(new OneResourceMapper("downloads/projects/${project}/builds/${build}/html-reports/${report}/${path}", 
 						new HtmlReportDownloadResourceReference()));
 			}
 			

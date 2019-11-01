@@ -181,7 +181,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 				case "user":
 					User user = OneDev.getInstance(UserManager.class).get(Long.valueOf(referenceId));
 					if (user != null) {
-						String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(UserIdent.of(user.getFacade()));
+						String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(UserIdent.of(user));
 						String script = String.format("onedev.server.markdown.renderUserTooltip('%s', '%s', '%s')", 
 								JavaScriptEscape.escapeJavaScript(avatarUrl), 
 								JavaScriptEscape.escapeJavaScript(user.getDisplayName()), 

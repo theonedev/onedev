@@ -10,30 +10,30 @@ import org.unbescape.html.HtmlEscape;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.User;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 
-public abstract class AbstractUserChoiceProvider extends ChoiceProvider<UserFacade> {
+public abstract class AbstractUserChoiceProvider extends ChoiceProvider<User> {
 
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public void toJson(UserFacade choice, JSONWriter writer) throws JSONException {
+	public void toJson(User choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId()).key("name").value(HtmlEscape.escapeHtml5(choice.getDisplayName()));
 		String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(UserIdent.of(choice));
 		writer.key("avatar").value(avatarUrl);
 	}
 
 	@Override
-	public Collection<UserFacade> toChoices(Collection<String> ids) {
-		List<UserFacade> users = Lists.newArrayList();
-		CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
+	public Collection<User> toChoices(Collection<String> ids) {
+		List<User> users = Lists.newArrayList();
+		UserManager userManager = OneDev.getInstance(UserManager.class);
 		for (String each : ids) {
 			Long id = Long.valueOf(each);
-			users.add(cacheManager.getUser(id));
+			users.add(userManager.load(id));
 		}
 
 		return users;

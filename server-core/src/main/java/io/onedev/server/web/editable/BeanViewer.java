@@ -2,6 +2,7 @@ package io.onedev.server.web.editable;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ public class BeanViewer extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
+		Map<String, ComponentContext> componentContexts = new HashMap<>();
 		RepeatingView groupsView = new RepeatingView("groups");
 		for (Map.Entry<String, List<PropertyContext<Serializable>>> entry: properties.entrySet()) {
 			WebMarkupContainer groupItem = new WebMarkupContainer(groupsView.newChildId());
@@ -60,7 +62,7 @@ public class BeanViewer extends Panel {
 			
 			RepeatingView propertiesView = new RepeatingView("properties");
 			for (PropertyContext<Serializable> property: entry.getValue()) {
-				WebMarkupContainer propertyItem = new PropertyContainer(propertiesView.newChildId()) {
+				WebMarkupContainer propertyContainer = new PropertyContainer(propertiesView.newChildId()) {
 
 					@Override
 					public Object getInputValue(String name) {
@@ -78,18 +80,19 @@ public class BeanViewer extends Panel {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(property.isPropertyVisible(new ComponentContext(this), descriptor) && !property.isPropertyExcluded());
+						setVisible(property.isPropertyVisible(componentContexts, descriptor) && !property.isPropertyExcluded());
 					}
 					
 				};
-				propertiesView.add(propertyItem);
+				propertiesView.add(propertyContainer);
+				componentContexts.put(property.getPropertyName(), new ComponentContext(propertyContainer));
 				
 				Method propertyGetter = property.getPropertyGetter();
 				
 				WebMarkupContainer nameTd = new WebMarkupContainer("name");
-				propertyItem.add(nameTd);
+				propertyContainer.add(nameTd);
 				WebMarkupContainer valueTd = new WebMarkupContainer("value");
-				propertyItem.add(valueTd);
+				propertyContainer.add(valueTd);
 				
 				String displayName = property.getDisplayName();
 				Component content = new Label("content", displayName);
@@ -99,14 +102,14 @@ public class BeanViewer extends Panel {
 				if (omitName != null && omitName.value() != OmitName.Place.EDITOR) {
 					nameTd.setVisible(false);
 					valueTd.add(AttributeAppender.replace("colspan", "2"));
-					propertyItem.add(AttributeAppender.append("class", "name-omitted"));
+					propertyContainer.add(AttributeAppender.append("class", "name-omitted"));
 				}
 
 				Serializable bean = (Serializable) BeanViewer.this.getDefaultModelObject();
 				Serializable propertyValue = (Serializable) property.getPropertyValue(bean);
 				valueTd.add(property.renderForView("content", Model.of(propertyValue)));
 				
-				propertyItem.add(AttributeAppender.append("class", "property-" + property.getPropertyName()));
+				propertyContainer.add(AttributeAppender.append("class", "property-" + property.getPropertyName()));
 			}
 			groupItem.add(propertiesView);
 		}

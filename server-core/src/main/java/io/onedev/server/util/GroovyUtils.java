@@ -15,7 +15,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.groovyscript.GroovyScript;
+import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.scriptidentity.ScriptIdentity;
 
 public class GroovyUtils {

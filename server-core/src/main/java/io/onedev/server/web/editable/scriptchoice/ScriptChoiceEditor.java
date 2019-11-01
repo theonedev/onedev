@@ -15,7 +15,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.groovyscript.GroovyScript;
+import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.scriptidentity.ScriptIdentity;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;

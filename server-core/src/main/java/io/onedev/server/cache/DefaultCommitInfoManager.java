@@ -63,13 +63,12 @@ import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.git.command.RevListCommand.Order;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.IssueUtils;
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.work.BatchWorkManager;
 import io.onedev.server.util.work.BatchWorker;
 import jetbrains.exodus.ArrayByteIterable;
@@ -897,7 +896,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 	}
 	
 	@Override
-	public int getEdits(ProjectFacade project, UserFacade user, String path) {
+	public int getEdits(Project project, User user, String path) {
 		if (user.getEmail() != null) {
 			Environment env = getEnv(project.getId().toString());
 			Store emailToIndexStore = getStore(env, EMAIL_TO_INDEX_STORE);

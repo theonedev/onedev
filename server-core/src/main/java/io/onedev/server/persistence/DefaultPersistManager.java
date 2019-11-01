@@ -51,7 +51,7 @@ import io.onedev.commons.utils.BeanUtils;
 import io.onedev.commons.utils.ClassUtils;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.migration.DatabaseMigrator;
+import io.onedev.server.migration.DataMigrator;
 import io.onedev.server.migration.MigrationHelper;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.model.AbstractEntity;
@@ -145,7 +145,7 @@ public class DefaultPersistManager implements PersistManager {
 			logger.error("Database is not populated yet");
 			System.exit(1);
 		}
-		String appDataVersion = MigrationHelper.getVersion(DatabaseMigrator.class);
+		String appDataVersion = MigrationHelper.getVersion(DataMigrator.class);
 		if (dbDataVersion != null && !dbDataVersion.equals(appDataVersion)) {
 			logger.error("Data version mismatch (app data version: {}, db data version: {})", appDataVersion, dbDataVersion);
 			System.exit(1);
@@ -187,7 +187,7 @@ public class DefaultPersistManager implements PersistManager {
 				@Override
 				public void run() {
 					ModelVersion dataVersion = new ModelVersion();
-					dataVersion.versionColumn = MigrationHelper.getVersion(DatabaseMigrator.class);
+					dataVersion.versionColumn = MigrationHelper.getVersion(DataMigrator.class);
 					transactionManager.getSession().save(dataVersion);
 				}
 				
@@ -297,14 +297,14 @@ public class DefaultPersistManager implements PersistManager {
 			throw new RuntimeException("Incorrect data format: no data version");
 		}
 		
-		if (MigrationHelper.migrate(versionElement.getText(), new DatabaseMigrator(), dataDir)) {
+		if (MigrationHelper.migrate(versionElement.getText(), new DataMigrator(), dataDir)) {
 			// load version file again in case we changed something of it while migrating
 			versionFile = getVersionFile(dataDir);
 			dom = VersionedDocument.fromFile(versionFile);
 			elements = dom.getRootElement().elements();
 			Preconditions.checkState(elements.size() == 1);
 			versionElement = Preconditions.checkNotNull(elements.iterator().next().element(getVersionFieldName()));		
-			versionElement.setText(MigrationHelper.getVersion(DatabaseMigrator.class));
+			versionElement.setText(MigrationHelper.getVersion(DataMigrator.class));
 			dom.writeToFile(versionFile, false);
 		}		
 	}

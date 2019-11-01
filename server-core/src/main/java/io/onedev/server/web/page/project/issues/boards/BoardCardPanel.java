@@ -26,10 +26,9 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.Input;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.IssueStateLabel;
@@ -108,7 +107,7 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 						.findByName(field.getValues().iterator().next());
 				if (user != null) {
 					String tooltip = field.getName() + ": " + user.getDisplayName();
-					UserAvatar avatar = new UserAvatar(avatarsView.newChildId(), UserIdent.of(UserFacade.of(user)));
+					UserAvatar avatar = new UserAvatar(avatarsView.newChildId(), UserIdent.of(user));
 					avatar.add(AttributeAppender.append("title", tooltip));
 					avatarsView.add(avatar);
 				}

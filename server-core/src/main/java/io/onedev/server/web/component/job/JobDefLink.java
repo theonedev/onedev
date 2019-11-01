@@ -35,7 +35,7 @@ public class JobDefLink extends BookmarkablePageLink<Void> {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setEnabled(SecurityUtils.canReadCode(projectModel.getObject().getFacade()));
+		setEnabled(SecurityUtils.canReadCode(projectModel.getObject()));
 	}
 
 	@Override

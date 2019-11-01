@@ -56,7 +56,7 @@ public class ProjectDependency implements Serializable {
 		List<String> choices = new ArrayList<>();
 		Project project = ((ProjectPage)WicketUtils.getPage()).getProject();
 		for (Project each: OneDev.getInstance(ProjectManager.class).query()) {
-			if (!each.equals(project) && SecurityUtils.canReadCode(each.getFacade()))
+			if (!each.equals(project) && SecurityUtils.canReadCode(each))
 				choices.add(each.getName());
 		}
 		
@@ -82,7 +82,7 @@ public class ProjectDependency implements Serializable {
 		String projectName = (String) EditContext.get().getInputValue("projectName");
 		if (projectName != null) {
 			Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
-			if (project != null && SecurityUtils.canReadCode(project.getFacade()))
+			if (project != null && SecurityUtils.canReadCode(project))
 				return project;
 		}
 		return null;

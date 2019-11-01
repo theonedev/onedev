@@ -6,10 +6,6 @@ userMatcher
 
 criteria
     : Anyone
-    | ProjectAdministrators
-    | CodeWriters
-    | CodeReaders
-    | IssueReaders
     | userCriteria
     | groupCriteria
     ;
@@ -20,22 +16,6 @@ exceptCriteria
 
 Anyone
     : 'anyone'
-    ;
-
-ProjectAdministrators
-    : 'project' WS+ 'administrators'
-    ;
-
-CodeWriters
-    : 'code' WS+ 'writers'
-    ;
-
-CodeReaders
-    : 'code' WS+ 'readers'
-    ;
-
-IssueReaders
-    : 'issue' WS+ 'readers'
     ;
 
 userCriteria

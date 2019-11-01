@@ -387,7 +387,7 @@ public class ProjectTagsPage extends ProjectPage {
 						super.onConfigure();
 
 						Project project = getProject();
-						if (SecurityUtils.canWriteCode(project.getFacade())) {
+						if (SecurityUtils.canWriteCode(project)) {
 							TagProtection protection = project.getTagProtection(tagName, getLoginUser());
 							setEnabled(protection == null || !protection.isNoDeletion());
 						} else {
@@ -438,7 +438,7 @@ public class ProjectTagsPage extends ProjectPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 
 }

@@ -1,23 +1,20 @@
 package io.onedev.server.model.support.issue.transitiontrigger;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.User;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.util.WicketUtils;
+import io.onedev.server.web.editable.annotation.RoleChoice;
 
 @Editable(order=100, name="Button is pressed")
 public class PressButtonTrigger implements TransitionTrigger {
@@ -26,7 +23,7 @@ public class PressButtonTrigger implements TransitionTrigger {
 
 	private String buttonLabel;
 
-	private String authorized;
+	private List<String> authorizedRoles = new ArrayList<>();
 	
 	private List<String> promptFields = new ArrayList<>();
 	
@@ -40,15 +37,15 @@ public class PressButtonTrigger implements TransitionTrigger {
 		this.buttonLabel = buttonLabel;
 	}
 
-	@Editable(order=200, name="Authorization")
-	@io.onedev.server.web.editable.annotation.UserMatcher
-	@NotEmpty(message="may not be empty")
-	public String getAuthorized() {
-		return authorized;
+	@Editable(order=200, description="Optionally specify authorized roles to press this button. "
+			+ "If not specified, all users are allowed")
+	@RoleChoice
+	public List<String> getAuthorizedRoles() {
+		return authorizedRoles;
 	}
 	
-	public void setAuthorized(String authorized) {
-		this.authorized = authorized;
+	public void setAuthorizedRoles(List<String> authorizedRoles) {
+		this.authorizedRoles = authorizedRoles;
 	}
 
 	@Editable(order=500, description="Optionally select fields to prompt when this button is pressed")
@@ -71,24 +68,20 @@ public class PressButtonTrigger implements TransitionTrigger {
 		return fields;
 	}
 
-	public void onRenameField(String oldName, String newName) {
-		for (int i=0; i<getPromptFields().size(); i++) {
-			if (getPromptFields().get(i).equals(oldName))
-				getPromptFields().set(i, newName);
+	public boolean isAuthorized(Project project) {
+		if (!getAuthorizedRoles().isEmpty()) {
+			if (SecurityUtils.canManageIssues(Project.get())) {
+				return true;
+			} else {
+				for (String roleName: getAuthorizedRoles()) {
+					if (SecurityUtils.isAuthorizedWithRole(project, roleName))
+						return true;
+				}
+				return false;
+			}
+		} else {
+			return true;
 		}
-	}
-	
-	public void onDeleteField(String fieldName) {
-		for (Iterator<String> it = getPromptFields().iterator(); it.hasNext();) {
-			if (it.next().equals(fieldName))
-				it.remove();
-		}
-	}	
-	
-	public boolean isAuthorized() {
-		ProjectPage page = (ProjectPage) WicketUtils.getPage();
-		User user = SecurityUtils.getUser();
-		return user != null && UserMatcher.fromString(getAuthorized()).matches(page.getProject(), user);		
 	}
 	
 }

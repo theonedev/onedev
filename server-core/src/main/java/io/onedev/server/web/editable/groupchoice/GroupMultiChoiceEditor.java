@@ -15,10 +15,8 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
-import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.web.component.groupchoice.GroupChoiceProvider;
 import io.onedev.server.web.component.groupchoice.GroupMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -28,7 +26,7 @@ import io.onedev.server.web.editable.annotation.GroupChoice;
 @SuppressWarnings("serial")
 public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 	
-	private final List<GroupFacade> choices = new ArrayList<>();
+	private final List<Group> choices = new ArrayList<>();
 	
 	private GroupMultiChoice input;
 	
@@ -41,14 +39,14 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-    	List<GroupFacade> groups = new ArrayList<>();
+    	List<Group> groups = new ArrayList<>();
 		GroupChoice groupChoice = descriptor.getPropertyGetter().getAnnotation(GroupChoice.class);
 		Preconditions.checkNotNull(groupChoice);
 		if (groupChoice.value().length() != 0) {
-			choices.addAll((List<GroupFacade>)ReflectionUtils
+			choices.addAll((List<Group>)ReflectionUtils
 					.invokeStaticMethod(descriptor.getBeanClass(), groupChoice.value()));
 		} else {
-			choices.addAll(OneDev.getInstance(CacheManager.class).getGroups().values());
+			choices.addAll(OneDev.getInstance(GroupManager.class).query());
 		}
 	
     	groups = new ArrayList<>();
@@ -56,8 +54,8 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 			GroupManager groupManager = OneDev.getInstance(GroupManager.class);
 			for (String groupName: getModelObject()) {
 				Group group = groupManager.find(groupName);
-				if (group != null && choices.contains(group.getFacade()))
-					groups.add(group.getFacade());
+				if (group != null && choices.contains(group))
+					groups.add(group);
 			}
 		} 
 		
@@ -71,6 +69,7 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 			
 		};
         input.setConvertEmptyInputStringToNull(true);
+        
         input.setRequired(descriptor.isPropertyRequired());
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
@@ -89,9 +88,9 @@ public class GroupMultiChoiceEditor extends PropertyEditor<Collection<String>> {
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
 		List<String> groupNames = new ArrayList<>();
-		Collection<GroupFacade> groups = input.getConvertedInput();
+		Collection<Group> groups = input.getConvertedInput();
 		if (groups != null) {
-			for (GroupFacade group: groups)
+			for (Group group: groups)
 				groupNames.add(group.getName());
 		} 
 		return groupNames;

@@ -18,8 +18,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.issue.transitionprerequisite.TransitionPrerequisite;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsNotAnyOf;
 import io.onedev.server.model.support.issue.transitionprerequisite.ValueIsOneOf;
@@ -31,7 +31,6 @@ import io.onedev.server.model.support.issue.transitiontrigger.TransitionTrigger;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
@@ -131,14 +130,6 @@ public class TransitionSpec implements Serializable {
 		return fields;
 	}
 	
-	public void onRenameUser(String oldName, String newName) {
-		TransitionTrigger trigger = getTrigger();
-		if (trigger instanceof PressButtonTrigger) {
-			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			pressButton.setAuthorized(UserMatcher.onRenameUser(pressButton.getAuthorized(), oldName, newName));
-		}
-	}
-	
 	public Usage onDeleteBranch(String branchName) {
 		Usage usage = new Usage();
 		TransitionTrigger trigger = getTrigger();
@@ -153,32 +144,23 @@ public class TransitionSpec implements Serializable {
 		return usage.prefix("transitions: " + fromStates + "->" + toState);
 	}
 	
-	public Usage onDeleteUser(String userName) {
+	public void onRenameRole(String oldName, String newName) {
+		TransitionTrigger trigger = getTrigger();
+		if (trigger instanceof PressButtonTrigger) {
+			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
+			int index = pressButton.getAuthorizedRoles().indexOf(oldName);
+			if (index != -1) 
+				pressButton.getAuthorizedRoles().set(index, newName);
+		}
+	}
+	
+	public Usage onDeleteRole(String roleName) {
 		Usage usage = new Usage();
 		TransitionTrigger trigger = getTrigger();
 		if (trigger instanceof PressButtonTrigger) {
 			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			if (UserMatcher.isUsingUser(pressButton.getAuthorized(), userName))
-				usage.add("press button trigger: authorization");
-		}
-		return usage.prefix("transitions: " + fromStates + "->" + toState);
-	}
-	
-	public void onRenameGroup(String oldName, String newName) {
-		TransitionTrigger trigger = getTrigger();
-		if (trigger instanceof PressButtonTrigger) {
-			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			pressButton.setAuthorized(UserMatcher.onRenameGroup(pressButton.getAuthorized(), oldName, newName));
-		}
-	}
-	
-	public Usage onDeleteGroup(String groupName) {
-		Usage usage = new Usage();
-		TransitionTrigger trigger = getTrigger();
-		if (trigger instanceof PressButtonTrigger) {
-			PressButtonTrigger pressButton = (PressButtonTrigger) trigger;
-			if (UserMatcher.isUsingGroup(pressButton.getAuthorized(), groupName))
-				usage.add("press button trigger: authorization");
+			if (pressButton.getAuthorizedRoles().contains(roleName))
+				usage.add("press button trigger: authorized roles");
 		}
 		return usage.prefix("transitions: " + fromStates + "->" + toState);
 	}

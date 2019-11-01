@@ -23,10 +23,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
-import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 
@@ -64,12 +62,11 @@ public class IssueUtils {
 	public static Collection<String> getPropertyNames(Project project, Class<?> fieldBeanClass, Collection<String> fieldNames) {
 		Collection<String> propertyNames = new HashSet<>();
 		SettingManager settingManager = OneDev.getInstance(SettingManager.class); 
-		User user = SecurityUtils.getUser();
 		for (List<PropertyDescriptor> groupProperties: new BeanDescriptor(fieldBeanClass).getProperties().values()) {
 			for (PropertyDescriptor property: groupProperties) {
 				if (fieldNames.contains(property.getDisplayName())) {
 					FieldSpec field = settingManager.getIssueSetting().getFieldSpec(property.getDisplayName());
-					if (field != null && UserMatcher.fromString(field.getCanBeChangedBy()).matches(project, user))
+					if (field != null && SecurityUtils.canEditIssueField(project, field.getName()))
 						propertyNames.add(property.getPropertyName());
 				}
 			}

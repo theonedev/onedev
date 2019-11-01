@@ -17,7 +17,7 @@ public class ProjectAvatar extends WebComponent {
 	public ProjectAvatar(String id, Project project) {
 		super(id);
 
-		url = getAvatarManager().getAvatarUrl(project.getFacade());
+		url = getAvatarManager().getAvatarUrl(project);
 	}
 	
 	private AvatarManager getAvatarManager() {

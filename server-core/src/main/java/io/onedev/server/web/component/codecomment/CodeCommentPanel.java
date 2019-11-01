@@ -48,7 +48,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
@@ -104,7 +103,7 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		}));
 		
-		UserIdent userIdent = UserIdent.of(UserFacade.of(getComment().getUser()), getComment().getUserName());
+		UserIdent userIdent = UserIdent.of(getComment().getUser(), getComment().getUserName());
 		commentContainer.add(new UserIdentPanel("userAvatar", userIdent, Mode.AVATAR));
 		commentContainer.add(new Label("userName", userIdent.getName()));
 		commentContainer.add(new Label("action", "commented"));
@@ -247,7 +246,7 @@ public abstract class CodeCommentPanel extends Panel {
 		replyContainer.setMarkupId(reply.getAnchor());
 		replyContainer.add(AttributeAppender.append("name", reply.getAnchor()));
 		
-		UserIdent userIdent = UserIdent.of(UserFacade.of(reply.getUser()), reply.getUserName());
+		UserIdent userIdent = UserIdent.of(reply.getUser(), reply.getUserName());
 		replyContainer.add(new UserIdentPanel("userAvatar", userIdent, Mode.AVATAR));
 		replyContainer.add(new Label("userName", userIdent.getName()));
 		

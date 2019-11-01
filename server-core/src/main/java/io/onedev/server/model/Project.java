@@ -30,6 +30,7 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.validation.Valid;
 
@@ -74,6 +75,7 @@ import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.CommitInfoManager;
+import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
@@ -111,11 +113,9 @@ import io.onedev.server.model.support.issue.IssueSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
-import io.onedev.server.security.permission.DefaultPrivilege;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.ProjectFacade;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatcher.UserMatcher;
@@ -123,6 +123,8 @@ import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.RoleChoice;
+import io.onedev.server.web.editable.annotation.UserChoice;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -159,6 +161,13 @@ public class Project extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=true)
 	private Project forkedFrom;
+	
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=true)
+	private User owner;
+	
+	@Transient
+	private String ownerName;
 
 	@Column(nullable=false, unique=true)
 	private String name;
@@ -166,8 +175,6 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(length=65535)
 	private String description;
-	
-	private DefaultPrivilege defaultPrivilege;
 	
 	@Lob
 	@Column(length=65535, name="COMMIT_MSG_TRANSFORM")
@@ -212,12 +219,15 @@ public class Project extends AbstractEntity {
 	private Collection<Issue> issues = new ArrayList<>();
 	
     @OneToMany(mappedBy="forkedFrom")
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<Project> forks = new ArrayList<>();
     
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<GroupAuthorization> groupAuthorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 	private Collection<UserAuthorization> userAuthorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
@@ -367,15 +377,26 @@ public class Project extends AbstractEntity {
 		this.description = description;
 	}
 
-	@Editable(order=300, description="Optionally specify default privilege of the project")
-	@NameOfEmptyValue("No default privilege")
-	@Nullable
-	public DefaultPrivilege getDefaultPrivilege() {
-		return defaultPrivilege;
+	@Editable(order=300, name="Default Role", description="Optionally specify default role to access the project. ")
+	@RoleChoice
+	@NameOfEmptyValue("No default role")
+	public String getDefaultRoleName() {
+		return ownerName;
 	}
 
-	public void setDefaultPrivilege(DefaultPrivilege defaultPrivilege) {
-		this.defaultPrivilege = defaultPrivilege;
+	public void setDefaultRoleName(String ownerName) {
+		this.ownerName = ownerName;
+	}
+	
+	@Editable(order=500, name="Owner", description="Projects without owners are considered orphan projects")
+	@UserChoice
+	@NameOfEmptyValue("No owner")
+	public String getOwnerName() {
+		return ownerName;
+	}
+
+	public void setOwnerName(String ownerName) {
+		this.ownerName = ownerName;
 	}
 
 	@Editable
@@ -441,16 +462,26 @@ public class Project extends AbstractEntity {
 		return userAuthorizations;
 	}
 
-	public void setAuthorizedUsers(Collection<UserAuthorization> userAuthorizations) {
+	public void setUserAuthorizations(Collection<UserAuthorization> userAuthorizations) {
 		this.userAuthorizations = userAuthorizations;
 	}
 
+	@Nullable
 	public Project getForkedFrom() {
 		return forkedFrom;
 	}
 
 	public void setForkedFrom(Project forkedFrom) {
 		this.forkedFrom = forkedFrom;
+	}
+
+	@Nullable
+	public User getOwner() {
+		return owner;
+	}
+
+	public void setOwner(User owner) {
+		this.owner = owner;
 	}
 
 	public Collection<Project> getForks() {
@@ -1252,10 +1283,6 @@ public class Project extends AbstractEntity {
 		return null;
 	}
 
-	public ProjectFacade getFacade() {
-		return new ProjectFacade(this);
-	}
-
 	public RevCommit getLastCommit() {
 		if (lastCommitOptional == null) {
 			RevCommit lastCommit = null;
@@ -1474,6 +1501,28 @@ public class Project extends AbstractEntity {
 					return projectAware.getProject();
 			}
 			return null;
+		}
+	}
+	
+	public static int compareLastVisit(Project project1, Project project2) {
+		User user = SecurityUtils.getUser();
+		if (user != null) {
+			UserInfoManager userInfoManager = OneDev.getInstance(UserInfoManager.class);
+			Date date1 = userInfoManager.getVisitDate(user, project1);
+			Date date2 = userInfoManager.getVisitDate(user, project2);
+			if (date1 != null) {
+				if (date2 != null)
+					return date2.compareTo(date1);
+				else
+					return -1;
+			} else {
+				if (date2 != null)
+					return 1;
+				else
+					return project1.compareTo(project2);
+			}
+		} else {
+			return project1.compareTo(project2);
 		}
 	}
 	

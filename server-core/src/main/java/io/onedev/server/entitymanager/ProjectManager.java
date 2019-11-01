@@ -9,7 +9,6 @@ import org.eclipse.jgit.lib.Repository;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
-import io.onedev.server.util.facade.ProjectFacade;
 
 public interface ProjectManager extends EntityManager<Project> {
 	
@@ -42,6 +41,6 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Repository getRepository(Project project);
 	
-	Collection<ProjectFacade> getAccessibleProjects(@Nullable User user);
+	Collection<Project> getAccessibleProjects(@Nullable User user);
 	
 }

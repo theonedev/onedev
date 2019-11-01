@@ -70,7 +70,7 @@ public abstract class ProjectStatsPage extends ProjectPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 	
 	@Override

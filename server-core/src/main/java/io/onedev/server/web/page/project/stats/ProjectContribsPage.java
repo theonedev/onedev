@@ -40,7 +40,7 @@ public class ProjectContribsPage extends ProjectStatsPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 	
 	@Override

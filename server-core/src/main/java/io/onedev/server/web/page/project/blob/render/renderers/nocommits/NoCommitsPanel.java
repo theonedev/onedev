@@ -40,7 +40,7 @@ public class NoCommitsPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (SecurityUtils.canWriteCode(context.getProject().getFacade())) {
+		if (SecurityUtils.canWriteCode(context.getProject())) {
 			add(new MenuLink("addFiles") {
 
 				@Override

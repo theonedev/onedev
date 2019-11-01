@@ -1,9 +1,15 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import io.onedev.server.cache.CacheManager;
+import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -12,32 +18,33 @@ import io.onedev.server.model.Group;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
+import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.Usage;
 
 @Singleton
 public class DefaultGroupManager extends AbstractEntityManager<Group> implements GroupManager {
 
+	private static final Logger logger = LoggerFactory.getLogger(DefaultGroupManager.class);
+	
 	private final ProjectManager projectManager;
 	
 	private final SettingManager settingManager;
 	
 	private final IssueFieldManager issueFieldManager;
 	
-	private final CacheManager cacheManager;
-	
 	@Inject
 	public DefaultGroupManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
-			IssueFieldManager issueFieldManager, CacheManager cacheManager) {
+			IssueFieldManager issueFieldManager) {
 		super(dao);
 		this.projectManager = projectManager;
 		this.settingManager = settingManager;
 		this.issueFieldManager = issueFieldManager;
-		this.cacheManager = cacheManager;
 	}
 
 	@Transactional
@@ -49,7 +56,6 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 					protection.onRenameGroup(oldName, group.getName());
 				for (TagProtection protection: project.getTagProtections())
 					protection.onRenameGroup(oldName, group.getName());
-				project.getIssueSetting().onRenameGroup(oldName, group.getName());
 			}
 			
 			Authenticator authenticator = settingManager.getAuthenticator();
@@ -60,10 +66,16 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 			
 			issueFieldManager.onRenameGroup(oldName, group.getName());
 			settingManager.getIssueSetting().onRenameGroup(oldName, group.getName());
+			settingManager.getSecuritySetting().onRenameGroup(oldName, group.getName());
 		}
 		dao.persist(group);
 	}
 
+	@Override
+	public List<Group> query() {
+		return query(true);
+	}
+	
 	@Transactional
 	@Override
 	public void delete(Group group) {
@@ -73,15 +85,16 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 				usage.add(protection.onDeleteGroup(group.getName()));
 			for (TagProtection protection: project.getTagProtections()) 
 				usage.add(protection.onDeleteGroup(group.getName()));
-			usage.add(project.getIssueSetting().onDeleteGroup(group.getName()));
 			usage.prefix("project '" + project.getName() + "': setting");
 		}
 
 		usage.add(settingManager.getIssueSetting().onDeleteGroup(group.getName()).prefix("administration"));
 
 		Authenticator authenticator = settingManager.getAuthenticator();
-		if (authenticator != null && authenticator.getDefaultGroupNames().contains(group.getName())) 
-			usage.add("administration: authenticator");
+		if (authenticator != null)
+			usage.add(authenticator.onDeleteGroup(group.getName()).prefix("administration"));
+		
+		usage.add(settingManager.getSecuritySetting().onDeleteGroup(group.getName()).prefix("administration"));
 		
 		usage.checkInUse("Group '" + group.getName() + "'");
 		
@@ -91,11 +104,23 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 	@Sessional
 	@Override
 	public Group find(String name) {
-		Long id = cacheManager.getGroupIdByName(name);
-		if (id != null) 
-			return load(id);
-		else
-			return null;
+		EntityCriteria<Group> criteria = newCriteria();
+		criteria.add(Restrictions.eq("name", name));
+		criteria.setCacheable(true);
+		return find(criteria);
+	}
+
+	@Override
+	public Group findAnonymous() {
+		SecuritySetting securitySetting = OneDev.getInstance(SettingManager.class).getSecuritySetting();
+		if (securitySetting.isEnableAnonymousAccess()) {
+			Group group = OneDev.getInstance(GroupManager.class).find(securitySetting.getAnonymousGroup());
+			if (group != null) 
+				return group;
+			else
+				logger.error("Undefined anonymous group: " + securitySetting.getAnonymousGroup());
+		}
+		return null;
 	}
 	
 }

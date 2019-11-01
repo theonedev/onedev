@@ -14,6 +14,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 import io.onedev.server.web.component.select2.Response;
@@ -58,7 +59,7 @@ public class BuildChoiceProvider extends ChoiceProvider<Build> {
 		int count = (page+1) * WebConstants.PAGE_SIZE;
 		Project project = projectModel.getObject();
 		if (project != null) {
-			List<Build> builds = OneDev.getInstance(BuildManager.class).query(project, term, count);		
+			List<Build> builds = OneDev.getInstance(BuildManager.class).query(project, SecurityUtils.getUser(), term, count);		
 			new ResponseFiller<>(response).fill(builds, page, WebConstants.PAGE_SIZE);
 		} else {
 			response.setHasMore(false);

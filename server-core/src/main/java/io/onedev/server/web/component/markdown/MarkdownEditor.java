@@ -54,7 +54,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.model.User;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -277,7 +277,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 
 					AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
 					List<Map<String, String>> userList = new ArrayList<>();
-					for (UserFacade user: getUserMentionSupport().findUsers(userQuery, ATWHO_LIMIT)) {
+					for (User user: getUserMentionSupport().findUsers(userQuery, ATWHO_LIMIT)) {
 						Map<String, String> userMap = new HashMap<>();
 						userMap.put("name", user.getName());
 						if (user.getFullName() != null)

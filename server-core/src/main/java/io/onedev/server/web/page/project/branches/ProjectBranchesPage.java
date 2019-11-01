@@ -476,7 +476,7 @@ public class ProjectBranchesPage extends ProjectPage {
 					@Override
 					protected void onConfigure() {
 						super.onConfigure();
-						setVisible(SecurityUtils.canAdministrate(getProject().getFacade()) 
+						setVisible(SecurityUtils.canManage(getProject()) 
 								&& !branch.equals(getProject().getDefaultBranch()));
 					}
 					
@@ -692,7 +692,7 @@ public class ProjectBranchesPage extends ProjectPage {
 						super.onConfigure();
 
 						Project project = getProject();
-						if (SecurityUtils.canWriteCode(project.getFacade())) {
+						if (SecurityUtils.canWriteCode(project)) {
 							if (project.getDefaultBranch().equals(branch)) {
 								setEnabled(false);
 							} else {
@@ -809,7 +809,7 @@ public class ProjectBranchesPage extends ProjectPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 
 	private static class State implements Serializable {

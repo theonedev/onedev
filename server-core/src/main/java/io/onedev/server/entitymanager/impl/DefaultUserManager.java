@@ -1,17 +1,19 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.shiro.authc.credential.PasswordService;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.ReplicationMode;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.cache.CacheManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -26,6 +28,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.Usage;
 
 @Singleton
@@ -39,21 +42,17 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     
     private final IssueFieldManager issueFieldManager;
     
-    private final CacheManager cacheManager;
-    
     private final ListenerRegistry listenerRegistry;
     
 	@Inject
     public DefaultUserManager(Dao dao, ProjectManager projectManager, SettingManager settingManager, 
-    		IssueFieldManager issueFieldManager, CacheManager cacheManager, 
-    		PasswordService passwordService, ListenerRegistry listenerRegistry) {
+    		IssueFieldManager issueFieldManager, PasswordService passwordService, ListenerRegistry listenerRegistry) {
         super(dao);
         
         this.passwordService = passwordService;
         this.projectManager = projectManager;
         this.settingManager = settingManager;
         this.issueFieldManager = issueFieldManager;
-        this.cacheManager = cacheManager;
         this.listenerRegistry = listenerRegistry;
     }
 
@@ -169,27 +168,34 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	query.setParameter("userName", user.getDisplayName());
     	query.executeUpdate();
     	
+    	query = getSession().createQuery("update Project set owner=null where owner=:user");
+    	query.setParameter("user", user);
+    	query.executeUpdate();
+    	
 		dao.remove(user);
     }
 
 	@Sessional
     @Override
     public User findByName(String userName) {
-		Long id = cacheManager.getUserIdByName(userName);
-		if (id != null) 
-			return load(id);
-		else
-			return null;
+		EntityCriteria<User> criteria = newCriteria();
+		criteria.add(Restrictions.eq("name", userName));
+		criteria.setCacheable(true);
+		return find(criteria);
     }
+
+	@Override
+	public List<User> query() {
+		return query(true);
+	}
 
 	@Sessional
     @Override
     public User findByEmail(String email) {
-		Long id = cacheManager.getUserIdByEmail(email);
-		if (id != null) 
-			return load(id);
-		else
-			return null;
+		EntityCriteria<User> criteria = newCriteria();
+		criteria.add(Restrictions.eq("email", email));
+		criteria.setCacheable(true);
+		return find(criteria);
     }
 	
     @Sessional

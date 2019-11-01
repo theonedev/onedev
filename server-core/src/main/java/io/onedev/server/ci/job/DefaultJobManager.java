@@ -89,7 +89,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.ProjectPrivilege;
+import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.BuildCommitAware;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.patternset.PatternSet;
@@ -273,8 +273,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					} else {
 						subject = User.asSubject(0L);
 					}
-					if (!subject.isPermitted(new ProjectPermission(dependencyProject.getFacade(), 
-							ProjectPrivilege.CODE_READ))) {
+					if (!subject.isPermitted(new ProjectPermission(dependencyProject, new ReadCode()))) {
 						throw new OneException("Unable to access dependency project '" 
 								+ dependency.getProjectName() + "': permission denied");
 					}

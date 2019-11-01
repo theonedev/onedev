@@ -25,7 +25,7 @@ public class AffinalProjectsModel extends LoadableDetachableModel<Collection<Pro
 		Project project = OneDev.getInstance(Dao.class).load(Project.class, projectId);
 		List<Project> affinals = project.getForkRoot().getForkDescendants();
 		for (Iterator<Project> it = affinals.iterator(); it.hasNext();) {
-			if (!SecurityUtils.canReadIssues(it.next().getFacade()))
+			if (!SecurityUtils.canAccess(it.next()))
 				it.remove();
 		}
 		return affinals;

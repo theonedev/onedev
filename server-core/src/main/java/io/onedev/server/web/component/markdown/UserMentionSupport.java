@@ -2,10 +2,10 @@ package io.onedev.server.web.component.markdown;
 
 import java.util.List;
 
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.model.User;
 
 public interface UserMentionSupport {
 
-	List<UserFacade> findUsers(String query, int count);
+	List<User> findUsers(String query, int count);
 
 }

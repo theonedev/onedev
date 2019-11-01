@@ -16,7 +16,6 @@ import io.onedev.commons.codeassist.grammar.RuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.model.Project;
-import io.onedev.server.security.permission.ProjectPrivilege;
 import io.onedev.server.util.reviewrequirement.ReviewRequirementParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -46,9 +45,8 @@ public class ReviewRequirementBehavior extends ANTLRAssistBehavior {
 
 					@Override
 					protected List<InputSuggestion> match(String matchWith) {
-						Project project = projectModel.getObject();
 						if (terminalExpect.findExpectByRule("userCriteria") != null)
-							return SuggestionUtils.suggestUsers(project, ProjectPrivilege.CODE_READ, matchWith);
+							return SuggestionUtils.suggestUsers(matchWith);
 						else 
 							return SuggestionUtils.suggestGroups(matchWith);
 					}

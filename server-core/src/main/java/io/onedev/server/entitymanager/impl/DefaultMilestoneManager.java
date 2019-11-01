@@ -73,6 +73,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 		EntityCriteria<Milestone> criteria = EntityCriteria.of(Milestone.class);
 		criteria.add(Restrictions.eq("project", project));
 		criteria.add(Restrictions.eq("name", name));
+		criteria.setCacheable(true);
 		return find(criteria);
 	}
 

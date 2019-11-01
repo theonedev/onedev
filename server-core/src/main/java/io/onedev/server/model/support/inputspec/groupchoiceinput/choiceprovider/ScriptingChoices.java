@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.server.util.GroovyUtils;
-import io.onedev.server.util.facade.GroupFacade;
+import io.onedev.server.model.Group;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ScriptChoice;
@@ -39,11 +39,11 @@ public class ScriptingChoices implements ChoiceProvider {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<GroupFacade> getChoices(boolean allPossible) {
+	public List<Group> getChoices(boolean allPossible) {
 		Map<String, Object> variables = new HashMap<>();
 		variables.put("allPossible", allPossible);
 		try {
-			return (List<GroupFacade>) GroovyUtils.evalScriptByName(scriptName, variables);
+			return (List<Group>) GroovyUtils.evalScriptByName(scriptName, variables);
 		} catch (RuntimeException e) {
 			if (allPossible) {
 				logger.error("Error getting all possible choices", e);

@@ -3,6 +3,7 @@ package io.onedev.server.web.editable;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
@@ -146,8 +147,8 @@ public abstract class PropertyContext<T> implements Serializable {
 		return descriptor.isPropertyRequired();
 	}
 
-	public boolean isPropertyVisible(ComponentContext componentContext, BeanDescriptor beanDescriptor) {
-		return descriptor.isPropertyVisible(componentContext, beanDescriptor);
+	public boolean isPropertyVisible(Map<String, ComponentContext> componentContexts, BeanDescriptor beanDescriptor) {
+		return descriptor.isPropertyVisible(componentContexts, beanDescriptor);
 	}
 	
 }

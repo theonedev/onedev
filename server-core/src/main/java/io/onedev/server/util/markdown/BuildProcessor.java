@@ -5,7 +5,7 @@ import org.jsoup.nodes.Document;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 
 public class BuildProcessor extends BuildParser implements MarkdownProcessor {
 	
@@ -17,7 +17,7 @@ public class BuildProcessor extends BuildParser implements MarkdownProcessor {
 	@Override
 	protected String toHtml(Build build, String text) {
 		CharSequence url = RequestCycle.get().urlFor(
-				BuildLogPage.class, BuildLogPage.paramsOf(build, null)); 
+				BuildDashboardPage.class, BuildDashboardPage.paramsOf(build, null)); 
 		return String.format("<a href='%s' class='build reference' data-reference=%d>%s</a>", url, build.getId(), text);
 	}
 	

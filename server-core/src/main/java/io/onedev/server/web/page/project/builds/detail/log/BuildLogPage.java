@@ -7,6 +7,7 @@ import org.apache.wicket.markup.html.link.ResourceLink;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.build.log.BuildLogPanel;
 import io.onedev.server.web.download.BuildLogDownloadResource;
 import io.onedev.server.web.download.BuildLogDownloadResourceReference;
@@ -30,6 +31,11 @@ public class BuildLogPage extends BuildDetailPage {
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
 		response.render(OnDomReadyHeaderItem.forScript("onedev.server.buildDetail.onLogDomReady();"));
+	}
+
+	@Override
+	protected boolean isPermitted() {
+		return SecurityUtils.canAccessLog(getBuild());
 	}
 
 	public Component renderOptions(String componentId) {

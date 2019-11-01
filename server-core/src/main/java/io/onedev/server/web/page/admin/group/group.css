@@ -37,7 +37,10 @@
 	left: 44px;
 }
 
-#group .authorization.list .head .select2-container,
+#group .authorization.list .select2-container,
 #group .membership.list .head .select2-container {
 	width: 240px;
+} 
+#group .authorization.list .property-roleName .select2-container {
+	width: 360px;
 } 

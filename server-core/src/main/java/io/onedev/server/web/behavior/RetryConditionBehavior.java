@@ -3,7 +3,10 @@ package io.onedev.server.web.behavior;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.base.Optional;
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.AntlrUtils;
@@ -16,6 +19,7 @@ import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobAware;
+import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.retrycondition.RetryCondition;
 import io.onedev.server.ci.job.retrycondition.RetryConditionLexer;
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser;
@@ -47,9 +51,23 @@ public class RetryConditionBehavior extends ANTLRAssistBehavior {
 							Job job = jobAware.getJob();
 							fields.addAll(job.getParamSpecMap().keySet());
 							return SuggestionUtils.suggest(fields, matchWith);
-						} else {
-							return null;
-						}
+						} else if ("criteriaValue".equals(spec.getLabel())) {
+							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
+							Preconditions.checkState(operatorElements.size() == 1);
+							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
+							int operator = AntlrUtils.getLexerRule(RetryConditionLexer.ruleNames, operatorName);							
+							if (operator == RetryConditionLexer.Is) {
+								List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+								Preconditions.checkState(fieldElements.size() == 1);
+								String fieldName = RetryCondition.getValue(fieldElements.get(0).getMatchedText());
+								JobAware jobAware = getComponent().findParent(JobAware.class);
+								Job job = jobAware.getJob();
+								ParamSpec paramSpec = job.getParamSpecMap().get(fieldName);
+								if (paramSpec != null) 
+									return SuggestionUtils.suggest(paramSpec.getPossibleValues(), matchWith);
+							}
+						} 
+						return null;
 					}
 					
 					@Override

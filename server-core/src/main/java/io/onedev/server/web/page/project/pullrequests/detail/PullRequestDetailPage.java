@@ -101,7 +101,6 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.component.branch.BranchLink;
@@ -624,7 +623,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 	
 	private WebMarkupContainer newManageContainer() {
 		WebMarkupContainer container = new WebMarkupContainer("manage");
-		container.setVisible(SecurityUtils.canAdministrate(getPullRequest().getTargetProject().getFacade()));
+		container.setVisible(SecurityUtils.canManage(getPullRequest().getTargetProject()));
 		container.add(new Link<Void>("synchronize") {
 
 			@Override
@@ -781,7 +780,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			
 		});
 		
-		UserIdent userIdent = UserIdent.of(UserFacade.of(request.getSubmitter()), request.getSubmitterName());
+		UserIdent userIdent = UserIdent.of(request.getSubmitter(), request.getSubmitterName());
 		statusAndBranchesContainer.add(new UserIdentPanel("user", userIdent, Mode.NAME));
 		statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
 		
@@ -1283,7 +1282,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 	
 	private class RequestTab extends PageTab {

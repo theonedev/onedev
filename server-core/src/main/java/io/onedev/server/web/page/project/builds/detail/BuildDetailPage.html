@@ -14,6 +14,7 @@
     			<a wicket:id="moreInfo" class="more-info pull-right" title="More info"><span class="fa fa-ellipsis-h"></span></a>
             </div>
             <pre wicket:id="statusMessage" class="status-message alert"></pre>
+            <wicket:enclosure child="commitMessage">
             <div class="commit-info clearfix">
                 <div class="pull-left"><i class="fa fa-ext fa-commit"></i> Commit: </div>
                 <div class="pull-left">
@@ -25,6 +26,7 @@
                     <span wicket:id="commitAvatars"></span> <span wicket:id="commitNames"></span>
                 </div>
             </div>
+            </wicket:enclosure>
 			<ul wicket:id="buildTabs" class="tabs nav nav-tabs"></ul>
 			<wicket:child></wicket:child>
 		</div>

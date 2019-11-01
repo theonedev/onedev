@@ -331,7 +331,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canReadCode(getProject().getFacade()));
+				setVisible(SecurityUtils.canReadCode(getProject()));
 			}
 			
 		});		
@@ -492,7 +492,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable String query, int page) {

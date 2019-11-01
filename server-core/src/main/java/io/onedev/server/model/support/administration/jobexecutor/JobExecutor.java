@@ -1,15 +1,19 @@
 package io.onedev.server.model.support.administration.jobexecutor;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jgit.lib.ObjectId;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.launcher.loader.ExtensionPoint;
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
+import io.onedev.server.OneDev;
 import io.onedev.server.ci.job.JobContext;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
@@ -30,7 +34,7 @@ public abstract class JobExecutor implements Serializable {
 	
 	private String applicableBranches;
 	
-	private String applicAppAppableJobNames;
+	private String applicableJobNames;
 	
 	private String applicableJobImages;
 
@@ -78,14 +82,21 @@ public abstract class JobExecutor implements Serializable {
 	@Editable(order=10200, group="Job Applicability",
 			description="Optionally specify space-separated jobs applicable for this executor. "
 					+ "Use * or ? for wildcard match. Leave empty to match all")
-	@Patterns
+	@Patterns(suggester = "suggestJobNames")
 	@NameOfEmptyValue("All")
 	public String getApplicableJobNames() {
-		return applicAppAppableJobNames;
+		return applicableJobNames;
 	}
 
 	public void setApplicableJobNames(String applicableJobNames) {
-		this.applicAppAppableJobNames = applicableJobNames;
+		this.applicableJobNames = applicableJobNames;
+	}
+	
+	@SuppressWarnings("unused")
+	private static List<InputSuggestion> suggestJobNames(String matchWith) {
+		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class).getJobNames(null));
+		Collections.sort(jobNames);
+		return SuggestionUtils.suggest(jobNames, matchWith);
 	}
 
 	@Editable(order=10300, group="Job Applicability",

@@ -13,7 +13,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
@@ -36,7 +35,7 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		UserIdent userIdent = UserIdent.of(UserFacade.of(getComment().getUser()), getComment().getUserName());
+		UserIdent userIdent = UserIdent.of(getComment().getUser(), getComment().getUserName());
 		add(new Label("user", userIdent.getName()));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate())));
 		

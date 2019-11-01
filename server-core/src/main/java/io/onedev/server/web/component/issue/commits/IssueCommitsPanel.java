@@ -70,7 +70,7 @@ public class IssueCommitsPanel extends GenericPanel<Issue> {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(SecurityUtils.canReadCode(getIssue().getProject().getFacade()) 
+		setVisible(SecurityUtils.canReadCode(getIssue().getProject()) 
 				&& !getIssue().getCommits().isEmpty());
 	}
 

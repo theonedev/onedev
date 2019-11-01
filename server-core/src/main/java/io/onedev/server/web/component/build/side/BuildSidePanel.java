@@ -38,7 +38,6 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -115,10 +114,10 @@ public abstract class BuildSidePanel extends Panel {
 		jobLink.add(new Label("label", getBuild().getJobName()));
 		general.add(jobLink);
 		
-		UserIdent submitter = UserIdent.of(UserFacade.of(getBuild().getSubmitter()), getBuild().getSubmitterName());
+		UserIdent submitter = UserIdent.of(getBuild().getSubmitter(), getBuild().getSubmitterName());
 		general.add(new UserIdentPanel("submitter", submitter, UserIdentPanel.Mode.AVATAR_AND_NAME));
 
-		UserIdent canceller = UserIdent.of(UserFacade.of(getBuild().getCanceller()), getBuild().getCancellerName());
+		UserIdent canceller = UserIdent.of(getBuild().getCanceller(), getBuild().getCancellerName());
 		general.add(new UserIdentPanel("canceller", canceller, UserIdentPanel.Mode.AVATAR_AND_NAME) {
 
 			@Override

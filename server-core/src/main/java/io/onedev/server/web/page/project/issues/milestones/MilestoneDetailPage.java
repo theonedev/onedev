@@ -83,7 +83,7 @@ public class MilestoneDetailPage extends ProjectIssuesPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
+				setVisible(SecurityUtils.canManageIssues(getProject()));
 			}
 
 		});

@@ -1,6 +1,5 @@
 package io.onedev.server.model;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -8,9 +7,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
-import io.onedev.server.security.permission.ProjectPrivilege;
-import io.onedev.server.util.facade.UserAuthorizationFacade;
 
 @Entity
 @Table(
@@ -28,9 +24,10 @@ public class UserAuthorization extends AbstractEntity {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(nullable=false)
 	private User user;
-	
-	@Column(nullable=false)
-	private ProjectPrivilege privilege = ProjectPrivilege.CODE_READ;
+
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
+	private Role role;
 	
 	public Project getProject() {
 		return project;
@@ -48,16 +45,12 @@ public class UserAuthorization extends AbstractEntity {
 		this.user = user;
 	}
 
-	public ProjectPrivilege getPrivilege() {
-		return privilege;
+	public Role getRole() {
+		return role;
 	}
 
-	public void setPrivilege(ProjectPrivilege privilege) {
-		this.privilege = privilege;
-	}
-
-	public UserAuthorizationFacade getFacade() {
-		return new UserAuthorizationFacade(this);
+	public void setRole(Role role) {
+		this.role = role;
 	}
 	
 }

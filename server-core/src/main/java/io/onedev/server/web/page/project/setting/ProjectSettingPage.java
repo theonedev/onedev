@@ -21,7 +21,7 @@ public abstract class ProjectSettingPage extends ProjectPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAdministrate(getProject().getFacade());
+		return SecurityUtils.canManage(getProject());
 	}
 	
 	@Override

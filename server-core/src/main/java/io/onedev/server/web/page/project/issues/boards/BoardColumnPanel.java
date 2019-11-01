@@ -40,6 +40,7 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.IssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
@@ -47,7 +48,6 @@ import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.issue.fieldspec.UserChoiceField;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.search.entity.issue.ChoiceFieldCriteria;
 import io.onedev.server.search.entity.issue.FieldOperatorCriteria;
@@ -56,13 +56,11 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.search.entity.issue.StateCriteria;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.IssueConstants;
-import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
-import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -159,21 +157,20 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 									for (TransitionSpec transition: workflow.getTransitionSpecs(true)) {
 										if (transition.canTransite(issue) 
 												&& transition.getTrigger() instanceof PressButtonTrigger
-												&& ((PressButtonTrigger)transition.getTrigger()).isAuthorized()
+												&& ((PressButtonTrigger)transition.getTrigger()).isAuthorized(getProject())
 												&& transition.getToState().equals(getColumn())) {
 											issue.setState(getColumn());
 											break;
 										}
 									}
-								} else if (SecurityUtils.canWriteCode(issue.getProject().getFacade())) {
+								} else if (SecurityUtils.canWriteCode(issue.getProject())) {
 									FieldSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
-									UserMatcher userMatcher = UserMatcher.fromString(fieldSpec.getCanBeChangedBy());
-									if (fieldSpec != null && userMatcher.matches(getProject(), SecurityUtils.getUser())) {
+									if (fieldSpec != null && SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName())) {
 										issue = SerializationUtils.clone(issue);
 										issue.setFieldValue(identifyField, getColumn());
 									}
 								}
-							} else if (SecurityUtils.canWriteCode(issue.getProject().getFacade())) { 
+							} else if (SecurityUtils.canWriteCode(issue.getProject())) { 
 								// move issue between backlog column and board column
 								issue = SerializationUtils.clone(issue);
 								issue.setMilestone(getMilestone());
@@ -253,7 +250,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		if (user != null) {
 			head.add(new WebMarkupContainer("title").setVisible(false));
-			head.add(new UserIdentPanel("userIdent", UserIdent.of(UserFacade.of(user)), Mode.AVATAR_AND_NAME));
+			head.add(new UserIdentPanel("userIdent", UserIdent.of(user), Mode.AVATAR_AND_NAME));
 		} else {
 			head.add(new Label("title", title).setEscapeModelStrings(false));
 			head.add(new WebMarkupContainer("userIdent").setVisible(false));
@@ -337,7 +334,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				String fieldName = getBoard().getIdentifyField();
 				if (issue.getMilestone() == null && getMilestone() != null) { 
 					// move a backlog issue to board 
-					if (!SecurityUtils.canWriteCode(issue.getProject().getFacade())) 
+					if (!SecurityUtils.canWriteCode(issue.getProject())) 
 						throw new UnauthorizedException("Permission denied");
 					
 					OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, getMilestone(), SecurityUtils.getUser());
@@ -348,7 +345,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					for (TransitionSpec transition: workflow.getTransitionSpecs(true)) {
 						if (transition.canTransite(issue) 
 								&& transition.getTrigger() instanceof PressButtonTrigger 
-								&& ((PressButtonTrigger)transition.getTrigger()).isAuthorized() 
+								&& ((PressButtonTrigger)transition.getTrigger()).isAuthorized(getProject()) 
 								&& transition.getToState().equals(getColumn())) {
 							transitionRef.set(transition);
 							break;
@@ -361,7 +358,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					PressButtonTrigger trigger = (PressButtonTrigger) transitionRef.get().getTrigger();
 					for (String promptField: trigger.getPromptFields()) {
 						FieldSpec fieldSpec = getIssueSetting().getFieldSpec(promptField);
-						if (fieldSpec != null && UserMatcher.fromString(fieldSpec.getCanBeChangedBy()).matches(getProject(), SecurityUtils.getUser())) {
+						if (fieldSpec != null && SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName())) {
 							hasPromptFields = true;
 							break;
 						}
@@ -405,14 +402,14 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 						markAccepted(target, issue, true);
 					}
 				} else {
-					if (!SecurityUtils.canWriteCode(issue.getProject().getFacade())) 
+					if (!SecurityUtils.canWriteCode(issue.getProject())) 
 						throw new UnauthorizedException("Permission denied");
 					
 					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 					if (fieldSpec == null)
 						throw new OneException("Undefined custom field: " + fieldName);
 					
-					if (!UserMatcher.fromString(fieldSpec.getCanBeChangedBy()).matches(getProject(), SecurityUtils.getUser()))
+					if (!SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName()))
 						throw new UnauthorizedException("Permission denied");
 					
 					Map<String, Object> fieldValues = new HashMap<>();

@@ -129,7 +129,7 @@ public enum PullRequestOperation {
 			return request.getSourceProject() != null 
 					&& request.getSource().getObjectName(false) == null 
 					&& SecurityUtils.canModify(request) 
-					&& SecurityUtils.canWriteCode(request.getSourceProject().getFacade());
+					&& SecurityUtils.canWriteCode(request.getSourceProject());
 		}
 
 	};

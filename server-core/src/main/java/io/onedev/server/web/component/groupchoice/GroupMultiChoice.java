@@ -6,13 +6,13 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.util.facade.GroupFacade;
+import io.onedev.server.model.Group;
 import io.onedev.server.web.component.select2.Select2MultiChoice;
 
 @SuppressWarnings("serial")
-public class GroupMultiChoice extends Select2MultiChoice<GroupFacade> {
+public class GroupMultiChoice extends Select2MultiChoice<Group> {
 
-	public GroupMultiChoice(String id, IModel<Collection<GroupFacade>> groupsModel, 
+	public GroupMultiChoice(String id, IModel<Collection<Group>> groupsModel, 
 			AbstractGroupChoiceProvider choiceProvider) {
 		super(id, groupsModel, choiceProvider);
 	}

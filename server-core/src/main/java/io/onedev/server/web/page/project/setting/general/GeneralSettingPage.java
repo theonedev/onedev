@@ -13,12 +13,13 @@ import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.component.project.ConfirmDeleteProjectModal;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.Path;
+import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
@@ -36,6 +37,11 @@ public class GeneralSettingPage extends ProjectSettingPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		if (getProject().getOwner() != null)
+			getProject().setOwnerName(getProject().getOwner().getName());
+		else
+			getProject().setOwnerName(null);
 		
 		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 
@@ -55,7 +61,7 @@ public class GeneralSettingPage extends ProjectSettingPage {
 				editor.getDescriptor().copyProperties(object, getProject());
 			}
 			
-		}, Lists.newArrayList("name", "description", "defaultPrivilege"), false);
+		}, Lists.newArrayList("name", "description", "defaultRoleName", "ownerName"), false);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -75,6 +81,10 @@ public class GeneralSettingPage extends ProjectSettingPage {
 					String errorMessage = "This name has already been used by another project"; 
 					editor.error(new Path(new PathNode.Named("name")), errorMessage);
 				} else {
+					if (project.getOwnerName() != null)
+						project.setOwner(OneDev.getInstance(UserManager.class).findByName(project.getOwnerName()));
+					else
+						project.setOwner(null);
 					projectManager.save(project, oldName);
 					Session.get().success("General setting has been updated");
 					setResponsePage(GeneralSettingPage.class, paramsOf(project));

@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,6 +23,7 @@ import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,37 +35,36 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.cache.CacheManager;
+import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserAuthorizationManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.CloneCommand;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Group;
+import io.onedev.server.model.GroupAuthorization;
+import io.onedev.server.model.Membership;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.TagProtection;
-import io.onedev.server.model.support.administration.groovyscript.GroovyScript;
+import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.security.permission.ProjectPrivilege;
+import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.Usage;
-import io.onedev.server.util.facade.GroupAuthorizationFacade;
-import io.onedev.server.util.facade.MembershipFacade;
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.avatar.AvatarManager;
 
@@ -74,11 +75,9 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	
     private final CommitInfoManager commitInfoManager;
     
-    private final UserAuthorizationManager userAuthorizationManager;
-    
     private final BuildManager buildManager;
     
-    private final CacheManager cacheManager;
+    private final GroupManager groupManager;
     
     private final AvatarManager avatarManager;
     
@@ -96,16 +95,14 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	
     @Inject
     public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager,  
-    		UserAuthorizationManager userAuthorizationManager, BuildManager buildManager, 
-    		CacheManager cacheManager, AvatarManager avatarManager, SettingManager settingManager, 
-    		TransactionManager transactionManager, SessionManager sessionManager, 
-    		ListenerRegistry listenerRegistry) {
+    		BuildManager buildManager, AvatarManager avatarManager, GroupManager groupManager,
+    		SettingManager settingManager, TransactionManager transactionManager, 
+    		SessionManager sessionManager, ListenerRegistry listenerRegistry) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
-        this.userAuthorizationManager = userAuthorizationManager;
         this.buildManager = buildManager;
-        this.cacheManager = cacheManager;
+        this.groupManager = groupManager;
         this.avatarManager = avatarManager;
         this.settingManager = settingManager;
         this.transactionManager = transactionManager;
@@ -153,7 +150,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     	dao.persist(project);
     	
        	if (isNew) {
-       		authorizeCreator(project, SecurityUtils.getUser());
+       		project.setOwner(SecurityUtils.getUser());
            	checkSanity(project);
     	} 
        	
@@ -200,31 +197,22 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     
     @Override
     public Project find(String projectName) {
-    	Long id = cacheManager.getProjectIdByName(projectName);
-    	if (id != null)
-    		return load(id);
-    	else
-    		return null;
+		EntityCriteria<Project> criteria = newCriteria();
+		criteria.add(Restrictions.eq("name", projectName));
+		criteria.setCacheable(true);
+		return find(criteria);
     }
 
-    private void authorizeCreator(Project project, User user) {
-		UserAuthorization authorization = new UserAuthorization();
-		authorization.setPrivilege(ProjectPrivilege.ADMINISTRATION);
-		authorization.setProject(project);
-		authorization.setUser(user);
-		userAuthorizationManager.save(authorization);
-    }
-    
     @Transactional
 	@Override
 	public void fork(Project from, Project to) {
     	dao.persist(to);
-    	authorizeCreator(to, SecurityUtils.getUser());
+    	to.setOwner(SecurityUtils.getUser());
         FileUtils.cleanDir(to.getGitDir());
         new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
         checkSanity(to);
         commitInfoManager.cloneInfo(from, to);
-        avatarManager.copyAvatar(from.getFacade(), to.getFacade());
+        avatarManager.copyAvatar(from, to);
 	}
 
 	private boolean isGitHookValid(File gitDir, String hookName) {
@@ -414,30 +402,29 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	}
 	
 	@Override
-	public Collection<ProjectFacade> getAccessibleProjects(User user) {
-		Collection<ProjectFacade> projects = new HashSet<>();
+	public List<Project> query() {
+		return query(true);
+	}
+
+	@Override
+	public Collection<Project> getAccessibleProjects(User user) {
+		Collection<Project> projects = new HashSet<>();
 		
 		if (SecurityUtils.isAdministrator()) {
-			projects.addAll(cacheManager.getProjects().values());
+			projects.addAll(OneDev.getInstance(ProjectManager.class).query());
 		} else {
 			if (user != null) {
-				Collection<Long> groupIds = new HashSet<>();
-				for (MembershipFacade membership: cacheManager.getMemberships().values()) {
-					if (membership.getUserId().equals(user.getId())) 
-						groupIds.add(membership.getGroupId());
+				for (Membership membership: user.getMemberships()) {
+					for (GroupAuthorization authorization: membership.getGroup().getAuthorizations())
+						projects.add(authorization.getProject());
 				}
-				for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
-					if (groupIds.contains(authorization.getGroupId()))
-						projects.add(cacheManager.getProject(authorization.getProjectId()));
-				}
-				for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
-					if (authorization.getUserId().equals(user.getId()))
-						projects.add(cacheManager.getProject(authorization.getProjectId()));
-				}
+				for (UserAuthorization authorization: user.getAuthorizations()) 
+					projects.add(authorization.getProject());
 			}
-			for (ProjectFacade project: cacheManager.getProjects().values()) {
-				if (project.getDefaultPrivilege() != null)
-					projects.add(project);
+			Group group = groupManager.findAnonymous();
+			if (group != null) {
+				for (GroupAuthorization authorization: group.getAuthorizations()) 
+					projects.add(authorization.getProject());
 			}
 		}
 		

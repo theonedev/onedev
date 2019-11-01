@@ -151,7 +151,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			if (suggestedSourceBranch != null) {
 				if (!suggestedSourceBranch.equals(getProject().getDefaultBranch())) {
 					target = new ProjectAndBranch(getProject(), getProject().getDefaultBranch());
-	 			} else if (getProject().getForkedFrom() != null && SecurityUtils.canReadCode(getProject().getForkedFrom().getFacade())) {
+	 			} else if (getProject().getForkedFrom() != null && SecurityUtils.canReadCode(getProject().getForkedFrom())) {
 					target = new ProjectAndBranch(getProject().getForkedFrom(), 
 							getProject().getForkedFrom().getDefaultBranch());
 				} else {
@@ -211,7 +211,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 				OneDev.getInstance(PullRequestManager.class).checkQuality(request);
 
-				if (SecurityUtils.canWriteCode(getProject().getFacade()) && request.getReviews().isEmpty()) {
+				if (SecurityUtils.canWriteCode(getProject()) && request.getReviews().isEmpty()) {
 					PullRequestReview review = new PullRequestReview();
 					review.setRequest(request);
 					review.setUser(SecurityUtils.getUser());
@@ -829,7 +829,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 	
 	@Override

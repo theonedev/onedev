@@ -17,6 +17,9 @@ import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneException;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.Choice;
+import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.model.support.inputspec.showcondition.ShowCondition;
 import io.onedev.server.model.support.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.model.support.issue.BoardSpec;
@@ -27,9 +30,6 @@ import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.issue.fieldspec.IssueChoiceField;
 import io.onedev.server.model.support.issue.fieldspec.UserChoiceField;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.Choice;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
@@ -38,7 +38,6 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.util.usermatcher.CodeWriters;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -129,8 +128,6 @@ public class GlobalIssueSetting implements Serializable {
 		fieldSpecs.add(priority);
 
 		UserChoiceField assignee = new UserChoiceField();
-		assignee.setChoiceProvider(new io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.CodeWriters());
-		assignee.setCanBeChangedBy(new CodeWriters().toString());
 		assignee.setAllowEmpty(true);
 		assignee.setNameOfEmptyValue("Not assigned");
 		assignee.setName("Assignee");
@@ -195,7 +192,7 @@ public class GlobalIssueSetting implements Serializable {
 		transition.setToState("Closed");
 		PressButtonTrigger pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Close");
-		pressButton.setAuthorized(new CodeWriters().toString());
+		pressButton.setAuthorizedRoles(Lists.newArrayList("Developer", "Tester"));
 		pressButton.setPromptFields(Lists.newArrayList("Resolution", "Duplicate With"));
 		transition.setTrigger(pressButton);
 		
@@ -207,7 +204,7 @@ public class GlobalIssueSetting implements Serializable {
 		pressButton = new PressButtonTrigger();
 		pressButton.setButtonLabel("Reopen");
 		transition.setRemoveFields(Lists.newArrayList("Resolution", "Duplicate With"));
-		pressButton.setAuthorized(new CodeWriters().toString());
+		pressButton.setAuthorizedRoles(Lists.newArrayList("Developer", "Tester"));
 		transition.setTrigger(pressButton);
 		
 		defaultTransitionSpecs.add(transition);
@@ -441,8 +438,6 @@ public class GlobalIssueSetting implements Serializable {
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		for (TransitionSpec transition: getDefaultTransitionSpecs())
-			transition.onRenameUser(oldName, newName);
 		for (FieldSpec field: getFieldSpecs())
 			field.onRenameUser(oldName, newName);
 		for (BoardSpec board: getDefaultBoardSpecs())
@@ -451,8 +446,6 @@ public class GlobalIssueSetting implements Serializable {
 	
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		for (TransitionSpec transition: getDefaultTransitionSpecs())
-			usage.add(transition.onDeleteUser(userName));
 		for (Iterator<BoardSpec> it = getDefaultBoardSpecs().iterator(); it.hasNext();) { 
 			Usage usageInBoard = it.next().onDeleteUser(this, userName);
 			if (usageInBoard != null)
@@ -467,19 +460,29 @@ public class GlobalIssueSetting implements Serializable {
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
-		for (TransitionSpec transition: getDefaultTransitionSpecs()) 
-			transition.onRenameGroup(oldName, newName);
 		for (FieldSpec field: getFieldSpecs())
 			field.onRenameGroup(oldName, newName);
 	}
 	
 	public Usage onDeleteGroup(String groupName) {
 		Usage usage = new Usage();
-		for (TransitionSpec transition: getDefaultTransitionSpecs())
-			usage.add(transition.onDeleteGroup(groupName));
 		
 		for (FieldSpec field: getFieldSpecs())
 			usage.add(field.onDeleteGroup(groupName));
+		
+		return usage.prefix("issue setting");
+	}
+	
+	public void onRenameRole(String oldName, String newName) {
+		for (TransitionSpec transition: getDefaultTransitionSpecs())
+			transition.onRenameRole(oldName, newName);
+	}
+	
+	public Usage onDeleteRole(String roleName) {
+		Usage usage = new Usage();
+		
+		for (TransitionSpec transition: getDefaultTransitionSpecs())
+			usage.add(transition.onDeleteRole(roleName));
 		
 		return usage.prefix("issue setting");
 	}

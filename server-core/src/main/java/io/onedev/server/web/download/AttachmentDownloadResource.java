@@ -19,7 +19,6 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.ProjectFacade;
 
 public class AttachmentDownloadResource extends AbstractResource {
 
@@ -44,7 +43,7 @@ public class AttachmentDownloadResource extends AbstractResource {
 		if (project == null) 
 			throw new EntityNotFoundException("Unable to find project: " + projectName);
 		
-		if (!SecurityUtils.canReadCode(project.getFacade())) 
+		if (!SecurityUtils.canReadCode(project)) 
 			throw new UnauthorizedException();
 
 		String uuid = params.get(PARAM_UUID).toString();
@@ -55,7 +54,7 @@ public class AttachmentDownloadResource extends AbstractResource {
 		if (StringUtils.isBlank(attachment))
 			throw new IllegalArgumentException("attachment parameter has to be specified");
 
-		File attachmentFile = new File(getAttachmentDir(project.getFacade(), uuid), attachment);
+		File attachmentFile = new File(getAttachmentDir(project, uuid), attachment);
 		if (!attachmentFile.exists()) 
 			throw new RuntimeException("Attachment not found: " + attachment);
 		
@@ -83,11 +82,11 @@ public class AttachmentDownloadResource extends AbstractResource {
 		return response;
 	}
 
-	private static File getAttachmentDir(ProjectFacade project, String uuid) {
+	private static File getAttachmentDir(Project project, String uuid) {
 		return OneDev.getInstance(AttachmentStorageManager.class).getAttachmentStorage(project, uuid);		
 	}
 	
-	public static PageParameters paramsOf(ProjectFacade project, String attachmentStorageUUID, String attachmentName) {
+	public static PageParameters paramsOf(Project project, String attachmentStorageUUID, String attachmentName) {
 		PageParameters params = new PageParameters();
 		params.set(PARAM_PROJECT, project.getName());
 		params.set(PARAM_UUID, attachmentStorageUUID);

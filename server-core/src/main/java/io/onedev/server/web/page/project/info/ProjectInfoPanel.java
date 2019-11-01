@@ -31,9 +31,7 @@ import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
-import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
-import io.onedev.server.web.page.project.tags.ProjectTagsPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
 @SuppressWarnings("serial")
 public abstract class ProjectInfoPanel extends Panel {
@@ -51,7 +49,7 @@ public abstract class ProjectInfoPanel extends Panel {
 		
 		if (getProject().getForkedFrom() != null) {
 			Link<Void> link = new ViewStateAwarePageLink<Void>("forkedFromLink", 
-					ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject().getForkedFrom())) {
+					ProjectDashboardPage.class, ProjectBlobPage.paramsOf(getProject().getForkedFrom())) {
 
 				@Override
 				protected void onComponentTag(ComponentTag tag) {
@@ -62,7 +60,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				
 			};
 			link.add(new Label("name", getProject().getForkedFrom().getName()));
-			link.setEnabled(SecurityUtils.canReadCode(getProject().getForkedFrom().getFacade()));
+			link.setEnabled(SecurityUtils.canAccess(getProject().getForkedFrom()));
 			add(link);
 		} else {
 			WebMarkupContainer link = new WebMarkupContainer("forkedFromLink");
@@ -84,45 +82,10 @@ public abstract class ProjectInfoPanel extends Panel {
 			add(new WebMarkupContainer("description").setVisible(false));
 		}
 		
-		add(new ViewStateAwarePageLink<Void>("commitsLink", 
-				ProjectCommitsPage.class, ProjectCommitsPage.paramsOf(getProject())) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(OneDev.getInstance(CommitInfoManager.class).getCommitCount(getProject()) != 0);
-			}
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-				add(new Label("count", commitInfoManager.getCommitCount(getProject()) + " commits"));
-			}
-			
-		});
-		
-		add(new ViewStateAwarePageLink<Void>("branchesLink", 
-				ProjectBranchesPage.class, ProjectBranchesPage.paramsOf(getProject())) {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(new Label("count", getProject().getRefs(Constants.R_HEADS).size() + " branches"));
-			}
-			
-		});
-		
-		add(new ViewStateAwarePageLink<Void>("tagsLink", 
-				ProjectTagsPage.class, ProjectTagsPage.paramsOf(getProject())) {
-
-			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-				add(new Label("count", getProject().getRefs(Constants.R_TAGS).size() + " tags"));
-			}
-			
-		});
+		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
+		add(new Label("commitCount", commitInfoManager.getCommitCount(getProject()) + " commits"));
+		add(new Label("branchCount", getProject().getRefs(Constants.R_HEADS).size() + " branches"));
+		add(new Label("tagCount", getProject().getRefs(Constants.R_TAGS).size() + " tags"));
 		
 		if (getProject().getForks().isEmpty()) {
 			add(new WebMarkupContainer("forks") {

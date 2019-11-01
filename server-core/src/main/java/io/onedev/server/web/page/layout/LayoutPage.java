@@ -23,7 +23,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
@@ -38,6 +37,9 @@ import io.onedev.server.web.page.admin.issuesetting.GlobalIssueSettingPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
 import io.onedev.server.web.page.admin.jobexecutor.JobExecutorPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
+import io.onedev.server.web.page.admin.role.NewRolePage;
+import io.onedev.server.web.page.admin.role.RoleDetailPage;
+import io.onedev.server.web.page.admin.role.RoleListPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
@@ -110,6 +112,11 @@ public abstract class LayoutPage extends BasePage {
 		administrationContainer.add(item = new WebMarkupContainer("userManagement"));
 		item.add(new ViewStateAwarePageLink<Void>("link", UserListPage.class));
 		if (getPage() instanceof UserListPage || getPage() instanceof NewUserPage || getPage() instanceof UserPage)
+			item.add(AttributeAppender.append("class", "active"));
+		
+		administrationContainer.add(item = new WebMarkupContainer("roleManagement"));
+		item.add(new ViewStateAwarePageLink<Void>("link", RoleListPage.class));
+		if (getPage() instanceof RoleListPage || getPage() instanceof NewRolePage || getPage() instanceof RoleDetailPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
 		administrationContainer.add(item = new WebMarkupContainer("groupManagement"));
@@ -192,7 +199,7 @@ public abstract class LayoutPage extends BasePage {
 		add(notSignedInContainer);
 		
 		WebMarkupContainer signedInContainer = new WebMarkupContainer("navSignedIn");
-		signedInContainer.add(new UserAvatar("avatar", UserIdent.of(UserFacade.of(loginUser))));
+		signedInContainer.add(new UserAvatar("avatar", UserIdent.of(loginUser)));
 		signedInContainer.add(new Label("name", loginUser!=null?loginUser.getDisplayName():""));
 		signedInContainer.add(new Label("header", loginUser!=null?loginUser.getDisplayName():""));
 		

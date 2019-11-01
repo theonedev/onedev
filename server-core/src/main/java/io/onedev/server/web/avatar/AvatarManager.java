@@ -4,25 +4,25 @@ import java.io.File;
 
 import javax.annotation.Nullable;
 
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.util.userident.UserIdent;
 
 public interface AvatarManager {
 	
 	String getAvatarUrl(UserIdent userIdent);
 	
-	String getAvatarUrl(ProjectFacade project);
+	String getAvatarUrl(Project project);
 	
-	void useAvatar(UserFacade user, @Nullable String avatarData);
+	void useAvatar(User user, @Nullable String avatarData);
 	
-	void useAvatar(ProjectFacade project, @Nullable String avatarData);
+	void useAvatar(Project project, @Nullable String avatarData);
 	
-	File getUploaded(UserFacade user);
+	File getUploaded(User user);
 	
-	File getUploaded(ProjectFacade project);
+	File getUploaded(Project project);
 	
-	void copyAvatar(ProjectFacade from, ProjectFacade to);
+	void copyAvatar(Project from, Project to);
 	
 }
 

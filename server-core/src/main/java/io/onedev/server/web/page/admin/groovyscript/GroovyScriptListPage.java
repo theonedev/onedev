@@ -33,7 +33,7 @@ import com.google.common.collect.Sets;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.groovyscript.GroovyScript;
+import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -114,7 +114,7 @@ public class GroovyScriptListPage extends AdministrationPage {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, TextUtils.describe(script.getJobAuthorization() != null));
+						return new Label(componentId, TextUtils.describe(script.isCanBeUsedByJobs()));
 					}
 					
 				});

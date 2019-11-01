@@ -13,11 +13,9 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.user.choice.UserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -27,7 +25,7 @@ import io.onedev.server.web.editable.annotation.UserChoice;
 @SuppressWarnings("serial")
 public class UserSingleChoiceEditor extends PropertyEditor<String> {
 
-	private final List<UserFacade> choices = new ArrayList<>();
+	private final List<User> choices = new ArrayList<>();
 	
 	private UserSingleChoice input;
 	
@@ -48,10 +46,10 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 			UserChoice userChoice = descriptor.getPropertyGetter().getAnnotation(UserChoice.class);
 			Preconditions.checkNotNull(userChoice);
 			if (userChoice.value().length() != 0) {
-				choices.addAll((List<UserFacade>)ReflectionUtils
+				choices.addAll((List<User>)ReflectionUtils
 						.invokeStaticMethod(descriptor.getBeanClass(), userChoice.value()));
 			} else {
-				choices.addAll(OneDev.getInstance(CacheManager.class).getUsers().values());
+				choices.addAll(OneDev.getInstance(UserManager.class).query());
 			}
 		} finally {
 			ComponentContext.pop();
@@ -63,13 +61,10 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 		else
 			user = null;
 		
-		UserFacade facade;
-		if (user != null && choices.contains(user.getFacade()))
-			facade = user.getFacade();
-		else
-			facade = null;
+		if (user != null && !choices.contains(user))
+			user = null;
 		
-    	input = new UserSingleChoice("input", Model.of(facade), new UserChoiceProvider(choices)) {
+    	input = new UserSingleChoice("input", Model.of(user), new UserChoiceProvider(choices)) {
 
 			@Override
 			protected void onInitialize() {
@@ -97,7 +92,7 @@ public class UserSingleChoiceEditor extends PropertyEditor<String> {
 
 	@Override
 	protected String convertInputToValue() throws ConversionException {
-		UserFacade user = input.getConvertedInput();
+		User user = input.getConvertedInput();
 		if (user != null)
 			return user.getName();
 		else

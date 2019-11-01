@@ -110,7 +110,6 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 		});
 
 		add(new IssuePullRequestsPanel("pullRequests", getModel()));
-		
 		add(new IssueCommitsPanel("commits", getModel()));
 		
 		List<Tab> tabs = new ArrayList<>();
@@ -189,7 +188,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 							}
 							
 						};
-						deleteLink.setVisible(SecurityUtils.canAdministrate(getIssue().getProject().getFacade()));
+						deleteLink.setVisible(SecurityUtils.canManageIssues(getIssue().getProject()));
 						return deleteLink;
 					}
 					

@@ -455,7 +455,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				Project project = getProject();
 				if ((state.mode == Mode.VIEW || state.mode == Mode.VIEW_PLAIN || state.mode == Mode.BLAME) 
 						&& isOnBranch() && state.blobIdent.isTree() 
-						&& SecurityUtils.canWriteCode(project.getFacade())) {
+						&& SecurityUtils.canWriteCode(project)) {
 					setVisible(true);
 					setEnabled(!reviewRequired.get() && !buildRequired.get());
 				} else {
@@ -1334,7 +1334,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 
 	@Override

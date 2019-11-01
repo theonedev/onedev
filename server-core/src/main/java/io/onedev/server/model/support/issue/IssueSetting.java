@@ -115,10 +115,6 @@ public class IssueSetting implements Serializable {
 	}
 
 	public void onRenameUser(String oldName, String newName) {
-		if (transitionSpecs != null) {
-			for (TransitionSpec transition: transitionSpecs)
-				transition.onRenameUser(oldName, newName);
-		}
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs)
 				board.onRenameUser(getGlobalSetting(), oldName, newName);
@@ -136,10 +132,6 @@ public class IssueSetting implements Serializable {
 	
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (transitionSpecs != null) {
-			for (TransitionSpec transition: transitionSpecs) 
-				usage.add(transition.onDeleteUser(userName));
-		}
 		if (boardSpecs != null) {
 			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) { 
 				Usage usageInBoard = it.next().onDeleteUser(getGlobalSetting(), userName);
@@ -152,18 +144,18 @@ public class IssueSetting implements Serializable {
 		return usage.prefix("issue setting");
 	}
 
-	public void onRenameGroup(String oldName, String newName) {
+	public void onRenameRole(String oldName, String newName) {
 		if (transitionSpecs != null) {
 			for (TransitionSpec transition: transitionSpecs)
-				transition.onRenameGroup(oldName, newName);
+				transition.onRenameRole(oldName, newName);
 		}
 	}
 
-	public Usage onDeleteGroup(String groupName) {
+	public Usage onDeleteRole(String roleName) {
 		Usage usage = new Usage();
 		if (transitionSpecs != null) {
 			for (TransitionSpec transition: transitionSpecs) 
-				usage.add(transition.onDeleteGroup(groupName));
+				usage.add(transition.onDeleteRole(roleName));
 		}
 		return usage.prefix("issue setting");
 	}

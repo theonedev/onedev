@@ -211,7 +211,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 	
 	public static PageParameters paramsOf(Project project, @Nullable String query) {

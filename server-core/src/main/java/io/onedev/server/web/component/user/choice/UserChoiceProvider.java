@@ -6,7 +6,7 @@ import java.util.List;
 
 import io.onedev.commons.utils.matchscore.MatchScoreProvider;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.model.User;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;
@@ -15,25 +15,25 @@ public class UserChoiceProvider extends AbstractUserChoiceProvider {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final List<UserFacade> choices;
+	private final List<User> choices;
 	
-	public UserChoiceProvider(List<UserFacade> choices) {
+	public UserChoiceProvider(List<User> choices) {
 		this.choices = new ArrayList<>(choices);
-		this.choices.sort(Comparator.comparing(UserFacade::getDisplayName));
+		this.choices.sort(Comparator.comparing(User::getDisplayName));
 	}
 	
 	@Override
-	public void query(String term, int page, Response<UserFacade> response) {
-		List<UserFacade> matched = MatchScoreUtils.filterAndSort(choices, new MatchScoreProvider<UserFacade>() {
+	public void query(String term, int page, Response<User> response) {
+		List<User> matched = MatchScoreUtils.filterAndSort(choices, new MatchScoreProvider<User>() {
 
 			@Override
-			public double getMatchScore(UserFacade object) {
+			public double getMatchScore(User object) {
 				return object.getMatchScore(term);
 			}
 			
 		});
 		
-		new ResponseFiller<UserFacade>(response).fill(matched, page, WebConstants.PAGE_SIZE);
+		new ResponseFiller<User>(response).fill(matched, page, WebConstants.PAGE_SIZE);
 	}
 
 }

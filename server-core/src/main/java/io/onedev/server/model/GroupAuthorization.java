@@ -1,6 +1,5 @@
 package io.onedev.server.model;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
@@ -9,14 +8,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import io.onedev.server.security.permission.ProjectPrivilege;
-import io.onedev.server.util.facade.GroupAuthorizationFacade;
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
 
 @Entity
 @Table(
 		indexes={@Index(columnList="o_group_id"), @Index(columnList="o_project_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_group_id", "o_project_id"})
 })
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class GroupAuthorization extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -29,8 +29,9 @@ public class GroupAuthorization extends AbstractEntity {
 	@JoinColumn(nullable=false)
 	private Group group;
 	
-	@Column(nullable=false)
-	private ProjectPrivilege privilege = ProjectPrivilege.CODE_READ;
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(nullable=false)
+	private Role role;
 	
 	public Project getProject() {
 		return project;
@@ -48,16 +49,12 @@ public class GroupAuthorization extends AbstractEntity {
 		this.group = group;
 	}
 
-	public ProjectPrivilege getPrivilege() {
-		return privilege;
+	public Role getRole() {
+		return role;
 	}
 
-	public void setPrivilege(ProjectPrivilege privilege) {
-		this.privilege = privilege;
+	public void setRole(Role role) {
+		this.role = role;
 	}
 
-	public GroupAuthorizationFacade getFacade() {
-		return new GroupAuthorizationFacade(this);
-	}
-	
 }

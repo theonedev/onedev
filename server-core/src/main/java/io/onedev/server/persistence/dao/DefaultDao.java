@@ -100,7 +100,15 @@ public class DefaultDao implements Dao, Serializable {
 	@Sessional
 	@Override
 	public <T extends AbstractEntity> List<T> query(Class<T> entityClass) {
-		return query(EntityCriteria.of(entityClass), 0, Integer.MAX_VALUE);
+		return query(entityClass, false);
+	}
+	
+	@Sessional
+	@Override
+	public <T extends AbstractEntity> List<T> query(Class<T> entityClass, boolean cacheable) {
+		EntityCriteria<T> criteria = EntityCriteria.of(entityClass);		
+		criteria.setCacheable(cacheable);
+		return query(criteria, 0, Integer.MAX_VALUE);
 	}
 
 	@Override

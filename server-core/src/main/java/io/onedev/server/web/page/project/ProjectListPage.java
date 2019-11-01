@@ -2,9 +2,8 @@ package io.onedev.server.web.page.project;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -24,13 +23,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.commons.utils.matchscore.MatchScoreProvider;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.security.permission.ProjectPrivilege;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.GroupAuthorizationFacade;
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserAuthorizationFacade;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
 import io.onedev.server.web.page.layout.LayoutPage;
@@ -49,34 +44,20 @@ public class ProjectListPage extends LayoutPage {
 	
 	private String query;
 	
-	private final IModel<List<ProjectFacade>> orphanProjectsModel = new LoadableDetachableModel<List<ProjectFacade>>() {
+	private final IModel<List<Project>> orphanProjectsModel = new LoadableDetachableModel<List<Project>>() {
 
 		@Override
-		protected List<ProjectFacade> load() {
-			CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
-			List<ProjectFacade> projects = new ArrayList<>();
+		protected List<Project> load() {
+			List<Project> projects = OneDev.getInstance(ProjectManager.class).query()
+					.stream()
+					.filter(it->it.getOwner() == null)
+					.sorted(Comparator.comparing(Project::getName))
+					.collect(Collectors.toList());
 			
-			Set<Long> projectIdsWithExplicitAdministrators = new HashSet<>();
-			for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
-				if (authorization.getPrivilege() == ProjectPrivilege.ADMINISTRATION)
-					projectIdsWithExplicitAdministrators.add(authorization.getProjectId());
-			}
-			for (GroupAuthorizationFacade authorization: cacheManager.getGroupAuthorizations().values()) {
-				if (authorization.getPrivilege() == ProjectPrivilege.ADMINISTRATION)
-					projectIdsWithExplicitAdministrators.add(authorization.getProjectId());
-			}
-			
-			for (ProjectFacade project: cacheManager.getProjects().values()) {
-				if (!projectIdsWithExplicitAdministrators.contains(project.getId())) {
-					projects.add(project);
-				}
-			}
-			projects.sort(Comparator.comparing(ProjectFacade::getName));
-			
-			return MatchScoreUtils.filterAndSort(projects, new MatchScoreProvider<ProjectFacade>() {
+			return MatchScoreUtils.filterAndSort(projects, new MatchScoreProvider<Project>() {
 
 				@Override
-				public double getMatchScore(ProjectFacade object) {
+				public double getMatchScore(Project object) {
 					return MatchScoreUtils.getMatchScore(object.getName(), query);
 				}
 				
@@ -91,17 +72,17 @@ public class ProjectListPage extends LayoutPage {
 		showOrphanProjects = params.get(PARAM_ORPHAN).toBoolean(false);
 	}
 	
-	private final IModel<List<ProjectFacade>> projectsModel = new LoadableDetachableModel<List<ProjectFacade>>() {
+	private final IModel<List<Project>> projectsModel = new LoadableDetachableModel<List<Project>>() {
 
 		@Override
-		protected List<ProjectFacade> load() {
-			List<ProjectFacade> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
+		protected List<Project> load() {
+			List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
 					.getAccessibleProjects(getLoginUser()));
-			projects.sort(ProjectFacade::compareLastVisit);
-			return MatchScoreUtils.filterAndSort(projects, new MatchScoreProvider<ProjectFacade>() {
+			projects.sort(Project::compareLastVisit);
+			return MatchScoreUtils.filterAndSort(projects, new MatchScoreProvider<Project>() {
 
 				@Override
-				public double getMatchScore(ProjectFacade object) {
+				public double getMatchScore(Project object) {
 					return MatchScoreUtils.getMatchScore(object.getName(), query);
 				}
 				
@@ -184,10 +165,10 @@ public class ProjectListPage extends LayoutPage {
 			
 		});
 		
-		add(projectList = new ProjectListPanel("projects", new AbstractReadOnlyModel<List<ProjectFacade>>() {
+		add(projectList = new ProjectListPanel("projects", new AbstractReadOnlyModel<List<Project>>() {
 
 			@Override
-			public List<ProjectFacade> getObject() {
+			public List<Project> getObject() {
 				if (showOrphanProjects)
 					return orphanProjectsModel.getObject();
 				else

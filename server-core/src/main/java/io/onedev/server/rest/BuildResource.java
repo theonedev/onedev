@@ -58,7 +58,7 @@ public class BuildResource {
 
     	Collection<Build> builds = buildManager.query(criteria, offset, count);
 		for (Build build: builds) {
-			if (!SecurityUtils.canReadIssues(build.getProject().getFacade()))
+			if (!SecurityUtils.canAccess(build.getProject()))
 				throw new UnauthorizedException("Unable to access project '" + build.getProject().getName() + "'");
 		}
 		
@@ -70,7 +70,7 @@ public class BuildResource {
     @GET
     public Build get(@PathParam("buildId") Long buildId) {
     	Build build = buildManager.load(buildId);
-    	if (!SecurityUtils.canReadIssues(build.getProject().getFacade()))
+    	if (!SecurityUtils.canAccess(build.getProject()))
 			throw new UnauthorizedException("Unauthorized access to project " + build.getProject().getName());
     	else
     		return build;

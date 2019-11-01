@@ -38,6 +38,7 @@
 	margin-right: 16px;
 }
 
-.job-executor .panel-heading .name {
+.job-executor .panel-heading .name,
+.role .panel-heading .name {
 	margin-right: 8px;
 }

@@ -8,9 +8,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.model.IssueChange;
-import io.onedev.server.util.facade.UserFacade;
-import io.onedev.server.web.util.DeleteCallback;
 import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.web.util.DeleteCallback;
 
 @SuppressWarnings("serial")
 public class IssueChangeActivity implements IssueActivity {
@@ -49,7 +48,7 @@ public class IssueChangeActivity implements IssueActivity {
 
 	@Override
 	public UserIdent getUser() {
-		return UserIdent.of(UserFacade.of(getChange().getUser()), getChange().getUserName());
+		return UserIdent.of(getChange().getUser(), getChange().getUserName());
 	}
 
 }

@@ -122,11 +122,9 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.ProjectPrivilege;
+import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.scriptidentity.JobIdentity;
@@ -706,11 +704,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 		checkBuilds(request);
 		
-		ProjectFacade project = request.getTargetProject().getFacade();
-		Permission writeCode = new ProjectPermission(project, ProjectPrivilege.CODE_WRITE); 
+		Project project = request.getTargetProject();
+		Permission writeCode = new ProjectPermission(project, new WriteCode()); 
 		if (request.getSubmitter() == null || !request.getSubmitter().asSubject().isPermitted(writeCode)) {
 			Collection<User> writers = new ArrayList<>();
-			for (UserFacade facade: SecurityUtils.getAuthorizedUsers(project, ProjectPrivilege.CODE_WRITE)) 
+			for (User facade: SecurityUtils.getAuthorizedUsers(project, new WriteCode())) 
 				writers.add(userManager.load(facade.getId()));
 			checkReviews(writers, 1, request.getLatestUpdate());
 		}
@@ -944,7 +942,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		for (Map.Entry<User, Long> entry: contributions.entrySet()) {
 			User user = entry.getKey();
 			int pathEdits = commitInfoManager.getEdits(
-					update.getRequest().getTargetProject().getFacade(), user.getFacade(), path);
+					update.getRequest().getTargetProject(), user, path);
 			entry.setValue(entry.getValue() + edits*pathEdits);
 			addedContributions += pathEdits;
 		}

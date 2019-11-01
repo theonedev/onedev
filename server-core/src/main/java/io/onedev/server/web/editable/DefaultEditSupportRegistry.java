@@ -34,7 +34,7 @@ public class DefaultEditSupportRegistry implements EditSupportRegistry {
 	public PropertyContext<Serializable> getPropertyEditContext(PropertyDescriptor descriptor) {
 		for (EditSupport each: editSupports) {
 			PropertyContext<?> editContext = each.getEditContext(descriptor);
-			if (editContext != null)
+			if (editContext != null) 
 				return (PropertyContext<Serializable>) editContext;
 		}
 		throw new RuntimeException(String.format(

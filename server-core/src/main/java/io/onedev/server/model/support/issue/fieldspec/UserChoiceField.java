@@ -9,11 +9,9 @@ import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.userchoiceinput.UserChoiceInput;
+import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.AllUsers;
 import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.GroupUsers;
-import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.IssueReaders;
 import io.onedev.server.model.support.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.model.support.inputspec.userchoiceinput.defaultvalueprovider.SpecifiedDefaultValue;
 import io.onedev.server.util.Usage;
@@ -25,7 +23,7 @@ public class UserChoiceField extends FieldSpec {
 	
 	private static final long serialVersionUID = 1L;
 
-	private ChoiceProvider choiceProvider = new IssueReaders();
+	private ChoiceProvider choiceProvider = new AllUsers();
 
 	private DefaultValueProvider defaultValueProvider;
 	
@@ -84,24 +82,6 @@ public class UserChoiceField extends FieldSpec {
 		return new Usage();
 	}
 
-	public void onRenameGroup(ChoiceProvider choiceProvider, String oldName, String newName) {
-		if (choiceProvider instanceof GroupUsers) {
-			GroupUsers groupUsers = (GroupUsers) choiceProvider;
-			if (groupUsers.getGroupName().equals(oldName))
-				groupUsers.setGroupName(newName);
-		}
-	}
-
-	public Usage onDeleteGroup(InputSpec inputSpec, ChoiceProvider choiceProvider, String groupName) {
-		Usage usage = new Usage();
-		if (choiceProvider instanceof GroupUsers) {
-			GroupUsers groupUsers = (GroupUsers) choiceProvider;
-			if (groupUsers.getGroupName().equals(groupName))
-				usage.add("available choices");
-		}
-		return usage.prefix("field '" + getName() + "'");
-	}
-	
 	@Override
 	public Object convertToObject(List<String> strings) {
 		return UserChoiceInput.convertToObject(strings);

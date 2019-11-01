@@ -13,7 +13,6 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.User;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -49,7 +48,7 @@ public abstract class UserPage extends AdministrationPage {
 			protected Component newHead(String componentId) {
 				Fragment fragment = new Fragment(componentId, "sidebarHeadFrag", UserPage.this);
 				User user = userModel.getObject();
-				fragment.add(new UserAvatar("avatar", UserIdent.of(UserFacade.of(user))).add(AttributeAppender.append("title", user.getDisplayName())));
+				fragment.add(new UserAvatar("avatar", UserIdent.of(user)).add(AttributeAppender.append("title", user.getDisplayName())));
 				fragment.add(new Label("name", user.getDisplayName()));
 				return fragment;
 			}
@@ -102,7 +101,7 @@ public abstract class UserPage extends AdministrationPage {
 			}
 			
 		};
-		link.add(new UserAvatar("avatar", UserIdent.of(getUser().getFacade())));
+		link.add(new UserAvatar("avatar", UserIdent.of(getUser())));
 		link.add(new Label("name", getUser().getDisplayName()));
 		fragment.add(link);
 		

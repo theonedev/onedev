@@ -33,6 +33,9 @@ import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueStateListPage;
 import io.onedev.server.web.page.admin.jobexecutor.JobExecutorPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
+import io.onedev.server.web.page.admin.role.NewRolePage;
+import io.onedev.server.web.page.admin.role.RoleDetailPage;
+import io.onedev.server.web.page.admin.role.RoleListPage;
 import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
@@ -57,12 +60,14 @@ import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
 import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.FixingBuildsPage;
@@ -145,8 +150,13 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/users/${user}/password", UserPasswordPage.class));
 		add(new OnePageMapper("administration/users/${user}/token", UserTokenPage.class));
 		
+		add(new OnePageMapper("administration/roles", RoleListPage.class));
+		add(new OnePageMapper("administration/roles/new", NewRolePage.class));
+		add(new OnePageMapper("administration/roles/${role}", RoleDetailPage.class));
+		
 		add(new OnePageMapper("administration/groups", GroupListPage.class));
 		add(new OnePageMapper("administration/groups/new", NewGroupPage.class));
+		add(new OnePageMapper("administration/groups/${group}", GroupProfilePage.class));
 		add(new OnePageMapper("administration/groups/${group}/profile", GroupProfilePage.class));
 		add(new OnePageMapper("administration/groups/${group}/members", GroupMembershipsPage.class));
 		add(new OnePageMapper("administration/groups/${group}/authorizations", GroupAuthorizationsPage.class));
@@ -190,7 +200,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 			
 		});
 		add(new OnePageMapper("projects/new", NewProjectPage.class));
-		add(new OnePageMapper("projects/${project}", ProjectBlobPage.class));
+		add(new OnePageMapper("projects/${project}", ProjectDashboardPage.class));
 
 		add(new OnePageMapper("projects/${project}/blob/#{revision}/#{path}", ProjectBlobPage.class) {
 			
@@ -239,7 +249,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/issues/${issue}/builds", FixingBuildsPage.class));
 		add(new OnePageMapper("projects/${project}/issues/new", NewIssuePage.class));
 		add(new OnePageMapper("projects/${project}/builds", ProjectBuildsPage.class));
-		add(new OnePageMapper("projects/${project}/builds/${build}", BuildLogPage.class));
+		add(new OnePageMapper("projects/${project}/builds/${build}", BuildDashboardPage.class));
 		add(new OnePageMapper("projects/${project}/builds/${build}/log", BuildLogPage.class));
 		add(new OnePageMapper("projects/${project}/builds/${build}/changes", BuildChangesPage.class));
 		add(new OnePageMapper("projects/${project}/builds/${build}/fixed-issues", FixedIssuesPage.class));

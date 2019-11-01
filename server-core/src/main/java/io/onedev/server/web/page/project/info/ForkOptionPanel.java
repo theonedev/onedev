@@ -39,7 +39,7 @@ abstract class ForkOptionPanel extends Panel {
 		project.setName(getProject().getName() + "." + SecurityUtils.getUser().getName());
 		
 		BeanEditor editor = BeanContext.edit("editor", project, 
-				Lists.newArrayList("name", "description", "defaultPrivilege"), false);
+				Lists.newArrayList("name", "description", "defaultRoles"), false);
 		
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
@@ -58,7 +58,7 @@ abstract class ForkOptionPanel extends Panel {
 					target.add(form);
 				} else {
 					projectManager.fork(getProject(), project);
-					Session.get().success("Repository forked");
+					Session.get().success("Project forked");
 					setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(project));
 				}
 			}

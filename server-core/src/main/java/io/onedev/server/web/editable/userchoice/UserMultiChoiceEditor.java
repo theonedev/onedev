@@ -15,11 +15,9 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.ComponentContext;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.web.component.user.choice.UserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -29,7 +27,7 @@ import io.onedev.server.web.editable.annotation.UserChoice;
 @SuppressWarnings("serial")
 public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	
-	private final List<UserFacade> choices = new ArrayList<>();
+	private final List<User> choices = new ArrayList<>();
 	
 	private UserMultiChoice input;
 	
@@ -50,22 +48,22 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 			UserChoice userChoice = descriptor.getPropertyGetter().getAnnotation(UserChoice.class);
 			Preconditions.checkNotNull(userChoice);
 			if (userChoice.value().length() != 0) {
-				choices.addAll((List<UserFacade>)ReflectionUtils
+				choices.addAll((List<User>)ReflectionUtils
 						.invokeStaticMethod(descriptor.getBeanClass(), userChoice.value()));
 			} else {
-				choices.addAll(OneDev.getInstance(CacheManager.class).getUsers().values());
+				choices.addAll(OneDev.getInstance(UserManager.class).query());
 			}
 		} finally {
 			ComponentContext.pop();
 		}
 
-		List<UserFacade> users = new ArrayList<>();
+		List<User> users = new ArrayList<>();
 		if (getModelObject() != null) {
 			UserManager userManager = OneDev.getInstance(UserManager.class);
 			for (String userName: getModelObject()) {
 				User user = userManager.findByName(userName);
-				if (user != null && choices.contains(user.getFacade()))
-					users.add(user.getFacade());
+				if (user != null && choices.contains(user))
+					users.add(user);
 			}
 		} 
 		
@@ -79,6 +77,7 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 			
 		};
         input.setConvertEmptyInputStringToNull(true);
+        
         input.setRequired(descriptor.isPropertyRequired());
         input.setLabel(Model.of(getDescriptor().getDisplayName()));
         
@@ -97,9 +96,9 @@ public class UserMultiChoiceEditor extends PropertyEditor<List<String>> {
 	@Override
 	protected List<String> convertInputToValue() throws ConversionException {
 		List<String> userNames = new ArrayList<>();
-		Collection<UserFacade> users = input.getConvertedInput();
+		Collection<User> users = input.getConvertedInput();
 		if (users != null) {
-			for (UserFacade user: users)
+			for (User user: users)
 				userNames.add(user.getName());
 		} 
 		return userNames;

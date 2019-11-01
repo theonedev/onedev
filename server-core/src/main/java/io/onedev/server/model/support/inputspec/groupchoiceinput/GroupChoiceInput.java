@@ -13,14 +13,14 @@ import io.onedev.server.OneDev;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.inputspec.groupchoiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.model.support.inputspec.groupchoiceinput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.util.facade.GroupFacade;
+import io.onedev.server.model.Group;
 
 public class GroupChoiceInput {
 	
 	public static List<String> getPossibleValues(ChoiceProvider choiceProvider) {
 		List<String> possibleValues = new ArrayList<>();
 		if (OneDev.getInstance(Validator.class).validate(choiceProvider).isEmpty()) {
-			for (GroupFacade group: choiceProvider.getChoices(true))
+			for (Group group: choiceProvider.getChoices(true))
 				possibleValues.add(group.getName());
 		}
 		return possibleValues;

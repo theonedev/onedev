@@ -42,7 +42,7 @@ public class InvalidCodeCommentPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canAdministrate(getCodeComment().getProject().getFacade()));
+				setVisible(SecurityUtils.canManage(getCodeComment().getProject()));
 			}
 			
 		}.add(new ConfirmOnClick("Really want to delete this code comment?")));

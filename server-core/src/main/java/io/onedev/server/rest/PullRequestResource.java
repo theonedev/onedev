@@ -43,7 +43,7 @@ public class PullRequestResource {
     @GET
     public PullRequest get(@PathParam("pullRequestId") Long pullRequestId) {
     	PullRequest request = pullRequestManager.load(pullRequestId);
-    	if (!SecurityUtils.canReadCode(request.getTargetProject().getFacade()))
+    	if (!SecurityUtils.canReadCode(request.getTargetProject()))
     		throw new UnauthorizedException();
     	return request;
     }
@@ -102,7 +102,7 @@ public class PullRequestResource {
 
     	Collection<PullRequest> requests = pullRequestManager.query(criteria, offset, count);
 		for (PullRequest request: requests) {
-	    	if (!SecurityUtils.canReadCode(request.getTargetProject().getFacade())) {
+	    	if (!SecurityUtils.canReadCode(request.getTargetProject())) {
 	    		throw new UnauthorizedException("Unable to access pull requests of project '" 
 	    				+ request.getTargetProject() + "'");
 	    	}

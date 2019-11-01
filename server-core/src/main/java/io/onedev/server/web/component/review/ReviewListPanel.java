@@ -29,9 +29,9 @@ import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
@@ -114,7 +114,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected void populateItem(ListItem<PullRequestReview> item) {
 				PullRequestReview review = item.getModelObject();
-				item.add(new UserIdentPanel("user", UserIdent.of(UserFacade.of(review.getUser())), Mode.AVATAR_AND_NAME));
+				item.add(new UserIdentPanel("user", UserIdent.of(review.getUser()), Mode.AVATAR_AND_NAME));
 				
 				PullRequest request = getPullRequest();
 				
@@ -215,7 +215,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 			}
 		                                                                                                                              
 			@Override
-			protected void onSelect(AjaxRequestTarget target, UserFacade user) {
+			protected void onSelect(AjaxRequestTarget target, User user) {
 				super.onSelect(target, user);
 				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}

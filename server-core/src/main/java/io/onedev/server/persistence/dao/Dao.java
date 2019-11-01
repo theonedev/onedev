@@ -77,6 +77,8 @@ public interface Dao {
 	
 	<T extends AbstractEntity> List<T> query(Class<T> entityClass);
 	
+	<T extends AbstractEntity> List<T> query(Class<T> entityClass, boolean cacheable);
+	
 	/**
 	 * This method expects to lookup a single entity with specified criteria
 	 * 

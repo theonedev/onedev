@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -12,6 +13,7 @@ import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.BeanUtils;
@@ -120,16 +122,16 @@ public class PropertyDescriptor implements Serializable {
 			return null;
 	}
 
-	public boolean isPropertyVisible(ComponentContext componentContext, BeanDescriptor beanDescriptor) {
-		return isPropertyVisible(componentContext, beanDescriptor, Sets.newHashSet());
+	public boolean isPropertyVisible(Map<String, ComponentContext> componentContexts, BeanDescriptor beanDescriptor) {
+		return isPropertyVisible(componentContexts, beanDescriptor, Sets.newHashSet());
 	}
 	
-	private boolean isPropertyVisible(ComponentContext componentContext, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
+	private boolean isPropertyVisible(Map<String, ComponentContext> componentContexts, BeanDescriptor beanDescriptor, Set<String> checkedPropertyNames) {
 		if (!checkedPropertyNames.add(getPropertyName()))
 			return false;
 		
 		Set<String> prevDependencyPropertyNames = new HashSet<>(getDependencyPropertyNames());
-		ComponentContext.push(componentContext);
+		ComponentContext.push(Preconditions.checkNotNull(componentContexts.get(getPropertyName())));
 		try {
 			/* 
 			 * Sometimes, the dependency may include properties introduced while evaluating available choices 
@@ -142,7 +144,7 @@ public class PropertyDescriptor implements Serializable {
 				return false;
 			for (String dependencyPropertyName: getDependencyPropertyNames()) {
 				Set<String> copyOfCheckedPropertyNames = new HashSet<>(checkedPropertyNames);
-				if (!beanDescriptor.getProperty(dependencyPropertyName).isPropertyVisible(componentContext, beanDescriptor, copyOfCheckedPropertyNames))
+				if (!beanDescriptor.getProperty(dependencyPropertyName).isPropertyVisible(componentContexts, beanDescriptor, copyOfCheckedPropertyNames))
 					return false;
 			}
 			return true;

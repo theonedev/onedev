@@ -2,7 +2,6 @@ package io.onedev.server.web.editable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +15,8 @@ public class Path implements Serializable {
 	private List<PathNode> nodes = new ArrayList<>();
 	
 	public Path(PathNode...nodes) {
-		this.nodes = Arrays.asList(nodes);
+		for (PathNode node: nodes)
+			this.nodes.add(node);
 	}
 	
 	public Path(List<PathNode> nodes) {

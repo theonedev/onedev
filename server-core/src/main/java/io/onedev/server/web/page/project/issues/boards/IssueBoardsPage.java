@@ -255,7 +255,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			Fragment boardFragment = new Fragment("content", "hasBoardsFrag", this);
 
 			Form<?> form = new Form<Void>("query");
-			if (!SecurityUtils.canAdministrate(getProject().getFacade()))
+			if (!SecurityUtils.canManageIssues(getProject()))
 				form.add(AttributeAppender.append("style", "margin-right: 0;"));
 			
 			form.add(new DropdownLink("board") {
@@ -268,7 +268,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected Component newContent(String id, FloatingPanel dropdown) {
 					Fragment menuFragment = new Fragment(id, "boardMenuFrag", IssueBoardsPage.this);
-					if (SecurityUtils.canAdministrate(getProject().getFacade())) {
+					if (SecurityUtils.canManageIssues(getProject())) {
 						menuFragment.add(AttributeAppender.append("class", "administrative"));
 					} 
 					menuFragment.add(new Link<Void>("useDefault") {
@@ -283,7 +283,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						@Override
 						protected void onConfigure() {
 							super.onConfigure();
-							setVisible(SecurityUtils.canAdministrate(getProject().getFacade()) 
+							setVisible(SecurityUtils.canManageIssues(getProject()) 
 									&& getProject().getIssueSetting().getBoardSpecs(false) != null);
 						}
 						
@@ -293,7 +293,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 						@Override
 						protected void populateItem(ListItem<BoardSpec> item) {
-							item.add(new WebMarkupContainer("dragIndicator").setVisible(SecurityUtils.canAdministrate(getProject().getFacade())));
+							item.add(new WebMarkupContainer("dragIndicator").setVisible(SecurityUtils.canManageIssues(getProject())));
 							
 							PageParameters params = IssueBoardsPage.paramsOf(
 									getProject(), item.getModelObject(), getMilestone(), 
@@ -307,7 +307,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 								@Override
 								protected void onConfigure() {
 									super.onConfigure();
-									setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
+									setVisible(SecurityUtils.canManageIssues(getProject()));
 								}
 								
 							};
@@ -346,7 +346,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						
 					});
 					
-					if (SecurityUtils.canAdministrate(getProject().getFacade())) {
+					if (SecurityUtils.canManage(getProject())) {
 						menuFragment.add(new SortBehavior() {
 							
 							@Override
@@ -372,7 +372,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 						@Override
 						protected void onConfigure() {
 							super.onConfigure();
-							setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
+							setVisible(SecurityUtils.canManageIssues(getProject()));
 						}
 						
 					});
@@ -434,7 +434,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
 						Fragment menuFragment = new Fragment(id, "milestoneMenuFrag", IssueBoardsPage.this);
-						if (SecurityUtils.canAdministrate(getProject().getFacade()))
+						if (SecurityUtils.canManage(getProject()))
 							menuFragment.add(AttributeAppender.append("class", "administrative"));
 
 						menuFragment.add(new ListView<Milestone>("milestones", new LoadableDetachableModel<List<Milestone>>() {
@@ -467,7 +467,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 									@Override
 									protected void onConfigure() {
 										super.onConfigure();
-										setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
+										setVisible(SecurityUtils.canManageIssues(getProject()));
 									}
 									
 								};
@@ -581,7 +581,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 							@Override
 							protected void onConfigure() {
 								super.onConfigure();
-								setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
+								setVisible(SecurityUtils.canManageIssues(getProject()));
 							}
 							
 						});
@@ -591,7 +591,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 				});		
 				form.add(milestoneFragment);
-			} else if (SecurityUtils.canAdministrate(getProject().getFacade())) {
+			} else if (SecurityUtils.canManageIssues(getProject())) {
 				form.add(new CreateMilestoneLink("milestone") {
 
 					@Override
@@ -699,7 +699,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
+					setVisible(SecurityUtils.canManageIssues(getProject()));
 				}
 				
 			});
@@ -708,7 +708,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 				@Override
 				protected void onConfigure() {
 					super.onConfigure();
-					setVisible(SecurityUtils.canAdministrate(getProject().getFacade()) 
+					setVisible(SecurityUtils.canManageIssues(getProject()) 
 							&& getProject().getIssueSetting().getBoardSpecs(false) != null);
 				}
 

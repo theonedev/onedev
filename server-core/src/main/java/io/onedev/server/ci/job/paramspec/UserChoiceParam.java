@@ -10,8 +10,8 @@ import javax.validation.constraints.NotNull;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.support.inputspec.userchoiceinput.UserChoiceInput;
+import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.AllUsers;
 import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.IssueReaders;
 import io.onedev.server.model.support.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -21,7 +21,7 @@ public class UserChoiceParam extends ParamSpec {
 	
 	private static final long serialVersionUID = 1L;
 
-	private ChoiceProvider choiceProvider = new IssueReaders();
+	private ChoiceProvider choiceProvider = new AllUsers();
 
 	private DefaultValueProvider defaultValueProvider;
 	

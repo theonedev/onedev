@@ -144,7 +144,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			@Override
 			protected List<? extends Tab> newTabs() {
 				List<ProjectTab> tabs = ProjectPage.this.newTabs();
-				if (SecurityUtils.canAdministrate(getProject().getFacade()))
+				if (SecurityUtils.canManage(getProject()))
 					tabs.add(new ProjectTab(Model.of("Setting"), "fa fa-fw fa-cog", 0, GeneralSettingPage.class, ProjectSettingPage.class));
 				return tabs;
 			}
@@ -187,7 +187,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadIssues(getProject().getFacade());
+		return SecurityUtils.canAccess(getProject());
 	}
 	
 	@Override
@@ -197,7 +197,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	
 	private List<ProjectTab> newTabs() {
 		List<ProjectTab> tabs = new ArrayList<>();
-		if (SecurityUtils.canReadCode(getProject().getFacade())) {
+		if (SecurityUtils.canReadCode(getProject())) {
 			tabs.add(new ProjectTab(Model.of("Files"), "fa fa-fw fa-file-text-o", 0, ProjectBlobPage.class));
 			tabs.add(new ProjectTab(Model.of("Commits"), "fa fa-fw fa-ext fa-commit", 0,
 					ProjectCommitsPage.class, CommitDetailPage.class) {
@@ -271,7 +271,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			
 		});
 		
-		if (SecurityUtils.canReadCode(getProject().getFacade())) {
+		if (SecurityUtils.canReadCode(getProject())) {
 			tabs.add(new ProjectTab(Model.of("Code Comments"), "fa fa-fw fa-comments", 
 					0, ProjectCodeCommentsPage.class) {
 
@@ -330,7 +330,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					
 				});
 				WebMarkupContainer settingItem = new WebMarkupContainer("setting");
-				settingItem.setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
+				settingItem.setVisible(SecurityUtils.canManage(getProject()));
 				settingItem.add(new Tabbable("menu", newSettingTabs()));
 				if (getPage() instanceof ProjectSettingPage) 
 					settingItem.add(AttributeAppender.append("class", "active expanded"));

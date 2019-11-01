@@ -18,7 +18,6 @@ public class TestPage extends BasePage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-
 		add(new Link<Void>("test") {
 
 			@Override
@@ -34,5 +33,5 @@ public class TestPage extends BasePage {
 		response.render(JavaScriptHeaderItem.forReference(new TestResourceReference()));
 		response.render(OnDomReadyHeaderItem.forScript("onedev.server.test.onDomReady();"));
 	}
-
+	
 }

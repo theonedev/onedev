@@ -25,14 +25,15 @@ import org.slf4j.LoggerFactory;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.cache.CacheManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
+import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
+import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.persistence.TransactionManager;
@@ -40,12 +41,6 @@ import io.onedev.server.security.permission.CreateProjects;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UserAdministration;
-import io.onedev.server.util.facade.GroupAuthorizationFacade;
-import io.onedev.server.util.facade.GroupFacade;
-import io.onedev.server.util.facade.MembershipFacade;
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserAuthorizationFacade;
-import io.onedev.server.util.facade.UserFacade;
 
 @Singleton
 public class OneAuthorizingRealm extends AuthorizingRealm {
@@ -54,8 +49,6 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 	
     private final UserManager userManager;
     
-    private final CacheManager cacheManager;
-    
     private final SettingManager configManager;
     
     private final MembershipManager membershipManager;
@@ -63,31 +56,22 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     private final GroupManager groupManager;
     
     private final TransactionManager transactionManager;
-        
+    
 	@Inject
-    public OneAuthorizingRealm(UserManager userManager, CacheManager cacheManager, SettingManager configManager, 
-    		MembershipManager membershipManager, GroupManager groupManager, TransactionManager transactionManager) {
+    public OneAuthorizingRealm(UserManager userManager, SettingManager configManager, 
+    		MembershipManager membershipManager, GroupManager groupManager, 
+    		TransactionManager transactionManager) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(AppLoader.getInstance(PasswordService.class));
 		setCredentialsMatcher(passwordMatcher);
 		
     	this.userManager = userManager;
-    	this.cacheManager = cacheManager;
     	this.configManager = configManager;
     	this.membershipManager = membershipManager;
     	this.groupManager = groupManager;
     	this.transactionManager = transactionManager;
     }
 
-	private Collection<Permission> getDefaultPermissions() {
-		Collection<Permission> defaultPermissions = new ArrayList<>();
-		for (ProjectFacade project: cacheManager.getProjects().values()) {
-			if (project.getDefaultPrivilege() != null)
-				defaultPermissions.add(new ProjectPermission(project, project.getDefaultPrivilege().getProjectPrivilege()));
-		}
-		return defaultPermissions;
-	}
-	
 	@Override
 	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
 		return new AuthorizationInfo() {
@@ -113,41 +97,27 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 						Long userId = (Long) principals.getPrimaryPrincipal();						
 						Collection<Permission> permissions = new ArrayList<>();
 
-						UserFacade user = null;
-				        if (userId != 0L) 
-				            user = cacheManager.getUser(userId);
-				        if (user != null) {
-							permissions.addAll(getDefaultPermissions());
+				        if (userId != 0L) { 
+				            User user = userManager.load(userId);
 				        	if (user.isRoot()) 
 				        		permissions.add(new SystemAdministration());
 				        	permissions.add(new UserAdministration(user));
-				           	for (MembershipFacade membership: cacheManager.getMemberships().values()) {
-				        		if (membership.getUserId().equals(userId)) {
-				        			GroupFacade group = cacheManager.getGroup(membership.getGroupId());
-				            		if (group.isAdministrator())
-				            			permissions.add(new SystemAdministration());
-				            		if (group.isCanCreateProjects())
-				            			permissions.add(new CreateProjects());
-				            		for (GroupAuthorizationFacade authorization: 
-				            				cacheManager.getGroupAuthorizations().values()) {
-				            			if (authorization.getGroupId().equals(group.getId())) {
-				                			permissions.add(new ProjectPermission(
-				                					cacheManager.getProject(authorization.getProjectId()), 
-				                					authorization.getPrivilege()));
-				            			}
-				            		}
-				        		}
+				           	for (Group group: user.getGroups()) {
+			            		if (group.isAdministrator())
+			            			permissions.add(new SystemAdministration());
+			            		if (group.isCreateProjects())
+			            			permissions.add(new CreateProjects());
+			            		for (GroupAuthorization authorization: group.getAuthorizations()) 
+	            					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 				        	}
-				        	for (UserAuthorizationFacade authorization: cacheManager.getUserAuthorizations().values()) {
-				        		if (authorization.getUserId().equals(userId)) {
-				            		permissions.add(new ProjectPermission(
-				            				cacheManager.getProject(authorization.getProjectId()), 
-				            				authorization.getPrivilege()));
-				        		}
-				        	}
-				        } else if (configManager.getSecuritySetting().isEnableAnonymousAccess()) {
-							permissions.addAll(getDefaultPermissions());
-				        }
+				        	for (UserAuthorization authorization: user.getAuthorizations()) 
+            					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
+				        } 
+			        	Group group = groupManager.findAnonymous();
+			        	if (group != null) {
+		            		for (GroupAuthorization authorization: group.getAuthorizations()) 
+            					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
+			        	}
 						return permissions;
 					}
 					
@@ -226,19 +196,18 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 		    				if (authenticated.getFullName() != null)
 		    					user.setFullName(authenticated.getFullName());
 		    				userManager.save(user);
-		    				if (authenticated.getGroupNames().isEmpty()) {
-		    					for (String groupName: authenticator.getDefaultGroupNames()) {
-		    						Group group = groupManager.find(groupName);
-		    						if (group != null) {
-		    							Membership membership = new Membership();
-		    							membership.setGroup(group);
-		    							membership.setUser(user);
-		    							user.getMemberships().add(membership);
-		    							membershipManager.save(membership);
-		    						} else {
-		    							logger.warn("Default group '{}' of external authenticator is not defined", groupName);
-		    						}
-		    					}
+		    				if (authenticated.getGroupNames().isEmpty() && authenticator.getDefaultGroup() != null) {
+	    						Group group = groupManager.find(authenticator.getDefaultGroup());
+	    						if (group != null) {
+	    							Membership membership = new Membership();
+	    							membership.setGroup(group);
+	    							membership.setUser(user);
+	    							user.getMemberships().add(membership);
+	    							membershipManager.save(membership);
+	    						} else {
+	    							logger.error("Default group '{}' of external authenticator is not defined", 
+	    									authenticator.getDefaultGroup());
+	    						}
 		    				}
 		    			}
 		        	} else {

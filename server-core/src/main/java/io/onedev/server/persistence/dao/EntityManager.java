@@ -71,6 +71,8 @@ public interface EntityManager<T extends AbstractEntity> {
 	
 	List<T> query(EntityCriteria<T> criteria);
 	
+	List<T> query(boolean cacheable);
+	
 	List<T> query();
 	
 	EntityCriteria<T> newCriteria();

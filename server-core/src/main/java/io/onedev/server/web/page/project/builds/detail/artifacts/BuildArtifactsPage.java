@@ -36,7 +36,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.download.ArtifactDownloadResource;
 import io.onedev.server.web.download.ArtifactDownloadResourceReference;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
@@ -46,11 +45,6 @@ public class BuildArtifactsPage extends BuildDetailPage {
 
 	public BuildArtifactsPage(PageParameters params) {
 		super(params);
-	}
-
-	@Override
-	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
 	}
 
 	@Override

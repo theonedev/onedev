@@ -54,9 +54,6 @@ public class ArtifactDownloadResource extends AbstractResource {
 		if (project == null) 
 			throw new EntityNotFoundException("Unable to find project: " + projectName);
 		
-		if (!SecurityUtils.canReadCode(project.getFacade()))
-			throw new UnauthorizedException();
-		
 		Long buildNumber = params.get(PARAM_BUILD).toOptionalLong();
 		
 		if (buildNumber == null)
@@ -69,6 +66,9 @@ public class ArtifactDownloadResource extends AbstractResource {
 					project.getName(), buildNumber);
 			throw new EntityNotFoundException(message);
 		}
+		
+		if (!SecurityUtils.canAccess(build))
+			throw new UnauthorizedException();
 		
 		List<String> pathSegments = new ArrayList<>();
 		String pathSegment = params.get(PARAM_PATH).toString();

@@ -82,6 +82,10 @@ body.BranchProtectionPage, body.WebHooksPage {
 #project-setting .commit-message-transforms th {
 	font-weight: normal;
 }
+#project-setting .authorization.list .select2-container,
+#project-setting .authorization.list .property-roleName .select2-container {
+	width: 360px;
+} 
 
 body.SecretListPage .help-block {
 	margin: 0 0 16px 0;

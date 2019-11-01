@@ -134,12 +134,12 @@ public class GroupListPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId,
 					IModel<Group> rowModel) {
-				cellItem.add(new Label(componentId, rowModel.getObject().isCanCreateProjects()));
+				cellItem.add(new Label(componentId, rowModel.getObject().isCreateProjects()));
 			}
 			
 		});
 		
-		columns.add(new AbstractColumn<Group, Void>(Model.of("Actions")) {
+		columns.add(new AbstractColumn<Group, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId, IModel<Group> rowModel) {
@@ -147,14 +147,6 @@ public class GroupListPage extends AdministrationPage {
 				
 				Group group = rowModel.getObject();
 				
-				fragment.add(new Link<Void>("profile") {
-
-					@Override
-					public void onClick() {
-						setResponsePage(GroupProfilePage.class, GroupProfilePage.paramsOf(rowModel.getObject()));
-					}
-
-				});
 				fragment.add(new Link<Void>("delete") {
 
 					@Override

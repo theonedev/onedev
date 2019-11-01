@@ -70,7 +70,7 @@ public class NewMilestonePage extends ProjectIssuesPage {
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canAdministrate(getProject().getFacade());
+		return SecurityUtils.canManageIssues(getProject());
 	}
 
 }

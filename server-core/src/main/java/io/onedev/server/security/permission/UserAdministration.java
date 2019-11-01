@@ -2,17 +2,17 @@ package io.onedev.server.security.permission;
 
 import org.apache.shiro.authz.Permission;
 
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.model.User;
 
 public class UserAdministration implements Permission {
 	
-	private final UserFacade user;
+	private final User user;
 
-	public UserAdministration(UserFacade user) {
+	public UserAdministration(User user) {
 		this.user = user;
 	}
 
-	public UserFacade getUser() {
+	public User getUser() {
 		return user;
 	}
 

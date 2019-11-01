@@ -1,5 +1,6 @@
 package io.onedev.server.util;
 
+import java.io.Serializable;
 import java.util.Stack;
 
 import javax.annotation.Nullable;
@@ -9,7 +10,9 @@ import org.apache.wicket.Page;
 
 import io.onedev.server.web.util.WicketUtils;
 
-public class ComponentContext {
+public class ComponentContext implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	private static ThreadLocal<Stack<ComponentContext>> stack =  new ThreadLocal<Stack<ComponentContext>>() {
 

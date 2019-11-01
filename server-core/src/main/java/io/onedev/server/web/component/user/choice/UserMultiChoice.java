@@ -6,14 +6,14 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.model.IModel;
 
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.model.User;
 import io.onedev.server.web.component.select2.Select2MultiChoice;
 
-public class UserMultiChoice extends Select2MultiChoice<UserFacade> {
+public class UserMultiChoice extends Select2MultiChoice<User> {
 
 	private static final long serialVersionUID = 1L;
 
-	public UserMultiChoice(String id, IModel<Collection<UserFacade>> model, AbstractUserChoiceProvider choiceProvider) {
+	public UserMultiChoice(String id, IModel<Collection<User>> model, AbstractUserChoiceProvider choiceProvider) {
 		super(id, model, choiceProvider);
 	}
 

@@ -19,13 +19,12 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.component.user.list.UserListLink;
 import io.onedev.server.web.component.watchstatus.WatchStatusLink;
-import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 public abstract class EntityWatchesPanel extends Panel {
@@ -81,7 +80,7 @@ public abstract class EntityWatchesPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<EntityWatch> item) {
 				User user = item.getModelObject().getUser();
-				item.add(new UserIdentPanel("watcher", UserIdent.of(UserFacade.of(user)), Mode.AVATAR));
+				item.add(new UserIdentPanel("watcher", UserIdent.of(user), Mode.AVATAR));
 			}
 
 			@Override

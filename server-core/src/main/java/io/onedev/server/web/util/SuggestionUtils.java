@@ -24,7 +24,6 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.match.PatternApplied;
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobVariable;
@@ -37,6 +36,7 @@ import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Build;
@@ -46,11 +46,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.Secret;
-import io.onedev.server.model.support.administration.groovyscript.GroovyScript;
-import io.onedev.server.security.permission.ProjectPrivilege;
+import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.scriptidentity.ScriptIdentity;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 
@@ -85,7 +82,7 @@ public class SuggestionUtils {
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		User user = SecurityUtils.getUser();
-		for (ProjectFacade project: OneDev.getInstance(ProjectManager.class).getAccessibleProjects(user)) {
+		for (Project project: OneDev.getInstance(ProjectManager.class).getAccessibleProjects(user)) {
 			int index = project.getName().toLowerCase().indexOf(matchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
 				suggestions.add(new InputSuggestion(project.getName(), new LinearRange(index, index+matchWith.length())));
@@ -161,7 +158,7 @@ public class SuggestionUtils {
 	public static List<InputSuggestion> suggestUsers(String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (UserFacade user: OneDev.getInstance(CacheManager.class).getUsers().values()) {
+		for (User user: OneDev.getInstance(UserManager.class).query()) {
 			LinearRange match = LinearRange.match(user.getName(), matchWith, true, false, true);
 			if (match != null) {
 				String description;
@@ -196,7 +193,7 @@ public class SuggestionUtils {
 		if (matchWith.startsWith("#"))
 			matchWith = matchWith.substring(1);
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (Build build: OneDev.getInstance(BuildManager.class).query(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
+		for (Build build: OneDev.getInstance(BuildManager.class).query(project, SecurityUtils.getUser(), matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
 			InputSuggestion suggestion;
 			
 			String description;
@@ -208,21 +205,6 @@ public class SuggestionUtils {
 			suggestion = new InputSuggestion("#" + build.getNumber(), description, null);
 			
 			suggestions.add(suggestion);
-		}
-		return suggestions;
-	}
-	
-	public static List<InputSuggestion> suggestUsers(Project project, ProjectPrivilege privilege, String matchWith) {
-		matchWith = matchWith.toLowerCase();
-		int numSuggestions = 0;
-		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (UserFacade user: SecurityUtils.getAuthorizedUsers(project.getFacade(), privilege)) {
-			String name = user.getName();
-			int index = name.toLowerCase().indexOf(matchWith);
-			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
-				LinearRange match = new LinearRange(index, index+matchWith.length());
-				suggestions.add(new InputSuggestion(name, user.getDisplayName(), match));
-			}
 		}
 		return suggestions;
 	}

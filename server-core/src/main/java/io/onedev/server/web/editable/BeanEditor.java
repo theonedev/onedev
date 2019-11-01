@@ -1,6 +1,7 @@
 package io.onedev.server.web.editable;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,6 +52,8 @@ public class BeanEditor extends ValueEditor<Serializable> {
 	private final boolean vertical;
 	
 	private RepeatingView groupsView;
+	
+	private Map<String, ComponentContext> componentContexts = new HashMap<>();
 	
 	public BeanEditor(String id, BeanDescriptor descriptor, IModel<Serializable> model) {
 		super(id, model);
@@ -115,8 +118,8 @@ public class BeanEditor extends ValueEditor<Serializable> {
 		}		
 	}
 
-	private WebMarkupContainer newItem(String id, PropertyContext<Serializable> property) {
-		WebMarkupContainer item = new PropertyContainer(id, property) {
+	private PropertyContainer newPropertyContainer(String id, PropertyContext<Serializable> property) {
+		PropertyContainer propertyContainer = new PropertyContainer(id, property) {
 
 			@Override
 			protected void onInitialize() {
@@ -208,14 +211,14 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(!property.getDescriptor().isPropertyExcluded() 
-						&& property.getDescriptor().isPropertyVisible(new ComponentContext(this), descriptor));
+						&& property.getDescriptor().isPropertyVisible(componentContexts, descriptor));
 			}
 
 		};
 		
-		item.add(AttributeAppender.append("class", "property-" + property.getPropertyName()));
+		propertyContainer.add(AttributeAppender.append("class", "property-" + property.getPropertyName()));
 
-		return item;
+		return propertyContainer;
 	}
 
 	public PropertyContext<Serializable> getPropertyContext(String propertyName) {
@@ -253,8 +256,11 @@ public class BeanEditor extends ValueEditor<Serializable> {
 			RepeatingView propertiesView = new RepeatingView("properties");
 			contentFrag.add(propertiesView);
 			
-			for (PropertyContext<Serializable> property: entry.getValue())
-				propertiesView.add(newItem(propertiesView.newChildId(), property));
+			for (PropertyContext<Serializable> property: entry.getValue()) {
+				PropertyContainer propertyContainer = newPropertyContainer(propertiesView.newChildId(), property);
+				propertiesView.add(propertyContainer);
+				componentContexts.put(property.getPropertyName(), new ComponentContext(propertyContainer));
+			}
 			
 			groupContainer.add(contentFrag);
 			

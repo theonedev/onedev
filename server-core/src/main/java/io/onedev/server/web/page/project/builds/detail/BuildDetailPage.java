@@ -18,6 +18,7 @@ import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -71,6 +72,7 @@ import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
 import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -116,7 +118,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 	
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canAccess(getBuild());
 	}
 	
 	private WebSocketObserver newBuildObserver(Long buildId) {
@@ -200,7 +202,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 				Map<String, List<String>> paramMap = JobParam.getParamMap(getBuild().getJob(), paramBean, 
 						getBuild().getJob().getParamSpecMap().keySet());
 				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap, SecurityUtils.getUser());
-				setResponsePage(BuildLogPage.class, BuildLogPage.paramsOf(getBuild(), position));
+				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild(), position));
 			}
 			
 			@Override
@@ -255,7 +257,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getBuild().isFinished());
+				setVisible(getBuild().isFinished() && SecurityUtils.canRunJob(getProject(), getBuild().getJobName()));
 			}
 			
 		});
@@ -271,7 +273,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getBuild().isFinished());
+				setVisible(!getBuild().isFinished() && SecurityUtils.canRunJob(getBuild().getProject(), getBuild().getJobName()));
 			}
 			
 		}.add(new ConfirmOnClick("Do you really want to cancel this build?")));
@@ -361,13 +363,31 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 				return getProject().getRevCommit(getBuild().getCommitHash(), true);
 			}
 			
-		}));
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.canReadCode(getProject()));
+			}
+			
+		});
 		
 		RevCommit commit = getProject().getRevCommit(getBuild().getCommitHash(), true);
 		add(new ContributorAvatars("commitAvatars", commit.getAuthorIdent(), commit.getCommitterIdent()));
 		add(new ContributorPanel("commitNames", commit.getAuthorIdent(), commit.getCommitterIdent()));
 		
-		Link<Void> hashLink = new ViewStateAwarePageLink<Void>("commitHash", CommitDetailPage.class, params);
+		Link<Void> hashLink = new ViewStateAwarePageLink<Void>("commitHash", CommitDetailPage.class, params) {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (!SecurityUtils.canReadCode(getProject()))
+					tag.setName("span");
+			}
+			
+		};
+		hashLink.setEnabled(SecurityUtils.canReadCode(getProject()));
 		hashLink.add(new Label("label", GitUtils.abbreviateSHA(commit.name())));
 		add(hashLink);
 		
@@ -379,15 +399,17 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			protected List<Tab> load() {
 				List<Tab> tabs = new ArrayList<>();
 
-				tabs.add(new BuildTab("Log", BuildLogPage.class) {
-
-					@Override
-					protected Component renderOptions(String componentId) {
-						BuildLogPage page = (BuildLogPage) getPage();
-						return page.renderOptions(componentId);
-					}
-					
-				});
+				if (SecurityUtils.canAccessLog(getBuild())) {
+					tabs.add(new BuildTab("Log", BuildLogPage.class) {
+	
+						@Override
+						protected Component renderOptions(String componentId) {
+							BuildLogPage page = (BuildLogPage) getPage();
+							return page.renderOptions(componentId);
+						}
+						
+					});
+				}
 				
 				LockUtils.read(getBuild().getArtifactsLockKey(), new Callable<Void>() {
 
@@ -401,7 +423,9 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 				});
 				
 				tabs.add(new BuildTab("Fixed Issues", FixedIssuesPage.class));
-				tabs.add(new BuildTab("Changes", BuildChangesPage.class));
+				
+				if (SecurityUtils.canReadCode(getProject()))
+					tabs.add(new BuildTab("Changes", BuildChangesPage.class));
 				
 				List<BuildTabContribution> contributions = new ArrayList<>(OneDev.getExtensions(BuildTabContribution.class));
 				contributions.sort(Comparator.comparing(BuildTabContribution::getOrder));
@@ -467,7 +491,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 							
 						};
 						deleteLink.add(new ConfirmOnClick("Do you really want to delete this build?"));
-						deleteLink.setVisible(SecurityUtils.canAdministrate(getBuild().getProject().getFacade()));
+						deleteLink.setVisible(SecurityUtils.canManage(getBuild()));
 						return deleteLink;
 					}
 					

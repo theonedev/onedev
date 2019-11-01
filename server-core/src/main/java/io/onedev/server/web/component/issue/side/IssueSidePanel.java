@@ -55,7 +55,6 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.AppendLoadingIndicatorListener;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -199,7 +198,7 @@ public abstract class IssueSidePanel extends Panel {
 				super.onConfigure();
 				User user = SecurityUtils.getUser();
 				String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
-				setVisible(SecurityUtils.canWriteCode(getIssue().getProject().getFacade())
+				setVisible(SecurityUtils.canWriteCode(getIssue().getProject())
 						|| user != null && user.equals(getIssue().getSubmitter()) && getIssue().getState().equals(initialState));
 			}
 
@@ -354,7 +353,7 @@ public abstract class IssueSidePanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canWriteCode(getIssue().getProject().getFacade()));
+				setVisible(SecurityUtils.canWriteCode(getIssue().getProject()));
 			}
 			
 		});
@@ -403,7 +402,7 @@ public abstract class IssueSidePanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<IssueVote> item) {
 				User user = item.getModelObject().getUser();
-				item.add(new UserIdentPanel("voter", UserIdent.of(UserFacade.of(user)), Mode.AVATAR));
+				item.add(new UserIdentPanel("voter", UserIdent.of(user), Mode.AVATAR));
 			}
 
 			@Override

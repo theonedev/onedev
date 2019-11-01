@@ -44,16 +44,12 @@
 	left: 44px;
 }
 
-#user .authorization.list a.other-sources {
-	margin-left: 4px;
-	color: #DCB508;
-	vertical-align: middle;
-}
-
-#user .membership.list .head .select2-container, 
-
-#user .authorization.list .head .select2-container {
+#user .membership.list .head .select2-container,
+#user .authorization.list .select2-container {
 	width: 240px;
+} 
+#user .authorization.list .property-roleNames .select2-container {
+	width: 360px;
 } 
 
 .new-user .actions .btn {

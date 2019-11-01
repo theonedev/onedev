@@ -24,7 +24,6 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.facade.ProjectFacade;
 
 @Singleton
 public class DefaultAttachmentStorageManager implements AttachmentStorageManager, SchedulableTask {
@@ -57,7 +56,7 @@ public class DefaultAttachmentStorageManager implements AttachmentStorageManager
 	}
 	
 	@Override
-	public File getAttachmentStorage(ProjectFacade project, String attachmentStorageUUID) {
+	public File getAttachmentStorage(Project project, String attachmentStorageUUID) {
 		File attachmentBase = storageManager.getProjectAttachmentDir(project.getId());
 		File attachmentStorage = getPermanentAttachmentStorage(attachmentBase, attachmentStorageUUID);
 		if (attachmentStorage.exists())

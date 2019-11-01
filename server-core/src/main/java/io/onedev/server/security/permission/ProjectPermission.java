@@ -2,32 +2,24 @@ package io.onedev.server.security.permission;
 
 import org.apache.shiro.authz.Permission;
 
-import io.onedev.server.util.facade.ProjectFacade;
+import io.onedev.server.model.Project;
 
 public class ProjectPermission implements Permission {
 
-	private final ProjectFacade project;
+	private final Project project;
 	
-	private final ProjectPrivilege privilege;
+	private final Permission privilege;
 	
-	public ProjectPermission(ProjectFacade project, ProjectPrivilege privilege) {
+	public ProjectPermission(Project project, Permission privilege) {
 		this.project = project;
 		this.privilege = privilege;
 	}
 	
-	public ProjectFacade getProject() {
-		return project;
-	}
-
-	public ProjectPrivilege getPrivilege() {
-		return privilege;
-	}
-
 	@Override
 	public boolean implies(Permission p) {
 		if (p instanceof ProjectPermission) {
 			ProjectPermission projectPermission = (ProjectPermission) p;
-			return project.equals(projectPermission.getProject()) && privilege.implies(projectPermission.getPrivilege());
+			return project.equals(projectPermission.project) && privilege.implies(projectPermission.privilege);
 		} else {
 			return false;
 		}

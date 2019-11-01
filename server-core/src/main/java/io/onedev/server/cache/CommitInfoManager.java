@@ -10,15 +10,14 @@ import io.onedev.server.git.Contribution;
 import io.onedev.server.git.Contributor;
 import io.onedev.server.git.NameAndEmail;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.util.Day;
-import io.onedev.server.util.facade.ProjectFacade;
-import io.onedev.server.util.facade.UserFacade;
 
 public interface CommitInfoManager {
 	
 	List<String> getFiles(Project project);
 	
-	int getEdits(ProjectFacade project, UserFacade user, String path);
+	int getEdits(Project project, User user, String path);
 	
 	int getCommitCount(Project project);
 	

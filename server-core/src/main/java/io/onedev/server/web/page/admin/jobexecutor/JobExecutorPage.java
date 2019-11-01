@@ -76,7 +76,6 @@ public class JobExecutorPage extends AdministrationPage {
 			
 			@Override
 			protected void onSort(AjaxRequestTarget target, SortPosition from, SortPosition to) {
-				List<JobExecutor> executors = getSettingManager().getJobExecutors();
 				JobExecutor executor = executors.get(from.getItemIndex());
 				executors.set(from.getItemIndex(), executors.set(to.getItemIndex(), executor));
 				getSettingManager().saveJobExecutors(executors);

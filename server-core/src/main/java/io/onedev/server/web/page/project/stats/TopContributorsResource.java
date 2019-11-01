@@ -54,7 +54,7 @@ class TopContributorsResource extends AbstractResource {
 			public void writeData(Attributes attributes) throws IOException {
 				Project project = OneDev.getInstance(Dao.class).load(Project.class, projectId);
 				
-				if (!SecurityUtils.canReadCode(project.getFacade()))
+				if (!SecurityUtils.canReadCode(project))
 					throw new UnauthorizedException();
 
 				List<Contributor> topContributors = OneDev.getInstance(CommitInfoManager.class).getTopContributors(project, TOP_CONTRIBUTORS, type, fromDay, toDay);

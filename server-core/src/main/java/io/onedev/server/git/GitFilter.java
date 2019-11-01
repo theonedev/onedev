@@ -40,7 +40,7 @@ import io.onedev.server.git.command.UploadCommand;
 import io.onedev.server.git.exception.GitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.SecurityUtils;
@@ -68,18 +68,21 @@ public class GitFilter implements Filter {
 	
 	private final SettingManager configManager;
 	
+	private final SessionManager sessionManager;
+	
 	private final Set<CodePullAuthorizationSource> codePullAuthorizationSources;
 	
 	@Inject
 	public GitFilter(OneDev oneDev, StorageManager storageManager, ProjectManager projectManager, 
-			WorkExecutor workManager, ServerConfig serverConfig, SettingManager configManager, 
-			Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
+			WorkExecutor workManager, ServerConfig serverConfig, SettingManager configManager,
+			SessionManager sessionManager, Set<CodePullAuthorizationSource> codePullAuthorizationSources) {
 		this.oneDev = oneDev;
 		this.storageManager = storageManager;
 		this.projectManager = projectManager;
 		this.workExecutor = workManager;
 		this.serverConfig = serverConfig;
 		this.configManager = configManager;
+		this.sessionManager = sessionManager;
 		this.codePullAuthorizationSources = codePullAuthorizationSources;
 	}
 	
@@ -88,8 +91,7 @@ public class GitFilter implements Filter {
 		return StringUtils.stripStart(pathInfo, "/");
 	}
 	
-	@Sessional
-	protected Project getProject(HttpServletRequest request, HttpServletResponse response, String projectInfo) 
+	private Project getProject(HttpServletRequest request, HttpServletResponse response, String projectInfo) 
 			throws IOException {
 		projectInfo = StringUtils.stripStart(StringUtils.stripEnd(projectInfo, "/"), "/");
 
@@ -118,38 +120,54 @@ public class GitFilter implements Filter {
 	
 	protected void processPacks(final HttpServletRequest request, final HttpServletResponse response) 
 			throws ServletException, IOException, InterruptedException, ExecutionException {
-		String pathInfo = getPathInfo(request);
-		
-		String service = StringUtils.substringAfterLast(pathInfo, "/");
-
-		String projectInfo = StringUtils.substringBeforeLast(pathInfo, "/");
-		Project project = getProject(request, response, projectInfo);
-		
-		doNotCache(response);
-		response.setHeader("Content-Type", "application/x-" + service + "-result");			
-
+		File gitDir;
+		boolean upload;
 		Map<String, String> environments = new HashMap<>();
-		String serverUrl;
-        if (serverConfig.getHttpPort() != 0)
-            serverUrl = "http://localhost:" + serverConfig.getHttpPort();
-        else 
-            serverUrl = "https://localhost:" + serverConfig.getHttpsPort();
-
-        environments.put("ONEDEV_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
-		environments.put("ONEDEV_URL", serverUrl);
-		environments.put("ONEDEV_USER_ID", User.getCurrentId().toString());
-		environments.put("ONEDEV_REPOSITORY_ID", project.getId().toString());
 		
-		// to be compatible with old repository
-        environments.put("GITPLEX_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
-		environments.put("GITPLEX_URL", serverUrl);
-		environments.put("GITPLEX_USER_ID", User.getCurrentId().toString());
-		environments.put("GITPLEX_REPOSITORY_ID", project.getId().toString());
-		
-		File gitDir = storageManager.getProjectGitDir(project.getId());
+		sessionManager.openSession();
+		try {
+			String pathInfo = getPathInfo(request);
+			
+			String service = StringUtils.substringAfterLast(pathInfo, "/");
 
-		if (GitSmartHttpTools.isUploadPack(request)) {
-			checkPullPermission(request, project);
+			String projectInfo = StringUtils.substringBeforeLast(pathInfo, "/");
+			Project project = getProject(request, response, projectInfo);
+			
+			doNotCache(response);
+			response.setHeader("Content-Type", "application/x-" + service + "-result");			
+
+			String serverUrl;
+	        if (serverConfig.getHttpPort() != 0)
+	            serverUrl = "http://localhost:" + serverConfig.getHttpPort();
+	        else 
+	            serverUrl = "https://localhost:" + serverConfig.getHttpsPort();
+
+	        environments.put("ONEDEV_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
+			environments.put("ONEDEV_URL", serverUrl);
+			environments.put("ONEDEV_USER_ID", User.getCurrentId().toString());
+			environments.put("ONEDEV_REPOSITORY_ID", project.getId().toString());
+			
+			// to be compatible with old repository
+	        environments.put("GITPLEX_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
+			environments.put("GITPLEX_URL", serverUrl);
+			environments.put("GITPLEX_USER_ID", User.getCurrentId().toString());
+			environments.put("GITPLEX_REPOSITORY_ID", project.getId().toString());
+			
+			gitDir = storageManager.getProjectGitDir(project.getId());
+
+			if (GitSmartHttpTools.isUploadPack(request)) {
+				checkPullPermission(request, project);
+				upload = true;
+			} else {
+				if (!SecurityUtils.canWriteCode(project))
+					throw new UnauthorizedException("You do not have permission to push to this project.");
+				upload = false;
+			}			
+		} finally {
+			sessionManager.closeSession();
+		}
+		
+		if (upload) {
 			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 				
 				@Override
@@ -165,8 +183,6 @@ public class GitFilter implements Filter {
 				
 			}).get();
 		} else {
-			if (!SecurityUtils.canWriteCode(project.getFacade()))
-				throw new UnauthorizedException("You do not have permission to push to this project.");
 			workExecutor.submit(new PrioritizedRunnable(PRIORITY) {
 				
 				@Override
@@ -195,7 +211,7 @@ public class GitFilter implements Filter {
 	}
 	
 	private void checkPullPermission(HttpServletRequest request, Project project) {
-		if (!SecurityUtils.canReadCode(project.getFacade())) {
+		if (!SecurityUtils.canReadCode(project)) {
 			boolean isAuthorized = false;
 			for (CodePullAuthorizationSource source: codePullAuthorizationSources) {
 				if (source.canPullCode(request, project)) {
@@ -209,26 +225,38 @@ public class GitFilter implements Filter {
 	}
 	
 	protected void processRefs(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String pathInfo = request.getRequestURI().substring(request.getContextPath().length());
-		pathInfo = StringUtils.stripStart(pathInfo, "/");
-
-		String projectInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
-		Project project = getProject(request, response, projectInfo);
-		String service = request.getParameter("service");
+		File gitDir;
+		boolean upload;
 		
-		File gitDir = storageManager.getProjectGitDir(project.getId());
+		sessionManager.openSession();
+		try {
+			String pathInfo = request.getRequestURI().substring(request.getContextPath().length());
+			pathInfo = StringUtils.stripStart(pathInfo, "/");
 
-		if (service.contains("upload")) {
-			checkPullPermission(request, project);
-			writeInitial(response, service);
-			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
-		} else {
-			if (!SecurityUtils.canWriteCode(project.getFacade())) {
-				throw new UnauthorizedException("You do not have permission to push to this project.");
+			String projectInfo = pathInfo.substring(0, pathInfo.length() - INFO_REFS.length());
+			Project project = getProject(request, response, projectInfo);
+			String service = request.getParameter("service");
+			
+			gitDir = storageManager.getProjectGitDir(project.getId());
+
+			if (service.contains("upload")) {
+				checkPullPermission(request, project);
+				writeInitial(response, service);
+				upload = true;
+			} else {
+				if (!SecurityUtils.canWriteCode(project)) {
+					throw new UnauthorizedException("You do not have permission to push to this project.");
+				}
+				writeInitial(response, service);
+				upload = false;
 			}
-			writeInitial(response, service);
-			new AdvertiseReceiveRefsCommand(gitDir).output(response.getOutputStream()).call();
+		} finally {
+			sessionManager.closeSession();
 		}
+		if (upload)
+			new AdvertiseUploadRefsCommand(gitDir).output(response.getOutputStream()).call();
+		else
+			new AdvertiseReceiveRefsCommand(gitDir).output(response.getOutputStream()).call();
 	}
 
 	@Override

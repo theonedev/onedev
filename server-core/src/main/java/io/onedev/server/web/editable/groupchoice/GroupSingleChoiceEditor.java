@@ -13,10 +13,8 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
-import io.onedev.server.util.facade.GroupFacade;
 import io.onedev.server.web.component.groupchoice.GroupChoiceProvider;
 import io.onedev.server.web.component.groupchoice.GroupSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
@@ -26,7 +24,7 @@ import io.onedev.server.web.editable.annotation.GroupChoice;
 @SuppressWarnings("serial")
 public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 	
-	private final List<GroupFacade> choices = new ArrayList<>();
+	private final List<Group> choices = new ArrayList<>();
 	
 	private GroupSingleChoice input;
 	
@@ -39,15 +37,13 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		GroupFacade facade;
-
 		GroupChoice groupChoice = descriptor.getPropertyGetter().getAnnotation(GroupChoice.class);
 		Preconditions.checkNotNull(groupChoice);
 		if (groupChoice.value().length() != 0) {
-			choices.addAll((List<GroupFacade>)ReflectionUtils
+			choices.addAll((List<Group>)ReflectionUtils
 					.invokeStaticMethod(descriptor.getBeanClass(), groupChoice.value()));
 		} else {
-			choices.addAll(OneDev.getInstance(CacheManager.class).getGroups().values());
+			choices.addAll(OneDev.getInstance(GroupManager.class).query());
 		}
 		
 		Group group;
@@ -56,12 +52,10 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 		else
 			group = null;
 		
-		if (group != null && choices.contains(group.getFacade()))
-			facade = group.getFacade();
-		else
-			facade = null;
+		if (group != null && !choices.contains(group))
+			group = null;
 
-    	input = new GroupSingleChoice("input", Model.of(facade), new GroupChoiceProvider(choices)) {
+    	input = new GroupSingleChoice("input", Model.of(group), new GroupChoiceProvider(choices)) {
 
     		@Override
 			protected void onInitialize() {
@@ -89,7 +83,7 @@ public class GroupSingleChoiceEditor extends PropertyEditor<String> {
 
 	@Override
 	protected String convertInputToValue() throws ConversionException {
-		GroupFacade group = input.getConvertedInput();
+		Group group = input.getConvertedInput();
 		if (group != null)
 			return group.getName();
 		else

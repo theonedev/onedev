@@ -12,7 +12,6 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
@@ -39,7 +38,7 @@ public class PullRequestSummaryPanel extends GenericPanel<PullRequest> {
 		link.add(new Label("label", request.getTitle()));
 		add(link);
 		add(new RequestStatusLabel("status", getModel()));
-		UserIdent submitterIdent = UserIdent.of(UserFacade.of(request.getSubmitter()), request.getSubmitterName());
+		UserIdent submitterIdent = UserIdent.of(request.getSubmitter(), request.getSubmitterName());
 		add(new UserIdentPanel("submitter", submitterIdent, Mode.NAME));
 		add(new Label("submitDate", DateUtils.formatAge(request.getSubmitDate())));
 		add(new Label("comments", request.getCommentCount()));

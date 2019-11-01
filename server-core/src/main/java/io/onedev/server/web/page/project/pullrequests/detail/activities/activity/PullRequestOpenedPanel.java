@@ -12,7 +12,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
@@ -33,7 +32,7 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 		super.onInitialize();
 		
 		PullRequest request = getPullRequest();
-		UserIdent userIdent = UserIdent.of(UserFacade.of(request.getSubmitter()), request.getSubmitterName());
+		UserIdent userIdent = UserIdent.of(request.getSubmitter(), request.getSubmitterName());
 		add(new Label("user", userIdent.getName()));
 		add(new Label("age", DateUtils.formatAge(request.getSubmitDate())));
 		

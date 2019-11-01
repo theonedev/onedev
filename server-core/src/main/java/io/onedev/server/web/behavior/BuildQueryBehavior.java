@@ -19,7 +19,7 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
-import io.onedev.server.cache.CacheManager;
+import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.BuildQueryLexer;
@@ -52,10 +52,6 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		return projectModel.getObject();
 	}
 	
-	private CacheManager getCacheManager() {
-		return OneDev.getInstance(CacheManager.class);
-	}
-	
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
@@ -68,7 +64,8 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 						Project project = getProject();
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = new ArrayList<>(BuildConstants.QUERY_FIELDS);
-							List<String> paramNames = new ArrayList<>(getCacheManager().getBuildParamNames());
+							BuildParamManager buildParamManager = OneDev.getInstance(BuildParamManager.class);
+							List<String> paramNames = new ArrayList<>(buildParamManager.getBuildParamNames());
 							Collections.sort(paramNames);
 							fields.addAll(paramNames);
 							return SuggestionUtils.suggest(fields, matchWith);
@@ -104,7 +101,8 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldName.equals(BuildConstants.FIELD_NUMBER)) {
 										return SuggestionUtils.suggestBuilds(project, matchWith);
 									} else {
-										List<String> paramValues = new ArrayList<>(getCacheManager().getBuildParamValues(fieldName));
+										BuildParamManager buildParamManager = OneDev.getInstance(BuildParamManager.class);
+										List<String> paramValues = new ArrayList<>(buildParamManager.getBuildParamValues(fieldName));
 										Collections.sort(paramValues);
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(paramValues, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;

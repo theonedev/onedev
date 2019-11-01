@@ -705,7 +705,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 	
 }

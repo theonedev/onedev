@@ -35,12 +35,16 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	Collection<Build> queryUnfinished();
 
-	List<Build> query(Project project, String term, int count);
+	List<Build> query(Project project, @Nullable User user, String term, int count);
 	
-	List<Build> queryAfter(Project project, Long afterBuildId, int count);
+	List<Build> query(Project project, @Nullable User user, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
+	
+	int count(Project project, @Nullable User user, EntityCriteria<Build> buildCriteria);
+	
+	Collection<Long> getBuildIdsByProject(Long projectId);
+	
+	Collection<Long> filterBuildIds(Long projectId, Collection<String> commitHashes);
 
-	List<Build> query(Project project, User user, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
-	
-	int count(Project project, User user, EntityCriteria<Build> buildCriteria);
+	Collection<String> getJobNames(@Nullable Long projectId);
 	
 }

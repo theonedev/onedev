@@ -14,8 +14,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.Path;
+import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 
@@ -33,7 +33,7 @@ public class NewProjectPage extends LayoutPage {
 		Project project = new Project();
 		
 		BeanEditor editor = BeanContext.edit("editor", project, 
-				Lists.newArrayList("name", "description", "defaultPrivilege"), false);
+				Lists.newArrayList("name", "description", "defaultRoleName"), false);
 		
 		Form<?> form = new Form<Void>("form") {
 

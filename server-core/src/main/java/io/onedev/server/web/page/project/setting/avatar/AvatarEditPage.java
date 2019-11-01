@@ -38,12 +38,12 @@ public class AvatarEditPage extends ProjectSettingPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getAvatarManager().getUploaded(getProject().getFacade()).exists());
+				setVisible(getAvatarManager().getUploaded(getProject()).exists());
 			}
 
 			@Override
 			public void onClick() {
-				getAvatarManager().useAvatar(getProject().getFacade(), null);
+				getAvatarManager().useAvatar(getProject(), null);
 				setResponsePage(AvatarEditPage.class, AvatarEditPage.paramsOf(getProject()));
 			}
 			
@@ -58,7 +58,7 @@ public class AvatarEditPage extends ProjectSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				AvatarManager avatarManager = OneDev.getInstance(AvatarManager.class);
-            	avatarManager.useAvatar(getProject().getFacade(), uploadedAvatarData);
+            	avatarManager.useAvatar(getProject(), uploadedAvatarData);
 				setResponsePage(AvatarEditPage.class, AvatarEditPage.paramsOf(getProject()));
 			}
 

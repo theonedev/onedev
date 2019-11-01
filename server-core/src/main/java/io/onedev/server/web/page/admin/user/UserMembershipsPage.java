@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Session;
@@ -36,13 +35,11 @@ import org.hibernate.criterion.Restrictions;
 import io.onedev.commons.utils.matchscore.MatchScoreProvider;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.MembershipManager;
+import io.onedev.server.model.Group;
 import io.onedev.server.model.Membership;
 import io.onedev.server.persistence.dao.EntityCriteria;
-import io.onedev.server.util.facade.GroupFacade;
-import io.onedev.server.util.facade.MembershipFacade;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
@@ -100,28 +97,19 @@ public class UserMembershipsPage extends UserPage {
 			
 		});
 		
-		add(new SelectToAddChoice<GroupFacade>("addNew", new AbstractGroupChoiceProvider() {
+		add(new SelectToAddChoice<Group>("addNew", new AbstractGroupChoiceProvider() {
 
 			@Override
-			public void query(String term, int page, Response<GroupFacade> response) {
-				List<GroupFacade> notMembersOf = new ArrayList<>();
-				CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
-				Set<Long> groupIds = new HashSet<>();
-				for (MembershipFacade membership: cacheManager.getMemberships().values()) {
-					if (membership.getUserId().equals(getUser().getId()))
-						groupIds.add(membership.getGroupId());
-				}
-				for (GroupFacade group: cacheManager.getGroups().values()) {
-					if (!groupIds.contains(group.getId()))
-						notMembersOf.add(group);
-				}
+			public void query(String term, int page, Response<Group> response) {
+				List<Group> notMembersOf = OneDev.getInstance(GroupManager.class).query();
+				notMembersOf.removeAll(getUser().getGroups());
 				Collections.sort(notMembersOf);
 				Collections.reverse(notMembersOf);
 				
-				notMembersOf = MatchScoreUtils.filterAndSort(notMembersOf, new MatchScoreProvider<GroupFacade>() {
+				notMembersOf = MatchScoreUtils.filterAndSort(notMembersOf, new MatchScoreProvider<Group>() {
 
 					@Override
-					public double getMatchScore(GroupFacade object) {
+					public double getMatchScore(Group object) {
 						return MatchScoreUtils.getMatchScore(object.getName(), term);
 					}
 					
@@ -143,7 +131,7 @@ public class UserMembershipsPage extends UserPage {
 			}
 			
 			@Override
-			protected void onSelect(AjaxRequestTarget target, GroupFacade selection) {
+			protected void onSelect(AjaxRequestTarget target, Group selection) {
 				Membership membership = new Membership();
 				membership.setUser(getUser());
 				membership.setGroup(OneDev.getInstance(GroupManager.class).load(selection.getId()));

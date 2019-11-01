@@ -9,11 +9,11 @@ import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.utils.matchscore.MatchScoreProvider;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
-import io.onedev.server.security.permission.ProjectPrivilege;
-import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.model.User;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
@@ -29,23 +29,22 @@ public class ReviewerProvider extends AbstractUserChoiceProvider {
 	}
 	
 	@Override
-	public void query(String term, int page, Response<UserFacade> response) {
+	public void query(String term, int page, Response<User> response) {
 		PullRequest request = requestModel.getObject();
-		Collection<UserFacade> users = SecurityUtils.getAuthorizedUsers(request.getTargetProject().getFacade(), 
-				ProjectPrivilege.CODE_READ);
+		Collection<User> users = OneDev.getInstance(UserManager.class).query();
 		for (PullRequestReview review: request.getReviews()) {
 			if (review.getExcludeDate() == null && review.getResult() == null)
-				users.remove(review.getUser().getFacade());
+				users.remove(review.getUser());
 		}
 		
-		List<UserFacade> reviewers = new ArrayList<>(users);
+		List<User> reviewers = new ArrayList<>(users);
 
-		reviewers.sort(Comparator.comparing(UserFacade::getDisplayName));
+		reviewers.sort(Comparator.comparing(User::getDisplayName));
 		
-		reviewers = MatchScoreUtils.filterAndSort(reviewers, new MatchScoreProvider<UserFacade>() {
+		reviewers = MatchScoreUtils.filterAndSort(reviewers, new MatchScoreProvider<User>() {
 
 			@Override
-			public double getMatchScore(UserFacade object) {
+			public double getMatchScore(User object) {
 				return object.getMatchScore(term);
 			}
 			

@@ -5,10 +5,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -26,6 +30,7 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -40,20 +45,28 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.commons.utils.schedule.SchedulableTask;
 import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.entitymanager.GroupManager;
+import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.BuildParam;
+import io.onedev.server.model.Group;
+import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
+import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -64,8 +77,12 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.build.BuildQuery;
+import io.onedev.server.security.permission.ManageProject;
+import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.BuildConstants;
+import io.onedev.server.util.facade.BuildFacade;
+import io.onedev.server.util.patternset.PatternSet;
 
 @Singleton
 public class DefaultBuildManager extends AbstractEntityManager<Build> implements BuildManager, SchedulableTask {
@@ -82,20 +99,28 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	private final StorageManager storageManager;
 	
+	private final GroupManager groupManager;
+	
 	private final TaskScheduler taskScheduler;
 	
 	private final TransactionManager transactionManager;
+	
+	private final Map<Long, BuildFacade> builds = new HashMap<>();
+	
+	private final ReadWriteLock buildsLock = new ReentrantReadWriteLock();
 	
 	private String taskId;
 	
 	@Inject
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
-			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager, 
-			StorageManager storageManager, TransactionManager transactionManager) {
+			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager,
+			GroupManager groupManager, StorageManager storageManager, 
+			TransactionManager transactionManager) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
 		this.buildDependenceManager = buildDependenceManager;
 		this.storageManager = storageManager;
+		this.groupManager = groupManager;
 		this.taskScheduler = taskScheduler;
 		this.transactionManager = transactionManager;
 	}
@@ -103,8 +128,22 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Transactional
 	@Override
 	public void delete(Build build) {
-		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getNumber()));
     	super.delete(build);
+    	
+		FileUtils.deleteDir(storageManager.getBuildDir(build.getProject().getId(), build.getNumber()));
+		Long buildId = build.getId();
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				buildsLock.writeLock().lock();
+				try {
+					builds.remove(buildId);
+				} finally {
+					buildsLock.writeLock().unlock();
+				}
+			}
+		});
 	}
 	
 	@Sessional
@@ -115,6 +154,51 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		criteria.add(Restrictions.eq("number", number));
 		criteria.setCacheable(true);
 		return find(criteria);
+	}
+
+	@Transactional
+	@Override
+	public void save(Build build) {
+		super.save(build);
+		
+		BuildFacade facade = build.getFacade();
+		transactionManager.runAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				buildsLock.writeLock().lock();
+				try {
+					builds.put(facade.getId(), facade);
+				} finally {
+					buildsLock.writeLock().unlock();
+				}
+			}
+			
+		});
+	}
+	
+	@Transactional
+	@Listen
+	public void on(EntityRemoved event) {
+		if (event.getEntity() instanceof Project) {
+			Long projectId = event.getEntity().getId();
+			transactionManager.runAfterCommit(new Runnable() {
+
+				@Override
+				public void run() {
+					buildsLock.writeLock().lock();
+					try {
+						for (Iterator<Map.Entry<Long, BuildFacade>> it = builds.entrySet().iterator(); it.hasNext();) {
+							BuildFacade build = it.next().getValue();
+							if (build.getProjectId().equals(projectId))
+								it.remove();
+						}
+					} finally {
+						buildsLock.writeLock().unlock();
+					}
+				}
+			});
+		}
 	}
 
 	@Sessional
@@ -174,11 +258,18 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 	@Sessional
 	@Override
-	public List<Build> query(Project project, String term, int count) {
+	public List<Build> query(Project project, User user, String term, int count) {
 		List<Build> builds = new ArrayList<>();
 
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.eq("project", project));
+		Collection<String> accessibleJobNames = getAccessibleJobNames(project, user);
+		if (accessibleJobNames != null) {
+			List<Criterion> jobCriterions = new ArrayList<>();
+			for (String jobName: accessibleJobNames) 
+				jobCriterions.add(Restrictions.eq("jobName", jobName));
+			criteria.add(Restrictions.or(jobCriterions.toArray(new Criterion[jobCriterions.size()])));
+		}
 		
 		if (StringUtils.isNotBlank(term)) {
 			if (term.startsWith("#")) {
@@ -203,16 +294,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		return builds;
 	}
 	
-	@Override
-	public List<Build> queryAfter(Project project, Long afterBuildId, int count) {
-		EntityCriteria<Build> criteria = newCriteria();
-		criteria.add(Restrictions.eq("project", project));
-		criteria.addOrder(Order.asc("id"));
-		if (afterBuildId != null)
-			criteria.add(Restrictions.gt("id", afterBuildId));
-		return query(criteria, 0, count);
-	}
-	
 	@Transactional
 	@Override
 	public void create(Build build) {
@@ -231,6 +312,15 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			Root<Build> root, CriteriaBuilder builder, User user) {
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(builder.equal(root.get(BuildConstants.ATTR_PROJECT), project));
+
+		Collection<String> accessibleJobNames = getAccessibleJobNames(project, user);
+		if (accessibleJobNames != null) {
+			List<Predicate> jobPredicates = new ArrayList<>();
+			for (String jobName: accessibleJobNames) 
+				jobPredicates.add(builder.equal(root.get(BuildConstants.ATTR_JOB), jobName));
+			predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
+		}
+		
 		if (criteria != null)
 			predicates.add(criteria.getPredicate(project, root, builder, user));
 		return predicates.toArray(new Predicate[0]);
@@ -387,8 +477,16 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		return CronScheduleBuilder.dailyAtHourAndMinute(0, 0);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Listen
 	public void on(SystemStarted event) {
+		logger.info("Caching build info...");
+		
+		Query<?> query = dao.getSession().createQuery("select id, project.id, commitHash, jobName from Build");
+		for (Object[] fields: (List<Object[]>)query.list()) {
+			Long buildId = (Long) fields[0];
+			builds.put(buildId, new BuildFacade(buildId, (Long)fields[1], (String)fields[2], (String)fields[3]));
+		}
 		taskId = taskScheduler.schedule(this);
 	}
 
@@ -436,4 +534,139 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		return null;
 	}
 	
+	@Override
+	public Collection<Long> getBuildIdsByProject(Long projectId) {
+		buildsLock.readLock().lock();
+		try {
+			Collection<Long> buildIds = new HashSet<>();
+			for (BuildFacade build: builds.values()) {
+				if (build.getProjectId().equals(projectId))
+					buildIds.add(build.getId());
+			}
+			return buildIds;
+		} finally {
+			buildsLock.readLock().unlock();
+		}
+	}
+
+	@Override
+	public Collection<Long> filterBuildIds(Long projectId, Collection<String> commitHashes) {
+		buildsLock.readLock().lock();
+		try {
+			Collection<Long> buildIds = new HashSet<>();
+			for (BuildFacade build: builds.values()) {
+				if (build.getProjectId().equals(projectId) 
+						&& commitHashes.contains(build.getCommitHash())) {
+					buildIds.add(build.getId());
+				}
+			}
+			return buildIds;
+		} finally {
+			buildsLock.readLock().unlock();
+		}
+	}
+
+	@Override
+	public Collection<String> getJobNames(Long projectId) {
+		buildsLock.readLock().lock();
+		try {
+			Set<String> jobNames = new HashSet<>();
+			for (BuildFacade build: builds.values()) {
+				if (projectId == null || projectId.equals(build.getProjectId()))
+					jobNames.add(build.getJobName());
+			}
+			return jobNames;
+		} finally {
+			buildsLock.readLock().unlock();
+		}
+	}
+
+	private Collection<String> getAccessibleJobNames(Role role, Collection<String> jobNames) {
+		StringMatcher matcher = new StringMatcher();
+		Collection<String> accessibleJobNames = new HashSet<>();
+		for (JobPrivilege jobPrivilege: role.getJobPrivileges()) {
+			for (String jobName: jobNames) {
+				if (PatternSet.fromString(jobPrivilege.getJobNames()).matches(matcher, jobName))
+					accessibleJobNames.add(jobName);
+			}
+		}
+		return accessibleJobNames;
+	}
+	
+	private Collection<String> getAccessibleJobNames(Project project, User user) {
+		if (User.asSubject(user).isPermitted(new ProjectPermission(project, new ManageProject()))) {
+			return null;
+		} else {
+			Collection<String> jobNames = getJobNames(project.getId());
+			Collection<String> accessibleJobNames = new HashSet<>();
+			if (user != null) {
+				for (UserAuthorization authorization: user.getAuthorizations()) {
+					if (authorization.getProject().equals(project))
+						accessibleJobNames.addAll(getAccessibleJobNames(authorization.getRole(), jobNames));
+				}
+				for (Group group: user.getGroups()) {
+					for (GroupAuthorization authorization: group.getAuthorizations()) {
+						if (authorization.getProject().equals(project))
+							accessibleJobNames.addAll(getAccessibleJobNames(authorization.getRole(), jobNames));
+					}
+				}
+			}
+			Group group = groupManager.findAnonymous();
+			if (group != null) {
+				for (GroupAuthorization authorization: group.getAuthorizations()) {
+					if (authorization.getProject().equals(project))
+						accessibleJobNames.addAll(getAccessibleJobNames(authorization.getRole(), jobNames));
+				}
+			}
+			return accessibleJobNames;
+		}
+	}
+
+	private void populateAccessibleJobNames(Map<Long, Collection<String>> accessibleJobNames, Map<Long, Collection<String>> jobNames, 
+			Project project, Role role) {
+		Collection<String> jobNamesOfProject = jobNames.get(project.getId());
+		if (jobNamesOfProject != null) {
+			Collection<String> accessibleJobNamesOfProject = getAccessibleJobNames(role, jobNamesOfProject);
+			Collection<String> currentAccessibleJobNamesOfProject = accessibleJobNames.get(project.getId());
+			if (currentAccessibleJobNamesOfProject == null) {
+				currentAccessibleJobNamesOfProject = new HashSet<>();
+				accessibleJobNames.put(project.getId(), currentAccessibleJobNamesOfProject);
+			}
+			currentAccessibleJobNamesOfProject.addAll(accessibleJobNamesOfProject);
+		}
+	}
+	
+	private Map<Long, Collection<String>> getAccessibleJobNames(User user) {
+		Map<Long, Collection<String>> jobNames = new HashMap<>();
+		buildsLock.readLock().lock();
+		try {
+			for (BuildFacade build: builds.values()) {
+				Collection<String> jobNamesOfBuild = jobNames.get(build.getId());
+				if (jobNamesOfBuild == null) {
+					jobNamesOfBuild = new HashSet<>();
+					jobNames.put(build.getId(), jobNamesOfBuild);
+				}
+				jobNamesOfBuild.add(build.getJobName());
+			}
+		} finally {
+			buildsLock.readLock().unlock();
+		}
+		
+		Map<Long, Collection<String>> accessibleJobNames = new HashMap<>();
+		if (user != null) {
+			for (UserAuthorization authorization: user.getAuthorizations()) 
+				populateAccessibleJobNames(accessibleJobNames, jobNames, authorization.getProject(), authorization.getRole());
+			for (Group group: user.getGroups()) {
+				for (GroupAuthorization authorization: group.getAuthorizations())
+					populateAccessibleJobNames(accessibleJobNames, jobNames, authorization.getProject(), authorization.getRole());
+			}
+		}
+		Group group = groupManager.findAnonymous();
+		if (group != null) {
+			for (GroupAuthorization authorization: group.getAuthorizations())
+				populateAccessibleJobNames(accessibleJobNames, jobNames, authorization.getProject(), authorization.getRole());
+		}
+		return accessibleJobNames;
+	}
+
 }

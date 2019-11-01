@@ -97,10 +97,15 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 	}
 
 	@Override
-	public List<T> query() {
-		return dao.query(entityClass);
+	public List<T> query(boolean cacheable) {
+		return dao.query(entityClass, cacheable);
 	}
 
+	@Override
+	public List<T> query() {
+		return query(false);
+	}
+	
 	@Override
 	public T find(EntityCriteria<T> entityCriteria) {
 		return dao.find(entityCriteria);

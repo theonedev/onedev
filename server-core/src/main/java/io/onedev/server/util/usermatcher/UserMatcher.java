@@ -61,14 +61,6 @@ public class UserMatcher implements Serializable {
 	private static UserMatcherCriteria getUserMatcherCriteria(CriteriaContext criteriaContext) {
 		if (criteriaContext.Anyone() != null) {
 			return new Anyone();
-		} else if (criteriaContext.ProjectAdministrators() != null) {
-			return new ProjectAdministrators();
-		} else if (criteriaContext.CodeWriters() != null) {
-			return new CodeWriters();
-		} else if (criteriaContext.CodeReaders() != null) {
-			return new CodeReaders();
-		} else if (criteriaContext.IssueReaders() != null) {
-			return new IssueReaders();
 		} else if (criteriaContext.userCriteria() != null) {
 			String userName = getValue(criteriaContext.userCriteria().Value());
 			SpecifiedUser specifiedUser = new SpecifiedUser();

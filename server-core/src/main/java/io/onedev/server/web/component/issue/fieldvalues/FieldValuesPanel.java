@@ -34,13 +34,12 @@ import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 
@@ -69,7 +68,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 				protected void populateItem(ListItem<String> item) {
 					String value = item.getModelObject();
 					if (getField().getType().equals(FieldSpec.USER)) {
-						UserIdent userIdent = UserIdent.of(UserFacade.of(OneDev.getInstance(UserManager.class).findByName(value)), value);
+						UserIdent userIdent = UserIdent.of(OneDev.getInstance(UserManager.class).findByName(value), value);
 						item.add(new UserIdentPanel("value", userIdent, Mode.AVATAR_AND_NAME));
 					} else if (getField().getType().equals(FieldSpec.ISSUE)) {
 						Issue issue = OneDev.getInstance(IssueManager.class).find(project, Long.valueOf(value));
@@ -86,7 +85,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(value));
 						if (build != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
-							Link<Void> link = new BookmarkablePageLink<Void>("link", BuildLogPage.class, BuildLogPage.paramsOf(build, null));
+							Link<Void> link = new BookmarkablePageLink<Void>("link", 
+									BuildDashboardPage.class, BuildDashboardPage.paramsOf(build, null));
 							link.add(new Label("label", "#" + build.getNumber()));
 							linkFrag.add(link);
 							item.add(linkFrag);

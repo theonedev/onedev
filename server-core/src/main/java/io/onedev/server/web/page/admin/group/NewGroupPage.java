@@ -1,16 +1,10 @@
 package io.onedev.server.web.page.admin.group;
 
 import org.apache.wicket.Session;
-import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.apache.wicket.ajax.form.OnChangeAjaxBehavior;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
-import org.apache.wicket.markup.html.form.CheckBox;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-
-import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
@@ -18,18 +12,14 @@ import io.onedev.server.model.Group;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.Path;
+import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
 @SuppressWarnings("serial")
 public class NewGroupPage extends AdministrationPage {
 
 	private Group group = new Group();
-	
-	private CheckBox administratorInput;
-	
-	private CheckBox canCreateProjectsInput;
 	
 	public NewGroupPage(PageParameters params) {
 		super(params);
@@ -39,8 +29,7 @@ public class NewGroupPage extends AdministrationPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BeanEditor editor = BeanContext.edit("editor", group, 
-				Sets.newHashSet("administrator", "canCreateProjects"), true);
+		BeanEditor editor = BeanContext.edit("editor", group);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -55,8 +44,6 @@ public class NewGroupPage extends AdministrationPage {
 							"This name has already been used by another group");
 				} 
 				if (editor.isValid()) {
-					group.setAdministrator(administratorInput.getModelObject());
-					group.setCanCreateProjects(canCreateProjectsInput.getModelObject());
 					groupManager.save(group, null);
 					Session.get().success("Group created");
 					setResponsePage(GroupMembershipsPage.class, GroupMembershipsPage.paramsOf(group));
@@ -65,30 +52,6 @@ public class NewGroupPage extends AdministrationPage {
 			
 		};
 		form.add(editor);
-		administratorInput = new CheckBox("administrator", Model.of(group.isAdministrator()));
-		administratorInput.add(new OnChangeAjaxBehavior() {
-
-			@Override
-			protected void onUpdate(AjaxRequestTarget target) {
-				if (administratorInput.getModelObject())
-					canCreateProjectsInput.setModelObject(true);
-				target.add(canCreateProjectsInput);
-			}
-			
-		});
-		form.add(administratorInput);
-		
-		canCreateProjectsInput = new CheckBox("canCreateProjects", Model.of(group.isCanCreateProjects())) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setEnabled(!administratorInput.getModelObject());
-			}
-			
-		};
-		canCreateProjectsInput.setOutputMarkupId(true);
-		form.add(canCreateProjectsInput);			
 		add(form);
 	}
 

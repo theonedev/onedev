@@ -209,7 +209,7 @@ public class ProjectCommitsPage extends ProjectPage {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject().getFacade());
+		return SecurityUtils.canReadCode(getProject());
 	}
 	
 }

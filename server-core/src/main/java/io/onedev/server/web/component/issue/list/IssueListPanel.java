@@ -58,7 +58,6 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.UserFacade;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
@@ -355,7 +354,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canAdministrate(getProject().getFacade()));
+				setVisible(SecurityUtils.canManageIssues(getProject()));
 			}
 			
 		});
@@ -463,7 +462,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canWriteCode(getProject().getFacade()) && issuesTable.getItemCount() != 0);
+				setVisible(SecurityUtils.canWriteCode(getProject()) && issuesTable.getItemCount() != 0);
 			}
 			
 		});
@@ -516,7 +515,7 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		});
-		if (SecurityUtils.canWriteCode(getProject().getFacade())) {
+		if (SecurityUtils.canWriteCode(getProject())) {
 			columns.add(selectionColumn = new SelectionColumn<Issue, Void>() {
 
 				@Override
@@ -546,7 +545,7 @@ public abstract class IssueListPanel extends Panel {
 				
 				fragment.add(new IssueStateLabel("state", rowModel));
 				
-				UserIdent submitterIdent = UserIdent.of(UserFacade.of(issue.getSubmitter()), issue.getSubmitterName());
+				UserIdent submitterIdent = UserIdent.of(issue.getSubmitter(), issue.getSubmitterName());
 				fragment.add(new UserIdentPanel("submitter", submitterIdent, Mode.NAME));
 				fragment.add(new Label("submitDate", DateUtils.formatAge(issue.getSubmitDate())));
 				

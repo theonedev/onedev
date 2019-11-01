@@ -9,7 +9,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.model.User;
 
 @JsonTypeInfo(property="@class", use = Id.CLASS)
 public abstract class UserIdent implements Serializable {
@@ -18,14 +18,14 @@ public abstract class UserIdent implements Serializable {
 
 	public abstract String getName();
 	
-	public static UserIdent of(@Nullable UserFacade user) {
+	public static UserIdent of(@Nullable User user) {
 		if (user != null)
 			return new OrdinaryUserIdent(user.getDisplayName(), user.getEmail());
 		else
 			return new SystemUserIdent();
 	}
 	
-	public static UserIdent of(@Nullable UserFacade user, @Nullable String userName) {
+	public static UserIdent of(@Nullable User user, @Nullable String userName) {
 		if (user != null) {
 			return new OrdinaryUserIdent(user.getDisplayName(), user.getEmail());
 		} else if (userName != null) {

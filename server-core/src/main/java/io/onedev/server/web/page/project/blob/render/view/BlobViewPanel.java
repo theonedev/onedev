@@ -70,7 +70,7 @@ public abstract class BlobViewPanel extends Panel {
 		WebMarkupContainer changeActions = new WebMarkupContainer("changeActions");
 
 		Project project = context.getProject();
-		if (SecurityUtils.canWriteCode(project.getFacade()) && context.isOnBranch()) {
+		if (SecurityUtils.canWriteCode(project) && context.isOnBranch()) {
 			User user = OneDev.getInstance(UserManager.class).getCurrent();
 			String revision = context.getBlobIdent().revision;
 			String path = context.getBlobIdent().path;

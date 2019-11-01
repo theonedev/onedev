@@ -96,7 +96,7 @@ public class IssuePullRequestsPanel extends GenericPanel<Issue> {
 	@Override
 	protected void onConfigure() {
 		super.onConfigure();
-		setVisible(SecurityUtils.canReadCode(getIssue().getProject().getFacade()) 
+		setVisible(SecurityUtils.canReadCode(getIssue().getProject()) 
 				&& !requestsModel.getObject().isEmpty());
 	}
 

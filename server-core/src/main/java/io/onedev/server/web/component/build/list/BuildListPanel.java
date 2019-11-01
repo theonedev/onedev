@@ -66,7 +66,7 @@ import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.model.EntityModel;
-import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.page.project.savedquery.SavedQueriesOpened;
@@ -304,8 +304,8 @@ public abstract class BuildListPanel extends Panel {
 				Build build = rowModel.getObject();
 				Long buildId = build.getId();
 				
-				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildLogPage.class, 
-						BuildLogPage.paramsOf(build, getQueryPosition(cellItem)));
+				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDashboardPage.class, 
+						BuildDashboardPage.paramsOf(build, getQueryPosition(cellItem)));
 				link.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
 					@Override
@@ -361,8 +361,8 @@ public abstract class BuildListPanel extends Panel {
 					
 				});
 				
-				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildLogPage.class, 
-						BuildLogPage.paramsOf(build, getQueryPosition(cellItem)));
+				Link<Void> link = new BookmarkablePageLink<Void>("link", BuildDashboardPage.class, 
+						BuildDashboardPage.paramsOf(build, getQueryPosition(cellItem)));
 				
 				link.add(new Label("label", new AbstractReadOnlyModel<String>() {
 
@@ -405,7 +405,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		if (SecurityUtils.canReadCode(getProject().getFacade())) {
+		if (SecurityUtils.canReadCode(getProject())) {
 			columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_COMMIT)) {
 
 				@Override

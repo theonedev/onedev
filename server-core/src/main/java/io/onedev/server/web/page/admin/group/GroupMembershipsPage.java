@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.Session;
@@ -36,15 +35,13 @@ import org.hibernate.criterion.Restrictions;
 import io.onedev.commons.utils.matchscore.MatchScoreProvider;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CacheManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.facade.MembershipFacade;
-import io.onedev.server.util.facade.UserFacade;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
@@ -57,7 +54,6 @@ import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;
 import io.onedev.server.web.component.user.choice.UserChoiceResourceReference;
 import io.onedev.server.web.page.admin.user.UserProfilePage;
 import io.onedev.server.web.util.PagingHistorySupport;
-import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 public class GroupMembershipsPage extends GroupPage {
@@ -104,28 +100,19 @@ public class GroupMembershipsPage extends GroupPage {
 			
 		});
 		
-		add(new SelectToAddChoice<UserFacade>("addNew", new AbstractUserChoiceProvider() {
+		add(new SelectToAddChoice<User>("addNew", new AbstractUserChoiceProvider() {
 
 			@Override
-			public void query(String term, int page, Response<UserFacade> response) {
-				List<UserFacade> nonMembers = new ArrayList<>();
-				CacheManager cacheManager = OneDev.getInstance(CacheManager.class);
-				Set<Long> memberIds = new HashSet<>();
-				for (MembershipFacade membership: cacheManager.getMemberships().values()) {
-					if (membership.getGroupId().equals(getGroup().getId()))
-						memberIds.add(membership.getUserId());
-				}
-				for (UserFacade user: cacheManager.getUsers().values()) {
-					if (!memberIds.contains(user.getId()))
-						nonMembers.add(user);
-				}
+			public void query(String term, int page, Response<User> response) {
+				List<User> nonMembers = OneDev.getInstance(UserManager.class).query();
+				nonMembers.removeAll(getGroup().getMembers());
 				Collections.sort(nonMembers);
 				Collections.reverse(nonMembers);
 				
-				nonMembers = MatchScoreUtils.filterAndSort(nonMembers, new MatchScoreProvider<UserFacade>() {
+				nonMembers = MatchScoreUtils.filterAndSort(nonMembers, new MatchScoreProvider<User>() {
 
 					@Override
-					public double getMatchScore(UserFacade object) {
+					public double getMatchScore(User object) {
 						return object.getMatchScore(term);
 					}
 					
@@ -147,7 +134,7 @@ public class GroupMembershipsPage extends GroupPage {
 			}
 			
 			@Override
-			protected void onSelect(AjaxRequestTarget target, UserFacade selection) {
+			protected void onSelect(AjaxRequestTarget target, User selection) {
 				Membership membership = new Membership();
 				membership.setGroup(getGroup());
 				membership.setUser(OneDev.getInstance(UserManager.class).load(selection.getId()));
@@ -217,7 +204,7 @@ public class GroupMembershipsPage extends GroupPage {
 				Fragment fragment = new Fragment(componentId, "nameFrag", GroupMembershipsPage.this);
 				Link<Void> link = new BookmarkablePageLink<Void>("link", UserProfilePage.class, 
 						UserProfilePage.paramsOf(user));
-				link.add(new UserAvatar("avatar", UserIdent.of(UserFacade.of(user))));
+				link.add(new UserAvatar("avatar", UserIdent.of(user)));
 				link.add(new Label("name", user.getDisplayName()));
 				fragment.add(link);
 				cellItem.add(fragment);

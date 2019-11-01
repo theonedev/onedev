@@ -45,9 +45,6 @@ public class BuildLogDownloadResource extends AbstractResource {
 		if (project == null) 
 			throw new EntityNotFoundException("Unable to find project: " + projectName);
 		
-		if (!SecurityUtils.canReadCode(project.getFacade()))
-			throw new UnauthorizedException();
-		
 		Long buildNumber = params.get(PARAM_BUILD).toOptionalLong();
 		
 		if (buildNumber == null)
@@ -61,6 +58,9 @@ public class BuildLogDownloadResource extends AbstractResource {
 			throw new EntityNotFoundException(message);
 		}
 		
+		if (!SecurityUtils.canAccessLog(build))
+			throw new UnauthorizedException();
+	
 		ResourceResponse response = new ResourceResponse();
 		response.setContentType(MimeTypes.OCTET_STREAM);
 		

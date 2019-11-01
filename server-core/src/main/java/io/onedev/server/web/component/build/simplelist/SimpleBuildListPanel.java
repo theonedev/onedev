@@ -20,7 +20,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
+import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 
 @SuppressWarnings("serial")
 public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
@@ -46,7 +46,7 @@ public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
 				Build build = item.getModelObject();
 				
 				Link<Void> buildLink = new BookmarkablePageLink<Void>("build", 
-						BuildLogPage.class, BuildLogPage.paramsOf(build, null));
+						BuildDashboardPage.class, BuildDashboardPage.paramsOf(build, null));
 				
 				Long buildId = build.getId();
 				buildLink.add(new BuildStatusIcon("status", new LoadableDetachableModel<Status>() {
