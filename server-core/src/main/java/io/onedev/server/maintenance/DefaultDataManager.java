@@ -131,13 +131,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 			developer.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
 			
 			JobPrivilege jobPrivilege = new JobPrivilege();
-			jobPrivilege.setJobNames("-Release -Production");
-			jobPrivilege.setManageJob(true);
-			developer.getJobPrivileges().add(jobPrivilege);
-			
-			jobPrivilege = new JobPrivilege();
-			jobPrivilege.setJobNames("Release Production");
-			jobPrivilege.setAccessLog(true);
+			jobPrivilege.setJobNames("*");
+			jobPrivilege.setRunJob(true);
 			developer.getJobPrivileges().add(jobPrivilege);
 			
 			roleManager.save(developer, null);
@@ -148,12 +143,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			tester.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
 			
 			jobPrivilege = new JobPrivilege();
-			jobPrivilege.setJobNames("QA");
-			jobPrivilege.setManageJob(true);
-			tester.getJobPrivileges().add(jobPrivilege);
-			
-			jobPrivilege = new JobPrivilege();
-			jobPrivilege.setJobNames("-QA");
+			jobPrivilege.setJobNames("*");
 			jobPrivilege.setAccessLog(true);
 			tester.getJobPrivileges().add(jobPrivilege);
 			
@@ -165,7 +155,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			reporter.setEditableIssueFields(Lists.newArrayList("Type", "Priority"));
 			
 			jobPrivilege = new JobPrivilege();
-			jobPrivilege.setJobNames("Release Production");
+			jobPrivilege.setJobNames("*");
 			reporter.getJobPrivileges().add(jobPrivilege);
 
 			roleManager.save(reporter, null);
