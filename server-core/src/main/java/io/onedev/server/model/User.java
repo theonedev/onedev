@@ -2,6 +2,7 @@ package io.onedev.server.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -9,6 +10,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
+import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Version;
@@ -31,8 +33,12 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
+import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.validation.annotation.UserName;
+import io.onedev.server.util.watch.QuerySubscriptionSupport;
+import io.onedev.server.util.watch.QueryWatchSupport;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Password;
 
@@ -67,7 +73,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-	private Collection<UserAuthorization> authorizations = new ArrayList<>();
+	private Collection<UserAuthorization> projectAuthorizations = new ArrayList<>();
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -83,10 +89,89 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private Collection<IssueWatch> issueWatches = new ArrayList<>();
     
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
-    private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
+    private Collection<IssueQuerySetting> projectIssueQuerySettings = new ArrayList<>();
     
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<BuildQuerySetting> projectBuildQuerySettings = new ArrayList<>();
+    
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<PullRequestQuerySetting> projectPullRequestQuerySettings = new ArrayList<>();
+    
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<CommitQuerySetting> projectCommitQuerySettings = new ArrayList<>();
+    
+    @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
+    private Collection<CodeCommentQuerySetting> projectCodeCommentQuerySettings = new ArrayList<>();
+    
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<NamedIssueQuery> userIssueQueries = new ArrayList<>();
+
+	@Lob
+	@Column(nullable=false, length=65535)
+	private LinkedHashMap<String, Boolean> userIssueQueryWatches = new LinkedHashMap<>();
+	
+	@Column(nullable=false, length=65535)
+	private LinkedHashMap<String, Boolean> issueQueryWatches = new LinkedHashMap<>();
+	
     private transient Collection<Group> groups;
     
+	public void setUserQueryWatches(LinkedHashMap<String, Boolean> userQueryWatches) {
+		this.userIssueQueryWatches = userQueryWatches;
+	}
+
+	public void setQueryWatches(LinkedHashMap<String, Boolean> queryWatches) {
+		this.issueQueryWatches = queryWatches;
+	}
+
+	public QuerySetting<NamedIssueQuery> getIssueQuerySetting() {
+		return new QuerySetting<NamedIssueQuery>() {
+
+			@Override
+			public Project getProject() {
+				return null;
+			}
+
+			@Override
+			public User getUser() {
+				return User.this;
+			}
+
+			@Override
+			public ArrayList<NamedIssueQuery> getUserQueries() {
+				return userIssueQueries;
+			}
+
+			@Override
+			public void setUserQueries(ArrayList<NamedIssueQuery> userQueries) {
+				User.this.userIssueQueries = userQueries;
+			}
+
+			@Override
+			public QueryWatchSupport<NamedIssueQuery> getQueryWatchSupport() {
+				return new QueryWatchSupport<NamedIssueQuery>() {
+
+					@Override
+					public LinkedHashMap<String, Boolean> getUserQueryWatches() {
+						return userIssueQueryWatches;
+					}
+
+					@Override
+					public LinkedHashMap<String, Boolean> getQueryWatches() {
+						return issueQueryWatches;
+					}
+					
+				};
+			}
+
+			@Override
+			public QuerySubscriptionSupport<NamedIssueQuery> getQuerySubscriptionSupport() {
+				return null;
+			}
+			
+		};
+	}
+	
     @Override
     public PrincipalCollection getPrincipals() {
         return new SimplePrincipalCollection(getId(), "");
@@ -205,20 +290,12 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return version;
 	}
 
-	public Collection<IssueQuerySetting> getIssueQuerySettings() {
-		return issueQuerySettings;
+	public Collection<UserAuthorization> getProjectAuthorizations() {
+		return projectAuthorizations;
 	}
 
-	public void setIssueQuerySettings(Collection<IssueQuerySetting> issueQuerySettings) {
-		this.issueQuerySettings = issueQuerySettings;
-	}
-
-	public Collection<UserAuthorization> getAuthorizations() {
-		return authorizations;
-	}
-
-	public void setAuthorizations(Collection<UserAuthorization> authorizations) {
-		this.authorizations = authorizations;
+	public void setProjectAuthorizations(Collection<UserAuthorization> projectAuthorizations) {
+		this.projectAuthorizations = projectAuthorizations;
 	}
 	
 	@Override

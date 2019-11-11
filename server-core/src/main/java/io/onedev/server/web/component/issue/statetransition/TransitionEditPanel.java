@@ -13,7 +13,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.TransitionSpec;
@@ -105,7 +105,7 @@ abstract class TransitionEditPanel extends Panel implements InputContext {
 		add(form);
 	}
 
-	private GlobalIssueSetting getIssueSetting() {
+	private IssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	

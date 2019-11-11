@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issueworkflowreconcile;
+package io.onedev.server.web.component.issue.workflowreconcile;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;

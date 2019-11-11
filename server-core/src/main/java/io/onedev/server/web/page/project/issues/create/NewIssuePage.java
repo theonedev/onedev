@@ -15,7 +15,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.search.entity.issue.IssueCriteria;
@@ -24,9 +24,9 @@ import io.onedev.server.util.scriptidentity.ScriptIdentity;
 import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
 import io.onedev.server.util.scriptidentity.SiteAdministrator;
 import io.onedev.server.web.component.issue.create.NewIssueEditor;
+import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.page.security.LoginPage;
 
 @SuppressWarnings("serial")
@@ -107,7 +107,7 @@ public class NewIssuePage extends ProjectPage implements InputContext, ScriptIde
 		add(form);
 	}
 
-	private GlobalIssueSetting getIssueSetting() {
+	private IssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	

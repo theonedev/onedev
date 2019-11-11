@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.html.form.Form;
@@ -18,13 +17,13 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 
 @SuppressWarnings("serial")
-public class PromptFieldsUponIssueOpenSettingPage extends IssueSettingPage {
+public class PromptFieldsUponIssueOpenSettingPage extends ProjectIssueSettingPage {
 
-	private Set<String> fieldSet;
+	private Collection<String> fieldSet;
 	
 	public PromptFieldsUponIssueOpenSettingPage(PageParameters params) {
 		super(params);
-		fieldSet = getSetting().getPromptFieldsUponIssueOpen(true);
+		fieldSet = getProjectSetting().getPromptFieldsUponIssueOpen(true);
 	}
 
 	@Override
@@ -36,7 +35,7 @@ public class PromptFieldsUponIssueOpenSettingPage extends IssueSettingPage {
 			@Override
 			protected void onSubmit() {
 				super.onSubmit();
-				getSetting().setPromptFieldsUponIssueOpen(fieldSet);
+				getProjectSetting().setPromptFieldsUponIssueOpen(fieldSet);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 				setResponsePage(PromptFieldsUponIssueOpenSettingPage.class, PromptFieldsUponIssueOpenSettingPage.paramsOf(getProject()));
 				Session.get().success("Setting saved");
@@ -65,7 +64,7 @@ public class PromptFieldsUponIssueOpenSettingPage extends IssueSettingPage {
 			@Override
 			protected Map<String, String> load() {
 				Map<String, String> choices = new LinkedHashMap<>();
-				for (String fieldName: getGlobalSetting().getFieldNames())
+				for (String fieldName: getSetting().getFieldNames())
 					choices.put(fieldName, fieldName);
 				return choices;
 			}
@@ -76,7 +75,7 @@ public class PromptFieldsUponIssueOpenSettingPage extends IssueSettingPage {
 
 			@Override
 			public void onClick() {
-				getSetting().setPromptFieldsUponIssueOpen(null);
+				getProjectSetting().setPromptFieldsUponIssueOpen(null);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 				setResponsePage(PromptFieldsUponIssueOpenSettingPage.class, PromptFieldsUponIssueOpenSettingPage.paramsOf(getProject()));
 				Session.get().success("Reset to default setting");
@@ -85,7 +84,7 @@ public class PromptFieldsUponIssueOpenSettingPage extends IssueSettingPage {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getSetting().getPromptFieldsUponIssueOpen(false) != null);
+				setVisible(getProjectSetting().getPromptFieldsUponIssueOpen(false) != null);
 			}
 			
 		});

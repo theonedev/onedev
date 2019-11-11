@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.savedquery;
+package io.onedev.server.web.component.savedquery;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -48,7 +48,6 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
 public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
@@ -73,10 +72,10 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			return new ArrayList<>();
 	}	
 	
-	private WatchStatus getProjectWatchStatus(T namedQuery) {
+	private WatchStatus getWatchStatus(T namedQuery) {
 		QuerySetting<T> querySetting = getQuerySetting();
 		if (querySetting != null)
-			return querySetting.getQueryWatchSupport().getProjectWatchStatus(namedQuery);
+			return querySetting.getQueryWatchSupport().getWatchStatus(namedQuery);
 		else
 			return WatchStatus.DEFAULT;
 	}
@@ -89,10 +88,10 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			return WatchStatus.DEFAULT;
 	}
 	
-	private boolean getProjectSubscriptionStatus(T namedQuery) {
+	private boolean getSubscriptionStatus(T namedQuery) {
 		QuerySetting<T> querySetting = getQuerySetting();
 		if (querySetting != null)
-			return querySetting.getQuerySubscriptionSupport().getProjectQuerySubscriptions().contains(namedQuery.getName());
+			return querySetting.getQuerySubscriptionSupport().getQuerySubscriptions().contains(namedQuery.getName());
 		else
 			return false;
 	}
@@ -103,11 +102,6 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			return querySetting.getQuerySubscriptionSupport().getUserQuerySubscriptions().contains(namedQuery.getName());
 		else
 			return false;
-	}
-	
-	private Project getProject() {
-		ProjectPage page = (ProjectPage) getPage();
-		return page.getProject();
 	}
 	
 	@Override
@@ -196,15 +190,15 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				};
 			}
 			
-			private Component newProjectQueriesEditor(String componentId, ModalPanel modal, ArrayList<T> projectQueries, 
+			private Component newQueriesEditor(String componentId, ModalPanel modal, ArrayList<T> queries, 
 					@Nullable UseDefaultListener useDefaultListener) {
-				return new NamedQueriesEditor(componentId, projectQueries, useDefaultListener) {
+				return new NamedQueriesEditor(componentId, queries, useDefaultListener) {
 					
 					@Override
 					protected void onSave(AjaxRequestTarget target, ArrayList<T> queries) {
 						target.add(SavedQueriesPanel.this);
 						modal.close();
-						onSaveProjectQueries(queries);
+						onSaveQueries(queries);
 					}
 					
 					@Override
@@ -239,7 +233,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 				});
 				fragment.add(newUserQueriesEditor(TAB_PANEL_ID, modal, userQueries));
 				
-				if (SecurityUtils.canManage(getProject())) {
+				if (SecurityUtils.isAdministrator() || Project.get() != null && SecurityUtils.canManage(Project.get())) {
 					tabs.add(new AjaxActionTab(Model.of("For All Users")) {
 
 						@Override
@@ -250,26 +244,26 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 						@Override
 						protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-							ArrayList<T> projectQueries = getProjectQueries();
+							ArrayList<T> queries = getQueries();
 							UseDefaultListener useDefaultListener;
-							if (projectQueries == null) {
-								projectQueries = new ArrayList<>(getDefaultProjectQueries());
+							if (queries == null) {
+								queries = new ArrayList<>(getDefaultQueries());
 								useDefaultListener = null;
-							} else if (getDefaultProjectQueries() != null) {
+							} else if (getDefaultQueries() != null) {
 								useDefaultListener = new UseDefaultListener() {
 									
 									@Override
 									public void onUseDefault(AjaxRequestTarget target) {
 										target.add(SavedQueriesPanel.this);
 										modal.close();
-										onSaveProjectQueries(null);
+										onSaveQueries(null);
 									}
 									
 								};
 							} else {
 								useDefaultListener = null;
 							}
-							Component editor = newProjectQueriesEditor(TAB_PANEL_ID, modal, projectQueries, useDefaultListener);
+							Component editor = newQueriesEditor(TAB_PANEL_ID, modal, queries, useDefaultListener);
 							fragment.replace(editor);
 							target.add(editor);
 						}
@@ -376,12 +370,12 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 		});
 		
-		add(new ListView<T>("projectQueries", new LoadableDetachableModel<List<T>>() {
+		add(new ListView<T>("queries", new LoadableDetachableModel<List<T>>() {
 
 			@Override
 			protected List<T> load() {
 				List<T> namedQueries = new ArrayList<>();
-				for (T namedQuery: getProjectQueries()!=null?getProjectQueries():getDefaultProjectQueries()) {
+				for (T namedQuery: getQueries()!=null?getQueries():getDefaultQueries()) {
 					try {
 						if (SecurityUtils.getUser() != null || !needsLogin(namedQuery))
 							namedQueries.add(namedQuery);
@@ -408,13 +402,13 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 						target.add(this);
 
 						QuerySetting<T> querySetting = getQuerySetting();
-						querySetting.getQueryWatchSupport().setProjectWatchStatus(namedQuery, watchStatus);
+						querySetting.getQueryWatchSupport().setWatchStatus(namedQuery, watchStatus);
 						onSaveQuerySetting(querySetting);
 					}
 					
 					@Override
 					protected WatchStatus getWatchStatus() {
-						return getProjectWatchStatus(namedQuery);
+						return SavedQueriesPanel.this.getWatchStatus(namedQuery);
 					}
 
 					@Override
@@ -433,15 +427,15 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 
 						QuerySetting<T> querySetting = getQuerySetting();
 						if (subscriptionStatus)
-							querySetting.getQuerySubscriptionSupport().getProjectQuerySubscriptions().add(namedQuery.getName());
+							querySetting.getQuerySubscriptionSupport().getQuerySubscriptions().add(namedQuery.getName());
 						else
-							querySetting.getQuerySubscriptionSupport().getProjectQuerySubscriptions().remove(namedQuery.getName());
+							querySetting.getQuerySubscriptionSupport().getQuerySubscriptions().remove(namedQuery.getName());
 						onSaveQuerySetting(querySetting);
 					}
 					
 					@Override
 					protected boolean isSubscribed() {
-						return getProjectSubscriptionStatus(namedQuery);
+						return getSubscriptionStatus(namedQuery);
 					}
 
 					@Override
@@ -571,14 +565,14 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	protected abstract QuerySetting<T> getQuerySetting();
 	
 	@Nullable
-	protected abstract ArrayList<T> getProjectQueries();
+	protected abstract ArrayList<T> getQueries();
 
-	protected abstract void onSaveProjectQueries(ArrayList<T> projectQueries);
+	protected abstract void onSaveQueries(ArrayList<T> queries);
 	
 	protected abstract void onSaveQuerySetting(QuerySetting<T> querySetting);
 	
 	@Nullable
-	protected ArrayList<T> getDefaultProjectQueries() {
+	protected ArrayList<T> getDefaultQueries() {
 		return null;
 	}
 	

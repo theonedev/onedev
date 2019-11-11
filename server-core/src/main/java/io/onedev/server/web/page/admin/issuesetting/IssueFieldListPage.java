@@ -32,7 +32,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.asset.inputspec.InputSpecCssResourceReference;
@@ -46,7 +46,7 @@ import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.util.TextUtils;
 
 @SuppressWarnings("serial")
-public class IssueFieldListPage extends GlobalIssueSettingPage {
+public class IssueFieldListPage extends IssueSettingPage {
 
 	public IssueFieldListPage(PageParameters params) {
 		super(params);
@@ -76,7 +76,7 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 					}
 
 					@Override
-					protected GlobalIssueSetting getSetting() {
+					protected IssueSetting getSetting() {
 						return IssueFieldListPage.this.getSetting();
 					}
 
@@ -129,7 +129,7 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 
 					@Override
 					protected Component newLabel(String componentId) {
-						return new Label(componentId, TextUtils.describe(getSetting().getDefaultListFields().contains(field.getName())));
+						return new Label(componentId, TextUtils.describe(getSetting().getListFields().contains(field.getName())));
 					}
 					
 				});
@@ -254,7 +254,6 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 							fragment.add(BeanContext.view("viewer1", field, Sets.newHashSet("name"), true));
 							FieldBean bean = new FieldBean();
 							bean.setPromptUponIssueOpen(getSetting().getDefaultPromptFieldsUponIssueOpen().contains(field.getName()));
-							bean.setDisplayInIssueList(getSetting().getDefaultListFields().contains(field.getName()));
 							fragment.add(BeanContext.view("viewer2", bean, Sets.newHashSet("field"), true));
 							fragment.add(new ModalLink("edit") {
 
@@ -275,7 +274,7 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 										}
 
 										@Override
-										protected GlobalIssueSetting getSetting() {
+										protected IssueSetting getSetting() {
 											return IssueFieldListPage.this.getSetting();
 										}
 
@@ -295,7 +294,7 @@ public class IssueFieldListPage extends GlobalIssueSettingPage {
 								public void onClick(AjaxRequestTarget target) {
 									getSetting().getFieldSpecs().remove(index);
 									getSetting().getDefaultPromptFieldsUponIssueOpen().remove(field.getName());
-									getSetting().getDefaultListFields().remove(field.getName());
+									getSetting().getListFields().remove(field.getName());
 									getSetting().onDeleteField(field.getName());
 									getSetting().setReconciled(false);
 									OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());

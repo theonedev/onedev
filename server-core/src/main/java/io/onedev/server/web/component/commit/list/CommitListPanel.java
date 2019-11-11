@@ -75,13 +75,13 @@ import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.contributorpanel.ContributorPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.page.project.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.util.QuerySaveSupport;
 import io.onedev.server.web.util.VisibleVisitor;
 

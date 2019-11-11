@@ -7,7 +7,7 @@ query
     ;
 
 criteria
-    : operator=(Mine|Outstanding|Closed|SubmittedByMe)	#OperatorCriteria
+    : operator=(Mine|SubmittedByMe)	#OperatorCriteria
     | operator=(SubmittedBy|FixedInBuild) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
     | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty) #FieldOperatorCriteria
@@ -33,14 +33,6 @@ Mine
 All
 	: 'all'
 	;
-	
-Outstanding
-	: 'outstanding'
-	;
-	
-Closed
-	: 'closed'
-	;	
 	
 OrderBy
     : 'order' WS+ 'by'

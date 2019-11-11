@@ -23,7 +23,7 @@ import io.onedev.server.util.watch.QueryWatchSupport;
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_user_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "o_user_id"})}
 )
-public class CommitQuerySetting extends QuerySetting<NamedCommitQuery> {
+public class CommitQuerySetting extends AbstractEntity implements QuerySetting<NamedCommitQuery> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -92,7 +92,7 @@ public class CommitQuerySetting extends QuerySetting<NamedCommitQuery> {
 			}
 
 			@Override
-			public LinkedHashSet<String> getProjectQuerySubscriptions() {
+			public LinkedHashSet<String> getQuerySubscriptions() {
 				return projectQuerySubscriptions;
 			}
 			

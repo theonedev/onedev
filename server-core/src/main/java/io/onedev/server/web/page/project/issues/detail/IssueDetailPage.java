@@ -41,6 +41,7 @@ import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
 import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
+import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
@@ -49,8 +50,7 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
-import io.onedev.server.web.page.project.issues.list.IssueListPage;
-import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowChangeAlertPanel;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
@@ -187,11 +187,11 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 							@Override
 							public void onClick() {
 								OneDev.getInstance(IssueManager.class).delete(getIssue());
-								PageParameters params = IssueListPage.paramsOf(
+								PageParameters params = ProjectIssueListPage.paramsOf(
 										getProject(), 
 										QueryPosition.getQuery(position), 
 										QueryPosition.getPage(position) + 1); 
-								setResponsePage(IssueListPage.class, params);
+								setResponsePage(ProjectIssueListPage.class, params);
 							}
 							
 						};

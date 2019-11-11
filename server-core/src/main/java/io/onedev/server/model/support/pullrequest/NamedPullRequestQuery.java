@@ -45,5 +45,5 @@ public class NamedPullRequestQuery implements NamedQuery {
 	public void setQuery(String query) {
 		this.query = query;
 	}
-	
+
 }

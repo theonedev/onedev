@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issueworkflowreconcile;
+package io.onedev.server.web.component.issue.workflowreconcile;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -16,8 +16,6 @@ import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ShowCondition;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.util.WicketUtils;
 
 @Editable
 public class UndefinedFieldResolution implements Serializable {
@@ -61,7 +59,6 @@ public class UndefinedFieldResolution implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getFieldChoices() {
-		ProjectPage page = (ProjectPage) WicketUtils.getPage();
 		List<String> fields = new ArrayList<>();
 		for (FieldSpec field: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs()) 
 			fields.add(field.getName());

@@ -18,13 +18,13 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
-import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
-import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.Choice;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
@@ -51,7 +51,6 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 		if (fieldIndex != -1) {
 			bean.setField(SerializationUtils.clone(getSetting().getFieldSpecs().get(fieldIndex)));
 			bean.setPromptUponIssueOpen(getSetting().getDefaultPromptFieldsUponIssueOpen().contains(bean.getField().getName()));
-			bean.setDisplayInIssueList(getSetting().getDefaultListFields().contains(bean.getField().getName()));
 		}
 
 		Form<?> form = new Form<Void>("form") {
@@ -104,7 +103,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 						FieldSpec oldField = getSetting().getFieldSpecs().get(fieldIndex);
 						getSetting().getFieldSpecs().set(fieldIndex, field);
 						getSetting().getDefaultPromptFieldsUponIssueOpen().remove(oldField.getName());
-						getSetting().getDefaultListFields().remove(oldField.getName());
+						getSetting().getListFields().remove(oldField.getName());
 						if (!field.getName().equals(oldField.getName())) {
 							getSetting().onRenameField(oldField.getName(), field.getName());
 							getSetting().setReconciled(false);
@@ -151,8 +150,6 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 					}
 					if (bean.isPromptUponIssueOpen())
 						getSetting().getDefaultPromptFieldsUponIssueOpen().add(field.getName());
-					if (bean.isDisplayInIssueList())
-						getSetting().getDefaultListFields().add(field.getName());
 					OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
 					onSave(target);
 				} else {
@@ -181,7 +178,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 		add(form);
 	}
 
-	protected abstract GlobalIssueSetting getSetting();
+	protected abstract IssueSetting getSetting();
 	
 	protected abstract void onSave(AjaxRequestTarget target);
 	

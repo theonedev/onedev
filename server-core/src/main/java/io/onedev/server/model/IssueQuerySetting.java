@@ -23,7 +23,7 @@ import io.onedev.server.util.watch.QueryWatchSupport;
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_user_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "o_user_id"})}
 )
-public class IssueQuerySetting extends QuerySetting<NamedIssueQuery> {
+public class IssueQuerySetting extends AbstractEntity implements QuerySetting<NamedIssueQuery> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -44,7 +44,7 @@ public class IssueQuerySetting extends QuerySetting<NamedIssueQuery> {
 	private LinkedHashMap<String, Boolean> userQueryWatches = new LinkedHashMap<>();
 	
 	@Column(nullable=false, length=65535)
-	private LinkedHashMap<String, Boolean> projectQueryWatches = new LinkedHashMap<>();
+	private LinkedHashMap<String, Boolean> queryWatches = new LinkedHashMap<>();
 	
 	@Override
 	public Project getProject() {
@@ -78,8 +78,8 @@ public class IssueQuerySetting extends QuerySetting<NamedIssueQuery> {
 		this.userQueryWatches = userQueryWatches;
 	}
 
-	public void setProjectQueryWatches(LinkedHashMap<String, Boolean> projectQueryWatches) {
-		this.projectQueryWatches = projectQueryWatches;
+	public void setQueryWatches(LinkedHashMap<String, Boolean> projectQueryWatches) {
+		this.queryWatches = projectQueryWatches;
 	}
 
 	@Override
@@ -92,8 +92,8 @@ public class IssueQuerySetting extends QuerySetting<NamedIssueQuery> {
 			}
 
 			@Override
-			public LinkedHashMap<String, Boolean> getProjectQueryWatches() {
-				return projectQueryWatches;
+			public LinkedHashMap<String, Boolean> getQueryWatches() {
+				return queryWatches;
 			}
 			
 		};

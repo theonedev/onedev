@@ -11,7 +11,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
@@ -123,7 +123,7 @@ abstract class StateEditPanel extends Panel {
 		add(form);
 	}
 
-	protected abstract GlobalIssueSetting getSetting();
+	protected abstract IssueSetting getSetting();
 	
 	protected abstract void onSave(AjaxRequestTarget target);
 	

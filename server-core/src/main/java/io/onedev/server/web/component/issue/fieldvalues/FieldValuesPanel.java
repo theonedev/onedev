@@ -24,9 +24,8 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
@@ -38,7 +37,6 @@ import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.editable.EditableUtils;
-import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
@@ -50,15 +48,13 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 		super(id);
 	}
 
-	private GlobalIssueSetting getIssueSetting() {
+	private IssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		Project project = ((ProjectPage) getPage()).getProject();
 		
 		if (getField() != null && !getField().getValues().isEmpty()) {
 			Fragment fragment = new Fragment("content", "nonEmptyValuesFrag", this);
@@ -71,7 +67,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						UserIdent userIdent = UserIdent.of(OneDev.getInstance(UserManager.class).findByName(value), value);
 						item.add(new UserIdentPanel("value", userIdent, Mode.AVATAR_AND_NAME));
 					} else if (getField().getType().equals(FieldSpec.ISSUE)) {
-						Issue issue = OneDev.getInstance(IssueManager.class).find(project, Long.valueOf(value));
+						Issue issue = OneDev.getInstance(IssueManager.class).find(getIssue().getProject(), Long.valueOf(value));
 						if (issue != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue, null));
@@ -94,7 +90,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 							item.add(new Label("value", "#" + value));
 						}
 					} else if (getField().getType().equals(FieldSpec.PULLREQUEST)) {
-						PullRequest request = OneDev.getInstance(PullRequestManager.class).find(project, Long.valueOf(value));
+						PullRequest request = OneDev.getInstance(PullRequestManager.class).find(getIssue().getProject(), Long.valueOf(value));
 						if (request != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request, null));

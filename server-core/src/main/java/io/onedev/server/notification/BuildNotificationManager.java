@@ -63,11 +63,11 @@ public class BuildNotificationManager {
 	public void on(BuildEvent event) {
 		Project project = event.getProject();
 		Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
-		for (BuildQuerySetting setting: project.getBuildQuerySettings()) {
-			for (String queryName: setting.getQuerySubscriptionSupport().getProjectQuerySubscriptions())
-				fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), project.getSavedBuildQuery(queryName));
-			for (String queryName: setting.getQuerySubscriptionSupport().getUserQuerySubscriptions()) 
-				fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), setting.getUserQuery(queryName));
+		for (BuildQuerySetting setting: project.getUserBuildQuerySettings()) {
+			for (String name: setting.getQuerySubscriptionSupport().getQuerySubscriptions())
+				fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), NamedQuery.find(project.getNamedBuildQueries(), name));
+			for (String name: setting.getQuerySubscriptionSupport().getUserQuerySubscriptions()) 
+				fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), NamedQuery.find(setting.getUserQueries(), name));
 		}
 
 		Build build = event.getBuild();

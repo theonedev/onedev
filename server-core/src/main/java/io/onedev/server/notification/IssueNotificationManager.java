@@ -14,7 +14,9 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueCommented;
@@ -44,16 +46,23 @@ public class IssueNotificationManager {
 	
 	private final IssueWatchManager issueWatchManager;
 	
+	private final UserManager userManager;
+	
 	private final UserInfoManager userInfoManager;
+	
+	private final SettingManager settingManager;
 	
 	@Inject
 	public IssueNotificationManager(MarkdownManager markdownManager, MailManager mailManager, 
-			UrlManager urlManager, IssueWatchManager issueWatchManager, UserInfoManager userInfoManager) {
+			UrlManager urlManager, IssueWatchManager issueWatchManager, UserInfoManager userInfoManager, 
+			UserManager userManager, SettingManager settingManager) {
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.markdownManager = markdownManager;
 		this.issueWatchManager = issueWatchManager;
 		this.userInfoManager = userInfoManager;
+		this.userManager = userManager;
+		this.settingManager = settingManager;
 	}
 	
 	@Transactional
@@ -71,7 +80,7 @@ public class IssueNotificationManager {
 
 			@Override
 			protected Collection<? extends QuerySetting<?>> getQuerySettings() {
-				return issue.getProject().getIssueQuerySettings();
+				return issue.getProject().getUserIssueQuerySettings();
 			}
 
 			@Override
@@ -80,8 +89,34 @@ public class IssueNotificationManager {
 			}
 
 			@Override
-			protected NamedQuery getSavedProjectQuery(String name) {
-				return issue.getProject().getIssueSetting().getSavedQuery(name);
+			protected Collection<? extends NamedQuery> getNamedQueries() {
+				return issue.getProject().getIssueSetting().getNamedQueries(true);
+			}
+			
+		}.getWatches().entrySet()) {
+			watch(issue, entry.getKey(), entry.getValue());
+		}
+		
+		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<Issue>() {
+
+			@Override
+			protected Issue getEntity() {
+				return issue;
+			}
+
+			@Override
+			protected Collection<? extends QuerySetting<?>> getQuerySettings() {
+				return userManager.query().stream().map(it->it.getIssueQuerySetting()).collect(Collectors.toList());
+			}
+
+			@Override
+			protected EntityQuery<Issue> parse(String queryString) {
+				return IssueQuery.parse(null, queryString, true);
+			}
+
+			@Override
+			protected Collection<? extends NamedQuery> getNamedQueries() {
+				return settingManager.getIssueSetting().getNamedQueries();
 			}
 			
 		}.getWatches().entrySet()) {

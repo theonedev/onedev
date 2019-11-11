@@ -8,6 +8,6 @@ public abstract class QuerySubscriptionSupport<T extends NamedQuery> {
 
 	public abstract LinkedHashSet<String> getUserQuerySubscriptions();
 
-	public abstract LinkedHashSet<String> getProjectQuerySubscriptions();
+	public abstract LinkedHashSet<String> getQuerySubscriptions();
 	
 }

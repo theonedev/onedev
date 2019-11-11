@@ -41,7 +41,7 @@ import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.BackupSetting;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.SystemSetting;
@@ -193,7 +193,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		} 
 		setting = settingManager.getSetting(Key.ISSUE);
 		if (setting == null) {
-			settingManager.saveIssueSetting(new GlobalIssueSetting());
+			settingManager.saveIssueSetting(new IssueSetting());
 		} 
 		setting = settingManager.getSetting(Key.AUTHENTICATOR);
 		if (setting == null) {

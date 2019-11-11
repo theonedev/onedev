@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -53,7 +52,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
@@ -69,14 +68,15 @@ import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.model.EntityModel;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.page.project.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -122,9 +122,9 @@ public abstract class IssueListPanel extends Panel {
 	
 	private SortableDataProvider<Issue, Void> dataProvider;	
 	
-	public IssueListPanel(String id, Project project, @Nullable String query) {
+	public IssueListPanel(String id, @Nullable Project project, @Nullable String query) {
 		super(id);
-		projectModel = new EntityModel<Project>(project);
+		projectModel = project!=null?new EntityModel<Project>(project):Model.of((Project)null);
 		this.query = query;
 	}
 	
@@ -139,6 +139,7 @@ public abstract class IssueListPanel extends Panel {
 		super.onDetach();
 	}
 	
+	@Nullable
 	private Project getProject() {
 		return projectModel.getObject();
 	}
@@ -160,7 +161,7 @@ public abstract class IssueListPanel extends Panel {
 		return null;
 	}
 	
-	private GlobalIssueSetting getGlobalIssueSetting() {
+	private IssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
@@ -268,13 +269,13 @@ public abstract class IssueListPanel extends Panel {
 		
 		others.add(new ModalLink("listFields") {
 
-			private Set<String> fieldSet;
+			private Collection<String> fieldSet;
 			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				Fragment fragment = new Fragment(id, "listFieldsFrag", IssueListPanel.this);
 				Form<?> form = new Form<Void>("form");
-				fieldSet = getProject().getIssueSetting().getListFields(true);
+				fieldSet = getListFields();
 				form.add(new StringMultiChoice("fields", new IModel<Collection<String>>() {
 
 					@Override
@@ -296,7 +297,7 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					protected Map<String, String> load() {
 						Map<String, String> choices = new LinkedHashMap<>();
-						for (String fieldName: getGlobalIssueSetting().getFieldNames())
+						for (String fieldName: getIssueSetting().getFieldNames())
 							choices.put(fieldName, fieldName);
 						return choices;
 					}
@@ -318,8 +319,13 @@ public abstract class IssueListPanel extends Panel {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 						modal.close();
-						getProject().getIssueSetting().setListFields(fieldSet);
-						OneDev.getInstance(ProjectManager.class).save(getProject());
+						if (getProject() != null) {
+							getProject().getIssueSetting().setListFields(fieldSet);
+							OneDev.getInstance(ProjectManager.class).save(getProject());
+						} else {
+							getIssueSetting().setListFields(fieldSet);
+							OneDev.getInstance(SettingManager.class).saveIssueSetting(getIssueSetting());
+						}
 						onQueryUpdated(target, query);
 					}
 					
@@ -335,7 +341,7 @@ public abstract class IssueListPanel extends Panel {
 						onQueryUpdated(target, query);
 					}
 					
-				}.setVisible(getProject().getIssueSetting().getListFields(false) != null));
+				}.setVisible(getProject() != null && getProject().getIssueSetting().getListFields(false) != null));
 				
 				form.add(new AjaxLink<Void>("cancel") {
 
@@ -354,7 +360,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManageIssues(getProject()));
+				setVisible(SecurityUtils.isAdministrator() || getProject() != null && SecurityUtils.canManageIssues(getProject()));
 			}
 			
 		});
@@ -364,7 +370,11 @@ public abstract class IssueListPanel extends Panel {
 			query = parsedQueryModel.getObject().toString();
 		else
 			query = null;
-		add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject(), query)));
+		
+		if (getProject() != null) 
+			add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject(), query)));
+		else
+			add(new WebMarkupContainer("newIssue").setVisible(false));
 		
 		others.add(batchEditSelected = new ModalLink("batchEditSelected") {
 
@@ -412,7 +422,9 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(selectionColumn != null && !selectionColumn.getSelections().isEmpty());
+				setVisible(getProject() != null 
+						&& selectionColumn != null 
+						&& !selectionColumn.getSelections().isEmpty());
 			}
 			
 		});
@@ -462,7 +474,9 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canWriteCode(getProject()) && issuesTable.getItemCount() != 0);
+				setVisible(getProject() != null 
+						&& SecurityUtils.canWriteCode(getProject()) 
+						&& issuesTable.getItemCount() != 0);
 			}
 			
 		});
@@ -515,7 +529,7 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		});
-		if (SecurityUtils.canWriteCode(getProject())) {
+		if (getProject() != null && SecurityUtils.canWriteCode(getProject())) {
 			columns.add(selectionColumn = new SelectionColumn<Issue, Void>() {
 
 				@Override
@@ -535,11 +549,17 @@ public abstract class IssueListPanel extends Panel {
 				Fragment fragment = new Fragment(componentId, "summaryFrag", IssueListPanel.this);
 				fragment.add(new Label("number", "#" + issue.getNumber()));
 				OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
-				QueryPosition position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
+				QueryPosition position;
+				if (getProject() != null) {
+					position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
 						(int)issuesTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
+				} else {
+					position = null;
+				}
 				Link<Void> link = new BookmarkablePageLink<Void>("title", IssueActivitiesPage.class, 
 						IssueActivitiesPage.paramsOf(issue, position));
 				link.add(new Label("label", issue.getTitle()));
+					
 				fragment.add(link);
 				fragment.add(new WebMarkupContainer("copy").add(new CopyClipboardBehavior(Model.of("#" + issue.getNumber() + ": " + issue.getTitle()))));
 				
@@ -561,7 +581,31 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		});
-		for (String field: getGlobalIssueSetting().sortFieldNames(getProject().getIssueSetting().getListFields(true))) {
+		
+		if (getProject() == null) {
+			columns.add(new AbstractColumn<Issue, Void>(Model.of("Project")) {
+
+				@Override
+				public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
+						IModel<Issue> rowModel) {
+					Issue issue = rowModel.getObject();
+					Fragment fragment = new Fragment(componentId, "projectFrag", IssueListPanel.this);
+					Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectDashboardPage.class, 
+							ProjectDashboardPage.paramsOf(issue.getProject()));
+					link.add(new Label("label", issue.getProject()));
+					fragment.add(link);
+					cellItem.add(fragment);
+				}
+				
+				@Override
+				public String getCssClass() {
+					return "project";
+				}
+				
+			});
+		}
+		
+		for (String field: getIssueSetting().sortFieldNames(getListFields())) {
 			columns.add(new AbstractColumn<Issue, Void>(Model.of(field)) {
 
 				@Override
@@ -606,6 +650,13 @@ public abstract class IssueListPanel extends Panel {
 				return item;
 			}
 		});
+	}
+	
+	private Collection<String> getListFields() {
+		if (getProject() != null)
+			return getProject().getIssueSetting().getListFields(true);
+		else
+			return getIssueSetting().getListFields();
 	}
 	
 	@Override

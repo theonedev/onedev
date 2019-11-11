@@ -27,7 +27,6 @@ import io.onedev.server.web.page.admin.group.GroupMembershipsPage;
 import io.onedev.server.web.page.admin.group.GroupProfilePage;
 import io.onedev.server.web.page.admin.group.NewGroupPage;
 import io.onedev.server.web.page.admin.issuesetting.DefaultBoardListPage;
-import io.onedev.server.web.page.admin.issuesetting.DefaultQueryListPage;
 import io.onedev.server.web.page.admin.issuesetting.DefaultStateTransitionsPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueStateListPage;
@@ -49,6 +48,7 @@ import io.onedev.server.web.page.admin.user.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.UserProfilePage;
 import io.onedev.server.web.page.admin.user.UserTokenPage;
 import io.onedev.server.web.page.init.ServerInitPage;
+import io.onedev.server.web.page.issue.IssueListPage;
 import io.onedev.server.web.page.my.MyAvatarPage;
 import io.onedev.server.web.page.my.MyPasswordPage;
 import io.onedev.server.web.page.my.MyProfilePage;
@@ -72,7 +72,7 @@ import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.FixingBuildsPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
-import io.onedev.server.web.page.project.issues.list.IssueListPage;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneListPage;
@@ -108,6 +108,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 	public OneUrlMapper(WebApplication app) {
 		add(new OnePageMapper("init", ServerInitPage.class));
 		add(new OnePageMapper("loading", BrowserInfoPage.class));
+		add(new OnePageMapper("issues", IssueListPage.class));
 		addProjectPages();
 		addMyPages();
 		addAdministrationPages();
@@ -174,7 +175,6 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("administration/settings/issue-states", IssueStateListPage.class));
 		add(new OnePageMapper("administration/settings/state-transitions", DefaultStateTransitionsPage.class));
 		add(new OnePageMapper("administration/settings/issue-boards", DefaultBoardListPage.class));
-		add(new OnePageMapper("administration/settings/default-issue-queries", DefaultQueryListPage.class));
 		
 		add(new OnePageMapper("administration/server-log", ServerLogPage.class));
 		add(new OnePageMapper("administration/server-information", ServerInformationPage.class));
@@ -243,7 +243,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 
 		add(new OnePageMapper("projects/${project}/issue-boards", IssueBoardsPage.class));
 		add(new OnePageMapper("projects/${project}/issue-boards/${board}", IssueBoardsPage.class));
-		add(new OnePageMapper("projects/${project}/issue-list", IssueListPage.class));
+		add(new OnePageMapper("projects/${project}/issue-list", ProjectIssueListPage.class));
 		add(new OnePageMapper("projects/${project}/issues/${issue}", IssueActivitiesPage.class));
 		add(new OnePageMapper("projects/${project}/issues/${issue}/activities", IssueActivitiesPage.class));
 		add(new OnePageMapper("projects/${project}/issues/${issue}/builds", FixingBuildsPage.class));

@@ -17,7 +17,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.search.entity.AndCriteriaHelper;
 import io.onedev.server.search.entity.ParensAware;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 
 public class AndCriteria extends IssueCriteria implements ParensAware {
 	

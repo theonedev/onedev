@@ -36,7 +36,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.model.support.inputspec.InputSpec;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
@@ -307,7 +307,7 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		add(form);		
 	}
 	
-	private GlobalIssueSetting getIssueSetting() {
+	private IssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();		
 	}
 

@@ -52,11 +52,11 @@ public class CommitNotificationManager {
 		if (!event.getNewCommitId().equals(ObjectId.zeroId())) {
 			Project project = event.getProject();
 			Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
-			for (CommitQuerySetting setting: project.getCommitQuerySettings()) {
-				for (String queryName: setting.getQuerySubscriptionSupport().getProjectQuerySubscriptions())
-					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), project.getSavedCommitQuery(queryName));
-				for (String queryName: setting.getQuerySubscriptionSupport().getUserQuerySubscriptions()) 
-					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), setting.getUserQuery(queryName));
+			for (CommitQuerySetting setting: project.getUserCommitQuerySettings()) {
+				for (String name: setting.getQuerySubscriptionSupport().getQuerySubscriptions())
+					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), NamedQuery.find(project.getNamedCommitQueries(), name));
+				for (String name: setting.getQuerySubscriptionSupport().getUserQuerySubscriptions()) 
+					fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), NamedQuery.find(setting.getUserQueries(), name));
 			}
 			
 			Collection<String> notifyEmails = new HashSet<>();

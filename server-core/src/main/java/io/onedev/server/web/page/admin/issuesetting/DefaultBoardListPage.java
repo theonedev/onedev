@@ -31,7 +31,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
@@ -44,7 +44,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
 
 @SuppressWarnings("serial")
-public class DefaultBoardListPage extends GlobalIssueSettingPage {
+public class DefaultBoardListPage extends IssueSettingPage {
 
 	private DataTable<BoardSpec, Void> boardsTable;
 	
@@ -131,7 +131,7 @@ public class DefaultBoardListPage extends GlobalIssueSettingPage {
 				List<String> columnsForDisplay = new ArrayList<>();
 				for (String column: rowModel.getObject().getColumns()) {
 					if (column == null) {
-						GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+						IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 						FieldSpec field = issueSetting.getFieldSpec(board.getIdentifyField());
 						if (field != null)
 							columnsForDisplay.add("<i>" + HtmlEscape.escapeHtml5(field.getNameOfEmptyValue()) + "</i>");

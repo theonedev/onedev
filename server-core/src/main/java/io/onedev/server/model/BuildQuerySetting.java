@@ -23,7 +23,7 @@ import io.onedev.server.util.watch.QueryWatchSupport;
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_user_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "o_user_id"})}
 )
-public class BuildQuerySetting extends QuerySetting<NamedBuildQuery> {
+public class BuildQuerySetting extends AbstractEntity implements QuerySetting<NamedBuildQuery> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -45,7 +45,7 @@ public class BuildQuerySetting extends QuerySetting<NamedBuildQuery> {
 	
 	@Lob
 	@Column(nullable=false, length=65535)
-	private LinkedHashSet<String> projectQuerySubscriptions = new LinkedHashSet<>();
+	private LinkedHashSet<String> querySubscriptions = new LinkedHashSet<>();
 	
 	@Override
 	public Project getProject() {
@@ -90,11 +90,11 @@ public class BuildQuerySetting extends QuerySetting<NamedBuildQuery> {
 			}
 
 			@Override
-			public LinkedHashSet<String> getProjectQuerySubscriptions() {
-				return projectQuerySubscriptions;
+			public LinkedHashSet<String> getQuerySubscriptions() {
+				return querySubscriptions;
 			}
 			
 		};
 	}
-	
+
 }

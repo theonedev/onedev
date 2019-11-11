@@ -15,7 +15,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 
 public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	

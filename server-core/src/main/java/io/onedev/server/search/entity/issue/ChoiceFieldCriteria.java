@@ -17,10 +17,10 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 
 public class ChoiceFieldCriteria extends FieldCriteria {
 
@@ -85,7 +85,7 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	@Override
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		SpecifiedChoices specifiedChoices = SpecifiedChoices.of(issueSetting.getFieldSpec(getFieldName()));
 		if (specifiedChoices != null && !specifiedChoices.getChoiceValues().contains(value)) {
 			undefinedFieldValues.add(new UndefinedFieldValue(getFieldName(), value));

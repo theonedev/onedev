@@ -44,5 +44,5 @@ public class NamedCommitQuery implements NamedQuery {
 	public void setQuery(String query) {
 		this.query = query;
 	}
-	
+
 }

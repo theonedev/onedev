@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.savedquery;
+package io.onedev.server.web.component.savedquery;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -7,7 +7,6 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -20,11 +19,6 @@ public abstract class SaveQueryPanel extends Panel {
 		super(id);
 	}
 
-	private Project getProject() {
-		ProjectPage page = (ProjectPage) getPage();
-		return page.getProject();
-	}
-	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -61,7 +55,11 @@ public abstract class SaveQueryPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canManage(getProject()));
+				
+				if (getPage() instanceof ProjectPage) 
+					setVisible(SecurityUtils.canManage(((ProjectPage)getPage()).getProject()));
+				else
+					setVisible(SecurityUtils.isAdministrator());
 			}
 			
 		});

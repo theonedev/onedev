@@ -12,13 +12,13 @@ import io.onedev.server.web.component.issue.statetransition.StateTransitionListP
 import io.onedev.server.web.component.issue.statetransition.UseDefaultListener;
 
 @SuppressWarnings("serial")
-public class StateTransitionsPage extends IssueSettingPage {
+public class StateTransitionsPage extends ProjectIssueSettingPage {
 
 	private List<TransitionSpec> transitions;
 	
 	public StateTransitionsPage(PageParameters params) {
 		super(params);
-		transitions = getSetting().getTransitionSpecs(true);
+		transitions = getProjectSetting().getTransitionSpecs(true);
 	}
 	
 	@Override
@@ -29,18 +29,18 @@ public class StateTransitionsPage extends IssueSettingPage {
 
 			@Override
 			protected void onChanged(AjaxRequestTarget target) {
-				getSetting().setTransitionSpecs(transitions);
+				getProjectSetting().setTransitionSpecs(transitions);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
 
 			@Override
 			protected UseDefaultListener getUseDefaultListener() {
-				if (getSetting().getTransitionSpecs(false) != null) {
+				if (getProjectSetting().getTransitionSpecs(false) != null) {
 					return new UseDefaultListener() {
 						
 						@Override
 						public void onUseDefault() {
-							getSetting().setTransitionSpecs(null);
+							getProjectSetting().setTransitionSpecs(null);
 							OneDev.getInstance(ProjectManager.class).save(getProject());
 							setResponsePage(StateTransitionsPage.class, StateTransitionsPage.paramsOf(getProject()));
 						}

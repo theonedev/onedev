@@ -9,7 +9,7 @@ public abstract class QueryWatchSupport<T extends NamedQuery> {
 
 	public abstract LinkedHashMap<String, Boolean> getUserQueryWatches();
 
-	public abstract LinkedHashMap<String, Boolean> getProjectQueryWatches();
+	public abstract LinkedHashMap<String, Boolean> getQueryWatches();
 
 	private WatchStatus getWatchStatus(Map<String, Boolean> watches, String name) {
 		Boolean watching = watches.get(name);
@@ -28,16 +28,16 @@ public abstract class QueryWatchSupport<T extends NamedQuery> {
 			watches.remove(name);
 	}
 	
-	public WatchStatus getProjectWatchStatus(T namedQuery) {
-		return getWatchStatus(getProjectQueryWatches(), namedQuery.getName());
+	public WatchStatus getWatchStatus(T namedQuery) {
+		return getWatchStatus(getQueryWatches(), namedQuery.getName());
 	}
 	
 	public WatchStatus getUserWatchStatus(T namedQuery) {
 		return getWatchStatus(getUserQueryWatches(), namedQuery.getName());
 	}
 
-	public void setProjectWatchStatus(T namedQuery, WatchStatus watchStatus) {
-		setWatchStatus(getProjectQueryWatches(), namedQuery.getName(), watchStatus);
+	public void setWatchStatus(T namedQuery, WatchStatus watchStatus) {
+		setWatchStatus(getQueryWatches(), namedQuery.getName(), watchStatus);
 	}
 	
 	public void setUserWatchStatus(T namedQuery, WatchStatus watchStatus) {

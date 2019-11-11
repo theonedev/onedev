@@ -109,7 +109,7 @@ import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.Secret;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
-import io.onedev.server.model.support.issue.IssueSetting;
+import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
@@ -234,19 +234,19 @@ public class Project extends AbstractEntity {
 	private Collection<CodeComment> codeComments = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<IssueQuerySetting> issueQuerySettings = new ArrayList<>();
+	private Collection<IssueQuerySetting> userIssueQuerySettings = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<CommitQuerySetting> commitQuerySettings = new ArrayList<>();
+	private Collection<CommitQuerySetting> userCommitQuerySettings = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<PullRequestQuerySetting> pullRequestQuerySettings = new ArrayList<>();
+	private Collection<PullRequestQuerySetting> userPullRequestQuerySettings = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<CodeCommentQuerySetting> codeCommentQuerySettings = new ArrayList<>();
+	private Collection<CodeCommentQuerySetting> userCodeCommentQuerySettings = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
-	private Collection<BuildQuerySetting> buildQuerySettings = new ArrayList<>();
+	private Collection<BuildQuerySetting> userBuildQuerySettings = new ArrayList<>();
 	
 	@OneToMany(mappedBy="project", cascade=CascadeType.REMOVE)
 	private Collection<Milestone> milestones = new ArrayList<>();
@@ -254,7 +254,7 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
-	private IssueSetting issueSetting = new IssueSetting();
+	private ProjectIssueSetting issueSetting = new ProjectIssueSetting();
 	
 	@Lob
 	@Column(length=65535, nullable=false)
@@ -264,59 +264,59 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
-	private ArrayList<NamedCommitQuery> savedCommitQueries = new ArrayList<>();
+	private ArrayList<NamedCommitQuery> namedCommitQueries = new ArrayList<>();
 	{
-		savedCommitQueries.add(new NamedCommitQuery("All", "all"));
-		savedCommitQueries.add(new NamedCommitQuery("Default branch", "default-branch"));
-		savedCommitQueries.add(new NamedCommitQuery("Authored by me", "authored-by-me"));
-		savedCommitQueries.add(new NamedCommitQuery("Committed by me", "committed-by-me"));
-		savedCommitQueries.add(new NamedCommitQuery("Committed recently", "after(last week)"));
+		namedCommitQueries.add(new NamedCommitQuery("All", "all"));
+		namedCommitQueries.add(new NamedCommitQuery("Default branch", "default-branch"));
+		namedCommitQueries.add(new NamedCommitQuery("Authored by me", "authored-by-me"));
+		namedCommitQueries.add(new NamedCommitQuery("Committed by me", "committed-by-me"));
+		namedCommitQueries.add(new NamedCommitQuery("Committed recently", "after(last week)"));
 	}
 	
 	@Lob
 	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
-	private ArrayList<NamedPullRequestQuery> savedPullRequestQueries = new ArrayList<>();
+	private ArrayList<NamedPullRequestQuery> namedPullRequestQueries = new ArrayList<>();
 	{
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Open", "open"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("To be reviewed by me", "to be reviewed by me"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("To be changed by me", "submitted by me and someone requested for changes"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Request for changes by me", "requested for changes by me"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Approved by me", "approved by me"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted by me", "submitted by me"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("Closed", "merged or discarded"));
-		savedPullRequestQueries.add(new NamedPullRequestQuery("All", "all"));
+		namedPullRequestQueries.add(new NamedPullRequestQuery("Open", "open"));
+		namedPullRequestQueries.add(new NamedPullRequestQuery("To be reviewed by me", "to be reviewed by me"));
+		namedPullRequestQueries.add(new NamedPullRequestQuery("To be changed by me", "submitted by me and someone requested for changes"));
+		namedPullRequestQueries.add(new NamedPullRequestQuery("Request for changes by me", "requested for changes by me"));
+		namedPullRequestQueries.add(new NamedPullRequestQuery("Approved by me", "approved by me"));
+		namedPullRequestQueries.add(new NamedPullRequestQuery("Submitted by me", "submitted by me"));
+		namedPullRequestQueries.add(new NamedPullRequestQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
+		namedPullRequestQueries.add(new NamedPullRequestQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+		namedPullRequestQueries.add(new NamedPullRequestQuery("Closed", "merged or discarded"));
+		namedPullRequestQueries.add(new NamedPullRequestQuery("All", "all"));
 	}
 	
 	@Lob
 	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
-	private ArrayList<NamedCodeCommentQuery> savedCodeCommentQueries = new ArrayList<>(); 
+	private ArrayList<NamedCodeCommentQuery> namedCodeCommentQueries = new ArrayList<>(); 
 	{
-		savedCodeCommentQueries.add(new NamedCodeCommentQuery("All", "all"));
-		savedCodeCommentQueries.add(new NamedCodeCommentQuery("Created by me", "created by me"));
-		savedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is after \"last week\""));
-		savedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+		namedCodeCommentQueries.add(new NamedCodeCommentQuery("All", "all"));
+		namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created by me", "created by me"));
+		namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is after \"last week\""));
+		namedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is after \"last week\""));
 	}
 	
 	@Lob
 	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
-	private ArrayList<NamedBuildQuery> savedBuildQueries = new ArrayList<>();
+	private ArrayList<NamedBuildQuery> namedBuildQueries = new ArrayList<>();
 	{
-		savedBuildQueries.add(new NamedBuildQuery("All", "all"));
-		savedBuildQueries.add(new NamedBuildQuery("Successful", "successful"));
-		savedBuildQueries.add(new NamedBuildQuery("Failed", "failed"));
-		savedBuildQueries.add(new NamedBuildQuery("Failed eventually", "failed and not(will retry)"));
-		savedBuildQueries.add(new NamedBuildQuery("In error", "in error"));
-		savedBuildQueries.add(new NamedBuildQuery("Cancelled", "cancelled"));
-		savedBuildQueries.add(new NamedBuildQuery("Timed out", "timed out"));
-		savedBuildQueries.add(new NamedBuildQuery("Running", "running"));
-		savedBuildQueries.add(new NamedBuildQuery("Waiting", "waiting"));
-		savedBuildQueries.add(new NamedBuildQuery("Queueing", "queueing"));
-		savedBuildQueries.add(new NamedBuildQuery("Build recently", "\"Submit Date\" is after \"last week\""));
+		namedBuildQueries.add(new NamedBuildQuery("All", "all"));
+		namedBuildQueries.add(new NamedBuildQuery("Successful", "successful"));
+		namedBuildQueries.add(new NamedBuildQuery("Failed", "failed"));
+		namedBuildQueries.add(new NamedBuildQuery("Failed eventually", "failed and not(will retry)"));
+		namedBuildQueries.add(new NamedBuildQuery("In error", "in error"));
+		namedBuildQueries.add(new NamedBuildQuery("Cancelled", "cancelled"));
+		namedBuildQueries.add(new NamedBuildQuery("Timed out", "timed out"));
+		namedBuildQueries.add(new NamedBuildQuery("Running", "running"));
+		namedBuildQueries.add(new NamedBuildQuery("Waiting", "waiting"));
+		namedBuildQueries.add(new NamedBuildQuery("Queueing", "queueing"));
+		namedBuildQueries.add(new NamedBuildQuery("Build recently", "\"Submit Date\" is after \"last week\""));
 	}
 	
 	@Lob
@@ -1033,11 +1033,11 @@ public class Project extends AbstractEntity {
 		this.codeComments = codeComments;
 	}
 
-	public IssueSetting getIssueSetting() {
+	public ProjectIssueSetting getIssueSetting() {
 		return issueSetting;
 	}
 
-	public void setIssueSetting(IssueSetting issueSetting) {
+	public void setIssueSetting(ProjectIssueSetting issueSetting) {
 		this.issueSetting = issueSetting;
 	}
 
@@ -1049,112 +1049,76 @@ public class Project extends AbstractEntity {
 		this.buildSetting = buildSetting;
 	}
 
-	public ArrayList<NamedCommitQuery> getSavedCommitQueries() {
-		return savedCommitQueries;
+	public ArrayList<NamedCommitQuery> getNamedCommitQueries() {
+		return namedCommitQueries;
 	}
 
-	public void setSavedCommitQueries(ArrayList<NamedCommitQuery> savedCommitQueries) {
-		this.savedCommitQueries = savedCommitQueries;
+	public void setNamedCommitQueries(ArrayList<NamedCommitQuery> namedCommitQueries) {
+		this.namedCommitQueries = namedCommitQueries;
 	}
 	
-	public ArrayList<NamedPullRequestQuery> getSavedPullRequestQueries() {
-		return savedPullRequestQueries;
+	public ArrayList<NamedPullRequestQuery> getNamedPullRequestQueries() {
+		return namedPullRequestQueries;
 	}
 
-	public void setSavedPullRequestQueries(ArrayList<NamedPullRequestQuery> savedPullRequestQueries) {
-		this.savedPullRequestQueries = savedPullRequestQueries;
+	public void setNamedPullRequestQueries(ArrayList<NamedPullRequestQuery> namedPullRequestQueries) {
+		this.namedPullRequestQueries = namedPullRequestQueries;
 	}
 	
-	@Nullable
-	public NamedCommitQuery getSavedCommitQuery(String name) {
-		for (NamedCommitQuery namedQuery: getSavedCommitQueries()) {
-			if (namedQuery.getName().equals(name))
-				return namedQuery;
-		}
-		return null;
+	public ArrayList<NamedCodeCommentQuery> getNamedCodeCommentQueries() {
+		return namedCodeCommentQueries;
+	}
+
+	public void setNamedCodeCommentQueries(ArrayList<NamedCodeCommentQuery> namedCodeCommentQueries) {
+		this.namedCodeCommentQueries = namedCodeCommentQueries;
 	}
 	
-	@Nullable
-	public NamedPullRequestQuery getSavedPullRequestQuery(String name) {
-		for (NamedPullRequestQuery namedQuery: getSavedPullRequestQueries()) {
-			if (namedQuery.getName().equals(name))
-				return namedQuery;
-		}
-		return null;
+	public ArrayList<NamedBuildQuery> getNamedBuildQueries() {
+		return namedBuildQueries;
+	}
+
+	public void setNamedBuildQueries(ArrayList<NamedBuildQuery> namedBuildQueries) {
+		this.namedBuildQueries = namedBuildQueries;
+	}
+
+	public Collection<IssueQuerySetting> getUserIssueQuerySettings() {
+		return userIssueQuerySettings;
+	}
+
+	public void setUserIssueQuerySettings(Collection<IssueQuerySetting> userIssueQuerySettings) {
+		this.userIssueQuerySettings = userIssueQuerySettings;
+	}
+
+	public Collection<CommitQuerySetting> getUserCommitQuerySettings() {
+		return userCommitQuerySettings;
+	}
+
+	public void setUserCommitQuerySettings(Collection<CommitQuerySetting> userCommitQuerySettings) {
+		this.userCommitQuerySettings = userCommitQuerySettings;
+	}
+
+	public Collection<PullRequestQuerySetting> getUserPullRequestQuerySettings() {
+		return userPullRequestQuerySettings;
+	}
+
+	public void setUserPullRequestQuerySettings(Collection<PullRequestQuerySetting> userPullRequestQuerySettings) {
+		this.userPullRequestQuerySettings = userPullRequestQuerySettings;
+	}
+
+	public Collection<CodeCommentQuerySetting> getUserCodeCommentQuerySettings() {
+		return userCodeCommentQuerySettings;
+	}
+
+	public void setUserCodeCommentQuerySettings(Collection<CodeCommentQuerySetting> userCodeCommentQuerySettings) {
+		this.userCodeCommentQuerySettings = userCodeCommentQuerySettings;
 	}
 	
-	@Nullable
-	public NamedCodeCommentQuery getSavedCodeCommentQuery(String name) {
-		for (NamedCodeCommentQuery namedQuery: getSavedCodeCommentQueries()) {
-			if (namedQuery.getName().equals(name))
-				return namedQuery;
-		}
-		return null;
-	}
-	
-	@Nullable
-	public NamedBuildQuery getSavedBuildQuery(String name) {
-		for (NamedBuildQuery namedQuery: getSavedBuildQueries()) {
-			if (namedQuery.getName().equals(name))
-				return namedQuery;
-		}
-		return null;
-	}
-	
-	public ArrayList<NamedCodeCommentQuery> getSavedCodeCommentQueries() {
-		return savedCodeCommentQueries;
+	public Collection<BuildQuerySetting> getUserBuildQuerySettings() {
+		return userBuildQuerySettings;
 	}
 
-	public void setSavedCodeCommentQueries(ArrayList<NamedCodeCommentQuery> savedCodeCommentQueries) {
-		this.savedCodeCommentQueries = savedCodeCommentQueries;
-	}
-	
-	public ArrayList<NamedBuildQuery> getSavedBuildQueries() {
-		return savedBuildQueries;
-	}
-
-	public void setSavedBuildQueries(ArrayList<NamedBuildQuery> savedBuildQueries) {
-		this.savedBuildQueries = savedBuildQueries;
-	}
-
-	public Collection<IssueQuerySetting> getIssueQuerySettings() {
-		return issueQuerySettings;
-	}
-
-	public void setIssueQuerySettings(Collection<IssueQuerySetting> issueQuerySettings) {
-		this.issueQuerySettings = issueQuerySettings;
-	}
-
-	public Collection<CommitQuerySetting> getCommitQuerySettings() {
-		return commitQuerySettings;
-	}
-
-	public void setCommitQuerySettings(Collection<CommitQuerySetting> commitQuerySettings) {
-		this.commitQuerySettings = commitQuerySettings;
-	}
-
-	public Collection<PullRequestQuerySetting> getPullRequestQuerySettings() {
-		return pullRequestQuerySettings;
-	}
-
-	public void setPullRequestQuerySettings(Collection<PullRequestQuerySetting> pullRequestQuerySettings) {
-		this.pullRequestQuerySettings = pullRequestQuerySettings;
-	}
-
-	public Collection<CodeCommentQuerySetting> getCodeCommentQuerySettings() {
-		return codeCommentQuerySettings;
-	}
-
-	public void setCodeCommentQuerySettings(Collection<CodeCommentQuerySetting> codeCommentQuerySettings) {
-		this.codeCommentQuerySettings = codeCommentQuerySettings;
-	}
-	
-	public Collection<BuildQuerySetting> getBuildQuerySettings() {
-		return buildQuerySettings;
-	}
-
-	public void setBuildQuerySettings(Collection<BuildQuerySetting> buildQuerySettings) {
-		this.buildQuerySettings = buildQuerySettings;
+	public void setUserBuildQuerySettings(Collection<BuildQuerySetting> userBuildQuerySettings) {
+		this.userBuildQuerySettings = userBuildQuerySettings;
 	}
 
 	public Collection<Build> getBuilds() {

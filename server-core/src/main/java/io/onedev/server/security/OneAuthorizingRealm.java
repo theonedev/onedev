@@ -107,15 +107,15 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 			            			permissions.add(new SystemAdministration());
 			            		if (group.isCreateProjects())
 			            			permissions.add(new CreateProjects());
-			            		for (GroupAuthorization authorization: group.getAuthorizations()) 
+			            		for (GroupAuthorization authorization: group.getProjectAuthorizations()) 
 	            					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 				        	}
-				        	for (UserAuthorization authorization: user.getAuthorizations()) 
+				        	for (UserAuthorization authorization: user.getProjectAuthorizations()) 
             					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 				        } 
 			        	Group group = groupManager.findAnonymous();
 			        	if (group != null) {
-		            		for (GroupAuthorization authorization: group.getAuthorizations()) 
+		            		for (GroupAuthorization authorization: group.getProjectAuthorizations()) 
             					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 			        	}
 						return permissions;

@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issues.list;
+package io.onedev.server.web.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,9 +6,9 @@ import java.util.List;
 import javax.validation.constraints.NotNull;
 
 import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
-import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
 
 @Editable
 public class NamedIssueQueriesBean extends NamedQueriesBean<NamedIssueQuery> {

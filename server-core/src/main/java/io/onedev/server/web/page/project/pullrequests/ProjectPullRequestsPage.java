@@ -49,6 +49,7 @@ import io.onedev.server.entitymanager.PullRequestQuerySettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestQuerySetting;
+import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
@@ -60,13 +61,13 @@ import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.pullrequest.summary.PullRequestSummaryPanel;
+import io.onedev.server.web.component.savedquery.NamedQueriesBean;
+import io.onedev.server.web.component.savedquery.SaveQueryPanel;
+import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
+import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
-import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
-import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
-import io.onedev.server.web.page.project.savedquery.SavedQueriesClosed;
-import io.onedev.server.web.page.project.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.VisibleVisitor;
@@ -113,7 +114,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 				for (NamedPullRequestQuery namedQuery: getProject().getPullRequestQuerySettingOfCurrentUser().getUserQueries())
 					queries.add(namedQuery.getQuery());
 			}
-			for (NamedPullRequestQuery namedQuery: getProject().getSavedPullRequestQueries())
+			for (NamedPullRequestQuery namedQuery: getProject().getNamedPullRequestQueries())
 				queries.add(namedQuery.getQuery());
 			for (String each: queries) {
 				try {
@@ -170,8 +171,8 @@ public class ProjectPullRequestsPage extends ProjectPage {
 			}
 
 			@Override
-			protected ArrayList<NamedPullRequestQuery> getProjectQueries() {
-				return getProject().getSavedPullRequestQueries();
+			protected ArrayList<NamedPullRequestQuery> getQueries() {
+				return getProject().getNamedPullRequestQueries();
 			}
 
 			@Override
@@ -180,8 +181,8 @@ public class ProjectPullRequestsPage extends ProjectPage {
 			}
 
 			@Override
-			protected void onSaveProjectQueries(ArrayList<NamedPullRequestQuery> projectQueries) {
-				getProject().setSavedPullRequestQueries(projectQueries);
+			protected void onSaveQueries(ArrayList<NamedPullRequestQuery> projectQueries) {
+				getProject().setNamedPullRequestQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
 
@@ -255,7 +256,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 							@Override
 							protected void onSaveForMine(AjaxRequestTarget target, String name) {
 								PullRequestQuerySetting setting = getProject().getPullRequestQuerySettingOfCurrentUser();
-								NamedPullRequestQuery namedQuery = setting.getUserQuery(name);
+								NamedPullRequestQuery namedQuery = NamedQuery.find(setting.getUserQueries(), name);
 								if (namedQuery == null) {
 									namedQuery = new NamedPullRequestQuery(name, query);
 									setting.getUserQueries().add(namedQuery);
@@ -269,10 +270,10 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 							@Override
 							protected void onSaveForAll(AjaxRequestTarget target, String name) {
-								NamedPullRequestQuery namedQuery = getProject().getSavedPullRequestQuery(name);
+								NamedPullRequestQuery namedQuery = NamedQuery.find(getProject().getNamedPullRequestQueries(), name);
 								if (namedQuery == null) {
 									namedQuery = new NamedPullRequestQuery(name, query);
-									getProject().getSavedPullRequestQueries().add(namedQuery);
+									getProject().getNamedPullRequestQueries().add(namedQuery);
 								} else {
 									namedQuery.setQuery(query);
 								}

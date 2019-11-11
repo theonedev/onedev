@@ -9,7 +9,7 @@ import io.onedev.server.web.component.issue.statetransition.StateTransitionListP
 import io.onedev.server.web.component.issue.statetransition.UseDefaultListener;
 
 @SuppressWarnings("serial")
-public class DefaultStateTransitionsPage extends GlobalIssueSettingPage {
+public class DefaultStateTransitionsPage extends IssueSettingPage {
 
 	public DefaultStateTransitionsPage(PageParameters params) {
 		super(params);

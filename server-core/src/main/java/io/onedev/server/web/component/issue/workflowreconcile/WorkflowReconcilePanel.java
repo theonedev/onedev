@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issueworkflowreconcile;
+package io.onedev.server.web.component.issue.workflowreconcile;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -25,13 +25,13 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.ajaxlistener.ChangeTextListener;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.ajaxlistener.SelfDisableListener;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValueResolution.FixType;
 import io.onedev.server.web.editable.BeanContext;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValueResolution.FixType;
 
 @SuppressWarnings("serial")
 public abstract class WorkflowReconcilePanel extends Panel {
@@ -360,7 +360,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 				getIssueManager().fixFieldValueOrders();
 				
 				SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-				GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
+				IssueSetting issueSetting = settingManager.getIssueSetting();
 				issueSetting.setReconciled(true);
 				settingManager.saveIssueSetting(issueSetting);
 				

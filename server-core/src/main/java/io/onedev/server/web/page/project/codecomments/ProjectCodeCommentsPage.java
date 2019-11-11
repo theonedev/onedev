@@ -17,15 +17,16 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.CodeCommentQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
+import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.savedquery.NamedQueriesBean;
+import io.onedev.server.web.component.savedquery.SaveQueryPanel;
+import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
-import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
-import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
@@ -48,7 +49,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 				for (NamedCodeCommentQuery namedQuery: getProject().getCodeCommentQuerySettingOfCurrentUser().getUserQueries())
 					queries.add(namedQuery.getQuery());
 			}
-			for (NamedCodeCommentQuery namedQuery: getProject().getSavedCodeCommentQueries())
+			for (NamedCodeCommentQuery namedQuery: getProject().getNamedCodeCommentQueries())
 				queries.add(namedQuery.getQuery());
 			for (String each: queries) {
 				try {
@@ -94,8 +95,8 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 			}
 
 			@Override
-			protected ArrayList<NamedCodeCommentQuery> getProjectQueries() {
-				return getProject().getSavedCodeCommentQueries();
+			protected ArrayList<NamedCodeCommentQuery> getQueries() {
+				return getProject().getNamedCodeCommentQueries();
 			}
 
 			@Override
@@ -104,8 +105,8 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 			}
 
 			@Override
-			protected void onSaveProjectQueries(ArrayList<NamedCodeCommentQuery> projectQueries) {
-				getProject().setSavedCodeCommentQueries(projectQueries);
+			protected void onSaveQueries(ArrayList<NamedCodeCommentQuery> projectQueries) {
+				getProject().setNamedCodeCommentQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
 
@@ -160,7 +161,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 									@Override
 									protected void onSaveForMine(AjaxRequestTarget target, String name) {
 										CodeCommentQuerySetting setting = getProject().getCodeCommentQuerySettingOfCurrentUser();
-										NamedCodeCommentQuery namedQuery = setting.getUserQuery(name);
+										NamedCodeCommentQuery namedQuery = NamedQuery.find(setting.getUserQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedCodeCommentQuery(name, query);
 											setting.getUserQueries().add(namedQuery);
@@ -174,10 +175,10 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 
 									@Override
 									protected void onSaveForAll(AjaxRequestTarget target, String name) {
-										NamedCodeCommentQuery namedQuery = getProject().getSavedCodeCommentQuery(name);
+										NamedCodeCommentQuery namedQuery = NamedQuery.find(getProject().getNamedCodeCommentQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedCodeCommentQuery(name, query);
-											getProject().getSavedCodeCommentQueries().add(namedQuery);
+											getProject().getNamedCodeCommentQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}

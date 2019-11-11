@@ -34,7 +34,7 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
-import io.onedev.server.web.page.project.issues.list.IssueListPage;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 
 @SuppressWarnings("serial")
 abstract class BacklogColumnPanel extends Panel {
@@ -112,8 +112,8 @@ abstract class BacklogColumnPanel extends Panel {
 		});
 		
 		if (getQuery() != null) {
-			PageParameters params = IssueListPage.paramsOf(getProject(), getQuery().toString(), 1);
-			add(new BookmarkablePageLink<Void>("viewAsList", IssueListPage.class, params));
+			PageParameters params = ProjectIssueListPage.paramsOf(getProject(), getQuery().toString(), 1);
+			add(new BookmarkablePageLink<Void>("viewAsList", ProjectIssueListPage.class, params));
 		} else {
 			add(new WebMarkupContainer("viewAsList").setVisible(false));
 		}

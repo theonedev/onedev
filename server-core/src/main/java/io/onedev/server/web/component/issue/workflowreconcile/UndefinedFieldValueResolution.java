@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.issueworkflowreconcile;
+package io.onedev.server.web.component.issue.workflowreconcile;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -12,16 +12,16 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.web.component.issue.workflowreconcile.WorkflowReconcilePanel.UndefinedFieldValueContainer;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.editable.annotation.ShowCondition;
-import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowReconcilePanel.UndefinedFieldValueContainer;
 
 @Editable
 public class UndefinedFieldValueResolution implements Serializable {
@@ -67,7 +67,7 @@ public class UndefinedFieldValueResolution implements Serializable {
 	private static List<String> getValueChoices() {
 		UndefinedFieldValueContainer container = ComponentContext.get().getComponent()
 				.findParent(UndefinedFieldValueContainer.class); 
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		FieldSpec fieldSpec = Preconditions.checkNotNull(issueSetting.getFieldSpec(container.getFieldName()));
 		ComponentContext.push(new ComponentContext(container));
 		try {

@@ -12,7 +12,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.issue.fieldspec.UserChoiceField;
 
@@ -23,7 +23,7 @@ public class MineCriteria extends IssueCriteria {
 	private IssueCriteria getCriteria(Project project, User user) {
 		IssueCriteria submitterCriteria = new SubmittedByCriteria(user, user.getName());
 		List<IssueCriteria> fieldCriterias = new ArrayList<>();
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		for (FieldSpec field: issueSetting.getFieldSpecs()) {
 			if (field instanceof UserChoiceField) {
 				IssueCriteria fieldCriteria = new FieldOperatorCriteria(field.getName(), IssueQueryLexer.IsMe);

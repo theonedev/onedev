@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.savedquery;
+package io.onedev.server.web.component.savedquery;
 
 import io.onedev.server.web.page.base.BaseDependentCssResourceReference;
 

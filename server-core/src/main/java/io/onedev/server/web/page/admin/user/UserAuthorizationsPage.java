@@ -31,7 +31,7 @@ public class UserAuthorizationsPage extends UserPage {
 		super.onInitialize();
 		
 		AuthorizationsBean authorizationsBean = new AuthorizationsBean();
-		for (UserAuthorization authorization: getUser().getAuthorizations()) {
+		for (UserAuthorization authorization: getUser().getProjectAuthorizations()) {
 			AuthorizationBean authorizationBean = new AuthorizationBean();
 			authorizationBean.setProjectName(authorization.getProject().getName());
 			authorizationBean.setRoleName(authorization.getRole().getName());

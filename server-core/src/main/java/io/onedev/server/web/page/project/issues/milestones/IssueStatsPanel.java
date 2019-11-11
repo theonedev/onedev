@@ -9,7 +9,7 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Milestone;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.web.component.milestone.progress.MilestoneProgressBar;
@@ -31,7 +31,7 @@ class IssueStatsPanel extends GenericPanel<Milestone> {
 		
 		add(new MilestoneProgressBar("progress", getModel()));
 		
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();		
+		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();		
 		IssueCriteria openCriteria = issueSetting.getCategoryCriteria(StateSpec.Category.OPEN);
 		Link<Void> link = new BookmarkablePageLink<Void>("open", MilestoneDetailPage.class, 
 				MilestoneDetailPage.paramsOf(getMilestone(), openCriteria.toString()));

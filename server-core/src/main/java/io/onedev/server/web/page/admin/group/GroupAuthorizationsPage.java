@@ -31,7 +31,7 @@ public class GroupAuthorizationsPage extends GroupPage {
 		super.onInitialize();
 
 		AuthorizationsBean authorizationsBean = new AuthorizationsBean();
-		for (GroupAuthorization authorization: getGroup().getAuthorizations()) {
+		for (GroupAuthorization authorization: getGroup().getProjectAuthorizations()) {
 			AuthorizationBean authorizationBean = new AuthorizationBean();
 			authorizationBean.setProjectName(authorization.getProject().getName());
 			authorizationBean.setRoleName(authorization.getRole().getName());

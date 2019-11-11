@@ -35,7 +35,7 @@ import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
 import io.onedev.server.model.support.issue.fieldspec.DateField;
@@ -91,7 +91,7 @@ public abstract class IssueOperationsPanel extends Panel {
 		
 		RepeatingView transitionsView = new RepeatingView("transitions");
 
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		List<TransitionSpec> transitions = getIssue().getProject().getIssueSetting().getTransitionSpecs(true);
 		for (TransitionSpec transition: transitions) {
 			if (transition.canTransite(getIssue()) && transition.getTrigger() instanceof PressButtonTrigger) {

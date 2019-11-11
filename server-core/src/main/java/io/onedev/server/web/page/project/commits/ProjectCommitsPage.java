@@ -17,15 +17,16 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.CommitQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedCommitQuery;
+import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.savedquery.NamedQueriesBean;
+import io.onedev.server.web.component.savedquery.SaveQueryPanel;
+import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.savedquery.NamedQueriesBean;
-import io.onedev.server.web.page.project.savedquery.SaveQueryPanel;
-import io.onedev.server.web.page.project.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
@@ -52,7 +53,7 @@ public class ProjectCommitsPage extends ProjectPage {
 				for (NamedCommitQuery namedQuery: getProject().getCommitQuerySettingOfCurrentUser().getUserQueries())
 					queries.add(namedQuery.getQuery());
 			}
-			for (NamedCommitQuery namedQuery: getProject().getSavedCommitQueries())
+			for (NamedCommitQuery namedQuery: getProject().getNamedCommitQueries())
 				queries.add(namedQuery.getQuery());
 			for (String each: queries) {
 				try {
@@ -100,8 +101,8 @@ public class ProjectCommitsPage extends ProjectPage {
 			}
 
 			@Override
-			protected ArrayList<NamedCommitQuery> getProjectQueries() {
-				return getProject().getSavedCommitQueries();
+			protected ArrayList<NamedCommitQuery> getQueries() {
+				return getProject().getNamedCommitQueries();
 			}
 
 			@Override
@@ -110,8 +111,8 @@ public class ProjectCommitsPage extends ProjectPage {
 			}
 
 			@Override
-			protected void onSaveProjectQueries(ArrayList<NamedCommitQuery> projectQueries) {
-				getProject().setSavedCommitQueries(projectQueries);
+			protected void onSaveQueries(ArrayList<NamedCommitQuery> projectQueries) {
+				getProject().setNamedCommitQueries(projectQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
 
@@ -139,7 +140,7 @@ public class ProjectCommitsPage extends ProjectPage {
 									@Override
 									protected void onSaveForMine(AjaxRequestTarget target, String name) {
 										CommitQuerySetting setting = getProject().getCommitQuerySettingOfCurrentUser();
-										NamedCommitQuery namedQuery = setting.getUserQuery(name);
+										NamedCommitQuery namedQuery = NamedQuery.find(setting.getUserQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedCommitQuery(name, query);
 											setting.getUserQueries().add(namedQuery);
@@ -153,10 +154,10 @@ public class ProjectCommitsPage extends ProjectPage {
 
 									@Override
 									protected void onSaveForAll(AjaxRequestTarget target, String name) {
-										NamedCommitQuery namedQuery = getProject().getSavedCommitQuery(name);
+										NamedCommitQuery namedQuery = NamedQuery.find(getProject().getNamedCommitQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedCommitQuery(name, query);
-											getProject().getSavedCommitQueries().add(namedQuery);
+											getProject().getNamedCommitQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}

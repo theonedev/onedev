@@ -42,7 +42,7 @@ import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.Input;
@@ -363,12 +363,12 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			return null;
 	}
 	
-	private GlobalIssueSetting getIssueSetting() {
+	private IssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
 	public long getFieldOrdinal(String fieldName, Object fieldValue) {
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
 		if (fieldSpec != null) 
 			return fieldSpec.getOrdinal(fieldValue);

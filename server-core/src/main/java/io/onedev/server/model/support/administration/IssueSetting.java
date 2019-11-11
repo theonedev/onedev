@@ -41,7 +41,7 @@ import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public class GlobalIssueSetting implements Serializable {
+public class IssueSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -51,17 +51,17 @@ public class GlobalIssueSetting implements Serializable {
 	
 	private List<FieldSpec> fieldSpecs = new ArrayList<>();
 	
-	private Set<String> defaultPromptFieldsUponIssueOpen = new HashSet<>();
+	private Collection<String> defaultPromptFieldsUponIssueOpen = new HashSet<>();
 	
 	private List<BoardSpec> defaultBoardSpecs = new ArrayList<>();
 	
-	private Set<String> defaultListFields = new HashSet<>();
+	private Collection<String> listFields = new HashSet<>();
 	
-	private List<NamedIssueQuery> defaultQueries = new ArrayList<>();
+	private List<NamedIssueQuery> namedQueries = new ArrayList<>();
 	
 	private boolean reconciled = true;
 	
-	public GlobalIssueSetting() {
+	public IssueSetting() {
 		ChoiceField type = new ChoiceField();
 		type.setName("Type");
 		SpecifiedChoices specifiedChoices = new SpecifiedChoices();
@@ -220,20 +220,20 @@ public class GlobalIssueSetting implements Serializable {
 		board.setDisplayFields(Lists.newArrayList(IssueConstants.FIELD_STATE, "Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
 		defaultBoardSpecs.add(board);
 		
-		defaultListFields.add("Type");
-		defaultListFields.add("Priority");
-		defaultListFields.add("Assignee");
+		listFields.add("Type");
+		listFields.add("Priority");
+		listFields.add("Assignee");
 		
-		defaultQueries.add(new NamedIssueQuery("Outstanding", "outstanding"));
-		defaultQueries.add(new NamedIssueQuery("My outstanding", "outstanding and mine"));
-		defaultQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
-		defaultQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-		defaultQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
-		defaultQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
-		defaultQueries.add(new NamedIssueQuery("Critical outstanding", "outstanding and \"Priority\" is \"Critical\""));
-		defaultQueries.add(new NamedIssueQuery("Unassigned outstanding", "outstanding and \"Assignee\" is empty"));
-		defaultQueries.add(new NamedIssueQuery("Closed", "closed"));
-		defaultQueries.add(new NamedIssueQuery("All", "all"));
+		namedQueries.add(new NamedIssueQuery("Open", "\"State\" is \"Open\""));
+		namedQueries.add(new NamedIssueQuery("My open", "\"State\" is \"Open\" and mine"));
+		namedQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
+		namedQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+		namedQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
+		namedQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
+		namedQueries.add(new NamedIssueQuery("Critical open", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
+		namedQueries.add(new NamedIssueQuery("Unassigned open", "\"State\" is \"Open\" and \"Assignee\" is empty"));
+		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
+		namedQueries.add(new NamedIssueQuery("All", "all"));
 	}
 	
 	public List<String> sortFieldNames(Collection<String> fieldNames) {
@@ -275,11 +275,11 @@ public class GlobalIssueSetting implements Serializable {
 		this.fieldSpecs = fieldSpecs;
 	}
 
-	public Set<String> getDefaultPromptFieldsUponIssueOpen() {
+	public Collection<String> getDefaultPromptFieldsUponIssueOpen() {
 		return defaultPromptFieldsUponIssueOpen;
 	}
 
-	public void setDefaultPromptFieldsUponIssueOpen(Set<String> defaultPromptFieldsUponIssueOpen) {
+	public void setDefaultPromptFieldsUponIssueOpen(Collection<String> defaultPromptFieldsUponIssueOpen) {
 		this.defaultPromptFieldsUponIssueOpen = defaultPromptFieldsUponIssueOpen;
 	}
 
@@ -321,7 +321,7 @@ public class GlobalIssueSetting implements Serializable {
 				it.remove();
 		}
 		
-		for (Iterator<NamedIssueQuery> it = getDefaultQueries().iterator(); it.hasNext();) {
+		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
@@ -339,7 +339,7 @@ public class GlobalIssueSetting implements Serializable {
 			transition.onRenameState(oldName, newName);
 		for (BoardSpec board: getDefaultBoardSpecs())
 			board.onRenameState(oldName, newName);
-		for (NamedIssueQuery namedQuery: getDefaultQueries()) {
+		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
 				query.onRenameState(oldName, newName);
@@ -370,7 +370,7 @@ public class GlobalIssueSetting implements Serializable {
 				it.remove();
 		}
 		
-		for (Iterator<NamedIssueQuery> it = getDefaultQueries().iterator(); it.hasNext();) {
+		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
@@ -400,7 +400,7 @@ public class GlobalIssueSetting implements Serializable {
 			field.onRenameInput(oldName, newName);
 		for (BoardSpec board: getDefaultBoardSpecs())
 			board.onRenameField(this, oldName, newName);
-		for (NamedIssueQuery namedQuery: getDefaultQueries()) {
+		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
 				query.onRenameField(oldName, newName);
@@ -421,7 +421,7 @@ public class GlobalIssueSetting implements Serializable {
 				it.remove();
 		}
 
-		for (Iterator<NamedIssueQuery> it = getDefaultQueries().iterator(); it.hasNext();) {
+		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
 				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
@@ -511,21 +511,20 @@ public class GlobalIssueSetting implements Serializable {
 		this.defaultBoardSpecs = defaultBoardSpecs;
 	}
 
-	public Set<String> getDefaultListFields() {
-		return defaultListFields;
+	public Collection<String> getListFields() {
+		return listFields;
 	}
 
-	public void setDefaultListFields(Set<String> defaultListFields) {
-		this.defaultListFields = defaultListFields;
+	public void setListFields(Collection<String> listFields) {
+		this.listFields = listFields;
 	}
 	
-	@Editable(order=300, description="Define default issue queries for all projects")
-	public List<NamedIssueQuery> getDefaultQueries() {
-		return defaultQueries;
+	public List<NamedIssueQuery> getNamedQueries() {
+		return namedQueries;
 	}
 
-	public void setDefaultQueries(List<NamedIssueQuery> defaultQueries) {
-		this.defaultQueries = defaultQueries;
+	public void setNamedQueries(List<NamedIssueQuery> namedQueries) {
+		this.namedQueries = namedQueries;
 	}
 	
 }

@@ -22,7 +22,7 @@ import io.onedev.server.util.watch.QueryWatchSupport;
 		indexes={@Index(columnList="o_project_id"), @Index(columnList="o_user_id")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "o_user_id"})}
 )
-public class CodeCommentQuerySetting extends QuerySetting<NamedCodeCommentQuery> {
+public class CodeCommentQuerySetting extends AbstractEntity implements QuerySetting<NamedCodeCommentQuery> {
 
 	private static final long serialVersionUID = 1L;
 

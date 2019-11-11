@@ -263,10 +263,9 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.eq("project", project));
-		Collection<String> accessibleJobNames = getAccessibleJobNames(project, user);
-		if (accessibleJobNames != null) {
+		if (!User.asSubject(user).isPermitted(new ProjectPermission(project, new ManageProject()))) {
 			List<Criterion> jobCriterions = new ArrayList<>();
-			for (String jobName: accessibleJobNames) 
+			for (String jobName: getAccessibleJobNames(project, user)) 
 				jobCriterions.add(Restrictions.eq("jobName", jobName));
 			criteria.add(Restrictions.or(jobCriterions.toArray(new Criterion[jobCriterions.size()])));
 		}
@@ -313,10 +312,9 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		List<Predicate> predicates = new ArrayList<>();
 		predicates.add(builder.equal(root.get(BuildConstants.ATTR_PROJECT), project));
 
-		Collection<String> accessibleJobNames = getAccessibleJobNames(project, user);
-		if (accessibleJobNames != null) {
+		if (!User.asSubject(user).isPermitted(new ProjectPermission(project, new ManageProject()))) {
 			List<Predicate> jobPredicates = new ArrayList<>();
-			for (String jobName: accessibleJobNames) 
+			for (String jobName: getAccessibleJobNames(project, user)) 
 				jobPredicates.add(builder.equal(root.get(BuildConstants.ATTR_JOB), jobName));
 			predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
 		}
@@ -592,34 +590,30 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		}
 		return accessibleJobNames;
 	}
-	
+
 	private Collection<String> getAccessibleJobNames(Project project, User user) {
-		if (User.asSubject(user).isPermitted(new ProjectPermission(project, new ManageProject()))) {
-			return null;
-		} else {
-			Collection<String> jobNames = getJobNames(project.getId());
-			Collection<String> accessibleJobNames = new HashSet<>();
-			if (user != null) {
-				for (UserAuthorization authorization: user.getAuthorizations()) {
-					if (authorization.getProject().equals(project))
-						accessibleJobNames.addAll(getAccessibleJobNames(authorization.getRole(), jobNames));
-				}
-				for (Group group: user.getGroups()) {
-					for (GroupAuthorization authorization: group.getAuthorizations()) {
-						if (authorization.getProject().equals(project))
-							accessibleJobNames.addAll(getAccessibleJobNames(authorization.getRole(), jobNames));
-					}
-				}
+		Collection<String> jobNames = getJobNames(project.getId());
+		Collection<String> accessibleJobNames = new HashSet<>();
+		if (user != null) {
+			for (UserAuthorization authorization: user.getProjectAuthorizations()) {
+				if (authorization.getProject().equals(project))
+					accessibleJobNames.addAll(getAccessibleJobNames(authorization.getRole(), jobNames));
 			}
-			Group group = groupManager.findAnonymous();
-			if (group != null) {
-				for (GroupAuthorization authorization: group.getAuthorizations()) {
+			for (Group group: user.getGroups()) {
+				for (GroupAuthorization authorization: group.getProjectAuthorizations()) {
 					if (authorization.getProject().equals(project))
 						accessibleJobNames.addAll(getAccessibleJobNames(authorization.getRole(), jobNames));
 				}
 			}
-			return accessibleJobNames;
 		}
+		Group group = groupManager.findAnonymous();
+		if (group != null) {
+			for (GroupAuthorization authorization: group.getProjectAuthorizations()) {
+				if (authorization.getProject().equals(project))
+					accessibleJobNames.addAll(getAccessibleJobNames(authorization.getRole(), jobNames));
+			}
+		}
+		return accessibleJobNames;
 	}
 
 	private void populateAccessibleJobNames(Map<Long, Collection<String>> accessibleJobNames, Map<Long, Collection<String>> jobNames, 
@@ -654,16 +648,16 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		
 		Map<Long, Collection<String>> accessibleJobNames = new HashMap<>();
 		if (user != null) {
-			for (UserAuthorization authorization: user.getAuthorizations()) 
+			for (UserAuthorization authorization: user.getProjectAuthorizations()) 
 				populateAccessibleJobNames(accessibleJobNames, jobNames, authorization.getProject(), authorization.getRole());
 			for (Group group: user.getGroups()) {
-				for (GroupAuthorization authorization: group.getAuthorizations())
+				for (GroupAuthorization authorization: group.getProjectAuthorizations())
 					populateAccessibleJobNames(accessibleJobNames, jobNames, authorization.getProject(), authorization.getRole());
 			}
 		}
 		Group group = groupManager.findAnonymous();
 		if (group != null) {
-			for (GroupAuthorization authorization: group.getAuthorizations())
+			for (GroupAuthorization authorization: group.getProjectAuthorizations())
 				populateAccessibleJobNames(accessibleJobNames, jobNames, authorization.getProject(), authorization.getRole());
 		}
 		return accessibleJobNames;

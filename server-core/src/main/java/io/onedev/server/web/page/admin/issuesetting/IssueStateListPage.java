@@ -32,7 +32,7 @@ import com.google.common.collect.Sets;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
@@ -43,7 +43,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
 
 @SuppressWarnings("serial")
-public class IssueStateListPage extends GlobalIssueSettingPage {
+public class IssueStateListPage extends IssueSettingPage {
 
 	public IssueStateListPage(PageParameters params) {
 		super(params);
@@ -81,7 +81,7 @@ public class IssueStateListPage extends GlobalIssueSettingPage {
 					}
 
 					@Override
-					protected GlobalIssueSetting getSetting() {
+					protected IssueSetting getSetting() {
 						return IssueStateListPage.this.getSetting();
 					}
 
@@ -262,7 +262,7 @@ public class IssueStateListPage extends GlobalIssueSettingPage {
 										}
 
 										@Override
-										protected GlobalIssueSetting getSetting() {
+										protected IssueSetting getSetting() {
 											return IssueStateListPage.this.getSetting();
 										}
 

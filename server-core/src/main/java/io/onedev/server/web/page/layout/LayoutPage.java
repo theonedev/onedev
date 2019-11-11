@@ -33,8 +33,8 @@ import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.GroupPage;
 import io.onedev.server.web.page.admin.group.NewGroupPage;
-import io.onedev.server.web.page.admin.issuesetting.GlobalIssueSettingPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
+import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.page.admin.jobexecutor.JobExecutorPage;
 import io.onedev.server.web.page.admin.mailsetting.MailSettingPage;
 import io.onedev.server.web.page.admin.role.NewRolePage;
@@ -48,6 +48,7 @@ import io.onedev.server.web.page.admin.user.NewUserPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.UserPage;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.issue.IssueListPage;
 import io.onedev.server.web.page.my.MyAvatarPage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.MyPasswordPage;
@@ -80,6 +81,13 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof ProjectListPage || getPage() instanceof ProjectPage || getPage() instanceof NewProjectPage) 
 			projectsContainer.add(AttributeAppender.append("class", "active"));
 		add(projectsContainer);
+		
+		WebMarkupContainer issuesContainer = new WebMarkupContainer("navIssues");
+		issuesContainer.add(new ViewStateAwarePageLink<Void>("link", IssueListPage.class, IssueListPage.paramsOf("", 0)));
+		
+		if (getPage() instanceof IssueListPage) 
+			issuesContainer.add(AttributeAppender.append("class", "active"));
+		add(issuesContainer);
 		
 		RepeatingView contributionsView = new RepeatingView("navContributions");		
 		List<MainNavContribution> contributions = new ArrayList<>();
@@ -151,7 +159,7 @@ public abstract class LayoutPage extends BasePage {
 		
 		administrationContainer.add(item = new WebMarkupContainer("issueSetting"));
 		item.add(new ViewStateAwarePageLink<Void>("link", IssueFieldListPage.class));
-		if (getPage() instanceof GlobalIssueSettingPage)
+		if (getPage() instanceof IssueSettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
 		administrationContainer.add(item = new WebMarkupContainer("mailSetting"));

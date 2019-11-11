@@ -13,20 +13,20 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.model.support.issue.IssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.issue.ProjectIssueSetting;
+import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 @SuppressWarnings("serial")
-public abstract class IssueSettingPage extends ProjectSettingPage {
+public abstract class ProjectIssueSettingPage extends ProjectSettingPage {
 
-	public IssueSettingPage(PageParameters params) {
+	public ProjectIssueSettingPage(PageParameters params) {
 		super(params);
 	}
 
@@ -64,11 +64,11 @@ public abstract class IssueSettingPage extends ProjectSettingPage {
 		add(new Tabbable("issueSettingTabs", tabs));
 	}
 
-	protected IssueSetting getSetting() {
+	protected ProjectIssueSetting getProjectSetting() {
 		return getProject().getIssueSetting();
 	}
 	
-	protected GlobalIssueSetting getGlobalSetting() {
+	protected IssueSetting getSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	

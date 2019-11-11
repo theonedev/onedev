@@ -22,7 +22,7 @@ import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
@@ -44,7 +44,7 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 		this.settingManager = settingManager;
 	}
 
-	private GlobalIssueSetting getIssueSetting() {
+	private IssueSetting getIssueSetting() {
 		return settingManager.getIssueSetting();
 	}
 	

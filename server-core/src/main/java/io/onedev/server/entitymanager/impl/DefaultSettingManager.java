@@ -15,7 +15,7 @@ import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.BackupSetting;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
@@ -160,7 +160,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 
 	@Transactional
 	@Override
-	public void saveIssueSetting(GlobalIssueSetting issueSetting) {
+	public void saveIssueSetting(IssueSetting issueSetting) {
 		Setting setting = getSetting(Key.ISSUE);
 		if (setting == null) {
 			setting = new Setting();
@@ -172,7 +172,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	
 	@Sessional
 	@Override
-	public GlobalIssueSetting getIssueSetting() {
+	public IssueSetting getIssueSetting() {
         Setting setting;
         if (issueSettingId == null) {
     		setting = getSetting(Key.ISSUE);
@@ -181,7 +181,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
         } else {
             setting = load(issueSettingId);
         }
-        return (GlobalIssueSetting) setting.getValue();
+        return (IssueSetting) setting.getValue();
 	}
 
 	@Transactional

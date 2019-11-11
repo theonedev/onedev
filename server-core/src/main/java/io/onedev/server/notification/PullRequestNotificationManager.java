@@ -89,7 +89,7 @@ public class PullRequestNotificationManager implements PersistListener {
 
 			@Override
 			protected Collection<? extends QuerySetting<?>> getQuerySettings() {
-				return request.getTargetProject().getPullRequestQuerySettings();
+				return request.getTargetProject().getUserPullRequestQuerySettings();
 			}
 
 			@Override
@@ -98,8 +98,8 @@ public class PullRequestNotificationManager implements PersistListener {
 			}
 
 			@Override
-			protected NamedQuery getSavedProjectQuery(String name) {
-				return request.getTargetProject().getSavedPullRequestQuery(name);
+			protected Collection<? extends NamedQuery> getNamedQueries() {
+				return request.getTargetProject().getNamedPullRequestQueries();
 			}
 			
 		}.getWatches().entrySet()) {

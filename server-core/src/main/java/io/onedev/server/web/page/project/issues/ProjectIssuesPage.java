@@ -14,10 +14,11 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.util.scriptidentity.ScriptIdentity;
 import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
 import io.onedev.server.util.scriptidentity.SiteAdministrator;
+import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
@@ -25,12 +26,11 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.issues.boards.IssueBoardsPage;
-import io.onedev.server.web.page.project.issues.list.IssueListPage;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneEditPage;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneListPage;
 import io.onedev.server.web.page.project.issues.milestones.NewMilestonePage;
-import io.onedev.server.web.page.project.issueworkflowreconcile.WorkflowChangeAlertPanel;
 
 @SuppressWarnings("serial")
 public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIdentityAware {
@@ -39,7 +39,7 @@ public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIde
 		super(params);
 	}
 
-	protected GlobalIssueSetting getGlobalIssueSetting() {
+	protected IssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();		
 	}
 	
@@ -57,7 +57,7 @@ public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIde
 		});
 		
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new IssuesTab("Issue List", IssueListPage.class) {
+		tabs.add(new IssuesTab("Issue List", ProjectIssueListPage.class) {
 
 			@Override
 			public Component render(String componentId) {
@@ -65,11 +65,10 @@ public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIde
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, IssueListPage.class, 
-								IssueListPage.paramsOf(getProject(), "", 0));
+						return new ViewStateAwarePageLink<Void>(linkId, ProjectIssueListPage.class, 
+								ProjectIssueListPage.paramsOf(getProject(), "", 0));
 					}
 				};
-				
 			}
 			
 		});

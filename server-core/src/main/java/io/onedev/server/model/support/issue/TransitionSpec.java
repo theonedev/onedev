@@ -17,7 +17,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.issue.transitionprerequisite.TransitionPrerequisite;
@@ -31,14 +31,14 @@ import io.onedev.server.model.support.issue.transitiontrigger.TransitionTrigger;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution.FixType;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution.FixType;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateResolution;
 
 @Editable
 public class TransitionSpec implements Serializable {
@@ -125,7 +125,7 @@ public class TransitionSpec implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getFieldChoices() {
 		List<String> fields = new ArrayList<>();
-		for (FieldSpec field: getGlobalIssueSetting().getFieldSpecs())
+		for (FieldSpec field: getIssueSetting().getFieldSpecs())
 			fields.add(field.getName());
 		return fields;
 	}
@@ -222,19 +222,19 @@ public class TransitionSpec implements Serializable {
 		return fromStates.isEmpty() || toState.equals(stateName);
 	}
 
-	public Collection<String> getUndefinedFields(GlobalIssueSetting globalSetting) {
+	public Collection<String> getUndefinedFields(IssueSetting setting) {
 		Collection<String> undefinedFields = new HashSet<>();
-		if (getPrerequisite() != null && globalSetting.getFieldSpec(getPrerequisite().getInputName()) == null)
+		if (getPrerequisite() != null && setting.getFieldSpec(getPrerequisite().getInputName()) == null)
 			undefinedFields.add(getPrerequisite().getInputName());
 		if (getTrigger() instanceof PressButtonTrigger) {
 			PressButtonTrigger trigger = (PressButtonTrigger) getTrigger();
 			for (String field: trigger.getPromptFields()) {
-				if (globalSetting.getFieldSpec(field) == null)
+				if (setting.getFieldSpec(field) == null)
 					undefinedFields.add(field);
 			}
 		}
 		for (String field: getRemoveFields()) {
-			if (globalSetting.getFieldSpec(field) == null)
+			if (setting.getFieldSpec(field) == null)
 				undefinedFields.add(field);
 		}
 		return undefinedFields;
@@ -296,7 +296,7 @@ public class TransitionSpec implements Serializable {
 	@SuppressWarnings("unused")
 	private static List<String> getStateChoices() {
 		List<String> stateNames = new ArrayList<>();
-		for (StateSpec state: getGlobalIssueSetting().getStateSpecs())
+		for (StateSpec state: getIssueSetting().getStateSpecs())
 			stateNames.add(state.getName());
 		return stateNames;
 	}
@@ -324,7 +324,7 @@ public class TransitionSpec implements Serializable {
 		return false;
 	}
 	
-	private static GlobalIssueSetting getGlobalIssueSetting() {
+	private static IssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 
@@ -332,7 +332,7 @@ public class TransitionSpec implements Serializable {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>(); 
 		if (prerequisite != null) {
 			ValueMatcher valueMatcher = prerequisite.getValueMatcher(); 
-			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getGlobalIssueSetting().getFieldSpec(prerequisite.getInputName()));
+			SpecifiedChoices specifiedChoices = SpecifiedChoices.of(getIssueSetting().getFieldSpec(prerequisite.getInputName()));
 			if (specifiedChoices != null) {
 				if (valueMatcher instanceof ValueIsOneOf) {
 					ValueIsOneOf valueIsOneOf = (ValueIsOneOf) valueMatcher;
@@ -354,10 +354,10 @@ public class TransitionSpec implements Serializable {
 
 	public Collection<? extends String> getUndefinedStates() {
 		Collection<String> undefinedStates = new HashSet<>();
-		if (getGlobalIssueSetting().getStateSpec(toState) == null)
+		if (getIssueSetting().getStateSpec(toState) == null)
 			undefinedStates.add(toState);
 		for (String fromState: fromStates) {
-			if (getGlobalIssueSetting().getStateSpec(fromState) == null)
+			if (getIssueSetting().getStateSpec(fromState) == null)
 				undefinedStates.add(fromState);
 		}
 		return undefinedStates;

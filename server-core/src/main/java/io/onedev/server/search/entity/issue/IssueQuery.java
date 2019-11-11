@@ -40,7 +40,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.fieldspec.BooleanField;
 import io.onedev.server.model.support.issue.fieldspec.BuildChoiceField;
 import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
@@ -70,8 +70,8 @@ import io.onedev.server.search.entity.issue.IssueQueryParser.QueryContext;
 import io.onedev.server.search.entity.issue.IssueQueryParser.RevisionCriteriaContext;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.web.page.admin.issuesetting.GlobalIssueSettingPage;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.util.WicketUtils;
 
 public class IssueQuery extends EntityQuery<Issue> {
@@ -142,10 +142,6 @@ public class IssueQuery extends EntityQuery<Issue> {
 						switch (ctx.operator.getType()) {
 						case IssueQueryLexer.Mine:
 							return new MineCriteria();
-						case IssueQueryLexer.Outstanding:
-							return new OutstandingCriteria();
-						case IssueQueryLexer.Closed:
-							return new ClosedCriteria();
 						case IssueQueryLexer.SubmittedByMe:
 							return new SubmittedByMeCriteria();
 						default:
@@ -172,13 +168,16 @@ public class IssueQuery extends EntityQuery<Issue> {
 						if (ctx.SubmittedBy() != null) {
 							return new SubmittedByCriteria(getUser(value), value);
 						} else if (ctx.FixedInBuild() != null) {
-							return new FixedInCriteria(getBuild(project, value));
+							if (project != null)
+								return new FixedInCriteria(getBuild(project, value));
+							else
+								throw new OneException("Unsupported operator in global issue query: " + getRuleName(IssueQueryLexer.FixedInBuild));
 						} else {
 							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
 						}
 					}
 					
-					private ObjectId getCommitId(RevisionCriteriaContext revision) {
+					private ObjectId getCommitId(Project project, RevisionCriteriaContext revision) {
 						String value = getValue(revision.Quoted().getText());
 						if (revision.Build() != null) {
 							return ObjectId.fromString(getBuild(project, value).getCommitHash());
@@ -192,15 +191,18 @@ public class IssueQuery extends EntityQuery<Issue> {
 					}
 					
 					public IssueCriteria visitFixedBetweenCriteria(FixedBetweenCriteriaContext ctx) {
+						if (project == null)
+							throw new OneException("Unsupported operator in global issue query: " + getRuleName(IssueQueryLexer.FixedBetween));
+						
 						RevisionCriteriaContext sinceRevision = ctx.revisionCriteria(0);
 						int sinceType = sinceRevision.revisionType.getType();
 						String sinceValue = getValue(sinceRevision.Quoted().getText());
-						ObjectId sinceCommitId = getCommitId(sinceRevision);
+						ObjectId sinceCommitId = getCommitId(project, sinceRevision);
 						
 						RevisionCriteriaContext untilRevision = ctx.revisionCriteria(1);
 						int untilType = untilRevision.revisionType.getType();
 						String untilValue = getValue(untilRevision.Quoted().getText());
-						ObjectId untilCommitId = getCommitId(untilRevision);
+						ObjectId untilCommitId = getCommitId(project, untilRevision);
 						return new FixedBetweenCriteria(sinceType, sinceValue, sinceCommitId, untilType, untilValue, untilCommitId);
 					}
 					
@@ -358,9 +360,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 		}
 	}
 	
-	private static GlobalIssueSetting getIssueSetting() {
-		if (WicketUtils.getPage() instanceof GlobalIssueSettingPage) 
-			return ((GlobalIssueSettingPage)WicketUtils.getPage()).getSetting();
+	private static IssueSetting getIssueSetting() {
+		if (WicketUtils.getPage() instanceof IssueSettingPage) 
+			return ((IssueSettingPage)WicketUtils.getPage()).getSetting();
 		else
 			return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}

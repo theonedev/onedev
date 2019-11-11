@@ -126,12 +126,12 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		if (role != null) {
 			User user = getUser();
 			if (user != null) {
-				for (UserAuthorization authorization: user.getAuthorizations()) {
+				for (UserAuthorization authorization: user.getProjectAuthorizations()) {
 					if (project.equals(authorization.getProject()) && authorization.getRole().equals(role))
 						return true;
 				}
 				for (Group group: user.getGroups()) {
-					for (GroupAuthorization authorization: group.getAuthorizations()) {
+					for (GroupAuthorization authorization: group.getProjectAuthorizations()) {
 						if (project.equals(authorization.getProject()) && authorization.getRole().equals(role))
 							return true;
 					}
@@ -139,7 +139,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 			} 
 			Group group = OneDev.getInstance(GroupManager.class).findAnonymous();
 			if (group != null) {
-				for (GroupAuthorization authorization: group.getAuthorizations()) {
+				for (GroupAuthorization authorization: group.getProjectAuthorizations()) {
 					if (project.equals(authorization.getProject()) && authorization.getRole().equals(role))
 						return true;
 				}

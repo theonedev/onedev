@@ -1,5 +1,14 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.search.entity.EntityQuery.getValue;
+import static io.onedev.server.search.entity.issue.IssueQuery.checkField;
+import static io.onedev.server.search.entity.issue.IssueQuery.getOperator;
+import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedBetween;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInBuild;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsMe;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.Mine;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
 import static io.onedev.server.util.IssueConstants.FIELD_COMMENT;
 import static io.onedev.server.util.IssueConstants.FIELD_COMMENT_COUNT;
 import static io.onedev.server.util.IssueConstants.FIELD_DESCRIPTION;
@@ -14,6 +23,8 @@ import static io.onedev.server.util.IssueConstants.FIELD_VOTE_COUNT;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
@@ -34,7 +45,7 @@ import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.fieldspec.BooleanField;
 import io.onedev.server.model.support.issue.fieldspec.BuildChoiceField;
 import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
@@ -46,8 +57,6 @@ import io.onedev.server.model.support.issue.fieldspec.NumberField;
 import io.onedev.server.model.support.issue.fieldspec.PullRequestChoiceField;
 import io.onedev.server.model.support.issue.fieldspec.TextField;
 import io.onedev.server.model.support.issue.fieldspec.UserChoiceField;
-import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.IssueQueryLexer;
 import io.onedev.server.search.entity.issue.IssueQueryParser;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.DateUtils;
@@ -72,13 +81,14 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		projectModel.detach();
 	}
 	
+	@Nullable
 	private Project getProject() {
 		return projectModel.getObject();
 	}
 
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
-		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
@@ -118,17 +128,17 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
 							Preconditions.checkState(operatorElements.size() == 1);
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
-							int operator = IssueQuery.getOperator(operatorName);							
+							int operator = getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								if (operator == IssueQueryLexer.SubmittedBy)
+								if (operator == SubmittedBy)
 									return SuggestionUtils.suggestUsers(matchWith);
 								else if (project != null)
 									return SuggestionUtils.suggestBuilds(project, matchWith);
 							} else {
-								String fieldName = IssueQuery.getValue(fieldElements.get(0).getMatchedText());
+								String fieldName = getValue(fieldElements.get(0).getMatchedText());
 								
 								try {
-									IssueQuery.checkField(fieldName, operator);
+									checkField(fieldName, operator);
 									FieldSpec fieldSpec = issueSetting.getFieldSpec(fieldName);
 									if (fieldSpec instanceof DateField || fieldName.equals(FIELD_SUBMIT_DATE) 
 											|| fieldName.equals(FIELD_UPDATE_DATE)) {
@@ -192,28 +202,26 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
-		if (suggestedLiteral.equals("mine")) {
+		if (suggestedLiteral.equals(getRuleName(Mine))) {
 			if (SecurityUtils.getUser() != null)
 				return Optional.of("issues relevant to me");
 			else
 				return null;
 		} 
 
-		if ((suggestedLiteral.equals("is me") || suggestedLiteral.equals("is not me")) && SecurityUtils.getUser() == null)
+		if (suggestedLiteral.equals(getRuleName(IsMe)) && SecurityUtils.getUser() == null)
 			return null;	
 		
-		if (suggestedLiteral.equals("open"))
-			return Optional.of("issues with state in open category");
-		else if (suggestedLiteral.equals("closed"))
-			return Optional.of("issues with state in closed category");
+		if (getProject() == null && (suggestedLiteral.equals(getRuleName(FixedBetween)) || suggestedLiteral.equals(getRuleName(FixedInBuild))))
+			return null;
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
-				String fieldName = IssueQuery.getValue(fieldElements.iterator().next().getMatchedText());
+				String fieldName = getValue(fieldElements.iterator().next().getMatchedText());
 				try {
-					IssueQuery.checkField(fieldName, IssueQuery.getOperator(suggestedLiteral));
+					checkField(fieldName, getOperator(suggestedLiteral));
 				} catch (OneException e) {
 					return null;
 				}

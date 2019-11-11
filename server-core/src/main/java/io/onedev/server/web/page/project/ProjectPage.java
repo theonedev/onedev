@@ -53,7 +53,7 @@ import io.onedev.server.web.page.project.info.ProjectInfoPanel;
 import io.onedev.server.web.page.project.issues.ProjectIssuesPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueDetailPage;
-import io.onedev.server.web.page.project.issues.list.IssueListPage;
+import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
 import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
@@ -238,7 +238,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			});
 		}
 		
-		tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, IssueListPage.class, ProjectIssuesPage.class, 
+		tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, ProjectIssueListPage.class, ProjectIssuesPage.class, 
 				IssueDetailPage.class, NewIssuePage.class) {
 
 			@Override
@@ -247,8 +247,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 					@Override
 					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, IssueListPage.class, 
-								IssueListPage.paramsOf(getProject(), "", 0));
+						return new ViewStateAwarePageLink<Void>(linkId, ProjectIssueListPage.class, 
+								ProjectIssueListPage.paramsOf(getProject(), "", 0));
 					}
 				};
 			}

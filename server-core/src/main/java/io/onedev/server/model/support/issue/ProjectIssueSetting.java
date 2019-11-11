@@ -14,41 +14,41 @@ import javax.annotation.Nullable;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldResolution.FixType;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedFieldValue;
-import io.onedev.server.web.page.project.issueworkflowreconcile.UndefinedStateResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution.FixType;
 
-public class IssueSetting implements Serializable {
+public class ProjectIssueSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	private List<TransitionSpec> transitionSpecs;
 	
-	private Set<String> promptFieldsUponIssueOpen;
+	private Collection<String> promptFieldsUponIssueOpen;
 	
-	private Set<String> listFields;
+	private Collection<String> listFields;
 	
 	private List<BoardSpec> boardSpecs;
 
-	private List<NamedIssueQuery> savedQueries;
+	private List<NamedIssueQuery> namedQueries;
 	
-	private transient GlobalIssueSetting globalSetting;
+	private transient IssueSetting setting;
 	
-	private GlobalIssueSetting getGlobalSetting() {
-		if (globalSetting == null)
-			globalSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		return globalSetting;
+	private IssueSetting getSetting() {
+		if (setting == null)
+			setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		return setting;
 	}
 
 	@Nullable
 	public List<TransitionSpec> getTransitionSpecs(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && transitionSpecs == null)
-			return new ArrayList<>(getGlobalSetting().getDefaultTransitionSpecs());
+			return new ArrayList<>(getSetting().getDefaultTransitionSpecs());
 		else
 			return transitionSpecs;
 	}
@@ -58,33 +58,33 @@ public class IssueSetting implements Serializable {
 	}
 
 	@Nullable
-	public Set<String> getPromptFieldsUponIssueOpen(boolean useDefaultIfNotDefined) {
+	public Collection<String> getPromptFieldsUponIssueOpen(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && promptFieldsUponIssueOpen == null)
-			return new HashSet<>(getGlobalSetting().getDefaultPromptFieldsUponIssueOpen());
+			return new HashSet<>(getSetting().getDefaultPromptFieldsUponIssueOpen());
 		else
 			return promptFieldsUponIssueOpen;
 	}
 
-	public void setPromptFieldsUponIssueOpen(@Nullable Set<String> promptFieldsUponIssueOpen) {
+	public void setPromptFieldsUponIssueOpen(@Nullable Collection<String> promptFieldsUponIssueOpen) {
 		this.promptFieldsUponIssueOpen = promptFieldsUponIssueOpen;
 	}
 
 	@Nullable
-	public Set<String> getListFields(boolean useDefaultIfNotDefined) {
+	public Collection<String> getListFields(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && listFields == null)
-			return new HashSet<>(getGlobalSetting().getDefaultListFields());
+			return new HashSet<>(getSetting().getListFields());
 		else
 			return listFields;
 	}
 	
-	public void setListFields(@Nullable Set<String> listFields) {
+	public void setListFields(@Nullable Collection<String> listFields) {
 		this.listFields = listFields;
 	}
 
 	@Nullable
 	public List<BoardSpec> getBoardSpecs(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && boardSpecs == null)
-			return new ArrayList<>(getGlobalSetting().getDefaultBoardSpecs());
+			return new ArrayList<>(getSetting().getDefaultBoardSpecs());
 		else
 			return boardSpecs;
 	}
@@ -94,20 +94,20 @@ public class IssueSetting implements Serializable {
 	}
 
 	@Nullable
-	public List<NamedIssueQuery> getSavedQueries(boolean useDefaultIfNotDefined) {
-		if (useDefaultIfNotDefined && savedQueries == null)
-			return new ArrayList<>(getGlobalSetting().getDefaultQueries());
+	public List<NamedIssueQuery> getNamedQueries(boolean useDefaultIfNotDefined) {
+		if (useDefaultIfNotDefined && namedQueries == null)
+			return new ArrayList<>(getSetting().getNamedQueries());
 		else
-			return savedQueries;
+			return namedQueries;
 	}
 
-	public void setSavedQueries(@Nullable List<NamedIssueQuery> savedQueries) {
-		this.savedQueries = savedQueries;
+	public void setNamedQueries(@Nullable List<NamedIssueQuery> namedQueries) {
+		this.namedQueries = namedQueries;
 	}
 
 	@Nullable
-	public NamedIssueQuery getSavedQuery(String name) {
-		for (NamedIssueQuery namedQuery: getSavedQueries(true)) {
+	public NamedIssueQuery getNamedQuery(String name) {
+		for (NamedIssueQuery namedQuery: getNamedQueries(true)) {
 			if (namedQuery.getName().equals(name))
 				return namedQuery;
 		}
@@ -117,7 +117,7 @@ public class IssueSetting implements Serializable {
 	public void onRenameUser(String oldName, String newName) {
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs)
-				board.onRenameUser(getGlobalSetting(), oldName, newName);
+				board.onRenameUser(getSetting(), oldName, newName);
 		}
 	}
 
@@ -134,7 +134,7 @@ public class IssueSetting implements Serializable {
 		Usage usage = new Usage();
 		if (boardSpecs != null) {
 			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) { 
-				Usage usageInBoard = it.next().onDeleteUser(getGlobalSetting(), userName);
+				Usage usageInBoard = it.next().onDeleteUser(getSetting(), userName);
 				if (usageInBoard != null)
 					usage.add(usageInBoard);
 				else
@@ -164,22 +164,22 @@ public class IssueSetting implements Serializable {
 		Set<String> undefinedFields = new HashSet<>();
 		if (listFields != null) {
 			for (String fieldName: listFields) {
-				if (getGlobalSetting().getFieldSpec(fieldName) == null)
+				if (getSetting().getFieldSpec(fieldName) == null)
 					undefinedFields.add(fieldName);
 			}
 		}
 		if (promptFieldsUponIssueOpen != null) {
 			for (String fieldName: promptFieldsUponIssueOpen) {
-				if (getGlobalSetting().getFieldSpec(fieldName) == null)
+				if (getSetting().getFieldSpec(fieldName) == null)
 					undefinedFields.add(fieldName);
 			}
 		}
 		if (transitionSpecs != null) {
 			for (TransitionSpec transition: transitionSpecs)
-				undefinedFields.addAll(transition.getUndefinedFields(getGlobalSetting()));
+				undefinedFields.addAll(transition.getUndefinedFields(getSetting()));
 		}
-		if (savedQueries != null) {
-			for (NamedIssueQuery namedQuery: savedQueries) {
+		if (namedQueries != null) {
+			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
 					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedFields());
 				} catch (Exception e) {
@@ -206,8 +206,8 @@ public class IssueSetting implements Serializable {
 					promptFieldsUponIssueOpen.add(entry.getValue().getNewField());
 			}
 		}
-		if (savedQueries != null) {
-			for (Iterator<NamedIssueQuery> it = savedQueries.iterator(); it.hasNext();) {
+		if (namedQueries != null) {
+			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
 					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
@@ -248,8 +248,8 @@ public class IssueSetting implements Serializable {
 	public Collection<String> getUndefinedStates(Project project) {
 		Set<String> undefinedStates = new HashSet<>();
 
-		if (savedQueries != null) {
-			for (NamedIssueQuery namedQuery: savedQueries) {
+		if (namedQueries != null) {
+			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
 					undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedStates());
 				} catch (Exception e) {
@@ -271,8 +271,8 @@ public class IssueSetting implements Serializable {
 	}
 
 	public void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
-		if (savedQueries != null) {
-			for (NamedIssueQuery namedQuery: savedQueries) {
+		if (namedQueries != null) {
+			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
 					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
 					for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
@@ -296,8 +296,8 @@ public class IssueSetting implements Serializable {
 	
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		Collection<UndefinedFieldValue> undefinedFieldValues = new HashSet<>();
-		if (savedQueries != null) {
-			for (NamedIssueQuery namedQuery: savedQueries) {
+		if (namedQueries != null) {
+			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
 					undefinedFieldValues.addAll(IssueQuery.parse(null, namedQuery.getQuery(), false).getUndefinedFieldValues());
 				} catch (Exception e) {
@@ -316,8 +316,8 @@ public class IssueSetting implements Serializable {
 	}
 	
 	public void fixUndefinedFieldValues(Map<String, ValueSetEdit> valueSetEdits) {
-		if (savedQueries != null) {
-			for (Iterator<NamedIssueQuery> it = savedQueries.iterator(); it.hasNext();) {
+		if (namedQueries != null) {
+			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
 					boolean remove = false;
