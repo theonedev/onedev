@@ -14,7 +14,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.PullRequestConstants;
 
-public class RequestForChangesByMeCriteria extends PullRequestCriteria {
+public class RequestedForChangesByMeCriteria extends PullRequestCriteria {
 
 	private static final long serialVersionUID = 1L;
 

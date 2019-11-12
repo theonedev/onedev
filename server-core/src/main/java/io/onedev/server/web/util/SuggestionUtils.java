@@ -47,6 +47,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.Secret;
 import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.scriptidentity.ScriptIdentity;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
@@ -82,7 +83,7 @@ public class SuggestionUtils {
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		User user = SecurityUtils.getUser();
-		for (Project project: OneDev.getInstance(ProjectManager.class).getAccessibleProjects(user)) {
+		for (Project project: OneDev.getInstance(ProjectManager.class).getPermittedProjects(user, new AccessProject())) {
 			int index = project.getName().toLowerCase().indexOf(matchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
 				suggestions.add(new InputSuggestion(project.getName(), new LinearRange(index, index+matchWith.length())));

@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffAlgorithm.SupportedAlgorithm;
@@ -35,7 +36,6 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.GroupManager;
@@ -407,24 +407,30 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	}
 
 	@Override
-	public Collection<Project> getAccessibleProjects(User user) {
+	public Collection<Project> getPermittedProjects(User user, Permission permission) {
 		Collection<Project> projects = new HashSet<>();
 		
 		if (SecurityUtils.isAdministrator()) {
-			projects.addAll(OneDev.getInstance(ProjectManager.class).query());
+			projects.addAll(query());
 		} else {
 			if (user != null) {
 				for (Membership membership: user.getMemberships()) {
-					for (GroupAuthorization authorization: membership.getGroup().getProjectAuthorizations())
+					for (GroupAuthorization authorization: membership.getGroup().getProjectAuthorizations()) {
+						if (authorization.getRole().implies(permission))
+							projects.add(authorization.getProject());
+					}
+				}
+				for (UserAuthorization authorization: user.getProjectAuthorizations()) { 
+					if (authorization.getRole().implies(permission))
 						projects.add(authorization.getProject());
 				}
-				for (UserAuthorization authorization: user.getProjectAuthorizations()) 
-					projects.add(authorization.getProject());
 			}
 			Group group = groupManager.findAnonymous();
 			if (group != null) {
-				for (GroupAuthorization authorization: group.getProjectAuthorizations()) 
-					projects.add(authorization.getProject());
+				for (GroupAuthorization authorization: group.getProjectAuthorizations()) { 
+					if (authorization.getRole().implies(permission))
+						projects.add(authorization.getProject());
+				}
 			}
 		}
 		

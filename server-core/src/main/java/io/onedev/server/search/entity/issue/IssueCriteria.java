@@ -21,7 +21,8 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public abstract Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user);
+	public abstract Predicate getPredicate(@Nullable Project project, Root<Issue> root, 
+			CriteriaBuilder builder, @Nullable User user);
 
 	public final void fill(Issue issue) {
 		fill(issue, new HashSet<>());

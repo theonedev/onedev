@@ -14,13 +14,13 @@ import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.PullRequestConstants;
 
-public class RequestForChangesByCriteria extends PullRequestCriteria {
+public class RequestedForChangesByCriteria extends PullRequestCriteria {
 
 	private static final long serialVersionUID = 1L;
 
 	private final User value;
 	
-	public RequestForChangesByCriteria(User value) {
+	public RequestedForChangesByCriteria(User value) {
 		this.value = value;
 	}
 	

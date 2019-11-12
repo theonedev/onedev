@@ -59,7 +59,8 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
     void open(PullRequest request);
     
-    PullRequest open(ProjectAndBranch source, ProjectAndBranch target, MergeStrategy mergeStrategy, User submitter, String title);
+    PullRequest open(ProjectAndBranch source, ProjectAndBranch target, 
+    		MergeStrategy mergeStrategy, User submitter, String title);
     
     void delete(PullRequest request);
     
@@ -71,9 +72,11 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	void checkQuality(PullRequest request);
 	
-	List<PullRequest> query(Project targetProject, User user, EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults);
+	List<PullRequest> query(@Nullable Project targetProject, @Nullable User user, 
+			EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults);
 	
-	int count(Project targetProject, User user, EntityCriteria<PullRequest> requestCriteria);
+	int count(@Nullable Project targetProject, @Nullable User user, 
+			EntityCriteria<PullRequest> requestCriteria);
 	
 	List<PullRequest> query(Project targetProject, String term, int count);
 

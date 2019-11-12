@@ -101,16 +101,15 @@ import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
-import io.onedev.server.model.support.BuildSetting;
 import io.onedev.server.model.support.CommitMessageTransform;
-import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
+import io.onedev.server.model.support.ProjectBuildSetting;
 import io.onedev.server.model.support.Secret;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
-import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
+import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.storage.StorageManager;
@@ -259,7 +258,12 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
-	private BuildSetting buildSetting = new BuildSetting();
+	private ProjectBuildSetting buildSetting = new ProjectBuildSetting();
+	
+	@Lob
+	@Column(length=65535, nullable=false)
+	@JsonView(DefaultView.class)
+	private ProjectPullRequestSetting pullRequestSetting = new ProjectPullRequestSetting();
 	
 	@Lob
 	@Column(length=65535, nullable=false)
@@ -276,47 +280,12 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(length=65535, nullable=false)
 	@JsonView(DefaultView.class)
-	private ArrayList<NamedPullRequestQuery> namedPullRequestQueries = new ArrayList<>();
-	{
-		namedPullRequestQueries.add(new NamedPullRequestQuery("Open", "open"));
-		namedPullRequestQueries.add(new NamedPullRequestQuery("To be reviewed by me", "to be reviewed by me"));
-		namedPullRequestQueries.add(new NamedPullRequestQuery("To be changed by me", "submitted by me and someone requested for changes"));
-		namedPullRequestQueries.add(new NamedPullRequestQuery("Request for changes by me", "requested for changes by me"));
-		namedPullRequestQueries.add(new NamedPullRequestQuery("Approved by me", "approved by me"));
-		namedPullRequestQueries.add(new NamedPullRequestQuery("Submitted by me", "submitted by me"));
-		namedPullRequestQueries.add(new NamedPullRequestQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
-		namedPullRequestQueries.add(new NamedPullRequestQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-		namedPullRequestQueries.add(new NamedPullRequestQuery("Closed", "merged or discarded"));
-		namedPullRequestQueries.add(new NamedPullRequestQuery("All", "all"));
-	}
-	
-	@Lob
-	@Column(length=65535, nullable=false)
-	@JsonView(DefaultView.class)
 	private ArrayList<NamedCodeCommentQuery> namedCodeCommentQueries = new ArrayList<>(); 
 	{
 		namedCodeCommentQueries.add(new NamedCodeCommentQuery("All", "all"));
 		namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created by me", "created by me"));
 		namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is after \"last week\""));
 		namedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-	}
-	
-	@Lob
-	@Column(length=65535, nullable=false)
-	@JsonView(DefaultView.class)
-	private ArrayList<NamedBuildQuery> namedBuildQueries = new ArrayList<>();
-	{
-		namedBuildQueries.add(new NamedBuildQuery("All", "all"));
-		namedBuildQueries.add(new NamedBuildQuery("Successful", "successful"));
-		namedBuildQueries.add(new NamedBuildQuery("Failed", "failed"));
-		namedBuildQueries.add(new NamedBuildQuery("Failed eventually", "failed and not(will retry)"));
-		namedBuildQueries.add(new NamedBuildQuery("In error", "in error"));
-		namedBuildQueries.add(new NamedBuildQuery("Cancelled", "cancelled"));
-		namedBuildQueries.add(new NamedBuildQuery("Timed out", "timed out"));
-		namedBuildQueries.add(new NamedBuildQuery("Running", "running"));
-		namedBuildQueries.add(new NamedBuildQuery("Waiting", "waiting"));
-		namedBuildQueries.add(new NamedBuildQuery("Queueing", "queueing"));
-		namedBuildQueries.add(new NamedBuildQuery("Build recently", "\"Submit Date\" is after \"last week\""));
 	}
 	
 	@Lob
@@ -1041,14 +1010,22 @@ public class Project extends AbstractEntity {
 		this.issueSetting = issueSetting;
 	}
 
-	public BuildSetting getBuildSetting() {
+	public ProjectBuildSetting getBuildSetting() {
 		return buildSetting;
 	}
 
-	public void setBuildSetting(BuildSetting buildSetting) {
+	public void setBuildSetting(ProjectBuildSetting buildSetting) {
 		this.buildSetting = buildSetting;
 	}
 
+	public ProjectPullRequestSetting getPullRequestSetting() {
+		return pullRequestSetting;
+	}
+
+	public void setPullRequestSetting(ProjectPullRequestSetting pullRequestSetting) {
+		this.pullRequestSetting = pullRequestSetting;
+	}
+	
 	public ArrayList<NamedCommitQuery> getNamedCommitQueries() {
 		return namedCommitQueries;
 	}
@@ -1056,15 +1033,7 @@ public class Project extends AbstractEntity {
 	public void setNamedCommitQueries(ArrayList<NamedCommitQuery> namedCommitQueries) {
 		this.namedCommitQueries = namedCommitQueries;
 	}
-	
-	public ArrayList<NamedPullRequestQuery> getNamedPullRequestQueries() {
-		return namedPullRequestQueries;
-	}
 
-	public void setNamedPullRequestQueries(ArrayList<NamedPullRequestQuery> namedPullRequestQueries) {
-		this.namedPullRequestQueries = namedPullRequestQueries;
-	}
-	
 	public ArrayList<NamedCodeCommentQuery> getNamedCodeCommentQueries() {
 		return namedCodeCommentQueries;
 	}
@@ -1073,14 +1042,6 @@ public class Project extends AbstractEntity {
 		this.namedCodeCommentQueries = namedCodeCommentQueries;
 	}
 	
-	public ArrayList<NamedBuildQuery> getNamedBuildQueries() {
-		return namedBuildQueries;
-	}
-
-	public void setNamedBuildQueries(ArrayList<NamedBuildQuery> namedBuildQueries) {
-		this.namedBuildQueries = namedBuildQueries;
-	}
-
 	public Collection<IssueQuerySetting> getUserIssueQuerySettings() {
 		return userIssueQuerySettings;
 	}

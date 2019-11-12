@@ -14,11 +14,14 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.BuildQuerySetting;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedQuery;
+import io.onedev.server.model.support.ProjectBuildSetting;
 import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.administration.BuildSetting;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.build.list.BuildListPanel;
@@ -48,7 +51,7 @@ public class ProjectBuildsPage extends ProjectPage {
 				for (NamedBuildQuery namedQuery: getProject().getBuildQuerySettingOfCurrentUser().getUserQueries())
 					queries.add(namedQuery.getQuery());
 			}
-			for (NamedBuildQuery namedQuery: getProject().getNamedBuildQueries())
+			for (NamedBuildQuery namedQuery: getProject().getBuildSetting().getNamedQueries(true))
 				queries.add(namedQuery.getQuery());
 			query = null;
 			for (String each: queries) {
@@ -65,6 +68,10 @@ public class ProjectBuildsPage extends ProjectPage {
 
 	private BuildQuerySettingManager getBuildQuerySettingManager() {
 		return OneDev.getInstance(BuildQuerySettingManager.class);		
+	}
+	
+	protected BuildSetting getBuildSetting() {
+		return OneDev.getInstance(SettingManager.class).getBuildSetting();		
 	}
 	
 	@Override
@@ -97,7 +104,7 @@ public class ProjectBuildsPage extends ProjectPage {
 
 			@Override
 			protected ArrayList<NamedBuildQuery> getQueries() {
-				return getProject().getNamedBuildQueries();
+				return (ArrayList<NamedBuildQuery>) getProject().getBuildSetting().getNamedQueries(false);
 			}
 
 			@Override
@@ -106,9 +113,14 @@ public class ProjectBuildsPage extends ProjectPage {
 			}
 
 			@Override
-			protected void onSaveQueries(ArrayList<NamedBuildQuery> projectQueries) {
-				getProject().setNamedBuildQueries(projectQueries);
+			protected void onSaveQueries(ArrayList<NamedBuildQuery> namedQueries) {
+				getProject().getBuildSetting().setNamedQueries(namedQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
+			}
+
+			@Override
+			protected ArrayList<NamedBuildQuery> getDefaultQueries() {
+				return (ArrayList<NamedBuildQuery>) getBuildSetting().getNamedQueries();
 			}
 
 		});
@@ -170,10 +182,13 @@ public class ProjectBuildsPage extends ProjectPage {
 
 									@Override
 									protected void onSaveForAll(AjaxRequestTarget target, String name) {
-										NamedBuildQuery namedQuery = NamedQuery.find(getProject().getNamedBuildQueries(), name);
+										ProjectBuildSetting setting = getProject().getBuildSetting();
+										if (setting.getNamedQueries(false) == null) 
+											setting.setNamedQueries(new ArrayList<>(getBuildSetting().getNamedQueries()));
+										NamedBuildQuery namedQuery = getProject().getBuildSetting().getNamedQuery(name);
 										if (namedQuery == null) {
 											namedQuery = new NamedBuildQuery(name, query);
-											getProject().getNamedBuildQueries().add(namedQuery);
+											setting.getNamedQueries(false).add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}

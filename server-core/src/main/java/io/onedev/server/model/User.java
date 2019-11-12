@@ -3,6 +3,7 @@ package io.onedev.server.model;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -33,8 +34,10 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
+import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
+import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.validation.annotation.UserName;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
@@ -114,16 +117,30 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> issueQueryWatches = new LinkedHashMap<>();
 	
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<NamedPullRequestQuery> userPullRequestQueries = new ArrayList<>();
+
+	@Lob
+	@Column(nullable=false, length=65535)
+	private LinkedHashMap<String, Boolean> userPullRequestQueryWatches = new LinkedHashMap<>();
+	
+	@Column(nullable=false, length=65535)
+	private LinkedHashMap<String, Boolean> pullRequestQueryWatches = new LinkedHashMap<>();
+	
+	@Lob
+	@Column(nullable=false, length=65535)
+	private ArrayList<NamedBuildQuery> userBuildQueries = new ArrayList<>();
+
+	@Lob
+	@Column(nullable=false, length=65535)
+	private LinkedHashSet<String> userBuildQuerySubscriptions = new LinkedHashSet<>();
+	
+	@Column(nullable=false, length=65535)
+	private LinkedHashSet<String> buildQuerySubscriptions = new LinkedHashSet<>();
+	
     private transient Collection<Group> groups;
     
-	public void setUserQueryWatches(LinkedHashMap<String, Boolean> userQueryWatches) {
-		this.userIssueQueryWatches = userQueryWatches;
-	}
-
-	public void setQueryWatches(LinkedHashMap<String, Boolean> queryWatches) {
-		this.issueQueryWatches = queryWatches;
-	}
-
 	public QuerySetting<NamedIssueQuery> getIssueQuerySetting() {
 		return new QuerySetting<NamedIssueQuery>() {
 
@@ -144,7 +161,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 			@Override
 			public void setUserQueries(ArrayList<NamedIssueQuery> userQueries) {
-				User.this.userIssueQueries = userQueries;
+				userIssueQueries = userQueries;
 			}
 
 			@Override
@@ -172,7 +189,121 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		};
 	}
 	
-    @Override
+	public void setBuildQuerySetting(QuerySetting<NamedBuildQuery> querySetting) {
+		buildQuerySubscriptions = querySetting.getQuerySubscriptionSupport().getQuerySubscriptions();
+		userBuildQuerySubscriptions = querySetting.getQuerySubscriptionSupport().getUserQuerySubscriptions();
+		userBuildQueries = querySetting.getUserQueries();
+	}
+	
+	public void setIssueQuerySetting(QuerySetting<NamedIssueQuery> querySetting) {
+		issueQueryWatches = querySetting.getQueryWatchSupport().getQueryWatches();
+		userIssueQueryWatches = querySetting.getQueryWatchSupport().getUserQueryWatches();
+		userIssueQueries = querySetting.getUserQueries();
+	}
+	
+	public void setPullRequestQuerySetting(QuerySetting<NamedPullRequestQuery> querySetting) {
+		pullRequestQueryWatches = querySetting.getQueryWatchSupport().getQueryWatches();
+		userPullRequestQueryWatches = querySetting.getQueryWatchSupport().getUserQueryWatches();
+		userPullRequestQueries = querySetting.getUserQueries();
+	}
+	
+	public QuerySetting<NamedPullRequestQuery> getPullRequestQuerySetting() {
+		return new QuerySetting<NamedPullRequestQuery>() {
+
+			@Override
+			public Project getProject() {
+				return null;
+			}
+
+			@Override
+			public User getUser() {
+				return User.this;
+			}
+
+			@Override
+			public ArrayList<NamedPullRequestQuery> getUserQueries() {
+				return userPullRequestQueries;
+			}
+
+			@Override
+			public void setUserQueries(ArrayList<NamedPullRequestQuery> userQueries) {
+				userPullRequestQueries = userQueries;
+			}
+
+			@Override
+			public QueryWatchSupport<NamedPullRequestQuery> getQueryWatchSupport() {
+				return new QueryWatchSupport<NamedPullRequestQuery>() {
+
+					@Override
+					public LinkedHashMap<String, Boolean> getUserQueryWatches() {
+						return userPullRequestQueryWatches;
+					}
+
+					@Override
+					public LinkedHashMap<String, Boolean> getQueryWatches() {
+						return pullRequestQueryWatches;
+					}
+					
+				};
+			}
+
+			@Override
+			public QuerySubscriptionSupport<NamedPullRequestQuery> getQuerySubscriptionSupport() {
+				return null;
+			}
+			
+		};
+	}
+	
+	public QuerySetting<NamedBuildQuery> getBuildQuerySetting() {
+		return new QuerySetting<NamedBuildQuery>() {
+
+			@Override
+			public Project getProject() {
+				return null;
+			}
+
+			@Override
+			public User getUser() {
+				return User.this;
+			}
+
+			@Override
+			public ArrayList<NamedBuildQuery> getUserQueries() {
+				return userBuildQueries;
+			}
+
+			@Override
+			public void setUserQueries(ArrayList<NamedBuildQuery> userQueries) {
+				userBuildQueries = userQueries;
+			}
+
+			@Override
+			public QueryWatchSupport<NamedBuildQuery> getQueryWatchSupport() {
+				return null;
+			}
+
+			@Override
+			public QuerySubscriptionSupport<NamedBuildQuery> getQuerySubscriptionSupport() {
+				return new QuerySubscriptionSupport<NamedBuildQuery>() {
+
+					@Override
+					public LinkedHashSet<String> getUserQuerySubscriptions() {
+						return userBuildQuerySubscriptions;
+					}
+
+					@Override
+					public LinkedHashSet<String> getQuerySubscriptions() {
+						return buildQuerySubscriptions;
+					}
+					
+				};
+			}
+			
+		};
+	}
+	
+	@Override
     public PrincipalCollection getPrincipals() {
         return new SimplePrincipalCollection(getId(), "");
     }

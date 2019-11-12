@@ -80,7 +80,6 @@ import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
-import io.onedev.server.web.util.VisibleVisitor;
 
 @SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
@@ -169,18 +168,7 @@ public abstract class IssueListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer others = new WebMarkupContainer("others") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(visitChildren(Component.class, new VisibleVisitor()) != null);
-			}
-			
-		};
-		add(others);
-		
-		others.add(new AjaxLink<Void>("showSavedQueries") {
+		add(new AjaxLink<Void>("showSavedQueries") {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -205,7 +193,7 @@ public abstract class IssueListPanel extends Panel {
 		}.setOutputMarkupPlaceholderTag(true));
 		
 		Component querySave;
-		others.add(querySave = new AjaxLink<Void>("saveQuery") {
+		add(querySave = new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
@@ -267,7 +255,7 @@ public abstract class IssueListPanel extends Panel {
 		});
 		add(form);
 		
-		others.add(new ModalLink("listFields") {
+		add(new ModalLink("listFields") {
 
 			private Collection<String> fieldSet;
 			
@@ -376,7 +364,7 @@ public abstract class IssueListPanel extends Panel {
 		else
 			add(new WebMarkupContainer("newIssue").setVisible(false));
 		
-		others.add(batchEditSelected = new ModalLink("batchEditSelected") {
+		add(batchEditSelected = new ModalLink("batchEditSelected") {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
@@ -431,7 +419,7 @@ public abstract class IssueListPanel extends Panel {
 
 		batchEditSelected.setOutputMarkupPlaceholderTag(true);
 		
-		others.add(new ModalLink("batchEditAll") {
+		add(new ModalLink("batchEditAll") {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {

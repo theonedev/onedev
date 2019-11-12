@@ -53,7 +53,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		this(null, new ArrayList<>());
 	}
 	
-	public static PullRequestQuery parse(Project project, @Nullable String queryString) {
+	public static PullRequestQuery parse(@Nullable Project project, @Nullable String queryString) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			PullRequestQueryLexer lexer = new PullRequestQueryLexer(is);
@@ -99,7 +99,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						case PullRequestQueryLexer.ToBeReviewedByMe:
 							return new ToBeReviewedByMeCriteria();
 						case PullRequestQueryLexer.RequestedForChangesByMe:
-							return new RequestForChangesByMeCriteria();
+							return new RequestedForChangesByMeCriteria();
 						case PullRequestQueryLexer.ApprovedByMe:
 							return new ApprovedByMeCriteria();
 						case PullRequestQueryLexer.DiscardedByMe:
@@ -128,15 +128,21 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						case PullRequestQueryLexer.ApprovedBy:
 							return new ApprovedByCriteria(getUser(value));
 						case PullRequestQueryLexer.RequestedForChangesBy:
-							return new RequestForChangesByCriteria(getUser(value));
+							return new RequestedForChangesByCriteria(getUser(value));
 						case PullRequestQueryLexer.SubmittedBy:
 							return new SubmittedByCriteria(getUser(value));
 						case PullRequestQueryLexer.DiscardedBy:
 							return new DiscardedByCriteria(getUser(value));
 						case PullRequestQueryLexer.IncludesCommit:
-							return new IncludesCommitCriteria(getCommitId(project, value));
+							if (project != null)
+								return new IncludesCommitCriteria(getCommitId(project, value));
+							else
+								throw new OneException("Unsupported operator in global issue query: " + getRuleName(PullRequestQueryLexer.IncludesCommit));
 						case PullRequestQueryLexer.IncludesIssue:
-							return new IncludesIssueCriteria(getIssue(project, value));
+							if (project != null)
+								return new IncludesIssueCriteria(getIssue(project, value));
+							else
+								throw new OneException("Unsupported operator in global issue query: " + getRuleName(PullRequestQueryLexer.IncludesIssue));
 						default:
 							throw new OneException("Unexpected operator: " + ctx.operator.getText());
 						}
@@ -152,7 +158,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						String fieldName = getValue(ctx.Quoted(0).getText());
 						String value = getValue(ctx.Quoted(1).getText());
 						int operator = ctx.operator.getType();
-						checkField(project, fieldName, operator);
+						checkField(fieldName, operator);
 						
 						switch (operator) {
 						case PullRequestQueryLexer.IsBefore:
@@ -261,7 +267,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 		}
 	}
 	
-	public static void checkField(Project project, String fieldName, int operator) {
+	public static void checkField(String fieldName, int operator) {
 		if (!PullRequestConstants.QUERY_FIELDS.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {

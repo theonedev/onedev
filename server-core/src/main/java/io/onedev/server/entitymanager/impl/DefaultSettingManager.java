@@ -15,9 +15,11 @@ import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.BackupSetting;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.BuildSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.administration.MailSetting;
+import io.onedev.server.model.support.administration.PullRequestSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
@@ -48,6 +50,10 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	private volatile Long jobExecutorsId;
 	
 	private volatile Long jobScriptsId;
+	
+	private volatile Long pullRequestSettingId;
+	
+	private volatile Long buildSettingId;
 	
 	@Inject
 	public DefaultSettingManager(Dao dao, DataManager dataManager) {
@@ -273,6 +279,58 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 			setting.setKey(Key.JOB_SCRIPTS);
 		}
 		setting.setValue((Serializable) jobScripts);
+		dao.persist(setting);
+	}
+	
+	@Sessional
+	@Override
+	public PullRequestSetting getPullRequestSetting() {
+        Setting setting;
+        if (pullRequestSettingId == null) {
+    		setting = getSetting(Key.PULL_REQUEST);
+    		Preconditions.checkNotNull(setting);
+    		pullRequestSettingId = setting.getId();
+        } else {
+            setting = load(pullRequestSettingId);
+        }
+        return (PullRequestSetting)setting.getValue();
+	}
+
+	@Transactional
+	@Override
+	public void savePullRequestSetting(PullRequestSetting pullRequestSetting) {
+		Setting setting = getSetting(Key.PULL_REQUEST);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(Key.PULL_REQUEST);
+		}
+		setting.setValue(pullRequestSetting);
+		dao.persist(setting);
+	}
+	
+	@Sessional
+	@Override
+	public BuildSetting getBuildSetting() {
+        Setting setting;
+        if (buildSettingId == null) {
+    		setting = getSetting(Key.BUILD);
+    		Preconditions.checkNotNull(setting);
+    		buildSettingId = setting.getId();
+        } else {
+            setting = load(buildSettingId);
+        }
+        return (BuildSetting)setting.getValue();
+	}
+
+	@Transactional
+	@Override
+	public void saveBuildSetting(BuildSetting buildSetting) {
+		Setting setting = getSetting(Key.BUILD);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(Key.BUILD);
+		}
+		setting.setValue(buildSetting);
 		dao.persist(setting);
 	}
 	

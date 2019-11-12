@@ -41,8 +41,10 @@ import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.BackupSetting;
+import io.onedev.server.model.support.administration.BuildSetting;
 import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.administration.MailSetting;
+import io.onedev.server.model.support.administration.PullRequestSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
@@ -206,6 +208,14 @@ public class DefaultDataManager implements DataManager, Serializable {
 		setting = settingManager.getSetting(Key.JOB_SCRIPTS);
 		if (setting == null) {
 			settingManager.saveGroovyScripts(Lists.newArrayList());
+		}
+		setting = settingManager.getSetting(Key.PULL_REQUEST);
+		if (setting == null) {
+			settingManager.savePullRequestSetting(new PullRequestSetting());
+		}
+		setting = settingManager.getSetting(Key.BUILD);
+		if (setting == null) {
+			settingManager.saveBuildSetting(new BuildSetting());
 		}
 		
 		setting = settingManager.getSetting(Key.MAIL);

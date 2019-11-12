@@ -316,7 +316,6 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 						QuerySetting<T> querySetting = getQuerySetting();
 						querySetting.getQueryWatchSupport().setUserWatchStatus(namedQuery, watchStatus);
 						onSaveQuerySetting(querySetting);
-						
 					}
 					
 					@Override
@@ -342,9 +341,7 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 							querySetting.getQuerySubscriptionSupport().getUserQuerySubscriptions().add(namedQuery.getName());
 						else
 							querySetting.getQuerySubscriptionSupport().getUserQuerySubscriptions().remove(namedQuery.getName());
-							
 						onSaveQuerySetting(querySetting);
-						
 					}
 					
 					@Override

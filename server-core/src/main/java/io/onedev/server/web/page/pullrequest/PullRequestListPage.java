@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.pullrequests;
+package io.onedev.server.web.page.pullrequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,16 +14,12 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.PullRequestQuerySettingManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.PullRequestQuerySetting;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.PullRequestSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
-import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -31,13 +27,13 @@ import io.onedev.server.web.component.pullrequest.list.PullRequestListPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
-import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.layout.LayoutPage;
 import io.onedev.server.web.util.NamedPullRequestQueriesBean;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
-public class ProjectPullRequestsPage extends ProjectPage {
+public class PullRequestListPage extends LayoutPage {
 
 	private static final String PARAM_CURRENT_PAGE = "currentPage";
 	
@@ -45,21 +41,22 @@ public class ProjectPullRequestsPage extends ProjectPage {
 	
 	private String query;
 	
-	public ProjectPullRequestsPage(PageParameters params) {
+	public PullRequestListPage(PageParameters params) {
 		super(params);
 		query = params.get(PARAM_QUERY).toOptionalString();
 		if (query != null && query.length() == 0) {
 			query = null;
 			List<String> queries = new ArrayList<>();
-			if (getProject().getPullRequestQuerySettingOfCurrentUser() != null) { 
-				for (NamedPullRequestQuery namedQuery: getProject().getPullRequestQuerySettingOfCurrentUser().getUserQueries())
+			if (getLoginUser() != null) { 
+				for (NamedPullRequestQuery namedQuery: getLoginUser().getPullRequestQuerySetting().getUserQueries())
 					queries.add(namedQuery.getQuery());
 			}
-			for (NamedPullRequestQuery namedQuery: getProject().getPullRequestSetting().getNamedQueries(true))
+			for (NamedPullRequestQuery namedQuery: getPullRequestSetting().getNamedQueries())
 				queries.add(namedQuery.getQuery());
+			
 			for (String each: queries) {
 				try {
-					if (SecurityUtils.getUser() != null || !PullRequestQuery.parse(getProject(), each).needsLogin()) {  
+					if (SecurityUtils.getUser() != null || !PullRequestQuery.parse(null, each).needsLogin()) {  
 						query = each;
 						break;
 					}
@@ -68,15 +65,11 @@ public class ProjectPullRequestsPage extends ProjectPage {
 			} 
 		}
 	}
-
-	private PullRequestQuerySettingManager getPullRequestQuerySettingManager() {
-		return OneDev.getInstance(PullRequestQuerySettingManager.class);		
-	}
 	
 	protected PullRequestSetting getPullRequestSetting() {
 		return OneDev.getInstance(SettingManager.class).getPullRequestSetting();		
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -91,39 +84,38 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 			@Override
 			protected boolean needsLogin(NamedPullRequestQuery namedQuery) {
-				return PullRequestQuery.parse(getProject(), namedQuery.getQuery()).needsLogin();
+				return PullRequestQuery.parse(null, namedQuery.getQuery()).needsLogin();
 			}
 
 			@Override
 			protected Link<Void> newQueryLink(String componentId, NamedPullRequestQuery namedQuery) {
-				return new BookmarkablePageLink<Void>(componentId, ProjectPullRequestsPage.class, 
-						ProjectPullRequestsPage.paramsOf(getProject(), namedQuery.getQuery(), 0));
+				return new BookmarkablePageLink<Void>(componentId, PullRequestListPage.class, 
+						PullRequestListPage.paramsOf(namedQuery.getQuery(), 0));
 			}
 
 			@Override
 			protected QuerySetting<NamedPullRequestQuery> getQuerySetting() {
-				return getProject().getPullRequestQuerySettingOfCurrentUser();
+				if (getLoginUser() != null)
+					return getLoginUser().getPullRequestQuerySetting();
+				else
+					return null;
+			}
+
+			@Override
+			protected void onSaveQuerySetting(QuerySetting<NamedPullRequestQuery> querySetting) {
+				getLoginUser().setPullRequestQuerySetting(querySetting);
+				OneDev.getInstance(UserManager.class).save(getLoginUser());
+			}
+
+			@Override
+			protected void onSaveQueries(ArrayList<NamedPullRequestQuery> queries) {
+				getPullRequestSetting().setNamedQueries(queries);
+				OneDev.getInstance(SettingManager.class).savePullRequestSetting(getPullRequestSetting());
 			}
 
 			@Override
 			protected ArrayList<NamedPullRequestQuery> getQueries() {
-				return (ArrayList<NamedPullRequestQuery>) getProject().getPullRequestSetting().getNamedQueries(false);
-			}
-
-			@Override
-			protected ArrayList<NamedPullRequestQuery> getDefaultQueries() {
 				return (ArrayList<NamedPullRequestQuery>) getPullRequestSetting().getNamedQueries();
-			}
-			
-			@Override
-			protected void onSaveQuerySetting(QuerySetting<NamedPullRequestQuery> querySetting) {
-				getPullRequestQuerySettingManager().save((PullRequestQuerySetting) querySetting);
-			}
-
-			@Override
-			protected void onSaveQueries(ArrayList<NamedPullRequestQuery> namedQueries) {
-				getProject().getPullRequestSetting().setNamedQueries(namedQueries);
-				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
 
 		});
@@ -132,7 +124,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getProject(), query, 0);
+				PageParameters params = paramsOf(query, 0);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -144,7 +136,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 			
 		};
 
-		add(new PullRequestListPanel("main", getProject(), query) {
+		add(new PullRequestListPanel("main", null, query) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -153,7 +145,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(ProjectPullRequestsPage.class, paramsOf(getProject(), query, 0));
+				setResponsePage(PullRequestListPage.class, paramsOf(query, 0));
 			}
 
 			@Override
@@ -170,32 +162,29 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 									@Override
 									protected void onSaveForMine(AjaxRequestTarget target, String name) {
-										PullRequestQuerySetting setting = getProject().getPullRequestQuerySettingOfCurrentUser();
-										NamedPullRequestQuery namedQuery = NamedQuery.find(setting.getUserQueries(), name);
+										NamedPullRequestQuery namedQuery = NamedQuery.find(getLoginUser().getPullRequestQuerySetting().getUserQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedPullRequestQuery(name, query);
-											setting.getUserQueries().add(namedQuery);
+											getLoginUser().getPullRequestQuerySetting().getUserQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
-										getPullRequestQuerySettingManager().save(setting);
+										OneDev.getInstance(UserManager.class).save(getLoginUser());
 										target.add(savedQueries);
 										close();
 									}
 
 									@Override
 									protected void onSaveForAll(AjaxRequestTarget target, String name) {
-										ProjectPullRequestSetting setting = getProject().getPullRequestSetting();
-										if (setting.getNamedQueries(false) == null) 
-											setting.setNamedQueries(new ArrayList<>(getPullRequestSetting().getNamedQueries()));
-										NamedPullRequestQuery namedQuery = setting.getNamedQuery(name);
+										PullRequestSetting pullRequestSetting = getPullRequestSetting();
+										NamedPullRequestQuery namedQuery = pullRequestSetting.getNamedQuery(name);
 										if (namedQuery == null) {
 											namedQuery = new NamedPullRequestQuery(name, query);
-											setting.getNamedQueries(false).add(namedQuery);
+											pullRequestSetting.getNamedQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(ProjectManager.class).save(getProject());
+										OneDev.getInstance(SettingManager.class).savePullRequestSetting(pullRequestSetting);
 										target.add(savedQueries);
 										close();
 									}
@@ -227,16 +216,11 @@ public class ProjectPullRequestsPage extends ProjectPage {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new ProjectPullRequestsCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new PullRequestListCssResourceReference()));
 	}
 	
-	@Override
-	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject());
-	}
-	
-	public static PageParameters paramsOf(Project project, @Nullable String query, int page) {
-		PageParameters params = paramsOf(project);
+	public static PageParameters paramsOf(@Nullable String query, int page) {
+		PageParameters params = new PageParameters();
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		if (page != 0)

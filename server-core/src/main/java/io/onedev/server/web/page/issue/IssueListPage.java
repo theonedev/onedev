@@ -16,7 +16,6 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.IssueSetting;
@@ -105,12 +104,16 @@ public class IssueListPage extends LayoutPage {
 
 			@Override
 			protected QuerySetting<NamedIssueQuery> getQuerySetting() {
-				return getLoginUser().getIssueQuerySetting();
+				if (getLoginUser() != null)
+					return getLoginUser().getIssueQuerySetting();
+				else
+					return null;
 			}
 
 			@Override
 			protected void onSaveQuerySetting(QuerySetting<NamedIssueQuery> querySetting) {
-				OneDev.getInstance(UserManager.class).save((User) querySetting);
+				getLoginUser().setIssueQuerySetting(querySetting);
+				OneDev.getInstance(UserManager.class).save(getLoginUser());
 			}
 
 			@Override
@@ -183,20 +186,14 @@ public class IssueListPage extends LayoutPage {
 									@Override
 									protected void onSaveForAll(AjaxRequestTarget target, String name) {
 										IssueSetting issueSetting = getIssueSetting();
-										NamedIssueQuery namedQuery = null;
-										for (NamedIssueQuery each: issueSetting.getNamedQueries()) {
-											if (each.getName().equals(name)) {
-												namedQuery = each;
-												break;
-											}
-										}
+										NamedIssueQuery namedQuery = issueSetting.getNamedQuery(name);
 										if (namedQuery == null) {
 											namedQuery = new NamedIssueQuery(name, query);
 											issueSetting.getNamedQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
-										OneDev.getInstance(SettingManager.class).saveIssueSetting(getIssueSetting());
+										OneDev.getInstance(SettingManager.class).saveIssueSetting(issueSetting);
 										target.add(savedQueries);
 										close();
 									}

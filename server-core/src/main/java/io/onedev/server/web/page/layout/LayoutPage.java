@@ -57,6 +57,7 @@ import io.onedev.server.web.page.my.MyTokenPage;
 import io.onedev.server.web.page.project.NewProjectPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.page.pullrequest.PullRequestListPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
 import io.onedev.server.web.page.security.RegisterPage;
@@ -84,10 +85,16 @@ public abstract class LayoutPage extends BasePage {
 		
 		WebMarkupContainer issuesContainer = new WebMarkupContainer("navIssues");
 		issuesContainer.add(new ViewStateAwarePageLink<Void>("link", IssueListPage.class, IssueListPage.paramsOf("", 0)));
-		
 		if (getPage() instanceof IssueListPage) 
 			issuesContainer.add(AttributeAppender.append("class", "active"));
 		add(issuesContainer);
+		
+		WebMarkupContainer pullRequestsContainer = new WebMarkupContainer("navPullRequests");
+		pullRequestsContainer.add(new ViewStateAwarePageLink<Void>("link", PullRequestListPage.class, 
+				PullRequestListPage.paramsOf("", 0)));
+		if (getPage() instanceof PullRequestListPage) 
+			pullRequestsContainer.add(AttributeAppender.append("class", "active"));
+		add(pullRequestsContainer);
 		
 		RepeatingView contributionsView = new RepeatingView("navContributions");		
 		List<MainNavContribution> contributions = new ArrayList<>();
