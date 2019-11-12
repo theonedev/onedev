@@ -9,6 +9,9 @@
 .build-list>.head>* {
 	margin-bottom: 20px;
 }
+.build-list>.head>.others:empty {
+	margin-bottom: 0;
+}
 .build-list>.head>.others>* {
 	margin-right: 16px;
 	color: #666;

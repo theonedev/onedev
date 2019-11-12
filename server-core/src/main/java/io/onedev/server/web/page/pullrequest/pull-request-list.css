@@ -1,0 +1,6 @@
+#pull-request-list>.main {
+	min-width: 360px;
+}
+#layout>.body>#pull-request-list .pull-request-list>.head>form {
+	margin-right: 0;
+}

@@ -20,6 +20,9 @@
 	right: 0;
 	top: 0;
 }
+.issue-list>.head>.others:empty {
+	margin-bottom: 0;
+}
 .issue-list>.head>.others>* {
 	margin-right: 16px;
 	color: #666;

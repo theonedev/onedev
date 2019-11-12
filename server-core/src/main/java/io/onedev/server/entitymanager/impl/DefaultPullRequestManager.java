@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -122,6 +123,7 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.SecurityUtils;
@@ -950,16 +952,24 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	}
 	
 	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 
-			Project targetProject, User user, Root<PullRequest> root, CriteriaBuilder builder) {
+			@Nullable Project targetProject, @Nullable User user, Root<PullRequest> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(builder.equal(root.get("targetProject"), targetProject));
+		if (targetProject != null) {
+			predicates.add(builder.equal(root.get("targetProject"), targetProject));
+		} else if (!SecurityUtils.isAdministrator()) {
+			List<Predicate> targetProjectPredicates = new ArrayList<>();
+			for (Project each: projectManager.getPermittedProjects(user, new ReadCode())) 
+				targetProjectPredicates.add(builder.equal(root.get(PullRequestConstants.ATTR_TARGET_PROJECT), each));
+			predicates.add(builder.or(targetProjectPredicates.toArray(new Predicate[targetProjectPredicates.size()])));
+		}
+		
 		if (criteria != null)
 			predicates.add(criteria.getPredicate(targetProject, root, builder, user));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
-	private CriteriaQuery<PullRequest> buildCriteriaQuery(Session session, Project targetProject, User user,
-			EntityQuery<PullRequest> requestQuery) {
+	private CriteriaQuery<PullRequest> buildCriteriaQuery(Session session, @Nullable Project targetProject, 
+			User user, EntityQuery<PullRequest> requestQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<PullRequest> query = builder.createQuery(PullRequest.class);
 		Root<PullRequest> root = query.from(PullRequest.class);
@@ -984,7 +994,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Sessional
 	@Override
-	public List<PullRequest> query(Project targetProject, User user, EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults) {
+	public List<PullRequest> query(@Nullable Project targetProject, @Nullable User user, 
+			EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults) {
 		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), targetProject, user, requestQuery);
 		Query<PullRequest> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
@@ -994,7 +1005,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public int count(Project targetProject, User user, io.onedev.server.search.entity.EntityCriteria<PullRequest> requestCriteria) {
+	public int count(@Nullable Project targetProject, @Nullable User user, 
+			io.onedev.server.search.entity.EntityCriteria<PullRequest> requestCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
@@ -1053,7 +1065,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public List<PullRequest> query(Project targetProject, String term, int count) {
+	public List<PullRequest> query(Project targetProject, @Nullable String term, int count) {
 		List<PullRequest> requests = new ArrayList<>();
 
 		EntityCriteria<PullRequest> criteria = newCriteria();

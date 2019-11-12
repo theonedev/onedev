@@ -14,6 +14,8 @@ public class PullRequestConstants {
 	
 	public static final String FIELD_STATUS = "Status";
 	
+	public static final String ATTR_TARGET_PROJECT = "targetProject";
+	
 	public static final String FIELD_TARGET_BRANCH = "Target Branch";
 	
 	public static final String ATTR_TARGET_BRANCH = "targetBranch";

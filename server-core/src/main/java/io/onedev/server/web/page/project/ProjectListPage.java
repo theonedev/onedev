@@ -25,6 +25,7 @@ import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
@@ -77,7 +78,7 @@ public class ProjectListPage extends LayoutPage {
 		@Override
 		protected List<Project> load() {
 			List<Project> projects = new ArrayList<>(OneDev.getInstance(ProjectManager.class)
-					.getAccessibleProjects(getLoginUser()));
+					.getPermittedProjects(getLoginUser(), new AccessProject()));
 			projects.sort(Project::compareLastVisit);
 			return MatchScoreUtils.filterAndSort(projects, new MatchScoreProvider<Project>() {
 

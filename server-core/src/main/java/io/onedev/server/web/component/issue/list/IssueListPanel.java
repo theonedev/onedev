@@ -80,7 +80,6 @@ import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
-import io.onedev.server.web.util.VisibleVisitor;
 
 @SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
@@ -117,8 +116,6 @@ public abstract class IssueListPanel extends Panel {
 	private DataTable<Issue, Void> issuesTable;
 	
 	private SelectionColumn<Issue, Void> selectionColumn;
-	
-	private ModalLink batchEditSelected;
 	
 	private SortableDataProvider<Issue, Void> dataProvider;	
 	
@@ -169,15 +166,8 @@ public abstract class IssueListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer others = new WebMarkupContainer("others") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(visitChildren(Component.class, new VisibleVisitor()) != null);
-			}
-			
-		};
+		WebMarkupContainer others = new WebMarkupContainer("others");
+		others.setOutputMarkupId(true);
 		add(others);
 		
 		others.add(new AjaxLink<Void>("showSavedQueries") {
@@ -186,7 +176,7 @@ public abstract class IssueListPanel extends Panel {
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 				if (event.getPayload() instanceof SavedQueriesClosed) {
-					((SavedQueriesClosed) event.getPayload()).getHandler().add(this);
+					((SavedQueriesClosed) event.getPayload()).getHandler().add(others);
 				}
 			}
 			
@@ -199,13 +189,12 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				send(getPage(), Broadcast.BREADTH, new SavedQueriesOpened(target));
-				target.add(this);
+				target.add(others);
 			}
 			
-		}.setOutputMarkupPlaceholderTag(true));
+		});
 		
-		Component querySave;
-		others.add(querySave = new AjaxLink<Void>("saveQuery") {
+		others.add(new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
@@ -245,7 +234,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(querySave);
+					target.add(others);
 			}
 			
 		});
@@ -376,7 +365,7 @@ public abstract class IssueListPanel extends Panel {
 		else
 			add(new WebMarkupContainer("newIssue").setVisible(false));
 		
-		others.add(batchEditSelected = new ModalLink("batchEditSelected") {
+		others.add(new ModalLink("batchEditSelected") {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
@@ -429,8 +418,6 @@ public abstract class IssueListPanel extends Panel {
 			
 		});
 
-		batchEditSelected.setOutputMarkupPlaceholderTag(true);
-		
 		others.add(new ModalLink("batchEditAll") {
 
 			@Override
@@ -534,7 +521,7 @@ public abstract class IssueListPanel extends Panel {
 
 				@Override
 				protected void onSelectionChange(AjaxRequestTarget target) {
-					target.add(batchEditSelected);
+					target.add(others);
 				}
 				
 			});

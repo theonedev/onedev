@@ -40,7 +40,7 @@ public class DefaultBuildQuerySettingManager extends AbstractEntityManager<Build
 		setting.getQuerySubscriptionSupport().getUserQuerySubscriptions().retainAll(
 				setting.getUserQueries().stream().map(it->it.getName()).collect(Collectors.toSet()));
 		setting.getQuerySubscriptionSupport().getQuerySubscriptions().retainAll(
-				setting.getProject().getNamedBuildQueries().stream().map(it->it.getName()).collect(Collectors.toSet()));
+				setting.getProject().getBuildSetting().getNamedQueries(true).stream().map(it->it.getName()).collect(Collectors.toSet()));
 		if (setting.getQuerySubscriptionSupport().getQuerySubscriptions().isEmpty() && setting.getUserQueries().isEmpty()) {
 			if (!setting.isNew())
 				delete(setting);

@@ -26,13 +26,13 @@ public interface IssueManager extends EntityManager<Issue> {
     
 	void open(Issue issue);
 	
-	List<Issue> query(@Nullable Project project, User user, EntityQuery<Issue> issueQuery, int firstResult, int maxResults);
+	List<Issue> query(@Nullable Project project, @Nullable User user, EntityQuery<Issue> issueQuery, int firstResult, int maxResults);
 	
-	int count(@Nullable Project project, User user, @Nullable IssueCriteria issueCriteria);
+	int count(@Nullable Project project, @Nullable User user, @Nullable IssueCriteria issueCriteria);
 	
 	List<Issue> query(Project project, @Nullable String term, int count);
 
-	int count(Milestone milestone, User user, @Nullable StateSpec.Category category);
+	int count(Milestone milestone, @Nullable User user, @Nullable StateSpec.Category category);
 	
 	Collection<String> getUndefinedStates();
 	

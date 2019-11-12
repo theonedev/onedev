@@ -1,0 +1,40 @@
+.pull-request-list>.head {
+	position: relative;
+}
+.pull-request-list>.head>* {
+	margin-bottom: 20px;
+}
+.pull-request-list>.head>form {
+	margin-right: 170px;
+}
+.pull-request-list>.head>.open-new {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.pull-request-list>.head>.others:empty {
+	margin-bottom: 0;
+}
+.pull-request-list>.head>.others>* {
+	margin-right: 16px;
+	color: #666;
+}
+.pull-request-list>.head>.others>*:last-child {
+	margin-right: 0;
+}
+.pull-request-list>.body .new-indicator {
+	width: 4px;
+	padding: 0;
+}
+.pull-request-list>.body td a {
+	color: #444;
+}
+
+.pull-request-list>.body tr.request.new td.new-indicator {
+	background: #4667EE;
+}
+@media(max-width: 991px) {
+	.pull-request-list thead, .pull-request-list td.expanded {
+		display: none;		
+	}
+}

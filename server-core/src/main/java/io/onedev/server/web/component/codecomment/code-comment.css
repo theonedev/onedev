@@ -1,6 +1,9 @@
 .code-comments>.head>* {
 	margin-bottom: 20px;
 }
+.code-comments>.head>.others:empty {
+	margin-bottom: 0;
+}
 .code-comments>.head>.others>* {
 	margin-right: 16px;
 	color: #666;

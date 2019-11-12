@@ -12,6 +12,9 @@
 .commit-list>.head>* {
 	margin-bottom: 20px;
 }
+.commit-list>.head>.others:empty {
+	margin-bottom: 0;
+}
 .commit-list>.head>.others>* {
 	margin-right: 16px;
 	color: #666;

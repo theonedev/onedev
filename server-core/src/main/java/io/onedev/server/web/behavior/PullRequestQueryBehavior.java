@@ -1,5 +1,14 @@
 package io.onedev.server.web.behavior;
 
+import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.getRuleName;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IncludesCommit;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IncludesIssue;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeReviewedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.RequestedForChangesByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ApprovedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.SubmittedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.DiscardedByMe;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +33,7 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -77,7 +87,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 							} else {
 								String fieldName = PullRequestQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
-									PullRequestQuery.checkField(project, fieldName, operator);
+									PullRequestQuery.checkField(fieldName, operator);
 									if (fieldName.equals(PullRequestConstants.FIELD_SUBMIT_DATE) 
 											|| fieldName.equals(PullRequestConstants.FIELD_UPDATE_DATE)
 											|| fieldName.equals(PullRequestConstants.FIELD_CLOSE_DATE)) {
@@ -120,13 +130,27 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
+		if (SecurityUtils.getUser() == null 
+				&& (suggestedLiteral.equals(getRuleName(ToBeReviewedByMe))
+						|| suggestedLiteral.equals(getRuleName(RequestedForChangesByMe))
+						|| suggestedLiteral.equals(getRuleName(ApprovedByMe))
+						|| suggestedLiteral.equals(getRuleName(SubmittedByMe))
+						|| suggestedLiteral.equals(getRuleName(DiscardedByMe)))) {
+			return null;
+		}
+		if (getProject() == null 
+				&& (suggestedLiteral.equals(getRuleName(IncludesCommit)) 
+						|| suggestedLiteral.equals(getRuleName(IncludesIssue)))) {
+			return null;
+		}
+		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
 			if (!fieldElements.isEmpty()) {
 				String fieldName = PullRequestQuery.getValue(fieldElements.iterator().next().getMatchedText());
 				try {
-					PullRequestQuery.checkField(getProject(), fieldName, PullRequestQuery.getOperator(suggestedLiteral));
+					PullRequestQuery.checkField(fieldName, PullRequestQuery.getOperator(suggestedLiteral));
 				} catch (OneException e) {
 					return null;
 				}

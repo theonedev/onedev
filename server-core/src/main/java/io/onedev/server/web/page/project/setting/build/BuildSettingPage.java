@@ -5,7 +5,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.support.BuildSetting;
+import io.onedev.server.model.support.ProjectBuildSetting;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
@@ -20,7 +20,7 @@ public class BuildSettingPage extends ProjectSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		BuildSetting buildSetting = getProject().getBuildSetting();
+		ProjectBuildSetting buildSetting = getProject().getBuildSetting();
 
 		Form<?> form = new Form<Void>("form") {
 

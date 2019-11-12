@@ -18,7 +18,9 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.MarkdownAware;
 import io.onedev.server.event.pullrequest.PullRequestBuildEvent;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
@@ -63,15 +65,21 @@ public class PullRequestNotificationManager implements PersistListener {
 	
 	private final UserInfoManager userInfoManager;
 	
+	private final UserManager userManager;
+	
+	private final SettingManager settingManager;
+	
 	@Inject
 	public PullRequestNotificationManager(MailManager mailManager, UrlManager urlManager, 
 			MarkdownManager markdownManager, PullRequestWatchManager pullRequestWatchManager, 
-			UserInfoManager userInfoManager) {
+			UserInfoManager userInfoManager, UserManager userManager, SettingManager settingManager) {
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
 		this.markdownManager = markdownManager;
 		this.pullRequestWatchManager = pullRequestWatchManager;
 		this.userInfoManager = userInfoManager;
+		this.userManager = userManager;
+		this.settingManager = settingManager;
 	}
 	
 	@Transactional
@@ -80,7 +88,7 @@ public class PullRequestNotificationManager implements PersistListener {
 		PullRequest request = event.getRequest();
 		User user = event.getUser();
 		
-		for(Map.Entry<User, Boolean> entry: new QueryWatchBuilder<PullRequest>() {
+		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<PullRequest>() {
 
 			@Override
 			protected PullRequest getEntity() {
@@ -99,12 +107,38 @@ public class PullRequestNotificationManager implements PersistListener {
 
 			@Override
 			protected Collection<? extends NamedQuery> getNamedQueries() {
-				return request.getTargetProject().getNamedPullRequestQueries();
+				return request.getTargetProject().getPullRequestSetting().getNamedQueries(true);
 			}
 			
 		}.getWatches().entrySet()) {
 			watch(request, entry.getKey(), entry.getValue());
-		};
+		}
+		
+		for (Map.Entry<User, Boolean> entry: new QueryWatchBuilder<PullRequest>() {
+
+			@Override
+			protected PullRequest getEntity() {
+				return request;
+			}
+
+			@Override
+			protected Collection<? extends QuerySetting<?>> getQuerySettings() {
+				return userManager.query().stream().map(it->it.getPullRequestQuerySetting()).collect(Collectors.toList());
+			}
+
+			@Override
+			protected EntityQuery<PullRequest> parse(String queryString) {
+				return PullRequestQuery.parse(null, queryString);
+			}
+
+			@Override
+			protected Collection<? extends NamedQuery> getNamedQueries() {
+				return settingManager.getPullRequestSetting().getNamedQueries();
+			}
+			
+		}.getWatches().entrySet()) {
+			watch(request, entry.getKey(), entry.getValue());
+		}
 		
 		if (user != null)
 			watch(request, user, true);

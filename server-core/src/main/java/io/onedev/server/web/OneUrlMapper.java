@@ -98,6 +98,7 @@ import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
 import io.onedev.server.web.page.project.stats.SourceLinesPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
+import io.onedev.server.web.page.pullrequest.PullRequestListPage;
 import io.onedev.server.web.page.security.ForgetPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
@@ -109,6 +110,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("init", ServerInitPage.class));
 		add(new OnePageMapper("loading", BrowserInfoPage.class));
 		add(new OnePageMapper("issues", IssueListPage.class));
+		add(new OnePageMapper("pull-requests", PullRequestListPage.class));
 		addProjectPages();
 		addMyPages();
 		addAdministrationPages();

@@ -48,11 +48,11 @@ public class IssueQueryGrammarTest {
 		assertEquals(1, suggestions.size());
 		assertEquals("\"Date\" is before \"2018-09-01 2:30PM\":36", suggestions.get(0).toString());
 
-		suggestions = codeAssist.suggest(new InputStatus("outstanding", 11), "query");
+		suggestions = codeAssist.suggest(new InputStatus("mine", 4), "query");
 		assertEquals(3, suggestions.size());
-		assertEquals("outstanding:11", suggestions.get(0).toString());
-		assertEquals("\"outstanding\" :14", suggestions.get(1).toString());
-		assertEquals("outstanding :12", suggestions.get(2).toString());
+		assertEquals("mine:4", suggestions.get(0).toString());
+		assertEquals("\"mine\" :7", suggestions.get(1).toString());
+		assertEquals("mine :5", suggestions.get(2).toString());
 	}
 	
 }

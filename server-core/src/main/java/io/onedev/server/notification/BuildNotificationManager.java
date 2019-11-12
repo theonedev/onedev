@@ -10,7 +10,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import io.onedev.commons.launcher.loader.Listen;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.build.BuildEvent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildQuerySetting;
@@ -27,13 +29,21 @@ public class BuildNotificationManager {
 	
 	private final UrlManager urlManager;
 	
+	private final UserManager userManager;
+	
+	private final SettingManager settingManager;
+	
 	@Inject
-	public BuildNotificationManager(MailManager mailManager, UrlManager urlManager) {
+	public BuildNotificationManager(MailManager mailManager, UrlManager urlManager, 
+			UserManager userManager, SettingManager settingManager) {
 		this.mailManager = mailManager;
 		this.urlManager = urlManager;
+		this.userManager = userManager;
+		this.settingManager = settingManager;
 	}
 
-	private void fillSubscribedQueryStrings(Map<User, Collection<String>> subscribedQueryStrings, User user, @Nullable NamedQuery query) {
+	private void fillSubscribedQueryStrings(Map<User, Collection<String>> subscribedQueryStrings, 
+			User user, @Nullable NamedQuery query) {
 		if (query != null) {
 			Collection<String> value = subscribedQueryStrings.get(user);
 			if (value == null) {
@@ -64,10 +74,14 @@ public class BuildNotificationManager {
 		Project project = event.getProject();
 		Map<User, Collection<String>> subscribedQueryStrings = new HashMap<>();
 		for (BuildQuerySetting setting: project.getUserBuildQuerySettings()) {
-			for (String name: setting.getQuerySubscriptionSupport().getQuerySubscriptions())
-				fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), NamedQuery.find(project.getNamedBuildQueries(), name));
-			for (String name: setting.getQuerySubscriptionSupport().getUserQuerySubscriptions()) 
-				fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), NamedQuery.find(setting.getUserQueries(), name));
+			for (String name: setting.getQuerySubscriptionSupport().getQuerySubscriptions()) {
+				fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), 
+						NamedQuery.find(project.getBuildSetting().getNamedQueries(true), name));
+			}
+			for (String name: setting.getQuerySubscriptionSupport().getUserQuerySubscriptions()) { 
+				fillSubscribedQueryStrings(subscribedQueryStrings, setting.getUser(), 
+						NamedQuery.find(setting.getUserQueries(), name));
+			}
 		}
 
 		Build build = event.getBuild();
@@ -84,6 +98,32 @@ public class BuildNotificationManager {
 				}
 			}
 		}
+		
+		subscribedQueryStrings.clear();
+		for (User user: userManager.query()) {
+			for (String name: user.getBuildQuerySetting().getQuerySubscriptionSupport().getQuerySubscriptions()) {
+				fillSubscribedQueryStrings(subscribedQueryStrings, user, 
+						NamedQuery.find(settingManager.getBuildSetting().getNamedQueries(), name));
+			}
+			for (String name: user.getBuildQuerySetting().getQuerySubscriptionSupport().getUserQuerySubscriptions()) { 
+				fillSubscribedQueryStrings(subscribedQueryStrings, user, 
+						NamedQuery.find(user.getBuildQuerySetting().getUserQueries(), name));
+			}
+		}
+
+		for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
+			User user = entry.getKey();
+			for (String queryString: entry.getValue()) {
+				try {
+					if (BuildQuery.parse(null, queryString).matches(build, user)) {
+						notifyEmails.add(user.getEmail());
+						break;
+					}
+				} catch (Exception e) {
+				}
+			}
+		}
+		
 		notify(build, notifyEmails);
 	}
 	

@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.pullrequests;
+package io.onedev.server.web.util;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -9,6 +9,7 @@ import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInBuild;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsMe;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.Mine;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
 import static io.onedev.server.util.IssueConstants.FIELD_COMMENT;
 import static io.onedev.server.util.IssueConstants.FIELD_COMMENT_COUNT;
 import static io.onedev.server.util.IssueConstants.FIELD_DESCRIPTION;
@@ -209,11 +210,17 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				return null;
 		} 
 
-		if (suggestedLiteral.equals(getRuleName(IsMe)) && SecurityUtils.getUser() == null)
+		if (SecurityUtils.getUser() == null 
+				&& (suggestedLiteral.equals(getRuleName(IsMe)) 
+						|| suggestedLiteral.equals(getRuleName(SubmittedByMe)))) {
 			return null;	
+		}
 		
-		if (getProject() == null && (suggestedLiteral.equals(getRuleName(FixedBetween)) || suggestedLiteral.equals(getRuleName(FixedInBuild))))
+		if (getProject() == null 
+				&& (suggestedLiteral.equals(getRuleName(FixedBetween)) 
+						|| suggestedLiteral.equals(getRuleName(FixedInBuild)))) {
 			return null;
+		}
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {

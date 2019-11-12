@@ -46,6 +46,11 @@
 			<version>1.7</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>1.18</version>
+		</dependency>
+		<dependency>
 			<groupId>org.jetbrains.xodus</groupId>
 			<artifactId>xodus-entity-store</artifactId>
 			<version>1.2.3</version>
@@ -58,7 +63,7 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>20.0</version>
+			<version>25.1-android</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

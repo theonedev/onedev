@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
+import org.apache.shiro.authz.Permission;
 import org.eclipse.jgit.lib.Repository;
 
 import io.onedev.server.model.Project;
@@ -41,6 +42,6 @@ public interface ProjectManager extends EntityManager<Project> {
 	
 	Repository getRepository(Project project);
 	
-	Collection<Project> getAccessibleProjects(@Nullable User user);
+	Collection<Project> getPermittedProjects(@Nullable User user, Permission permission);
 	
 }

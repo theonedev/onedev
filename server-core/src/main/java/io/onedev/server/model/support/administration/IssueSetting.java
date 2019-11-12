@@ -527,4 +527,13 @@ public class IssueSetting implements Serializable {
 		this.namedQueries = namedQueries;
 	}
 	
+	@Nullable
+	public NamedIssueQuery getNamedQuery(String name) {
+		for (NamedIssueQuery namedQuery: getNamedQueries()) {
+			if (namedQuery.getName().equals(name))
+				return namedQuery;
+		}
+		return null;
+	}
+	
 }

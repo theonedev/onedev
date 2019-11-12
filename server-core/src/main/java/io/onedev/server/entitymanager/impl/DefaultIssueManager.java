@@ -69,6 +69,7 @@ import io.onedev.server.search.entity.issue.AndCriteria;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
+import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.ValueSetEdit;
@@ -174,13 +175,13 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	}
 
 	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Issue> criteria, 
-			@Nullable Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+			@Nullable Project project, Root<Issue> root, CriteriaBuilder builder, @Nullable User user) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (project != null) {
 			predicates.add(builder.equal(root.get("project"), project));
 		} else if (!SecurityUtils.isAdministrator()) {
 			List<Predicate> projectPredicates = new ArrayList<>();
-			for (Project each: projectManager.getAccessibleProjects(user)) 
+			for (Project each: projectManager.getPermittedProjects(user, new AccessProject())) 
 				projectPredicates.add(builder.equal(root.get(IssueConstants.ATTR_PROJECT), each));
 			predicates.add(builder.or(projectPredicates.toArray(new Predicate[projectPredicates.size()])));
 		}
@@ -189,7 +190,8 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		return predicates.toArray(new Predicate[0]);
 	}
 	
-	private CriteriaQuery<Issue> buildCriteriaQuery(Session session, Project project, EntityQuery<Issue> issueQuery, User user) {
+	private CriteriaQuery<Issue> buildCriteriaQuery(Session session, @Nullable Project project, 
+			EntityQuery<Issue> issueQuery, @Nullable User user) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Issue> query = builder.createQuery(Issue.class);
 		Root<Issue> root = query.from(Issue.class);
@@ -226,8 +228,8 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 	@Sessional
 	@Override
-	public List<Issue> query(@Nullable Project project, User user, io.onedev.server.search.entity.EntityQuery<Issue> issueQuery, 
-			int firstResult, int maxResults) {
+	public List<Issue> query(@Nullable Project project, @Nullable User user, 
+			io.onedev.server.search.entity.EntityQuery<Issue> issueQuery, int firstResult, int maxResults) {
 		CriteriaQuery<Issue> criteriaQuery = buildCriteriaQuery(getSession(), project, issueQuery, user);
 		Query<Issue> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
@@ -248,7 +250,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	
 	@Sessional
 	@Override
-	public int count(@Nullable Project project, User user, IssueCriteria issueCriteria) {
+	public int count(@Nullable Project project, @Nullable User user, IssueCriteria issueCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Issue> root = criteriaQuery.from(Issue.class);
@@ -260,7 +262,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	}
 
 	@Override
-	public int count(Milestone milestone, User user, @Nullable StateSpec.Category category) {
+	public int count(Milestone milestone, @Nullable User user, @Nullable StateSpec.Category category) {
 		if (category != null) {
 			IssueCriteria criteria = getIssueSetting().getCategoryCriteria(category);
 			if (criteria != null) {
@@ -347,7 +349,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 	@Sessional
 	@Override
-	public List<Issue> query(Project project, String term, int count) {
+	public List<Issue> query(Project project, @Nullable String term, int count) {
 		List<Issue> issues = new ArrayList<>();
 
 		EntityCriteria<Issue> criteria = newCriteria();

@@ -7,7 +7,7 @@ public class ProjectPullRequestsCssResourceReference extends CssResourceReferenc
 	private static final long serialVersionUID = 1L;
 
 	public ProjectPullRequestsCssResourceReference() {
-		super(ProjectPullRequestsCssResourceReference.class, "project-pullrequests.css");
+		super(ProjectPullRequestsCssResourceReference.class, "project-pull-requests.css");
 	}
 
 }

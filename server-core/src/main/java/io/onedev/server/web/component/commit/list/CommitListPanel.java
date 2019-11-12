@@ -83,7 +83,6 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.util.QuerySaveSupport;
-import io.onedev.server.web.util.VisibleVisitor;
 
 @SuppressWarnings("serial")
 public class CommitListPanel extends Panel {
@@ -273,15 +272,8 @@ public class CommitListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		WebMarkupContainer others = new WebMarkupContainer("others") {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(visitChildren(Component.class, new VisibleVisitor()) != null);
-			}
-			
-		};
+		WebMarkupContainer others = new WebMarkupContainer("others");
+		others.setOutputMarkupId(true);
 		add(others);
 		
 		others.add(new AjaxLink<Void>("showSavedQueries") {
@@ -290,7 +282,7 @@ public class CommitListPanel extends Panel {
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 				if (event.getPayload() instanceof SavedQueriesClosed) {
-					((SavedQueriesClosed) event.getPayload()).getHandler().add(this);
+					((SavedQueriesClosed) event.getPayload()).getHandler().add(others);
 				}
 			}
 			
@@ -303,13 +295,12 @@ public class CommitListPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				send(getPage(), Broadcast.BREADTH, new SavedQueriesOpened(target));
-				target.add(this);
+				target.add(others);
 			}
 			
-		}.setOutputMarkupPlaceholderTag(true));
+		});
 		
-		Component querySave;
-		others.add(querySave = new AjaxLink<Void>("saveQuery") {
+		others.add(new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
@@ -349,7 +340,7 @@ public class CommitListPanel extends Panel {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(querySave);
+					target.add(others);
 			}
 			
 		});

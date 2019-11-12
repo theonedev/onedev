@@ -6,9 +6,11 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.support.administration.BackupSetting;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.BuildSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.administration.MailSetting;
+import io.onedev.server.model.support.administration.PullRequestSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
@@ -109,5 +111,13 @@ public interface SettingManager extends EntityManager<Setting> {
 	List<GroovyScript> getGroovyScripts();
 	
 	void saveGroovyScripts(List<GroovyScript> jobScripts);
+	
+	PullRequestSetting getPullRequestSetting();
+	
+	void savePullRequestSetting(PullRequestSetting pullRequestSetting);
+	
+	BuildSetting getBuildSetting();
+	
+	void saveBuildSetting(BuildSetting buildSetting);
 	
 }

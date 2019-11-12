@@ -43,6 +43,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 	
 	public ProjectIssueListPage(PageParameters params) {
 		super(params);
+		
 		query = params.get(PARAM_QUERY).toOptionalString();
 		if (query != null && query.length() == 0) {
 			query = null;
@@ -108,8 +109,8 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 			}
 
 			@Override
-			protected void onSaveQueries(ArrayList<NamedIssueQuery> projectQueries) {
-				getProject().getIssueSetting().setNamedQueries(projectQueries);
+			protected void onSaveQueries(ArrayList<NamedIssueQuery> namedQueries) {
+				getProject().getIssueSetting().setNamedQueries(namedQueries);
 				OneDev.getInstance(ProjectManager.class).save(getProject());
 			}
 
@@ -178,13 +179,12 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 									@Override
 									protected void onSaveForAll(AjaxRequestTarget target, String name) {
 										ProjectIssueSetting setting = getProject().getIssueSetting();
-										if (setting.getNamedQueries(false) == null) {
+										if (setting.getNamedQueries(false) == null) 
 											setting.setNamedQueries(new ArrayList<>(getIssueSetting().getNamedQueries()));
-										}
-										NamedIssueQuery namedQuery = getProject().getIssueSetting().getNamedQuery(name);
+										NamedIssueQuery namedQuery = setting.getNamedQuery(name);
 										if (namedQuery == null) {
 											namedQuery = new NamedIssueQuery(name, query);
-											getProject().getIssueSetting().getNamedQueries(true).add(namedQuery);
+											setting.getNamedQueries(false).add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
