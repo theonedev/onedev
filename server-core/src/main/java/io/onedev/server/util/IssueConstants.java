@@ -59,7 +59,7 @@ public class IssueConstants {
 	public static final String ATTR_MILESTONE = "milestone";
 	
 	public static final String ATTR_FIELDS = "fields";
-	
+		
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_SUBMITTER, FIELD_DESCRIPTION, 
 			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, 

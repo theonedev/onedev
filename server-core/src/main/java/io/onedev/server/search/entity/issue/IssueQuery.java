@@ -1,15 +1,6 @@
 package io.onedev.server.search.entity.issue;
 
-import static io.onedev.server.util.IssueConstants.FIELD_COMMENT;
-import static io.onedev.server.util.IssueConstants.FIELD_COMMENT_COUNT;
-import static io.onedev.server.util.IssueConstants.FIELD_DESCRIPTION;
-import static io.onedev.server.util.IssueConstants.FIELD_MILESTONE;
-import static io.onedev.server.util.IssueConstants.FIELD_NUMBER;
-import static io.onedev.server.util.IssueConstants.FIELD_STATE;
-import static io.onedev.server.util.IssueConstants.FIELD_SUBMIT_DATE;
-import static io.onedev.server.util.IssueConstants.FIELD_TITLE;
-import static io.onedev.server.util.IssueConstants.FIELD_UPDATE_DATE;
-import static io.onedev.server.util.IssueConstants.FIELD_VOTE_COUNT;
+import static io.onedev.server.util.IssueConstants.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
