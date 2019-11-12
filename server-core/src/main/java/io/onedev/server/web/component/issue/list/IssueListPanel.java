@@ -117,8 +117,6 @@ public abstract class IssueListPanel extends Panel {
 	
 	private SelectionColumn<Issue, Void> selectionColumn;
 	
-	private ModalLink batchEditSelected;
-	
 	private SortableDataProvider<Issue, Void> dataProvider;	
 	
 	public IssueListPanel(String id, @Nullable Project project, @Nullable String query) {
@@ -168,7 +166,11 @@ public abstract class IssueListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new AjaxLink<Void>("showSavedQueries") {
+		WebMarkupContainer others = new WebMarkupContainer("others");
+		others.setOutputMarkupId(true);
+		add(others);
+		
+		others.add(new AjaxLink<Void>("showSavedQueries") {
 
 			@Override
 			public void onEvent(IEvent<?> event) {
@@ -187,13 +189,12 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			public void onClick(AjaxRequestTarget target) {
 				send(getPage(), Broadcast.BREADTH, new SavedQueriesOpened(target));
-				target.add(this);
+				target.add(others);
 			}
 			
-		}.setOutputMarkupPlaceholderTag(true));
+		});
 		
-		Component querySave;
-		add(querySave = new AjaxLink<Void>("saveQuery") {
+		others.add(new AjaxLink<Void>("saveQuery") {
 
 			@Override
 			protected void onConfigure() {
@@ -233,7 +234,7 @@ public abstract class IssueListPanel extends Panel {
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
 				if (SecurityUtils.getUser() != null && getQuerySaveSupport() != null)
-					target.add(querySave);
+					target.add(others);
 			}
 			
 		});
@@ -255,7 +256,7 @@ public abstract class IssueListPanel extends Panel {
 		});
 		add(form);
 		
-		add(new ModalLink("listFields") {
+		others.add(new ModalLink("listFields") {
 
 			private Collection<String> fieldSet;
 			
@@ -364,7 +365,7 @@ public abstract class IssueListPanel extends Panel {
 		else
 			add(new WebMarkupContainer("newIssue").setVisible(false));
 		
-		add(batchEditSelected = new ModalLink("batchEditSelected") {
+		others.add(new ModalLink("batchEditSelected") {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
@@ -417,9 +418,7 @@ public abstract class IssueListPanel extends Panel {
 			
 		});
 
-		batchEditSelected.setOutputMarkupPlaceholderTag(true);
-		
-		add(new ModalLink("batchEditAll") {
+		others.add(new ModalLink("batchEditAll") {
 
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
@@ -522,7 +521,7 @@ public abstract class IssueListPanel extends Panel {
 
 				@Override
 				protected void onSelectionChange(AjaxRequestTarget target) {
-					target.add(batchEditSelected);
+					target.add(others);
 				}
 				
 			});
