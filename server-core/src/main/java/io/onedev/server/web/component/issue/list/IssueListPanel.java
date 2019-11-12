@@ -176,7 +176,7 @@ public abstract class IssueListPanel extends Panel {
 			public void onEvent(IEvent<?> event) {
 				super.onEvent(event);
 				if (event.getPayload() instanceof SavedQueriesClosed) {
-					((SavedQueriesClosed) event.getPayload()).getHandler().add(this);
+					((SavedQueriesClosed) event.getPayload()).getHandler().add(others);
 				}
 			}
 			
