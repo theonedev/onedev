@@ -106,6 +106,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     @OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
     private Collection<CodeCommentQuerySetting> projectCodeCommentQuerySettings = new ArrayList<>();
     
+    @OneToMany(mappedBy="owner")
+    private Collection<Project> projects = new ArrayList<>();
+    
 	@Lob
 	@Column(nullable=false, length=65535)
 	private ArrayList<NamedIssueQuery> userIssueQueries = new ArrayList<>();
@@ -321,7 +324,15 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     		return User.asSubject(0L);
     }
     
-    @Editable(name="Login Name", order=100)
+    public Collection<Project> getProjects() {
+		return projects;
+	}
+
+	public void setProjects(Collection<Project> projects) {
+		this.projects = projects;
+	}
+
+	@Editable(name="Login Name", order=100)
 	@UserName
 	@NotEmpty
 	public String getName() {

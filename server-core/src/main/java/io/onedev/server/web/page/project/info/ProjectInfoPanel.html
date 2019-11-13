@@ -15,6 +15,7 @@
 			<a wicket:id="forkNow">fork now</a>
 		</div>
 		<div wicket:id="description" class="description"></div>
+		<wicket:enclosure child="cloneUrl">
 		<div class="clone form-inline">
 			<div class="input-group">
 		    	<div class="input-group-addon">Clone URL</div>
@@ -22,5 +23,6 @@
 				<a wicket:id="copyUrl" class="input-group-addon"><i class="fa fa-clipboard"></i></a>
 		    </div>		
 		</div>
+		</wicket:enclosure>
 	</div>
 </wicket:panel>

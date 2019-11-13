@@ -32,12 +32,14 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.GroupAuthorization;
 import io.onedev.server.model.Membership;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.permission.CreateProjects;
+import io.onedev.server.security.permission.ManageProject;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UserAdministration;
@@ -88,6 +90,17 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 				return new HashSet<>();
 			}
 			
+			private Collection<Permission> getGroupPermissions(Group group) {
+				Collection<Permission> permissions = new ArrayList<>();
+        		if (group.isAdministrator())
+        			permissions.add(new SystemAdministration());
+        		if (group.isCreateProjects())
+        			permissions.add(new CreateProjects());
+        		for (GroupAuthorization authorization: group.getProjectAuthorizations()) 
+					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
+				return permissions;
+			}
+			
 			@Override
 			public Collection<Permission> getObjectPermissions() {
 				return transactionManager.getSessionManager().call(new Callable<Collection<Permission>>() {
@@ -102,22 +115,16 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 				        	if (user.isRoot()) 
 				        		permissions.add(new SystemAdministration());
 				        	permissions.add(new UserAdministration(user));
-				           	for (Group group: user.getGroups()) {
-			            		if (group.isAdministrator())
-			            			permissions.add(new SystemAdministration());
-			            		if (group.isCreateProjects())
-			            			permissions.add(new CreateProjects());
-			            		for (GroupAuthorization authorization: group.getProjectAuthorizations()) 
-	            					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
-				        	}
+				           	for (Group group: user.getGroups())
+				           		permissions.addAll(getGroupPermissions(group));
 				        	for (UserAuthorization authorization: user.getProjectAuthorizations()) 
             					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
+				        	for (Project project: user.getProjects()) 
+				        		permissions.add(new ProjectPermission(project, new ManageProject()));
 				        } 
 			        	Group group = groupManager.findAnonymous();
-			        	if (group != null) {
-		            		for (GroupAuthorization authorization: group.getProjectAuthorizations()) 
-            					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
-			        	}
+			        	if (group != null)
+			           		permissions.addAll(getGroupPermissions(group));
 						return permissions;
 					}
 					

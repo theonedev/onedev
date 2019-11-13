@@ -73,7 +73,8 @@ public abstract class ProjectInfoPanel extends Panel {
 		
 		UrlManager urlManager = OneDev.getInstance(UrlManager.class);
 		Model<String> cloneUrlModel = Model.of(urlManager.urlFor(getProject()));
-		add(new TextField<String>("cloneUrl", cloneUrlModel));
+		add(new TextField<String>("cloneUrl", cloneUrlModel)
+				.setVisible(SecurityUtils.canReadCode(getProject())));
 		add(new WebMarkupContainer("copyUrl").add(new CopyClipboardBehavior(cloneUrlModel)));
 		
 		if (getProject().getDescription() != null) {
@@ -154,7 +155,9 @@ public abstract class ProjectInfoPanel extends Panel {
 				};
 			}
 			
-		}.setVisible(SecurityUtils.canCreateProjects()));
+		}.setVisible(SecurityUtils.canCreateProjects() 
+				&& SecurityUtils.getUser() != null 
+				&&  SecurityUtils.canReadCode(getProject())));
 	}
 	
 	private Project getProject() {
