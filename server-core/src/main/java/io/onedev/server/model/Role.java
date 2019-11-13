@@ -75,7 +75,9 @@ public class Role extends AbstractEntity implements Permission {
 	@OneToMany(mappedBy="role", cascade=CascadeType.REMOVE)
 	private Collection<GroupAuthorization> groupAuthorizations = new ArrayList<>();
 	
-	@Editable(order=100)
+	@Editable(order=100, description="Specify name of the role. <b style='color:red'>NOTE: </b> "
+			+ "Permission to view issues will be granted implicitly even if no other permissions "
+			+ "are specified here")
 	@NotEmpty
 	public String getName() {
 		return name;

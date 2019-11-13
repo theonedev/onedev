@@ -45,6 +45,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.scriptidentity.JobIdentity;
@@ -356,7 +357,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 		commitState.revision = getBuild().getCommitHash();
 		PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
 		
-		add(new CommitMessagePanel("commitMessage", getProject(), new AbstractReadOnlyModel<RevCommit>() {
+		add(new CommitMessagePanel("commitMessage", new AbstractReadOnlyModel<RevCommit>() {
 
 			@Override
 			public RevCommit getObject() {
@@ -369,6 +370,11 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(SecurityUtils.canReadCode(getProject()));
+			}
+
+			@Override
+			protected Project getProject() {
+				return BuildDetailPage.this.getProject();
 			}
 			
 		});

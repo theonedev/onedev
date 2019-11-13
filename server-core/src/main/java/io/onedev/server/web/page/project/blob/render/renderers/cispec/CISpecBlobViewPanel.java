@@ -19,6 +19,7 @@ import com.google.common.base.Throwables;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.git.Blob;
+import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.job.RunJobLink;
@@ -53,7 +54,14 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 						WebMarkupContainer nav = new WebMarkupContainer(navsView.newChildId());
 						nav.add(new Label("jobName", job.getName()));
 						nav.add(AttributeAppender.append("data-name", job.getName()));
-						nav.add(new RunJobLink("run", context.getProject(), context.getCommit().copy(), job.getName()));
+						nav.add(new RunJobLink("run", context.getCommit().copy(), job.getName()) {
+
+							@Override
+							protected Project getProject() {
+								return context.getProject();
+							}
+							
+						});
 						navsView.add(nav);
 						jobsView.add(BeanContext.view(jobsView.newChildId(), job));
 					}

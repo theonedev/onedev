@@ -162,7 +162,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							if (project != null)
 								return new FixedInCriteria(getBuild(project, value));
 							else
-								throw new OneException("Unsupported operator in global issue query: " + getRuleName(IssueQueryLexer.FixedInBuild));
+								throw new OneException("Unsupported criteria in global issue query: " + getRuleName(IssueQueryLexer.FixedInBuild));
 						} else {
 							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
 						}
@@ -183,7 +183,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					
 					public IssueCriteria visitFixedBetweenCriteria(FixedBetweenCriteriaContext ctx) {
 						if (project == null)
-							throw new OneException("Unsupported operator in global issue query: " + getRuleName(IssueQueryLexer.FixedBetween));
+							throw new OneException("Unsupported criteria in global issue query: " + getRuleName(IssueQueryLexer.FixedBetween));
 						
 						RevisionCriteriaContext sinceRevision = ctx.revisionCriteria(0);
 						int sinceType = sinceRevision.revisionType.getType();

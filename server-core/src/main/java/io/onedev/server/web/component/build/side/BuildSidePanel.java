@@ -110,7 +110,14 @@ public abstract class BuildSidePanel extends Panel {
 		
 		general.add(new WebMarkupContainer("copyCommitHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 		
-		Link<Void> jobLink = new JobDefLink("job", getProject(), getBuild().getCommitId(), getBuild().getJobName());
+		Link<Void> jobLink = new JobDefLink("job", getBuild().getCommitId(), getBuild().getJobName()) {
+
+			@Override
+			protected Project getProject() {
+				return BuildSidePanel.this.getProject();
+			}
+			
+		};
 		jobLink.add(new Label("label", getBuild().getJobName()));
 		general.add(jobLink);
 		

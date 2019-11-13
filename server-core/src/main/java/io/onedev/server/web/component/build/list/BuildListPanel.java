@@ -66,9 +66,9 @@ import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -77,8 +77,6 @@ import io.onedev.server.web.util.QuerySaveSupport;
 public abstract class BuildListPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(BuildListPanel.class);
-	
-	private final IModel<Project> projectModel;
 	
 	private final String query;
 	
@@ -107,9 +105,8 @@ public abstract class BuildListPanel extends Panel {
 	
 	private DataTable<Build, Void> buildsTable;
 	
-	public BuildListPanel(String id, Project project, @Nullable String query) {
+	public BuildListPanel(String id, @Nullable String query) {
 		super(id);
-		this.projectModel = new EntityModel<Project>(project);
 		this.query = query;
 	}
 	
@@ -119,14 +116,12 @@ public abstract class BuildListPanel extends Panel {
 	
 	@Override
 	protected void onDetach() {
-		projectModel.detach();
 		parsedQueryModel.detach();
 		super.onDetach();
 	}
 	
-	private Project getProject() {
-		return projectModel.getObject();
-	}
+	@Nullable
+	protected abstract Project getProject();
 
 	protected BuildQuery getBaseQuery() {
 		return new BuildQuery();
@@ -144,11 +139,16 @@ public abstract class BuildListPanel extends Panel {
 	protected QuerySaveSupport getQuerySaveSupport() {
 		return null;
 	}
-	
+
+	@Nullable
 	private QueryPosition getQueryPosition(Item<ICellPopulator<Build>> cellItem) {
-		OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
-		return new QueryPosition(parsedQueryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
-				(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
+		if (getProject() != null) {
+			OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
+			return new QueryPosition(parsedQueryModel.getObject().toString(), (int)buildsTable.getItemCount(), 
+					(int)buildsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
+		} else {
+			return null;
+		}
 	}
 	
 	@Override
@@ -250,7 +250,8 @@ public abstract class BuildListPanel extends Panel {
 
 			@Override
 			public Iterator<? extends Build> iterator(long first, long count) {
-				return getBuildManager().query(getProject(), SecurityUtils.getUser(), parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+				return getBuildManager().query(getProject(), SecurityUtils.getUser(), 
+						parsedQueryModel.getObject(), (int)first, (int)count).iterator();
 			}
 
 			@Override
@@ -376,6 +377,29 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
+		if (getProject() == null) {
+			columns.add(new AbstractColumn<Build, Void>(Model.of("Project")) {
+
+				@Override
+				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
+						IModel<Build> rowModel) {
+					Build build = rowModel.getObject();
+					Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+					Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectDashboardPage.class, 
+							ProjectDashboardPage.paramsOf(build.getProject()));
+					link.add(new Label("label", build.getProject()));
+					fragment.add(link);
+					cellItem.add(fragment);
+				}
+				
+				@Override
+				public String getCssClass() {
+					return "project";
+				}
+				
+			});
+		}
+		
 		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_JOB)) {
 
 			@Override
@@ -387,38 +411,51 @@ public abstract class BuildListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
 					IModel<Build> rowModel) {
 				Build build = rowModel.getObject();
-				Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
-				Link<Void> link = new JobDefLink("link", getProject(), build.getCommitId(), build.getJobName());
-				link.add(new Label("label", build.getJobName()));
-				fragment.add(link);
-				cellItem.add(fragment);
+				if (SecurityUtils.canReadCode(build.getProject())) {
+					Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
+					Link<Void> link = new JobDefLink("link", build.getCommitId(), build.getJobName()) {
+
+						@Override
+						protected Project getProject() {
+							return BuildListPanel.this.getProject();
+						}
+						
+					};
+					link.add(new Label("label", build.getJobName()));
+					fragment.add(link);
+					cellItem.add(fragment);
+				} else {
+					cellItem.add(new Label(componentId, build.getJobName()));
+				}
 			}
 		});
 		
-		if (SecurityUtils.canReadCode(getProject())) {
-			columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_COMMIT)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_COMMIT)) {
 
-				@Override
-				public String getCssClass() {
-					return "commit expanded";
-				}
+			@Override
+			public String getCssClass() {
+				return "commit expanded";
+			}
 
-				@Override
-				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-						IModel<Build> rowModel) {
+			@Override
+			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
+					IModel<Build> rowModel) {
+				Build build = rowModel.getObject();
+				if (SecurityUtils.canReadCode(build.getProject())) {
 					Fragment fragment = new Fragment(componentId, "commitFrag", BuildListPanel.this);
-					Build build = rowModel.getObject();
 					CommitDetailPage.State commitState = new CommitDetailPage.State();
 					commitState.revision = build.getCommitHash();
-					PageParameters params = CommitDetailPage.paramsOf(getProject(), commitState);
+					PageParameters params = CommitDetailPage.paramsOf(build.getProject(), commitState);
 					Link<Void> hashLink = new ViewStateAwarePageLink<Void>("hashLink", CommitDetailPage.class, params);
 					fragment.add(hashLink);
 					hashLink.add(new Label("hash", GitUtils.abbreviateSHA(build.getCommitHash())));
 					fragment.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(build.getCommitHash()))));
 					cellItem.add(fragment);
+				} else {
+					cellItem.add(new Label(componentId, GitUtils.abbreviateSHA(build.getCommitHash())));
 				}
-			});
-		}
+			}
+		});
 
 		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_SUBMIT_DATE)) {
 

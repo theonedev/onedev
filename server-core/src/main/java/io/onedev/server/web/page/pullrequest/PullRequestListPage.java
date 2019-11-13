@@ -16,6 +16,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.PullRequestSetting;
@@ -103,7 +104,6 @@ public class PullRequestListPage extends LayoutPage {
 
 			@Override
 			protected void onSaveQuerySetting(QuerySetting<NamedPullRequestQuery> querySetting) {
-				getLoginUser().setPullRequestQuerySetting(querySetting);
 				OneDev.getInstance(UserManager.class).save(getLoginUser());
 			}
 
@@ -136,7 +136,7 @@ public class PullRequestListPage extends LayoutPage {
 			
 		};
 
-		add(new PullRequestListPanel("main", null, query) {
+		add(new PullRequestListPanel("main", query) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -162,10 +162,11 @@ public class PullRequestListPage extends LayoutPage {
 
 									@Override
 									protected void onSaveForMine(AjaxRequestTarget target, String name) {
-										NamedPullRequestQuery namedQuery = NamedQuery.find(getLoginUser().getPullRequestQuerySetting().getUserQueries(), name);
+										QuerySetting<NamedPullRequestQuery> querySetting = getLoginUser().getPullRequestQuerySetting();
+										NamedPullRequestQuery namedQuery = NamedQuery.find(querySetting.getUserQueries(), name);
 										if (namedQuery == null) {
 											namedQuery = new NamedPullRequestQuery(name, query);
-											getLoginUser().getPullRequestQuerySetting().getUserQueries().add(namedQuery);
+											querySetting.getUserQueries().add(namedQuery);
 										} else {
 											namedQuery.setQuery(query);
 										}
@@ -207,6 +208,11 @@ public class PullRequestListPage extends LayoutPage {
 					}
 					
 				};
+			}
+
+			@Override
+			protected Project getProject() {
+				return null;
 			}
 			
 		});

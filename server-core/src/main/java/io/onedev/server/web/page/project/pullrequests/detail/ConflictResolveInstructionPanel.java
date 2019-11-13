@@ -7,23 +7,24 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 
 @SuppressWarnings("serial")
-class ConflictResolveInstructionPanel extends Panel {
+abstract class ConflictResolveInstructionPanel extends Panel {
 
-	public ConflictResolveInstructionPanel(String id, IModel<PullRequest> model) {
-		super(id, model);
+	public ConflictResolveInstructionPanel(String id) {
+		super(id);
 	}
 
+	protected abstract PullRequest getPullRequest();
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		PullRequest request = (PullRequest) getDefaultModelObject();
+		PullRequest request = getPullRequest();
 		Fragment fragment;
 		MergeStrategy strategy = request.getMergeStrategy();
 		boolean sameRepo = request.getTarget().getProject().equals(request.getSource().getProject());					

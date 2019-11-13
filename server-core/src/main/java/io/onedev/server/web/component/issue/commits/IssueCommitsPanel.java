@@ -18,6 +18,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
@@ -47,7 +48,14 @@ public class IssueCommitsPanel extends GenericPanel<Issue> {
 			@Override
 			protected void populateItem(ListItem<RevCommit> item) {
 				RevCommit commit = item.getModelObject();
-				item.add(new CommitMessagePanel("message", getIssue().getProject(), item.getModel()));
+				item.add(new CommitMessagePanel("message", item.getModel()) {
+
+					@Override
+					protected Project getProject() {
+						return getIssue().getProject();
+					}
+					
+				});
 				
 				CommitDetailPage.State commitState = new CommitDetailPage.State();
 				commitState.revision = commit.name();

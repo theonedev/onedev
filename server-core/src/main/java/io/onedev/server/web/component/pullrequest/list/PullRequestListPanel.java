@@ -54,18 +54,15 @@ import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.pullrequest.summary.PullRequestSummaryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
-public class PullRequestListPanel extends Panel {
+public abstract class PullRequestListPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(PullRequestListPanel.class);
-	
-	private final IModel<Project> projectModel;
 	
 	private final String query;
 	
@@ -90,10 +87,8 @@ public class PullRequestListPanel extends Panel {
 	
 	private DataTable<PullRequest, Void> requestsTable;
 	
-	public PullRequestListPanel(String id, @Nullable Project project, @Nullable String query) {
+	public PullRequestListPanel(String id, @Nullable String query) {
 		super(id);
-
-		projectModel = project!=null?new EntityModel<Project>(project):Model.of((Project)null);
 		this.query = query;
 	}
 
@@ -117,14 +112,11 @@ public class PullRequestListPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		parsedQueryModel.detach();
-		projectModel.detach();
 		super.onDetach();
 	}
 	
 	@Nullable
-	private Project getProject() {
-		return projectModel.getObject();
-	}
+	protected abstract Project getProject();
 
 	@Override
 	protected void onInitialize() {
@@ -262,9 +254,13 @@ public class PullRequestListPanel extends Panel {
 
 					@Override
 					protected QueryPosition getQueryPosition() {
-						OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
-						return new QueryPosition(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
-								(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
+						if (getProject() != null) {
+							OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
+							return new QueryPosition(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
+									(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
+						} else {
+							return null;
+						}
 					}
 					
 				});

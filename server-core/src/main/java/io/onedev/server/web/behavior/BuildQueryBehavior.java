@@ -3,6 +3,8 @@ package io.onedev.server.web.behavior;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
@@ -26,6 +28,7 @@ import io.onedev.server.search.entity.build.BuildQueryLexer;
 import io.onedev.server.search.entity.build.BuildQueryParser;
 import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -48,6 +51,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		projectModel.detach();
 	}
 	
+	@Nullable
 	private Project getProject() {
 		return projectModel.getObject();
 	}
@@ -127,6 +131,20 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
+		if ((noLoginSupport || SecurityUtils.getUser() == null) 
+				&& (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.SubmittedByMe)) 
+						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.CancelledByMe)))) {
+			return null;
+		}
+		if (getProject() == null 
+				&& (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.AssociatedWithPullRequest)) 
+						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.DependenciesOf))
+						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.DependsOn))
+						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.FixedIssue))
+						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.RequiredByPullRequest)))) {
+			return null;
+		}
+		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);
@@ -138,10 +156,6 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 					return null;
 				}
 			} 
-			if (noLoginSupport && (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.SubmittedByMe))
-							|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.CancelledByMe)))) {
-				return null;
-			}
 		}
 		return super.describe(parseExpect, suggestedLiteral);
 	}

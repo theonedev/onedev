@@ -23,29 +23,25 @@ import io.onedev.commons.utils.Highlighter;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.CommitMessageTransformer;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
 @SuppressWarnings("serial")
-public class CommitMessagePanel extends Panel {
+public abstract class CommitMessagePanel extends Panel {
 
-	private final EntityModel<Project> projectModel;
-	
 	private final IModel<RevCommit> commitModel;
 	
 	private final IModel<List<Pattern>> highlightPatternsModel;
 	
-	public CommitMessagePanel(String id, Project project, 
-			IModel<RevCommit> commitModel, IModel<List<Pattern>> highlightPatternsModel) {
+	public CommitMessagePanel(String id, IModel<RevCommit> commitModel, 
+			IModel<List<Pattern>> highlightPatternsModel) {
 		super(id);
 		
-		this.projectModel = new EntityModel<Project>(project);
 		this.commitModel = commitModel;
 		this.highlightPatternsModel = highlightPatternsModel;
 	}
 
-	public CommitMessagePanel(String id, Project project, IModel<RevCommit> commitModel) {
-		this(id, project, commitModel, new LoadableDetachableModel<List<Pattern>>() {
+	public CommitMessagePanel(String id, IModel<RevCommit> commitModel) {
+		this(id, commitModel, new LoadableDetachableModel<List<Pattern>>() {
 
 			@Override
 			protected List<Pattern> load() {
@@ -74,9 +70,7 @@ public class CommitMessagePanel extends Panel {
 		});
 	}
 	
-	private Project getProject() {
-		return projectModel.getObject();
-	}
+	protected abstract Project getProject();
 	
 	private RevCommit getCommit() {
 		return commitModel.getObject();
@@ -134,7 +128,6 @@ public class CommitMessagePanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		projectModel.detach();
 		commitModel.detach();
 		highlightPatternsModel.detach();
 		

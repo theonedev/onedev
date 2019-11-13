@@ -144,7 +144,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 			
 		};
 
-		add(new PullRequestListPanel("main", getProject(), query) {
+		add(new PullRequestListPanel("main", query) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -218,6 +218,11 @@ public class ProjectPullRequestsPage extends ProjectPage {
 					}
 					
 				};
+			}
+
+			@Override
+			protected Project getProject() {
+				return ProjectPullRequestsPage.this.getProject();
 			}
 			
 		});

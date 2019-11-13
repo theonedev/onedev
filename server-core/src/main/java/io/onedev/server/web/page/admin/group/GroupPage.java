@@ -10,9 +10,12 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.unbescape.html.HtmlEscape;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -22,7 +25,6 @@ import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
 @SuppressWarnings("serial")
@@ -37,7 +39,14 @@ public abstract class GroupPage extends AdministrationPage {
 		
 		Long groupId = params.get(PARAM_GROUP).toLong();
 		
-		groupModel = new EntityModel<Group>(Group.class, groupId);
+		groupModel = new LoadableDetachableModel<Group>() {
+
+			@Override
+			protected Group load() {
+				return OneDev.getInstance(GroupManager.class).load(groupId);
+			}
+			
+		};
 	}
 
 	@Override

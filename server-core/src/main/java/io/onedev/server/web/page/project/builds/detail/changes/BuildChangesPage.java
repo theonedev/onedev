@@ -13,6 +13,7 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
@@ -38,7 +39,7 @@ public class BuildChangesPage extends BuildDetailPage {
 
 		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 		Build prevBuild = buildManager.findStreamPrevious(getBuild(), null);
-		add(new CommitListPanel("commits", getProject(), query) {
+		add(new CommitListPanel("commits", query) {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
@@ -53,6 +54,11 @@ public class BuildChangesPage extends BuildDetailPage {
 					revisions.add(new Revision(prevBuild.getCommitHash(), Revision.Scope.SINCE));
 				revisions.add(new Revision(getBuild().getCommitHash(), Revision.Scope.UNTIL));
 				return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
+			}
+
+			@Override
+			protected Project getProject() {
+				return BuildChangesPage.this.getProject();
 			}
 			
 		});

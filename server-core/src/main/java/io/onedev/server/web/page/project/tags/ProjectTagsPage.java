@@ -315,7 +315,14 @@ public class ProjectTagsPage extends ProjectPage {
 				link.add(new Label("name", tagName));
 				item.add(link);
 				
-				item.add(new CommitStatusPanel("buildStatus", getProject(), ref.getPeeledObj().copy()));
+				item.add(new CommitStatusPanel("buildStatus", ref.getPeeledObj().copy()) {
+
+					@Override
+					protected Project getProject() {
+						return ProjectTagsPage.this.getProject();
+					}
+					
+				});
 
 				if (ref.getObj() instanceof RevTag) {
 					RevTag revTag = (RevTag) ref.getObj();

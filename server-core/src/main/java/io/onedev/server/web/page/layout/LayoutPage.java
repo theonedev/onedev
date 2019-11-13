@@ -48,6 +48,7 @@ import io.onedev.server.web.page.admin.user.NewUserPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.UserPage;
 import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.build.BuildListPage;
 import io.onedev.server.web.page.issue.IssueListPage;
 import io.onedev.server.web.page.my.MyAvatarPage;
 import io.onedev.server.web.page.my.MyPage;
@@ -95,6 +96,13 @@ public abstract class LayoutPage extends BasePage {
 		if (getPage() instanceof PullRequestListPage) 
 			pullRequestsContainer.add(AttributeAppender.append("class", "active"));
 		add(pullRequestsContainer);
+		
+		WebMarkupContainer buildsContainer = new WebMarkupContainer("navBuilds");
+		buildsContainer.add(new ViewStateAwarePageLink<Void>("link", BuildListPage.class, 
+				BuildListPage.paramsOf("", 0)));
+		if (getPage() instanceof BuildListPage) 
+			buildsContainer.add(AttributeAppender.append("class", "active"));
+		add(buildsContainer);
 		
 		RepeatingView contributionsView = new RepeatingView("navContributions");		
 		List<MainNavContribution> contributions = new ArrayList<>();

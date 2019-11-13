@@ -463,7 +463,14 @@ public class ProjectBranchesPage extends ProjectPage {
 				link.add(new Label("name", branch));
 				item.add(link);
 				
-				item.add(new CommitStatusPanel("buildStatus", getProject(), ref.getRef().getObjectId()));
+				item.add(new CommitStatusPanel("buildStatus", ref.getRef().getObjectId()) {
+
+					@Override
+					protected Project getProject() {
+						return ProjectBranchesPage.this.getProject();
+					}
+					
+				});
 				
 				item.add(new AjaxLink<Void>("makeDefault") {
 

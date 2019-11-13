@@ -8,6 +8,7 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.FixedInCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
@@ -33,7 +34,7 @@ public class FixedIssuesPage extends BuildDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new IssueListPanel("issues", getProject(), query) {
+		add(new IssueListPanel("issues", query) {
 
 			@Override
 			protected IssueQuery getBaseQuery() {
@@ -62,6 +63,11 @@ public class FixedIssuesPage extends BuildDetailPage {
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
 				setResponsePage(FixedIssuesPage.class, FixedIssuesPage.paramsOf(getBuild(), getPosition(), query));
+			}
+
+			@Override
+			protected Project getProject() {
+				return FixedIssuesPage.this.getProject();
 			}
 			
 		});

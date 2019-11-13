@@ -1,13 +1,13 @@
 <wicket:extend>
 	<div class="page-title">Job Executors</div>
+	<div class="help-block">
+       For a given CI job, the first matching job executor will be used
+	</div>
 	<div wicket:id="jobExecutorSetting" class="panel-list">
 		<ul class="list-unstyled protections">
 			<li wicket:id="executors" class="executor"><div wicket:id="executor"></div></li>
 		</ul>
 		<div wicket:id="newExecutor"></div>
-		<div class="help-block">
-        <i class="fa fa-info-circle"></i> For a given CI job, the first matching job executor will be used
-		</div>
 	</div>
 	<wicket:fragment wicket:id="editNewFrag">
 		<div class="executor panel panel-default">

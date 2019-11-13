@@ -78,22 +78,19 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
 import io.onedev.server.web.util.QuerySaveSupport;
 
 @SuppressWarnings("serial")
-public class CommitListPanel extends Panel {
+public abstract class CommitListPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitListPanel.class);
 	
 	private static final int COMMITS_PER_PAGE = 50;
 	
 	private static final int MAX_PAGES = 50;
-	
-	private final IModel<Project> projectModel;
 	
 	private final String query;
 	
@@ -232,9 +229,8 @@ public class CommitListPanel extends Panel {
 	
 	private RepeatingView commitsView;
 	
-	public CommitListPanel(String id, Project project, @Nullable String query) {
+	public CommitListPanel(String id, @Nullable String query) {
 		super(id);
-		this.projectModel = new EntityModel<Project>(project);
 		this.query = query;
 	}
 	
@@ -243,13 +239,10 @@ public class CommitListPanel extends Panel {
 		parsedQueryModel.detach();
 		commitsModel.detach();
 		labelsModel.detach();
-		projectModel.detach();
 		super.onDetach();
 	}
 	
-	private Project getProject() {
-		return projectModel.getObject();
-	}
+	protected abstract Project getProject();
 	
 	@Nullable
 	protected String getCompareWith() {
@@ -506,7 +499,7 @@ public class CommitListPanel extends Panel {
 			item = new Fragment(itemId, "commitFrag", this);
 			item.add(new ContributorAvatars("avatar", commit.getAuthorIdent(), commit.getCommitterIdent()));
 
-			item.add(new CommitMessagePanel("message", getProject(), new LoadableDetachableModel<RevCommit>() {
+			item.add(new CommitMessagePanel("message", new LoadableDetachableModel<RevCommit>() {
 
 				@Override
 				protected RevCommit load() {
@@ -527,7 +520,14 @@ public class CommitListPanel extends Panel {
 					return patterns;
 				}
 				
-			}));
+			}) {
+
+				@Override
+				protected Project getProject() {
+					return CommitListPanel.this.getProject();
+				}
+				
+			});
 
 			RepeatingView labelsView = new RepeatingView("labels");
 
@@ -592,11 +592,16 @@ public class CommitListPanel extends Panel {
 			item.add(new WebMarkupContainer("copyHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
 			
 			getCommitIdsToQueryStatus().add(commit.copy());
-			item.add(new CommitStatusPanel("buildStatus", getProject(), commit.copy()) {
+			item.add(new CommitStatusPanel("buildStatus", commit.copy()) {
 
 				@Override
 				protected String getCssClasses() {
 					return "btn btn-default";
+				}
+
+				@Override
+				protected Project getProject() {
+					return CommitListPanel.this.getProject();
 				}
 				
 			});

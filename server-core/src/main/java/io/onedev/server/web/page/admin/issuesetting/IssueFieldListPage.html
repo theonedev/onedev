@@ -1,13 +1,13 @@
 <wicket:extend>
+	<div class="help-block">Define all custom issue fields here. Each project can 
+	decide to use all or a subset of these fields via its issue transition setting</div>
 	<div class="issue-fields def-list list">
 		<div class="head clearfix">
 			<div class="pull-left">
-				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+				<a wicket:id="addNew" class="btn btn-success"><i class="fa fa-plus"></i> Add New</a>
 			</div>
 		</div>
 		<table wicket:id="issueFields" class="table table-hover"></table>
-		<div class="help-block"><i class="fa fa-info-circle"></i> Define all custom issue fields here. Each project can 
-		decide to use all or a subset of these fields via its issue transition setting</div>
 	</div>
 	<wicket:fragment wicket:id="columnFrag">
 		<a wicket:id="link"><span wicket:id="label"></span></a>

@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.model.IModel;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
@@ -27,30 +26,24 @@ import io.onedev.server.util.scriptidentity.JobIdentity;
 import io.onedev.server.util.scriptidentity.ScriptIdentity;
 import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 
 @SuppressWarnings("serial")
-public class RunJobLink extends AjaxLink<Void> {
+public abstract class RunJobLink extends AjaxLink<Void> {
 
-	private final IModel<Project> projectModel;
-	
 	private final ObjectId commitId;
 	
 	private final String jobName;
 	
-	public RunJobLink(String componentId, Project project, ObjectId commitId, String jobName) {
+	public RunJobLink(String componentId, ObjectId commitId, String jobName) {
 		super(componentId);
 		
-		this.projectModel = new EntityModel<Project>(project);
 		this.commitId = commitId;
 		this.jobName = jobName;
 	}
 	
-	private Project getProject() {
-		return projectModel.getObject();
-	}
+	protected abstract Project getProject();
 	
 	@Override
 	public void onClick(AjaxRequestTarget target) {
@@ -103,12 +96,6 @@ public class RunJobLink extends AjaxLink<Void> {
 	protected void onConfigure() {
 		super.onConfigure();
 		setVisible(SecurityUtils.canRunJob(getProject(), jobName));
-	}
-
-	@Override
-	protected void onDetach() {
-		projectModel.detach();
-		super.onDetach();
 	}
 
 	private abstract class ParamEditModalPanel extends BeanEditModalPanel implements InputContext, ScriptIdentityAware {

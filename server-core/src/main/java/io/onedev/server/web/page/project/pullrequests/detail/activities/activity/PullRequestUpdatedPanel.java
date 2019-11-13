@@ -73,18 +73,30 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 				
 				item.add(new UserIdentPanel("author", UserIdent.of(commit.getAuthorIdent()), Mode.AVATAR));
 
-				Project project = getUpdate().getRequest().getTarget().getProject();
-				item.add(new CommitMessagePanel("message", project, item.getModel()));
+				item.add(new CommitMessagePanel("message", item.getModel()) {
 
-				item.add(new CommitStatusPanel("buildStatus", project, commit.copy()) {
+					@Override
+					protected Project getProject() {
+						return getUpdate().getRequest().getTarget().getProject(); 
+					}
+					
+				});
+
+				item.add(new CommitStatusPanel("buildStatus", commit.copy()) {
 					
 					@Override
 					protected String getCssClasses() {
 						return "btn btn-default btn-xs";
 					}
+
+					@Override
+					protected Project getProject() {
+						return getUpdate().getRequest().getTarget().getProject();
+					}
 					
 				});
 				
+				Project project = getUpdate().getRequest().getTarget().getProject();
 				CommitDetailPage.State commitState = new CommitDetailPage.State();
 				commitState.revision = commit.name();
 				PageParameters params = CommitDetailPage.paramsOf(project, commitState);

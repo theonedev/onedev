@@ -383,7 +383,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 	}
 	
 	private Component newCommitsPanel() {
-		return new CommitListPanel(TAB_PANEL_ID, getProject(), null) {
+		return new CommitListPanel(TAB_PANEL_ID, null) {
 
 			@Override
 			protected void onConfigure() {
@@ -398,6 +398,11 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 				revisions.add(new Revision(request.getBaseCommitHash(), Revision.Scope.SINCE));
 				revisions.add(new Revision(request.getHeadCommitHash(), Revision.Scope.UNTIL));
 				return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
+			}
+
+			@Override
+			protected Project getProject() {
+				return NewPullRequestPage.this.getProject();
 			}
 
 		}.setOutputMarkupId(true);

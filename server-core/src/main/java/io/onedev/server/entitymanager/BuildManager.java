@@ -37,9 +37,9 @@ public interface BuildManager extends EntityManager<Build> {
 
 	List<Build> query(Project project, @Nullable User user, String term, int count);
 	
-	List<Build> query(Project project, @Nullable User user, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
+	List<Build> query(@Nullable Project project, @Nullable User user, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
 	
-	int count(Project project, @Nullable User user, EntityCriteria<Build> buildCriteria);
+	int count(@Nullable Project project, @Nullable User user, EntityCriteria<Build> buildCriteria);
 	
 	Collection<Long> getBuildIdsByProject(Long projectId);
 	

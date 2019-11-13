@@ -137,12 +137,12 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 							if (project != null)
 								return new IncludesCommitCriteria(getCommitId(project, value));
 							else
-								throw new OneException("Unsupported operator in global issue query: " + getRuleName(PullRequestQueryLexer.IncludesCommit));
+								throw new OneException("Unsupported criteria in global issue query: " + getRuleName(PullRequestQueryLexer.IncludesCommit));
 						case PullRequestQueryLexer.IncludesIssue:
 							if (project != null)
 								return new IncludesIssueCriteria(getIssue(project, value));
 							else
-								throw new OneException("Unsupported operator in global issue query: " + getRuleName(PullRequestQueryLexer.IncludesIssue));
+								throw new OneException("Unsupported criteria in global issue query: " + getRuleName(PullRequestQueryLexer.IncludesIssue));
 						default:
 							throw new OneException("Unexpected operator: " + ctx.operator.getText());
 						}

@@ -123,7 +123,6 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
@@ -862,7 +861,14 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new ConflictResolveInstructionPanel(id, new EntityModel<PullRequest>(getPullRequest()));
+						return new ConflictResolveInstructionPanel(id) {
+
+							@Override
+							protected PullRequest getPullRequest() {
+								return PullRequestDetailPage.this.getPullRequest();
+							}
+							
+						};
 					}
 					
 				});
@@ -886,7 +892,14 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new CheckoutRequestInstructionPanel(id, new EntityModel<PullRequest>(getPullRequest()));
+						return new CheckoutRequestInstructionPanel(id) {
+
+							@Override
+							protected PullRequest getPullRequest() {
+								return PullRequestDetailPage.this.getPullRequest();
+							}
+							
+						};
 					}
 					
 				});

@@ -601,7 +601,7 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 					state.rightSide.getRevision(), pathFilterModel, whitespaceOptionModel, blameModel, this);
 			break;
 		default:
-			tabPanel = new CommitListPanel(TAB_PANEL_ID, getProject(), null) {
+			tabPanel = new CommitListPanel(TAB_PANEL_ID, null) {
 
 				@Override
 				protected CommitQuery getBaseQuery() {
@@ -617,6 +617,11 @@ public class RevisionComparePage extends ProjectPage implements CommentSupport {
 						revisions.add(new Revision(leftCommitId.name(), Revision.Scope.UNTIL));
 					} 
 					return new CommitQuery(Lists.newArrayList(new RevisionCriteria(revisions)));
+				}
+
+				@Override
+				protected Project getProject() {
+					return RevisionComparePage.this.getProject();
 				}
 				
 			};

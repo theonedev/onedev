@@ -30,6 +30,7 @@ import io.onedev.server.web.component.savedquery.NamedQueriesBean;
 import io.onedev.server.web.component.savedquery.SaveQueryPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesPanel;
 import io.onedev.server.web.page.project.ProjectPage;
+import io.onedev.server.web.util.NamedBuildQueriesBean;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QuerySaveSupport;
 
@@ -141,7 +142,7 @@ public class ProjectBuildsPage extends ProjectPage {
 			
 		};
 		
-		add(new BuildListPanel("main", getProject(), query) {
+		add(new BuildListPanel("main", query) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {
@@ -215,6 +216,11 @@ public class ProjectBuildsPage extends ProjectPage {
 					}
 
 				};
+			}
+
+			@Override
+			protected Project getProject() {
+				return ProjectBuildsPage.this.getProject();
 			}
 
 		});

@@ -70,8 +70,8 @@ import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.util.IssueConstants;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
@@ -179,7 +179,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		List<Predicate> predicates = new ArrayList<>();
 		if (project != null) {
 			predicates.add(builder.equal(root.get("project"), project));
-		} else if (!SecurityUtils.isAdministrator()) {
+		} else if (!User.asSubject(user).isPermitted(new SystemAdministration())) {
 			List<Predicate> projectPredicates = new ArrayList<>();
 			for (Project each: projectManager.getPermittedProjects(user, new AccessProject())) 
 				projectPredicates.add(builder.equal(root.get(IssueConstants.ATTR_PROJECT), each));

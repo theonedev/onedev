@@ -9,6 +9,7 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.commons.utils.HtmlUtils;
@@ -21,7 +22,6 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.PathNode;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 
@@ -41,7 +41,14 @@ public class RoleDetailPage extends AdministrationPage {
 		
 		Long roleId = params.get(PARAM_ROLE).toLong();
 		
-		roleModel = new EntityModel<Role>(Role.class, roleId);
+		roleModel = new LoadableDetachableModel<Role>() {
+
+			@Override
+			protected Role load() {
+				return OneDev.getInstance(RoleManager.class).load(roleId);
+			}
+			
+		};
 	}
 
 	@Override

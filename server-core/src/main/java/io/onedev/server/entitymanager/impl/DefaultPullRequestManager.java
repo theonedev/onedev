@@ -124,6 +124,7 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
+import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.SecurityUtils;
@@ -956,7 +957,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		List<Predicate> predicates = new ArrayList<>();
 		if (targetProject != null) {
 			predicates.add(builder.equal(root.get("targetProject"), targetProject));
-		} else if (!SecurityUtils.isAdministrator()) {
+		} else if (!User.asSubject(user).isPermitted(new SystemAdministration())) {
 			List<Predicate> targetProjectPredicates = new ArrayList<>();
 			for (Project each: projectManager.getPermittedProjects(user, new ReadCode())) 
 				targetProjectPredicates.add(builder.equal(root.get(PullRequestConstants.ATTR_TARGET_PROJECT), each));

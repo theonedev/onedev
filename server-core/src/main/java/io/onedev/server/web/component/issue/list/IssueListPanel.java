@@ -73,7 +73,6 @@ import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
@@ -85,8 +84,6 @@ import io.onedev.server.web.util.QuerySaveSupport;
 public abstract class IssueListPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(IssueListPanel.class);
-	
-	private final IModel<Project> projectModel;
 	
 	private final String query;
 	
@@ -119,9 +116,8 @@ public abstract class IssueListPanel extends Panel {
 	
 	private SortableDataProvider<Issue, Void> dataProvider;	
 	
-	public IssueListPanel(String id, @Nullable Project project, @Nullable String query) {
+	public IssueListPanel(String id, @Nullable String query) {
 		super(id);
-		projectModel = project!=null?new EntityModel<Project>(project):Model.of((Project)null);
 		this.query = query;
 	}
 	
@@ -132,14 +128,11 @@ public abstract class IssueListPanel extends Panel {
 	@Override
 	protected void onDetach() {
 		parsedQueryModel.detach();
-		projectModel.detach();
 		super.onDetach();
 	}
 	
 	@Nullable
-	private Project getProject() {
-		return projectModel.getObject();
-	}
+	protected abstract Project getProject();
 
 	protected IssueQuery getBaseQuery() {
 		return new IssueQuery();

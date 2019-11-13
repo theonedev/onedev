@@ -1,5 +1,9 @@
 package io.onedev.server.web.component.revisionpicker;
 
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
 import javax.annotation.Nullable;
 
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -11,8 +15,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.project.ProjectPicker;
-import io.onedev.server.web.model.AffinalProjectsModel;
 
 @SuppressWarnings("serial")
 public abstract class AffinalRevisionPicker extends Panel {
@@ -60,7 +64,20 @@ public abstract class AffinalRevisionPicker extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new ProjectPicker("projectPicker", new AffinalProjectsModel(projectId), projectId) {
+		add(new ProjectPicker("projectPicker", new LoadableDetachableModel<Collection<Project>>() {
+
+			@Override
+			protected Collection<Project> load() {
+				Project project = OneDev.getInstance(Dao.class).load(Project.class, projectId);
+				List<Project> affinals = project.getForkRoot().getForkDescendants();
+				for (Iterator<Project> it = affinals.iterator(); it.hasNext();) {
+					if (!SecurityUtils.canAccess(it.next()))
+						it.remove();
+				}
+				return affinals;
+			}
+			
+		}, projectId) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Project project) {

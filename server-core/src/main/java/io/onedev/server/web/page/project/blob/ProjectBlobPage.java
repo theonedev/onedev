@@ -683,10 +683,18 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	
 	private void newCommitStatus(@Nullable AjaxRequestTarget target) {
 		Component commitStatus;
-		if (resolvedRevision != null)
-			commitStatus = new CommitStatusPanel("buildStatus", getProject(), resolvedRevision);
-		else
+		if (resolvedRevision != null) {
+			commitStatus = new CommitStatusPanel("buildStatus", resolvedRevision) {
+
+				@Override
+				protected Project getProject() {
+					return ProjectBlobPage.this.getProject();
+				}
+				
+			};
+		} else {
 			commitStatus = new WebMarkupContainer("buildStatus");
+		}
 		
 		commitStatus.setOutputMarkupPlaceholderTag(true);
 		

@@ -1,16 +1,16 @@
 <wicket:extend>
 	<div class="page-title">Groovy Scripts</div>
+	<div class="help-block">All Groovy scripts used across the system 
+		should be defined here and reviewed by the site administrator for security reasons. For a given 
+		name, the first authorized script will be used</div>
 	<div class="groovy-scripts def-list list">
 		<div class="head clearfix">
 			<div class="pull-left">
-				<a wicket:id="addNew" class="btn btn-default"><i class="fa fa-plus"></i> Add New</a>
+				<a wicket:id="addNew" class="btn btn-success"><i class="fa fa-plus"></i> Add New</a>
 			</div>
 		</div>
 		<div class="body">
 			<table wicket:id="scripts" class="table table-hover"></table>
-			<div class="help-block"><i class="fa fa-info-circle"></i> All Groovy scripts used across the system 
-				should be defined here and reviewed by the site administrator for security reasons. For a given 
-				name, the first authorized script will be used</div>
 		</div>
 	</div>
 	<wicket:fragment wicket:id="columnFrag">

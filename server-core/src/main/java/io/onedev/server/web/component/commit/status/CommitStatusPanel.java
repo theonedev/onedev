@@ -40,15 +40,12 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 
 @SuppressWarnings("serial")
-public class CommitStatusPanel extends Panel {
+public abstract class CommitStatusPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommitStatusPanel.class);
-	
-	private final IModel<Project> projectModel;
 	
 	private final ObjectId commitId;
 	
@@ -78,16 +75,12 @@ public class CommitStatusPanel extends Panel {
 		
 	};
 	
-	public CommitStatusPanel(String id, Project project, ObjectId commitId) {
+	public CommitStatusPanel(String id, ObjectId commitId) {
 		super(id);
-		
-		this.projectModel = new EntityModel<Project>(project);
 		this.commitId = commitId;
 	}
 	
-	private Project getProject() {
-		return projectModel.getObject();
-	}
+	protected abstract Project getProject();
 
 	@Override
 	protected void onInitialize() {
@@ -105,16 +98,28 @@ public class CommitStatusPanel extends Panel {
 					WebMarkupContainer jobItem = new WebMarkupContainer(jobsView.newChildId());
 					Status status = getProject().getCommitStatus(commitId).get(job.getName());
 					
-					Link<Void> defLink = new JobDefLink("name", getProject(), commitId, job.getName());
+					Link<Void> defLink = new JobDefLink("name", commitId, job.getName()) {
+
+						@Override
+						protected Project getProject() {
+							return CommitStatusPanel.this.getProject();
+						}
+						
+					};
 					defLink.add(new Label("label", job.getName()));
 					jobItem.add(defLink);
 					
-					jobItem.add(new RunJobLink("run", getProject(), commitId, job.getName()) {
+					jobItem.add(new RunJobLink("run", commitId, job.getName()) {
 
 						@Override
 						public void onClick(AjaxRequestTarget target) {
 							super.onClick(target);
 							dropdown.close();
+						}
+
+						@Override
+						protected Project getProject() {
+							return CommitStatusPanel.this.getProject();
 						}
 						
 					});
@@ -203,7 +208,6 @@ public class CommitStatusPanel extends Panel {
 
 	@Override
 	protected void onDetach() {
-		projectModel.detach();
 		jobsModel.detach();
 		statusModel.detach();
 		super.onDetach();

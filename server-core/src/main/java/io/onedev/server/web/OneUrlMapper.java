@@ -47,6 +47,7 @@ import io.onedev.server.web.page.admin.user.UserMembershipsPage;
 import io.onedev.server.web.page.admin.user.UserPasswordPage;
 import io.onedev.server.web.page.admin.user.UserProfilePage;
 import io.onedev.server.web.page.admin.user.UserTokenPage;
+import io.onedev.server.web.page.build.BuildListPage;
 import io.onedev.server.web.page.init.ServerInitPage;
 import io.onedev.server.web.page.issue.IssueListPage;
 import io.onedev.server.web.page.my.MyAvatarPage;
@@ -111,6 +112,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("loading", BrowserInfoPage.class));
 		add(new OnePageMapper("issues", IssueListPage.class));
 		add(new OnePageMapper("pull-requests", PullRequestListPage.class));
+		add(new OnePageMapper("builds", BuildListPage.class));
 		addProjectPages();
 		addMyPages();
 		addAdministrationPages();

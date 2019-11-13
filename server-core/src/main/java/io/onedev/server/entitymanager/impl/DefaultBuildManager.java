@@ -15,6 +15,7 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -25,6 +26,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -79,6 +81,7 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.security.permission.ManageProject;
 import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.facade.BuildFacade;
@@ -307,16 +310,34 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			buildDependenceManager.save(dependence);
 	}
 
-	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Build> criteria, Project project, 
-			Root<Build> root, CriteriaBuilder builder, User user) {
+	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Build> criteria, 
+			@Nullable Project project, Root<Build> root, CriteriaBuilder builder, @Nullable User user) {
 		List<Predicate> predicates = new ArrayList<>();
-		predicates.add(builder.equal(root.get(BuildConstants.ATTR_PROJECT), project));
 
-		if (!User.asSubject(user).isPermitted(new ProjectPermission(project, new ManageProject()))) {
-			List<Predicate> jobPredicates = new ArrayList<>();
-			for (String jobName: getAccessibleJobNames(project, user)) 
-				jobPredicates.add(builder.equal(root.get(BuildConstants.ATTR_JOB), jobName));
-			predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
+		Subject subject = User.asSubject(user);
+		if (project != null) {
+			predicates.add(builder.equal(root.get(BuildConstants.ATTR_PROJECT), project));
+			if (!subject.isPermitted(new ProjectPermission(project, new ManageProject()))) {
+				List<Predicate> jobPredicates = new ArrayList<>();
+				for (String jobName: getAccessibleJobNames(project, user)) 
+					jobPredicates.add(builder.equal(root.get(BuildConstants.ATTR_JOB), jobName));
+				predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
+			}
+		} else if (!subject.isPermitted(new SystemAdministration())) {
+			List<Predicate> projectPredicates = new ArrayList<>();
+			for (Map.Entry<Project, Collection<String>> entry: getAccessibleJobNames(user).entrySet()) {
+				if (subject.isPermitted(new ProjectPermission(project, new ManageProject()))) {
+					projectPredicates.add(builder.equal(root.get(BuildConstants.ATTR_PROJECT), entry.getKey()));
+				} else {
+					List<Predicate> jobPredicates = new ArrayList<>();
+					for (String jobName: entry.getValue()) 
+						jobPredicates.add(builder.equal(root.get(BuildConstants.ATTR_JOB), jobName));
+					projectPredicates.add(builder.and(
+							builder.equal(root.get(BuildConstants.ATTR_PROJECT), entry.getKey()), 
+							builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()]))));
+				}
+			}
+			predicates.add(builder.or(projectPredicates.toArray(new Predicate[projectPredicates.size()])));
 		}
 		
 		if (criteria != null)
@@ -324,7 +345,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		return predicates.toArray(new Predicate[0]);
 	}
 	
-	private CriteriaQuery<Build> buildCriteriaQuery(Session session, Project project, EntityQuery<Build> buildQuery, User user) {
+	private CriteriaQuery<Build> buildCriteriaQuery(Session session, @Nullable Project project, 
+			EntityQuery<Build> buildQuery, @Nullable User user) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
@@ -349,8 +371,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	@Sessional
 	@Override
-	public List<Build> query(Project project, User user, EntityQuery<Build> buildQuery, int firstResult,
-			int maxResults) {
+	public List<Build> query(@Nullable Project project, @Nullable User user, 
+			EntityQuery<Build> buildQuery, int firstResult, int maxResults) {
 		CriteriaQuery<Build> criteriaQuery = buildCriteriaQuery(getSession(), project, buildQuery, user);
 		Query<Build> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
@@ -360,7 +382,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 	@Sessional
 	@Override
-	public int count(Project project, User user, io.onedev.server.search.entity.EntityCriteria<Build> buildCriteria) {
+	public int count(@Nullable Project project, @Nullable User user, 
+			io.onedev.server.search.entity.EntityCriteria<Build> buildCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Build> root = criteriaQuery.from(Build.class);
@@ -616,37 +639,37 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		return accessibleJobNames;
 	}
 
-	private void populateAccessibleJobNames(Map<Long, Collection<String>> accessibleJobNames, Map<Long, Collection<String>> jobNames, 
-			Project project, Role role) {
+	private void populateAccessibleJobNames(Map<Project, Collection<String>> accessibleJobNames, 
+			Map<Long, Collection<String>> jobNames, Project project, Role role) {
 		Collection<String> jobNamesOfProject = jobNames.get(project.getId());
 		if (jobNamesOfProject != null) {
 			Collection<String> accessibleJobNamesOfProject = getAccessibleJobNames(role, jobNamesOfProject);
-			Collection<String> currentAccessibleJobNamesOfProject = accessibleJobNames.get(project.getId());
+			Collection<String> currentAccessibleJobNamesOfProject = accessibleJobNames.get(project);
 			if (currentAccessibleJobNamesOfProject == null) {
 				currentAccessibleJobNamesOfProject = new HashSet<>();
-				accessibleJobNames.put(project.getId(), currentAccessibleJobNamesOfProject);
+				accessibleJobNames.put(project, currentAccessibleJobNamesOfProject);
 			}
 			currentAccessibleJobNamesOfProject.addAll(accessibleJobNamesOfProject);
 		}
 	}
 	
-	private Map<Long, Collection<String>> getAccessibleJobNames(User user) {
+	private Map<Project, Collection<String>> getAccessibleJobNames(User user) {
 		Map<Long, Collection<String>> jobNames = new HashMap<>();
 		buildsLock.readLock().lock();
 		try {
 			for (BuildFacade build: builds.values()) {
-				Collection<String> jobNamesOfBuild = jobNames.get(build.getId());
-				if (jobNamesOfBuild == null) {
-					jobNamesOfBuild = new HashSet<>();
-					jobNames.put(build.getId(), jobNamesOfBuild);
+				Collection<String> jobNamesOfProject = jobNames.get(build.getProjectId());
+				if (jobNamesOfProject == null) {
+					jobNamesOfProject = new HashSet<>();
+					jobNames.put(build.getId(), jobNamesOfProject);
 				}
-				jobNamesOfBuild.add(build.getJobName());
+				jobNamesOfProject.add(build.getJobName());
 			}
 		} finally {
 			buildsLock.readLock().unlock();
 		}
 		
-		Map<Long, Collection<String>> accessibleJobNames = new HashMap<>();
+		Map<Project, Collection<String>> accessibleJobNames = new HashMap<>();
 		if (user != null) {
 			for (UserAuthorization authorization: user.getProjectAuthorizations()) 
 				populateAccessibleJobNames(accessibleJobNames, jobNames, authorization.getProject(), authorization.getRole());

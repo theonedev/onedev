@@ -189,24 +189,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		};
 	}
 	
-	public void setBuildQuerySetting(QuerySetting<NamedBuildQuery> querySetting) {
-		buildQuerySubscriptions = querySetting.getQuerySubscriptionSupport().getQuerySubscriptions();
-		userBuildQuerySubscriptions = querySetting.getQuerySubscriptionSupport().getUserQuerySubscriptions();
-		userBuildQueries = querySetting.getUserQueries();
-	}
-	
-	public void setIssueQuerySetting(QuerySetting<NamedIssueQuery> querySetting) {
-		issueQueryWatches = querySetting.getQueryWatchSupport().getQueryWatches();
-		userIssueQueryWatches = querySetting.getQueryWatchSupport().getUserQueryWatches();
-		userIssueQueries = querySetting.getUserQueries();
-	}
-	
-	public void setPullRequestQuerySetting(QuerySetting<NamedPullRequestQuery> querySetting) {
-		pullRequestQueryWatches = querySetting.getQueryWatchSupport().getQueryWatches();
-		userPullRequestQueryWatches = querySetting.getQueryWatchSupport().getUserQueryWatches();
-		userPullRequestQueries = querySetting.getUserQueries();
-	}
-	
 	public QuerySetting<NamedPullRequestQuery> getPullRequestQuerySetting() {
 		return new QuerySetting<NamedPullRequestQuery>() {
 

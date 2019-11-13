@@ -54,7 +54,6 @@ import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.compare.RevisionComparePage;
-import io.onedev.server.web.page.project.pullrequests.ProjectPullRequestsPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -63,7 +62,7 @@ import io.onedev.server.web.util.QuerySaveSupport;
 @SuppressWarnings("serial")
 public abstract class CodeCommentListPanel extends Panel {
 
-	private static final Logger logger = LoggerFactory.getLogger(ProjectPullRequestsPage.class);
+	private static final Logger logger = LoggerFactory.getLogger(CodeCommentListPanel.class);
 	
 	private static final int MAX_COMMENT_LEN = 75;
 	

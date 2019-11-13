@@ -66,7 +66,7 @@ public class BuildQuery extends EntityQuery<Build> {
 		this(null, new ArrayList<>());
 	}
 	
-	public static BuildQuery parse(Project project, @Nullable String queryString) {
+	public static BuildQuery parse(@Nullable Project project, @Nullable String queryString) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			BuildQueryLexer lexer = new BuildQueryLexer(is);
@@ -138,17 +138,32 @@ public class BuildQuery extends EntityQuery<Build> {
 						} else if (ctx.CancelledBy() != null) {
 							return new CancelledByCriteria(getUser(value), value);
 						} else if (ctx.FixedIssue() != null) {
-							return new FixedIssueCriteria(getIssue(project, value));
+							if (project != null)
+								return new FixedIssueCriteria(getIssue(project, value));
+							else
+								throw new OneException("Unsupported criteria in global build query: " + getRuleName(BuildQueryLexer.FixedIssue));
 						} else if (ctx.DependsOn() != null) {
-							return new DependsOnCriteria(getBuild(project, value));
+							if (project != null)
+								return new DependsOnCriteria(getBuild(project, value));
+							else
+								throw new OneException("Unsupported criteria in global build query: " + getRuleName(BuildQueryLexer.DependsOn));
 						} else if (ctx.DependenciesOf() != null) {
-							return new DependenciesOfCriteria(getBuild(project, value));
+							if (project != null)
+								return new DependenciesOfCriteria(getBuild(project, value));
+							else
+								throw new OneException("Unsupported criteria in global build query: " + getRuleName(BuildQueryLexer.DependenciesOf));
 						} else if (ctx.RequiredByPullRequest() != null) {
-							return new RequiredByPullRequestCriteria(getPullRequest(project, value));
+							if (project != null)
+								return new RequiredByPullRequestCriteria(getPullRequest(project, value));
+							else
+								throw new OneException("Unsupported criteria in global build query: " + getRuleName(BuildQueryLexer.RequiredByPullRequest));
 						} else if (ctx.AssociatedWithPullRequest() != null) {
-							return new AssociatedWithPullRequestCriteria(getPullRequest(project, value));
+							if (project != null)
+								return new AssociatedWithPullRequestCriteria(getPullRequest(project, value));
+							else
+								throw new OneException("Unsupported criteria in global build query: " + getRuleName(BuildQueryLexer.AssociatedWithPullRequest));
 						} else {
-							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
+							throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
 						}
 					}
 					
@@ -181,7 +196,10 @@ public class BuildQuery extends EntityQuery<Build> {
 						case BuildQueryLexer.Is:
 							switch (fieldName) {
 							case FIELD_COMMIT:
-								return new CommitCriteria(getCommitId(project, value));
+								if (project != null)
+									return new CommitCriteria(getCommitId(project, value));
+								else
+									throw new OneException("Unable to query by commit in global build query");
 							case FIELD_JOB:
 								return new JobCriteria(value);
 							case FIELD_NUMBER:

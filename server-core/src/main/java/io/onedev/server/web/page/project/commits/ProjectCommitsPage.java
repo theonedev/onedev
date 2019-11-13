@@ -118,7 +118,7 @@ public class ProjectCommitsPage extends ProjectPage {
 
 		});
 		
-		add(new CommitListPanel("main", getProject(), query) {
+		add(new CommitListPanel("main", query) {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
@@ -189,6 +189,11 @@ public class ProjectCommitsPage extends ProjectPage {
 			@Override
 			protected String getCompareWith() {
 				return compareWith;
+			}
+
+			@Override
+			protected Project getProject() {
+				return ProjectCommitsPage.this.getProject();
 			}
 
 		});

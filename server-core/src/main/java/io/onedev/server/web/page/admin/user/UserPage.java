@@ -10,8 +10,11 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -22,7 +25,6 @@ import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
-import io.onedev.server.web.model.EntityModel;
 import io.onedev.server.web.page.admin.AdministrationPage;
 
 @SuppressWarnings("serial")
@@ -35,7 +37,15 @@ public abstract class UserPage extends AdministrationPage {
 	public UserPage(PageParameters params) {
 		super(params);
 		
-		userModel = new EntityModel<User>(User.class, params.get(PARAM_USER).toLong());
+		Long userId = params.get(PARAM_USER).toLong();
+		userModel = new LoadableDetachableModel<User>() {
+
+			@Override
+			protected User load() {
+				return OneDev.getInstance(UserManager.class).load(userId);
+			}
+			
+		};
 	}
 
 	@Override
