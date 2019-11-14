@@ -12,7 +12,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.AndCriteriaHelper;
 import io.onedev.server.search.entity.ParensAware;
@@ -30,8 +29,8 @@ public class AndCriteria extends IssueCriteria implements ParensAware {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
-		return new AndCriteriaHelper<Issue>(criterias).getPredicate(project, root, builder, user);
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
+		return new AndCriteriaHelper<Issue>(criterias).getPredicate(root, builder, user);
 	}
 
 	@Override

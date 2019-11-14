@@ -9,7 +9,6 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 
 public class BooleanFieldCriteria extends FieldCriteria {
@@ -24,7 +23,7 @@ public class BooleanFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public Predicate getValuePredicate(Project project, Join<?, ?> field, CriteriaBuilder builder, User user) {
+	public Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
 		return builder.equal(field.get(IssueField.ATTR_VALUE), String.valueOf(value));
 	}
 

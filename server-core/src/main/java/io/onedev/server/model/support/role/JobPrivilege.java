@@ -46,7 +46,7 @@ public class JobPrivilege implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestJobNames(String matchWith) {
-		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class).getJobNames(null));
+		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class).getJobNames());
 		Collections.sort(jobNames);
 		return SuggestionUtils.suggest(jobNames, matchWith);
 	}
@@ -66,7 +66,7 @@ public class JobPrivilege implements Serializable {
 	}
 
 	@Editable(order=200, description="The permission to run job manually. It also implies the permission "
-			+ "to access build log, published artifacts and reports")
+			+ "to access build log, and all published reports")
 	@ShowCondition("isManageJobDisabled")
 	public boolean isRunJob() {
 		return runJob;
@@ -81,8 +81,8 @@ public class JobPrivilege implements Serializable {
 		return !(boolean) EditContext.get().getInputValue("runJob");
 	}
 	
-	@Editable(order=300, name="Access Build Log", description="The permission to access build log. It also implies the permission "
-			+ "to access published artifacts and reports")
+	@Editable(order=300, name="Access Build Log", description="The permission to access build log. "
+			+ "It also implies the permission to access published reports")
 	@ShowCondition("isRunJobDisabled")
 	public boolean isAccessLog() {
 		return accessLog;

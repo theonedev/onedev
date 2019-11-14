@@ -15,6 +15,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.MilestoneManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.issue.IssueChangeEvent;
@@ -38,14 +39,28 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 
 	private final SettingManager settingManager;
 	
+	private final ProjectManager projectManager;
+	
 	@Inject
-	public DefaultMilestoneManager(Dao dao, SettingManager settingManager) {
+	public DefaultMilestoneManager(Dao dao, SettingManager settingManager, ProjectManager projectManager) {
 		super(dao);
 		this.settingManager = settingManager;
+		this.projectManager = projectManager;
 	}
 
 	private IssueSetting getIssueSetting() {
 		return settingManager.getIssueSetting();
+	}
+	
+	@Sessional
+	@Override
+	public Milestone find(String milestoneFQN) {
+		String projectName = StringUtils.substringBefore(milestoneFQN, ":");
+		Project project = projectManager.find(projectName);
+		if (project != null) 
+			return find(project, StringUtils.substringAfter(milestoneFQN, ":"));
+		else 
+			return null;
 	}
 	
 	@Transactional

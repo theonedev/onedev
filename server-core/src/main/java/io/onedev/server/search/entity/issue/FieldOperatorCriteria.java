@@ -10,7 +10,6 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.SecurityUtils;
 
@@ -26,7 +25,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Project project, Join<?, ?> field, CriteriaBuilder builder, User user) {
+	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
 		Path<?> attribute = field.get(IssueField.ATTR_VALUE);
 		if (operator == IssueQueryLexer.IsEmpty)
 			return builder.isNull(attribute);

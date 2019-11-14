@@ -1,14 +1,11 @@
 package io.onedev.server.search.entity;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.Path;
-
-import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Splitter;
 
@@ -18,15 +15,19 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.entitymanager.MilestoneManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.ProjectAwareCommitId;
+import io.onedev.server.util.ProjectAwareRevision;
 
 public abstract class EntityQuery<T extends AbstractEntity> implements Serializable {
 
@@ -79,45 +80,76 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		return dateValue;
 	}
 	
-	public static ObjectId getCommitId(Project project, String revision) {
-		try {
-			ObjectId commitId = project.getRepository().resolve(revision);
-			if (commitId == null)
-				throw new RevisionSyntaxException("");
-			return commitId;								
-		} catch (RevisionSyntaxException | IOException e) {
-			throw new OneException("Invalid revision string: " + revision);
-		}
+	public static ProjectAwareCommitId getCommitId(@Nullable Project project, String value) {
+		if (project != null && !value.contains(":"))
+			value = project.getName() + ":" + value;
+		ProjectAwareCommitId commitId = ProjectAwareCommitId.from(value);
+		if (commitId != null)
+			return commitId;
+		else
+			throw new OneException("Unable to find revision: " + value);
 	}
 
-	public static Issue getIssue(Project project, String number) {
-		if (number.startsWith("#"))
-			number = number.substring(1);
-		Issue issue = OneDev.getInstance(IssueManager.class).find(project, getLongValue(number));
+	public static ProjectAwareRevision getRevision(@Nullable Project project, String value) {
+		if (project != null && !value.contains(":"))
+			value = project.getName() + ":" + value;
+		ProjectAwareRevision revision = ProjectAwareRevision.from(value);
+		if (revision != null)
+			return revision;
+		else
+			throw new OneException("Unable to find revision: " + value);
+	}
+	
+	public static Issue getIssue(@Nullable Project project, String value) {
+		if (project != null) {
+			if (value.startsWith("#"))
+				value = project.getName() + value;
+			else if (!value.contains("#"))
+				value = project.getName() + "#" + value;
+		}
+		Issue issue = OneDev.getInstance(IssueManager.class).find(value);
 		if (issue != null)
 			return issue;
 		else
-			throw new OneException("Unable to find issue: #" + number);
+			throw new OneException("Unable to find issue: " + value);
 	}
 	
-	public static PullRequest getPullRequest(Project project, String number) {
-		if (number.startsWith("#"))
-			number = number.substring(1);
-		PullRequest request = OneDev.getInstance(PullRequestManager.class).find(project, getLongValue(number));
-		if (request != null)
-			return request;
+	public static PullRequest getPullRequest(@Nullable Project project, String value) {
+		if (project != null) {
+			if (value.startsWith("#"))
+				value = project.getName() + value;
+			else if (!value.contains("#"))
+				value = project.getName() + "#" + value;
+		}
+		PullRequest pullRequest = OneDev.getInstance(PullRequestManager.class).find(value);
+		if (pullRequest != null)
+			return pullRequest;
 		else
-			throw new OneException("Unable to find pull request: #" + number);
+			throw new OneException("Unable to find pull request: " + value);
 	}
 	
-	public static Build getBuild(Project project, String number) {
-		if (number.startsWith("#"))
-			number = number.substring(1);
-		Build build = OneDev.getInstance(BuildManager.class).find(project, getLongValue(number));
+	public static Build getBuild(@Nullable Project project, String value) {
+		if (project != null) {
+			if (value.startsWith("#"))
+				value = project.getName() + value;
+			else if (!value.contains("#"))
+				value = project.getName() + "#" + value;
+		}
+		Build build = OneDev.getInstance(BuildManager.class).find(value);
 		if (build != null)
 			return build;
 		else
-			throw new OneException("Unable to find build: #" + number);
+			throw new OneException("Unable to find build: " + value);
+	}
+	
+	public static Milestone getMilestone(@Nullable Project project, String value) {
+		if (project != null && !value.contains(":")) 
+			value = project.getName() + ":" + value;
+		Milestone milestone = OneDev.getInstance(MilestoneManager.class).find(value);
+		if (milestone != null)
+			return milestone;
+		else
+			throw new OneException("Unable to find milestone: " + value);
 	}
 	
 	public boolean needsLogin() {

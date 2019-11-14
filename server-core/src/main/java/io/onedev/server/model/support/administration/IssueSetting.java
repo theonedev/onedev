@@ -225,13 +225,14 @@ public class IssueSetting implements Serializable {
 		listFields.add("Assignee");
 		
 		namedQueries.add(new NamedIssueQuery("Open", "\"State\" is \"Open\""));
-		namedQueries.add(new NamedIssueQuery("My open", "\"State\" is \"Open\" and mine"));
+		namedQueries.add(new NamedIssueQuery("Assigned to me & Open", "\"Assignee\" is me and \"State\" is \"Open\""));
+		namedQueries.add(new NamedIssueQuery("Submitted by me & Open", "submitted by me and \"State\" is \"Open\""));
+		namedQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
+		namedQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
 		namedQueries.add(new NamedIssueQuery("Submitted recently", "\"Submit Date\" is after \"last week\""));
 		namedQueries.add(new NamedIssueQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-		namedQueries.add(new NamedIssueQuery("Submitted by me", "submitted by me"));
-		namedQueries.add(new NamedIssueQuery("Assigned to me", "\"Assignee\" is me"));
-		namedQueries.add(new NamedIssueQuery("Critical open", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
-		namedQueries.add(new NamedIssueQuery("Unassigned open", "\"State\" is \"Open\" and \"Assignee\" is empty"));
+		namedQueries.add(new NamedIssueQuery("Open & Critical", "\"State\" is \"Open\" and \"Priority\" is \"Critical\""));
+		namedQueries.add(new NamedIssueQuery("Open & Unassigned", "\"State\" is \"Open\" and \"Assignee\" is empty"));
 		namedQueries.add(new NamedIssueQuery("Closed", "\"State\" is \"Closed\""));
 		namedQueries.add(new NamedIssueQuery("All", "all"));
 	}

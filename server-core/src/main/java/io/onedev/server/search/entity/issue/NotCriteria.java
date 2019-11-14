@@ -7,7 +7,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.NotCriteriaHelper;
 import io.onedev.server.util.ValueSetEdit;
@@ -24,8 +23,8 @@ public class NotCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
-		return new NotCriteriaHelper<Issue>(criteria).getPredicate(project, root, builder, user);
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
+		return new NotCriteriaHelper<Issue>(criteria).getPredicate(root, builder, user);
 	}
 
 	@Override

@@ -48,7 +48,7 @@ public class BoardSpec implements Serializable {
 	
 	private String baseQuery;
 	
-	private String backlogBaseQuery = "outstanding";
+	private String backlogBaseQuery = "\"State\" is \"Open\"";
 	
 	private String identifyField;
 	

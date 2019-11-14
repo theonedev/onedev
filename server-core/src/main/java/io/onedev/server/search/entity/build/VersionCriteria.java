@@ -6,7 +6,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.BuildConstants;
@@ -22,7 +21,7 @@ public class VersionCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
 		Path<String> attribute = root.get(BuildConstants.ATTR_VERSION);
 		String normalized = value.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);

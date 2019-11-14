@@ -13,6 +13,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -32,7 +33,7 @@ public class Milestone extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public static final String FIELD_ATTR_NAME = "name";
+	public static final String ATTR_NAME = "name";
 	
 	@ManyToOne
 	@JoinColumn(nullable=false)
@@ -64,6 +65,7 @@ public class Milestone extends AbstractEntity {
 	}
 
 	@Editable(order=100)
+	@Pattern(regexp="[^:]*", message="Character ':' is not allowed") // ':' will be used as project/milestone separator in issue query
 	@NotEmpty
 	public String getName() {
 		return name;

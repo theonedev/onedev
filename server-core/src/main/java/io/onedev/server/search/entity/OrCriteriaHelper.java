@@ -8,7 +8,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 
 public class OrCriteriaHelper<T extends AbstractEntity> extends EntityCriteria<T> {
@@ -22,10 +21,10 @@ public class OrCriteriaHelper<T extends AbstractEntity> extends EntityCriteria<T
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<T> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<T> root, CriteriaBuilder builder, User user) {
 		List<Predicate> predicates = new ArrayList<>();
 		for (EntityCriteria<T> criteria: criterias)
-			predicates.add(criteria.getPredicate(project, root, builder, user));
+			predicates.add(criteria.getPredicate(root, builder, user));
 		return builder.or(predicates.toArray(new Predicate[0]));
 	}
 

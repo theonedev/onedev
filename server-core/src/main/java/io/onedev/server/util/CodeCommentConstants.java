@@ -8,6 +8,8 @@ import com.google.common.collect.Lists;
 
 public class CodeCommentConstants {
 	
+	public static final String ATTR_PROJECT = "project";
+	
 	public static final String FIELD_CONTENT = "Content";
 	
 	public static final String ATTR_CONTENT = "content";

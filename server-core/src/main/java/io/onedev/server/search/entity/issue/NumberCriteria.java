@@ -6,7 +6,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.IssueConstants;
 
@@ -24,7 +23,7 @@ public class NumberCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
 		Path<Long> attribute = root.get(IssueConstants.ATTR_NUMBER);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(attribute, value);
@@ -51,7 +50,9 @@ public class NumberCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(IssueConstants.FIELD_NUMBER) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(String.valueOf(value));
+		return IssueQuery.quote(IssueConstants.FIELD_NUMBER) + " " 
+				+ IssueQuery.getRuleName(operator) + " " 
+				+ IssueQuery.quote(String.valueOf(value));
 	}
 
 }

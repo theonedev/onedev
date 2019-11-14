@@ -1,4 +1,4 @@
-package io.onedev.server.model.support;
+package io.onedev.server.util;
 
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;

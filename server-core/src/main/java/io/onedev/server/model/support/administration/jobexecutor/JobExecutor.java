@@ -82,7 +82,7 @@ public abstract class JobExecutor implements Serializable {
 	@Editable(order=10200, group="Job Applicability",
 			description="Optionally specify space-separated jobs applicable for this executor. "
 					+ "Use * or ? for wildcard match. Leave empty to match all")
-	@Patterns(suggester = "suggestJobNames")
+	@Patterns
 	@NameOfEmptyValue("All")
 	public String getApplicableJobNames() {
 		return applicableJobNames;
@@ -94,7 +94,7 @@ public abstract class JobExecutor implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestJobNames(String matchWith) {
-		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class).getJobNames(null));
+		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class).getJobNames());
 		Collections.sort(jobNames);
 		return SuggestionUtils.suggest(jobNames, matchWith);
 	}

@@ -1,5 +1,6 @@
 package io.onedev.server.search.entity.build;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
 import javax.persistence.criteria.JoinType;
@@ -11,27 +12,31 @@ import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.BuildConstants;
 
 public class DependsOnCriteria extends EntityCriteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
-	private Build value;
+	private final Build build;
 	
-	public DependsOnCriteria(Build value) {
+	private final String value;
+	
+	public DependsOnCriteria(@Nullable Project project, String value) {
+		build = EntityQuery.getBuild(project, value);
 		this.value = value;
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
 		From<?, ?> join = root.join(BuildConstants.ATTR_DEPENDENCIES, JoinType.LEFT);
-		return builder.equal(join.get(BuildDependence.ATTR_DEPENDENCY), value);
+		return builder.equal(join.get(BuildDependence.ATTR_DEPENDENCY), build);
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		for (BuildDependence dependence: value.getDependents()) {
+		for (BuildDependence dependence: this.build.getDependents()) {
 			if (dependence.getDependent().equals(build))
 				return true;
 		}
@@ -45,7 +50,7 @@ public class DependsOnCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.getRuleName(BuildQueryLexer.DependsOn) + " " + BuildQuery.quote("#" + value.getNumber());
+		return BuildQuery.getRuleName(BuildQueryLexer.DependsOn) + " " + BuildQuery.quote(value);
 	}
 
 }

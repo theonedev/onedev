@@ -3,6 +3,7 @@ package io.onedev.server.search.entity.build;
 import java.util.Collection;
 import java.util.HashSet;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -19,16 +20,25 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.BuildConstants;
 
 public class FixedIssueCriteria extends EntityCriteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
-	private Issue value;
+	private final Issue issue;
 	
-	public FixedIssueCriteria(Issue value) {
+	private final String value;
+	
+	public FixedIssueCriteria(@Nullable Project project, String value) {
+		issue = EntityQuery.getIssue(project, value);
 		this.value = value;
+	}
+	
+	public FixedIssueCriteria(Issue issue) {
+		this.issue = issue;
+		value = String.valueOf(issue.getNumber());
 	}
 
 	private CommitInfoManager getCommitInfoManager() {
@@ -36,24 +46,29 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 	}
 	
 	@Override
-	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
 		Path<Long> attribute = root.get(BuildConstants.ATTR_ID);
-		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(project, value.getNumber());
+		Project project = issue.getProject();
+		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(project, issue.getNumber());
 		Collection<String> descendents = new HashSet<>();
 		for (ObjectId each: getCommitInfoManager().getDescendants(project, fixCommits))
 			descendents.add(each.name());
 		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 		Collection<Long> inBuildIds = buildManager.filterBuildIds(project.getId(), descendents);
-		return inManyValues(builder, attribute, inBuildIds, buildManager.getBuildIdsByProject(project.getId()));
+		return builder.and(
+				builder.equal(root.get(BuildConstants.ATTR_PROJECT), issue.getProject()),
+				inManyValues(builder, attribute, inBuildIds, buildManager.getBuildIdsByProject(project.getId())));
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(build.getProject(), value.getNumber()); 
-		for (ObjectId commit: fixCommits) {
-			ObjectId buildCommit = ObjectId.fromString(build.getCommitHash());
-			if (GitUtils.isMergedInto(build.getProject().getRepository(), null, commit, buildCommit))
-				return true;
+		if (build.getProject().equals(issue.getProject())) {
+			Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(build.getProject(), issue.getNumber()); 
+			for (ObjectId commit: fixCommits) {
+				ObjectId buildCommit = ObjectId.fromString(build.getCommitHash());
+				if (GitUtils.isMergedInto(build.getProject().getRepository(), null, commit, buildCommit))
+					return true;
+			}
 		}
 		return false;
 	}
@@ -65,7 +80,7 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.getRuleName(BuildQueryLexer.FixedIssue) + " " + BuildQuery.quote("#" + value.getNumber());
+		return BuildQuery.getRuleName(BuildQueryLexer.FixedIssue) + " " + BuildQuery.quote(value);
 	}
 
 }

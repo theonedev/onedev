@@ -6,7 +6,7 @@ public class ReadCode implements Permission {
 
 	@Override
 	public boolean implies(Permission p) {
-		return p instanceof ReadCode;
+		return p instanceof ReadCode || new AccessProject().implies(p);
 	}
 
 }

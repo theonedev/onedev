@@ -8,9 +8,9 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.BuildConstants;
 
 public class RunningDateCriteria extends EntityCriteria<Build> {
@@ -19,31 +19,31 @@ public class RunningDateCriteria extends EntityCriteria<Build> {
 
 	private final int operator;
 	
-	private final Date value;
+	private final Date date;
 	
-	private final String rawValue;
+	private final String value;
 	
-	public RunningDateCriteria(Date value, String rawValue, int operator) {
+	public RunningDateCriteria(String value, int operator) {
 		this.operator = operator;
+		date = EntityQuery.getDateValue(value);
 		this.value = value;
-		this.rawValue = rawValue;
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
 		Path<Date> attribute = root.get(BuildConstants.ATTR_RUNNING_DATE);
 		if (operator == BuildQueryLexer.IsBefore)
-			return builder.lessThan(attribute, value);
+			return builder.lessThan(attribute, date);
 		else
-			return builder.greaterThan(attribute, value);
+			return builder.greaterThan(attribute, date);
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
 		if (operator == BuildQueryLexer.IsBefore)
-			return build.getRunningDate().before(value);
+			return build.getRunningDate().before(date);
 		else
-			return build.getRunningDate().after(value);
+			return build.getRunningDate().after(date);
 	}
 
 	@Override
@@ -53,7 +53,8 @@ public class RunningDateCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.quote(BuildConstants.FIELD_RUNNING_DATE) + " " + BuildQuery.getRuleName(operator) + " " + BuildQuery.quote(rawValue);
+		return BuildQuery.quote(BuildConstants.FIELD_RUNNING_DATE) + " " 
+				+ BuildQuery.getRuleName(operator) + " " + BuildQuery.quote(value);
 	}
 
 }

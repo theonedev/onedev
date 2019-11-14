@@ -11,7 +11,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.IssueConstants;
 
@@ -19,29 +18,29 @@ public class MilestoneCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final String value;
+	private final String milestoneName;
 
-	public MilestoneCriteria(@Nullable String value) {
-		this.value = value;
+	public MilestoneCriteria(@Nullable String milestoneName) {
+		this.milestoneName = milestoneName;
 	}
 
 	public String getValue() {
-		return value;
+		return milestoneName;
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
-		Path<?> attribute = root.join(IssueConstants.ATTR_MILESTONE, JoinType.LEFT).get(Milestone.FIELD_ATTR_NAME);
-		if (value != null)
-			return builder.equal(attribute, value);
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
+		Path<?> attribute = root.join(IssueConstants.ATTR_MILESTONE, JoinType.LEFT).get(Milestone.ATTR_NAME);
+		if (milestoneName != null)
+			return builder.equal(attribute, milestoneName);
 		else
 			return builder.isNull(attribute);
 	}
 
 	@Override
 	public boolean matches(Issue issue, User user) {
-		if (value != null)
-			return issue.getMilestone() != null && issue.getMilestone().getName().equals(value);
+		if (milestoneName != null)
+			return issue.getMilestone() != null && issue.getMilestone().getName().equals(milestoneName);
 		else
 			return issue.getMilestone() == null;
 	}
@@ -53,16 +52,20 @@ public class MilestoneCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		if (value != null) 
-			return IssueQuery.quote(IssueConstants.FIELD_MILESTONE) + " " + IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(value);
-		else
-			return IssueQuery.quote(IssueConstants.FIELD_MILESTONE) + " " + IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
+		if (milestoneName != null) {
+			return IssueQuery.quote(IssueConstants.FIELD_MILESTONE) + " " 
+					+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
+					+ IssueQuery.quote(milestoneName);
+		} else {
+			return IssueQuery.quote(IssueConstants.FIELD_MILESTONE) + " " 
+					+ IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
+		}
 	}
 
 	@Override
 	public void fill(Issue issue, Set<String> initedLists) {
-		if (value != null)
-			issue.setMilestone(issue.getProject().getMilestone(value));
+		if (milestoneName != null)
+			issue.setMilestone(issue.getProject().getMilestone(milestoneName));
 	}
 
 }

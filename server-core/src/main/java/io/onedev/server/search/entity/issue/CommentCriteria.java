@@ -9,7 +9,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.IssueConstants;
 
@@ -24,7 +23,7 @@ public class CommentCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
 		From<?, ?> join = root.join(IssueConstants.ATTR_COMMENTS, JoinType.LEFT);
 		Path<String> attribute = join.get(IssueComment.PATH_CONTENT);
 		return builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
@@ -46,7 +45,8 @@ public class CommentCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(IssueConstants.FIELD_COMMENT) + " " + IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " + IssueQuery.quote(value);
+		return IssueQuery.quote(IssueConstants.FIELD_COMMENT) + " " 
+				+ IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " + IssueQuery.quote(value);
 	}
 
 }

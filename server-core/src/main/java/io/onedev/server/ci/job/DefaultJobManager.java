@@ -88,8 +88,9 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.security.CodePullAuthorizationSource;
+import io.onedev.server.security.permission.AccessBuild;
+import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.BuildCommitAware;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.patternset.PatternSet;
@@ -273,11 +274,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					} else {
 						subject = User.asSubject(0L);
 					}
-					if (!subject.isPermitted(new ProjectPermission(dependencyProject, new ReadCode()))) {
-						throw new OneException("Unable to access dependency project '" 
-								+ dependency.getProjectName() + "': permission denied");
-					}
-					
 					String buildNumberStr = build.interpolate(dependency.getBuildNumber());
 					if (buildNumberStr.startsWith("#"))
 						buildNumberStr = buildNumberStr.substring(1);
@@ -288,6 +284,13 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								dependency.getProjectName(), buildNumber);
 						throw new OneException(errorMessage);
 					}
+					
+					JobPermission jobPermission = new JobPermission(dependencyBuild.getJobName(), new AccessBuild());
+					if (!subject.isPermitted(new ProjectPermission(dependencyProject, jobPermission))) {
+						throw new OneException("Unable to access dependency build '" 
+								+ dependency.getProjectName() + "#" + dependencyBuild.getNumber() + "': permission denied");
+					}
+					
 					BuildDependence dependence = new BuildDependence();
 					dependence.setDependency(dependencyBuild);
 					dependence.setDependent(build);

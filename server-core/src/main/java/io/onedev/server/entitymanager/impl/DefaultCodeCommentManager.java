@@ -243,10 +243,10 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 			Join<?, ?> relations = root.join(CodeCommentConstants.ATTR_RELATIONS, JoinType.INNER);
 			relations.on(builder.equal(relations.get(CodeCommentRelation.ATTR_REQUEST), request));
 		} else {
-			predicates.add(builder.equal(root.get("project"), project));
+			predicates.add(builder.equal(root.get(CodeCommentConstants.ATTR_PROJECT), project));
 		}
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(project, root, builder, user));
+			predicates.add(criteria.getPredicate(root, builder, user));
 		return predicates.toArray(new Predicate[0]);
 	}
 	

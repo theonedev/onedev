@@ -23,7 +23,7 @@ public class SourceProjectCriteria extends PullRequestCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
 		Path<User> attribute = root.get(PullRequestConstants.ATTR_SOURCE_PROJECT);
 		return builder.equal(attribute, value);
 	}

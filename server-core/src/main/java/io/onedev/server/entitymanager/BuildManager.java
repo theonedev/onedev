@@ -21,6 +21,9 @@ public interface BuildManager extends EntityManager<Build> {
     @Nullable
     Build find(Project project, long number);
     
+    @Nullable
+    Build find(String buildFQN);
+    
 	Build findStreamPrevious(Build build, @Nullable Build.Status status);
 
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, Map<String, List<String>> params); 
@@ -35,9 +38,10 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	Collection<Build> queryUnfinished();
 
-	List<Build> query(Project project, @Nullable User user, String term, int count);
+	List<Build> query(@Nullable Project project, @Nullable User user, String term, int count);
 	
-	List<Build> query(@Nullable Project project, @Nullable User user, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
+	List<Build> query(@Nullable Project project, @Nullable User user, 
+			EntityQuery<Build> buildQuery, int firstResult, int maxResults);
 	
 	int count(@Nullable Project project, @Nullable User user, EntityCriteria<Build> buildCriteria);
 	
@@ -45,6 +49,8 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	Collection<Long> filterBuildIds(Long projectId, Collection<String> commitHashes);
 
-	Collection<String> getJobNames(@Nullable Long projectId);
+	Collection<String> getJobNames();
+	
+	Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project, @Nullable User user);
 	
 }

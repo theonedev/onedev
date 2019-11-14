@@ -20,6 +20,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.role.CodePrivilege;
 import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.security.permission.AccessBuild;
@@ -216,7 +217,8 @@ public class Role extends AbstractEntity implements Permission {
 		} else {
 			if (manageProject) {
 				permissions.add(new ReadCode());
-				permissions.add(new AccessProject());
+				for (FieldSpec field: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs())
+					permissions.add(new EditIssueField(field.getName()));
 				permissions.add(new JobPermission("*", new AccessBuildLog()));
 			} else {
 				if (codePrivilege != CodePrivilege.NONE)

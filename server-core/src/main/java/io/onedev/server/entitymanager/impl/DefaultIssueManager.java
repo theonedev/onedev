@@ -34,6 +34,7 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQuerySettingManager;
@@ -139,6 +140,24 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		return find(criteria);
 	}
 	
+	@Sessional
+	@Override
+	public Issue find(String issueFQN) {
+		String projectName = StringUtils.substringBefore(issueFQN, "#");
+		Project project = projectManager.find(projectName);
+		if (project != null) {
+			String issueNumberStr = StringUtils.substringAfter(issueFQN, "#");
+			try {
+				Long issueNumber = Long.valueOf(issueNumberStr);
+				return find(project, issueNumber);
+			} catch (NumberFormatException e) {
+				throw new OneException("Invalid issue number: " + issueNumberStr);
+			}
+		} else {
+			return null;
+		}
+	}
+	
 	@Transactional
 	@Override
 	public void open(Issue issue) {
@@ -178,7 +197,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			@Nullable Project project, Root<Issue> root, CriteriaBuilder builder, @Nullable User user) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (project != null) {
-			predicates.add(builder.equal(root.get("project"), project));
+			predicates.add(builder.equal(root.get(IssueConstants.ATTR_PROJECT), project));
 		} else if (!User.asSubject(user).isPermitted(new SystemAdministration())) {
 			List<Predicate> projectPredicates = new ArrayList<>();
 			for (Project each: projectManager.getPermittedProjects(user, new AccessProject())) 
@@ -186,7 +205,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			predicates.add(builder.or(projectPredicates.toArray(new Predicate[projectPredicates.size()])));
 		}
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(project, root, builder, user));
+			predicates.add(criteria.getPredicate(root, builder, user));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
@@ -349,24 +368,16 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 	@Sessional
 	@Override
-	public List<Issue> query(Project project, @Nullable String term, int count) {
+	public List<Issue> query(Project project, String term, int count) {
 		List<Issue> issues = new ArrayList<>();
 
 		EntityCriteria<Issue> criteria = newCriteria();
-		criteria.add(Restrictions.eq("project", project));
+		criteria.add(Restrictions.eq(IssueConstants.ATTR_PROJECT, project));
 		
-		if (StringUtils.isNotBlank(term)) {
-			if (term.startsWith("#")) {
-				term = term.substring(1);
-				try {
-					long buildNumber = Long.parseLong(term);
-					criteria.add(Restrictions.eq("number", buildNumber));
-				} catch (NumberFormatException e) {
-					criteria.add(Restrictions.or(
-							Restrictions.ilike("title", "#" + term, MatchMode.ANYWHERE),
-							Restrictions.ilike("noSpaceTitle", "#" + term, MatchMode.ANYWHERE)));
-				}
-			} else try {
+		if (term.startsWith("#"))
+			term = term.substring(1);
+		if (term.length() != 0) {
+			try {
 				long buildNumber = Long.parseLong(term);
 				criteria.add(Restrictions.eq("number", buildNumber));
 			} catch (NumberFormatException e) {

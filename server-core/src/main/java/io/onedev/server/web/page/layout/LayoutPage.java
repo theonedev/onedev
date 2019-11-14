@@ -99,7 +99,7 @@ public abstract class LayoutPage extends BasePage {
 		
 		WebMarkupContainer buildsContainer = new WebMarkupContainer("navBuilds");
 		buildsContainer.add(new ViewStateAwarePageLink<Void>("link", BuildListPage.class, 
-				BuildListPage.paramsOf("", 0)));
+				BuildListPage.paramsOf("", null, 0)));
 		if (getPage() instanceof BuildListPage) 
 			buildsContainer.add(AttributeAppender.append("class", "active"));
 		add(buildsContainer);

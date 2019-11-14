@@ -10,7 +10,7 @@ import org.eclipse.jgit.lib.FileMode;
 
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.ProjectAndBranch;
+import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.page.project.ProjectPage;

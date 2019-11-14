@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -63,6 +64,7 @@ import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
@@ -407,10 +409,10 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	}
 
 	@Override
-	public Collection<Project> getPermittedProjects(User user, Permission permission) {
+	public Collection<Project> getPermittedProjects(@Nullable User user, Permission permission) {
 		Collection<Project> projects = new HashSet<>();
 		
-		if (SecurityUtils.isAdministrator()) {
+		if (User.asSubject(user).isPermitted(new SystemAdministration())) {
 			projects.addAll(query());
 		} else {
 			if (user != null) {

@@ -13,7 +13,6 @@ import javax.persistence.criteria.Root;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.RangeBuilder;
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 
 public abstract class EntityCriteria<T extends AbstractEntity> implements Serializable {
@@ -22,7 +21,7 @@ public abstract class EntityCriteria<T extends AbstractEntity> implements Serial
 	
 	public static final int IN_CLAUSE_LIMIT = 1000;
 	
-	public abstract Predicate getPredicate(Project project, Root<T> root, CriteriaBuilder builder, User user);
+	public abstract Predicate getPredicate(Root<T> root, CriteriaBuilder builder, User user);
 
 	public abstract boolean matches(T entity, User user);
 	

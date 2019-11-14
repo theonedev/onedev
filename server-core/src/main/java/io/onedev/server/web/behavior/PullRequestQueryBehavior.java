@@ -1,13 +1,11 @@
 package io.onedev.server.web.behavior;
 
 import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.getRuleName;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IncludesCommit;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.IncludesIssue;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeReviewedByMe;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.RequestedForChangesByMe;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ApprovedByMe;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.SubmittedByMe;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.DiscardedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.RequestedForChangesByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.SubmittedByMe;
+import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeReviewedByMe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -97,7 +95,10 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 										return SuggestionUtils.suggestProjects(matchWith);
 									} else if (fieldName.equals(PullRequestConstants.FIELD_TARGET_BRANCH) 
 											|| fieldName.equals(PullRequestConstants.FIELD_SOURCE_BRANCH)) {
-										return SuggestionUtils.suggestBranches(project, matchWith);
+										if (project != null)
+											return SuggestionUtils.suggestBranches(project, matchWith);
+										else
+											return null;
 									} else if (fieldName.equals(PullRequestConstants.FIELD_MERGE_STRATEGY)) {
 										List<String> candidates = new ArrayList<>();
 										for (MergeStrategy strategy: MergeStrategy.values())
@@ -138,12 +139,6 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 						|| suggestedLiteral.equals(getRuleName(DiscardedByMe)))) {
 			return null;
 		}
-		if (getProject() == null 
-				&& (suggestedLiteral.equals(getRuleName(IncludesCommit)) 
-						|| suggestedLiteral.equals(getRuleName(IncludesIssue)))) {
-			return null;
-		}
-		
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);

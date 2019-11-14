@@ -6,7 +6,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.BuildConstants;
@@ -26,7 +25,7 @@ public class NumberCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
 		Path<Long> attribute = root.get(IssueConstants.ATTR_NUMBER);
 		if (operator == BuildQueryLexer.Is)
 			return builder.equal(attribute, value);

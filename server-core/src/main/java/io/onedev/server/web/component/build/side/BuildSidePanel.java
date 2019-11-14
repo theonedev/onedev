@@ -44,7 +44,7 @@ import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import io.onedev.server.web.page.build.BuildListPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.QueryPositionSupport;
 
@@ -248,24 +248,19 @@ public abstract class BuildSidePanel extends Panel {
 		WebMarkupContainer dependencesContainer = new WebMarkupContainer("dependences");
 		add(dependencesContainer);
 		
-		Link<Void> dependentsLink = new BookmarkablePageLink<Void>("dependents", ProjectBuildsPage.class, 
-				ProjectBuildsPage.paramsOf(getProject(), "depends on " + BuildQuery.quote("#" + getBuild().getNumber()), 0));
+		String query = "depends on " + BuildQuery.quote(getBuild().getProject().getName() + "#" + getBuild().getNumber());
+		Link<Void> dependentsLink = new BookmarkablePageLink<Void>("dependents", BuildListPage.class, 
+				BuildListPage.paramsOf(query, getBuild().getDependents().size(), 0));
 		dependentsLink.setVisible(!getBuild().getDependents().isEmpty());
-		
-		if (getBuild().getDependents().size() > 1)
-			dependentsLink.add(new Label("label", getBuild().getDependents().size() + " builds"));
-		else
-			dependentsLink.add(new Label("label", getBuild().getDependents().size() + " build"));
+		dependentsLink.add(new Label("label", getBuild().getDependents().size() + " build(s)"));
 		
 		dependencesContainer.add(dependentsLink);
 		
-		Link<Void> dependenciesLink = new BookmarkablePageLink<Void>("dependencies", ProjectBuildsPage.class, 
-				ProjectBuildsPage.paramsOf(getProject(), "dependencies of " + BuildQuery.quote("#" + getBuild().getNumber()), 0));
+		query = "dependencies of " + BuildQuery.quote(getBuild().getProject().getName() + "#" + getBuild().getNumber());
+		Link<Void> dependenciesLink = new BookmarkablePageLink<Void>("dependencies", BuildListPage.class, 
+				BuildListPage.paramsOf(query, getBuild().getDependencies().size(), 0));
 		dependenciesLink.setVisible(!getBuild().getDependencies().isEmpty());
-		if (getBuild().getDependencies().size() > 1)
-			dependenciesLink.add(new Label("label", getBuild().getDependencies().size() + " builds"));
-		else
-			dependenciesLink.add(new Label("label", getBuild().getDependencies().size() + " build"));
+		dependenciesLink.add(new Label("label", getBuild().getDependencies().size() + " build(s)"));
 		dependencesContainer.add(dependenciesLink);
 		
 		WebMarkupContainer comma = new WebMarkupContainer("comma");

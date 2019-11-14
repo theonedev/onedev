@@ -155,9 +155,7 @@ public abstract class ProjectInfoPanel extends Panel {
 				};
 			}
 			
-		}.setVisible(SecurityUtils.canCreateProjects() 
-				&& SecurityUtils.getUser() != null 
-				&&  SecurityUtils.canReadCode(getProject())));
+		}.setVisible(SecurityUtils.canCreateProjects() &&  SecurityUtils.canReadCode(getProject())));
 	}
 	
 	private Project getProject() {

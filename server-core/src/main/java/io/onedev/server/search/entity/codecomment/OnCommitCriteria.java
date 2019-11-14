@@ -17,21 +17,28 @@ public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 
 	private static final long serialVersionUID = 1L;
 
-	private final ObjectId value;
+	private final Project project;
 	
-	public OnCommitCriteria(ObjectId value) {
-		this.value = value;
+	private final ObjectId commitId;
+	
+	public OnCommitCriteria(Project project, ObjectId commitId) {
+		this.project = project;
+		this.commitId = commitId;
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<CodeComment> root, CriteriaBuilder builder, User user) {
-		Path<?> attribute = CodeCommentQuery.getPath(root, CodeCommentConstants.ATTR_COMMIT);
-		return builder.equal(attribute, value.name());
+	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
+		Path<?> projectAttribute = CodeCommentQuery.getPath(root, CodeCommentConstants.ATTR_PROJECT);
+		Path<?> commitAttribute = CodeCommentQuery.getPath(root, CodeCommentConstants.ATTR_COMMIT);
+		return builder.and(
+				builder.equal(projectAttribute, project),
+				builder.equal(commitAttribute, commitId.name()));
 	}
 
 	@Override
 	public boolean matches(CodeComment comment, User user) {
-		return comment.getMarkPos().getCommit().equals(value.name());
+		return comment.getProject().equals(project) 
+				&& comment.getMarkPos().getCommit().equals(commitId.name());
 	}
 
 	@Override
@@ -41,7 +48,7 @@ public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public String toString() {
-		return CodeCommentQuery.getRuleName(CodeCommentQueryLexer.OnCommit) + " " + CodeCommentQuery.quote(value.name());
+		return CodeCommentQuery.getRuleName(CodeCommentQueryLexer.OnCommit) + " " + CodeCommentQuery.quote(commitId.name());
 	}
 
 }

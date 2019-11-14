@@ -4,10 +4,7 @@ import static io.onedev.server.search.entity.EntityQuery.getValue;
 import static io.onedev.server.search.entity.issue.IssueQuery.checkField;
 import static io.onedev.server.search.entity.issue.IssueQuery.getOperator;
 import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedBetween;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInBuild;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsMe;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.Mine;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
 import static io.onedev.server.util.IssueConstants.FIELD_COMMENT;
@@ -114,15 +111,13 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 						} else if ("revisionValue".equals(spec.getLabel())) {
 							String revisionType = terminalExpect.getState()
 									.findMatchedElementsByLabel("revisionType", true).iterator().next().getMatchedText();
-							if (project != null) {
-								switch (revisionType) {
-								case "branch":
-									return SuggestionUtils.suggestBranches(project, matchWith);
-								case "tag":
-									return SuggestionUtils.suggestTags(project, matchWith);
-								case "build":
-									return SuggestionUtils.suggestBuilds(project, matchWith);
-								}
+							switch (revisionType) {
+							case "branch":
+								return SuggestionUtils.suggestBranches(project, matchWith);
+							case "tag":
+								return SuggestionUtils.suggestTags(project, matchWith);
+							case "build":
+								return SuggestionUtils.suggestBuilds(project, matchWith);
 							}
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
@@ -133,7 +128,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							if (fieldElements.isEmpty()) {
 								if (operator == SubmittedBy)
 									return SuggestionUtils.suggestUsers(matchWith);
-								else if (project != null)
+								else 
 									return SuggestionUtils.suggestBuilds(project, matchWith);
 							} else {
 								String fieldName = getValue(fieldElements.get(0).getMatchedText());
@@ -148,14 +143,11 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldSpec instanceof UserChoiceField) {
 										return SuggestionUtils.suggestUsers(matchWith);
 									} else if (fieldSpec instanceof IssueChoiceField) {
-										if (project != null)
-											return SuggestionUtils.suggestIssues(project, matchWith);
+										return SuggestionUtils.suggestIssues(project, matchWith);
 									} else if (fieldSpec instanceof BuildChoiceField) {
-										if (project != null)
-											return SuggestionUtils.suggestBuilds(project, matchWith);
+										return SuggestionUtils.suggestBuilds(project, matchWith);
 									} else if (fieldSpec instanceof PullRequestChoiceField) {
-										if (project != null)
-											return SuggestionUtils.suggestPullRequests(project, matchWith);
+										return SuggestionUtils.suggestPullRequests(project, matchWith);
 									} else if (fieldSpec instanceof BooleanField) {
 										return SuggestionUtils.suggest(Lists.newArrayList("true", "false"), matchWith);
 									} else if (fieldSpec instanceof GroupChoiceField) {
@@ -173,10 +165,10 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 											ComponentContext.pop();
 										}			
 									} else if (fieldName.equals(FIELD_MILESTONE)) {
-										if (project != null) {
-											List<String> candidates = project.getMilestones().stream().map(it->it.getName()).collect(Collectors.toList());
-											return SuggestionUtils.suggest(candidates, matchWith);
-										}
+										if (project != null)
+											return SuggestionUtils.suggestMilestones(project, matchWith);
+										else
+											return null;
 									} else if (fieldName.equals(FIELD_TITLE) || fieldName.equals(FIELD_DESCRIPTION) 
 											|| fieldName.equals(FIELD_COMMENT) || fieldName.equals(FIELD_VOTE_COUNT) 
 											|| fieldName.equals(FIELD_COMMENT_COUNT) || fieldName.equals(FIELD_NUMBER) 
@@ -203,23 +195,10 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
-		if (suggestedLiteral.equals(getRuleName(Mine))) {
-			if (SecurityUtils.getUser() != null)
-				return Optional.of("issues relevant to me");
-			else
-				return null;
-		} 
-
 		if (SecurityUtils.getUser() == null 
 				&& (suggestedLiteral.equals(getRuleName(IsMe)) 
 						|| suggestedLiteral.equals(getRuleName(SubmittedByMe)))) {
 			return null;	
-		}
-		
-		if (getProject() == null 
-				&& (suggestedLiteral.equals(getRuleName(FixedBetween)) 
-						|| suggestedLiteral.equals(getRuleName(FixedInBuild)))) {
-			return null;
 		}
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");

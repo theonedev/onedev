@@ -11,7 +11,6 @@ import static io.onedev.server.util.BuildConstants.FIELD_VERSION;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -48,6 +47,7 @@ import io.onedev.server.search.entity.build.BuildQueryParser.OrderContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.QueryContext;
 import io.onedev.server.util.BuildConstants;
+import io.onedev.server.util.ProjectAwareCommitId;
 
 public class BuildQuery extends EntityQuery<Build> {
 
@@ -133,38 +133,22 @@ public class BuildQuery extends EntityQuery<Build> {
 					@Override
 					public EntityCriteria<Build> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
-						if (ctx.SubmittedBy() != null) {
+						if (ctx.SubmittedBy() != null) 
 							return new SubmittedByCriteria(getUser(value), value);
-						} else if (ctx.CancelledBy() != null) {
+						else if (ctx.CancelledBy() != null) 
 							return new CancelledByCriteria(getUser(value), value);
-						} else if (ctx.FixedIssue() != null) {
-							if (project != null)
-								return new FixedIssueCriteria(getIssue(project, value));
-							else
-								throw new OneException("Unsupported criteria in global build query: " + getRuleName(BuildQueryLexer.FixedIssue));
-						} else if (ctx.DependsOn() != null) {
-							if (project != null)
-								return new DependsOnCriteria(getBuild(project, value));
-							else
-								throw new OneException("Unsupported criteria in global build query: " + getRuleName(BuildQueryLexer.DependsOn));
-						} else if (ctx.DependenciesOf() != null) {
-							if (project != null)
-								return new DependenciesOfCriteria(getBuild(project, value));
-							else
-								throw new OneException("Unsupported criteria in global build query: " + getRuleName(BuildQueryLexer.DependenciesOf));
-						} else if (ctx.RequiredByPullRequest() != null) {
-							if (project != null)
-								return new RequiredByPullRequestCriteria(getPullRequest(project, value));
-							else
-								throw new OneException("Unsupported criteria in global build query: " + getRuleName(BuildQueryLexer.RequiredByPullRequest));
-						} else if (ctx.AssociatedWithPullRequest() != null) {
-							if (project != null)
-								return new AssociatedWithPullRequestCriteria(getPullRequest(project, value));
-							else
-								throw new OneException("Unsupported criteria in global build query: " + getRuleName(BuildQueryLexer.AssociatedWithPullRequest));
-						} else {
+						else if (ctx.FixedIssue() != null) 
+							return new FixedIssueCriteria(project, value);
+						else if (ctx.DependsOn() != null) 
+							return new DependsOnCriteria(project, value);
+						else if (ctx.DependenciesOf() != null) 
+							return new DependenciesOfCriteria(project, value);
+						else if (ctx.RequiredByPullRequest() != null) 
+							return new RequiredByPullRequestCriteria(project, value);
+						else if (ctx.AssociatedWithPullRequest() != null) 
+							return new AssociatedWithPullRequestCriteria(project, value);
+						else 
 							throw new RuntimeException("Unexpected criteria: " + ctx.operator.getText());
-						}
 					}
 					
 					@Override
@@ -182,24 +166,21 @@ public class BuildQuery extends EntityQuery<Build> {
 						switch (operator) {
 						case BuildQueryLexer.IsBefore:
 						case BuildQueryLexer.IsAfter:
-							Date dateValue = getDateValue(value);
 							if (fieldName.equals(FIELD_SUBMIT_DATE))
-								return new SubmitDateCriteria(dateValue, value, operator);
+								return new SubmitDateCriteria(value, operator);
 							else if (fieldName.equals(FIELD_QUEUEING_DATE))
-								return new QueueingDateCriteria(dateValue, value, operator);
+								return new QueueingDateCriteria(value, operator);
 							else if (fieldName.equals(FIELD_RUNNING_DATE))
-								return new RunningDateCriteria(dateValue, value, operator);
+								return new RunningDateCriteria(value, operator);
 							else if (fieldName.equals(FIELD_FINISH_DATE))
-								return new FinishDateCriteria(dateValue, value, operator);
+								return new FinishDateCriteria(value, operator);
 							else
 								throw new IllegalStateException();
 						case BuildQueryLexer.Is:
 							switch (fieldName) {
 							case FIELD_COMMIT:
-								if (project != null)
-									return new CommitCriteria(getCommitId(project, value));
-								else
-									throw new OneException("Unable to query by commit in global build query");
+								ProjectAwareCommitId commitId = getCommitId(project, value); 
+								return new CommitCriteria(commitId.getProject(), commitId.getCommitId());
 							case FIELD_JOB:
 								return new JobCriteria(value);
 							case FIELD_NUMBER:

@@ -80,6 +80,8 @@ public abstract class BuildListPanel extends Panel {
 	
 	private final String query;
 	
+	private final Integer expectedCount;
+	
 	private IModel<BuildQuery> parsedQueryModel = new LoadableDetachableModel<BuildQuery>() {
 
 		@Override
@@ -105,9 +107,10 @@ public abstract class BuildListPanel extends Panel {
 	
 	private DataTable<Build, Void> buildsTable;
 	
-	public BuildListPanel(String id, @Nullable String query) {
+	public BuildListPanel(String id, @Nullable String query, @Nullable Integer expectedCount) {
 		super(id);
 		this.query = query;
+		this.expectedCount = expectedCount;
 	}
 	
 	private BuildManager getBuildManager() {
@@ -278,6 +281,9 @@ public abstract class BuildListPanel extends Panel {
 			
 		};
 		
+		if (expectedCount != null && expectedCount != dataProvider.size())
+			warn("Some builds might be hidden due to permission policy");
+		
 		body.add(new NotificationPanel("feedback", this));
 		
 		List<IColumn<Build, Void>> columns = new ArrayList<>();
@@ -417,7 +423,7 @@ public abstract class BuildListPanel extends Panel {
 
 						@Override
 						protected Project getProject() {
-							return BuildListPanel.this.getProject();
+							return rowModel.getObject().getProject();
 						}
 						
 					};

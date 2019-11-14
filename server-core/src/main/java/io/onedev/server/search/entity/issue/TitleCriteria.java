@@ -6,7 +6,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.IssueConstants;
 
@@ -21,7 +20,7 @@ public class TitleCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
 		Path<String> attribute = root.get(IssueConstants.ATTR_TITLE);
 		return builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
 	}

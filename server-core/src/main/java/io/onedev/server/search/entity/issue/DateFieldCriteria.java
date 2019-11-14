@@ -8,41 +8,41 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityQuery;
 
 public class DateFieldCriteria extends FieldCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private final Date value;
+	private final Date date;
 	
-	private final String rawValue;
+	private final String value;
 	
 	private final int operator;
 	
-	public DateFieldCriteria(String name, Date value, String rawValue, int operator) {
+	public DateFieldCriteria(String name, String value, int operator) {
 		super(name);
+		date = EntityQuery.getDateValue(value);
 		this.value = value;
-		this.rawValue = rawValue;
 		this.operator = operator;
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Project project, Join<?, ?> field, CriteriaBuilder builder, User user) {
+	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
 		if (operator == IssueQueryLexer.IsBefore)
-			return builder.lessThan(field.get(IssueField.ATTR_ORDINAL), value.getTime());
+			return builder.lessThan(field.get(IssueField.ATTR_ORDINAL), date.getTime());
 		else
-			return builder.greaterThan(field.get(IssueField.ATTR_ORDINAL), value.getTime());
+			return builder.greaterThan(field.get(IssueField.ATTR_ORDINAL), date.getTime());
 	}
 
 	@Override
 	public boolean matches(Issue issue, User user) {
 		Date fieldValue = (Date) issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.IsBefore)
-			return fieldValue != null && fieldValue.before(value);
+			return fieldValue != null && fieldValue.before(date);
 		else
-			return fieldValue != null && fieldValue.after(value);
+			return fieldValue != null && fieldValue.after(date);
 	}
 
 	@Override
@@ -52,7 +52,8 @@ public class DateFieldCriteria extends FieldCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(rawValue);
+		return IssueQuery.quote(getFieldName()) + " " + IssueQuery.getRuleName(operator) 
+			+ " " + IssueQuery.quote(value);
 	}
 
 }

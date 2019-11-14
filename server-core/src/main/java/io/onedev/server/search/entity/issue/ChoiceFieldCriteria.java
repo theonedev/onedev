@@ -15,7 +15,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
@@ -43,7 +42,7 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Project project, Join<?, ?> field, CriteriaBuilder builder, User user) {
+	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
 		if (allowMultiple) {
 			return builder.equal(field.get(IssueField.ATTR_VALUE), String.valueOf(value));
 		} else {

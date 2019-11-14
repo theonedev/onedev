@@ -17,21 +17,27 @@ public class CommitCriteria extends EntityCriteria<Build>  {
 
 	private static final long serialVersionUID = 1L;
 
-	private final ObjectId value;
+	private final Project project; 
 	
-	public CommitCriteria(ObjectId value) {
-		this.value = value;
+	private final ObjectId commitId;
+	
+	public CommitCriteria(Project project, ObjectId commitId) {
+		this.project = project;
+		this.commitId = commitId;
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
-		Path<?> attribute = BuildQuery.getPath(root, BuildConstants.ATTR_COMMIT);
-		return builder.equal(attribute, value.name());
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
+		Path<?> projectAttribute = BuildQuery.getPath(root, BuildConstants.ATTR_PROJECT);
+		Path<?> commitAttribute = BuildQuery.getPath(root, BuildConstants.ATTR_COMMIT);
+		return builder.and(
+				builder.equal(projectAttribute, project), 
+				builder.equal(commitAttribute, commitId.name()));
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return build.getCommitHash().equals(value.name());
+		return build.getProject().equals(project) && build.getCommitHash().equals(commitId.name());
 	}
 
 	@Override
@@ -41,7 +47,7 @@ public class CommitCriteria extends EntityCriteria<Build>  {
 
 	@Override
 	public String toString() {
-		return BuildQuery.quote(BuildConstants.FIELD_COMMIT) + " " + BuildQuery.getRuleName(BuildQueryLexer.Is) + " " + BuildQuery.quote(value.name());
+		return BuildQuery.quote(BuildConstants.FIELD_COMMIT) + " " + BuildQuery.getRuleName(BuildQueryLexer.Is) + " " + BuildQuery.quote(commitId.name());
 	}
 
 }

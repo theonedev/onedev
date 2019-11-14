@@ -11,7 +11,7 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.ProjectAndRevision;
+import io.onedev.server.util.ProjectAndRevision;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.modal.ModalPanel;

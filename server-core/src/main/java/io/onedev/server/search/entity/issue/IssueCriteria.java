@@ -6,13 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -21,9 +16,6 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	
 	private static final long serialVersionUID = 1L;
 	
-	public abstract Predicate getPredicate(@Nullable Project project, Root<Issue> root, 
-			CriteriaBuilder builder, @Nullable User user);
-
 	public final void fill(Issue issue) {
 		fill(issue, new HashSet<>());
 	}
@@ -70,4 +62,5 @@ public abstract class IssueCriteria extends EntityCriteria<Issue> {
 	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
 		return false;
 	}
+	
 }

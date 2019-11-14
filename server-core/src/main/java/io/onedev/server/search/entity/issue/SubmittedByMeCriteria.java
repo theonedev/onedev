@@ -8,7 +8,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.IssueConstants;
 
@@ -17,7 +16,7 @@ public class SubmittedByMeCriteria extends IssueCriteria {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
 		Path<User> attribute = root.get(IssueConstants.ATTR_SUBMITTER);
 		return builder.equal(attribute, user);
 	}

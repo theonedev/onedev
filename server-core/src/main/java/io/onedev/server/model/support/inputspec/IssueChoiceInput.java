@@ -40,7 +40,7 @@ public class IssueChoiceInput {
 
 	public static List<String> convertToStrings(Object value) {
 		if (value instanceof Long)
-			return Lists.newArrayList((String) value);
+			return Lists.newArrayList(value.toString());
 		else
 			return new ArrayList<>();
 	}

@@ -7,7 +7,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
@@ -25,7 +24,7 @@ public class ToBeReviewedByCriteria extends PullRequestCriteria {
 	}
 	
 	@Override
-	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
 		From<?, ?> join = root.join(PullRequestConstants.ATTR_REVIEWS, JoinType.LEFT);
 		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.ATTR_USER);
 		Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.ATTR_EXCLUDE_DATE);
@@ -49,7 +48,8 @@ public class ToBeReviewedByCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ToBeReviewedBy) + " " + PullRequestQuery.quote(value.getName());
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ToBeReviewedBy) 
+				+ " " + PullRequestQuery.quote(value.getName());
 	}
 
 }

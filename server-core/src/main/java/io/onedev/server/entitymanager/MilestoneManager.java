@@ -14,5 +14,7 @@ public interface MilestoneManager extends EntityManager<Milestone> {
 	void delete(Milestone milestone, @Nullable Milestone moveIssuesToMilestone);
 	
 	void close(Milestone milestone, @Nullable Milestone moveOpenIssuesToMilestone);
+
+	Milestone find(String milestoneFQN);
 	
 }

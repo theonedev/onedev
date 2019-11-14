@@ -55,7 +55,8 @@ public class PullRequestChoiceProvider extends ChoiceProvider<PullRequest> {
 	public void query(String term, int page, Response<PullRequest> response) {
 		int count = (page+1) * WebConstants.PAGE_SIZE;
 		Project project = projectModel.getObject();
-		List<PullRequest> requests = OneDev.getInstance(PullRequestManager.class).query(project, term, count);		
+		List<PullRequest> requests = OneDev.getInstance(PullRequestManager.class)
+				.query(project, term, count);		
 		new ResponseFiller<>(response).fill(requests, page, WebConstants.PAGE_SIZE);
 	}
 	

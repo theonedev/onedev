@@ -501,7 +501,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public BuildFacade getFacade() {
-		return new BuildFacade(getId(), getProject().getId(), getCommitHash(), getJobName());
+		return new BuildFacade(getId(), getProject().getId(), getCommitHash());
 	}
 	
 	public Collection<String> getSecretValuesToMask() {

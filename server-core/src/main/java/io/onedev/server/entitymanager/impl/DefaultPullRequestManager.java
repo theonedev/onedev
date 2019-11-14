@@ -97,7 +97,6 @@ import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.FileProtection;
-import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -126,6 +125,7 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.WriteCode;
+import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
@@ -965,7 +965,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 		
 		if (criteria != null)
-			predicates.add(criteria.getPredicate(targetProject, root, builder, user));
+			predicates.add(criteria.getPredicate(root, builder, user));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
@@ -1066,24 +1066,34 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public List<PullRequest> query(Project targetProject, @Nullable String term, int count) {
+	public PullRequest find(String pullRequestFQN) {
+		String projectName = StringUtils.substringBefore(pullRequestFQN, "#");
+		Project project = projectManager.find(projectName);
+		if (project != null) {
+			String pullRequestNumberStr = StringUtils.substringAfter(pullRequestFQN, "#");
+			try {
+				Long pullRequestNumber = Long.valueOf(pullRequestNumberStr);
+				return find(project, pullRequestNumber);
+			} catch (NumberFormatException e) {
+				throw new OneException("Invalid pull request number: " + pullRequestNumberStr);
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	@Sessional
+	@Override
+	public List<PullRequest> query(Project project, String term, int count) {
 		List<PullRequest> requests = new ArrayList<>();
 
 		EntityCriteria<PullRequest> criteria = newCriteria();
-		criteria.add(Restrictions.eq("targetProject", targetProject));
+		criteria.add(Restrictions.eq(PullRequestConstants.ATTR_TARGET_PROJECT, project));
 		
-		if (StringUtils.isNotBlank(term)) {
-			if (term.startsWith("#")) {
-				term = term.substring(1);
-				try {
-					long buildNumber = Long.parseLong(term);
-					criteria.add(Restrictions.eq("number", buildNumber));
-				} catch (NumberFormatException e) {
-					criteria.add(Restrictions.or(
-							Restrictions.ilike("title", "#" + term, MatchMode.ANYWHERE),
-							Restrictions.ilike("noSpaceTitle", "#" + term, MatchMode.ANYWHERE)));
-				}
-			} else try {
+		if (term.startsWith("#"))
+			term = term.substring(1);
+		if (term.length() != 0) {
+			try {
 				long buildNumber = Long.parseLong(term);
 				criteria.add(Restrictions.eq("number", buildNumber));
 			} catch (NumberFormatException e) {

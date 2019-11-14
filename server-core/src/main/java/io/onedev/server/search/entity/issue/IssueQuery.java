@@ -1,11 +1,18 @@
 package io.onedev.server.search.entity.issue;
 
-import static io.onedev.server.util.IssueConstants.*;
+import static io.onedev.server.util.IssueConstants.FIELD_COMMENT;
+import static io.onedev.server.util.IssueConstants.FIELD_COMMENT_COUNT;
+import static io.onedev.server.util.IssueConstants.FIELD_DESCRIPTION;
+import static io.onedev.server.util.IssueConstants.FIELD_MILESTONE;
+import static io.onedev.server.util.IssueConstants.FIELD_NUMBER;
+import static io.onedev.server.util.IssueConstants.FIELD_STATE;
+import static io.onedev.server.util.IssueConstants.FIELD_SUBMIT_DATE;
+import static io.onedev.server.util.IssueConstants.FIELD_TITLE;
+import static io.onedev.server.util.IssueConstants.FIELD_UPDATE_DATE;
+import static io.onedev.server.util.IssueConstants.FIELD_VOTE_COUNT;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -21,8 +28,6 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
-import org.eclipse.jgit.errors.RevisionSyntaxException;
-import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.server.OneDev;
@@ -131,8 +136,6 @@ public class IssueQuery extends EntityQuery<Issue> {
 					@Override
 					public IssueCriteria visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
-						case IssueQueryLexer.Mine:
-							return new MineCriteria();
 						case IssueQueryLexer.SubmittedByMe:
 							return new SubmittedByMeCriteria();
 						default:
@@ -156,45 +159,25 @@ public class IssueQuery extends EntityQuery<Issue> {
 					
 					public IssueCriteria visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
-						if (ctx.SubmittedBy() != null) {
+						if (ctx.SubmittedBy() != null) 
 							return new SubmittedByCriteria(getUser(value), value);
-						} else if (ctx.FixedInBuild() != null) {
-							if (project != null)
-								return new FixedInCriteria(getBuild(project, value));
-							else
-								throw new OneException("Unsupported criteria in global issue query: " + getRuleName(IssueQueryLexer.FixedInBuild));
-						} else {
+						else if (ctx.FixedInBuild() != null) 
+							return new FixedInCriteria(project, value);
+						else 
 							throw new RuntimeException("Unexpected operator: " + ctx.operator.getText());
-						}
 					}
 					
-					private ObjectId getCommitId(Project project, RevisionCriteriaContext revision) {
-						String value = getValue(revision.Quoted().getText());
-						if (revision.Build() != null) {
-							return ObjectId.fromString(getBuild(project, value).getCommitHash());
-						} else {
-							try {
-								return project.getRepository().resolve(value);
-							} catch (RevisionSyntaxException | IOException e) {
-								throw new OneException("Invalid revision: " + value);
-							}
-						}
-					}
-					
+					@Override
 					public IssueCriteria visitFixedBetweenCriteria(FixedBetweenCriteriaContext ctx) {
-						if (project == null)
-							throw new OneException("Unsupported criteria in global issue query: " + getRuleName(IssueQueryLexer.FixedBetween));
-						
 						RevisionCriteriaContext sinceRevision = ctx.revisionCriteria(0);
 						int sinceType = sinceRevision.revisionType.getType();
 						String sinceValue = getValue(sinceRevision.Quoted().getText());
-						ObjectId sinceCommitId = getCommitId(project, sinceRevision);
 						
 						RevisionCriteriaContext untilRevision = ctx.revisionCriteria(1);
 						int untilType = untilRevision.revisionType.getType();
 						String untilValue = getValue(untilRevision.Quoted().getText());
-						ObjectId untilCommitId = getCommitId(project, untilRevision);
-						return new FixedBetweenCriteria(sinceType, sinceValue, sinceCommitId, untilType, untilValue, untilCommitId);
+						
+						return new FixedBetweenCriteria(project, sinceType, sinceValue, untilType, untilValue);
 					}
 					
 					@Override
@@ -213,13 +196,12 @@ public class IssueQuery extends EntityQuery<Issue> {
 						switch (operator) {
 						case IssueQueryLexer.IsBefore:
 						case IssueQueryLexer.IsAfter:
-							Date dateValue = getDateValue(value);
 							if (fieldName.equals(FIELD_SUBMIT_DATE)) 
-								return new SubmitDateCriteria(dateValue, value, operator);
+								return new SubmitDateCriteria(value, operator);
 							else if (fieldName.equals(FIELD_UPDATE_DATE))
-								return new UpdateDateCriteria(dateValue, value, operator);
+								return new UpdateDateCriteria(value, operator);
 							else 
-								return new DateFieldCriteria(fieldName, dateValue, value, operator);
+								return new DateFieldCriteria(fieldName, value, operator);
 						case IssueQueryLexer.Contains:
 							if (fieldName.equals(FIELD_TITLE)) {
 								return new TitleCriteria(value);
@@ -253,12 +235,12 @@ public class IssueQuery extends EntityQuery<Issue> {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
 								FieldSpec field = getIssueSetting().getFieldSpec(fieldName);
-								if (field instanceof IssueChoiceField || field instanceof BuildChoiceField 
-										|| field instanceof PullRequestChoiceField) {
-									value = value.trim();
-									if (value.startsWith("#"))
-										value = value.substring(1);
-									return new ReferenceableFieldCriteria(fieldName, getIntValue(value));
+								if (field instanceof IssueChoiceField) {
+									return new IssueFieldCriteria(fieldName, project, value);
+								} else if (field instanceof BuildChoiceField) {
+									return new BuildFieldCriteria(fieldName, project, value);
+								} else if (field instanceof PullRequestChoiceField) {
+									return new PullRequestFieldCriteria(fieldName, project, value);
 								} else if (field instanceof BooleanField) {
 									return new BooleanFieldCriteria(fieldName, getBooleanValue(value));
 								} else if (field instanceof NumberField) {

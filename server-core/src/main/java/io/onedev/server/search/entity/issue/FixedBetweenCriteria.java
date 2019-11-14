@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -19,17 +20,23 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.ProjectAwareCommitId;
 
 public class FixedBetweenCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 
+	private final Project project;
+	
 	private final int sinceType;
 	
 	private final String sinceValue;
@@ -42,18 +49,35 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	
 	private final ObjectId untilCommitId;
 	
-	public FixedBetweenCriteria(int sinceType, String sinceValue, ObjectId sinceCommitId, 
-			int untilType, String untilValue, ObjectId untilCommitId) {
+	public FixedBetweenCriteria(@Nullable Project project, int sinceType, String sinceValue, int untilType, String untilValue) {
 		this.sinceType = sinceType;
 		this.sinceValue = sinceValue;
-		this.sinceCommitId = sinceCommitId;
 		this.untilType = untilType;
 		this.untilValue = untilValue;
-		this.untilCommitId = untilCommitId;
+
+		ProjectAwareCommitId since = getCommitId(project, sinceType, sinceValue);
+		ProjectAwareCommitId until = getCommitId(project, untilType, untilValue);
+		sinceCommitId = since.getCommitId();
+		untilCommitId = until.getCommitId();
+		if (since.getProject().equals(until.getProject())) { 
+			this.project = since.getProject();
+		} else {
+			throw new OneException("'" + getRuleName(IssueQueryLexer.FixedBetween) 
+				+ "' should be used for same projects");
+		}
+	}
+	
+	private static ProjectAwareCommitId getCommitId(@Nullable Project project, int type, String value) {
+		if (type == IssueQueryLexer.Build) {
+			Build build = EntityQuery.getBuild(project, value);
+			return new ProjectAwareCommitId(build.getProject(), build.getCommitId());
+		} else {
+			return EntityQuery.getCommitId(project, value);
+		}
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
 		Set<Long> fixedIssueNumbers = new HashSet<>();
 		
 		Repository repository = project.getRepository();
@@ -67,33 +91,39 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		
+
+		Predicate issuePredicate;
 		Path<Long> attribute = root.get(IssueConstants.ATTR_NUMBER);		
 		if (fixedIssueNumbers.size() > IN_CLAUSE_LIMIT) {
 			Collection<Long> allIssueNumbers = OneDev.getInstance(IssueManager.class).getIssueNumbers(project.getId());
-			return inManyValues(builder, attribute, fixedIssueNumbers, allIssueNumbers);
+			issuePredicate = inManyValues(builder, attribute, fixedIssueNumbers, allIssueNumbers);
 		} else if (!fixedIssueNumbers.isEmpty()) {
-			return root.get(IssueConstants.ATTR_NUMBER).in(fixedIssueNumbers);
+			issuePredicate = root.get(IssueConstants.ATTR_NUMBER).in(fixedIssueNumbers);
 		} else {
-			return builder.disjunction();
+			issuePredicate = builder.disjunction();
 		}
+		return builder.and(builder.equal(root.get(IssueConstants.ATTR_PROJECT), project), issuePredicate);
 	}
 
 	@Override
 	public boolean matches(Issue issue, User user) {
-		Repository repository = issue.getProject().getRepository();
-		try (RevWalk revWalk = new RevWalk(repository)) {
-			revWalk.markStart(revWalk.parseCommit(untilCommitId));
-			revWalk.markUninteresting(revWalk.parseCommit(sinceCommitId));
+		if (project.equals(issue.getProject())) {
+			Repository repository = issue.getProject().getRepository();
+			try (RevWalk revWalk = new RevWalk(repository)) {
+				revWalk.markStart(revWalk.parseCommit(untilCommitId));
+				revWalk.markUninteresting(revWalk.parseCommit(sinceCommitId));
 
-			RevCommit commit;
-			while ((commit = revWalk.next()) != null) { 
-				if (IssueUtils.parseFixedIssues(issue.getProject(), commit.getFullMessage()).contains(issue.getNumber()))
-					return true;
+				RevCommit commit;
+				while ((commit = revWalk.next()) != null) { 
+					if (IssueUtils.parseFixedIssues(project, commit.getFullMessage()).contains(issue.getNumber()))
+						return true;
+				}
+				return false;
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
+		} else {
 			return false;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 	}
 

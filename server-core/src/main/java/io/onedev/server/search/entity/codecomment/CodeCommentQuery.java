@@ -43,6 +43,7 @@ import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrderCo
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.QueryContext;
 import io.onedev.server.util.CodeCommentConstants;
+import io.onedev.server.util.ProjectAwareCommitId;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
 
@@ -102,10 +103,12 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 					public EntityCriteria<CodeComment> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						int operator = ctx.operator.getType();
 						String value = getValue(ctx.Quoted().getText());
-						if (operator == CodeCommentQueryLexer.CreatedBy)
+						if (operator == CodeCommentQueryLexer.CreatedBy) {
 							return new CreatedByCriteria(getUser(value));
-						else
-							return new OnCommitCriteria(getCommitId(project, value));
+						} else {
+							ProjectAwareCommitId commitId = getCommitId(project, value); 
+							return new OnCommitCriteria(commitId.getProject(), commitId.getCommitId());
+						}
 					}
 					
 					@Override

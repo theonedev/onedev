@@ -8,8 +8,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.IssueConstants;
 
 public class SubmitDateCriteria extends IssueCriteria {
@@ -18,31 +18,31 @@ public class SubmitDateCriteria extends IssueCriteria {
 
 	private final int operator;
 	
-	private final Date value;
+	private final String value;
 	
-	private final String rawValue;
+	private final Date date;
 	
-	public SubmitDateCriteria(Date value, String rawValue, int operator) {
+	public SubmitDateCriteria(String value, int operator) {
+		date = EntityQuery.getDateValue(value);
 		this.operator = operator;
 		this.value = value;
-		this.rawValue = rawValue;
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
 		Path<Date> attribute = root.get(IssueConstants.ATTR_SUBMIT_DATE);
 		if (operator == IssueQueryLexer.IsBefore)
-			return builder.lessThan(attribute, value);
+			return builder.lessThan(attribute, date);
 		else
-			return builder.greaterThan(attribute, value);
+			return builder.greaterThan(attribute, date);
 	}
 
 	@Override
 	public boolean matches(Issue issue, User user) {
 		if (operator == IssueQueryLexer.IsBefore)
-			return issue.getSubmitDate().before(value);
+			return issue.getSubmitDate().before(date);
 		else
-			return issue.getSubmitDate().after(value);
+			return issue.getSubmitDate().after(date);
 	}
 
 	@Override
@@ -52,7 +52,8 @@ public class SubmitDateCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(IssueConstants.FIELD_SUBMIT_DATE) + " " + IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(rawValue);
+		return IssueQuery.quote(IssueConstants.FIELD_SUBMIT_DATE) + " " 
+				+ IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(value);
 	}
 
 }

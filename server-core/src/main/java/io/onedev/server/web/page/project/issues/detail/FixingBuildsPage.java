@@ -33,7 +33,7 @@ public class FixingBuildsPage extends IssueDetailPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new BuildListPanel("builds", query) {
+		add(new BuildListPanel("builds", query, null) {
 
 			@Override
 			protected BuildQuery getBaseQuery() {

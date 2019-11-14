@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -25,8 +26,10 @@ import org.slf4j.LoggerFactory;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.MembershipManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Group;
@@ -37,10 +40,15 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
+import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.CreateProjects;
+import io.onedev.server.security.permission.EditIssueField;
+import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ManageProject;
 import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.UserAdministration;
 
@@ -57,12 +65,14 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     
     private final GroupManager groupManager;
     
+    private final ProjectManager projectManager;
+    
     private final TransactionManager transactionManager;
     
 	@Inject
     public OneAuthorizingRealm(UserManager userManager, SettingManager configManager, 
     		MembershipManager membershipManager, GroupManager groupManager, 
-    		TransactionManager transactionManager) {
+    		ProjectManager projectManager, TransactionManager transactionManager) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(AppLoader.getInstance(PasswordService.class));
 		setCredentialsMatcher(passwordMatcher);
@@ -71,6 +81,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     	this.configManager = configManager;
     	this.membershipManager = membershipManager;
     	this.groupManager = groupManager;
+    	this.projectManager = projectManager;
     	this.transactionManager = transactionManager;
     }
 
@@ -90,11 +101,21 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 				return new HashSet<>();
 			}
 			
-			private Collection<Permission> getGroupPermissions(Group group) {
+			private Collection<Permission> getGroupPermissions(Group group, @Nullable User user) {
 				Collection<Permission> permissions = new ArrayList<>();
-        		if (group.isAdministrator())
-        			permissions.add(new SystemAdministration());
-        		if (group.isCreateProjects())
+        		if (group.isAdministrator()) {
+        			if (user != null) {
+        				permissions.add(new SystemAdministration());
+        			} else {
+        				for (Project project: projectManager.query()) {
+        					permissions.add(new ProjectPermission(project, new ReadCode()));
+        					for (FieldSpec field: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs())
+        						permissions.add(new ProjectPermission(project, new EditIssueField(field.getName())));
+        					permissions.add(new ProjectPermission(project, new JobPermission("*", new AccessBuildLog())));
+        				}
+        			}
+        		}
+        		if (user != null && group.isCreateProjects())
         			permissions.add(new CreateProjects());
         		for (GroupAuthorization authorization: group.getProjectAuthorizations()) 
 					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
@@ -110,13 +131,14 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 						Long userId = (Long) principals.getPrimaryPrincipal();						
 						Collection<Permission> permissions = new ArrayList<>();
 
+						User user = null;
 				        if (userId != 0L) { 
-				            User user = userManager.load(userId);
+				            user = userManager.load(userId);
 				        	if (user.isRoot()) 
 				        		permissions.add(new SystemAdministration());
 				        	permissions.add(new UserAdministration(user));
 				           	for (Group group: user.getGroups())
-				           		permissions.addAll(getGroupPermissions(group));
+				           		permissions.addAll(getGroupPermissions(group, user));
 				        	for (UserAuthorization authorization: user.getProjectAuthorizations()) 
             					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
 				        	for (Project project: user.getProjects()) 
@@ -124,7 +146,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 				        } 
 			        	Group group = groupManager.findAnonymous();
 			        	if (group != null)
-			           		permissions.addAll(getGroupPermissions(group));
+			           		permissions.addAll(getGroupPermissions(group, user));
 						return permissions;
 					}
 					

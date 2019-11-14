@@ -7,7 +7,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.util.IssueConstants;
 
@@ -22,7 +21,7 @@ public class DescriptionCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
 		Expression<String> attribute = root.get(IssueConstants.ATTR_DESCRIPTION);
 		if (value != null)
 			return builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
@@ -45,10 +44,13 @@ public class DescriptionCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		if (value != null)
-			return IssueQuery.quote(IssueConstants.FIELD_DESCRIPTION) + " " + IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " + IssueQuery.quote(value);
-		else
-			return IssueQuery.quote(IssueConstants.FIELD_DESCRIPTION) + " " + IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
+		if (value != null) {
+			return IssueQuery.quote(IssueConstants.FIELD_DESCRIPTION) + " " 
+					+ IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " + IssueQuery.quote(value);
+		} else {
+			return IssueQuery.quote(IssueConstants.FIELD_DESCRIPTION) + " " 
+					+ IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
+		}
 	}
 
 }

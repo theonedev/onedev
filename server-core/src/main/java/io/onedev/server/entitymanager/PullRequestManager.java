@@ -8,12 +8,12 @@ import javax.annotation.Nullable;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.ProjectAndBranch;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.ProjectAndBranch;
 
 public interface PullRequestManager extends EntityManager<PullRequest> {
     
@@ -29,6 +29,9 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
     
     @Nullable
     PullRequest find(Project targetProject, long number);
+    
+    @Nullable
+    PullRequest find(String pullRequestFQN);
     
 	@Nullable
 	PullRequest findLatest(Project targetProject, User submitter);

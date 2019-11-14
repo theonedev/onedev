@@ -1,7 +1,6 @@
 package io.onedev.server.search.entity.pullrequest;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -134,15 +133,9 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						case PullRequestQueryLexer.DiscardedBy:
 							return new DiscardedByCriteria(getUser(value));
 						case PullRequestQueryLexer.IncludesCommit:
-							if (project != null)
-								return new IncludesCommitCriteria(getCommitId(project, value));
-							else
-								throw new OneException("Unsupported criteria in global issue query: " + getRuleName(PullRequestQueryLexer.IncludesCommit));
+							return new IncludesCommitCriteria(project, value);
 						case PullRequestQueryLexer.IncludesIssue:
-							if (project != null)
-								return new IncludesIssueCriteria(getIssue(project, value));
-							else
-								throw new OneException("Unsupported criteria in global issue query: " + getRuleName(PullRequestQueryLexer.IncludesIssue));
+							return new IncludesIssueCriteria(project, value);
 						default:
 							throw new OneException("Unexpected operator: " + ctx.operator.getText());
 						}
@@ -163,14 +156,13 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						switch (operator) {
 						case PullRequestQueryLexer.IsBefore:
 						case PullRequestQueryLexer.IsAfter:
-							Date dateValue = getDateValue(value);
 							switch (fieldName) {
 							case PullRequestConstants.FIELD_SUBMIT_DATE:
-								return new SubmitDateCriteria(dateValue, value, operator);
+								return new SubmitDateCriteria(value, operator);
 							case PullRequestConstants.FIELD_UPDATE_DATE:
-								return new UpdateDateCriteria(dateValue, value, operator);
+								return new UpdateDateCriteria(value, operator);
 							case PullRequestConstants.FIELD_CLOSE_DATE:
-								return new CloseDateCriteria(dateValue, value, operator);
+								return new CloseDateCriteria(value, operator);
 							default:
 								throw new IllegalStateException();
 							}

@@ -16,6 +16,7 @@ import java.util.Set;
 
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.apache.wicket.Component;
@@ -102,6 +103,7 @@ public class Job implements Serializable, Validatable {
 	private transient Map<String, ParamSpec> paramSpecMap;
 	
 	@Editable(order=100, description="Specify name of the job")
+	@Pattern(regexp="[^:]*", message="Character ':' is not allowed") // ':' will be used as project/job separator in build query
 	@NotEmpty
 	public String getName() {
 		return name;

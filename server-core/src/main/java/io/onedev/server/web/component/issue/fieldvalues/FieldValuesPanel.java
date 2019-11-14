@@ -67,10 +67,12 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						UserIdent userIdent = UserIdent.of(OneDev.getInstance(UserManager.class).findByName(value), value);
 						item.add(new UserIdentPanel("value", userIdent, Mode.AVATAR_AND_NAME));
 					} else if (getField().getType().equals(FieldSpec.ISSUE)) {
-						Issue issue = OneDev.getInstance(IssueManager.class).find(getIssue().getProject(), Long.valueOf(value));
+						Issue issue = OneDev.getInstance(IssueManager.class)
+								.find(getIssue().getProject(), Long.valueOf(value));
 						if (issue != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
-							Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(issue, null));
+							Link<Void> link = new BookmarkablePageLink<Void>("link", IssueActivitiesPage.class, 
+									IssueActivitiesPage.paramsOf(issue, null));
 							link.add(new Label("label", "#" + issue.getNumber()));
 							linkFrag.add(link);
 							item.add(linkFrag);
@@ -78,7 +80,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 							item.add(new Label("value", "#" + value));
 						}
 					} else if (getField().getType().equals(FieldSpec.BUILD)) {
-						Build build = OneDev.getInstance(BuildManager.class).get(Long.valueOf(value));
+						Build build = OneDev.getInstance(BuildManager.class)
+								.find(getIssue().getProject(), Long.valueOf(value));
 						if (build != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
 							Link<Void> link = new BookmarkablePageLink<Void>("link", 
@@ -90,10 +93,12 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 							item.add(new Label("value", "#" + value));
 						}
 					} else if (getField().getType().equals(FieldSpec.PULLREQUEST)) {
-						PullRequest request = OneDev.getInstance(PullRequestManager.class).find(getIssue().getProject(), Long.valueOf(value));
+						PullRequest request = OneDev.getInstance(PullRequestManager.class)
+								.find(getIssue().getProject(), Long.valueOf(value));
 						if (request != null) {
 							Fragment linkFrag = new Fragment("value", "linkFrag", FieldValuesPanel.this);
-							Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, PullRequestActivitiesPage.paramsOf(request, null));
+							Link<Void> link = new BookmarkablePageLink<Void>("link", PullRequestActivitiesPage.class, 
+									PullRequestActivitiesPage.paramsOf(request, null));
 							link.add(new Label("label", "#" + request.getNumber()));
 							linkFrag.add(link);
 							item.add(linkFrag);

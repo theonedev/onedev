@@ -9,7 +9,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.CodeCommentRelation;
 import io.onedev.server.model.CodeCommentReply;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
@@ -27,7 +26,7 @@ public class CommentCriteria extends PullRequestCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
 		From<?, ?> join = root.join(PullRequestConstants.ATTR_COMMENTS, JoinType.LEFT);
 		Path<String> attribute = join.get(PullRequestComment.ATTR_CONTENT);
 		Predicate commentPredicate = builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");

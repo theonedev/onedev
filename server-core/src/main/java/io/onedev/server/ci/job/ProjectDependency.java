@@ -15,6 +15,8 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
+import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.interpolative.Segment;
@@ -55,8 +57,9 @@ public class ProjectDependency implements Serializable {
 	private static List<String> getProjectChoices() {
 		List<String> choices = new ArrayList<>();
 		Project project = ((ProjectPage)WicketUtils.getPage()).getProject();
-		for (Project each: OneDev.getInstance(ProjectManager.class).query()) {
-			if (!each.equals(project) && SecurityUtils.canReadCode(each))
+		User user = SecurityUtils.getUser();
+		for (Project each: OneDev.getInstance(ProjectManager.class).getPermittedProjects(user, new AccessProject())) {
+			if (!each.equals(project))
 				choices.add(each.getName());
 		}
 		

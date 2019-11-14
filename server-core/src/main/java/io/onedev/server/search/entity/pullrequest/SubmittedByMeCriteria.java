@@ -7,7 +7,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.PullRequestConstants;
@@ -17,7 +16,7 @@ public class SubmittedByMeCriteria extends PullRequestCriteria {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
 		Path<?> attribute = root.get(PullRequestConstants.ATTR_SUBMITTER);
 		return builder.equal(attribute, user);
 	}

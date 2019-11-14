@@ -101,7 +101,10 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
 									} else if (fieldName.equals(BuildConstants.FIELD_JOB)) {
-										return SuggestionUtils.suggestJobs(projectModel.getObject(), matchWith);
+										if (project != null)
+											return SuggestionUtils.suggestJobs(project, matchWith);
+										else
+											return null;
 									} else if (fieldName.equals(BuildConstants.FIELD_NUMBER)) {
 										return SuggestionUtils.suggestBuilds(project, matchWith);
 									} else {
@@ -134,14 +137,6 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		if ((noLoginSupport || SecurityUtils.getUser() == null) 
 				&& (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.SubmittedByMe)) 
 						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.CancelledByMe)))) {
-			return null;
-		}
-		if (getProject() == null 
-				&& (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.AssociatedWithPullRequest)) 
-						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.DependenciesOf))
-						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.DependsOn))
-						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.FixedIssue))
-						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.RequiredByPullRequest)))) {
 			return null;
 		}
 		

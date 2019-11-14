@@ -5,7 +5,6 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
@@ -22,7 +21,7 @@ public class StatusCriteria extends PullRequestCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
 		Path<?> attribute = PullRequestQuery.getPath(root, PullRequestConstants.ATTR_CLOSE_STATUS);
 		if (value.equalsIgnoreCase(PullRequestConstants.STATE_OPEN)) 
 			return builder.isNull(attribute);

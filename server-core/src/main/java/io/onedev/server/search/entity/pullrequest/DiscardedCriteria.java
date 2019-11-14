@@ -4,7 +4,6 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
@@ -13,18 +12,18 @@ public class DiscardedCriteria extends PullRequestCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private PullRequestCriteria getCriteria(Project project) {
+	private PullRequestCriteria getCriteria() {
 		return new StatusCriteria(CloseInfo.Status.DISCARDED.toString());
 	}
 	
 	@Override
-	public Predicate getPredicate(Project project, Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		return getCriteria(project).getPredicate(project, root, builder, user);
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+		return getCriteria().getPredicate(root, builder, user);
 	}
 
 	@Override
 	public boolean matches(PullRequest request, User user) {
-		return getCriteria(request.getTargetProject()).matches(request, user);
+		return getCriteria().matches(request, user);
 	}
 
 	@Override

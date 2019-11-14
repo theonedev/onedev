@@ -8,7 +8,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.BuildConstants;
@@ -18,7 +17,7 @@ public class CancelledByMeCriteria extends EntityCriteria<Build> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Project project, Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
 		Path<User> attribute = root.get(BuildConstants.ATTR_CANCELLER);
 		return builder.equal(attribute, user);
 	}

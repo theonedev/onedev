@@ -2,6 +2,7 @@ package io.onedev.server.web.util;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -12,6 +13,7 @@ import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.base.Preconditions;
@@ -42,6 +44,7 @@ import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
@@ -65,17 +68,29 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestBranches(Project project, String matchWith) {
-		matchWith = matchWith.toLowerCase();
-		int numSuggestions = 0;
-		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (RefInfo ref: project.getBranches()) {
-			String branch = GitUtils.ref2branch(ref.getRef().getName());
-			int index = branch.toLowerCase().indexOf(matchWith);
-			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
-				suggestions.add(new InputSuggestion(branch, new LinearRange(index, index+matchWith.length())));
-		}
-		return suggestions;
+	public static List<InputSuggestion> suggestBranches(@Nullable Project project, String matchWith) {
+		return suggest(project, matchWith, new ProjectScopedSuggester() {
+			
+			@Override
+			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, User user, 
+					String matchWith, boolean prependProject) {
+				int numSuggestions = 0;
+				for (RefInfo ref: project.getBranches()) {
+					String branch = GitUtils.ref2branch(ref.getRef().getName());
+					LinearRange match = LinearRange.match(branch, matchWith, true, false, true);
+					if (match != null && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
+						if (prependProject) {
+							int length = project.getName().length() + 1;
+							suggestions.add(new InputSuggestion(project.getName() + ":" + branch, 
+									null, new LinearRange(match.getFrom() + length, match.getTo() + length)));
+						} else {
+							suggestions.add(new InputSuggestion(branch, null, match));
+						}
+					}
+				}
+			}
+			
+		}, ":");
 	}
 	
 	public static List<InputSuggestion> suggestProjects(String matchWith) {
@@ -143,17 +158,29 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestTags(Project project, String matchWith) {
-		matchWith = matchWith.toLowerCase();
-		int numSuggestions = 0;
-		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (RefInfo ref: project.getTags()) {
-			String tag = GitUtils.ref2tag(ref.getRef().getName());
-			int index = tag.toLowerCase().indexOf(matchWith);
-			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
-				suggestions.add(new InputSuggestion(tag, new LinearRange(index, index+matchWith.length())));
-		}
-		return suggestions;
+	public static List<InputSuggestion> suggestTags(@Nullable Project project, String matchWith) {
+		return suggest(project, matchWith, new ProjectScopedSuggester() {
+			
+			@Override
+			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, User user, 
+					String matchWith, boolean prependProject) {
+				int numSuggestions = 0;
+				for (RefInfo ref: project.getTags()) {
+					String tag = GitUtils.ref2tag(ref.getRef().getName());
+					LinearRange match = LinearRange.match(tag, matchWith, true, false, true);
+					if (match != null && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
+						if (prependProject) {
+							int length = project.getName().length() + 1;
+							suggestions.add(new InputSuggestion(project.getName() + ":" + tag, 
+									null, new LinearRange(match.getFrom() + length, match.getTo() + length)));
+						} else {
+							suggestions.add(new InputSuggestion(tag, null, match));
+						}
+					}
+				}
+			}
+			
+		}, ":");
 	}
 	
 	public static List<InputSuggestion> suggestUsers(String matchWith) {
@@ -173,41 +200,68 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestIssues(Project project, String matchWith) {
-		matchWith = matchWith.toLowerCase();
-		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (Issue issue: OneDev.getInstance(IssueManager.class).query(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS))
-			suggestions.add(new InputSuggestion("#" + issue.getNumber(), issue.getTitle(), null));
-		return suggestions;
+	public static List<InputSuggestion> suggestIssues(@Nullable Project project, String matchWith) {
+		return suggest(project, matchWith, new ProjectScopedSuggester() {
+			
+			@Override
+			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, 
+					@Nullable User user, String matchWith, boolean prependProject) {
+				for (Issue issue: OneDev.getInstance(IssueManager.class).query(
+						project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
+					if (prependProject)
+						suggestions.add(new InputSuggestion(project.getName() + "#" + issue.getNumber(), issue.getTitle(), null));
+					else
+						suggestions.add(new InputSuggestion("#" + issue.getNumber(), issue.getTitle(), null));
+				}
+			}
+			
+		}, "#");
 	}
 	
-	public static List<InputSuggestion> suggestPullRequests(Project project, String matchWith) {
-		matchWith = matchWith.toLowerCase();
-		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (PullRequest request: OneDev.getInstance(PullRequestManager.class).query(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS))
-			suggestions.add(new InputSuggestion("#" + request.getNumber(), request.getTitle(), null));
-		return suggestions;
+	public static List<InputSuggestion> suggestPullRequests(@Nullable Project project, String matchWith) {
+		return suggest(project, matchWith, new ProjectScopedSuggester() {
+			
+			@Override
+			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, 
+					@Nullable User user, String matchWith, boolean prependProject) {
+				for (PullRequest request: OneDev.getInstance(PullRequestManager.class).query(
+						project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
+					if (prependProject)
+						suggestions.add(new InputSuggestion(project.getName() + "#" + request.getNumber(), request.getTitle(), null));
+					else
+						suggestions.add(new InputSuggestion("#" + request.getNumber(), request.getTitle(), null));
+				}
+			}
+			
+		}, "#");
 	}
 	
-	public static List<InputSuggestion> suggestBuilds(Project project, String matchWith) {
-		matchWith = matchWith.toLowerCase();
-		if (matchWith.startsWith("#"))
-			matchWith = matchWith.substring(1);
-		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (Build build: OneDev.getInstance(BuildManager.class).query(project, SecurityUtils.getUser(), matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
-			InputSuggestion suggestion;
+	public static List<InputSuggestion> suggestBuilds(@Nullable Project project, String matchWith) {
+		return suggest(project, matchWith, new ProjectScopedSuggester() {
 			
-			String description;
-			if (build.getVersion() != null) 
-				description = build.getVersion() + " : " + build.getJobName();
-			else
-				description = build.getJobName();
+			@Override
+			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, 
+					@Nullable User user, String matchWith, boolean prependProject) {
+				for (Build build: OneDev.getInstance(BuildManager.class).query(
+						project, user, matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
+					InputSuggestion suggestion;
+					
+					String description;
+					if (build.getVersion() != null) 
+						description = build.getVersion() + " : " + build.getJobName();
+					else
+						description = build.getJobName();
+
+					if (prependProject)
+						suggestion = new InputSuggestion(build.getProject().getName() + "#" + build.getNumber(), description, null);
+					else
+						suggestion = new InputSuggestion("#" + build.getNumber(), description, null);
+					
+					suggestions.add(suggestion);
+				}
+			}
 			
-			suggestion = new InputSuggestion("#" + build.getNumber(), description, null);
-			
-			suggestions.add(suggestion);
-		}
-		return suggestions;
+		}, "#");
 	}
 	
 	public static List<InputSuggestion> suggestGroups(String matchWith) {
@@ -227,15 +281,82 @@ public class SuggestionUtils {
 		return suggestPaths(commitInfoManager.getFiles(project), matchWith);
 	}
 	
-	public static List<InputSuggestion> suggestJobs(Project project, String matchWith) {
-		matchWith = matchWith.toLowerCase();
+	private static List<InputSuggestion> suggest(@Nullable Project project, String matchWith, 
+			ProjectScopedSuggester projectScopedSuggester, String scopeSeparator) {
 		List<InputSuggestion> suggestions = new ArrayList<>();
-		for (String jobName: project.getJobNames()) {
-			LinearRange match = LinearRange.match(jobName, matchWith, true, false, true);
-			if (match != null) 
-				suggestions.add(new InputSuggestion(jobName, null, match));
-		}
+		
+		User user = SecurityUtils.getUser();
+		boolean prependProject = project == null;
+		if (project == null) {
+			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
+			if (matchWith.contains(scopeSeparator)) {
+				String projectName = StringUtils.substringBefore(matchWith, scopeSeparator);
+				matchWith = StringUtils.substringAfter(matchWith, scopeSeparator);
+				project = projectManager.find(projectName);
+			} else {
+				for (Project each: projectManager.getPermittedProjects(user, new AccessProject())) {
+					LinearRange match = LinearRange.match(each.getName() + scopeSeparator, 
+							matchWith, true, false, true);
+					if (match != null) {
+						suggestions.add(new InputSuggestion(each.getName() + scopeSeparator, 
+								each.getName().length() + scopeSeparator.length(), "select project first", match));
+					}
+				}
+			}
+		} 
+		if (project != null)
+			projectScopedSuggester.fillSuggestions(suggestions, project, user, matchWith, prependProject);
+		
 		return suggestions;
+	}
+	
+	public static List<InputSuggestion> suggestJobs(@Nullable Project project, String matchWith) {
+		return suggest(project, matchWith, new ProjectScopedSuggester() {
+			
+			@Override
+			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, 
+					@Nullable User user, String matchWith, boolean prependProject) {
+				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+				Collection<String> jobNames = buildManager.getAccessibleJobNames(project, user).get(project);
+				for (String jobName: jobNames) {
+					LinearRange match = LinearRange.match(jobName, matchWith, true, false, true);
+					if (match != null) {
+						if (prependProject) {
+							int length = project.getName().length() + 1;
+							suggestions.add(new InputSuggestion(project.getName() + ":" + jobName, null, 
+									new LinearRange(match.getFrom() + length, match.getTo() + length)));
+						} else {
+							suggestions.add(new InputSuggestion(jobName, null, match));
+						}
+					}
+				}
+			}
+			
+		}, ":");
+	}
+	
+	public static List<InputSuggestion> suggestMilestones(@Nullable Project project, String matchWith) {
+		return suggest(project, matchWith, new ProjectScopedSuggester() {
+			
+			@Override
+			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, User user, 
+					String matchWith, boolean prependProject) {
+				for (Milestone milestone: project.getMilestones()) {
+					LinearRange match = LinearRange.match(milestone.getName(), matchWith, true, false, true);
+					if (match != null) {
+						if (prependProject) {
+							int length = project.getName().length() + 1;
+							suggestions.add(new InputSuggestion(project.getName() + ":" + milestone.getName(), 
+									null, new LinearRange(match.getFrom() + length, match.getTo() + length)));
+						} else {
+							suggestions.add(new InputSuggestion(milestone.getName(), null, match));
+						}
+					}
+				}
+			}
+			
+		}, ":");
+		
 	}
 	
 	public static List<InputSuggestion> suggestArtifacts(Build build, String matchWith) {
@@ -329,4 +450,11 @@ public class SuggestionUtils {
 		return suggestions;		
 	}
 
+	static interface ProjectScopedSuggester {
+		
+		void fillSuggestions(List<InputSuggestion> suggestions, Project project, 
+				@Nullable User user, String matchWith, boolean prependProject);
+		
+	}
+	
 }
