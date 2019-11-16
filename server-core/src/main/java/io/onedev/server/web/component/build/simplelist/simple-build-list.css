@@ -1,35 +1,34 @@
 .simple-build-list {
 	padding: 12px;
 }
-.simple-build-list>.head {
+.simple-build-list>.has-builds>.head {
     padding: 4px 0;
     border-bottom: 1px solid #DDD;
     margin-bottom: 4px;
     min-width: 100px;
     white-space: nowrap;
 }
-.simple-build-list>.head>span {
+.simple-build-list>.has-builds>.head>span {
     font-weight: bold;
     font-size: 15px;
     display: inline-block;
     margin-right: 8px;
 }
-.simple-build-list>.head>a {
+.simple-build-list>.has-builds>.head>a {
     color: #666;
 }
-.simple-build-list>.body>div>.build {
+.simple-build-list>.has-builds>.body>div>.build {
 	padding: 4px 0;
 	display: block;
 	text-decoration: none;
 	white-space: nowrap;
 }
-.simple-build-list>.body>div>.build>.status {
+.simple-build-list>.has-builds>.body>div>.build>.status {
 	margin-right: 8px;
 }
-.simple-build-list>.body>div>.build:hover {
+.simple-build-list>.has-builds>.body>div>.build:hover {
     background: #F0F0F0;
 }
-.simple-build-list>.body>.no-builds {
+.simple-build-list>.no-builds {
     font-style: italic;
-    padding: 12px;
 }

@@ -146,24 +146,7 @@ public abstract class CommitStatusPanel extends Panel {
 						}
 						
 					};
-					jobItem.add(new SimpleBuildListPanel("detail", buildsModel) {
-						
-						@Override
-						protected void onConfigure() {
-							super.onConfigure();
-							setVisible(!buildsModel.getObject().isEmpty());
-						}
-						
-					});
-					jobItem.add(new WebMarkupContainer("noBuilds") {
-
-						@Override
-						protected void onConfigure() {
-							super.onConfigure();
-							setVisible(buildsModel.getObject().isEmpty());
-						}
-						
-					});
+					jobItem.add(new SimpleBuildListPanel("detail", buildsModel));
 					
 					jobItem.setOutputMarkupId(true);
 					jobsView.add(jobItem);

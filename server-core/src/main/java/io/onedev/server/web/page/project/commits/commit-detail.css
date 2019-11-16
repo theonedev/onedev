@@ -88,6 +88,3 @@
 #commit-detail>.jobs>.job {
     margin-right: 20px;
 }
-#commit-detail>.jobs>.job .no-builds i {
-	display: none;
-}

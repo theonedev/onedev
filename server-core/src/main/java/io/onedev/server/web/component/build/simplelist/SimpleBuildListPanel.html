@@ -1,18 +1,24 @@
 <wicket:panel>
-    <div class="simple-build-list">
-        <wicket:enclosure child="showInList">
-            <div class="head">
-                <span>Builds</span> 
-                <a wicket:id="showInList" class="show-in-list" title="Show in build list"><i class="fa fa-list-ul"></i></a>
-            </div>
-        </wicket:enclosure>
-        <div class="body">
-            <div wicket:id="builds">
-				<a wicket:id="build" class="build">
-					<span wicket:id="status" class="status"></span>
-					<span wicket:id="title" class="title"></span>
-				</a>
-            </div>
-        </div>
-    </div>
+	<div wicket:id="content" class="simple-build-list"></div>
+	<wicket:fragment wicket:id="hasBuildsFrag">
+	    <div class="has-builds">
+	        <wicket:enclosure child="showInList">
+	            <div class="head">
+	                <span>Builds</span> 
+	                <a wicket:id="showInList" class="show-in-list" title="Show in build list"><i class="fa fa-list-ul"></i></a>
+	            </div>
+	        </wicket:enclosure>
+	        <div class="body">
+	            <div wicket:id="builds">
+					<a wicket:id="build" class="build">
+						<span wicket:id="status" class="status"></span>
+						<span wicket:id="title" class="title"></span>
+					</a>
+	            </div>
+	        </div>
+	    </div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="noBuildsFrag">
+		<div class="no-builds">No builds</div>
+	</wicket:fragment>
 </wicket:panel>

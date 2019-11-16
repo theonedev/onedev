@@ -27,3 +27,6 @@
 .commit-status-detail>.job>.body .simple-build-list {
 	padding: 0;
 }
+.commit-status-detail>.job>.body .no-builds {
+	padding: 0;
+}

@@ -49,6 +49,8 @@
 .ci-spec>.valid>div>.body>.side>.navs>.nav {
     position: relative;
     background: #444;
+    border-radius: 4px;
+    margin-bottom: 8px;
 }
 .ci-spec>.valid>div>.body>.side>.navs>.nav a {
     color: #BBB;
@@ -64,12 +66,6 @@
 }
 .ci-spec>.valid>div>.body>.side>.navs>.nav.active {
     background: #080808;
-}
-.ci-spec>.valid>div>.body>.side>.navs>.nav:first-child {
-    border-radius: 4px 4px 0 0;
-}
-.ci-spec>.valid>div>.body>.side>.navs>.nav:last-child {
-    border-radius: 0 0 4px 4px;
 }
 .ci-spec>.valid>div>.body>.side>.navs>.nav:first-child:last-child {
     border-radius: 4px;

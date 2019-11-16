@@ -269,7 +269,7 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 
 					@Override
 					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new SimpleBuildListPanel(id, new LoadableDetachableModel<List<Build>>() {
+						IModel<List<Build>> buildsModel = new LoadableDetachableModel<List<Build>>() {
 
 							@Override
 							protected List<Build> load() {
@@ -279,7 +279,9 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 								return builds;
 							}
 							
-						}) {
+						};						
+						
+						return new SimpleBuildListPanel(id, buildsModel) {
 
 							@Override
 							protected Component newListLink(String componentId) {
@@ -317,12 +319,6 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 						}
 						tag.put("class", cssClasses);
 						tag.put("title", title);
-					}
-
-					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						setEnabled(getProject().getCommitStatus(commitId).get(job.getName()) != null);
 					}
 					
 				};

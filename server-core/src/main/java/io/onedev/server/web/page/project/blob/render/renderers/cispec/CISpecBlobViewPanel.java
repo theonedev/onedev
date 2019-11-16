@@ -60,7 +60,7 @@ public class CISpecBlobViewPanel extends BlobViewPanel {
 							protected Project getProject() {
 								return context.getProject();
 							}
-							
+
 						});
 						navsView.add(nav);
 						jobsView.add(BeanContext.view(jobsView.newChildId(), job));

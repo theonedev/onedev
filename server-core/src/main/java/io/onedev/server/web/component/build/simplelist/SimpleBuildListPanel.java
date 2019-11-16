@@ -11,6 +11,7 @@ import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -37,44 +38,42 @@ public class SimpleBuildListPanel extends GenericPanel<List<Build>> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(newListLink("showInList"));
-		
-		add(new ListView<Build>("builds", getModel()) {
+		Fragment fragment;
+		if (!getBuilds().isEmpty()) {
+			fragment = new Fragment("content", "hasBuildsFrag", this);
+			fragment.add(newListLink("showInList"));
+			
+			fragment.add(new ListView<Build>("builds", getModel()) {
 
-			@Override
-			protected void populateItem(ListItem<Build> item) {
-				Build build = item.getModelObject();
-				
-				Link<Void> buildLink = new BookmarkablePageLink<Void>("build", 
-						BuildDashboardPage.class, BuildDashboardPage.paramsOf(build, null));
-				
-				Long buildId = build.getId();
-				buildLink.add(new BuildStatusIcon("status", new LoadableDetachableModel<Status>() {
-
-					@Override
-					protected Status load() {
-						return OneDev.getInstance(BuildManager.class).load(buildId).getStatus();
-					}
+				@Override
+				protected void populateItem(ListItem<Build> item) {
+					Build build = item.getModelObject();
 					
-				}));
+					Link<Void> buildLink = new BookmarkablePageLink<Void>("build", 
+							BuildDashboardPage.class, BuildDashboardPage.paramsOf(build, null));
+					
+					Long buildId = build.getId();
+					buildLink.add(new BuildStatusIcon("status", new LoadableDetachableModel<Status>() {
 
-				StringBuilder builder = new StringBuilder("#" + build.getNumber());
-				if (build.getVersion() != null)
-					builder.append(" (" + build.getVersion() + ")");
-				buildLink.add(new Label("title", builder.toString())); 
-				item.add(buildLink);
-			}
-			
-		});
-		add(new WebMarkupContainer("noBuilds") {
+						@Override
+						protected Status load() {
+							return OneDev.getInstance(BuildManager.class).load(buildId).getStatus();
+						}
+						
+					}));
 
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(getBuilds().isEmpty());
-			}
-			
-		});
+					StringBuilder builder = new StringBuilder("#" + build.getNumber());
+					if (build.getVersion() != null)
+						builder.append(" (" + build.getVersion() + ")");
+					buildLink.add(new Label("title", builder.toString())); 
+					item.add(buildLink);
+				}
+				
+			});
+		} else {
+			fragment = new Fragment("content", "noBuildsFrag", this);
+		}
+		add(fragment);
 	}
 
 	protected Component newListLink(String componentId) {
