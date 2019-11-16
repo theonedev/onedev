@@ -34,7 +34,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			return canReview(request);
+			return canReview(request) && request.isOpen();
 		}
 
 		@Override
@@ -55,7 +55,7 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			return canReview(request);
+			return canReview(request) && request.isOpen();
 		}
 
 		@Override
