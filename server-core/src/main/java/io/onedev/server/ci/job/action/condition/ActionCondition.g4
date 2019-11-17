@@ -5,7 +5,7 @@ condition
     ;
 
 criteria
-    : operator=(Successful|Failed|Cancelled|TimedOut|PreviousIsSuccessful|PreviousIsFailed|PreviousIsCancelled|PreviousIsTimedOut|WillRetry|AssociatedWithPullRequests|RequiredByPullRequests) #OperatorCriteria
+    : operator=(Successful|Failed|Cancelled|TimedOut|PreviousIsSuccessful|PreviousIsFailed|PreviousIsCancelled|PreviousIsTimedOut|AssociatedWithPullRequests|RequiredByPullRequests) #OperatorCriteria
     | operator=OnBranch WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Contains|Is) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
@@ -52,10 +52,6 @@ PreviousIsTimedOut
 	
 OnBranch
 	: 'on' WS+ 'branch'
-	;
-	
-WillRetry
-	: 'will' WS+ 'retry'
 	;
 	
 AssociatedWithPullRequests

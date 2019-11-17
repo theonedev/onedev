@@ -196,8 +196,10 @@ public class DefaultLogManager implements LogManager {
 			LogSnippet snippet = recentSnippets.get(build.getId());
 			if (snippet != null) {
 				for (JobLogEntry entry: snippet.entries) {
-					if (pattern.matcher(entry.getMessage()).find())
+					if ((build.getRetryDate() == null || !entry.getDate().before(build.getRetryDate())) 
+							&& pattern.matcher(entry.getMessage()).find()) {
 						return true;
+					}
 				}
 			}
 			
@@ -207,8 +209,10 @@ public class DefaultLogManager implements LogManager {
 				try (ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(logFile)))) {
 					while (true) {
 						JobLogEntry entry  = (JobLogEntry) ois.readObject();
-						if (pattern.matcher(entry.getMessage()).find())
+						if ((build.getRetryDate() == null || !entry.getDate().before(build.getRetryDate())) 
+								&& pattern.matcher(entry.getMessage()).find()) {
 							return true;
+						}
 					}
 				} catch (EOFException e) {
 				} catch (IOException|ClassNotFoundException e) {

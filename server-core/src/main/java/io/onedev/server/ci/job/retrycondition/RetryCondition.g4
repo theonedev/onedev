@@ -5,8 +5,7 @@ condition
     ;
 
 criteria
-    : operator=(Failed|Cancelled|TimedOut) #OperatorCriteria
-    | criteriaField=Quoted WS+ operator=(Contains|Is) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    : criteriaField=Quoted WS+ operator=(Contains|Is) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria
@@ -15,18 +14,6 @@ criteria
 	
 Never
 	: 'never'
-	;
-	
-Failed
-	: 'failed'
-	;
-	
-Cancelled
-	: 'cancelled'
-	;
-	
-TimedOut
-	: 'timed' WS+ 'out'
 	;
 	
 Contains

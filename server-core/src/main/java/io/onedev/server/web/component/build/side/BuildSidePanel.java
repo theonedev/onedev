@@ -135,9 +135,6 @@ public abstract class BuildSidePanel extends Panel {
 			
 		});
 		
-		general.add(new Label("retried", String.valueOf(getBuild().getRetried()))
-				.setVisible(getBuild().getRetried() != 0));
-		
 		general.add(new Label("submitDate", new LoadableDetachableModel<String>() {
 
 			@Override

@@ -1,13 +1,8 @@
 package io.onedev.server.web;
 
-import org.apache.wicket.core.request.handler.BookmarkablePageRequestHandler;
-import org.apache.wicket.core.request.handler.IPageClassRequestHandler;
-import org.apache.wicket.core.request.handler.RenderPageRequestHandler;
 import org.apache.wicket.core.request.mapper.ResourceMapper;
 import org.apache.wicket.markup.html.pages.BrowserInfoPage;
 import org.apache.wicket.protocol.http.WebApplication;
-import org.apache.wicket.request.IRequestHandler;
-import org.apache.wicket.request.Url;
 import org.apache.wicket.request.mapper.CompoundRequestMapper;
 
 import io.onedev.server.web.download.ArchiveDownloadResourceReference;
@@ -185,47 +180,11 @@ public class OneUrlMapper extends CompoundRequestMapper {
 	}
 	
 	private void addProjectPages() {
-		add(new OnePageMapper("projects", ProjectListPage.class) {
-			
-			/*
-			 * This logic is added to prevent url "/" from being redirected to "/projects"
-			 */
-			@Override
-			public Url mapHandler(IRequestHandler requestHandler) {
-				if (requestHandler instanceof BookmarkablePageRequestHandler 
-						|| requestHandler instanceof RenderPageRequestHandler) {
-					IPageClassRequestHandler pageClassRequestHandler = (IPageClassRequestHandler) requestHandler;
-					if (pageClassRequestHandler.getPageClass() == ProjectListPage.class) {
-						return null;
-					}
-				}
-				return super.mapHandler(requestHandler);
-			}
-			
-		});
+		add(new OnePageMapper("projects", ProjectListPage.class));
 		add(new OnePageMapper("projects/new", NewProjectPage.class));
 		add(new OnePageMapper("projects/${project}", ProjectDashboardPage.class));
 
-		add(new OnePageMapper("projects/${project}/blob/#{revision}/#{path}", ProjectBlobPage.class) {
-			
-			/*
-			 * This logic is added to prevent url "/projects/<project>" from being redirected to 
-			 * "/projects/<project>/blob"
-			 */
-			@Override
-			public Url mapHandler(IRequestHandler requestHandler) {
-				if (requestHandler instanceof BookmarkablePageRequestHandler 
-						|| requestHandler instanceof RenderPageRequestHandler) {
-					IPageClassRequestHandler pageClassRequestHandler = (IPageClassRequestHandler) requestHandler;
-					if (pageClassRequestHandler.getPageClass() == ProjectBlobPage.class 
-							&& pageClassRequestHandler.getPageParameters().get("revision").toString() == null) {
-						return null;
-					}
-				}
-				return super.mapHandler(requestHandler);
-			}
-			
-		});
+		add(new OnePageMapper("projects/${project}/blob/#{revision}/#{path}", ProjectBlobPage.class));
 		add(new OnePageMapper("projects/${project}/commits/${revision}", CommitDetailPage.class));
 		add(new OnePageMapper("projects/${project}/commits", ProjectCommitsPage.class));
 		add(new OnePageMapper("projects/${project}/compare", RevisionComparePage.class));

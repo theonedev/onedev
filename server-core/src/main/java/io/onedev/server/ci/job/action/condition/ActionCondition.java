@@ -106,8 +106,6 @@ public class ActionCondition implements Predicate<Build> {
 						return new PreviousIsCancelledCriteria();
 					case ActionConditionLexer.PreviousIsTimedOut:
 						return new PreviousIsTimedOutCriteria();
-					case ActionConditionLexer.WillRetry:
-						return new WillRetryCriteria();
 					case ActionConditionLexer.AssociatedWithPullRequests:
 						return new AssociatedWithPullRequestsCriteria();
 					case ActionConditionLexer.RequiredByPullRequests:

@@ -30,7 +30,7 @@
 	transform: rotate(-90deg);
 }
 
-#build-detail>.main>.status-message {
+#build-detail>.main>.error-message {
     font-size: 13px;
     max-height: 100px;
     overflow: auto;

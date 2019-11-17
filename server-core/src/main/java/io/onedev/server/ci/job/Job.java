@@ -285,7 +285,7 @@ public class Job implements Serializable, Validatable {
 		this.reports = reports;
 	}
 
-	@Editable(order=9400, group="Job Retry", description="Specify the condition to retry build")
+	@Editable(order=9400, group="Retry Upon Failure", description="Specify condition to retry build upon failure")
 	@NotEmpty
 	@RetryCondition
 	public String getRetryCondition() {
@@ -296,7 +296,7 @@ public class Job implements Serializable, Validatable {
 		this.retryCondition = retryCondition;
 	}
 
-	@Editable(order=9410, group="Job Retry", description="Maximum of retries before giving up")
+	@Editable(order=9410, group="Retry Upon Failure", description="Maximum of retries before giving up")
 	public int getMaxRetries() {
 		return maxRetries;
 	}
@@ -305,7 +305,7 @@ public class Job implements Serializable, Validatable {
 		this.maxRetries = maxRetries;
 	}
 
-	@Editable(order=9420, group="Job Retry", description="Delay for the first retry in seconds. "
+	@Editable(order=9420, group="Retry Upon Failure", description="Delay for the first retry in seconds. "
 			+ "Delay of subsequent retries will be calculated using an exponential back-off "
 			+ "based on this delay")
 	public int getRetryDelay() {

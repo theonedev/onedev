@@ -1,6 +1,6 @@
 onedev.server.buildDetail = {
-    onStatusMessageDomReady: function() {
-        var ps = new PerfectScrollbar($("#build-detail>.main>.status-message")[0]);
+    onErrorMessageDomReady: function() {
+        var ps = new PerfectScrollbar($("#build-detail>.main>.error-message")[0]);
         $(window).resize(function() {
             ps.update();
         });

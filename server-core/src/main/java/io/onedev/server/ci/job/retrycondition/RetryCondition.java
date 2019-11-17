@@ -22,7 +22,6 @@ import io.onedev.server.ci.job.retrycondition.RetryConditionParser.ConditionCont
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser.CriteriaContext;
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser.FieldOperatorValueCriteriaContext;
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser.NotCriteriaContext;
-import io.onedev.server.ci.job.retrycondition.RetryConditionParser.OperatorCriteriaContext;
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser.OrCriteriaContext;
 import io.onedev.server.ci.job.retrycondition.RetryConditionParser.ParensCriteriaContext;
 import io.onedev.server.model.Build;
@@ -43,8 +42,8 @@ public class RetryCondition implements Predicate<Build> {
 		return StringUtils.unescape(FenceAware.unfence(token));
 	}
 	
-	public boolean test(Build build) {
-		return criteria.test(build);
+	public boolean test(Build context) {
+		return criteria.test(context);
 	}
 	
 	public static RetryCondition parse(Job job, String conditionString) {
@@ -86,20 +85,6 @@ public class RetryCondition implements Predicate<Build> {
 					return visit(ctx.criteria());
 				}
 	
-				@Override
-				public Predicate<Build> visitOperatorCriteria(OperatorCriteriaContext ctx) {
-					switch (ctx.operator.getType()) {
-					case RetryConditionLexer.Failed:
-						return new FailedCriteria();
-					case RetryConditionLexer.Cancelled:
-						return new CancelledCriteria();
-					case RetryConditionLexer.TimedOut:
-						return new TimedOutCriteria();
-					default:
-						throw new OneException("Unexpected operator: " + ctx.operator.getText());
-					}
-				}
-				
 				@Override
 				public Predicate<Build> visitFieldOperatorValueCriteria(FieldOperatorValueCriteriaContext ctx) {
 					String fieldName = getValue(ctx.Quoted(0).getText());

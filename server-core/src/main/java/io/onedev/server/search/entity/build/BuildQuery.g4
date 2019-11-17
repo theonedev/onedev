@@ -7,7 +7,7 @@ query
     ;
 
 criteria
-	: operator=(Successful|Failed|Cancelled|Running|Waiting|Pending|TimedOut|SubmittedByMe|CancelledByMe|WillRetry|AssociatedWithPullRequests|RequiredByPullRequests) #OperatorCriteria
+	: operator=(Successful|Failed|Cancelled|Running|Waiting|Pending|TimedOut|SubmittedByMe|CancelledByMe|AssociatedWithPullRequests|RequiredByPullRequests) #OperatorCriteria
 	| operator=(FixedIssue|SubmittedBy|CancelledBy|DependsOn|DependenciesOf|AssociatedWithPullRequest|RequiredByPullRequest) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria
@@ -52,10 +52,6 @@ Pending
 	: 'pending'
 	;		
 
-WillRetry
-	: 'will' WS+ 'retry'
-	;
-					
 SubmittedByMe
 	: 'submitted' WS+ 'by' WS+ 'me'
 	;

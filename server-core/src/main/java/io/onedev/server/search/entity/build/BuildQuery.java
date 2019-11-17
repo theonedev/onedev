@@ -119,8 +119,6 @@ public class BuildQuery extends EntityQuery<Build> {
 							return new SubmittedByMeCriteria();
 						case BuildQueryLexer.CancelledByMe:
 							return new CancelledByMeCriteria();
-						case BuildQueryLexer.WillRetry:
-							return new WillRetryCriteria();
 						case BuildQueryLexer.AssociatedWithPullRequests:
 							return new AssociatedWithPullRequestsCriteria();
 						case BuildQueryLexer.RequiredByPullRequests:

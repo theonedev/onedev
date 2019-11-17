@@ -59,6 +59,7 @@ import io.onedev.server.ci.job.log.LogManager;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.paramspec.SecretParam;
+import io.onedev.server.ci.job.retrycondition.RetryCondition;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -424,9 +425,59 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							};
 							
 							jobContexts.put(jobToken, jobContext);
-							executor.execute(jobToken, jobContext);
+							
+							int retried = 0;
+							while (true) {
+								try {
+									executor.execute(jobToken, jobContext);
+									break;
+								} catch (Exception e) {
+									if (ExceptionUtils.find(e, InterruptedException.class) != null) {
+										throw e;
+									} else {
+										if (retried++ < job.getMaxRetries() && transactionManager.call(new Callable<Boolean>() {
+
+											@Override
+											public Boolean call() {
+												Build build = buildManager.load(buildId);
+												if (e.getMessage() != null)
+													build.setErrorMessage(e.getMessage());
+												else
+													build.setErrorMessage(Throwables.getStackTraceAsString(e));
+												buildManager.save(build);
+												RetryCondition retryCondition = RetryCondition.parse(job, job.getRetryCondition());
+												return retryCondition.test(build);
+											}
+											
+										})) {
+											log(e, jobLogger);
+											jobLogger.log("Job will be retried after a while...");
+											try {						
+												Thread.sleep(job.getRetryDelay() * (long)(Math.pow(2, retried)) * 1000L);
+											} catch (InterruptedException e2) {
+												throw e2;
+											}
+											transactionManager.run(new Runnable() {
+
+												@Override
+												public void run() {
+													Build build = buildManager.load(buildId);
+													build.setErrorMessage(null);
+													build.setRetryDate(new Date());
+													buildManager.save(build);
+												}
+												
+											});
+										} else {
+											throw e;
+										}
+									}
+								}
+							}
 						} catch (Exception e) {
-							handleException(e, jobSecretsToMask, jobLogger);
+							if (ExceptionUtils.find(e, InterruptedException.class) == null)
+								log(e, jobLogger);
+							throw maskSecrets(e, jobSecretsToMask);
 						} finally {
 							jobContexts.remove(jobToken);
 							try {
@@ -448,7 +499,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								});
 								FileUtils.deleteDir(serverWorkspace);
 							} catch (Exception e) {
-								handleException(e, jobSecretsToMask, jobLogger);
+								if (ExceptionUtils.find(e, InterruptedException.class) == null) 
+									log(e, jobLogger);
+								throw maskSecrets(e, jobSecretsToMask);
 							}
 							jobLogger.log("Job finished");
 						}
@@ -473,20 +526,21 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 	
-	private void handleException(Exception e, Collection<String> jobSecretsToMask, JobLogger logger) {
-		if (ExceptionUtils.find(e, InterruptedException.class) == null) {
-			if (e.getMessage() != null)
-				logger.log(e.getMessage());
-			else
-				logger.log(Throwables.getStackTraceAsString(e));
-		}
+	private void log(Exception e, JobLogger logger) {
+		if (e.getMessage() != null)
+			logger.log(e.getMessage());
+		else
+			logger.log(e);
+	}
+	
+	private RuntimeException maskSecrets(Exception e, Collection<String> jobSecretsToMask) {
 		String errorMessage = e.getMessage();
 		if (errorMessage != null) {
 			for (String secret: jobSecretsToMask)
 				errorMessage = StringUtils.replace(errorMessage, secret, SecretInput.MASK);
-			throw new RuntimeException(errorMessage);
+			return new RuntimeException(errorMessage);
 		} else {
-			throw ExceptionUtils.unchecked(e);
+			return ExceptionUtils.unchecked(e);
 		}
 	}
 	
@@ -579,7 +633,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setRunningDate(null);
 			build.setSubmitDate(new Date());
 			build.setSubmitter(submitter);
-			build.setRetried(0);
 			buildParamManager.deleteParams(build);
 			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 				ParamSpec paramSpec = build.getJob().getParamSpecMap().get(entry.getKey());
@@ -738,7 +791,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Listen
 	public void on(BuildSubmitted event) {
 		Build build = event.getBuild();
-		build.setWillRetry(false);
 		FileUtils.deleteDir(build.getPublishDir());
 	}
 
@@ -746,45 +798,6 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	@Listen
 	public void on(BuildFinished event) {
 		Build build = event.getBuild();
-		build.setWillRetry(build.willRetryNow());
-		if (build.willRetryNow()) {
-			Long buildId = build.getId();
-			int retried = build.getRetried();
-			int retryDelay = build.getJob().getRetryDelay();
-			transactionManager.runAsyncAfterCommit(new Runnable() {
-
-				@Override
-				public void run() {
-					try {						
-						Thread.sleep(retryDelay * (long)(Math.pow(2, retried)) * 1000L);
-					} catch (InterruptedException e) {
-						throw new RuntimeException(e);
-					}
-					transactionManager.run(new Runnable() {
-
-						@Override
-						public void run() {
-							Build build = buildManager.load(buildId);
-							logger.info("Retrying build (project: {}, build number: {})...", 
-									build.getProject().getName(), build.getNumber());
-							build.setRetried(retried + 1);
-							build.setStatus(Build.Status.WAITING);
-							build.setFinishDate(null);
-							build.setPendingDate(null);
-							build.setRunningDate(null);
-							build.setSubmitDate(new Date());
-							build.setCanceller(null);
-							build.setCancellerName(null);
-							buildManager.save(build);
-							listenerRegistry.post(new BuildSubmitted(build));			
-						}
-						
-					});
-				}
-				
-			}, SecurityUtils.getSubject());
-		} 
-		
 		try {
 			for (PostBuildAction action: build.getJob().getPostBuildActions()) {
 				if (ActionCondition.parse(build.getJob(), action.getCondition()).test(build))
@@ -794,11 +807,9 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			logger.error("Error processing post build actions", e);
 		}
 		
-		if (!build.willRetryNow()) {
-			for (BuildParam param: build.getParams()) {
-				if (param.getType().equals(ParamSpec.SECRET)) 
-					param.setValue(null);
-			}
+		for (BuildParam param: build.getParams()) {
+			if (param.getType().equals(ParamSpec.SECRET)) 
+				param.setValue(null);
 		}
 	}
 	

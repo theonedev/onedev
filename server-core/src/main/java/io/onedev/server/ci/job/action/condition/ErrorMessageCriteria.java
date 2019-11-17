@@ -15,7 +15,7 @@ public class ErrorMessageCriteria implements Predicate<Build> {
 
 	@Override
 	public boolean test(Build build) {
-		return Pattern.compile(value).matcher(build.getStatusMessage()).find();
+		return Pattern.compile(value).matcher(build.getErrorMessage()).find();
 	}
 
 }

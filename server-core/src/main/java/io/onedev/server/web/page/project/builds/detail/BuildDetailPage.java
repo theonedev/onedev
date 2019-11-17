@@ -14,7 +14,6 @@ import javax.persistence.EntityNotFoundException;
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
@@ -37,7 +36,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.ci.job.JobManager;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
@@ -92,8 +90,6 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 	
 	private final QueryPosition position;
 	
-	private int retried;
-	
 	public BuildDetailPage(PageParameters params) {
 		super(params);
 		
@@ -127,12 +123,8 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			
 			@Override
 			public void onObservableChanged(IPartialPageRequestHandler handler, String observable) {
-				if (getBuild().getRetried() != retried) {
-					setResponsePage(getPage().getClass(), paramsOf(getBuild(), position));
-				} else {
-					handler.add(component);
-					handler.appendJavaScript("$(window).resize();");
-				}
+				handler.add(component);
+				handler.appendJavaScript("$(window).resize();");
 			}
 			
 			@Override
@@ -152,8 +144,6 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
-		
-		retried = getBuild().getRetried();
 		
 		WebMarkupContainer summary = new WebMarkupContainer("summary");
 		summary.add(newBuildObserver(getBuild().getId()));
@@ -300,11 +290,11 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 			
 		}.setOutputMarkupPlaceholderTag(true));
 		
-		add(new Label("statusMessage", new AbstractReadOnlyModel<String>() {
+		add(new Label("errorMessage", new AbstractReadOnlyModel<String>() {
 
 			@Override
 			public String getObject() {
-				return getBuild().getStatusMessage();
+				return getBuild().getErrorMessage();
 			}
 			
 		}) {
@@ -314,41 +304,19 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 				super.onInitialize();
 				
 				add(newBuildObserver(getBuild().getId()));
-				add(AttributeAppender.append("class", new AbstractReadOnlyModel<String>() {
-
-					@Override
-					public String getObject() {
-						switch (getBuild().getStatus()) {
-						case FAILED:
-						case TIMED_OUT:
-						case CANCELLED:
-							return "alert-danger";
-						case SUCCESSFUL:
-							return "alert-success";
-						case WAITING:
-						case PENDING:
-						case RUNNING:
-							return "alert-warning";
-						default:
-							throw new OneException("Unexpected build status: " + getBuild().getStatus());
-						}
-					}
-					
-				}));
-				
 				setOutputMarkupPlaceholderTag(true);
 			}
 
 			@Override
 			public void renderHead(IHeaderResponse response) {
 				super.renderHead(response);
-				response.render(OnDomReadyHeaderItem.forScript("onedev.server.buildDetail.onStatusMessageDomReady();"));
+				response.render(OnDomReadyHeaderItem.forScript("onedev.server.buildDetail.onErrorMessageDomReady();"));
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(getBuild().getStatusMessage() != null);
+				setVisible(getBuild().isFinished() && getBuild().getErrorMessage() != null);
 			}
 			
 		});

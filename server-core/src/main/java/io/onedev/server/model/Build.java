@@ -56,7 +56,6 @@ import io.onedev.server.ci.job.VariableInterpolator;
 import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.paramspec.SecretParam;
-import io.onedev.server.ci.job.retrycondition.RetryCondition;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -159,14 +158,10 @@ public class Build extends AbstractEntity implements Referenceable {
 
 	private Date finishDate;
 	
-	private int retried;
-
-	private boolean willRetry;
-	
-	private transient Boolean willRetryNow;
+	private Date retryDate;
 	
 	@Column(length=MAX_STATUS_MESSAGE_LEN)
-	private String statusMessage;
+	private String errorMessage;
 
 	@OneToMany(mappedBy="build", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -284,9 +279,9 @@ public class Build extends AbstractEntity implements Referenceable {
 		setStatus(status, null);
 	}
 	
-	public void setStatus(Status status, @Nullable String statusMessage) {
+	public void setStatus(Status status, @Nullable String errorMessage) {
 		this.status = status;
-		setStatusMessage(statusMessage);
+		setErrorMessage(errorMessage);
 	}
 	
 	public boolean isFinished() {
@@ -327,28 +322,12 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.finishDate = finishDate;
 	}
 
-	public int getRetried() {
-		return retried;
+	public Date getRetryDate() {
+		return retryDate;
 	}
 
-	public void setRetried(int retried) {
-		this.retried = retried;
-	}
-
-	public boolean isWillRetry() {
-		return willRetry;
-	}
-
-	public void setWillRetry(boolean willRetry) {
-		this.willRetry = willRetry;
-	}
-	
-	public boolean willRetryNow() {
-		if (willRetryNow == null) {
-			willRetryNow = getRetried() < getJob().getMaxRetries() 
-					&& RetryCondition.parse(getJob(), getJob().getRetryCondition()).test(this);
-		}
-		return willRetryNow;
+	public void setRetryDate(Date retryDate) {
+		this.retryDate = retryDate;
 	}
 
 	public Collection<BuildParam> getParams() {
@@ -375,17 +354,17 @@ public class Build extends AbstractEntity implements Referenceable {
 		this.dependents = dependents;
 	}
 
-	public String getStatusMessage() {
-		return statusMessage;
+	public String getErrorMessage() {
+		return errorMessage;
 	}
 
-	public void setStatusMessage(String statusMessage) {
-		if (statusMessage != null) {
-			statusMessage = StringUtils.abbreviate(statusMessage, MAX_STATUS_MESSAGE_LEN);
+	public void setErrorMessage(String errorMessage) {
+		if (errorMessage != null) {
+			errorMessage = StringUtils.abbreviate(errorMessage, MAX_STATUS_MESSAGE_LEN);
 			for (String secretValue: getSecretValuesToMask())
-				statusMessage = StringUtils.replace(statusMessage, secretValue, SecretInput.MASK);
+				errorMessage = StringUtils.replace(errorMessage, secretValue, SecretInput.MASK);
 		}
-		this.statusMessage = statusMessage;
+		this.errorMessage = errorMessage;
 	}
 
 	public Collection<PullRequestBuild> getPullRequestBuilds() {
