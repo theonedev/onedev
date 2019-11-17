@@ -22,6 +22,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
@@ -37,30 +38,31 @@ public class FixedBetweenCriteria extends IssueCriteria {
 
 	private final Project project;
 	
-	private final int sinceType;
+	private final int firstType;
 	
-	private final String sinceValue;
+	private final String firstValue;
 	
-	private final ObjectId sinceCommitId;
+	private final ObjectId firstCommitId;
 	
-	private final int untilType;
+	private final int secondType;
 	
-	private final String untilValue;
+	private final String secondValue;
 	
-	private final ObjectId untilCommitId;
+	private final ObjectId secondCommitId;
 	
-	public FixedBetweenCriteria(@Nullable Project project, int sinceType, String sinceValue, int untilType, String untilValue) {
-		this.sinceType = sinceType;
-		this.sinceValue = sinceValue;
-		this.untilType = untilType;
-		this.untilValue = untilValue;
+	public FixedBetweenCriteria(@Nullable Project project, int firstType, String firstValue, 
+			int secondType, String secondValue) {
+		this.firstType = firstType;
+		this.firstValue = firstValue;
+		this.secondType = secondType;
+		this.secondValue = secondValue;
 
-		ProjectAwareCommitId since = getCommitId(project, sinceType, sinceValue);
-		ProjectAwareCommitId until = getCommitId(project, untilType, untilValue);
-		sinceCommitId = since.getCommitId();
-		untilCommitId = until.getCommitId();
-		if (since.getProject().equals(until.getProject())) { 
-			this.project = since.getProject();
+		ProjectAwareCommitId first = getCommitId(project, firstType, firstValue);
+		ProjectAwareCommitId second = getCommitId(project, secondType, secondValue);
+		firstCommitId = first.getCommitId();
+		secondCommitId = second.getCommitId();
+		if (first.getProject().equals(second.getProject())) { 
+			this.project = first.getProject();
 		} else {
 			throw new OneException("'" + getRuleName(IssueQueryLexer.FixedBetween) 
 				+ "' should be used for same projects");
@@ -81,15 +83,19 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		Set<Long> fixedIssueNumbers = new HashSet<>();
 		
 		Repository repository = project.getRepository();
-		try (RevWalk revWalk = new RevWalk(repository)) {
-			revWalk.markStart(revWalk.parseCommit(untilCommitId));
-			revWalk.markUninteresting(revWalk.parseCommit(sinceCommitId));
+		ObjectId mergeBaseId = GitUtils.getMergeBase(repository, firstCommitId, secondCommitId);
+		if (mergeBaseId != null) {
+			try (RevWalk revWalk = new RevWalk(repository)) {
+				revWalk.markStart(revWalk.parseCommit(secondCommitId));
+				revWalk.markStart(revWalk.parseCommit(firstCommitId));
+				revWalk.markUninteresting(revWalk.parseCommit(mergeBaseId));
 
-			RevCommit commit;
-			while ((commit = revWalk.next()) != null) 
-				fixedIssueNumbers.addAll(IssueUtils.parseFixedIssues(project, commit.getFullMessage()));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+				RevCommit commit;
+				while ((commit = revWalk.next()) != null) 
+					fixedIssueNumbers.addAll(IssueUtils.parseFixedIssues(project, commit.getFullMessage()));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
 
 		Predicate issuePredicate;
@@ -109,22 +115,25 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	public boolean matches(Issue issue, User user) {
 		if (project.equals(issue.getProject())) {
 			Repository repository = issue.getProject().getRepository();
-			try (RevWalk revWalk = new RevWalk(repository)) {
-				revWalk.markStart(revWalk.parseCommit(untilCommitId));
-				revWalk.markUninteresting(revWalk.parseCommit(sinceCommitId));
+			ObjectId mergeBaseId = GitUtils.getMergeBase(repository, firstCommitId, secondCommitId);
+			if (mergeBaseId != null) {
+				try (RevWalk revWalk = new RevWalk(repository)) {
+					revWalk.markStart(revWalk.parseCommit(secondCommitId));
+					revWalk.markStart(revWalk.parseCommit(firstCommitId));
+					revWalk.markUninteresting(revWalk.parseCommit(mergeBaseId));
 
-				RevCommit commit;
-				while ((commit = revWalk.next()) != null) { 
-					if (IssueUtils.parseFixedIssues(project, commit.getFullMessage()).contains(issue.getNumber()))
-						return true;
+					RevCommit commit;
+					while ((commit = revWalk.next()) != null) { 
+						if (IssueUtils.parseFixedIssues(project, commit.getFullMessage()).contains(issue.getNumber()))
+							return true;
+					}
+					return false;
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
-				return false;
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		} else {
-			return false;
+			}			
 		}
+		return false;
 	}
 
 	@Override
@@ -135,9 +144,9 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	@Override
 	public String toString() {
 		return getRuleName(IssueQueryLexer.FixedBetween) + " " 
-				+ getRuleName(sinceType) + " " + quote(sinceValue) + " " 
+				+ getRuleName(firstType) + " " + quote(firstValue) + " " 
 				+ getRuleName(IssueQueryLexer.And) + " " 
-				+ getRuleName(untilType) + " " + quote(untilValue);
+				+ getRuleName(secondType) + " " + quote(secondValue);
 	}
 
 }

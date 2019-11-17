@@ -169,15 +169,15 @@ public class IssueQuery extends EntityQuery<Issue> {
 					
 					@Override
 					public IssueCriteria visitFixedBetweenCriteria(FixedBetweenCriteriaContext ctx) {
-						RevisionCriteriaContext sinceRevision = ctx.revisionCriteria(0);
-						int sinceType = sinceRevision.revisionType.getType();
-						String sinceValue = getValue(sinceRevision.Quoted().getText());
+						RevisionCriteriaContext firstRevision = ctx.revisionCriteria(0);
+						int firstType = firstRevision.revisionType.getType();
+						String firstValue = getValue(firstRevision.Quoted().getText());
 						
-						RevisionCriteriaContext untilRevision = ctx.revisionCriteria(1);
-						int untilType = untilRevision.revisionType.getType();
-						String untilValue = getValue(untilRevision.Quoted().getText());
+						RevisionCriteriaContext secondRevision = ctx.revisionCriteria(1);
+						int secondType = secondRevision.revisionType.getType();
+						String secondValue = getValue(secondRevision.Quoted().getText());
 						
-						return new FixedBetweenCriteria(project, sinceType, sinceValue, untilType, untilValue);
+						return new FixedBetweenCriteria(project, firstType, firstValue, secondType, secondValue);
 					}
 					
 					@Override
