@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONWriter;
+import org.unbescape.html.HtmlEscape;
 
 import com.google.common.collect.Lists;
 
@@ -19,7 +20,7 @@ public abstract class AbstractGroupChoiceProvider extends ChoiceProvider<Group> 
 
 	@Override
 	public void toJson(Group choice, JSONWriter writer) throws JSONException {
-		writer.key("id").value(choice.getId()).key("name").value(choice.getName());
+		writer.key("id").value(choice.getId()).key("name").value(HtmlEscape.escapeHtml5(choice.getName()));
 	}
 
 	@Override
