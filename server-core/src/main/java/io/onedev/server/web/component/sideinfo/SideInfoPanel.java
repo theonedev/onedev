@@ -42,7 +42,14 @@ public abstract class SideInfoPanel extends Panel {
 		super.onEvent(event);
 		if (event.getPayload() instanceof SideInfoOpened) {
 			SideInfoOpened moreInfoSideOpened = (SideInfoOpened) event.getPayload();
-			String script = String.format("$('#%s').show('slide', {direction: 'right', duration: 200});", getMarkupId());
+			String script = String.format(""
+					+ "$('#%s').show('slide', {"
+					+ "  direction: 'right', "
+					+ "  duration: 200, "
+					+ "  complete: function() {"
+					+ "    $(this).data('ps').update();"
+					+ "  }"
+					+ "});", getMarkupId());
 			moreInfoSideOpened.getHandler().appendJavaScript(script);
 		}
 	}

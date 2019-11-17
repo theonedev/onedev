@@ -33,7 +33,6 @@
 #build-detail>.main>.error-message {
     font-size: 13px;
     max-height: 100px;
-    overflow: auto;
     position: relative;
 }
 #build-detail>.main>.commit-info {
