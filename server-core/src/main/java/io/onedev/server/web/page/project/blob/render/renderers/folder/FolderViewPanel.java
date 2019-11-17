@@ -97,6 +97,13 @@ public class FolderViewPanel extends Panel {
 				}
 				
 				Collections.sort(children);
+				
+				BlobIdent ciSpecIdent = new BlobIdent(context.getBlobIdent().revision, 
+						CISpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits());
+				if (children.contains(ciSpecIdent)) {
+					children.remove(ciSpecIdent);
+					children.add(0, ciSpecIdent);
+				}
 				return children;
 			} catch (IOException e) {
 				throw new RuntimeException(e);
