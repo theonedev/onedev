@@ -11,6 +11,8 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -40,35 +42,48 @@ public class PullRequestListPage extends LayoutPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private String query;
+	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
+
+		@Override
+		protected String load() {
+			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
+			if (query != null && query.length() == 0) {
+				query = null;
+				List<String> queries = new ArrayList<>();
+				if (getLoginUser() != null) { 
+					for (NamedPullRequestQuery namedQuery: getLoginUser().getPullRequestQuerySetting().getUserQueries())
+						queries.add(namedQuery.getQuery());
+				}
+				for (NamedPullRequestQuery namedQuery: getPullRequestSetting().getNamedQueries())
+					queries.add(namedQuery.getQuery());
+				
+				for (String each: queries) {
+					try {
+						if (SecurityUtils.getUser() != null || !PullRequestQuery.parse(null, each).needsLogin()) {  
+							query = each;
+							break;
+						}
+					} catch (Exception e) {
+					}
+				} 
+			}
+			return query;
+		}
+		
+	};
 	
 	public PullRequestListPage(PageParameters params) {
 		super(params);
-		query = params.get(PARAM_QUERY).toOptionalString();
-		if (query != null && query.length() == 0) {
-			query = null;
-			List<String> queries = new ArrayList<>();
-			if (getLoginUser() != null) { 
-				for (NamedPullRequestQuery namedQuery: getLoginUser().getPullRequestQuerySetting().getUserQueries())
-					queries.add(namedQuery.getQuery());
-			}
-			for (NamedPullRequestQuery namedQuery: getPullRequestSetting().getNamedQueries())
-				queries.add(namedQuery.getQuery());
-			
-			for (String each: queries) {
-				try {
-					if (SecurityUtils.getUser() != null || !PullRequestQuery.parse(null, each).needsLogin()) {  
-						query = each;
-						break;
-					}
-				} catch (Exception e) {
-				}
-			} 
-		}
 	}
 	
 	protected PullRequestSetting getPullRequestSetting() {
 		return OneDev.getInstance(SettingManager.class).getPullRequestSetting();		
+	}
+
+	@Override
+	protected void onDetach() {
+		queryModel.detach();
+		super.onDetach();
 	}
 
 	@Override
@@ -124,7 +139,7 @@ public class PullRequestListPage extends LayoutPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(query, 0);
+				PageParameters params = paramsOf(queryModel.getObject(), 0);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -136,7 +151,7 @@ public class PullRequestListPage extends LayoutPage {
 			
 		};
 
-		add(new PullRequestListPanel("main", query) {
+		add(new PullRequestListPanel("main", queryModel.getObject()) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {

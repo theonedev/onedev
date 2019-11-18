@@ -8,6 +8,8 @@ import static io.onedev.server.util.BuildConstants.FIELD_QUEUEING_DATE;
 import static io.onedev.server.util.BuildConstants.FIELD_RUNNING_DATE;
 import static io.onedev.server.util.BuildConstants.FIELD_SUBMIT_DATE;
 import static io.onedev.server.util.BuildConstants.FIELD_VERSION;
+import static io.onedev.server.util.BuildConstants.ORDER_FIELDS;
+import static io.onedev.server.util.BuildConstants.QUERY_FIELDS;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,7 +48,6 @@ import io.onedev.server.search.entity.build.BuildQueryParser.OrCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.OrderContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.build.BuildQueryParser.QueryContext;
-import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.ProjectAwareCommitId;
 
 public class BuildQuery extends EntityQuery<Build> {
@@ -225,7 +226,7 @@ public class BuildQuery extends EntityQuery<Build> {
 			List<EntitySort> buildSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (!BuildConstants.ORDER_FIELDS.containsKey(fieldName)) 
+				if (!ORDER_FIELDS.containsKey(fieldName)) 
 					throw new OneException("Can not order by field: " + fieldName);
 				
 				EntitySort commentSort = new EntitySort();
@@ -245,15 +246,15 @@ public class BuildQuery extends EntityQuery<Build> {
 	
 	public static void checkField(Project project, String fieldName, int operator) {
 		Collection<String> paramNames = OneDev.getInstance(BuildParamManager.class).getBuildParamNames();
-		if (!BuildConstants.QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName))
+		if (!QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case BuildQueryLexer.IsBefore:
 		case BuildQueryLexer.IsAfter:
-			if (!fieldName.equals(BuildConstants.FIELD_SUBMIT_DATE) 
-					&& !fieldName.equals(BuildConstants.FIELD_QUEUEING_DATE)
-					&& !fieldName.equals(BuildConstants.FIELD_RUNNING_DATE)
-					&& !fieldName.equals(BuildConstants.FIELD_FINISH_DATE)) 
+			if (!fieldName.equals(FIELD_SUBMIT_DATE) 
+					&& !fieldName.equals(FIELD_QUEUEING_DATE)
+					&& !fieldName.equals(FIELD_RUNNING_DATE)
+					&& !fieldName.equals(FIELD_FINISH_DATE)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case BuildQueryLexer.Is:

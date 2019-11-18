@@ -9,6 +9,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -39,37 +41,49 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private String query;
+	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
+
+		@Override
+		protected String load() {
+			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
+			if (query != null && query.length() == 0) {
+				query = null;
+				List<String> queries = new ArrayList<>();
+				if (getProject().getIssueQuerySettingOfCurrentUser() != null) { 
+					for (NamedIssueQuery namedQuery: getProject().getIssueQuerySettingOfCurrentUser().getUserQueries())
+						queries.add(namedQuery.getQuery());
+				}
+				for (NamedIssueQuery namedQuery: getProject().getIssueSetting().getNamedQueries(true))
+					queries.add(namedQuery.getQuery());
+				for (String each: queries) {
+					try {
+						if (SecurityUtils.getUser() != null || !IssueQuery.parse(getProject(), each, true).needsLogin()) {  
+							query = each;
+							break;
+						}
+					} catch (Exception e) {
+					}
+				} 
+			}
+			return query;
+		}
+		
+	};
 	
 	public ProjectIssueListPage(PageParameters params) {
 		super(params);
-		
-		query = params.get(PARAM_QUERY).toOptionalString();
-		if (query != null && query.length() == 0) {
-			query = null;
-			List<String> queries = new ArrayList<>();
-			if (getProject().getIssueQuerySettingOfCurrentUser() != null) { 
-				for (NamedIssueQuery namedQuery: getProject().getIssueQuerySettingOfCurrentUser().getUserQueries())
-					queries.add(namedQuery.getQuery());
-			}
-			for (NamedIssueQuery namedQuery: getProject().getIssueSetting().getNamedQueries(true))
-				queries.add(namedQuery.getQuery());
-			for (String each: queries) {
-				try {
-					if (SecurityUtils.getUser() != null || !IssueQuery.parse(getProject(), each, true).needsLogin()) {  
-						query = each;
-						break;
-					}
-				} catch (Exception e) {
-				}
-			} 
-		}
 	}
 
 	private IssueQuerySettingManager getIssueQuerySettingManager() {
 		return OneDev.getInstance(IssueQuerySettingManager.class);		
 	}
 	
+	@Override
+	protected void onDetach() {
+		queryModel.detach();
+		super.onDetach();
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -125,7 +139,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getProject(), query, 0);
+				PageParameters params = paramsOf(getProject(), queryModel.getObject(), 0);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -137,7 +151,7 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 			
 		};
 		
-		add(new IssueListPanel("main", query) {
+		add(new IssueListPanel("main", queryModel.getObject()) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {

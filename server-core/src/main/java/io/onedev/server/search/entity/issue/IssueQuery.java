@@ -1,16 +1,5 @@
 package io.onedev.server.search.entity.issue;
 
-import static io.onedev.server.util.IssueConstants.FIELD_COMMENT;
-import static io.onedev.server.util.IssueConstants.FIELD_COMMENT_COUNT;
-import static io.onedev.server.util.IssueConstants.FIELD_DESCRIPTION;
-import static io.onedev.server.util.IssueConstants.FIELD_MILESTONE;
-import static io.onedev.server.util.IssueConstants.FIELD_NUMBER;
-import static io.onedev.server.util.IssueConstants.FIELD_STATE;
-import static io.onedev.server.util.IssueConstants.FIELD_SUBMIT_DATE;
-import static io.onedev.server.util.IssueConstants.FIELD_TITLE;
-import static io.onedev.server.util.IssueConstants.FIELD_UPDATE_DATE;
-import static io.onedev.server.util.IssueConstants.FIELD_VOTE_COUNT;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -149,9 +138,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 						int operator = ctx.operator.getType();
 						if (validate)
 							checkField(fieldName, operator);
-						if (fieldName.equals(FIELD_MILESTONE))
+						if (fieldName.equals(IssueConstants.FIELD_MILESTONE))
 							return new MilestoneCriteria(null);
-						else if (fieldName.equals(FIELD_DESCRIPTION))
+						else if (fieldName.equals(IssueConstants.FIELD_DESCRIPTION))
 							return new DescriptionCriteria(null);
 						else
 							return new FieldOperatorCriteria(fieldName, operator);
@@ -196,18 +185,18 @@ public class IssueQuery extends EntityQuery<Issue> {
 						switch (operator) {
 						case IssueQueryLexer.IsBefore:
 						case IssueQueryLexer.IsAfter:
-							if (fieldName.equals(FIELD_SUBMIT_DATE)) 
+							if (fieldName.equals(IssueConstants.FIELD_SUBMIT_DATE)) 
 								return new SubmitDateCriteria(value, operator);
-							else if (fieldName.equals(FIELD_UPDATE_DATE))
+							else if (fieldName.equals(IssueConstants.FIELD_UPDATE_DATE))
 								return new UpdateDateCriteria(value, operator);
 							else 
 								return new DateFieldCriteria(fieldName, value, operator);
 						case IssueQueryLexer.Contains:
-							if (fieldName.equals(FIELD_TITLE)) {
+							if (fieldName.equals(IssueConstants.FIELD_TITLE)) {
 								return new TitleCriteria(value);
-							} else if (fieldName.equals(FIELD_DESCRIPTION)) {
+							} else if (fieldName.equals(IssueConstants.FIELD_DESCRIPTION)) {
 								return new DescriptionCriteria(value);
-							} else if (fieldName.equals(FIELD_COMMENT)) {
+							} else if (fieldName.equals(IssueConstants.FIELD_COMMENT)) {
 								return new CommentCriteria(value);
 							} else {
 								FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
@@ -223,15 +212,15 @@ public class IssueQuery extends EntityQuery<Issue> {
 								}
 							}
 						case IssueQueryLexer.Is:
-							if (fieldName.equals(FIELD_MILESTONE)) {
+							if (fieldName.equals(IssueConstants.FIELD_MILESTONE)) {
 								return new MilestoneCriteria(value);
-							} else if (fieldName.equals(FIELD_STATE)) {
+							} else if (fieldName.equals(IssueConstants.FIELD_STATE)) {
 								return new StateCriteria(value);
-							} else if (fieldName.equals(FIELD_VOTE_COUNT)) {
+							} else if (fieldName.equals(IssueConstants.FIELD_VOTE_COUNT)) {
 								return new VoteCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(FIELD_COMMENT_COUNT)) {
+							} else if (fieldName.equals(IssueConstants.FIELD_COMMENT_COUNT)) {
 								return new CommentCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(FIELD_NUMBER)) {
+							} else if (fieldName.equals(IssueConstants.FIELD_NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
 								FieldSpec field = getIssueSetting().getFieldSpec(fieldName);
@@ -257,11 +246,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 							}
 						case IssueQueryLexer.IsLessThan:
 						case IssueQueryLexer.IsGreaterThan:
-							if (fieldName.equals(FIELD_VOTE_COUNT)) {
+							if (fieldName.equals(IssueConstants.FIELD_VOTE_COUNT)) {
 								return new VoteCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(FIELD_COMMENT_COUNT)) {
+							} else if (fieldName.equals(IssueConstants.FIELD_COMMENT_COUNT)) {
 								return new CommentCountCriteria(getIntValue(value), operator);
-							} else if (fieldName.equals(FIELD_NUMBER)) {
+							} else if (fieldName.equals(IssueConstants.FIELD_NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
 								FieldSpec field = getIssueSetting().getFieldSpec(fieldName);
@@ -350,8 +339,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case IssueQueryLexer.IsEmpty:
-			if (IssueConstants.QUERY_FIELDS.contains(fieldName) && !fieldName.equals(FIELD_DESCRIPTION) && !fieldName.equals(FIELD_MILESTONE)) 
+			if (IssueConstants.QUERY_FIELDS.contains(fieldName) 
+					&& !fieldName.equals(IssueConstants.FIELD_DESCRIPTION) 
+					&& !fieldName.equals(IssueConstants.FIELD_MILESTONE)) { 
 				throw newOperatorException(fieldName, operator);
+			}
 			break;
 		case IssueQueryLexer.IsMe:
 			if (!(fieldSpec instanceof UserChoiceField))
@@ -359,24 +351,27 @@ public class IssueQuery extends EntityQuery<Issue> {
 			break;
 		case IssueQueryLexer.IsBefore:
 		case IssueQueryLexer.IsAfter:
-			if (!fieldName.equals(FIELD_SUBMIT_DATE) && !fieldName.equals(FIELD_UPDATE_DATE) && !(fieldSpec instanceof DateField))
+			if (!fieldName.equals(IssueConstants.FIELD_SUBMIT_DATE) 
+					&& !fieldName.equals(IssueConstants.FIELD_UPDATE_DATE) 
+					&& !(fieldSpec instanceof DateField)) {
 				throw newOperatorException(fieldName, operator);
+			}
 			break;
 		case IssueQueryLexer.Contains:
-			if (!fieldName.equals(FIELD_TITLE) 
-					&& !fieldName.equals(FIELD_DESCRIPTION)
-					&& !fieldName.equals(FIELD_COMMENT)
+			if (!fieldName.equals(IssueConstants.FIELD_TITLE) 
+					&& !fieldName.equals(IssueConstants.FIELD_DESCRIPTION)
+					&& !fieldName.equals(IssueConstants.FIELD_COMMENT)
 					&& !(fieldSpec instanceof TextField) 
 					&& !(fieldSpec != null && fieldSpec.isAllowMultiple())) {
 				throw newOperatorException(fieldName, operator);
 			}
 			break;
 		case IssueQueryLexer.Is:
-			if (!fieldName.equals(FIELD_STATE) 
-					&& !fieldName.equals(FIELD_VOTE_COUNT) 
-					&& !fieldName.equals(FIELD_COMMENT_COUNT) 
-					&& !fieldName.equals(FIELD_NUMBER)
-					&& !fieldName.equals(FIELD_MILESTONE)
+			if (!fieldName.equals(IssueConstants.FIELD_STATE) 
+					&& !fieldName.equals(IssueConstants.FIELD_VOTE_COUNT) 
+					&& !fieldName.equals(IssueConstants.FIELD_COMMENT_COUNT) 
+					&& !fieldName.equals(IssueConstants.FIELD_NUMBER)
+					&& !fieldName.equals(IssueConstants.FIELD_MILESTONE)
 					&& !(fieldSpec instanceof IssueChoiceField)
 					&& !(fieldSpec instanceof PullRequestChoiceField)
 					&& !(fieldSpec instanceof BuildChoiceField)
@@ -391,9 +386,9 @@ public class IssueQuery extends EntityQuery<Issue> {
 			break;
 		case IssueQueryLexer.IsLessThan:
 		case IssueQueryLexer.IsGreaterThan:
-			if (!fieldName.equals(FIELD_VOTE_COUNT)
-					&& !fieldName.equals(FIELD_COMMENT_COUNT)
-					&& !fieldName.equals(FIELD_NUMBER)
+			if (!fieldName.equals(IssueConstants.FIELD_VOTE_COUNT)
+					&& !fieldName.equals(IssueConstants.FIELD_COMMENT_COUNT)
+					&& !fieldName.equals(IssueConstants.FIELD_NUMBER)
 					&& !(fieldSpec instanceof NumberField) 
 					&& !(fieldSpec instanceof ChoiceField))
 				throw newOperatorException(fieldName, operator);

@@ -9,6 +9,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -40,32 +42,39 @@ public class BuildListPage extends LayoutPage {
 	
 	private static final String PARAM_EXPECTED_COUNT = "expectedCount";
 	
-	private String query;
-	
 	private Integer expectedCount;
+	
+	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
+
+		@Override
+		protected String load() {
+			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
+			if (query != null && query.length() == 0) {
+				query = null;
+				List<String> queries = new ArrayList<>();
+				if (getLoginUser() != null) {
+					for (NamedBuildQuery namedQuery: getLoginUser().getBuildQuerySetting().getUserQueries())
+						queries.add(namedQuery.getQuery());
+				}
+				for (NamedBuildQuery namedQuery: getBuildSetting().getNamedQueries())
+					queries.add(namedQuery.getQuery());
+				for (String each: queries) {
+					try {
+						if (SecurityUtils.getUser() != null || !BuildQuery.parse(null, each).needsLogin()) {  
+							query = each;
+							break;
+						}
+					} catch (Exception e) {
+					}
+				} 
+			}
+			return query;
+		}
+		
+	};
 	
 	public BuildListPage(PageParameters params) {
 		super(params);
-		query = params.get(PARAM_QUERY).toOptionalString();
-		if (query != null && query.length() == 0) {
-			query = null;
-			List<String> queries = new ArrayList<>();
-			if (getLoginUser() != null) {
-				for (NamedBuildQuery namedQuery: getLoginUser().getBuildQuerySetting().getUserQueries())
-					queries.add(namedQuery.getQuery());
-			}
-			for (NamedBuildQuery namedQuery: getBuildSetting().getNamedQueries())
-				queries.add(namedQuery.getQuery());
-			for (String each: queries) {
-				try {
-					if (SecurityUtils.getUser() != null || !BuildQuery.parse(null, each).needsLogin()) {  
-						query = each;
-						break;
-					}
-				} catch (Exception e) {
-				}
-			} 
-		}
 		expectedCount = params.get(PARAM_EXPECTED_COUNT).toOptionalInteger();
 	}
 
@@ -73,6 +82,12 @@ public class BuildListPage extends LayoutPage {
 		return OneDev.getInstance(SettingManager.class).getBuildSetting();		
 	}
 	
+	@Override
+	protected void onDetach() {
+		queryModel.detach();
+		super.onDetach();
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -131,7 +146,7 @@ public class BuildListPage extends LayoutPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(query, null, 0);
+				PageParameters params = paramsOf(queryModel.getObject(), null, 0);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -143,7 +158,7 @@ public class BuildListPage extends LayoutPage {
 			
 		};
 		
-		add(new BuildListPanel("main", query, expectedCount) {
+		add(new BuildListPanel("main", queryModel.getObject(), expectedCount) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {

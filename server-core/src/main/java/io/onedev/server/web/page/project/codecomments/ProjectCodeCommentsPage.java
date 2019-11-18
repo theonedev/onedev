@@ -9,6 +9,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -37,36 +39,49 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private String query;
+	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
+
+		@Override
+		protected String load() {
+			String query = getPageParameters().get(PARAM_QUERY).toString();
+			if (query != null && query.length() == 0) {
+				query = null;
+				List<String> queries = new ArrayList<>();
+				if (getProject().getCodeCommentQuerySettingOfCurrentUser() != null) { 
+					for (NamedCodeCommentQuery namedQuery: getProject().getCodeCommentQuerySettingOfCurrentUser().getUserQueries())
+						queries.add(namedQuery.getQuery());
+				}
+				for (NamedCodeCommentQuery namedQuery: getProject().getNamedCodeCommentQueries())
+					queries.add(namedQuery.getQuery());
+				for (String each: queries) {
+					try {
+						if (SecurityUtils.getUser() != null || !CodeCommentQuery.parse(getProject(), each).needsLogin()) {  
+							query = each;
+							break;
+						}
+					} catch (Exception e) {
+					}
+				} 
+			}
+			return query;
+		}
+		
+	};
 	
 	public ProjectCodeCommentsPage(PageParameters params) {
 		super(params);
-		query = params.get(PARAM_QUERY).toString();
-		if (query != null && query.length() == 0) {
-			query = null;
-			List<String> queries = new ArrayList<>();
-			if (getProject().getCodeCommentQuerySettingOfCurrentUser() != null) { 
-				for (NamedCodeCommentQuery namedQuery: getProject().getCodeCommentQuerySettingOfCurrentUser().getUserQueries())
-					queries.add(namedQuery.getQuery());
-			}
-			for (NamedCodeCommentQuery namedQuery: getProject().getNamedCodeCommentQueries())
-				queries.add(namedQuery.getQuery());
-			for (String each: queries) {
-				try {
-					if (SecurityUtils.getUser() != null || !CodeCommentQuery.parse(getProject(), each).needsLogin()) {  
-						query = each;
-						break;
-					}
-				} catch (Exception e) {
-				}
-			} 
-		}
 	}
 
 	private CodeCommentQuerySettingManager getCodeCommentQuerySettingManager() {
 		return OneDev.getInstance(CodeCommentQuerySettingManager.class);		
 	}
 	
+	@Override
+	protected void onDetach() {
+		queryModel.detach();
+		super.onDetach();
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -116,7 +131,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getProject(), query);
+				PageParameters params = paramsOf(getProject(), queryModel.getObject());
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -128,7 +143,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 			
 		};
 		
-		add(new CodeCommentListPanel("main", query) {
+		add(new CodeCommentListPanel("main", queryModel.getObject()) {
 
 			@Override
 			protected Project getProject() {

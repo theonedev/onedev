@@ -6,6 +6,8 @@ import static io.onedev.server.util.CodeCommentConstants.FIELD_PATH;
 import static io.onedev.server.util.CodeCommentConstants.FIELD_REPLY;
 import static io.onedev.server.util.CodeCommentConstants.FIELD_REPLY_COUNT;
 import static io.onedev.server.util.CodeCommentConstants.FIELD_UPDATE_DATE;
+import static io.onedev.server.util.CodeCommentConstants.QUERY_FIELDS;
+import static io.onedev.server.util.CodeCommentConstants.ORDER_FIELDS;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,7 +44,6 @@ import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrCrite
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.OrderContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser.QueryContext;
-import io.onedev.server.util.CodeCommentConstants;
 import io.onedev.server.util.ProjectAwareCommitId;
 
 public class CodeCommentQuery extends EntityQuery<CodeComment> {
@@ -190,7 +191,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 			List<EntitySort> commentSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (!CodeCommentConstants.ORDER_FIELDS.containsKey(fieldName)) 
+				if (!ORDER_FIELDS.containsKey(fieldName)) 
 					throw new OneException("Can not order by field: " + fieldName);
 				
 				EntitySort commentSort = new EntitySort();
@@ -209,7 +210,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 	}
 	
 	public static void checkField(Project project, String fieldName, int operator) {
-		if (!CodeCommentConstants.QUERY_FIELDS.contains(fieldName))
+		if (!QUERY_FIELDS.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case CodeCommentQueryLexer.IsBefore:

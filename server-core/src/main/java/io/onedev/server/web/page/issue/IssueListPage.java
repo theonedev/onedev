@@ -11,6 +11,8 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -22,7 +24,6 @@ import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -41,36 +42,49 @@ public class IssueListPage extends LayoutPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private String query;
+	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
+
+		@Override
+		protected String load() {
+			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
+			if (query != null && query.length() == 0) {
+				query = null;
+				List<String> queries = new ArrayList<>();
+				if (getLoginUser() != null) {
+					for (NamedIssueQuery namedQuery: getLoginUser().getIssueQuerySetting().getUserQueries())
+						queries.add(namedQuery.getQuery());
+				}
+				for (NamedIssueQuery namedQuery: getIssueSetting().getNamedQueries())
+					queries.add(namedQuery.getQuery());
+				for (String each: queries) {
+					try {
+						if (getLoginUser() != null || !IssueQuery.parse(null, each, true).needsLogin()) {  
+							query = each;
+							break;
+						}
+					} catch (Exception e) {
+					}
+				} 
+			}
+			return query;
+		}
+		
+	};
 	
 	public IssueListPage(PageParameters params) {
 		super(params);
-		query = params.get(PARAM_QUERY).toOptionalString();
-		if (query != null && query.length() == 0) {
-			query = null;
-			List<String> queries = new ArrayList<>();
-			if (getLoginUser() != null) {
-				for (NamedIssueQuery namedQuery: getLoginUser().getIssueQuerySetting().getUserQueries())
-					queries.add(namedQuery.getQuery());
-			}
-			for (NamedIssueQuery namedQuery: getIssueSetting().getNamedQueries())
-				queries.add(namedQuery.getQuery());
-			for (String each: queries) {
-				try {
-					if (SecurityUtils.getUser() != null || !IssueQuery.parse(null, each, true).needsLogin()) {  
-						query = each;
-						break;
-					}
-				} catch (Exception e) {
-				}
-			} 
-		}
 	}
 	
 	protected IssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();		
 	}
 	
+	@Override
+	protected void onDetach() {
+		queryModel.detach();
+		super.onDetach();
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -133,7 +147,7 @@ public class IssueListPage extends LayoutPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(query, 0);
+				PageParameters params = paramsOf(queryModel.getObject(), 0);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -145,7 +159,7 @@ public class IssueListPage extends LayoutPage {
 			
 		};
 		
-		add(new IssueListPanel("main", query) {
+		add(new IssueListPanel("main", queryModel.getObject()) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {

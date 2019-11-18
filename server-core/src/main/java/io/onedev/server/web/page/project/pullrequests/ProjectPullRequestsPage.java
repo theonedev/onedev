@@ -11,6 +11,8 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -43,30 +45,37 @@ public class ProjectPullRequestsPage extends ProjectPage {
 	
 	private static final String PARAM_QUERY = "query";
 	
-	private String query;
+	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
+
+		@Override
+		protected String load() {
+			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
+			if (query != null && query.length() == 0) {
+				query = null;
+				List<String> queries = new ArrayList<>();
+				if (getProject().getPullRequestQuerySettingOfCurrentUser() != null) { 
+					for (NamedPullRequestQuery namedQuery: getProject().getPullRequestQuerySettingOfCurrentUser().getUserQueries())
+						queries.add(namedQuery.getQuery());
+				}
+				for (NamedPullRequestQuery namedQuery: getProject().getPullRequestSetting().getNamedQueries(true))
+					queries.add(namedQuery.getQuery());
+				for (String each: queries) {
+					try {
+						if (SecurityUtils.getUser() != null || !PullRequestQuery.parse(getProject(), each).needsLogin()) {  
+							query = each;
+							break;
+						}
+					} catch (Exception e) {
+					}
+				} 
+			}
+			return query;
+		}
+		
+	};
 	
 	public ProjectPullRequestsPage(PageParameters params) {
 		super(params);
-		query = params.get(PARAM_QUERY).toOptionalString();
-		if (query != null && query.length() == 0) {
-			query = null;
-			List<String> queries = new ArrayList<>();
-			if (getProject().getPullRequestQuerySettingOfCurrentUser() != null) { 
-				for (NamedPullRequestQuery namedQuery: getProject().getPullRequestQuerySettingOfCurrentUser().getUserQueries())
-					queries.add(namedQuery.getQuery());
-			}
-			for (NamedPullRequestQuery namedQuery: getProject().getPullRequestSetting().getNamedQueries(true))
-				queries.add(namedQuery.getQuery());
-			for (String each: queries) {
-				try {
-					if (SecurityUtils.getUser() != null || !PullRequestQuery.parse(getProject(), each).needsLogin()) {  
-						query = each;
-						break;
-					}
-				} catch (Exception e) {
-				}
-			} 
-		}
 	}
 
 	private PullRequestQuerySettingManager getPullRequestQuerySettingManager() {
@@ -77,6 +86,12 @@ public class ProjectPullRequestsPage extends ProjectPage {
 		return OneDev.getInstance(SettingManager.class).getPullRequestSetting();		
 	}
 	
+	@Override
+	protected void onDetach() {
+		queryModel.detach();
+		super.onDetach();
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -132,7 +147,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(getProject(), query, 0);
+				PageParameters params = paramsOf(getProject(), queryModel.getObject(), 0);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -144,7 +159,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 			
 		};
 
-		add(new PullRequestListPanel("main", query) {
+		add(new PullRequestListPanel("main", queryModel.getObject()) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {

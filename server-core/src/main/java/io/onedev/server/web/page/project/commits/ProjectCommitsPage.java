@@ -9,6 +9,8 @@ import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
@@ -36,41 +38,53 @@ public class ProjectCommitsPage extends ProjectPage {
 	
 	private static final String PARAM_COMMIT_QUERY = "commitQuery";
 	
-	private String query;
-	
 	private String compareWith;
+	
+	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
+
+		@Override
+		protected String load() {
+			String query = getPageParameters().get(PARAM_COMMIT_QUERY).toString();
+			if (query != null && query.length() == 0) {
+				query = null;
+				List<String> queries = new ArrayList<>();
+				if (getProject().getCommitQuerySettingOfCurrentUser() != null) { 
+					for (NamedCommitQuery namedQuery: getProject().getCommitQuerySettingOfCurrentUser().getUserQueries())
+						queries.add(namedQuery.getQuery());
+				}
+				for (NamedCommitQuery namedQuery: getProject().getNamedCommitQueries())
+					queries.add(namedQuery.getQuery());
+				for (String each: queries) {
+					try {
+						if (SecurityUtils.getUser() != null || !CommitQuery.parse(getProject(), each).needsLogin()) {  
+							query = each;
+							break;
+						}
+					} catch (Exception e) {
+					}
+				} 
+			}
+			return query;
+		}
+		
+	};
 	
 	public ProjectCommitsPage(PageParameters params) {
 		super(params);
 		
 		compareWith = params.get(PARAM_COMPARE_WITH).toString();
-
-		query = params.get(PARAM_COMMIT_QUERY).toString();
-		if (query != null && query.length() == 0) {
-			query = null;
-			List<String> queries = new ArrayList<>();
-			if (getProject().getCommitQuerySettingOfCurrentUser() != null) { 
-				for (NamedCommitQuery namedQuery: getProject().getCommitQuerySettingOfCurrentUser().getUserQueries())
-					queries.add(namedQuery.getQuery());
-			}
-			for (NamedCommitQuery namedQuery: getProject().getNamedCommitQueries())
-				queries.add(namedQuery.getQuery());
-			for (String each: queries) {
-				try {
-					if (SecurityUtils.getUser() != null || !CommitQuery.parse(getProject(), each).needsLogin()) {  
-						query = each;
-						break;
-					}
-				} catch (Exception e) {
-				}
-			} 
-		}
 	}
 
 	private CommitQuerySettingManager getCommitQuerySettingManager() {
 		return OneDev.getInstance(CommitQuerySettingManager.class);
 	}
 	
+	@Override
+	protected void onDetach() {
+		queryModel.detach();
+		super.onDetach();
+	}
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -90,9 +104,8 @@ public class ProjectCommitsPage extends ProjectPage {
 
 			@Override
 			protected Link<Void> newQueryLink(String componentId, NamedCommitQuery namedQuery) {
-				query = namedQuery.getQuery();
 				return new BookmarkablePageLink<Void>(componentId, ProjectCommitsPage.class, 
-						ProjectCommitsPage.paramsOf(getProject(), query, compareWith));
+						ProjectCommitsPage.paramsOf(getProject(), namedQuery.getQuery(), compareWith));
 			}
 
 			@Override
@@ -118,7 +131,7 @@ public class ProjectCommitsPage extends ProjectPage {
 
 		});
 		
-		add(new CommitListPanel("main", query) {
+		add(new CommitListPanel("main", queryModel.getObject()) {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
