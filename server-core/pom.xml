@@ -404,7 +404,7 @@
 	<properties>
 		<moduleClass>io.onedev.server.CoreModule</moduleClass>
 		<lucene.version>7.1.0</lucene.version>
-		<hibernate.version>5.4.4.Final</hibernate.version>
+		<hibernate.version>5.4.9.Final</hibernate.version>
 		<shiro.version>1.4.0</shiro.version>
 		<jgit.version>5.1.3.201810200350-r</jgit.version>
 		<flexmark.version>0.18.3</flexmark.version>

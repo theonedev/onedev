@@ -31,6 +31,7 @@
 	<logger name="com.jolbox.bonecp.BoneCPConfig" level="WARN"/>
 	<logger name="com.sun.jersey" level="WARN"/>
 	<logger name="org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl" level="ERROR"/>
+	<logger name="org.hibernate.boot.registry.classloading.internal.AggregatedServiceLoader" level="ERROR"/>
 	<logger name="org.reflections" level="WARN"/>
 	<logger name="org.apache.shiro.realm.AuthorizingRealm" level="WARN"/>
 	<logger name="com.joestelmach.natty" level="WARN"/>	
