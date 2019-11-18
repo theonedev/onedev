@@ -247,7 +247,7 @@ public abstract class BuildSidePanel extends Panel {
 		
 		String query = "depends on " + BuildQuery.quote(getBuild().getProject().getName() + "#" + getBuild().getNumber());
 		Link<Void> dependentsLink = new BookmarkablePageLink<Void>("dependents", BuildListPage.class, 
-				BuildListPage.paramsOf(query, getBuild().getDependents().size(), 0));
+				BuildListPage.paramsOf(query, 0, getBuild().getDependents().size()));
 		dependentsLink.setVisible(!getBuild().getDependents().isEmpty());
 		dependentsLink.add(new Label("label", getBuild().getDependents().size() + " build(s)"));
 		
@@ -255,7 +255,7 @@ public abstract class BuildSidePanel extends Panel {
 		
 		query = "dependencies of " + BuildQuery.quote(getBuild().getProject().getName() + "#" + getBuild().getNumber());
 		Link<Void> dependenciesLink = new BookmarkablePageLink<Void>("dependencies", BuildListPage.class, 
-				BuildListPage.paramsOf(query, getBuild().getDependencies().size(), 0));
+				BuildListPage.paramsOf(query, 0, getBuild().getDependencies().size()));
 		dependenciesLink.setVisible(!getBuild().getDependencies().isEmpty());
 		dependenciesLink.add(new Label("label", getBuild().getDependencies().size() + " build(s)"));
 		dependencesContainer.add(dependenciesLink);

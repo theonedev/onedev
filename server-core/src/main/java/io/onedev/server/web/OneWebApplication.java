@@ -56,7 +56,7 @@ import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.web.page.base.BasePage;
 import io.onedev.server.web.page.error.ErrorPage;
-import io.onedev.server.web.page.project.ProjectListPage;
+import io.onedev.server.web.page.layout.UICustomization;
 import io.onedev.server.web.resourcebundle.ResourceBundleReferences;
 import io.onedev.server.web.util.AbsoluteUrlRenderer;
 import io.onedev.server.web.websocket.WebSocketManager;
@@ -66,9 +66,13 @@ public class OneWebApplication extends WebApplication {
 	
 	private final Set<WebApplicationConfigurator> applicationConfigurators;
 	
+	private final UICustomization uiCustomization;
+	
 	@Inject
-	public OneWebApplication(Set<WebApplicationConfigurator> applicationConfigurators) {
+	public OneWebApplication(Set<WebApplicationConfigurator> applicationConfigurators, 
+			UICustomization uiCustomization) {
 		this.applicationConfigurators = applicationConfigurators;
+		this.uiCustomization = uiCustomization;
 	}
 	
 	@Override
@@ -234,7 +238,7 @@ public class OneWebApplication extends WebApplication {
 
 	@Override
 	public Class<? extends Page> getHomePage() {
-		return ProjectListPage.class;
+		return uiCustomization.getHomePage();
 	}
 
 	@Override

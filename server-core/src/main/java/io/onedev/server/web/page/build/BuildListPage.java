@@ -108,7 +108,7 @@ public class BuildListPage extends LayoutPage {
 			@Override
 			protected Link<Void> newQueryLink(String componentId, NamedBuildQuery namedQuery) {
 				return new BookmarkablePageLink<Void>(componentId, BuildListPage.class, 
-						BuildListPage.paramsOf(namedQuery.getQuery(), null, 0));
+						BuildListPage.paramsOf(namedQuery.getQuery(), 0, null));
 			}
 
 			@Override
@@ -146,7 +146,7 @@ public class BuildListPage extends LayoutPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(queryModel.getObject(), null, 0);
+				PageParameters params = paramsOf(queryModel.getObject(), 0, null);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -167,7 +167,7 @@ public class BuildListPage extends LayoutPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(BuildListPage.class, paramsOf(query, null, 0));
+				setResponsePage(BuildListPage.class, paramsOf(query, 0, null));
 			}
 
 			@Override
@@ -241,15 +241,15 @@ public class BuildListPage extends LayoutPage {
 		
 	}
 	
-	public static PageParameters paramsOf(@Nullable String query, 
-			@Nullable Integer expectedCount, int page) {
+	public static PageParameters paramsOf(@Nullable String query, int page,
+			@Nullable Integer expectedCount) {
 		PageParameters params = new PageParameters();
 		if (query != null)
 			params.add(PARAM_QUERY, query);
-		if (expectedCount != null)
-			params.add(PARAM_EXPECTED_COUNT, expectedCount);
 		if (page != 0)
 			params.add(PARAM_CURRENT_PAGE, page);
+		if (expectedCount != null)
+			params.add(PARAM_EXPECTED_COUNT, expectedCount);
 		return params;
 	}
 	

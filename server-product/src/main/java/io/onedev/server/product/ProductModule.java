@@ -1,8 +1,12 @@
 package io.onedev.server.product;
 
-import java.io.File;
+import static org.hibernate.cfg.AvailableSettings.DIALECT;
+import static org.hibernate.cfg.AvailableSettings.DRIVER;
+import static org.hibernate.cfg.AvailableSettings.PASS;
+import static org.hibernate.cfg.AvailableSettings.URL;
+import static org.hibernate.cfg.AvailableSettings.USER;
 
-import static org.hibernate.cfg.Environment.*;
+import java.io.File;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AbstractPluginModule;

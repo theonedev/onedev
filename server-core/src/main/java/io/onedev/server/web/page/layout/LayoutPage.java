@@ -1,10 +1,5 @@
 package io.onedev.server.web.page.layout;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -48,17 +43,11 @@ import io.onedev.server.web.page.admin.user.NewUserPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.UserPage;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.build.BuildListPage;
-import io.onedev.server.web.page.issue.IssueListPage;
 import io.onedev.server.web.page.my.MyAvatarPage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.MyPasswordPage;
 import io.onedev.server.web.page.my.MyProfilePage;
 import io.onedev.server.web.page.my.MyTokenPage;
-import io.onedev.server.web.page.project.NewProjectPage;
-import io.onedev.server.web.page.project.ProjectListPage;
-import io.onedev.server.web.page.project.ProjectPage;
-import io.onedev.server.web.page.pullrequest.PullRequestListPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
 import io.onedev.server.web.page.security.RegisterPage;
@@ -78,56 +67,19 @@ public abstract class LayoutPage extends BasePage {
 		
 		add(newNavContext("navContext"));
 		
-		WebMarkupContainer projectsContainer = new WebMarkupContainer("navProjects");
-		projectsContainer.add(new ViewStateAwarePageLink<Void>("link", ProjectListPage.class));
-		if (getPage() instanceof ProjectListPage || getPage() instanceof ProjectPage || getPage() instanceof NewProjectPage) 
-			projectsContainer.add(AttributeAppender.append("class", "active"));
-		add(projectsContainer);
+		UICustomization customization = OneDev.getInstance(UICustomization.class);
 		
-		WebMarkupContainer issuesContainer = new WebMarkupContainer("navIssues");
-		issuesContainer.add(new ViewStateAwarePageLink<Void>("link", IssueListPage.class, IssueListPage.paramsOf("", 0)));
-		if (getPage() instanceof IssueListPage) 
-			issuesContainer.add(AttributeAppender.append("class", "active"));
-		add(issuesContainer);
-		
-		WebMarkupContainer pullRequestsContainer = new WebMarkupContainer("navPullRequests");
-		pullRequestsContainer.add(new ViewStateAwarePageLink<Void>("link", PullRequestListPage.class, 
-				PullRequestListPage.paramsOf("", 0)));
-		if (getPage() instanceof PullRequestListPage) 
-			pullRequestsContainer.add(AttributeAppender.append("class", "active"));
-		add(pullRequestsContainer);
-		
-		WebMarkupContainer buildsContainer = new WebMarkupContainer("navBuilds");
-		buildsContainer.add(new ViewStateAwarePageLink<Void>("link", BuildListPage.class, 
-				BuildListPage.paramsOf("", null, 0)));
-		if (getPage() instanceof BuildListPage) 
-			buildsContainer.add(AttributeAppender.append("class", "active"));
-		add(buildsContainer);
-		
-		RepeatingView contributionsView = new RepeatingView("navContributions");		
-		List<MainNavContribution> contributions = new ArrayList<>();
-		for (MainNavContribution contribution: OneDev.getExtensions(MainNavContribution.class)) {
-			if (contribution.isAuthorized())
-				contributions.add(contribution);
-		}
-		Collections.sort(contributions, new Comparator<MainNavContribution>() {
-
-			@Override
-			public int compare(MainNavContribution o1, MainNavContribution o2) {
-				return o1.getOrder() - o2.getOrder();
+		RepeatingView tabsView = new RepeatingView("tabs");		
+		for (MainTab tab: customization.getMainTabs()) {
+			if (tab.isAuthorized()) {
+				WebMarkupContainer tabContainer = new WebMarkupContainer(tabsView.newChildId());
+				tabContainer.add(tab.render("tab"));
+				if (tab.isActive((LayoutPage) getPage()))
+					tabContainer.add(AttributeAppender.append("class", "active"));
+				tabsView.add(tabContainer);
 			}
-			
-		});
-		for (MainNavContribution contribution: contributions) {
-			WebMarkupContainer contributionContainer = new WebMarkupContainer(contributionsView.newChildId());
-			Link<Void> link = new ViewStateAwarePageLink<Void>("link", contribution.getPageClass());
-			link.add(new Label("label", contribution.getLabel()));
-			contributionContainer.add(link);
-			if (contribution.isActive((LayoutPage) getPage()))
-				contributionContainer.add(AttributeAppender.append("class", "active"));
-			contributionsView.add(contributionContainer);
 		}
-		add(contributionsView);
+		add(tabsView);
 		
 		WebMarkupContainer administrationContainer = new WebMarkupContainer("navAdministration");
 		WebMarkupContainer item;

@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
@@ -249,8 +250,14 @@ import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EditSupportLocator;
 import io.onedev.server.web.editable.EditSupportRegistry;
 import io.onedev.server.web.mapper.OnePageMapper;
-import io.onedev.server.web.page.layout.LayoutPage;
-import io.onedev.server.web.page.layout.MainNavContribution;
+import io.onedev.server.web.page.base.BasePage;
+import io.onedev.server.web.page.layout.BuildListTab;
+import io.onedev.server.web.page.layout.IssueListTab;
+import io.onedev.server.web.page.layout.MainTab;
+import io.onedev.server.web.page.layout.ProjectListTab;
+import io.onedev.server.web.page.layout.PullRequestListTab;
+import io.onedev.server.web.page.layout.UICustomization;
+import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.render.BlobRendererContribution;
 import io.onedev.server.web.page.test.TestPage;
 import io.onedev.server.web.websocket.BuildEventBroadcaster;
@@ -497,33 +504,20 @@ public class CoreModule extends AbstractPluginModule {
 		
 		bind(TaskButton.TaskFutureManager.class);
 		
-		contribute(MainNavContribution.class, new MainNavContribution() {
+		bind(UICustomization.class).toInstance(new UICustomization() {
 			
 			@Override
-			public boolean isAuthorized() {
-				return false;
+			public Class<? extends BasePage> getHomePage() {
+				return ProjectListPage.class;
 			}
 			
 			@Override
-			public Class<? extends LayoutPage> getPageClass() {
-				throw new UnsupportedOperationException();
-			}
-			
-			@Override
-			public int getOrder() {
-				throw new UnsupportedOperationException();
-			}
-			
-			@Override
-			public String getLabel() {
-				throw new UnsupportedOperationException();
+			public List<MainTab> getMainTabs() {
+				return Lists.newArrayList(
+						new ProjectListTab(), new IssueListTab(), 
+						new PullRequestListTab(), new BuildListTab());
 			}
 
-			@Override
-			public boolean isActive(LayoutPage page) {
-				return false;
-			}
-			
 		});
 	}
 	
