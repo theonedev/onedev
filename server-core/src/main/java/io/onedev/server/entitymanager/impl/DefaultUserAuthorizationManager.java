@@ -2,6 +2,7 @@ package io.onedev.server.entitymanager.impl;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -57,6 +58,16 @@ public class DefaultUserAuthorizationManager extends AbstractEntityManager<UserA
 		}
 	}
 
+	@Override
+	public List<UserAuthorization> query() {
+		return query(true);
+	}
+
+	@Override
+	public int count() {
+		return count(true);
+	}
+	
 	@Transactional
 	@Override
 	public void authorize(Project project, Collection<UserAuthorization> authorizations) {

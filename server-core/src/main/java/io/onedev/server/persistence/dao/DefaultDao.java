@@ -111,6 +111,20 @@ public class DefaultDao implements Dao, Serializable {
 		return query(criteria, 0, Integer.MAX_VALUE);
 	}
 
+	@Sessional
+	@Override
+	public <T extends AbstractEntity> int count(Class<T> entityClass) {
+		return count(entityClass, false);
+	}
+	
+	@Sessional
+	@Override
+	public <T extends AbstractEntity> int count(Class<T> entityClass, boolean cacheable) {
+		EntityCriteria<T> criteria = EntityCriteria.of(entityClass);		
+		criteria.setCacheable(cacheable);
+		return count(criteria);
+	}
+	
 	@Override
 	public SessionManager getSessionManager() {
 		return sessionManager;

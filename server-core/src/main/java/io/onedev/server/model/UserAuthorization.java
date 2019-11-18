@@ -8,11 +8,15 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Cache;
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
 @Entity
 @Table(
 		indexes={@Index(columnList="o_user_id"), @Index(columnList="o_project_id")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_user_id", "o_project_id"})
 })
+@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
 public class UserAuthorization extends AbstractEntity {
 
 	private static final long serialVersionUID = 1L;

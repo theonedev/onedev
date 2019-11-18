@@ -77,6 +77,8 @@ public class GroupMembershipsPage extends GroupPage {
 		EntityCriteria<Membership> criteria = EntityCriteria.of(Membership.class);
 		if (query != null)
 			criteria.createCriteria("user").add(Restrictions.ilike("name", query, MatchMode.ANYWHERE)); 
+		else
+			criteria.setCacheable(true);
 		criteria.add(Restrictions.eq("group", getGroup()));
 		return criteria;
 	}

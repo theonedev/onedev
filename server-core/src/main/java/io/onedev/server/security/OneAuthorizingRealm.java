@@ -2,8 +2,10 @@ package io.onedev.server.security;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
@@ -20,6 +22,8 @@ import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.Permission;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.wicket.MetaDataKey;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +45,7 @@ import io.onedev.server.model.UserAuthorization;
 import io.onedev.server.model.support.administration.authenticator.Authenticated;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
+import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.CreateProjects;
@@ -67,12 +72,19 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     
     private final ProjectManager projectManager;
     
+    private final SessionManager sessionManager;
+    
     private final TransactionManager transactionManager;
+    
+    @SuppressWarnings("serial")
+	private final MetaDataKey<Map<Long, AuthorizationInfo>> authorizationInfosKey = 
+			new MetaDataKey<Map<Long, AuthorizationInfo>>() {};    
     
 	@Inject
     public OneAuthorizingRealm(UserManager userManager, SettingManager configManager, 
     		MembershipManager membershipManager, GroupManager groupManager, 
-    		ProjectManager projectManager, TransactionManager transactionManager) {
+    		ProjectManager projectManager, SessionManager sessionManager, 
+    		TransactionManager transactionManager) {
 	    PasswordMatcher passwordMatcher = new PasswordMatcher();
 	    passwordMatcher.setPasswordService(AppLoader.getInstance(PasswordService.class));
 		setCredentialsMatcher(passwordMatcher);
@@ -82,11 +94,59 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
     	this.membershipManager = membershipManager;
     	this.groupManager = groupManager;
     	this.projectManager = projectManager;
+    	this.sessionManager = sessionManager;
     	this.transactionManager = transactionManager;
     }
 
-	@Override
-	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+	private Collection<Permission> getGroupPermissions(Group group, @Nullable User user) {
+		Collection<Permission> permissions = new ArrayList<>();
+		if (group.isAdministrator()) {
+			if (user != null) {
+				permissions.add(new SystemAdministration());
+			} else {
+				for (Project project: projectManager.query()) {
+					permissions.add(new ProjectPermission(project, new ReadCode()));
+					for (FieldSpec field: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs())
+						permissions.add(new ProjectPermission(project, new EditIssueField(field.getName())));
+					permissions.add(new ProjectPermission(project, new JobPermission("*", new AccessBuildLog())));
+				}
+			}
+		}
+		if (user != null && group.isCreateProjects())
+			permissions.add(new CreateProjects());
+		for (GroupAuthorization authorization: group.getProjectAuthorizations()) 
+			permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
+		return permissions;
+	}
+	
+	private AuthorizationInfo newAuthorizationInfo(Long userId) {
+		Collection<Permission> permissions = sessionManager.call(new Callable<Collection<Permission>>() {
+
+			@Override
+			public Collection<Permission> call() throws Exception {
+				Collection<Permission> permissions = new ArrayList<>();
+
+				User user = null;
+		        if (userId != 0L) { 
+		            user = userManager.load(userId);
+		        	if (user.isRoot()) 
+		        		permissions.add(new SystemAdministration());
+		        	permissions.add(new UserAdministration(user));
+		           	for (Group group: user.getGroups())
+		           		permissions.addAll(getGroupPermissions(group, user));
+		        	for (UserAuthorization authorization: user.getProjectAuthorizations()) 
+    					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
+		        	for (Project project: user.getProjects()) 
+		        		permissions.add(new ProjectPermission(project, new ManageProject()));
+		        } 
+	        	Group group = groupManager.findAnonymous();
+	        	if (group != null)
+	           		permissions.addAll(getGroupPermissions(group, user));
+				return permissions;
+			}
+			
+		});
+		
 		return new AuthorizationInfo() {
 			
 			private static final long serialVersionUID = 1L;
@@ -101,58 +161,32 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 				return new HashSet<>();
 			}
 			
-			private Collection<Permission> getGroupPermissions(Group group, @Nullable User user) {
-				Collection<Permission> permissions = new ArrayList<>();
-        		if (group.isAdministrator()) {
-        			if (user != null) {
-        				permissions.add(new SystemAdministration());
-        			} else {
-        				for (Project project: projectManager.query()) {
-        					permissions.add(new ProjectPermission(project, new ReadCode()));
-        					for (FieldSpec field: OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldSpecs())
-        						permissions.add(new ProjectPermission(project, new EditIssueField(field.getName())));
-        					permissions.add(new ProjectPermission(project, new JobPermission("*", new AccessBuildLog())));
-        				}
-        			}
-        		}
-        		if (user != null && group.isCreateProjects())
-        			permissions.add(new CreateProjects());
-        		for (GroupAuthorization authorization: group.getProjectAuthorizations()) 
-					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
-				return permissions;
-			}
-			
 			@Override
 			public Collection<Permission> getObjectPermissions() {
-				return transactionManager.getSessionManager().call(new Callable<Collection<Permission>>() {
-
-					@Override
-					public Collection<Permission> call() throws Exception {
-						Long userId = (Long) principals.getPrimaryPrincipal();						
-						Collection<Permission> permissions = new ArrayList<>();
-
-						User user = null;
-				        if (userId != 0L) { 
-				            user = userManager.load(userId);
-				        	if (user.isRoot()) 
-				        		permissions.add(new SystemAdministration());
-				        	permissions.add(new UserAdministration(user));
-				           	for (Group group: user.getGroups())
-				           		permissions.addAll(getGroupPermissions(group, user));
-				        	for (UserAuthorization authorization: user.getProjectAuthorizations()) 
-            					permissions.add(new ProjectPermission(authorization.getProject(), authorization.getRole()));
-				        	for (Project project: user.getProjects()) 
-				        		permissions.add(new ProjectPermission(project, new ManageProject()));
-				        } 
-			        	Group group = groupManager.findAnonymous();
-			        	if (group != null)
-			           		permissions.addAll(getGroupPermissions(group, user));
-						return permissions;
-					}
-					
-				});
+				return permissions;
 			}
-		};
+		};		
+	}
+	
+	@Override
+	protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principals) {
+		Long userId = (Long) principals.getPrimaryPrincipal();						
+		RequestCycle requestCycle = RequestCycle.get();
+		if (requestCycle != null) {
+			Map<Long, AuthorizationInfo> authorizationInfos = requestCycle.getMetaData(authorizationInfosKey);
+			if (authorizationInfos == null) {
+				authorizationInfos = new HashMap<>();
+				requestCycle.setMetaData(authorizationInfosKey, authorizationInfos);
+			}
+			AuthorizationInfo authorizationInfo = authorizationInfos.get(userId);
+			if (authorizationInfo == null) {
+				authorizationInfo = newAuthorizationInfo(userId);
+				authorizationInfos.put(userId, authorizationInfo);
+			}
+			return authorizationInfo;
+		} else {
+			return newAuthorizationInfo(userId);
+		}
 	}
 	
 	@Override

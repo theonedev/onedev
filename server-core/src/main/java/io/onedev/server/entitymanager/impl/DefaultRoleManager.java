@@ -65,6 +65,11 @@ public class DefaultRoleManager extends AbstractEntityManager<Role> implements R
 		return query(true);
 	}
 	
+	@Override
+	public int count() {
+		return count(true);
+	}
+	
 	@Sessional
 	@Override
 	public Role find(String name) {

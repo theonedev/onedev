@@ -75,6 +75,10 @@ public interface EntityManager<T extends AbstractEntity> {
 	
 	List<T> query();
 	
+	int count(boolean cacheable);
+	
+	int count();
+	
 	EntityCriteria<T> newCriteria();
 	
 	/**

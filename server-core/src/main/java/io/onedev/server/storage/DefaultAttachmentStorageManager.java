@@ -24,6 +24,7 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.persistence.dao.EntityCriteria;
 
 @Singleton
 public class DefaultAttachmentStorageManager implements AttachmentStorageManager, SchedulableTask {
@@ -96,7 +97,9 @@ public class DefaultAttachmentStorageManager implements AttachmentStorageManager
 	@Override
 	public void execute() {
 		try {
-			for (Project project: dao.query(Project.class)) {
+			EntityCriteria<Project> criteria = EntityCriteria.of(Project.class);
+			criteria.setCacheable(true);
+			for (Project project: dao.query(criteria)) {
 				File tempAttachmentBase = new File(storageManager.getProjectAttachmentDir(project.getId()), TEMP);
 				if (tempAttachmentBase.exists()) {
 					for (File file: tempAttachmentBase.listFiles()) {

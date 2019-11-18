@@ -28,8 +28,6 @@ public interface TransactionManager {
 
 	Transaction getTransaction();
 	
-	SessionManager getSessionManager();
-	
 	Session getSession();
 	
 	<T> T call(Callable<T> callable);

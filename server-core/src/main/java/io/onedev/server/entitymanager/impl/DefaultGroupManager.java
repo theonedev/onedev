@@ -71,11 +71,6 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 		dao.persist(group);
 	}
 
-	@Override
-	public List<Group> query() {
-		return query(true);
-	}
-	
 	@Transactional
 	@Override
 	public void delete(Group group) {
@@ -111,10 +106,20 @@ public class DefaultGroupManager extends AbstractEntityManager<Group> implements
 	}
 
 	@Override
+	public List<Group> query() {
+		return query(true);
+	}
+
+	@Override
+	public int count() {
+		return count(true);
+	}
+
+	@Override
 	public Group findAnonymous() {
 		SecuritySetting securitySetting = OneDev.getInstance(SettingManager.class).getSecuritySetting();
 		if (securitySetting.isEnableAnonymousAccess()) {
-			Group group = OneDev.getInstance(GroupManager.class).find(securitySetting.getAnonymousGroup());
+			Group group = find(securitySetting.getAnonymousGroup());
 			if (group != null) 
 				return group;
 			else

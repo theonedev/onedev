@@ -107,6 +107,16 @@ public abstract class AbstractEntityManager<T extends AbstractEntity> implements
 	}
 	
 	@Override
+	public int count(boolean cacheable) {
+		return dao.count(entityClass, cacheable);
+	}
+
+	@Override
+	public int count() {
+		return count(false);
+	}
+	
+	@Override
 	public T find(EntityCriteria<T> entityCriteria) {
 		return dao.find(entityCriteria);
 	}

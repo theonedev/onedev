@@ -62,6 +62,8 @@ public class GroupListPage extends AdministrationPage {
 		EntityCriteria<Group> criteria = EntityCriteria.of(Group.class);
 		if (query != null) 
 			criteria.add(Restrictions.ilike("name", query, MatchMode.ANYWHERE));
+		else
+			criteria.setCacheable(true);
 		return criteria;
 	}
 	

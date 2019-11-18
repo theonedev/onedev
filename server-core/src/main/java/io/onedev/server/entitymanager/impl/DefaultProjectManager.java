@@ -409,6 +409,11 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	}
 
 	@Override
+	public int count() {
+		return count(true);
+	}
+	
+	@Override
 	public Collection<Project> getPermittedProjects(@Nullable User user, Permission permission) {
 		Collection<Project> projects = new HashSet<>();
 		

@@ -107,6 +107,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     private Collection<CodeCommentQuerySetting> projectCodeCommentQuerySettings = new ArrayList<>();
     
     @OneToMany(mappedBy="owner")
+	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
     private Collection<Project> projects = new ArrayList<>();
     
 	@Lob

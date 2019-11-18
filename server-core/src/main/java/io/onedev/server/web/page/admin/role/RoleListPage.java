@@ -61,6 +61,8 @@ public class RoleListPage extends AdministrationPage {
 		EntityCriteria<Role> criteria = EntityCriteria.of(Role.class);
 		if (query != null) 
 			criteria.add(Restrictions.ilike("name", query, MatchMode.ANYWHERE));
+		else
+			criteria.setCacheable(true);
 		return criteria;
 	}
 	

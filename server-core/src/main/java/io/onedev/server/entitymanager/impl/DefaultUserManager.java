@@ -188,6 +188,11 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 	public List<User> query() {
 		return query(true);
 	}
+	
+	@Override
+	public int count() {
+		return count(true);
+	}
 
 	@Sessional
     @Override

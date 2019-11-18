@@ -2,6 +2,7 @@ package io.onedev.server.entitymanager.impl;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -54,6 +55,16 @@ public class DefaultGroupAuthorizationManager extends AbstractEntityManager<Grou
 				save(newAuthorization);
 			}
 		}
+	}
+	
+	@Override
+	public List<GroupAuthorization> query() {
+		return query(true);
+	}
+
+	@Override
+	public int count() {
+		return count(true);
 	}
 	
 }

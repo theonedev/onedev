@@ -1,6 +1,7 @@
 package io.onedev.server.entitymanager.impl;
 
 import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,6 +25,16 @@ public class DefaultMembershipManager extends AbstractEntityManager<Membership> 
 	public void delete(Collection<Membership> memberships) {
 		for (Membership membership: memberships)
 			dao.remove(membership);
+	}
+
+	@Override
+	public List<Membership> query() {
+		return query(true);
+	}
+
+	@Override
+	public int count() {
+		return count(true);
 	}
 
 }

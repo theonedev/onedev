@@ -68,6 +68,8 @@ public class UserListPage extends AdministrationPage {
 			criteria.add(Restrictions.or(
 					Restrictions.ilike("name", query, MatchMode.ANYWHERE), 
 					Restrictions.ilike("fullName", query, MatchMode.ANYWHERE)));
+		} else {
+			criteria.setCacheable(true);
 		}
 		return criteria;
 	}

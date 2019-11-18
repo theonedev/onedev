@@ -214,4 +214,14 @@ public class DefaultMilestoneManager extends AbstractEntityManager<Milestone> im
 		}
 	}
 	
+	@Override
+	public List<Milestone> query() {
+		return query(true);
+	}
+
+	@Override
+	public int count() {
+		return count(true);
+	}
+	
 }
