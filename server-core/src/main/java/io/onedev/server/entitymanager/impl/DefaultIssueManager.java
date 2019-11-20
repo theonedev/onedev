@@ -46,6 +46,8 @@ import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.event.system.SystemStarted;
+import io.onedev.server.issue.StateSpec;
+import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.IssueQuerySetting;
@@ -53,10 +55,7 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.IssueSetting;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
-import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -75,6 +74,7 @@ import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.facade.IssueFacade;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
@@ -343,17 +343,17 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 		
 		for (Project project: projectManager.query()) 
-			project.getIssueSetting().fixUndefinedStates(resolutions);
+			project.getIssueSetting().fixUndefinedStates(project, resolutions);
 		
 		for (IssueQuerySetting setting: issueQuerySettingManager.query()) 
-			fixUndefinedStates(resolutions, setting.getProject(), setting.getUserQueries());
+			fixUndefinedStates(setting.getProject(), resolutions, setting.getUserQueries());
 
 		for (User user: userManager.query())
-			fixUndefinedStates(resolutions, null, user.getIssueQuerySetting().getUserQueries());
+			fixUndefinedStates(null, resolutions, user.getIssueQuerySetting().getUserQueries());
 	}
 	
-	private void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions, 
-			@Nullable Project project, List<NamedIssueQuery> namedQueries) {
+	private void fixUndefinedStates(@Nullable Project project, Map<String, UndefinedStateResolution> resolutions, 
+			List<NamedIssueQuery> namedQueries) {
 		for (NamedIssueQuery namedQuery: namedQueries) {
 			try {
 				IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);

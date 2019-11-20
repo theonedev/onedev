@@ -13,15 +13,17 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.issue.BoardSpec;
+import io.onedev.server.issue.TransitionSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
+import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution.FixType;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
-import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution.FixType;
 
 public class ProjectIssueSetting implements Serializable {
 	
@@ -176,7 +178,7 @@ public class ProjectIssueSetting implements Serializable {
 		}
 		if (transitionSpecs != null) {
 			for (TransitionSpec transition: transitionSpecs)
-				undefinedFields.addAll(transition.getUndefinedFields(getSetting()));
+				undefinedFields.addAll(transition.getUndefinedFields(project));
 		}
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
@@ -188,7 +190,7 @@ public class ProjectIssueSetting implements Serializable {
 		}
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs) 
-				undefinedFields.addAll(board.getUndefinedFields());
+				undefinedFields.addAll(board.getUndefinedFields(project));
 		}
 		return undefinedFields;
 	}
@@ -259,7 +261,7 @@ public class ProjectIssueSetting implements Serializable {
 
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs)
-				undefinedStates.addAll(board.getUndefinedStates());
+				undefinedStates.addAll(board.getUndefinedStates(project));
 		}
 		
 		if (transitionSpecs != null) {
@@ -270,11 +272,11 @@ public class ProjectIssueSetting implements Serializable {
 		return undefinedStates;
 	}
 
-	public void fixUndefinedStates(Map<String, UndefinedStateResolution> resolutions) {
+	public void fixUndefinedStates(Project project, Map<String, UndefinedStateResolution> resolutions) {
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
+					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
 					for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 						query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 					namedQuery.setQuery(query.toString());
@@ -285,7 +287,7 @@ public class ProjectIssueSetting implements Serializable {
 		
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs)
-				board.fixUndefinedStates(resolutions);
+				board.fixUndefinedStates(project, resolutions);
 		}
 		
 		if (transitionSpecs != null) {

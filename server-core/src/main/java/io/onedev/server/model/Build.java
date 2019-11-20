@@ -53,23 +53,26 @@ import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.VariableInterpolator;
-import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
-import io.onedev.server.ci.job.paramspec.SecretParam;
+import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
-import io.onedev.server.model.support.inputspec.SecretInput;
+import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.facade.BuildFacade;
+import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.interpolative.Interpolative;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
+import io.onedev.server.web.util.BuildAware;
+import io.onedev.server.web.util.WicketUtils;
 
 @Entity
 @Table(
@@ -189,6 +192,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	private transient Job job;
 	
 	private transient Map<Build.Status, Build> streamPreviousCache = new HashMap<>();
+	
+	private transient Map<Integer, Collection<Long>> numbersOfStreamPreviousCache = new HashMap<>();
 	
 	public Project getProject() {
 		return project;
@@ -526,8 +531,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public String getSecretValue(String secretName) {
-		if (secretName.startsWith(SecretParam.LITERAL_VALUE_PREFIX))
-			return secretName.substring(SecretParam.LITERAL_VALUE_PREFIX.length());
+		if (secretName.startsWith(SecretInput.LITERAL_VALUE_PREFIX))
+			return secretName.substring(SecretInput.LITERAL_VALUE_PREFIX.length());
 		else
 			return project.getSecretValue(secretName, ObjectId.fromString(getCommitHash()));
 	}
@@ -547,7 +552,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	public Serializable getParamBean() {
 		Serializable paramBean;
 		try {
-			paramBean = (Serializable) JobParam.defineBeanClass(getJob().getParamSpecs()).newInstance();
+			paramBean = (Serializable) ParamSupply.defineBeanClass(getJob().getParamSpecs()).newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RuntimeException(e);
 		} 
@@ -610,6 +615,17 @@ public class Build extends AbstractEntity implements Referenceable {
 		return streamPreviousCache.get(status);
 	}
 	
+	public Collection<Long> getNumbersOfStreamPrevious(int limit) {
+		if (numbersOfStreamPreviousCache == null) 
+			numbersOfStreamPreviousCache = new HashMap<>();
+		if (!numbersOfStreamPreviousCache.containsKey(limit)) {
+			BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+			numbersOfStreamPreviousCache.put(limit, buildManager.queryNumbersOfStreamPrevious(
+					this, null, EntityCriteria.IN_CLAUSE_LIMIT));
+		}
+		return numbersOfStreamPreviousCache.get(limit);
+	}
+	
 	public void retrieveArtifacts(Build dependency, String artifacts, File workspaceDir) {
 		LockUtils.read(dependency.getArtifactsLockKey(), new Callable<Void>() {
 
@@ -646,6 +662,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	@SuppressWarnings("unchecked")
 	public void interpolate(Serializable bean) {
+		Build.push(this);
 		try {
 			for (Method getter: BeanUtils.findGetters(bean.getClass())) {
 				Method setter = BeanUtils.findSetter(getter);
@@ -673,6 +690,8 @@ public class Build extends AbstractEntity implements Referenceable {
 			}
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			throw new RuntimeException(e);
+		} finally {
+			Build.pop();
 		}
 	}
 	
@@ -710,10 +729,17 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	@Nullable
 	public static Build get() {
-		if (!stack.get().isEmpty()) 
+		if (!stack.get().isEmpty()) { 
 			return stack.get().peek();
-		else 
+		} else {
+			ComponentContext componentContext = ComponentContext.get();
+			if (componentContext != null) {
+				BuildAware buildAware = WicketUtils.findInnermost(componentContext.getComponent(), BuildAware.class);
+				if (buildAware != null) 
+					return buildAware.getBuild();
+			}
 			return null;
+		}
 	}
 	
 }

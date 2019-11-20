@@ -22,9 +22,9 @@ import com.google.common.collect.Sets;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.IssueSetting;
-import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 

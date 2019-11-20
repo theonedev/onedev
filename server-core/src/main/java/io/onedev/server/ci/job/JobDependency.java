@@ -10,8 +10,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.CISpecAware;
-import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
@@ -32,7 +32,7 @@ public class JobDependency implements Serializable {
 	
 	private boolean requireSuccessful = true;
 	
-	private List<JobParam> jobParams = new ArrayList<>();
+	private List<ParamSupply> jobParams = new ArrayList<>();
 	
 	private String artifacts = "**";
 	
@@ -60,11 +60,11 @@ public class JobDependency implements Serializable {
 	@Editable(order=200, name="Job Parameters")
 	@ParamSpecProvider("getParamSpecs")
 	@OmitName
-	public List<JobParam> getJobParams() {
+	public List<ParamSupply> getJobParams() {
 		return jobParams;
 	}
 
-	public void setJobParams(List<JobParam> jobParams) {
+	public void setJobParams(List<ParamSupply> jobParams) {
 		this.jobParams = jobParams;
 	}
 	

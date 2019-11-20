@@ -10,30 +10,31 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.BuildConstants;
 
 public class CancelledByCriteria extends EntityCriteria<Build> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final User value;
+	private final User user;
 	
-	private String rawValue;
+	private final String value;
 	
-	public CancelledByCriteria(User value, String rawValue) {
+	public CancelledByCriteria(String value) {
+		user = EntityQuery.getUser(value);
 		this.value = value;
-		this.rawValue = rawValue;
 	}
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
 		Path<User> attribute = root.get(BuildConstants.ATTR_CANCELLER);
-		return builder.equal(attribute, value);
+		return builder.equal(attribute, this.user);
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return Objects.equals(build.getCanceller(), value);
+		return Objects.equals(build.getCanceller(), this.user);
 	}
 
 	@Override
@@ -43,7 +44,7 @@ public class CancelledByCriteria extends EntityCriteria<Build> {
 	
 	@Override
 	public String toString() {
-		return BuildQuery.getRuleName(BuildQueryLexer.CancelledBy) + " " + BuildQuery.quote(rawValue);
+		return BuildQuery.getRuleName(BuildQueryLexer.CancelledBy) + " " + BuildQuery.quote(value);
 	}
 
 }

@@ -17,20 +17,17 @@ import com.google.common.collect.Lists;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneException;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.Choice;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
-import io.onedev.server.model.support.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
-import io.onedev.server.model.support.inputspec.showcondition.ShowCondition;
-import io.onedev.server.model.support.inputspec.showcondition.ValueIsOneOf;
-import io.onedev.server.model.support.issue.BoardSpec;
+import io.onedev.server.issue.BoardSpec;
+import io.onedev.server.issue.StateSpec;
+import io.onedev.server.issue.TransitionSpec;
+import io.onedev.server.issue.fieldspec.BuildChoiceField;
+import io.onedev.server.issue.fieldspec.ChoiceField;
+import io.onedev.server.issue.fieldspec.FieldSpec;
+import io.onedev.server.issue.fieldspec.IssueChoiceField;
+import io.onedev.server.issue.fieldspec.UserChoiceField;
+import io.onedev.server.issue.transitiontrigger.BuildSuccessfulTrigger;
+import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
-import io.onedev.server.model.support.issue.StateSpec;
-import io.onedev.server.model.support.issue.TransitionSpec;
-import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
-import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
-import io.onedev.server.model.support.issue.fieldspec.IssueChoiceField;
-import io.onedev.server.model.support.issue.fieldspec.UserChoiceField;
-import io.onedev.server.model.support.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.OrCriteria;
@@ -38,6 +35,11 @@ import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.Choice;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.util.inputspec.choiceinput.defaultvalueprovider.SpecifiedDefaultValue;
+import io.onedev.server.util.inputspec.showcondition.ShowCondition;
+import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -83,6 +85,10 @@ public class IssueSetting implements Serializable {
 		task.setValue("Task");
 		choices.add(task);
 
+		Choice buildFailure = new Choice();
+		buildFailure.setValue("Build Failure");
+		choices.add(buildFailure);
+		
 		specifiedChoices.setChoices(choices);
 		type.setChoiceProvider(specifiedChoices);
 		
@@ -134,6 +140,19 @@ public class IssueSetting implements Serializable {
 		
 		fieldSpecs.add(assignee);
 		
+		BuildChoiceField build = new BuildChoiceField();
+		build.setName("Build");
+		build.setAllowEmpty(true);
+		build.setNameOfEmptyValue("No build specified");
+		ShowCondition showCondition = new ShowCondition();
+		showCondition.setInputName("Type");
+		ValueIsOneOf valueIsOneOf = new ValueIsOneOf();
+		valueIsOneOf.setValues(Lists.newArrayList("Build Failure"));
+		showCondition.setValueMatcher(valueIsOneOf);
+		build.setShowCondition(showCondition);
+		
+		fieldSpecs.add(build);
+		
 		ChoiceField resolution = new ChoiceField();
 		resolution.setName("Resolution");
 		specifiedChoices = new SpecifiedChoices();
@@ -164,9 +183,9 @@ public class IssueSetting implements Serializable {
 		IssueChoiceField duplicateWith = new IssueChoiceField();
 		duplicateWith.setName("Duplicate With");
 		
-		ShowCondition showCondition = new ShowCondition();
+		showCondition = new ShowCondition();
 		showCondition.setInputName("Resolution");
-		ValueIsOneOf valueIsOneOf = new ValueIsOneOf();
+		valueIsOneOf = new ValueIsOneOf();
 		valueIsOneOf.setValues(Lists.newArrayList("Duplicated"));
 		showCondition.setValueMatcher(valueIsOneOf);
 		duplicateWith.setShowCondition(showCondition);
@@ -199,6 +218,26 @@ public class IssueSetting implements Serializable {
 		defaultTransitionSpecs.add(transition);
 		
 		transition = new TransitionSpec();
+		transition.setFromStates(Lists.newArrayList("Open"));
+		transition.setToState("Closed");
+		BuildSuccessfulTrigger buildSuccessful = new BuildSuccessfulTrigger();
+		buildSuccessful.setBranches("master");
+		buildSuccessful.setIssueQuery("\"Type\" is \"Build Failure\" and (\"Build\" is current or \"Build\" is previous)");
+		transition.setTrigger(buildSuccessful);
+		
+		defaultTransitionSpecs.add(transition);
+		
+		transition = new TransitionSpec();
+		transition.setFromStates(Lists.newArrayList("Open"));
+		transition.setToState("Closed");
+		buildSuccessful = new BuildSuccessfulTrigger();
+		buildSuccessful.setBranches("master");
+		buildSuccessful.setIssueQuery("fixed in current build");
+		transition.setTrigger(buildSuccessful);
+
+		defaultTransitionSpecs.add(transition);
+		
+		transition = new TransitionSpec();
 		transition.setFromStates(Lists.newArrayList("Closed"));
 		transition.setToState("Open");
 		pressButton = new PressButtonTrigger();
@@ -212,6 +251,7 @@ public class IssueSetting implements Serializable {
 		defaultPromptFieldsUponIssueOpen.add("Type");
 		defaultPromptFieldsUponIssueOpen.add("Priority");
 		defaultPromptFieldsUponIssueOpen.add("Assignee");
+		defaultPromptFieldsUponIssueOpen.add("Build");
 		
 		BoardSpec board = new BoardSpec();
 		board.setName(IssueConstants.FIELD_STATE);
@@ -292,16 +332,16 @@ public class IssueSetting implements Serializable {
 		this.reconciled = reconciled;
 	}
 
-	private Map<String, FieldSpec> getFieldSpecMap() {
-		// Do not use cache here as we may change fieldSpecs while editing IssueSetting
+	public Map<String, FieldSpec> getFieldSpecMap(@Nullable Collection<String> fieldNames) {
 		Map<String, FieldSpec> fieldSpecMap = new LinkedHashMap<>();
-		for (FieldSpec field: getFieldSpecs())
-			fieldSpecMap.put(field.getName(), field);
+		for (FieldSpec fieldSpec: getFieldSpecs()) {
+			if (fieldNames == null || fieldNames.contains(fieldSpec.getName()))
+				fieldSpecMap.put(fieldSpec.getName(), fieldSpec);
+		}
 		return fieldSpecMap;
 	}
 	
-	private Map<String, StateSpec> getStateSpecMap() {
-		// Do not use cache here as we may change fieldSpecs while editing IssueSetting
+	public Map<String, StateSpec> getStateSpecMap() {
 		Map<String, StateSpec> stateSpecMap = new LinkedHashMap<>();
 		for (StateSpec state: getStateSpecs())
 			stateSpecMap.put(state.getName(), state);
@@ -309,7 +349,7 @@ public class IssueSetting implements Serializable {
 	}
 	
 	public List<String> getFieldNames() {
-		return new ArrayList<>(getFieldSpecMap().keySet());
+		return new ArrayList<>(getFieldSpecMap(null).keySet());
 	}
 	
 	public void onDeleteState(String stateName) {
@@ -357,7 +397,7 @@ public class IssueSetting implements Serializable {
 
 	@Nullable
 	public FieldSpec getFieldSpec(String fieldName) {
-		return getFieldSpecMap().get(fieldName);
+		return getFieldSpecMap(null).get(fieldName);
 	}
 
 	public void onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {

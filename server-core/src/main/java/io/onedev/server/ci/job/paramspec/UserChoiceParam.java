@@ -9,10 +9,10 @@ import javax.validation.constraints.NotNull;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
-import io.onedev.server.model.support.inputspec.userchoiceinput.UserChoiceInput;
-import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.AllUsers;
-import io.onedev.server.model.support.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.model.support.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.util.inputspec.userchoiceinput.UserChoiceInput;
+import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.AllUsers;
+import io.onedev.server.util.inputspec.userchoiceinput.choiceprovider.ChoiceProvider;
+import io.onedev.server.util.inputspec.userchoiceinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 

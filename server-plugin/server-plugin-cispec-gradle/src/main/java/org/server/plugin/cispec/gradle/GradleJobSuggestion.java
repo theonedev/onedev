@@ -24,9 +24,9 @@ import io.onedev.server.plugin.report.html.JobHtmlReport;
 
 public class GradleJobSuggestion implements JobSuggestion {
 		
-	public static final String DETERMINE_DOCKER_IMAGE = "gradle-determine-docker-image";
+	public static final String DETERMINE_DOCKER_IMAGE = "gradle:determine-docker-image";
 	
-	public static final String DETERMINE_PROJECT_VERSION = "gradle-determine-project-version";
+	public static final String DETERMINE_PROJECT_VERSION = "gradle:determine-project-version";
 	
 	@Override
 	public Collection<Job> suggestJobs(Project project, ObjectId commitId) {
@@ -100,31 +100,37 @@ public class GradleJobSuggestion implements JobSuggestion {
 		}
 		return null;
 	}
-	
-	public static String determineDockerImage(Build build) {
-		String jdkVersion = null;
-		Blob blob = getGradlePropertiesBlob(build.getProject(), build.getCommitId());
-		if (blob != null)
-			jdkVersion = getJdkVersion(blob);
-		if (jdkVersion == null) {
-			blob = getGradleBlob(build.getProject(), build.getCommitId());
-			if (blob != null) 
-				jdkVersion = getJdkVersion(blob);
-		}
-		if (jdkVersion == null) {
-			blob = getKotlinGradleBlob(build.getProject(), build.getCommitId());
+
+	@Nullable
+	public static String determineDockerImage() {
+		Build build = Build.get();
+		if (build != null) {
+			String jdkVersion = null;
+			Blob blob = getGradlePropertiesBlob(build.getProject(), build.getCommitId());
 			if (blob != null)
 				jdkVersion = getJdkVersion(blob);
-		}
-		if (jdkVersion != null) {
-			try {
-				if (Integer.parseInt(jdkVersion) > 8)
-					return "gradle";
-			} catch (NumberFormatException e) {
+			if (jdkVersion == null) {
+				blob = getGradleBlob(build.getProject(), build.getCommitId());
+				if (blob != null) 
+					jdkVersion = getJdkVersion(blob);
 			}
-			return "gradle:5.6.3-jdk8";
+			if (jdkVersion == null) {
+				blob = getKotlinGradleBlob(build.getProject(), build.getCommitId());
+				if (blob != null)
+					jdkVersion = getJdkVersion(blob);
+			}
+			if (jdkVersion != null) {
+				try {
+					if (Integer.parseInt(jdkVersion) > 8)
+						return "gradle";
+				} catch (NumberFormatException e) {
+				}
+				return "gradle:5.6.3-jdk8";
+			} else {
+				return "gradle";
+			}
 		} else {
-			return "gradle";
+			return null;
 		}
 	}
 	

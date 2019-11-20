@@ -16,15 +16,15 @@ import io.onedev.server.OneDev;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobManager;
-import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.scriptidentity.JobIdentity;
-import io.onedev.server.util.scriptidentity.ScriptIdentity;
-import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
+import io.onedev.server.util.inputspec.InputContext;
+import io.onedev.server.util.script.identity.JobIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
@@ -53,7 +53,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 		if (!job.getParamSpecs().isEmpty()) {
 			Serializable paramBean;
 			try {
-				paramBean = JobParam.defineBeanClass(job.getParamSpecs()).newInstance();
+				paramBean = ParamSupply.defineBeanClass(job.getParamSpecs()).newInstance();
 			} catch (InstantiationException | IllegalAccessException e) {
 				throw new RuntimeException(e);
 			}
@@ -62,7 +62,7 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 
 				@Override
 				protected void onSave(AjaxRequestTarget target, Serializable bean) {
-					Map<String, List<String>> paramMap = JobParam.getParamMap(
+					Map<String, List<String>> paramMap = ParamSupply.getParamMap(
 							job, bean, job.getParamSpecMap().keySet());
 					Build build = OneDev.getInstance(JobManager.class).submit(getProject(), 
 							commitId, job.getName(), paramMap, SecurityUtils.getUser());

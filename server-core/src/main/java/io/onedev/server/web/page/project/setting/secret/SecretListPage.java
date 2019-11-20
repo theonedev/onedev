@@ -10,7 +10,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.support.inputspec.SecretInput;
+import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 

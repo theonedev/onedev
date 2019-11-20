@@ -1,14 +1,17 @@
 package io.onedev.server.entitymanager.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.util.lang.Objects;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -16,14 +19,22 @@ import com.google.common.base.Optional;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
-import io.onedev.server.event.build.BuildEvent;
+import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
+import io.onedev.server.issue.TransitionSpec;
+import io.onedev.server.issue.transitiontrigger.BuildSuccessfulTrigger;
+import io.onedev.server.issue.transitiontrigger.CommitTrigger;
+import io.onedev.server.issue.transitiontrigger.DiscardPullRequest;
+import io.onedev.server.issue.transitiontrigger.MergePullRequest;
+import io.onedev.server.issue.transitiontrigger.OpenPullRequest;
+import io.onedev.server.issue.transitiontrigger.PullRequestTrigger;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
@@ -31,24 +42,21 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.TransitionSpec;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueFieldChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueMilestoneChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueStateChangeData;
 import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
-import io.onedev.server.model.support.issue.transitiontrigger.BuildSuccessfulTrigger;
-import io.onedev.server.model.support.issue.transitiontrigger.CommitTrigger;
-import io.onedev.server.model.support.issue.transitiontrigger.DiscardPullRequest;
-import io.onedev.server.model.support.issue.transitiontrigger.MergePullRequest;
-import io.onedev.server.model.support.issue.transitiontrigger.OpenPullRequest;
-import io.onedev.server.model.support.issue.transitiontrigger.PullRequestTrigger;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDiscardData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeData;
+import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.search.entity.issue.IssueCriteria;
+import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.Input;
 
 @Singleton
@@ -59,14 +67,21 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	
 	private final IssueFieldManager issueFieldManager;
 	
+	private final TransactionManager transactionManager;
+	
+	private final BuildManager buildManager;
+	
 	private final ListenerRegistry listenerRegistry;
 	
 	@Inject
-	public DefaultIssueChangeManager(Dao dao, IssueManager issueManager, 
-			IssueFieldManager issueFieldManager, ListenerRegistry listenerRegistry) {
+	public DefaultIssueChangeManager(Dao dao, TransactionManager transactionManager, 
+			IssueManager issueManager,  IssueFieldManager issueFieldManager,
+			BuildManager buildManager, ListenerRegistry listenerRegistry) {
 		super(dao);
 		this.issueManager = issueManager;
 		this.issueFieldManager = issueFieldManager;
+		this.transactionManager = transactionManager;
+		this.buildManager = buildManager;
 		this.listenerRegistry = listenerRegistry;
 	}
 
@@ -191,27 +206,50 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 	
 	@Transactional
 	@Listen
-	public void on(BuildEvent event) {
-		Project project = event.getBuild().getProject();
-		for (TransitionSpec transition: project.getIssueSetting().getTransitionSpecs(true)) {
-			if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
-				BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
-				String branches = trigger.getBranches();
-				ObjectId commitId = ObjectId.fromString(event.getBuild().getCommitHash());
-				if (trigger.getJobName().equals(event.getBuild().getJobName()) 
-						&& event.getBuild().getStatus() == Build.Status.SUCCESSFUL
-						&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
-					Build build = event.getBuild();
-					for (Long issueNumber: build.getFixedIssueNumbers()) {
-						Issue issue = issueManager.find(build.getProject(), issueNumber);
-						if (issue != null && transition.getFromStates().contains(issue.getState())) { 
-							issue.removeFields(transition.getRemoveFields());
-							changeState(issue, transition.getToState(), new HashMap<>(), null, null);
+	public void on(BuildFinished event) {
+		Long buildId = event.getBuild().getId();
+		transactionManager.runAsyncAfterCommit(new Runnable() {
+
+			@Override
+			public void run() {
+				transactionManager.run(new Runnable() {
+
+					@Override
+					public void run() {
+						Build build = buildManager.load(buildId);
+						Project project = build.getProject();
+						for (TransitionSpec transition: project.getIssueSetting().getTransitionSpecs(true)) {
+							if (transition.getTrigger() instanceof BuildSuccessfulTrigger) {
+								BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
+								String branches = trigger.getBranches();
+								ObjectId commitId = ObjectId.fromString(build.getCommitHash());
+								if ((trigger.getJobName() == null || trigger.getJobName().equals(build.getJobName())) 
+										&& build.getStatus() == Build.Status.SUCCESSFUL
+										&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
+									Build.push(build);
+									try {
+										IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true);
+										List<IssueCriteria> criterias = new ArrayList<>();
+										for (String fromState: transition.getFromStates()) 
+											criterias.add(new StateCriteria(fromState));
+										criterias.add(query.getCriteria());
+										query = new IssueQuery(IssueCriteria.of(criterias), new ArrayList<>());
+										for (Issue issue: issueManager.query(project, null, query, 0, Integer.MAX_VALUE)) {
+											issue.removeFields(transition.getRemoveFields());
+											changeState(issue, transition.getToState(), new HashMap<>(), null, null);
+										}
+									} finally {
+										Build.pop();
+									}
+								}
+							}
 						}
 					}
-				}
+					
+				});
 			}
-		}
+			
+		}, SecurityUtils.getSubject());
 	}
 	
 	private void on(PullRequest request, Class<? extends PullRequestTrigger> triggerClass) {

@@ -165,6 +165,7 @@ import io.onedev.server.maintenance.RestoreDatabase;
 import io.onedev.server.maintenance.Upgrade;
 import io.onedev.server.migration.JpaConverter;
 import io.onedev.server.migration.PersistentBagConverter;
+import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -225,6 +226,7 @@ import io.onedev.server.util.markdown.DefaultMarkdownManager;
 import io.onedev.server.util.markdown.EntityReferenceManager;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.markdown.MarkdownProcessor;
+import io.onedev.server.util.script.ScriptContribution;
 import io.onedev.server.util.validation.DefaultEntityValidator;
 import io.onedev.server.util.validation.EntityValidator;
 import io.onedev.server.util.validation.ValidatorProvider;
@@ -302,6 +304,7 @@ public class CoreModule extends AbstractPluginModule {
 		configurePersistence();
 		configureRestServices();
 		configureWeb();
+		configureCI();
 		
 		bind(GitConfig.class).toProvider(GitConfigProvider.class);
 
@@ -518,6 +521,31 @@ public class CoreModule extends AbstractPluginModule {
 						new PullRequestListTab(), new BuildListTab());
 			}
 
+		});
+	}
+	
+	private void configureCI() {
+		contribute(ScriptContribution.class, new ScriptContribution() {
+
+			@Override
+			public GroovyScript getScript() {
+				GroovyScript script = new GroovyScript();
+				script.setName("determine-build-failure-investigator");
+				script.setContent(Lists.newArrayList("io.onedev.server.util.script.ScriptContribution.determineBuildFailureInvestigator()"));
+				return script;
+			}
+			
+		});
+		contribute(ScriptContribution.class, new ScriptContribution() {
+
+			@Override
+			public GroovyScript getScript() {
+				GroovyScript script = new GroovyScript();
+				script.setName("get-build-number");
+				script.setContent(Lists.newArrayList("io.onedev.server.util.script.ScriptContribution.getBuildNumber()"));
+				return script;
+			}
+			
 		});
 	}
 	

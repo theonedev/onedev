@@ -122,7 +122,6 @@ import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
-import io.onedev.server.web.editable.annotation.RoleChoice;
 import io.onedev.server.web.editable.annotation.UserChoice;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
@@ -346,17 +345,6 @@ public class Project extends AbstractEntity {
 		this.description = description;
 	}
 
-	@Editable(order=300, name="Default Role", description="Optionally specify default role to access the project. ")
-	@RoleChoice
-	@NameOfEmptyValue("No default role")
-	public String getDefaultRoleName() {
-		return ownerName;
-	}
-
-	public void setDefaultRoleName(String ownerName) {
-		this.ownerName = ownerName;
-	}
-	
 	@Editable(order=500, name="Owner", description="Projects without owners are considered orphan projects")
 	@UserChoice
 	@NameOfEmptyValue("No owner")
@@ -1355,19 +1343,23 @@ public class Project extends AbstractEntity {
 		return null;
 	}
 
-	public boolean isCommitOnBranches(ObjectId commitId, String branches) {
-		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-		Collection<ObjectId> descendants = commitInfoManager.getDescendants(this, Sets.newHashSet(commitId));
-		descendants.add(commitId);
-	
+	public boolean isCommitOnBranches(@Nullable ObjectId commitId, String branches) {
 		Matcher matcher = new PathMatcher();
-		PatternSet branchPatterns = PatternSet.fromString(branches);
-		for (RefInfo ref: getBranches()) {
-			String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
-			if (descendants.contains(ref.getPeeledObj()) && branchPatterns.matches(matcher, branchName))
-				return true;
+		if (commitId != null) {
+			CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
+			Collection<ObjectId> descendants = commitInfoManager.getDescendants(this, Sets.newHashSet(commitId));
+			descendants.add(commitId);
+		
+			PatternSet branchPatterns = PatternSet.fromString(branches);
+			for (RefInfo ref: getBranches()) {
+				String branchName = Preconditions.checkNotNull(GitUtils.ref2branch(ref.getRef().getName()));
+				if (descendants.contains(ref.getPeeledObj()) && branchPatterns.matches(matcher, branchName))
+					return true;
+			}
+			return false;
+		} else {
+			return PatternSet.fromString(branches).matches(matcher, "master");
 		}
-		return false;
 	}
 
 	public Collection<String> getChangedFiles(ObjectId oldObjectId, ObjectId newObjectId, 

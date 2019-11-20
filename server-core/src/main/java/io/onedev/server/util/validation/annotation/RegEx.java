@@ -17,7 +17,7 @@ public @interface RegEx {
 
 	boolean interpolative() default false;
 	
-	String value();
+	String pattern();
 	
     String message() default "Not matching specified regular expression";
 

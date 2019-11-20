@@ -1,7 +1,5 @@
 package io.onedev.server.search.entity.issue;
 
-import java.util.Objects;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -17,13 +15,20 @@ public class SubmittedByMeCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
-		Path<User> attribute = root.get(IssueConstants.ATTR_SUBMITTER);
-		return builder.equal(attribute, user);
+		if (user != null) {
+			Path<User> attribute = root.get(IssueConstants.ATTR_SUBMITTER);
+			return builder.equal(attribute, user);
+		} else {
+			return builder.disjunction();
+		}
 	}
 
 	@Override
 	public boolean matches(Issue issue, User user) {
-		return Objects.equals(issue.getSubmitter(), user);
+		if (user != null)
+			return user.equals(issue.getSubmitter());
+		else
+			return false;
 	}
 
 	@Override

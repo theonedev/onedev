@@ -1,7 +1,5 @@
 package io.onedev.server.search.entity.pullrequest;
 
-import java.util.Objects;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -17,13 +15,20 @@ public class DiscardedByMeCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		Path<User> attribute = PullRequestQuery.getPath(root, PullRequestConstants.ATTR_CLOSE_USER);
-		return builder.equal(attribute, user);
+		if (user != null) {
+			Path<User> attribute = PullRequestQuery.getPath(root, PullRequestConstants.ATTR_CLOSE_USER);
+			return builder.equal(attribute, user);
+		} else {
+			return builder.disjunction();
+		}
 	}
 
 	@Override
 	public boolean matches(PullRequest request, User user) {
-		return Objects.equals(request.getSubmitter(), user);
+		if (user != null)
+			return user.equals(request.getSubmitter());
+		else
+			return false;
 	}
 
 	@Override

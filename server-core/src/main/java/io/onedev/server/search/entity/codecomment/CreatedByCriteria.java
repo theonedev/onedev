@@ -10,27 +10,31 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.CodeCommentConstants;
 
 public class CreatedByCriteria extends EntityCriteria<CodeComment> {
 
 	private static final long serialVersionUID = 1L;
 
-	private final User value;
+	private final User user;
 	
-	public CreatedByCriteria(User value) {
+	private final String value;
+	
+	public CreatedByCriteria(String value) {
+		user = EntityQuery.getUser(value);
 		this.value = value;
 	}
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
 		Path<User> attribute = root.get(CodeCommentConstants.ATTR_USER);
-		return builder.equal(attribute, value);
+		return builder.equal(attribute, this.user);
 	}
 
 	@Override
 	public boolean matches(CodeComment comment, User user) {
-		return Objects.equals(comment.getUser(), value);
+		return Objects.equals(comment.getUser(), this.user);
 	}
 
 	@Override
@@ -40,7 +44,8 @@ public class CreatedByCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public String toString() {
-		return CodeCommentQuery.getRuleName(CodeCommentQueryLexer.CreatedBy) + " " + CodeCommentQuery.quote(value.getName());
+		return CodeCommentQuery.getRuleName(CodeCommentQueryLexer.CreatedBy) 
+				+ " " + CodeCommentQuery.quote(value);
 	}
 
 }

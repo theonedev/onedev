@@ -1,9 +1,11 @@
 package org.server.plugin.cispec.gradle;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.server.ci.job.JobSuggestion;
-import io.onedev.server.ci.job.NamedFunction;
-import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.util.script.ScriptContribution;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -18,16 +20,14 @@ public class GradleModule extends AbstractPluginModule {
 		// put your guice bindings here
 		contribute(JobSuggestion.class, GradleJobSuggestion.class);
 		
-		contribute(NamedFunction.class, new NamedFunction() {
+		contribute(ScriptContribution.class, new ScriptContribution() {
 
 			@Override
-			public String getName() {
-				return GradleJobSuggestion.DETERMINE_DOCKER_IMAGE;
-			}
-
-			@Override
-			public String call(Build build) {
-				return GradleJobSuggestion.determineDockerImage(build);
+			public GroovyScript getScript() {
+				GroovyScript script = new GroovyScript();
+				script.setName(GradleJobSuggestion.DETERMINE_DOCKER_IMAGE);
+				script.setContent(Lists.newArrayList("org.server.plugin.cispec.gradle.GradleJobSuggestion.determineDockerImage()"));
+				return script;
 			}
 			
 		});

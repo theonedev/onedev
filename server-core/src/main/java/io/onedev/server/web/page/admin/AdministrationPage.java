@@ -5,9 +5,9 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.scriptidentity.ScriptIdentity;
-import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
-import io.onedev.server.util.scriptidentity.SiteAdministrator;
+import io.onedev.server.util.script.identity.ScriptIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentityAware;
+import io.onedev.server.util.script.identity.SiteAdministrator;
 import io.onedev.server.web.page.layout.LayoutPage;
 
 @SuppressWarnings("serial")

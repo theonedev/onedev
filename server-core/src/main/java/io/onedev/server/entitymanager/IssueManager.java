@@ -6,11 +6,11 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import io.onedev.server.issue.StateSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueCriteria;

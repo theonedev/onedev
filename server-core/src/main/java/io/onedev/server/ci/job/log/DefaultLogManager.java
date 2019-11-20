@@ -45,10 +45,10 @@ import io.onedev.server.ci.job.log.instruction.LogInstructionParser.ParamContext
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.web.websocket.WebSocketManager;
 
 @Singleton

@@ -37,18 +37,18 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.ci.job.JobManager;
-import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.inputspec.InputContext;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.scriptidentity.JobIdentity;
-import io.onedev.server.util.scriptidentity.ScriptIdentity;
-import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
+import io.onedev.server.util.inputspec.InputContext;
+import io.onedev.server.util.script.identity.JobIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
@@ -75,12 +75,14 @@ import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardP
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
 
 @SuppressWarnings("serial")
-public abstract class BuildDetailPage extends ProjectPage implements InputContext, ScriptIdentityAware {
+public abstract class BuildDetailPage extends ProjectPage 
+		implements InputContext, ScriptIdentityAware, BuildAware {
 
 	public static final String PARAM_BUILD = "build";
 	
@@ -109,6 +111,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 		position = QueryPosition.from(params);
 	}
 	
+	@Override
 	public Build getBuild() {
 		return buildModel.getObject();
 	}
@@ -190,7 +193,7 @@ public abstract class BuildDetailPage extends ProjectPage implements InputContex
 		summary.add(new AjaxLink<Void>("rebuild") {
 
 			private void resubmit(Serializable paramBean) {
-				Map<String, List<String>> paramMap = JobParam.getParamMap(getBuild().getJob(), paramBean, 
+				Map<String, List<String>> paramMap = ParamSupply.getParamMap(getBuild().getJob(), paramBean, 
 						getBuild().getJob().getParamSpecMap().keySet());
 				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap, SecurityUtils.getUser());
 				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild(), position));

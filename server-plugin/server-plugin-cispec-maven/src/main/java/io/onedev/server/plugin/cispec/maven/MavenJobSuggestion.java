@@ -4,6 +4,8 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.annotation.Nullable;
+
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -28,7 +30,7 @@ public class MavenJobSuggestion implements JobSuggestion {
 
 	private static final Logger logger = LoggerFactory.getLogger(MavenJobSuggestion.class);
 	
-	public static final String DETERMINE_DOCKER_IMAGE = "maven-determine-docker-image";
+	public static final String DETERMINE_DOCKER_IMAGE = "maven:determine-docker-image";
 	
 	@Override
 	public Collection<Job> suggestJobs(Project project, ObjectId commitId) {
@@ -69,48 +71,54 @@ public class MavenJobSuggestion implements JobSuggestion {
 		return jobs;
 	}
 
-	public static String determineDockerImage(Build build) {
-		Project project = build.getProject();
-		ObjectId commitId = build.getCommitId();
-
-		Blob blob = project.getBlob(new BlobIdent(commitId.name(), "pom.xml", FileMode.TYPE_FILE), false);
-
-		Document document;
-		try {
-			document = new SAXReader().read(new StringReader(blob.getText().getContent()));
-		} catch (DocumentException e) {
-			logger.debug("Error parsing pom.xml (project: {}, commit: {})",
-					project.getName(), commitId.getName(), e);
-			return null;
-		}
-
-		String javaVersion = "1.8";
-
-		// Use XPath with localname as POM project element may contain xmlns definition
-		Node node = document.selectSingleNode("//*[local-name()='maven.compiler.source']");
-		if (node != null) {
-			javaVersion = node.getText().trim();
-		} else {
-			node = document.selectSingleNode("//*[local-name()='artifactId' and text()='maven-compiler-plugin']");
-			if (node != null)
-				node = node.getParent().selectSingleNode(".//*[local-name()='source']");
+	@Nullable
+	public static String determineDockerImage() {
+		Build build = Build.get();
+		if (build != null) {
+			Project project = build.getProject();
+			ObjectId commitId = build.getCommitId();
+	
+			Blob blob = project.getBlob(new BlobIdent(commitId.name(), "pom.xml", FileMode.TYPE_FILE), false);
+	
+			Document document;
+			try {
+				document = new SAXReader().read(new StringReader(blob.getText().getContent()));
+			} catch (DocumentException e) {
+				logger.debug("Error parsing pom.xml (project: {}, commit: {})",
+						project.getName(), commitId.getName(), e);
+				return null;
+			}
+	
+			String javaVersion = "1.8";
+	
+			// Use XPath with localname as POM project element may contain xmlns definition
+			Node node = document.selectSingleNode("//*[local-name()='maven.compiler.source']");
 			if (node != null) {
 				javaVersion = node.getText().trim();
 			} else {
-				// detect java version from Spring initializer generated projects
-				node = document.selectSingleNode("//*[local-name()='java.version']");
+				node = document.selectSingleNode("//*[local-name()='artifactId' and text()='maven-compiler-plugin']");
 				if (node != null)
+					node = node.getParent().selectSingleNode(".//*[local-name()='source']");
+				if (node != null) {
 					javaVersion = node.getText().trim();
+				} else {
+					// detect java version from Spring initializer generated projects
+					node = document.selectSingleNode("//*[local-name()='java.version']");
+					if (node != null)
+						javaVersion = node.getText().trim();
+				}
 			}
-		}
-
-		try {
-			if (Integer.parseInt(javaVersion) <= 8)
+	
+			try {
+				if (Integer.parseInt(javaVersion) <= 8)
+					return "maven:3.6.1-jdk-8";
+				else
+					return "maven:latest";
+			} catch (NumberFormatException e) {
 				return "maven:3.6.1-jdk-8";
-			else
-				return "maven:latest";
-		} catch (NumberFormatException e) {
-			return "maven:3.6.1-jdk-8";
-		}		
+			}		
+		} else {
+			return null;
+		}
 	}
 }

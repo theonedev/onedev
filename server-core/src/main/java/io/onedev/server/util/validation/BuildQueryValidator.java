@@ -10,13 +10,10 @@ import io.onedev.server.web.editable.annotation.BuildQuery;
 
 public class BuildQueryValidator implements ConstraintValidator<BuildQuery, String> {
 
-	private boolean noLoginSupport;
-	
 	private String message;
 	
 	@Override
 	public void initialize(BuildQuery constaintAnnotation) {
-		noLoginSupport = constaintAnnotation.noLoginSupport();
 		message = constaintAnnotation.message();
 	}
 
@@ -29,7 +26,7 @@ public class BuildQueryValidator implements ConstraintValidator<BuildQuery, Stri
 			try {
 				io.onedev.server.search.entity.build.BuildQuery buildQuery = 
 						io.onedev.server.search.entity.build.BuildQuery.parse(project, value);
-				if (noLoginSupport && buildQuery.needsLogin()) { 
+				if (buildQuery.needsLogin()) { 
 					String message = this.message;
 					if (message.length() == 0)
 						message = "This query needs login which is not supported here";

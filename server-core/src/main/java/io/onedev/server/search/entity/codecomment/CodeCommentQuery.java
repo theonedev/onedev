@@ -6,8 +6,8 @@ import static io.onedev.server.util.CodeCommentConstants.FIELD_PATH;
 import static io.onedev.server.util.CodeCommentConstants.FIELD_REPLY;
 import static io.onedev.server.util.CodeCommentConstants.FIELD_REPLY_COUNT;
 import static io.onedev.server.util.CodeCommentConstants.FIELD_UPDATE_DATE;
-import static io.onedev.server.util.CodeCommentConstants.QUERY_FIELDS;
 import static io.onedev.server.util.CodeCommentConstants.ORDER_FIELDS;
+import static io.onedev.server.util.CodeCommentConstants.QUERY_FIELDS;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -105,7 +105,7 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 						int operator = ctx.operator.getType();
 						String value = getValue(ctx.Quoted().getText());
 						if (operator == CodeCommentQueryLexer.CreatedBy) {
-							return new CreatedByCriteria(getUser(value));
+							return new CreatedByCriteria(value);
 						} else {
 							ProjectAwareCommitId commitId = getCommitId(project, value); 
 							return new OnCommitCriteria(commitId.getProject(), commitId.getCommitId());

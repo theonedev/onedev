@@ -16,7 +16,6 @@ import java.util.Set;
 
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.apache.wicket.Component;
@@ -28,8 +27,8 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.CISpecAware;
 import io.onedev.server.ci.job.action.PostBuildAction;
-import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.model.Project;
@@ -37,6 +36,7 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
+import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.web.editable.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
@@ -103,7 +103,7 @@ public class Job implements Serializable, Validatable {
 	private transient Map<String, ParamSpec> paramSpecMap;
 	
 	@Editable(order=100, description="Specify name of the job")
-	@Pattern(regexp="[^:]*", message="Character ':' is not allowed") // ':' will be used as project/job separator in build query
+	@RegEx(pattern="[^:]*", message="Character ':' is not allowed") // ':' will be used as project/job separator in build query
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -451,7 +451,7 @@ public class Job implements Serializable, Validatable {
 	
 	public Map<String, ParamSpec> getParamSpecMap() {
 		if (paramSpecMap == null)
-			paramSpecMap = JobParam.getParamSpecMap(paramSpecs);
+			paramSpecMap = ParamSupply.getParamSpecMap(paramSpecs);
 		return paramSpecMap;
 	}
 	

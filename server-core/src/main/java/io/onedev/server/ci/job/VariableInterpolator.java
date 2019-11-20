@@ -8,7 +8,6 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.model.Build;
@@ -17,13 +16,11 @@ import io.onedev.server.util.Input;
 
 public class VariableInterpolator implements Function<String, String> {
 
-	public static final String PARAMS_PREFIX = "params."; 
+	public static final String PARAMS_PREFIX = "params:"; 
 	
-	public static final String SECRETS_PREFIX = "secrets.";
+	public static final String SECRETS_PREFIX = "secrets:";
 	
-	public static final String SCRIPTS_PREFIX = "scripts.";
-	
-	public static final String FUNCTIONS_PREFIX = "functions.";
+	public static final String SCRIPTS_PREFIX = "scripts:";
 	
 	private final Build build;
 	
@@ -63,14 +60,11 @@ public class VariableInterpolator implements Function<String, String> {
 			String scriptName = t.substring(SCRIPTS_PREFIX.length());
 			Map<String, Object> context = new HashMap<>();
 			context.put("build", build);
-			return (String) GroovyUtils.evalScriptByName(scriptName, context);
-		} else if (t.startsWith(FUNCTIONS_PREFIX)) {
-			String functionName = t.substring(FUNCTIONS_PREFIX.length());
-			for (NamedFunction function: OneDev.getExtensions(NamedFunction.class)) {
-				if (function.getName().equals(functionName))
-					return function.call(build);
-			}
-			throw new OneException("Unable to find function with name: " + functionName);
+			Object result = GroovyUtils.evalScriptByName(scriptName, context);
+			if (result != null)
+				return result.toString();
+			else
+				return "";
 		} else {
 			throw new OneException("Unrecognized interpolation variable: " + t);
 		}

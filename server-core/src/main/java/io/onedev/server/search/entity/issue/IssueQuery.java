@@ -22,21 +22,21 @@ import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.issue.fieldspec.BooleanField;
+import io.onedev.server.issue.fieldspec.BuildChoiceField;
+import io.onedev.server.issue.fieldspec.ChoiceField;
+import io.onedev.server.issue.fieldspec.DateField;
+import io.onedev.server.issue.fieldspec.FieldSpec;
+import io.onedev.server.issue.fieldspec.GroupChoiceField;
+import io.onedev.server.issue.fieldspec.IssueChoiceField;
+import io.onedev.server.issue.fieldspec.NumberField;
+import io.onedev.server.issue.fieldspec.PullRequestChoiceField;
+import io.onedev.server.issue.fieldspec.TextField;
+import io.onedev.server.issue.fieldspec.UserChoiceField;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.IssueSetting;
-import io.onedev.server.model.support.issue.fieldspec.BooleanField;
-import io.onedev.server.model.support.issue.fieldspec.BuildChoiceField;
-import io.onedev.server.model.support.issue.fieldspec.ChoiceField;
-import io.onedev.server.model.support.issue.fieldspec.DateField;
-import io.onedev.server.model.support.issue.fieldspec.FieldSpec;
-import io.onedev.server.model.support.issue.fieldspec.GroupChoiceField;
-import io.onedev.server.model.support.issue.fieldspec.IssueChoiceField;
-import io.onedev.server.model.support.issue.fieldspec.NumberField;
-import io.onedev.server.model.support.issue.fieldspec.PullRequestChoiceField;
-import io.onedev.server.model.support.issue.fieldspec.TextField;
-import io.onedev.server.model.support.issue.fieldspec.UserChoiceField;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -127,6 +127,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 						switch (ctx.operator.getType()) {
 						case IssueQueryLexer.SubmittedByMe:
 							return new SubmittedByMeCriteria();
+						case IssueQueryLexer.FixedInCurrentBuild:
+							return new FixedInCurrentBuildCriteria();
 						default:
 							throw new OneException("Unexpected operator: " + ctx.operator.getText());
 						}
@@ -149,7 +151,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 					public IssueCriteria visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
 						if (ctx.SubmittedBy() != null) 
-							return new SubmittedByCriteria(getUser(value), value);
+							return new SubmittedByCriteria(value);
 						else if (ctx.FixedInBuild() != null) 
 							return new FixedInCriteria(project, value);
 						else 
@@ -347,6 +349,11 @@ public class IssueQuery extends EntityQuery<Issue> {
 			break;
 		case IssueQueryLexer.IsMe:
 			if (!(fieldSpec instanceof UserChoiceField))
+				throw newOperatorException(fieldName, operator);
+			break;
+		case IssueQueryLexer.IsCurrent:
+		case IssueQueryLexer.IsPrevious:
+			if (!(fieldSpec instanceof BuildChoiceField))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case IssueQueryLexer.IsBefore:

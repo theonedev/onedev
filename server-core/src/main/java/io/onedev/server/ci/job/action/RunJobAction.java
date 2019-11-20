@@ -19,8 +19,8 @@ import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.CISpecAware;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobManager;
-import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.persistence.SessionManager;
@@ -42,7 +42,7 @@ public class RunJobAction extends PostBuildAction {
 	
 	private String jobName;
 	
-	private List<JobParam> jobParams = new ArrayList<>();
+	private List<ParamSupply> jobParams = new ArrayList<>();
 	
 	@Editable(order=900, name="Job")
 	@ChoiceProvider("getJobChoices")
@@ -64,11 +64,11 @@ public class RunJobAction extends PostBuildAction {
 	@ParamSpecProvider("getParamSpecs")
 	@OmitName
 	@Valid
-	public List<JobParam> getJobParams() {
+	public List<ParamSupply> getJobParams() {
 		return jobParams;
 	}
 
-	public void setJobParams(List<JobParam> jobParams) {
+	public void setJobParams(List<ParamSupply> jobParams) {
 		this.jobParams = jobParams;
 	}
 	
@@ -105,7 +105,7 @@ public class RunJobAction extends PostBuildAction {
 						Build build = OneDev.getInstance(BuildManager.class).load(buildId);
 						Build.push(build);
 						try {
-							new MatrixRunner<List<String>>(JobParam.getParamMatrix(getJobParams())) {
+							new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(getJobParams())) {
 								
 								@Override
 								public void run(Map<String, List<String>> paramMap) {
@@ -141,7 +141,7 @@ public class RunJobAction extends PostBuildAction {
 		Job jobToRun = ciSpec.getJobMap().get(jobName);
 		if (jobToRun != null) {
 			try {
-				JobParam.validateParams(jobToRun.getParamSpecs(), jobParams);
+				ParamSupply.validateParams(jobToRun.getParamSpecs(), jobParams);
 			} catch (ValidationException e) {
 				throw new ValidationException("Error validating parameters of run job '" 
 						+ jobToRun.getName() + "': " + e.getMessage());

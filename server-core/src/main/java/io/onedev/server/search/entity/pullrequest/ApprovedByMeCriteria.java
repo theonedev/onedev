@@ -19,20 +19,31 @@ public class ApprovedByMeCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		From<?, ?> join = root.join(PullRequestConstants.ATTR_REVIEWS, JoinType.LEFT);
-		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.ATTR_USER);
-		Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.ATTR_EXCLUDE_DATE);
-		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.ATTR_RESULT_APPROVED);
-		return builder.and(
-				builder.equal(userPath, user), 
-				builder.isNull(excludeDatePath), 
-				builder.equal(approvedPath, true));
+		if (user != null) {
+			From<?, ?> join = root.join(PullRequestConstants.ATTR_REVIEWS, JoinType.LEFT);
+			Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.ATTR_USER);
+			Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.ATTR_EXCLUDE_DATE);
+			Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.ATTR_RESULT_APPROVED);
+			return builder.and(
+					builder.equal(userPath, user), 
+					builder.isNull(excludeDatePath), 
+					builder.equal(approvedPath, true));
+		} else {
+			return builder.disjunction();
+		}
 	}
 
 	@Override
 	public boolean matches(PullRequest request, User user) {
-		PullRequestReview review = request.getReview(user);
-		return review != null && review.getExcludeDate() == null && review.getResult() != null && review.getResult().isApproved();
+		if (user != null) {
+			PullRequestReview review = request.getReview(user);
+			return review != null 
+					&& review.getExcludeDate() == null 
+					&& review.getResult() != null 
+					&& review.getResult().isApproved();
+		} else {
+			return false;
+		}
 	}
 
 	@Override

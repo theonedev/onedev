@@ -29,7 +29,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobVariable;
-import io.onedev.server.ci.job.NamedFunction;
 import io.onedev.server.ci.job.VariableInterpolator;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
@@ -52,7 +51,8 @@ import io.onedev.server.model.support.Secret;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.script.ScriptContribution;
+import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 
 public class SuggestionUtils {
@@ -129,8 +129,10 @@ public class SuggestionUtils {
 			if (!variables.containsKey(varName) && script.isAuthorized(ScriptIdentity.get()))
 				variables.put(varName, null);
 		}
-		for (NamedFunction function: OneDev.getExtensions(NamedFunction.class)) {
-			String varName = VariableInterpolator.FUNCTIONS_PREFIX + function.getName();
+		
+		for (ScriptContribution contribution: OneDev.getExtensions(ScriptContribution.class)) {
+			String varName = VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX 
+					+ contribution.getScript().getName();
 			if (!variables.containsKey(varName))
 				variables.put(varName, null);
 		}

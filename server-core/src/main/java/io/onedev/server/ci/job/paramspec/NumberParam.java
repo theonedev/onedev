@@ -5,8 +5,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
-import io.onedev.server.model.support.inputspec.numberinput.NumberInput;
-import io.onedev.server.model.support.inputspec.numberinput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.util.inputspec.numberinput.NumberInput;
+import io.onedev.server.util.inputspec.numberinput.defaultvalueprovider.DefaultValueProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 

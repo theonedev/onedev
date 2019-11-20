@@ -1,7 +1,5 @@
 package io.onedev.server.search.entity.build;
 
-import java.util.Objects;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -18,13 +16,20 @@ public class SubmittedByMeCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
-		Path<User> attribute = root.get(BuildConstants.ATTR_SUBMITTER);
-		return builder.equal(attribute, user);
+		if (user != null) {
+			Path<User> attribute = root.get(BuildConstants.ATTR_SUBMITTER);
+			return builder.equal(attribute, user);
+		} else {
+			return builder.disjunction();
+		}
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return Objects.equals(build.getSubmitter(), user);
+		if (user != null)
+			return user.equals(build.getSubmitter());
+		else
+			return false;
 	}
 
 	@Override

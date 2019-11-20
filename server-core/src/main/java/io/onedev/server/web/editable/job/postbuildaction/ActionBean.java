@@ -14,7 +14,7 @@ public class ActionBean implements Serializable {
 
 	private PostBuildAction action;
 
-	@Editable(name="Type", order=100)
+	@Editable(order=100, name="Type")
 	@NotNull(message="may not be empty")
 	public PostBuildAction getAction() {
 		return action;

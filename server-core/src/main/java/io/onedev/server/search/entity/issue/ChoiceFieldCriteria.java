@@ -17,8 +17,8 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.IssueSetting;
-import io.onedev.server.model.support.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.util.ValueSetEdit;
+import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 
 public class ChoiceFieldCriteria extends FieldCriteria {

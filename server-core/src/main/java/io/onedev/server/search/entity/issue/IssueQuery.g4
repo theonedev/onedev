@@ -7,10 +7,10 @@ query
     ;
 
 criteria
-    : operator=SubmittedByMe	#OperatorCriteria
+    : operator=(SubmittedByMe|FixedInCurrentBuild)	#OperatorCriteria
     | operator=(SubmittedBy|FixedInBuild) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | FixedBetween WS+ revisionCriteria WS+ And WS+ revisionCriteria #FixedBetweenCriteria
-    | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty) #FieldOperatorCriteria
+    | criteriaField=Quoted WS+ operator=(IsMe|IsEmpty|IsCurrent|IsPrevious) #FieldOperatorCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsGreaterThan|IsLessThan|IsBefore|IsAfter|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
@@ -41,7 +41,19 @@ SubmittedBy
 FixedInBuild
 	: 'fixed' WS+ 'in' WS+ 'build'
 	;							
+
+FixedInCurrentBuild
+	: 'fixed' WS+ 'in' WS+ 'current' WS+ 'build'
+	;
+
+IsCurrent
+	: 'is' WS+ 'current' 
+	;
 	
+IsPrevious
+	: 'is' WS+ 'previous'
+	;
+			
 FixedBetween
 	: 'fixed' WS+ 'between' 
 	;

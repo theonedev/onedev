@@ -7,7 +7,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.issue.TransitionSpec;
 import io.onedev.server.web.component.issue.statetransition.StateTransitionListPanel;
 import io.onedev.server.web.component.issue.statetransition.UseDefaultListener;
 

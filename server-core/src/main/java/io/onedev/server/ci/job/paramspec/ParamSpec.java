@@ -4,8 +4,8 @@ import javax.validation.Valid;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.model.support.inputspec.InputSpec;
-import io.onedev.server.model.support.inputspec.showcondition.ShowCondition;
+import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.inputspec.showcondition.ShowCondition;
 import io.onedev.server.util.validation.annotation.ParamName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;

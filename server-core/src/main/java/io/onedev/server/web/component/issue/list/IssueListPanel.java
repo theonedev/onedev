@@ -222,6 +222,7 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		}));
+		
 		input.add(new AjaxFormComponentUpdatingBehavior("input"){
 			
 			@Override

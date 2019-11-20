@@ -23,6 +23,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.subject.Subject;
@@ -555,9 +556,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		taskScheduler.unschedule(taskId);
 	}
 
-	@Sessional
-	@Override
-	public Build findStreamPrevious(Build build, Status status) {
+	private CriteriaQuery<Object[]> buildQueryOfStreamPrevios(Build build, Status status, String...fields) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Object[]> query = builder.createQuery(Object[].class);
 		Root<Build> root = query.from(Build.class);
@@ -568,11 +567,50 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		if (status != null)
 			predicates.add(builder.equal(root.get("status"), status));
 		predicates.add(builder.lessThan(root.get("number"), build.getNumber()));
-		
 		query.where(predicates.toArray(new Predicate[0]));
+		List<Selection<?>> selections = new ArrayList<>();
+		for (String field: fields)
+			selections.add(root.get(field));
+		query.multiselect(selections);
 		
+		return query;
+	}
+	
+	@Sessional
+	@Override
+	public Collection<Long> queryNumbersOfStreamPrevious(Build build, Status status, int limit) {
+		Map<ObjectId, Long> buildNumbers = new HashMap<>();
+		for (Object[] fields: getSession().createQuery(buildQueryOfStreamPrevios(build, status, "commitHash", "number")).list()) {
+			buildNumbers.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
+		}
+		
+		Collection<Long> prevBuildNumbers = new HashSet<>();
+		try (RevWalk revWalk = new RevWalk(build.getProject().getRepository())) {
+			RevCommit current = revWalk.lookupCommit(build.getCommitId());
+			revWalk.parseHeaders(current);
+			while (current.getParentCount() != 0) {
+				RevCommit firstParent = current.getParent(0);
+				Long buildNumber = buildNumbers.get(firstParent);
+				if (buildNumber != null) {
+					prevBuildNumbers.add(buildNumber);
+					if (prevBuildNumbers.size() >= limit)
+						break;
+				}
+				current = firstParent;
+				revWalk.parseHeaders(current);
+			} 
+		} catch (MissingObjectException e) {
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return prevBuildNumbers;
+	}
+
+	@Sessional
+	@Override
+	public Build findStreamPrevious(Build build, Status status) {
 		Map<ObjectId, Long> buildIds = new HashMap<>();
-		for (Object[] fields: getSession().createQuery(query.multiselect(root.get("commitHash"), root.get("id"))).list()) {
+		for (Object[] fields: getSession().createQuery(buildQueryOfStreamPrevios(build, status, "commitHash", "id")).list()) {
 			buildIds.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
 		}
 		

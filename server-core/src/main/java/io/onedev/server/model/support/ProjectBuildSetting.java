@@ -27,7 +27,7 @@ public class ProjectBuildSetting implements Serializable {
 	
 	@Editable(description="Specify builds to preserve. OneDev will run every night to remove builds not matching "
 			+ "query specified here")
-	@BuildQuery(noLoginSupport=true)
+	@BuildQuery
 	@NotEmpty
 	public String getBuildsToPreserve() {
 		return buildsToPreserve;

@@ -11,16 +11,14 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.script.ScriptContribution;
+import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.annotation.ScriptChoice;
 
 @SuppressWarnings("serial")
 public class ScriptChoiceEditor extends PropertyEditor<String> {
@@ -40,12 +38,17 @@ public class ScriptChoiceEditor extends PropertyEditor<String> {
 			@Override
 			protected Map<String, String> load() {
 				Map<String, String> choices = new LinkedHashMap<>();
-				ScriptChoice scriptChoice = descriptor.getPropertyGetter().getAnnotation(ScriptChoice.class);
-				Preconditions.checkNotNull(scriptChoice);
 				
 				for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
 					if (script.isAuthorized(ScriptIdentity.get())) 
-						choices.put(script.getName(), null);
+						choices.put(script.getName(), script.getName());
+				}
+				for (ScriptContribution contribution: OneDev.getExtensions(ScriptContribution.class)) {
+					GroovyScript script = contribution.getScript();
+					if (script.isAuthorized(ScriptIdentity.get())) { 
+						String displayName = GroovyScript.BUILTIN_PREFIX + script.getName();
+						choices.put(displayName, displayName);
+					}
 				}
 				
 				return choices;

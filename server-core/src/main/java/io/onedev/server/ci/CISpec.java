@@ -13,6 +13,9 @@ import javax.validation.ConstraintValidatorContext;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 
@@ -20,7 +23,7 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobDependency;
 import io.onedev.server.ci.job.action.PostBuildAction;
-import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.ci.job.retrycondition.RetryCondition;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.migration.VersionedDocument;
@@ -33,6 +36,8 @@ import io.onedev.server.web.editable.annotation.Editable;
 public class CISpec implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Logger logger = LoggerFactory.getLogger(CISpec.class);
 	
 	public static final String BLOB_PATH = "onedev-ci.xml";
 	
@@ -80,7 +85,7 @@ public class CISpec implements Serializable, Validatable {
 				Job dependencyJob = getJobMap().get(dependency.getJobName());
 				if (dependencyJob != null) {
 					try {
-						JobParam.validateParams(dependencyJob.getParamSpecs(), dependency.getJobParams());
+						ParamSupply.validateParams(dependencyJob.getParamSpecs(), dependency.getJobParams());
 					} catch (ValidationException e) {
 						String message = "Item #" + j + ": Error validating parameters of dependency job '" 
 								+ dependencyJob.getName() + "': " + e.getMessage();
@@ -111,7 +116,7 @@ public class CISpec implements Serializable, Validatable {
 			j=1;
 			for (JobTrigger trigger: job.getTriggers()) {
 				try {
-					JobParam.validateParams(job.getParamSpecs(), trigger.getParams());
+					ParamSupply.validateParams(job.getParamSpecs(), trigger.getParams());
 				} catch (Exception e) {
 					String message = "Item #" + j + ": Error validating job parameters: " + e.getMessage();
 					context.buildConstraintViolationWithTemplate(message)
@@ -140,6 +145,8 @@ public class CISpec implements Serializable, Validatable {
 				try {
 					action.validateWithContext(this, job);
 				} catch (Exception e) {
+					if (e.getMessage() == null)
+						logger.error("Error validating post build action", e);
 					context.buildConstraintViolationWithTemplate("Item #" + j + ": " + e.getMessage())
 							.addPropertyNode("jobs").addPropertyNode("postBuildActions")
 								.inIterable().atIndex(i)

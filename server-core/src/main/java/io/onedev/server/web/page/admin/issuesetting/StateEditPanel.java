@@ -11,8 +11,8 @@ import org.apache.wicket.request.cycle.RequestCycle;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.issue.StateSpec;
 import io.onedev.server.model.support.administration.IssueSetting;
-import io.onedev.server.model.support.issue.StateSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;

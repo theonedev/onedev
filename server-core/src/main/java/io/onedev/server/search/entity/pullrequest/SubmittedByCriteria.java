@@ -9,27 +9,31 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.PullRequestConstants;
 
 public class SubmittedByCriteria extends PullRequestCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private final User value;
+	private final User user;
 	
-	public SubmittedByCriteria(User value) {
+	private final String value;
+	
+	public SubmittedByCriteria(String value) {
+		user = EntityQuery.getUser(value);
 		this.value = value;
 	}
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
 		Path<User> attribute = root.get(PullRequestConstants.ATTR_SUBMITTER);
-		return builder.equal(attribute, value);
+		return builder.equal(attribute, this.user);
 	}
 
 	@Override
 	public boolean matches(PullRequest request, User user) {
-		return Objects.equals(request.getSubmitter(), value);
+		return Objects.equals(request.getSubmitter(), this.user);
 	}
 
 	@Override
@@ -39,7 +43,7 @@ public class SubmittedByCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.SubmittedBy) + " " + PullRequestQuery.quote(value.getName());
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.SubmittedBy) + " " + PullRequestQuery.quote(value);
 	}
 
 }

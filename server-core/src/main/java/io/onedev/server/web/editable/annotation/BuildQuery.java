@@ -20,6 +20,4 @@ public @interface BuildQuery {
 
     Class<? extends Payload>[] payload() default {};
     
-    boolean noLoginSupport() default false;
-    
 }

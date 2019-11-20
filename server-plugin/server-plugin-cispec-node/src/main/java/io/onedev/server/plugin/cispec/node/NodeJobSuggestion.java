@@ -30,7 +30,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 
 	private static final Logger logger = LoggerFactory.getLogger(NodeJobSuggestion.class);
 	
-	public static final String DETERMINE_PROJECT_VERSION = "node-determine-project-version";
+	public static final String DETERMINE_PROJECT_VERSION = "node:determine-project-version";
 	
 	@Override
 	public Collection<Job> suggestJobs(Project project, ObjectId commitId) {
@@ -254,11 +254,17 @@ public class NodeJobSuggestion implements JobSuggestion {
 		return null;
 	}
 
-	public static String determineProjectVersion(Build build) {
-		JsonNode jsonNode = getPackageJson(build.getProject(), build.getCommitId());
-		if (jsonNode != null)
-			return jsonNode.findValue("version").asText();
-		else
+	@Nullable
+	public static String determineProjectVersion() {
+		Build build = Build.get();
+		if (build != null) {
+			JsonNode jsonNode = getPackageJson(build.getProject(), build.getCommitId());
+			if (jsonNode != null)
+				return jsonNode.findValue("version").asText();
+			else
+				return null;
+		} else {
 			return null;
+		}
 	}
 }

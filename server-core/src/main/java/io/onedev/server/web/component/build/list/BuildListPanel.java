@@ -220,7 +220,7 @@ public abstract class BuildListPanel extends Panel {
 				return getProject();
 			}
 			
-		}, false));
+		}));
 		
 		input.add(new AjaxFormComponentUpdatingBehavior("input"){
 			

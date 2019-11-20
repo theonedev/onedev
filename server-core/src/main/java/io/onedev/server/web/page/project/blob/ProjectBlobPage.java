@@ -80,9 +80,9 @@ import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.query.BlobQuery;
 import io.onedev.server.search.code.query.TextQuery;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.scriptidentity.JobIdentity;
-import io.onedev.server.util.scriptidentity.ScriptIdentity;
-import io.onedev.server.util.scriptidentity.ScriptIdentityAware;
+import io.onedev.server.util.script.identity.JobIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.web.PrioritizedComponentRenderer;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
@@ -1361,7 +1361,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 
 	@Override
 	public ScriptIdentity getScriptIdentity() {
-		return new JobIdentity(getProject(), getCommit().copy());
+		if (getBlobIdent().revision != null)
+			return new JobIdentity(getProject(), getCommit().copy());
+		else // when we add file to an empty project
+			return new JobIdentity(getProject(), null);
 	}
 
 }

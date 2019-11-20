@@ -56,9 +56,9 @@ import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.action.PostBuildAction;
 import io.onedev.server.ci.job.action.condition.ActionCondition;
 import io.onedev.server.ci.job.log.LogManager;
-import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
 import io.onedev.server.ci.job.paramspec.SecretParam;
+import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.ci.job.retrycondition.RetryCondition;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.entitymanager.BuildManager;
@@ -83,7 +83,6 @@ import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
-import io.onedev.server.model.support.inputspec.SecretInput;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -94,9 +93,10 @@ import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.BuildCommitAware;
 import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.scriptidentity.JobIdentity;
-import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.script.identity.JobIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.validation.Interpolated;
 import io.onedev.server.web.editable.Path;
 
@@ -175,7 +175,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
     	try {
         	lock.lockInterruptibly();
 			return submit(project, commitId, jobName, paramMap, submitter, new LinkedHashSet<>()); 
-    	} catch (Exception e) {
+    	} catch (Throwable e) {
     		throw ExceptionUtils.unchecked(e);
 		}
 	}
@@ -194,7 +194,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setStatus(Build.Status.WAITING);
 			build.setSubmitter(submitter);
 			
-			JobParam.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
+			ParamSupply.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
 			
 			if (!checkedJobNames.add(jobName)) {
 				String message = String.format("Circular job dependencies found (%s)", checkedJobNames);
@@ -233,7 +233,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				Build.push(build);
 				try {
 					for (JobDependency dependency: build.getJob().getJobDependencies()) {
-						new MatrixRunner<List<String>>(JobParam.getParamMatrix(dependency.getJobParams())) {
+						new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(dependency.getJobParams())) {
 							
 							@Override
 							public void run(Map<String, List<String>> params) {
@@ -431,7 +431,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								try {
 									executor.execute(jobToken, jobContext);
 									break;
-								} catch (Exception e) {
+								} catch (Throwable e) {
 									if (ExceptionUtils.find(e, InterruptedException.class) != null) {
 										throw e;
 									} else {
@@ -474,7 +474,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									}
 								}
 							}
-						} catch (Exception e) {
+						} catch (Throwable e) {
 							if (ExceptionUtils.find(e, InterruptedException.class) == null)
 								log(e, jobLogger);
 							throw maskSecrets(e, jobSecretsToMask);
@@ -498,7 +498,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 									
 								});
 								FileUtils.deleteDir(serverWorkspace);
-							} catch (Exception e) {
+							} catch (Throwable e) {
 								if (ExceptionUtils.find(e, InterruptedException.class) == null) 
 									log(e, jobLogger);
 								throw maskSecrets(e, jobSecretsToMask);
@@ -516,7 +516,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			} else {
 				markBuildError(build, "No applicable job executor");
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			if (e.getMessage() != null)
 				markBuildError(build, e.getMessage());
 			else
@@ -526,14 +526,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		}
 	}
 	
-	private void log(Exception e, JobLogger logger) {
+	private void log(Throwable e, JobLogger logger) {
 		if (e.getMessage() != null)
 			logger.log(e.getMessage());
 		else
 			logger.log(e);
 	}
 	
-	private RuntimeException maskSecrets(Exception e, Collection<String> jobSecretsToMask) {
+	private RuntimeException maskSecrets(Throwable e, Collection<String> jobSecretsToMask) {
 		String errorMessage = e.getMessage();
 		if (errorMessage != null) {
 			for (String secret: jobSecretsToMask)
@@ -573,7 +573,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							for (Job job: ciSpec.getJobs()) {
 								JobTrigger trigger = job.getMatchedTrigger(event);
 								if (trigger != null) {
-									Map<String, List<List<String>>> paramMatrix = JobParam.getParamMatrix(trigger.getParams());						
+									Map<String, List<List<String>>> paramMatrix = ParamSupply.getParamMatrix(trigger.getParams());						
 									Long projectId = event.getProject().getId();
 									
 									// run asynchrously as session may get closed due to exception
@@ -595,7 +595,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 															}
 															
 														}.run();
-													} catch (Exception e) {
+													} catch (Throwable e) {
 														String message = String.format("Error submitting build (project: %s, commit: %s, job: %s)", 
 																project.getName(), commitId.name(), job.getName());
 														logger.error(message, e);
@@ -609,7 +609,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								}
 							}
 						}
-					} catch (Exception e) {
+					} catch (Throwable e) {
 						String message = String.format("Error checking job triggers (project: %s, commit: %s)", 
 								event.getProject().getName(), commitId.name());
 						logger.error(message, e);
@@ -781,7 +781,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				});
 				if (!hasRunnings && status == Status.STOPPING)
 					break;
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				logger.error("Error checking unfinished builds", e);
 			}
 		}	
@@ -803,7 +803,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 				if (ActionCondition.parse(build.getJob(), action.getCondition()).test(build))
 					action.execute(build);
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			logger.error("Error processing post build actions", e);
 		}
 		

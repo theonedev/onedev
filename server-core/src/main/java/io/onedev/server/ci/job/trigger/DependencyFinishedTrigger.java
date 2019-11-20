@@ -4,7 +4,7 @@ import java.util.List;
 
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobDependency;
-import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.build.BuildFinished;
 import io.onedev.server.model.Build;
@@ -24,7 +24,7 @@ public class DependencyFinishedTrigger extends JobTrigger {
 			for (JobDependency dependency: job.getJobDependencies()) {
 				if (dependency.getJobName().equals(build.getJobName()) 
 						&& (!dependency.isRequireSuccessful() || build.getStatus() == Status.SUCCESSFUL)) {
-					for (JobParam param: dependency.getJobParams()) {
+					for (ParamSupply param: dependency.getJobParams()) {
 						if (!param.isSecret()) {
 							List<String> paramValue = build.getParamMap().get(param.getName());
 							if (!param.getValuesProvider().getValues().contains(paramValue))

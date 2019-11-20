@@ -13,10 +13,10 @@ import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.scriptidentity.JobIdentity;
-import io.onedev.server.util.scriptidentity.ScriptIdentity;
-import io.onedev.server.util.scriptidentity.SiteAdministrator;
-import io.onedev.server.util.validation.annotation.DnsName;
+import io.onedev.server.util.script.identity.JobIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentity;
+import io.onedev.server.util.script.identity.SiteAdministrator;
+import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.web.editable.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -29,7 +29,11 @@ public class GroovyScript implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String BUILTIN_PREFIX = "builtin:";
+
 	private String name;
+	
+	private String description;
 	
 	private List<String> content;
 	
@@ -40,7 +44,7 @@ public class GroovyScript implements Serializable {
 	private String allowedBranches;
 
 	@Editable(order=100)
-	@DnsName
+	@RegEx(pattern="^(?!" + BUILTIN_PREFIX + ").*$", message="Name is not allowed to start with '" + BUILTIN_PREFIX + "'")
 	@NotEmpty
 	public String getName() {
 		return name;
@@ -48,6 +52,15 @@ public class GroovyScript implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Editable(order=200)
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@Editable(order=300)
@@ -139,5 +152,5 @@ public class GroovyScript implements Serializable {
 		if (getAllowedProjects().length() == 0)
 			setAllowedProjects(null);
 	}
-	
+
 }

@@ -10,8 +10,8 @@ import org.apache.wicket.Component;
 
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobAware;
-import io.onedev.server.ci.job.param.JobParam;
 import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -24,17 +24,17 @@ public abstract class JobTrigger implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private List<JobParam> params = new ArrayList<>();
+	private List<ParamSupply> params = new ArrayList<>();
 
 	@Editable(name="Job Parameters", order=1000)
 	@ParamSpecProvider("getParamSpecs")
 	@OmitName
 	@Valid
-	public List<JobParam> getParams() {
+	public List<ParamSupply> getParams() {
 		return params;
 	}
 
-	public void setParams(List<JobParam> params) {
+	public void setParams(List<ParamSupply> params) {
 		this.params = params;
 	}
 	

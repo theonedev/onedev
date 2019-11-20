@@ -13,12 +13,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Multiline;
 
@@ -65,7 +65,7 @@ public class Milestone extends AbstractEntity {
 	}
 
 	@Editable(order=100)
-	@Pattern(regexp="[^:]*", message="Character ':' is not allowed") // ':' will be used as project/milestone separator in issue query
+	@RegEx(pattern="[^:]*", message="Character ':' is not allowed") // ':' will be used as project/milestone separator in issue query
 	@NotEmpty
 	public String getName() {
 		return name;

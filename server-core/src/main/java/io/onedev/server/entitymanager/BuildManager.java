@@ -26,6 +26,8 @@ public interface BuildManager extends EntityManager<Build> {
     
 	Build findStreamPrevious(Build build, @Nullable Build.Status status);
 
+	Collection<Long> queryNumbersOfStreamPrevious(Build build, @Nullable Build.Status status, int limit);
+	
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName, Map<String, List<String>> params); 
 	
 	Collection<Build> query(Project project, ObjectId commitId, @Nullable String jobName); 

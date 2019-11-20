@@ -16,7 +16,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.script.ScriptContribution;
+import io.onedev.server.util.script.identity.ScriptIdentity;
 
 public class GroovyUtils {
 	
@@ -59,6 +60,19 @@ public class GroovyUtils {
     }
 
     public static Object evalScriptByName(String scriptName, Map<String, Object> variables) {
+    	if (scriptName.startsWith(GroovyScript.BUILTIN_PREFIX)) {
+    		scriptName = scriptName.substring(GroovyScript.BUILTIN_PREFIX.length());
+        	for (ScriptContribution contribution: OneDev.getExtensions(ScriptContribution.class)) {
+        		GroovyScript script = contribution.getScript();
+        		if (script.getName().equals(scriptName) && script.isAuthorized(ScriptIdentity.get())) {
+        			try {
+        				return evalScript(StringUtils.join(script.getContent(), "\n"), variables);
+        			} catch (Exception e) {
+        				throw new OneException("Error evaluating builtin groovy script: " + scriptName, e);
+        			}
+        		}
+        	}
+    	}
     	for (GroovyScript script: OneDev.getInstance(SettingManager.class).getGroovyScripts()) {
     		if (script.getName().equals(scriptName) && script.isAuthorized(ScriptIdentity.get())) {
     			try {

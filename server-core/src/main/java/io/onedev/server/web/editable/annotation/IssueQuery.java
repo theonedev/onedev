@@ -19,5 +19,4 @@ public @interface IssueQuery {
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
-    
 }

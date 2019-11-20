@@ -6,9 +6,9 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.model.support.inputspec.booleaninput.BooleanInput;
-import io.onedev.server.model.support.inputspec.booleaninput.defaultvalueprovider.DefaultValueProvider;
-import io.onedev.server.model.support.inputspec.booleaninput.defaultvalueprovider.FalseDefaultValue;
+import io.onedev.server.util.inputspec.booleaninput.BooleanInput;
+import io.onedev.server.util.inputspec.booleaninput.defaultvalueprovider.DefaultValueProvider;
+import io.onedev.server.util.inputspec.booleaninput.defaultvalueprovider.FalseDefaultValue;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=300, name=ParamSpec.BOOLEAN)

@@ -49,15 +49,17 @@ public class BeanViewer extends Panel {
 		Map<String, ComponentContext> componentContexts = new HashMap<>();
 		RepeatingView groupsView = new RepeatingView("groups");
 		for (Map.Entry<String, List<PropertyContext<Serializable>>> entry: properties.entrySet()) {
-			WebMarkupContainer groupItem = new WebMarkupContainer(groupsView.newChildId());
-			groupsView.add(groupItem);
+			WebMarkupContainer groupContainer = new WebMarkupContainer(groupsView.newChildId());
+			groupContainer.add(AttributeAppender.append("class", 
+					"group-" + entry.getKey().replace(" ", "-").toLowerCase()));
+			groupsView.add(groupContainer);
 			WebMarkupContainer toggleLink = new WebMarkupContainer("toggle");
 			toggleLink.add(new Label("groupName", entry.getKey()));
-			groupItem.add(toggleLink);
+			groupContainer.add(toggleLink);
 
 			if (entry.getKey().length() == 0) {
 				toggleLink.setVisible(false);
-				groupItem.add(AttributeAppender.append("class", "expanded"));
+				groupContainer.add(AttributeAppender.append("class", "expanded"));
 			}
 			
 			RepeatingView propertiesView = new RepeatingView("properties");
@@ -111,7 +113,7 @@ public class BeanViewer extends Panel {
 				
 				propertyContainer.add(AttributeAppender.append("class", "property-" + property.getPropertyName()));
 			}
-			groupItem.add(propertiesView);
+			groupContainer.add(propertiesView);
 		}
 		add(groupsView);
 		

@@ -1,9 +1,11 @@
 package io.onedev.server.plugin.cispec.node;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.server.ci.job.JobSuggestion;
-import io.onedev.server.ci.job.NamedFunction;
-import io.onedev.server.model.Build;
+import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.util.script.ScriptContribution;
 
 /**
  * NOTE: Do not forget to rename moduleClass property defined in the pom if you've renamed this class.
@@ -18,16 +20,14 @@ public class NodePluginModule extends AbstractPluginModule {
 		// put your guice bindings here
 		contribute(JobSuggestion.class, NodeJobSuggestion.class);
 		
-		contribute(NamedFunction.class, new NamedFunction() {
+		contribute(ScriptContribution.class, new ScriptContribution() {
 
 			@Override
-			public String getName() {
-				return NodeJobSuggestion.DETERMINE_PROJECT_VERSION;
-			}
-
-			@Override
-			public String call(Build build) {
-				return NodeJobSuggestion.determineProjectVersion(build);
+			public GroovyScript getScript() {
+				GroovyScript script = new GroovyScript();
+				script.setName(NodeJobSuggestion.DETERMINE_PROJECT_VERSION);
+				script.setContent(Lists.newArrayList("io.onedev.server.plugin.cispec.node.NodeJobSuggestion.determineProjectVersion()"));
+				return script;
 			}
 			
 		});

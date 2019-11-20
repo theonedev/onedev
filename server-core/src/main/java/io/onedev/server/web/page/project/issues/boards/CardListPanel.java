@@ -17,9 +17,9 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
+import io.onedev.server.issue.BoardSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;

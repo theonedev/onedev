@@ -64,7 +64,7 @@ import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobManager;
-import io.onedev.server.ci.job.param.JobParam;
+import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.ci.job.trigger.JobTrigger;
 import io.onedev.server.ci.job.trigger.PullRequestTrigger;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -130,8 +130,8 @@ import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
-import io.onedev.server.util.scriptidentity.JobIdentity;
-import io.onedev.server.util.scriptidentity.ScriptIdentity;
+import io.onedev.server.util.script.identity.JobIdentity;
+import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.work.BatchWorkManager;
 import io.onedev.server.util.work.BatchWorker;
 
@@ -745,7 +745,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 								try {
 									if (pullRequestTrigger.matches(pullRequestMergePreviewCalculated, job)) {
 										boolean required = requiredJobNames.contains(job.getName());
-										new MatrixRunner<List<String>>(JobParam.getParamMatrix(trigger.getParams())) {
+										new MatrixRunner<List<String>>(ParamSupply.getParamMatrix(trigger.getParams())) {
 											
 											@Override
 											public void run(Map<String, List<String>> paramMap) {

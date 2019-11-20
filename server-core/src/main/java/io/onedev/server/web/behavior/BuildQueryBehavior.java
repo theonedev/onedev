@@ -37,12 +37,9 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
-	private final boolean noLoginSupport;
-	
-	public BuildQueryBehavior(IModel<Project> projectModel, boolean noLoginSupport) {
+	public BuildQueryBehavior(IModel<Project> projectModel) {
 		super(BuildQueryParser.class, "query", false);
 		this.projectModel = projectModel;
-		this.noLoginSupport = noLoginSupport;
 	}
 
 	@Override
@@ -134,7 +131,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
-		if ((noLoginSupport || SecurityUtils.getUser() == null) 
+		if (SecurityUtils.getUser() == null 
 				&& (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.SubmittedByMe)) 
 						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.CancelledByMe)))) {
 			return null;

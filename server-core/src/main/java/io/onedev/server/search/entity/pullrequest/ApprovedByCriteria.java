@@ -17,9 +17,12 @@ public class ApprovedByCriteria extends PullRequestCriteria {
 
 	private static final long serialVersionUID = 1L;
 
-	private final User value;
+	private final User user;
 	
-	public ApprovedByCriteria(User value) {
+	private final String value;
+	
+	public ApprovedByCriteria(String value) {
+		user = EntityQuery.getUser(value);
 		this.value = value;
 	}
 	
@@ -30,14 +33,14 @@ public class ApprovedByCriteria extends PullRequestCriteria {
 		Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.ATTR_EXCLUDE_DATE);
 		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.ATTR_RESULT_APPROVED);
 		return builder.and(
-				builder.equal(userPath, value), 
+				builder.equal(userPath, this.user), 
 				builder.isNull(excludeDatePath), 
 				builder.equal(approvedPath, true));
 	}
 
 	@Override
 	public boolean matches(PullRequest request, User user) {
-		PullRequestReview review = request.getReview(value);
+		PullRequestReview review = request.getReview(this.user);
 		return review != null && review.getExcludeDate() == null && review.getResult() != null
 				&& review.getResult().isApproved();
 	}
@@ -50,7 +53,7 @@ public class ApprovedByCriteria extends PullRequestCriteria {
 	@Override
 	public String toString() {
 		return PullRequestQuery.getRuleName(PullRequestQueryLexer.ApprovedBy) + " " 
-				+ PullRequestQuery.quote(value.getName());
+				+ PullRequestQuery.quote(value);
 	}
 
 }

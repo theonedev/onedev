@@ -21,7 +21,7 @@ public class RegExValidator implements ConstraintValidator<RegEx, String> {
 	@Override
 	public void initialize(RegEx constaintAnnotation) {
 		interpolative = constaintAnnotation.interpolative();
-		pattern = Pattern.compile(constaintAnnotation.value());
+		pattern = Pattern.compile(constaintAnnotation.pattern());
 		message = constaintAnnotation.message();
 	}
 

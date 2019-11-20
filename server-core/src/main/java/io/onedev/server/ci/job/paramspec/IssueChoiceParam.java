@@ -3,7 +3,7 @@ package io.onedev.server.ci.job.paramspec;
 import java.util.List;
 import java.util.Map;
 
-import io.onedev.server.model.support.inputspec.IssueChoiceInput;
+import io.onedev.server.util.inputspec.IssueChoiceInput;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable(order=1100, name=ParamSpec.ISSUE)

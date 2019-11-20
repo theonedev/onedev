@@ -1,7 +1,5 @@
 package io.onedev.server.search.entity.codecomment;
 
-import java.util.Objects;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -18,13 +16,20 @@ public class CreatedByMeCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
-		Path<?> attribute = root.get(CodeCommentConstants.ATTR_USER);
-		return builder.equal(attribute, user);
+		if (user != null) {
+			Path<?> attribute = root.get(CodeCommentConstants.ATTR_USER);
+			return builder.equal(attribute, user);
+		} else {
+			return builder.disjunction();
+		}
 	}
 
 	@Override
 	public boolean matches(CodeComment comment, User user) {
-		return Objects.equals(comment.getUser(), user);
+		if (user != null)
+			return user.equals(comment.getUser());
+		else
+			return false;
 	}
 
 	@Override

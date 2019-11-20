@@ -34,7 +34,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.server.model.support.issue.TransitionSpec;
+import io.onedev.server.issue.TransitionSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;

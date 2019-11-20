@@ -8,8 +8,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.collect.Sets;
 
+import io.onedev.server.issue.BoardSpec;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.issue.BoardSpec;
 import io.onedev.server.web.behavior.WebSocketObserver;
 
 @SuppressWarnings("serial")
