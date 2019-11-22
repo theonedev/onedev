@@ -118,49 +118,49 @@ public class DefaultDataManager implements DataManager, Serializable {
 					user.setPassword(passwordService.encryptPassword(user.getPassword()));
 					userManager.save(user, null);
 					idManager.init(User.class);
+					
+					Role manager = new Role();
+					manager.setName("Manager");
+					manager.setManageProject(true);
+					roleManager.save(manager, null);
+					
+					Role developer = new Role();
+					developer.setName("Developer");
+					developer.setCodePrivilege(CodePrivilege.WRITE);
+					developer.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
+					
+					JobPrivilege jobPrivilege = new JobPrivilege();
+					jobPrivilege.setJobNames("*");
+					jobPrivilege.setRunJob(true);
+					developer.getJobPrivileges().add(jobPrivilege);
+					
+					roleManager.save(developer, null);
+
+					Role tester = new Role();
+					tester.setName("Tester");
+					tester.setCodePrivilege(CodePrivilege.READ);
+					tester.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
+					
+					jobPrivilege = new JobPrivilege();
+					jobPrivilege.setJobNames("*");
+					jobPrivilege.setAccessLog(true);
+					tester.getJobPrivileges().add(jobPrivilege);
+					
+					roleManager.save(tester, null);
+					
+					Role reporter = new Role();
+					reporter.setName("Reporter");
+					reporter.setCodePrivilege(CodePrivilege.NONE);
+					reporter.setEditableIssueFields(Lists.newArrayList("Type", "Priority"));
+					
+					jobPrivilege = new JobPrivilege();
+					jobPrivilege.setJobNames("*");
+					reporter.getJobPrivileges().add(jobPrivilege);
+
+					roleManager.save(reporter, null);					
 				}
 				
 			});
-
-			Role manager = new Role();
-			manager.setName("Manager");
-			manager.setManageProject(true);
-			roleManager.save(manager, null);
-			
-			Role developer = new Role();
-			developer.setName("Developer");
-			developer.setCodePrivilege(CodePrivilege.WRITE);
-			developer.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
-			
-			JobPrivilege jobPrivilege = new JobPrivilege();
-			jobPrivilege.setJobNames("*");
-			jobPrivilege.setRunJob(true);
-			developer.getJobPrivileges().add(jobPrivilege);
-			
-			roleManager.save(developer, null);
-
-			Role tester = new Role();
-			tester.setName("Tester");
-			tester.setCodePrivilege(CodePrivilege.READ);
-			tester.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
-			
-			jobPrivilege = new JobPrivilege();
-			jobPrivilege.setJobNames("*");
-			jobPrivilege.setAccessLog(true);
-			tester.getJobPrivileges().add(jobPrivilege);
-			
-			roleManager.save(tester, null);
-			
-			Role reporter = new Role();
-			reporter.setName("Reporter");
-			reporter.setCodePrivilege(CodePrivilege.NONE);
-			reporter.setEditableIssueFields(Lists.newArrayList("Type", "Priority"));
-			
-			jobPrivilege = new JobPrivilege();
-			jobPrivilege.setJobNames("*");
-			reporter.getJobPrivileges().add(jobPrivilege);
-
-			roleManager.save(reporter, null);
 		}
 
 		Setting setting = settingManager.getSetting(Key.SYSTEM);
