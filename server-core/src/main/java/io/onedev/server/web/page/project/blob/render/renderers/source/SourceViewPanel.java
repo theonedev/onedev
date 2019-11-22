@@ -1046,9 +1046,13 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				link.add(AttributeAppender.append("data-symbolindex", symbols.indexOf(symbol)));
 				
 				fragment.add(link);
-				
-				if (symbol == symbols.get(0)) {
-					link.add(AttributeAppender.append("class", "active"));
+
+				for (Symbol each: symbols) {
+					if (each.isDisplayInOutline()) {
+						if (symbol == each)
+							link.add(AttributeAppender.append("class", "active"));
+						break;
+					}
 				}
 				
 				return fragment;

@@ -61,7 +61,7 @@ public class SuggestionUtils {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (String candidate: candidates) {
-			LinearRange match = LinearRange.match(candidate, matchWith, true, false, false);
+			LinearRange match = LinearRange.match(candidate, matchWith);
 			if (match != null) 
 				suggestions.add(new InputSuggestion(candidate, null, match));
 		}
@@ -77,7 +77,7 @@ public class SuggestionUtils {
 				int numSuggestions = 0;
 				for (RefInfo ref: project.getBranches()) {
 					String branch = GitUtils.ref2branch(ref.getRef().getName());
-					LinearRange match = LinearRange.match(branch, matchWith, true, false, true);
+					LinearRange match = LinearRange.match(branch, matchWith);
 					if (match != null && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
 						if (prependProject) {
 							int length = project.getName().length() + 1;
@@ -169,7 +169,7 @@ public class SuggestionUtils {
 				int numSuggestions = 0;
 				for (RefInfo ref: project.getTags()) {
 					String tag = GitUtils.ref2tag(ref.getRef().getName());
-					LinearRange match = LinearRange.match(tag, matchWith, true, false, true);
+					LinearRange match = LinearRange.match(tag, matchWith);
 					if (match != null && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) {
 						if (prependProject) {
 							int length = project.getName().length() + 1;
@@ -189,7 +189,7 @@ public class SuggestionUtils {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (User user: OneDev.getInstance(UserManager.class).query()) {
-			LinearRange match = LinearRange.match(user.getName(), matchWith, true, false, true);
+			LinearRange match = LinearRange.match(user.getName(), matchWith);
 			if (match != null) {
 				String description;
 				if (!user.getDisplayName().equals(user.getName()))
@@ -297,8 +297,7 @@ public class SuggestionUtils {
 				project = projectManager.find(projectName);
 			} else {
 				for (Project each: projectManager.getPermittedProjects(user, new AccessProject())) {
-					LinearRange match = LinearRange.match(each.getName() + scopeSeparator, 
-							matchWith, true, false, true);
+					LinearRange match = LinearRange.match(each.getName() + scopeSeparator, matchWith);
 					if (match != null) {
 						suggestions.add(new InputSuggestion(each.getName() + scopeSeparator, 
 								each.getName().length() + scopeSeparator.length(), "select project first", match));
@@ -321,7 +320,7 @@ public class SuggestionUtils {
 				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
 				Collection<String> jobNames = buildManager.getAccessibleJobNames(project, user).get(project);
 				for (String jobName: jobNames) {
-					LinearRange match = LinearRange.match(jobName, matchWith, true, false, true);
+					LinearRange match = LinearRange.match(jobName, matchWith);
 					if (match != null) {
 						if (prependProject) {
 							int length = project.getName().length() + 1;
@@ -344,7 +343,7 @@ public class SuggestionUtils {
 			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, User user, 
 					String matchWith, boolean prependProject) {
 				for (Milestone milestone: project.getMilestones()) {
-					LinearRange match = LinearRange.match(milestone.getName(), matchWith, true, false, true);
+					LinearRange match = LinearRange.match(milestone.getName(), matchWith);
 					if (match != null) {
 						if (prependProject) {
 							int length = project.getName().length() + 1;
