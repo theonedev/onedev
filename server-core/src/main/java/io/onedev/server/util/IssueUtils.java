@@ -6,19 +6,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
-import org.jsoup.nodes.TextNode;
+import com.google.common.collect.Lists;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Sets;
-
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -30,7 +25,17 @@ import io.onedev.server.web.editable.PropertyDescriptor;
 
 public class IssueUtils {
 	
-    private static final Set<String> FIX_ISSUE_WORDS = Sets.newHashSet("fix", "fixed", "fixes", "resolve", "resolved", "resolves");
+	private static final List<String> ISSUE_FIX_WORDS = Lists.newArrayList(
+			"fix", "fixed", "fixes", "fixing", "resolve", "resolved", "resolves", "resolving");
+	
+    private static final Pattern ISSUE_FIX_PATTERN;
+    
+    static {
+    	StringBuilder builder = new StringBuilder("(^|\\W+)(");
+    	builder.append(StringUtils.join(ISSUE_FIX_WORDS, "|"));
+    	builder.append(")\\s+issue\\s+#(\\d+)(?=$|\\W+)");
+    	ISSUE_FIX_PATTERN = Pattern.compile(builder.toString());
+    }
     
 	private static final String FIELD_BEAN_PREFIX = "IssueFieldBean";
 	
@@ -92,77 +97,28 @@ public class IssueUtils {
 		}
 	}
 	
-	public static Collection<Long> parseFixedIssues(Project project, String commitMessage) {
+	public static Collection<Long> parseFixedIssueNumbers(String commitMessage) {
 		Collection<Long> issueNumbers = new HashSet<>();
 
 		// Skip unmatched commit message quickly 
-		boolean found = false;
+		boolean fixWordsFound = false;
 		String lowerCaseCommitMessage = commitMessage.toLowerCase();
-		for (String word: FIX_ISSUE_WORDS) {
+		for (String word: ISSUE_FIX_WORDS) {
 			if (lowerCaseCommitMessage.indexOf(word) != -1) {
-				found = true;
+				fixWordsFound = true;
 				break;
 			}
 		}
 		
-		if (found) {
-			/*
-			 * Transform commit message with defined transformers first in order not to process issue keys pointing 
-			 * to external issue trackers
-			 */
-			commitMessage = CommitMessageTransformer.transform(commitMessage, project.getCommitMessageTransforms());
-			
-			// Only process top level text node to skip transformed links above
-			Element body = Jsoup.parseBodyFragment(commitMessage).body();
-			for (int i=0; i<body.childNodeSize(); i++) {
-				Node node = body.childNode(i);
-				if (node instanceof TextNode) {
-					TextNode textNode = (TextNode) body.childNode(i);
-					StringTokenizer tokenizer = new StringTokenizer(textNode.getWholeText());
-					while (tokenizer.hasMoreTokens()) {
-						String token = tokenizer.nextToken();
-						if (FIX_ISSUE_WORDS.contains(token.toLowerCase())) {
-							while (FIX_ISSUE_WORDS.contains(parseIssueNumbers(tokenizer, issueNumbers)))
-								parseIssueNumbers(tokenizer, issueNumbers);
-						}
-					}
-				}
-			}
+		if (fixWordsFound 
+				&& lowerCaseCommitMessage.contains("#") 
+				&& lowerCaseCommitMessage.contains("issue")) {
+			Matcher matcher = ISSUE_FIX_PATTERN.matcher(lowerCaseCommitMessage);
+			while (matcher.find())
+				issueNumbers.add(Long.parseLong(matcher.group(3)));
 		}
 		
 		return issueNumbers;
 	}
 	
-	private static String parseIssueNumbers(StringTokenizer tokenizer, Collection<Long> issueNumbers) {
-		boolean issuesFound = false;
-		while (tokenizer.hasMoreTokens()) {
-			String token = tokenizer.nextToken();
-			if (token.startsWith("#")) {
-				for (String field: Splitter.on(",").omitEmptyStrings().split(token)) {
-					if (field.startsWith("#")) {
-						field = field.substring(1);
-						int index = 0;
-						for (char ch: field.toCharArray()) {
-							if (Character.isDigit(ch))
-								index++;
-							else
-								break;
-						}
-						String digits = field.substring(0, index);
-						if (digits.length() != 0) {
-							issueNumbers.add(Long.parseLong(digits));
-							issuesFound = true;
-							if (index == field.length())
-								continue;
-						} 
-					} 
-					return null;
-				}
-			} else if (!issuesFound || !token.toLowerCase().equals("and") && !token.equals(",")) {
-				return token;
-			}
-		} 
-		return null;
-	}
-		
 }

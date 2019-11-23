@@ -2,15 +2,15 @@
 	<div id="request-detail">
 		<div class="main">
 			<div wicket:id="requestHead" class="title">
-				<div wicket:id="title" class="title"></div>
+				<span wicket:id="title" class="title"></span>
 				<a wicket:id="editLink" title="Edit title" class="edit"><i class="fa fa-pencil"></i></a>
 				<form wicket:id="editForm" class="form">
 					<div class="clearable-wrapper">
 						<input wicket:id="title" type="text" placeholder="Input title" class="form-control">
 					</div>
 					<div class="actions">
-						<input wicket:id="save" type="submit" value="Save" class="btn btn-primary"/>
-						<input wicket:id="cancel" type="button" value="Cancel" class="btn btn-default"/>
+						<a wicket:id="save" title="Save" value="Save" class="btn btn-success"><i class="fa fa-check"></i></a>
+						<a wicket:id="cancel" title="Cancel" type="button" value="Cancel" class="btn btn-danger"><i class="fa fa-times"></i></a>
 					</div>
 				</form>
 			</div>

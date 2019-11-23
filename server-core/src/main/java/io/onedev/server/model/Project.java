@@ -32,7 +32,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.Version;
-import javax.validation.Valid;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.dom4j.Element;
@@ -101,7 +100,6 @@ import io.onedev.server.git.exception.ObjectNotFoundException;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
-import io.onedev.server.model.support.CommitMessageTransform;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.ProjectBuildSetting;
@@ -173,11 +171,6 @@ public class Project extends AbstractEntity {
 	@Lob
 	@Column(length=65535)
 	private String description;
-	
-	@Lob
-	@Column(length=65535, name="COMMIT_MSG_TRANSFORM")
-	@JsonView(DefaultView.class)
-	private ArrayList<CommitMessageTransform> commitMessageTransforms = new ArrayList<>();
 	
 	/*
 	 * Optimistic lock is necessary to ensure database integrity when update 
@@ -354,17 +347,6 @@ public class Project extends AbstractEntity {
 
 	public void setOwnerName(String ownerName) {
 		this.ownerName = ownerName;
-	}
-
-	@Editable
-	@Nullable
-	@Valid
-	public ArrayList<CommitMessageTransform> getCommitMessageTransforms() {
-		return commitMessageTransforms;
-	}
-
-	public void setCommitMessageTransforms(ArrayList<CommitMessageTransform> commitMessageTransforms) {
-		this.commitMessageTransforms = commitMessageTransforms;
 	}
 
 	public ArrayList<BranchProtection> getBranchProtections() {

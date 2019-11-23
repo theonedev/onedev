@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.ObjectId;
 import org.jsoup.nodes.Document;
@@ -16,6 +18,7 @@ import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.TextNodeVisitor;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
 public class CommitProcessor implements MarkdownProcessor {
@@ -32,8 +35,8 @@ public class CommitProcessor implements MarkdownProcessor {
 	}
 
 	@Override
-	public void process(Project project, Document rendered, Object context) {
-		if (project != null) {
+	public void process(@Nullable Project project, Document rendered, Object context) {
+		if (project != null && SecurityUtils.canReadCode(project)) {
 			TextNodeVisitor visitor = new TextNodeVisitor() {
 				
 				@Override

@@ -41,7 +41,17 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 	public static final int MAX_SUGGESTIONS = 1000;
 	
+	private final boolean noAutoFocus;
+	
 	private FloatingPanel dropdown;
+	
+	public InputAssistBehavior(boolean noAutoFocus) {
+		this.noAutoFocus = noAutoFocus;
+	}
+	
+	public InputAssistBehavior() {
+		this(true);
+	}
 	
 	@Override
 	protected void onBind() {
@@ -49,6 +59,8 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 		
 		Component input = getComponent();
 		input.add(AttributeAppender.append("class", "input-assist"));
+		if (noAutoFocus)
+			input.add(AttributeAppender.append("class", "no-autofocus"));
 		input.setOutputMarkupId(true);
 	}
 

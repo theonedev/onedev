@@ -82,7 +82,7 @@ public class DefaultMarkdownManager implements MarkdownManager {
 	}
 
 	@Override
-	public String process(Project project, String rendered, @Nullable Object context) {
+	public String process(@Nullable Project project, String rendered, @Nullable Object context) {
 		Document document = HtmlUtils.clean(rendered);
 		for (MarkdownProcessor htmlTransformer: htmlTransformers)
 			htmlTransformer.process(project, document, context);

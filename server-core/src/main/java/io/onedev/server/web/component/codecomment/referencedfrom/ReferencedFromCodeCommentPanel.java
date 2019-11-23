@@ -1,15 +1,16 @@
 package io.onedev.server.web.component.codecomment.referencedfrom;
 
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
+import org.unbescape.html.HtmlEscape;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 
 @SuppressWarnings("serial")
@@ -31,11 +32,16 @@ public class ReferencedFromCodeCommentPanel extends GenericPanel<CodeComment> {
 		super.onInitialize();
 		
 		CodeComment comment = getModelObject();
-		PageParameters params = ProjectBlobPage.paramsOf(comment);
-		Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectBlobPage.class, params);
-		link.add(new Label("label", comment.getMarkPos().getPath()));
 		
-		add(link);
+		if (SecurityUtils.canReadCode(comment.getProject())) {
+			PageParameters params = ProjectBlobPage.paramsOf(comment);
+			String url = RequestCycle.get().urlFor(ProjectBlobPage.class, params).toString();
+			String title = String.format("<a href='%s'>%s</a>", url, 
+					HtmlEscape.escapeHtml5(comment.getMarkPos().getPath()));
+			add(new Label("title", title).setEscapeModelStrings(false));  
+		} else {
+			add(new Label("title", comment.getMarkPos().getPath()));  
+		}
 	}
 
 }

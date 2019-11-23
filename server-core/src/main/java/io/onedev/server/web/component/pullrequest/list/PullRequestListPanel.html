@@ -20,6 +20,21 @@
 			<table wicket:id="requests" class="table"></table>
 		</div>
 	</div>
+	<wicket:fragment wicket:id="summaryFrag">
+        <div class="first-line">
+            <span wicket:id="title" class="title"></span> 
+            <span wicket:id="number" class="number"></span> 
+        </div>
+        <div class="second-line clearfix">
+            <div wicket:id="status" class="status pull-left"></div>
+            <div class="submission pull-left">
+                submitted by <a wicket:id="submitter"></a> <span wicket:id="submitDate"></span>
+            </div>
+            <div class="comments pull-left" title="Comments">
+                <span class="fa fa-comments-o"></span> <span wicket:id="comments"></span>
+            </div>
+        </div>
+	</wicket:fragment>
 	<wicket:fragment wicket:id="branchFrag">
 		<a wicket:id="link"></a>
 	</wicket:fragment>

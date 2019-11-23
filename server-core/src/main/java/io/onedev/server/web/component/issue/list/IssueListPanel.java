@@ -41,6 +41,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,6 +80,7 @@ import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
 public abstract class IssueListPanel extends Panel {
@@ -528,7 +530,6 @@ public abstract class IssueListPanel extends Panel {
 					IModel<Issue> rowModel) {
 				Issue issue = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "summaryFrag", IssueListPanel.this);
-				fragment.add(new Label("number", "#" + issue.getNumber()));
 				OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
 				QueryPosition position;
 				if (getProject() != null) {
@@ -537,12 +538,18 @@ public abstract class IssueListPanel extends Panel {
 				} else {
 					position = null;
 				}
-				Link<Void> link = new BookmarkablePageLink<Void>("title", IssueActivitiesPage.class, 
-						IssueActivitiesPage.paramsOf(issue, position));
-				link.add(new Label("label", issue.getTitle()));
-					
-				fragment.add(link);
-				fragment.add(new WebMarkupContainer("copy").add(new CopyClipboardBehavior(Model.of("#" + issue.getNumber() + ": " + issue.getTitle()))));
+				
+				String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
+						IssueActivitiesPage.paramsOf(issue, position)).toString();
+				
+				fragment.add(new Label("number", "<a href='" + url + "'>#" + issue.getNumber() + "</a>")
+						.setEscapeModelStrings(false));
+				
+				String transformed = new ReferenceTransformer(issue.getProject(), url).apply(issue.getTitle());
+				fragment.add(new Label("title", transformed).setEscapeModelStrings(false));
+				
+				fragment.add(new WebMarkupContainer("copy").add(
+						new CopyClipboardBehavior(Model.of("#" + issue.getNumber() + ": " + issue.getTitle()))));
 				
 				fragment.add(new IssueStateLabel("state", rowModel));
 				

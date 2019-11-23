@@ -20,6 +20,7 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.interpolative.Segment;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Interpolative;
@@ -95,7 +96,7 @@ public class ProjectDependency implements Serializable {
 	private static List<InputSuggestion> suggestBuilds(String matchWith) {
 		Project project = getInputProject();
 		if (project != null)
-			return SuggestionUtils.suggestBuilds(project, matchWith);
+			return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 		else
 			return new ArrayList<>();
 	}

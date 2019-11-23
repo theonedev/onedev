@@ -61,6 +61,7 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
+import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.diff.blob.BlobDiffPanel;
 import io.onedev.server.web.component.diff.revision.DiffViewMode;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
@@ -209,7 +210,14 @@ public abstract class CommitOptionPanel extends Panel {
 				tag.put("placeholder", getDefaultCommitMessage());
 			}
 			
-		});
+		}.add(new ReferenceInputBehavior(true) {
+
+			@Override
+			protected Project getProject() {
+				return context.getProject();
+			}
+			
+		}));
 		
 		form.add(new TextArea<String>("commitDetail", new IModel<String>() {
 
@@ -225,6 +233,13 @@ public abstract class CommitOptionPanel extends Panel {
 			@Override
 			public void setObject(String object) {
 				commitDetail = object;
+			}
+			
+		}).add(new ReferenceInputBehavior(true) {
+
+			@Override
+			protected Project getProject() {
+				return context.getProject();
 			}
 			
 		}));

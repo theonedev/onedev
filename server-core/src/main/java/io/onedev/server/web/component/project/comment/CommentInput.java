@@ -1,7 +1,10 @@
 package io.onedev.server.web.component.project.comment;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.model.IModel;
 
@@ -61,21 +64,27 @@ public abstract class CommentInput extends MarkdownEditor {
 		return new AtWhoReferenceSupport() {
 
 			@Override
-			public List<PullRequest> findPullRequests(Project project, String query, int count) {
+			public List<PullRequest> findPullRequests(@Nullable Project project, String query, int count) {
 				if (project == null)
 					project = getProject();
-				return OneDev.getInstance(PullRequestManager.class).query(project, query, count);
+				if (SecurityUtils.canReadCode(project))
+					return OneDev.getInstance(PullRequestManager.class).query(project, query, count);
+				else
+					return new ArrayList<>();
 			}
 
 			@Override
-			public List<Issue> findIssues(Project project, String query, int count) {
+			public List<Issue> findIssues(@Nullable Project project, String query, int count) {
 				if (project == null)
 					project = getProject();
-				return OneDev.getInstance(IssueManager.class).query(project, query, count);
+				if (SecurityUtils.canAccess(project))
+					return OneDev.getInstance(IssueManager.class).query(project, query, count);
+				else
+					return new ArrayList<>();
 			}
 
 			@Override
-			public List<Build> findBuilds(Project project, String query, int count) {
+			public List<Build> findBuilds(@Nullable Project project, String query, int count) {
 				if (project == null)
 					project = getProject();
 				return OneDev.getInstance(BuildManager.class).query(project, SecurityUtils.getUser(), query, count);

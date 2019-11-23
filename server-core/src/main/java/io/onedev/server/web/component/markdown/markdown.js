@@ -38,7 +38,8 @@ onedev.server.markdown = {
 		$preview.outerHeight($rendered.outerHeight());
 	},
 	onDomReady: function(containerId, callback, atWhoLimit, attachmentSupport, 
-			attachmentMaxSize, canMentionUser, canReferenceEntity, autosaveKey) {
+			attachmentMaxSize, canMentionUser, canReferenceEntity, 
+			projectNamePattern, autosaveKey) {
 		var $container = $("#" + containerId);
 		var $head = $container.children(".head");
 		var $body = $container.children(".body");
@@ -567,30 +568,23 @@ onedev.server.markdown = {
 		    });	
 	    } 
 
+		var referencePattern = "(^|\\W+)(pull\\s*request|issue|build)\\s+(" + projectNamePattern + ")?#\\S*$";
+		
 	    if (canReferenceEntity) {
-	    	function getReferencePullRequestProject() {
+	    	function getReferenceType() {
 	    		var input = $input.val().substring(0, $input.caret()).trim();
-	    		var match = /.*pull\s*request\s+([\w\.-]*)#$/gi.exec(input);
-	    		if (match)
-	    			return match[1];		
-	    		else
+	    		var match = new RegExp(referencePattern, 'gi').exec(input);
+	    		if (match) 
+	    			return match[2].replace(/\s+/g, '').toLowerCase();
+	    		else 
 	    			return undefined;   		
 	    	}
-
-	    	function getReferenceBuildProject() {
-                var input = $input.val().substring(0, $input.caret()).trim();
-                var match = /.*build\s+([\w\.-]*)#$/gi.exec(input);
-	    		if (match)
-	    			return match[1];		
-	    		else
-	    			return undefined;   		
-            }
-            
-	    	function getReferenceIssueProject() {
+	    	
+	    	function getReferenceProject() {
 	    		var input = $input.val().substring(0, $input.caret()).trim();
-	    		var match = /.*issue\s+([\w\.-]*)#$/gi.exec(input);
-	    		if (match)
-	    			return match[1];		
+	    		var match = new RegExp(referencePattern, 'gi').exec(input);
+	    		if (match) 
+	    			return match[3];		
 	    		else
 	    			return undefined;   		
 	    	}
@@ -602,41 +596,26 @@ onedev.server.markdown = {
 		        callbacks: {
 		        	remoteFilter: function(query, renderCallback) {
 		        		$container.data("atWhoReferenceRenderCallback", renderCallback);
-		        		var queryType;
-		        		var project = getReferencePullRequestProject();
-		        		if (project != undefined) {
-                            callback("referenceQuery", query, "pull request", project);
-                        } else {
-                            project = getReferenceBuildProject();
-                            if (project != undefined) {
-                                callback("referenceQuery", query, "build", project);
-                            } else {
-                                project = getReferenceIssueProject();
-                                if (project != undefined)
-                                    callback("referenceQuery", query, "issue", project);
-                                else if ($input.val().substring(0, $input.caret()).match(/(.*\s+|^)#/gi))
-                                    callback("referenceQuery", query, undefined, undefined);
-                            }
-                        }
+		        		var referenceType = getReferenceType();
+		        		if (referenceType) 
+                            callback("referenceQuery", query, referenceType, getReferenceProject());
+		        		else if ($input.val().substring(0, $input.caret()).match(/(.*\W+|^)#\S*$/gi))
+                            callback("referenceQuery", query, undefined, undefined);
 		        	}
 		        },
 		        displayTpl: function() {
-                    if (getReferencePullRequestProject() != undefined 
-                            || getReferenceBuildProject() != undefined 
-                            || getReferenceIssueProject() != undefined) {
+	        		var referenceType = getReferenceType();
+	        		if (referenceType) 
 			    		return "<li><span class='text-muted'>#${referenceNumber}</span> - ${referenceTitle}</li>";
-                    } else {
+	        		else
                         return "<li><span class='text-muted'>${referenceType} #${referenceNumber}</span> - ${referenceTitle}</li>";
-                    }
 		        },
 		        insertTpl: function() {
-                    if (getReferencePullRequestProject() != undefined
-                            || getReferenceBuildProject() != undefined 
-                            || getReferenceIssueProject() != undefined) {
+	        		var referenceType = getReferenceType();
+	        		if (referenceType) 
 		    			return "#${referenceNumber}";
-                    } else {
+	        		else
                         return '${referenceType} #${referenceNumber}';
-                    }	    		
 		        }, 
 		        limit: atWhoLimit
 		    });		

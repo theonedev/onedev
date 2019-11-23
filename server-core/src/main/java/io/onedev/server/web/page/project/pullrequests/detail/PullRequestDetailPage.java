@@ -103,6 +103,7 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
+import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.build.simplelist.SimpleBuildListPanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
@@ -135,6 +136,7 @@ import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.ProjectAttachmentSupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.ReferenceTransformer;
 import io.onedev.server.web.util.WicketUtils;
 import io.onedev.server.web.websocket.PageDataChanged;
 
@@ -195,14 +197,9 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		requestHead.setOutputMarkupId(true);
 		add(requestHead);
 		
-		requestHead.add(new Label("title", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return "#" + getPullRequest().getNumber() + " - " + getPullRequest().getTitle();
-			}
-			
-		}) {
+		ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), null);
+		String transformed = transformer.apply(request.getTitle());
+		requestHead.add(new Label("title", "#" + request.getNumber() + " - " + transformed) {
 
 			@Override
 			protected void onConfigure() {
@@ -210,7 +207,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				setVisible(!isEditingTitle);
 			}
 			
-		});
+		}.setEscapeModelStrings(false));
 		
 		requestHead.add(new AjaxLink<Void>("editLink") {
 
@@ -256,6 +253,13 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			@Override
 			public void setObject(String object) {
 				title = object;
+			}
+			
+		}).add(new ReferenceInputBehavior(false) {
+
+			@Override
+			protected Project getProject() {
+				return PullRequestDetailPage.this.getProject();
 			}
 			
 		}));

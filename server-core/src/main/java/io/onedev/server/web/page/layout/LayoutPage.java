@@ -69,7 +69,7 @@ public abstract class LayoutPage extends BasePage {
 		
 		UICustomization customization = OneDev.getInstance(UICustomization.class);
 		
-		RepeatingView tabsView = new RepeatingView("tabs");		
+		RepeatingView tabsView = new RepeatingView("navTabs");		
 		for (MainTab tab: customization.getMainTabs()) {
 			if (tab.isAuthorized()) {
 				WebMarkupContainer tabContainer = new WebMarkupContainer(tabsView.newChildId());

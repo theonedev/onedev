@@ -32,6 +32,7 @@ import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
@@ -77,6 +78,14 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			}
 			
 		}));
+		titleInput.add(new ReferenceInputBehavior(false) {
+
+			@Override
+			protected Project getProject() {
+				return NewIssueEditor.this.getProject();
+			}
+			
+		});
 		
 		add(descriptionInput = new CommentInput("description", Model.of(""), false) {
 

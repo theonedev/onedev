@@ -153,10 +153,6 @@
 }
 #issue-boards>.body .card a {
 	color: #666;
-	text-decoration: none;
-}
-#issue-boards>.body .card:hover a {
-	text-decoration: underline;
 }
 #issue-boards>.body .card .field-values>.value:last-child {
 	margin-right: 0;

@@ -63,6 +63,7 @@ import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
+import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.branch.picker.AffinalBranchPicker;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
@@ -606,7 +607,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 		
 		WebMarkupContainer titleContainer = new WebMarkupContainer("title");
 		form.add(titleContainer);
-		final TextField<String> titleInput = new TextField<String>("title", new IModel<String>() {
+		TextField<String> titleInput = new TextField<String>("title", new IModel<String>() {
 
 			@Override
 			public void detach() {
@@ -620,6 +621,14 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			@Override
 			public void setObject(String object) {
 				getPullRequest().setTitle(object);
+			}
+			
+		});
+		titleInput.add(new ReferenceInputBehavior(false) {
+			
+			@Override
+			protected Project getProject() {
+				return NewPullRequestPage.this.getProject();
 			}
 			
 		});

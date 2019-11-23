@@ -12,7 +12,7 @@ import io.onedev.server.util.validation.annotation.ProjectName;
 
 public class ProjectNameValidator implements ConstraintValidator<ProjectName, String> {
 
-	private static final Pattern PATTERN = Pattern.compile("[\\w-\\.]+");
+	public static final Pattern PATTERN = Pattern.compile("\\w([\\w-\\.]*\\w)?");
 	
 	private boolean interpolative;
 	
@@ -45,8 +45,10 @@ public class ProjectNameValidator implements ConstraintValidator<ProjectName, St
 		if (!PATTERN.matcher(value).matches()) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
-			if (message.length() == 0)
-				message = "Only alphanumeric, underscore, dash, and dot are accepted";
+			if (message.length() == 0) {
+				message = "Should start and end with alphanumeric or underscore. "
+						+ "Only alphanumeric, underscore, dash, and dot are allowed in the middle.";
+			}
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
 		} else if (value.equals("new")) {

@@ -20,11 +20,13 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobSuggestion;
+import io.onedev.server.ci.job.VariableInterpolator;
 import io.onedev.server.ci.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GroovyScript;
 
 public class NodeJobSuggestion implements JobSuggestion {
 
@@ -54,9 +56,8 @@ public class NodeJobSuggestion implements JobSuggestion {
 			Job job = new Job();
 			job.setName("angular ci");
 			job.setImage("1dev/cispec-node:10.16-alpine-chrome");
-
 			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@functions." + DETERMINE_PROJECT_VERSION + "@']\"", 
+					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
 					"echo", 
 					"npm install",
 					"npm install \\@angular/cli");
@@ -108,7 +109,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.setImage("node:10.16-alpine");
 
 			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@functions." + DETERMINE_PROJECT_VERSION + "@']\"", 
+					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
 					"echo",
 					"npm install typescript", 
 					"npm install", 
@@ -156,7 +157,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.setImage("node:10.16-alpine");
 
 			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@functions." + DETERMINE_PROJECT_VERSION + "@']\"", 
+					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
 					"echo", 
 					"npm install");
 
@@ -198,7 +199,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 			job.setImage("node:10.16-alpine");
 
 			List<String> commands = Lists.newArrayList( 
-					"echo \"##onedev[SetBuildVersion '@functions." + DETERMINE_PROJECT_VERSION + "@']\"", 
+					"echo \"##onedev[SetBuildVersion '@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_PROJECT_VERSION + "@']\"", 
 					"echo", 
 					"npm install");
 

@@ -305,7 +305,7 @@ onedev.server = {
 						$focusable[0].CodeMirror.focus();					
                     } else if ($focusable.length != 0 
                             && $focusable.closest(".select2-container").length == 0 
-                            && !$focusable.hasClass("input-assist")) {
+                            && $focusable.closest(".no-autofocus").length == 0) {
 						$focusable.focus();
 					} else {
 						$inError[0].scrollIntoView({behavior: "smooth", block: "center"});
@@ -318,8 +318,7 @@ onedev.server = {
 								$this[0].CodeMirror.focus();					
 							} else if ($this.closest(".select2-container").length == 0 
 									&& $this.attr("readonly") != "readonly"
-                                    && $this.attr("disabled") != "disabled"
-                                    && !$this.hasClass("input-assist")) {
+                                    && $this.attr("disabled") != "disabled") {
 								$this.focus();
 							}
 							return false;

@@ -27,7 +27,9 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
+import io.onedev.server.model.support.issue.changedata.IssueTitleChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
+import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleChangeData;
 import io.onedev.server.persistence.annotation.Transactional;
 
 @Singleton
@@ -233,12 +235,15 @@ public class EntityReferenceManager {
 	@Transactional
 	@Listen
 	public void on(PullRequestOpened event) {
+		addReferenceChange(event.getRequest(), event.getRequest().getTitle());
 		addReferenceChange(event.getRequest(), event.getRequest().getDescription());
 	}
 	
 	@Transactional
 	@Listen
 	public void on(PullRequestChangeEvent event) {
+		if (event.getChange().getData() instanceof PullRequestTitleChangeData)
+			addReferenceChange(event.getRequest(), event.getRequest().getTitle());
 		if (event.getChange().getData() instanceof PullRequestDescriptionChangeData)
 			addReferenceChange(event.getRequest(), event.getRequest().getDescription());
 	}
@@ -246,12 +251,15 @@ public class EntityReferenceManager {
 	@Transactional
 	@Listen
 	public void on(IssueOpened event) {
+		addReferenceChange(event.getIssue(), event.getIssue().getTitle());
 		addReferenceChange(event.getIssue(), event.getIssue().getDescription());
 	}
 	
 	@Transactional
 	@Listen
 	public void on(IssueChangeEvent event) {
+		if (event.getChange().getData() instanceof IssueTitleChangeData)
+			addReferenceChange(event.getIssue(), event.getIssue().getTitle());
 		if (event.getChange().getData() instanceof IssueDescriptionChangeData)
 			addReferenceChange(event.getIssue(), event.getIssue().getDescription());
 	}

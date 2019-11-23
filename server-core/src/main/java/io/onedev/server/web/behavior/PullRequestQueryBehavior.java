@@ -33,6 +33,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
@@ -77,7 +78,7 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 							int operator = PullRequestQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
 								if (operator == PullRequestQueryLexer.IncludesIssue)
-									return SuggestionUtils.suggestIssues(project, matchWith);
+									return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 								else if (operator != PullRequestQueryLexer.IncludesCommit)
 									return SuggestionUtils.suggestUsers(matchWith);
 								else

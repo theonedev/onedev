@@ -10,8 +10,6 @@ import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -39,6 +37,7 @@ import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
+import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
 abstract class BoardCardPanel extends GenericPanel<Issue> {
@@ -174,19 +173,15 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 
 		});
 		
-		Link<Void> link = new BookmarkablePageLink<Void>("number", 
-				IssueActivitiesPage.class, IssueActivitiesPage.paramsOf(getIssue(), getPosition()));
-		link.add(new Label("label", "#" + getIssue().getNumber()));
-		add(link);
+		String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
+				IssueActivitiesPage.paramsOf(getIssue(), getPosition())).toString();
+		
+		add(new Label("number", "<a href='" + url + "'>#" + getIssue().getNumber() + "</a>")
+				.setEscapeModelStrings(false));
 
-		add(new Label("title", new AbstractReadOnlyModel<String>() {
-
-			@Override
-			public String getObject() {
-				return getIssue().getTitle();
-			}
-			
-		}));
+		ReferenceTransformer transformer = new ReferenceTransformer(getIssue().getProject(), url);
+		add(new Label("title", transformer.apply(getIssue().getTitle()))
+				.setEscapeModelStrings(false));
 		
 		add(AttributeAppender.append("data-issue", getIssue().getId()));
 		

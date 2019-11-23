@@ -25,6 +25,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Referenceable;
+import io.onedev.server.util.validation.ProjectNameValidator;
 
 public abstract class ReferenceParser<T extends Referenceable> {
 	
@@ -40,13 +41,15 @@ public abstract class ReferenceParser<T extends Referenceable> {
 			Class<?> referenceClass = typeArguments.get(0);
 			referenceType = referenceClass.getSimpleName();
 			String[] words = StringUtils.split(WordUtils.uncamel(referenceType).toLowerCase(), " ");
-			StringBuilder builder = new StringBuilder("(^|\\s+)(");
+			StringBuilder builder = new StringBuilder("(^|\\W+)(");
 			for (int i=0; i<words.length-1; i++) 
 				builder.append(words[i]).append("\\s*");
-			builder.append(words[words.length-1]).append("\\s+)([\\w\\.-]*)#(\\d+)($|\\s+)");
+			builder.append(words[words.length-1]).append("\\s+)(");
+			builder.append(ProjectNameValidator.PATTERN.pattern());
+			builder.append(")?#(\\d+)(?=$|\\W+)");
 			pattern = Pattern.compile(builder.toString(), Pattern.CASE_INSENSITIVE);
 		} else {
-			throw new RuntimeException("Sub class of ReferenceParser must realize the type argument <T>");
+			throw new RuntimeException("Subclass of ReferenceParser must realize the type argument <T>");
 		}
 	}
 	
@@ -77,14 +80,19 @@ public abstract class ReferenceParser<T extends Referenceable> {
 		for (TextNode node : visitor.getMatchedNodes()) {
 			Matcher matcher = pattern.matcher(node.getWholeText());
 			while (matcher.find()) {
+				String referenceText = matcher.group(2);
 				String referenceProjectName = matcher.group(3);
+				Long referenceNumber = Long.valueOf(matcher.group(5));
+
 				Project referenceProject;
-				if (StringUtils.isNotBlank(referenceProjectName))
+				if (referenceProjectName != null) {
 					referenceProject = OneDev.getInstance(ProjectManager.class).find(referenceProjectName);
-				else
+					referenceText += referenceProjectName;
+				} else {
 					referenceProject = project;
-				Long referenceNumber = Long.valueOf(matcher.group(4));
-				String referenceText = referenceProjectName + "#" + referenceNumber;
+				}
+				referenceText += "#" + referenceNumber;
+				
 				String referenceTag;
 				if (referenceProject != null) {
 					T referenceable = findReferenceable(referenceProject, referenceNumber);
@@ -97,7 +105,7 @@ public abstract class ReferenceParser<T extends Referenceable> {
 				} else {
 					referenceTag = referenceText; 
 				}
-				HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + matcher.group(2) + referenceTag + matcher.group(5));
+				HtmlUtils.appendReplacement(matcher, node, matcher.group(1) + referenceTag);
 			}
 			HtmlUtils.appendTail(matcher, node);
 		}

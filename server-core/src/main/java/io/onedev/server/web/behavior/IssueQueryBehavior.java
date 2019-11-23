@@ -61,6 +61,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
@@ -117,7 +118,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 							case "tag":
 								return SuggestionUtils.suggestTags(project, matchWith);
 							case "build":
-								return SuggestionUtils.suggestBuilds(project, matchWith);
+								return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 							}
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
@@ -129,7 +130,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								if (operator == SubmittedBy)
 									return SuggestionUtils.suggestUsers(matchWith);
 								else 
-									return SuggestionUtils.suggestBuilds(project, matchWith);
+									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 							} else {
 								String fieldName = getValue(fieldElements.get(0).getMatchedText());
 								
@@ -143,11 +144,11 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldSpec instanceof UserChoiceField) {
 										return SuggestionUtils.suggestUsers(matchWith);
 									} else if (fieldSpec instanceof IssueChoiceField) {
-										return SuggestionUtils.suggestIssues(project, matchWith);
+										return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else if (fieldSpec instanceof BuildChoiceField) {
-										return SuggestionUtils.suggestBuilds(project, matchWith);
+										return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else if (fieldSpec instanceof PullRequestChoiceField) {
-										return SuggestionUtils.suggestPullRequests(project, matchWith);
+										return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else if (fieldSpec instanceof BooleanField) {
 										return SuggestionUtils.suggest(Lists.newArrayList("true", "false"), matchWith);
 									} else if (fieldSpec instanceof GroupChoiceField) {

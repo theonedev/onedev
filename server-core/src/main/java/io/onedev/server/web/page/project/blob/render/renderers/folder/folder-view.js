@@ -34,8 +34,7 @@ onedev.server.folderView = {
 							
 							$row.children(".last-commit.when").append("<span>" + lastCommit.when + "</span>");
 							var $message = $row.children(".last-commit.message");
-							$message.append("<a href='" + lastCommit.url + "'></a>");
-							$message.find("a").text(lastCommit.summary);
+							$message.append(lastCommit.html);
 
 							var alignment = {targetX: 0, targetY: 0, x: 0, y: 100, offset: 8};
 							$row.find("a.user").hover(function() {

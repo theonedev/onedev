@@ -1,4 +1,4 @@
-.commit-message>.summary a.commit {
+.commit-message>.summary a {
 	color: #444;
 }
 .commit-message>.detail {

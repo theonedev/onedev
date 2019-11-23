@@ -22,8 +22,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import io.onedev.commons.utils.Highlighter;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
-import io.onedev.server.util.CommitMessageTransformer;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
 public abstract class CommitMessagePanel extends Panel {
@@ -52,19 +52,20 @@ public abstract class CommitMessagePanel extends Panel {
 	}
 	
 	private String highlight(String text, @Nullable String commitUrl) {
+		ReferenceTransformer transformer = new ReferenceTransformer(getProject(), commitUrl);
+		
 		return Highlighter.highlightPatterns(text, highlightPatternsModel.getObject(), new Function<String, String>() {
 
 			@Override
 			public String apply(String text) {
-				String transformed = new CommitMessageTransformer(getProject(), commitUrl).apply(text);
-				return "<span class='highlight'>" + transformed + "</span>";
+				return "<span class='highlight'>" + transformer.apply(text) + "</span>";
 			}
 			
 		}, new Function<String, String>() {
 
 			@Override
 			public String apply(String text) {
-				return new CommitMessageTransformer(getProject(), commitUrl).apply(text);
+				return transformer.apply(text);
 			}
 			
 		});
@@ -83,10 +84,10 @@ public abstract class CommitMessagePanel extends Panel {
 		PageParameters params = CommitDetailPage.paramsOf(getProject(), getCommit().name()); 
 		String commitUrl = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
 		
-		add(new Label("summary", new AbstractReadOnlyModel<String>() {
+		add(new Label("summary", new LoadableDetachableModel<String>() {
 
 			@Override
-			public String getObject() {
+			protected String load() {
 				return highlight(getCommit().getShortMessage(), commitUrl);
 			}
 			

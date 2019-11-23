@@ -384,7 +384,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 									commitsStore.put(txn, parentCommitKey, new ArrayByteIterable(newParentCommitBytes));
 								}
 								
-								for (Long issueNumber: IssueUtils.parseFixedIssues(project, nextCommit.getFullMessage())) {
+								for (Long issueNumber: IssueUtils.parseFixedIssueNumbers(nextCommit.getFullMessage())) {
 									ByteIterable issueKey = new LongByteIterable(issueNumber);
 									Collection<ObjectId> fixCommits = readCommits(fixCommitsStore, txn, issueKey);
 									

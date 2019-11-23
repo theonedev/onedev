@@ -24,6 +24,7 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.util.ReferenceTransformer;
 
 /**
  * Loading commits of children may take some time, and we do this via resource loading to avoid blocking 
@@ -70,8 +71,10 @@ class LastCommitsResource extends AbstractResource {
 
 					LastCommitsOfChildren.Value value = entry.getValue();
 					PageParameters params = CommitDetailPage.paramsOf(project, value.getId().name());
-					info.url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
-					info.summary = value.getSummary();
+					String url = RequestCycle.get().urlFor(CommitDetailPage.class, params).toString();
+					
+					ReferenceTransformer transformer = new ReferenceTransformer(project, url);
+					info.html = transformer.apply(value.getSummary());
 					info.when = DateUtils.formatAge(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();
@@ -106,9 +109,7 @@ class LastCommitsResource extends AbstractResource {
 	
 	@SuppressWarnings("unused")
 	private static class LastCommitInfo {
-		String url;
-		
-		String summary;
+		String html;
 		
 		String when;
 		

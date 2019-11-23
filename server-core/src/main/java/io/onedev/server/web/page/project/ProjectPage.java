@@ -64,7 +64,6 @@ import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizat
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
 import io.onedev.server.web.page.project.setting.build.BuildSettingPage;
-import io.onedev.server.web.page.project.setting.commitmessagetransform.CommitMessageTransformPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
 import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
@@ -85,7 +84,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 	
 	public static PageParameters paramsOf(Project project) {
 		PageParameters params = new PageParameters();
-		params.set(PARAM_PROJECT, project.getName());
+		params.add(PARAM_PROJECT, project.getName());
 		return params;
 	}
 	
@@ -356,7 +355,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		tabs.add(new ProjectSettingTab("Secrets", "fa fa-fw fa-key", SecretListPage.class));
 		tabs.add(new ProjectSettingTab("Issue Setting", "fa fa-fw fa-bug", StateTransitionsPage.class, PromptFieldsUponIssueOpenSettingPage.class));
 		tabs.add(new ProjectSettingTab("Build Setting", "fa fa-fw fa-cubes", BuildSettingPage.class));
-		tabs.add(new ProjectSettingTab("Commit Message Transform", "fa fa-fw fa-comments", CommitMessageTransformPage.class));
 		tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", WebHooksPage.class));
 		return tabs;
 	}

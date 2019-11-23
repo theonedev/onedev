@@ -11,15 +11,18 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
-import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
+import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
 public abstract class IssueTitlePanel extends Panel {
@@ -34,6 +37,14 @@ public abstract class IssueTitlePanel extends Panel {
 		Fragment titleEditor = new Fragment(CONTENT_ID, "titleEditFrag", this);
 		Form<?> form = new Form<Void>("form");
 		TextField<String> titleInput = new TextField<String>("title", Model.of(getIssue().getTitle()));
+		titleInput.add(new ReferenceInputBehavior(false) {
+
+			@Override
+			protected Project getProject() {
+				return getIssue().getProject();
+			}
+			
+		});
 		titleInput.setRequired(true);
 		titleInput.setLabel(Model.of("Title"));
 		
@@ -81,14 +92,15 @@ public abstract class IssueTitlePanel extends Panel {
 	
 	private Fragment newTitleViewer() {
 		Fragment titleViewer = new Fragment(CONTENT_ID, "titleViewFrag", this);
-		titleViewer.add(new Label("title", new AbstractReadOnlyModel<String>() {
+		titleViewer.add(new Label("title", new LoadableDetachableModel<String>() {
 
 			@Override
-			public String getObject() {
-				return "#" + getIssue().getNumber() + " - " + getIssue().getTitle();
+			protected String load() {
+				ReferenceTransformer transformer = new ReferenceTransformer(getIssue().getProject(), null);
+				return "#" + getIssue().getNumber() + " - " + transformer.apply(getIssue().getTitle());
 			}
 			
-		}));
+		}).setEscapeModelStrings(false));
 		
 		titleViewer.add(new AjaxLink<Void>("edit") {
 

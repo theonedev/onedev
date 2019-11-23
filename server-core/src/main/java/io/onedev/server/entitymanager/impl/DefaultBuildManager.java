@@ -314,7 +314,10 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			List<Criterion> jobCriterions = new ArrayList<>();
 			for (String jobName: getAccessibleJobNames(project, user).get(project)) 
 				jobCriterions.add(Restrictions.eq(BuildConstants.ATTR_JOB, jobName));
-			criteria.add(Restrictions.or(jobCriterions.toArray(new Criterion[jobCriterions.size()])));
+			if (!jobCriterions.isEmpty())
+				criteria.add(Restrictions.or(jobCriterions.toArray(new Criterion[jobCriterions.size()])));
+			else
+				return builds;
 		}
 
 		if (term.startsWith("#"))
@@ -324,7 +327,9 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 				long buildNumber = Long.parseLong(term);
 				criteria.add(Restrictions.eq("number", buildNumber));
 			} catch (NumberFormatException e) {
-				criteria.add(Restrictions.ilike("version", term, MatchMode.ANYWHERE));
+				criteria.add(Restrictions.or(
+						Restrictions.ilike("version", term, MatchMode.ANYWHERE),
+						Restrictions.ilike("jobName", term, MatchMode.ANYWHERE)));
 			}
 		}
 		

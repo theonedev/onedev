@@ -56,13 +56,14 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.markdown.MarkdownManager;
+import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.util.validation.ProjectNameValidator;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.markdown.emoji.EmojiOnes;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
-import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 public class MarkdownEditor extends FormComponentPanel<String> {
@@ -313,8 +314,16 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 					else
 						referenceProject = null;
 					if (referenceProject != null || StringUtils.isBlank(referenceProjectName)) {
+						int count;
+						if ("issue".equals(referenceQueryType) 
+								|| "pull request".equals(referenceQueryType) 
+								|| "build".equals(referenceQueryType)) {
+							count = ATWHO_LIMIT*3;
+						} else {
+							count = ATWHO_LIMIT;
+						}
 						if (StringUtils.isBlank(referenceQueryType) || "issue".equals(referenceQueryType)) {
-							for (Issue issue: getReferenceSupport().findIssues(referenceProject, referenceQuery, ATWHO_LIMIT)) {
+							for (Issue issue: getReferenceSupport().findIssues(referenceProject, referenceQuery, count)) {
 								Map<String, String> referenceMap = new HashMap<>();
 								referenceMap.put("referenceType", "issue");
 								referenceMap.put("referenceNumber", String.valueOf(issue.getNumber()));
@@ -323,8 +332,8 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 								referenceList.add(referenceMap);
 							}
 						}
-						if (StringUtils.isBlank(referenceQueryType) || "pull request".equals(referenceQueryType)) {
-							for (PullRequest request: getReferenceSupport().findPullRequests(referenceProject, referenceQuery, ATWHO_LIMIT)) {
+						if (StringUtils.isBlank(referenceQueryType) || "pullrequest".equals(referenceQueryType)) {
+							for (PullRequest request: getReferenceSupport().findPullRequests(referenceProject, referenceQuery, count)) {
 								Map<String, String> referenceMap = new HashMap<>();
 								referenceMap.put("referenceType", "pull request");
 								referenceMap.put("referenceNumber", String.valueOf(request.getNumber()));
@@ -334,14 +343,16 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 							}
 						}
 						if (StringUtils.isBlank(referenceQueryType) || "build".equals(referenceQueryType)) {
-							for (Build build: getReferenceSupport().findBuilds(referenceProject, referenceQuery, ATWHO_LIMIT)) {
+							for (Build build: getReferenceSupport().findBuilds(referenceProject, referenceQuery, count)) {
 								Map<String, String> referenceMap = new HashMap<>();
 								referenceMap.put("referenceType", "build");
 								referenceMap.put("referenceNumber", String.valueOf(build.getNumber()));
 								
-								String title = build.getJobName();
-								if (build.getVersion() != null)
-									title += " : " + build.getVersion();
+								String title;
+								if (build.getVersion() != null) 
+									title = "(" + build.getVersion() + ") " + build.getJobName();
+								else
+									title = build.getJobName();
 								referenceMap.put("referenceTitle", title);
 								referenceMap.put("searchKey", build.getNumber() + " " + StringUtils.deleteWhitespace(title));
 								referenceList.add(referenceMap);
@@ -435,7 +446,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 		else
 			autosaveKey = "undefined";
 		
-		String script = String.format("onedev.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, %s);", 
+		String script = String.format("onedev.server.markdown.onDomReady('%s', %s, %d, %s, %d, %b, %b, '%s', %s);", 
 				container.getMarkupId(), 
 				callback, 
 				ATWHO_LIMIT, 
@@ -443,6 +454,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				getAttachmentSupport()!=null?getAttachmentSupport().getAttachmentMaxSize():0,
 				getUserMentionSupport() != null,
 				getReferenceSupport() != null, 
+				JavaScriptEscape.escapeJavaScript(ProjectNameValidator.PATTERN.pattern()),
 				autosaveKey);
 		response.render(OnDomReadyHeaderItem.forScript(script));
 		

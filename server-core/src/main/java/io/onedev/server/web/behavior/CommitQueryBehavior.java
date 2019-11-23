@@ -27,6 +27,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.commit.CommitQueryParser;
 import io.onedev.server.util.Constants;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
@@ -67,7 +68,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 						case CommitQueryParser.TAG:
 							return SuggestionUtils.suggestTags(project, matchWith);
 						case CommitQueryParser.BUILD:
-							return SuggestionUtils.suggestBuilds(project, matchWith);
+							return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 						case CommitQueryParser.AUTHOR:
 						case CommitQueryParser.COMMITTER:
 							Map<String, LinearRange> suggestedInputs = new LinkedHashMap<>();

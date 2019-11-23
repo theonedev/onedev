@@ -30,6 +30,7 @@ import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
+import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @SuppressWarnings("serial")
@@ -82,11 +83,11 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 								if (operator == BuildQueryLexer.SubmittedBy || operator == BuildQueryLexer.CancelledBy)
 									return SuggestionUtils.suggestUsers(matchWith);
 								else if (operator == BuildQueryLexer.DependsOn || operator == BuildQueryLexer.DependenciesOf)
-									return SuggestionUtils.suggestBuilds(project, matchWith);
+									return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 								else if (operator == BuildQueryLexer.FixedIssue)
-									return SuggestionUtils.suggestIssues(project, matchWith);
+									return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 								else 
-									return SuggestionUtils.suggestPullRequests(project, matchWith);
+									return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 							} else {
 								String fieldName = BuildQuery.getValue(fieldElements.get(0).getMatchedText());
  								try {
@@ -103,7 +104,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 										else
 											return null;
 									} else if (fieldName.equals(BuildConstants.FIELD_NUMBER)) {
-										return SuggestionUtils.suggestBuilds(project, matchWith);
+										return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else {
 										BuildParamManager buildParamManager = OneDev.getInstance(BuildParamManager.class);
 										List<String> paramValues = new ArrayList<>(buildParamManager.getBuildParamValues(fieldName));

@@ -20,11 +20,13 @@ import com.google.common.collect.Lists;
 import io.onedev.server.ci.job.CacheSpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobSuggestion;
+import io.onedev.server.ci.job.VariableInterpolator;
 import io.onedev.server.ci.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GroovyScript;
 
 public class MavenJobSuggestion implements JobSuggestion {
 
@@ -41,7 +43,7 @@ public class MavenJobSuggestion implements JobSuggestion {
 			Job job = new Job();
 			job.setName("maven ci");
 
-			job.setImage("@functions." + DETERMINE_DOCKER_IMAGE + "@");
+			job.setImage("@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@");
 			/*
 			 * Before running maven test, we extract version of the project and use LogInstruction to tell 
 			 * OneDev using extracted version for current build

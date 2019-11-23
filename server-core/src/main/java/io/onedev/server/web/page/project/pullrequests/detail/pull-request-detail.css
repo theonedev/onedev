@@ -10,15 +10,26 @@
 #request-detail>.main>div {
 	margin-bottom: 20px;
 }
-#request-detail>.main>.title>* {
-	display: inline;
-}
 #request-detail>.main>.title {
 	font-size: 20px;
 	font-weight: bold;
 	color: #444;
 	position: relative;
 }
+#request-detail>.main>.title form {
+	position: relative;
+	padding-right: 100px;
+}
+#request-detail>.main>.title form .actions {
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin: 0;
+}
+#request-detail>.main>.title form .actions a:first-child {
+	margin-right: 0;
+}
+
 #request-detail>.main>.title a.edit {
 	color: #666;
 	margin-left: 8px;

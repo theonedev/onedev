@@ -208,49 +208,49 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canModifyOrDelete(CodeComment comment) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(comment.getUser()) 
-				|| canWriteCode(comment.getProject());
+				|| canManage(comment.getProject());
 	}
 	
 	public static boolean canModifyOrDelete(CodeCommentReply reply) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(reply.getUser()) 
-				|| canWriteCode(reply.getComment().getProject());
+				|| canManage(reply.getComment().getProject());
 	}
 	
 	public static boolean canModifyOrDelete(PullRequestComment comment) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(comment.getUser()) 
-				|| canWriteCode(comment.getRequest().getTargetProject());
+				|| canManage(comment.getRequest().getTargetProject());
 	}
 	
 	public static boolean canModifyOrDelete(IssueComment comment) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(comment.getUser()) 
-				|| canWriteCode(comment.getIssue().getProject());
+				|| canManageIssues(comment.getIssue().getProject());
 	}
 	
 	public static boolean canModifyOrDelete(PullRequestChange change) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(change.getUser()) 
-				|| canWriteCode(change.getRequest().getTargetProject());
+				|| canManage(change.getRequest().getTargetProject());
 	}
 	
 	public static boolean canModifyOrDelete(IssueChange change) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(change.getUser()) 
-				|| canWriteCode(change.getIssue().getProject());
+				|| canManageIssues(change.getIssue().getProject());
 	}
 
 	public static boolean canModify(PullRequest request) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(request.getSubmitter()) 
-				|| canWriteCode(request.getTargetProject());
+				|| canManage(request.getTargetProject());
 	}
 	
 	public static boolean canModify(Issue issue) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(issue.getSubmitter()) 
-				|| canWriteCode(issue.getProject());
+				|| canManageIssues(issue.getProject());
 	}
 	
 }

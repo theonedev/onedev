@@ -35,6 +35,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
+import org.apache.wicket.request.cycle.RequestCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,17 +48,22 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
-import io.onedev.server.web.component.pullrequest.summary.PullRequestSummaryPanel;
+import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
+import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.pullrequests.create.NewPullRequestPage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
+import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
 public abstract class PullRequestListPanel extends Panel {
@@ -250,20 +256,33 @@ public abstract class PullRequestListPanel extends Panel {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				cellItem.add(new PullRequestSummaryPanel(componentId, rowModel) {
-
-					@Override
-					protected QueryPosition getQueryPosition() {
-						if (getProject() != null) {
-							OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
-							return new QueryPosition(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
-									(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
-						} else {
-							return null;
-						}
-					}
-					
-				});
+				PullRequest request = rowModel.getObject();
+				Fragment fragment = new Fragment(componentId, "summaryFrag", PullRequestListPanel.this);
+				
+				QueryPosition position;
+				if (getProject() != null) {
+					OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
+					position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
+							(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
+				} else {
+					position = null;
+				}
+				
+				String url = RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
+						PullRequestActivitiesPage.paramsOf(request, position)).toString();
+				
+				fragment.add(new Label("number", "<a href='" + url + "'>#" + request.getNumber() + "</a>")
+						.setEscapeModelStrings(false));
+				ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), url);
+				fragment.add(new Label("title", transformer.apply(request.getTitle())).setEscapeModelStrings(false));
+				
+				fragment.add(new RequestStatusLabel("status", rowModel));
+				UserIdent submitterIdent = UserIdent.of(request.getSubmitter(), request.getSubmitterName());
+				fragment.add(new UserIdentPanel("submitter", submitterIdent, Mode.NAME));
+				fragment.add(new Label("submitDate", DateUtils.formatAge(request.getSubmitDate())));
+				fragment.add(new Label("comments", request.getCommentCount()));
+				
+				cellItem.add(fragment);
 			}
 
 			@Override

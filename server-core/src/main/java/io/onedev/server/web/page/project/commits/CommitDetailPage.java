@@ -60,7 +60,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.search.code.CommitIndexed;
-import io.onedev.server.util.CommitMessageTransformer;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -82,6 +81,7 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.tags.ProjectTagsPage;
+import io.onedev.server.web.util.ReferenceTransformer;
 
 @SuppressWarnings("serial")
 public class CommitDetailPage extends ProjectPage implements CommentSupport {
@@ -141,8 +141,8 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		String transformed = new CommitMessageTransformer(getProject(), null).apply(getCommit().getShortMessage());
-		add(new Label("title", transformed).setEscapeModelStrings(false));
+		ReferenceTransformer transformer = new ReferenceTransformer(getProject(), null);
+		add(new Label("title", transformer.apply(getCommit().getShortMessage())).setEscapeModelStrings(false));
 
 		BlobIdent blobIdent = new BlobIdent(getCommit().name(), null, FileMode.TYPE_TREE);
 		ProjectBlobPage.State browseState = new ProjectBlobPage.State(blobIdent);
@@ -168,12 +168,10 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 		});
 		
 		String message = GitUtils.getDetailMessage(getCommit());
-		if (message != null) {
-			transformed = new CommitMessageTransformer(getProject(), null).apply(message);
-			add(new Label("detail", transformed).setEscapeModelStrings(false));
-		} else {
+		if (message != null) 
+			add(new Label("detail", transformer.apply(message)).setEscapeModelStrings(false));
+		else 
 			add(new WebMarkupContainer("detail").setVisible(false));
-		}
 		
 		add(new AjaxLazyLoadPanel("refs") {
 

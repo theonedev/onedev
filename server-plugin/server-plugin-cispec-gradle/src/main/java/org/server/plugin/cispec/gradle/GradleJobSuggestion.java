@@ -14,12 +14,14 @@ import com.google.common.collect.Lists;
 import io.onedev.server.ci.job.CacheSpec;
 import io.onedev.server.ci.job.Job;
 import io.onedev.server.ci.job.JobSuggestion;
+import io.onedev.server.ci.job.VariableInterpolator;
 import io.onedev.server.ci.job.trigger.BranchUpdateTrigger;
 import io.onedev.server.ci.job.trigger.PullRequestTrigger;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.plugin.report.html.JobHtmlReport;
 
 public class GradleJobSuggestion implements JobSuggestion {
@@ -38,7 +40,7 @@ public class GradleJobSuggestion implements JobSuggestion {
 		if (gradleBlob != null || kotlinGradleBlob != null) {
 			Job job = new Job();
 			job.setName("gradle ci");
-			job.setImage("@functions." + DETERMINE_DOCKER_IMAGE + "@");
+			job.setImage("@" + VariableInterpolator.SCRIPTS_PREFIX + GroovyScript.BUILTIN_PREFIX + DETERMINE_DOCKER_IMAGE + "@");
 			job.setCommands(Lists.newArrayList(
 					"set -e",
 					"echo \"Detecting project version (may require some time while downloading gradle dependencies)...\"",

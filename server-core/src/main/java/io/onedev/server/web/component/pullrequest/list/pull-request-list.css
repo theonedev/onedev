@@ -29,10 +29,33 @@
 .pull-request-list>.body td a {
 	color: #444;
 }
-
 .pull-request-list>.body tr.request.new td.new-indicator {
 	background: #4667EE;
 }
+
+.pull-request-list>.body td.summary .first-line {
+	margin-bottom: 8px;
+	font-weight: bold;
+	font-size: 16px;
+}
+.pull-request-list>.body td.summary .first-line>.title {
+    margin-right: 8px;
+    color: #444;
+}
+.pull-request-list>.body td.summary .second-line>* {
+	margin-right: 12px;
+}
+.pull-request-list>.body td.summary .second-line>*:last-child {
+	margin-right: 0;
+}
+.pull-request-list>.body td.summary .second-line>.status {
+	width: 75px;
+	padding: 6px 8px;
+}
+.pull-request-list>.body td.summary .second-line {
+	color: #888;
+}
+
 @media(max-width: 991px) {
 	.pull-request-list thead, .pull-request-list td.expanded {
 		display: none;		

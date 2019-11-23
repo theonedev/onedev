@@ -50,6 +50,8 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.Secret;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.security.permission.AccessProject;
+import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.script.ScriptContribution;
 import io.onedev.server.util.script.identity.ScriptIdentity;
@@ -202,55 +204,59 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestIssues(@Nullable Project project, String matchWith) {
+	public static List<InputSuggestion> suggestIssues(@Nullable Project project, String matchWith, int count) {
 		return suggest(project, matchWith, new ProjectScopedSuggester() {
 			
 			@Override
 			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, 
 					@Nullable User user, String matchWith, boolean prependProject) {
-				for (Issue issue: OneDev.getInstance(IssueManager.class).query(
-						project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
-					if (prependProject)
-						suggestions.add(new InputSuggestion(project.getName() + "#" + issue.getNumber(), issue.getTitle(), null));
-					else
-						suggestions.add(new InputSuggestion("#" + issue.getNumber(), issue.getTitle(), null));
+				if (User.asSubject(user).isPermitted(new ProjectPermission(project, new AccessProject()))) {
+					for (Issue issue: OneDev.getInstance(IssueManager.class).query(
+							project, matchWith, count)) {
+						if (prependProject)
+							suggestions.add(new InputSuggestion(project.getName() + "#" + issue.getNumber(), issue.getTitle(), null));
+						else
+							suggestions.add(new InputSuggestion("#" + issue.getNumber(), issue.getTitle(), null));
+					}
+				}				
+			}
+			
+		}, "#");
+	}
+	
+	public static List<InputSuggestion> suggestPullRequests(@Nullable Project project, String matchWith, int count) {
+		return suggest(project, matchWith, new ProjectScopedSuggester() {
+			
+			@Override
+			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, 
+					@Nullable User user, String matchWith, boolean prependProject) {
+				if (User.asSubject(user).isPermitted(new ProjectPermission(project, new ReadCode()))) {
+					for (PullRequest request: OneDev.getInstance(PullRequestManager.class).query(
+							project, matchWith, count)) {
+						if (prependProject)
+							suggestions.add(new InputSuggestion(project.getName() + "#" + request.getNumber(), request.getTitle(), null));
+						else
+							suggestions.add(new InputSuggestion("#" + request.getNumber(), request.getTitle(), null));
+					}
 				}
 			}
 			
 		}, "#");
 	}
 	
-	public static List<InputSuggestion> suggestPullRequests(@Nullable Project project, String matchWith) {
-		return suggest(project, matchWith, new ProjectScopedSuggester() {
-			
-			@Override
-			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, 
-					@Nullable User user, String matchWith, boolean prependProject) {
-				for (PullRequest request: OneDev.getInstance(PullRequestManager.class).query(
-						project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
-					if (prependProject)
-						suggestions.add(new InputSuggestion(project.getName() + "#" + request.getNumber(), request.getTitle(), null));
-					else
-						suggestions.add(new InputSuggestion("#" + request.getNumber(), request.getTitle(), null));
-				}
-			}
-			
-		}, "#");
-	}
-	
-	public static List<InputSuggestion> suggestBuilds(@Nullable Project project, String matchWith) {
+	public static List<InputSuggestion> suggestBuilds(@Nullable Project project, String matchWith, int count) {
 		return suggest(project, matchWith, new ProjectScopedSuggester() {
 			
 			@Override
 			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, 
 					@Nullable User user, String matchWith, boolean prependProject) {
 				for (Build build: OneDev.getInstance(BuildManager.class).query(
-						project, user, matchWith, InputAssistBehavior.MAX_SUGGESTIONS)) {
+						project, user, matchWith, count)) {
 					InputSuggestion suggestion;
 					
 					String description;
 					if (build.getVersion() != null) 
-						description = build.getVersion() + " : " + build.getJobName();
+						description = "(" + build.getVersion() + ") " + build.getJobName();
 					else
 						description = build.getJobName();
 
