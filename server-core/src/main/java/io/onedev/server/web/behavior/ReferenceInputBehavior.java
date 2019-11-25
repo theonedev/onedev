@@ -39,7 +39,7 @@ public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 		List<InputCompletion> completions = new ArrayList<>();
 		String contentBeforeCaret = inputStatus.getContentBeforeCaret();
 		Matcher matcher = REFERENCE_PATTERN.matcher(contentBeforeCaret);
-		if (matcher.find()) {
+		if (!contentBeforeCaret.endsWith("\n") && matcher.find()) {
 			String matchWith = matcher.group(6);
 			String projectName = matcher.group(4);
 			Project project;

@@ -568,25 +568,24 @@ onedev.server.markdown = {
 		    });	
 	    } 
 
-		var referencePattern = "(^|\\W+)(pull\\s*request|issue|build)\\s+(" + projectNamePattern + ")?#\\S*$";
+		var referencePattern = "(^|\\W+)((pull\\s*request|issue|build)\\s+)?(" + projectNamePattern + ")?#(\\S*)$";
 		
 	    if (canReferenceEntity) {
-	    	function getReferenceType() {
+	    	function matchReference() {
 	    		var input = $input.val().substring(0, $input.caret()).trim();
 	    		var match = new RegExp(referencePattern, 'gi').exec(input);
-	    		if (match) 
-	    			return match[2].replace(/\s+/g, '').toLowerCase();
-	    		else 
+	    		if (match) {
+	    			var referenceType = match[3];
+	    			if (referenceType)
+	    				referenceType = referenceType.replace(/\s+/g, '').toLowerCase();
+	    			return {
+	    				type: referenceType,
+	    				project: match[4],
+	    				query: match[6]
+	    			}
+	    		} else { 
 	    			return undefined;   		
-	    	}
-	    	
-	    	function getReferenceProject() {
-	    		var input = $input.val().substring(0, $input.caret()).trim();
-	    		var match = new RegExp(referencePattern, 'gi').exec(input);
-	    		if (match) 
-	    			return match[3];		
-	    		else
-	    			return undefined;   		
+	    		}
 	    	}
 	    	
 		    $input.atwho({
@@ -596,23 +595,19 @@ onedev.server.markdown = {
 		        callbacks: {
 		        	remoteFilter: function(query, renderCallback) {
 		        		$container.data("atWhoReferenceRenderCallback", renderCallback);
-		        		var referenceType = getReferenceType();
-		        		if (referenceType) 
-                            callback("referenceQuery", query, referenceType, getReferenceProject());
-		        		else if ($input.val().substring(0, $input.caret()).match(/(.*\W+|^)#\S*$/gi))
-                            callback("referenceQuery", query, undefined, undefined);
+		        		var match = matchReference();
+		        		if (match) 
+                            callback("referenceQuery", match.query, match.type, match.project);
 		        	}
 		        },
 		        displayTpl: function() {
-	        		var referenceType = getReferenceType();
-	        		if (referenceType) 
+	        		if (matchReference().type) 
 			    		return "<li><span class='text-muted'>#${referenceNumber}</span> - ${referenceTitle}</li>";
 	        		else
                         return "<li><span class='text-muted'>${referenceType} #${referenceNumber}</span> - ${referenceTitle}</li>";
 		        },
 		        insertTpl: function() {
-	        		var referenceType = getReferenceType();
-	        		if (referenceType) 
+	        		if (matchReference().type) 
 		    			return "#${referenceNumber}";
 	        		else
                         return '${referenceType} #${referenceNumber}';

@@ -185,6 +185,11 @@ onedev.server.inputassist = {
 			$input.data("update")($this);
 		});
 		onedev.server.inputassist.updateHelp($dropdown);
+		if ($input.is("textarea")) {
+		    var e = $.Event('keydown');
+		    e.which = 40; 
+		    $input.trigger(e);			
+		}
 	},
 	
 	initInfiniteScroll: function(assistId, callback) {
@@ -197,9 +202,9 @@ onedev.server.inputassist = {
 	
 	updateHelp: function($dropdown) {
 		if ($dropdown.find("tr.active").length != 0) {
-			$dropdown.find(".help .complete").empty().append("Tab or &crarr; to select active item.");
+			$dropdown.find(".help .complete").empty().append("Tab or &crarr; to use selected item.");
 		} else {
-			$dropdown.find(".help .complete").empty().append("Tab to select first item.");
+			$dropdown.find(".help .complete").empty().append("Tab to use first item.");
 		}
 	}
 };
