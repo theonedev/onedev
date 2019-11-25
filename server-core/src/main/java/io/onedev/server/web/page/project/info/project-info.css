@@ -4,30 +4,29 @@
 .project-info>div {
 	margin-bottom: 20px;
 }
-.project-info>.general {
-	border-bottom: 1px solid #ddd;
-	padding-bottom: 20px;
-	font-size: 20px; 
+.project-info>div:last-child {
+	margin-bottom: 0; 
 }
-.project-info>.general>a {
-	color: #777;
+
+.project-info>.head {
+	font-size: 16px;
+	font-weight: bold;
 }
-.project-info>.general>span {
-	margin-right: 16px;
+.project-info>.head .forks {
+	margin: 0 8px 0 20px;
 }
+
+.project-info>.forked-from {
+	margin-top: -20px;
+	font-size: 13px;
+	color: #666;
+}
+
 .project-info>.description {
-	border: 1px solid #DDD;
+	border: 1px dashed #BBB;
 	padding: 20px 20px 10px 20px;
 	border-radius: 4px;
 	background: #F5F5F5;
-}
-.project-info>.metrics>a, .project-info>.metrics>span {
-	font-size: 16px;
-	color: #444;
-	margin-right: 20px;
-}
-.project-info>.clone {
-	margin-bottom: 20px;
 }
 .project-info>.clone>.input-group {
 	width: 100%;

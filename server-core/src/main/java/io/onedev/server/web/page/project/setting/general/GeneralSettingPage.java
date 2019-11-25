@@ -5,6 +5,7 @@ import java.io.Serializable;
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
@@ -37,6 +38,8 @@ public class GeneralSettingPage extends ProjectSettingPage {
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
+		
+		add(new Label("generalSettingTitle", "General Setting (id: " + getProject().getId() + ")"));
 		
 		if (getProject().getOwner() != null)
 			getProject().setOwnerName(getProject().getOwner().getName());

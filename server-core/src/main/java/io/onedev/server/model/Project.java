@@ -301,8 +301,6 @@ public class Project extends AbstractEntity {
     
     private transient Optional<String> defaultBranchOptional;
     
-    private transient Optional<RevCommit> lastCommitOptional;
-    
     private transient Optional<IssueQuerySetting> issueQuerySettingOfCurrentUserHolder;
     
     private transient Optional<PullRequestQuerySetting> pullRequestQuerySettingOfCurrentUserHolder;
@@ -1176,29 +1174,6 @@ public class Project extends AbstractEntity {
 			}
 		}
 		return null;
-	}
-
-	public RevCommit getLastCommit() {
-		if (lastCommitOptional == null) {
-			RevCommit lastCommit = null;
-			try {
-				for (Ref ref: getRepository().getRefDatabase().getRefsByPrefix(Constants.R_HEADS)) {
-					RevCommit commit = getRevCommit(ref.getObjectId(), false);
-					if (commit != null) {
-						if (lastCommit != null) {
-							if (commit.getCommitTime() > lastCommit.getCommitTime())
-								lastCommit = commit;
-						} else {
-							lastCommit = commit;
-						}
-					}
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			lastCommitOptional = Optional.fromNullable(lastCommit);
-		}
-		return lastCommitOptional.orNull();
 	}
 
 	@Override
