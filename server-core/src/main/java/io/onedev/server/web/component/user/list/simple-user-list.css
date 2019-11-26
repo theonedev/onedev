@@ -1,13 +1,13 @@
-.floating>.content>.user-list {
+.floating>.content>.simple-user-list {
 	padding: 12px 0;
 	min-width: 120px;
 }
-.floating>.content>.user-list a {
+.floating>.content>.simple-user-list a {
 	display: block;
 	color: #555;
 	text-decoration: none;
 	padding: 8px 12px;
 }
-.floating>.content>.user-list a:hover {
+.floating>.content>.simple-user-list a:hover {
 	background: #F2F2F2;
 }

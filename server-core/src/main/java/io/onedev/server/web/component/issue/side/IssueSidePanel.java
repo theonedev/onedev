@@ -64,7 +64,7 @@ import io.onedev.server.web.component.milestone.progress.MilestoneProgressBar;
 import io.onedev.server.web.component.stringchoice.StringSingleChoice;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
-import io.onedev.server.web.component.user.list.UserListLink;
+import io.onedev.server.web.component.user.list.SimpleUserListLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.page.project.issues.milestones.MilestoneDetailPage;
@@ -413,7 +413,7 @@ public abstract class IssueSidePanel extends Panel {
 			
 		});
 		
-		container.add(new UserListLink("more") {
+		container.add(new SimpleUserListLink("more") {
 
 			@Override
 			protected void onConfigure() {

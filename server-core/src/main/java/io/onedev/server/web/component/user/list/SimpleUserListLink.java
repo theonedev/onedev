@@ -11,19 +11,19 @@ import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 
 @SuppressWarnings("serial")
-public abstract class UserListLink extends DropdownLink {
+public abstract class SimpleUserListLink extends DropdownLink {
 
-	public UserListLink(String id) {
+	public SimpleUserListLink(String id) {
 		super(id);
 	}
 
 	@Override
 	protected Component newContent(String id, FloatingPanel dropdown) {
-		return new UserListPanel(id) {
+		return new SimpleUserListPanel(id) {
 
 			@Override
 			protected List<User> getUsers() {
-				return UserListLink.this.getUsers();
+				return SimpleUserListLink.this.getUsers();
 			}
 			
 		};
@@ -32,7 +32,7 @@ public abstract class UserListLink extends DropdownLink {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(CssHeaderItem.forReference(new UserListCssResourceReference()));
+		response.render(CssHeaderItem.forReference(new SimpleUserListCssResourceReference()));
 	}
 
 	protected abstract List<User> getUsers();

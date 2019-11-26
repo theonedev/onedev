@@ -23,7 +23,7 @@ import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.util.watch.WatchStatus;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
-import io.onedev.server.web.component.user.list.UserListLink;
+import io.onedev.server.web.component.user.list.SimpleUserListLink;
 import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 
 @SuppressWarnings("serial")
@@ -91,7 +91,7 @@ public abstract class EntityWatchesPanel extends Panel {
 			
 		});
 		
-		add(new UserListLink("more") {
+		add(new SimpleUserListLink("more") {
 
 			@Override
 			protected void onConfigure() {

@@ -14,9 +14,9 @@ import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.user.UserProfilePage;
 
 @SuppressWarnings("serial")
-abstract class UserListPanel extends Panel {
+abstract class SimpleUserListPanel extends Panel {
 
-	public UserListPanel(String id) {
+	public SimpleUserListPanel(String id) {
 		super(id);
 	}
 

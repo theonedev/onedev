@@ -21,6 +21,7 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
@@ -38,6 +39,8 @@ import io.onedev.server.web.util.PagingHistorySupport;
 @SuppressWarnings("serial")
 public class ProjectListPanel extends Panel {
 
+	private static final int MAX_DESCRIPTION_LEN = 120;
+	
 	private final IModel<List<Project>> projectsModel;
 	
 	private final PagingHistorySupport pagingHistorySupport;
@@ -91,7 +94,7 @@ public class ProjectListPanel extends Panel {
 
 			@Override
 			public String getCssClass() {
-				return "owner expanded";
+				return "owner";
 			}
 			
 		});
@@ -102,10 +105,12 @@ public class ProjectListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<Project>> cellItem, String componentId, 
 					IModel<Project> rowModel) {
 				Project project = rowModel.getObject();
-				if (project.getDescription() != null)
-					cellItem.add(new Label(componentId, project.getDescription()));
-				else
+				if (project.getDescription() != null) {
+					cellItem.add(new Label(componentId, 
+							StringUtils.abbreviate(project.getDescription(), MAX_DESCRIPTION_LEN)));
+				} else {
 					cellItem.add(new Label(componentId, "<i>No description</i>").setEscapeModelStrings(false));
+				}
 			}
 
 			@Override

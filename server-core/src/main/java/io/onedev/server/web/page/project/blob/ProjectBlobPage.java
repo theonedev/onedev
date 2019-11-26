@@ -1178,9 +1178,9 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}	
-			} else if (state.mode == Mode.EDIT) {
+			} else if (state.mode == Mode.ADD || state.mode == Mode.EDIT) {
 				newBlobIdent = new BlobIdent(branch, getNewPath(), FileMode.REGULAR_FILE.getBits());
-			} else { 
+			} else {
 				// We've uploaded some files
 				newBlobIdent = null;
 			}
