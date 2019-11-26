@@ -6,11 +6,12 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.support.administration.BackupSetting;
-import io.onedev.server.model.support.administration.BuildSetting;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.administration.MailSetting;
-import io.onedev.server.model.support.administration.PullRequestSetting;
+import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
@@ -95,9 +96,9 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveSecuritySetting(SecuritySetting securitySetting);
 	
-	IssueSetting getIssueSetting();
+	GlobalIssueSetting getIssueSetting();
 	
-	void saveIssueSetting(IssueSetting issueSetting);
+	void saveIssueSetting(GlobalIssueSetting issueSetting);
 	
 	@Nullable
 	Authenticator getAuthenticator();
@@ -112,12 +113,16 @@ public interface SettingManager extends EntityManager<Setting> {
 	
 	void saveGroovyScripts(List<GroovyScript> jobScripts);
 	
-	PullRequestSetting getPullRequestSetting();
+	GlobalPullRequestSetting getPullRequestSetting();
 	
-	void savePullRequestSetting(PullRequestSetting pullRequestSetting);
+	void savePullRequestSetting(GlobalPullRequestSetting pullRequestSetting);
 	
-	BuildSetting getBuildSetting();
+	GlobalBuildSetting getBuildSetting();
 	
-	void saveBuildSetting(BuildSetting buildSetting);
+	void saveBuildSetting(GlobalBuildSetting buildSetting);
+	
+	GlobalProjectSetting getProjectSetting();
+	
+	void saveProjectSetting(GlobalProjectSetting projectSetting);
 	
 }

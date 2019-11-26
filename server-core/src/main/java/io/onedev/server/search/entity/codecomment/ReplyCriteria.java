@@ -7,6 +7,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.User;
@@ -27,13 +28,14 @@ public class ReplyCriteria extends EntityCriteria<CodeComment> {
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
 		From<?, ?> join = root.join(CodeCommentConstants.ATTR_REPLIES, JoinType.LEFT);
 		Path<String> attribute = join.get(CodeCommentReply.ATTR_CONTENT);
-		return builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
+		return builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%");
 	}
 
 	@Override
 	public boolean matches(CodeComment comment, User user) {
 		for (CodeCommentReply reply: comment.getReplies()) {
-			if (reply.getContent().toLowerCase().contains(value.toLowerCase()))
+			String content = reply.getContent();
+			if (WildcardUtils.matchString("*" + value.toLowerCase() + "*", content))
 				return true;
 		}
 		return false;

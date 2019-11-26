@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.PullRequestSetting;
+import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 
 public class ProjectPullRequestSetting implements Serializable {
 	
@@ -16,9 +16,9 @@ public class ProjectPullRequestSetting implements Serializable {
 	
 	private List<NamedPullRequestQuery> namedQueries;
 	
-	private transient PullRequestSetting setting;
+	private transient GlobalPullRequestSetting setting;
 	
-	private PullRequestSetting getSetting() {
+	private GlobalPullRequestSetting getGlobalSetting() {
 		if (setting == null)
 			setting = OneDev.getInstance(SettingManager.class).getPullRequestSetting();
 		return setting;
@@ -27,7 +27,7 @@ public class ProjectPullRequestSetting implements Serializable {
 	@Nullable
 	public List<NamedPullRequestQuery> getNamedQueries(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && namedQueries == null)
-			return new ArrayList<>(getSetting().getNamedQueries());
+			return new ArrayList<>(getGlobalSetting().getNamedQueries());
 		else
 			return namedQueries;
 	}

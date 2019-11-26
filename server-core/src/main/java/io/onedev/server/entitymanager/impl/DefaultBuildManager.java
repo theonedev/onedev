@@ -406,7 +406,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get("id")));
+			orders.add(builder.desc(root.get(BuildConstants.ATTR_ID)));
 		query.orderBy(orders);
 		
 		return query;

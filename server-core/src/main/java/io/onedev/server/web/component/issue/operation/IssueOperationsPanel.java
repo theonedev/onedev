@@ -40,7 +40,7 @@ import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueConstants;
@@ -91,7 +91,7 @@ public abstract class IssueOperationsPanel extends Panel {
 		
 		RepeatingView transitionsView = new RepeatingView("transitions");
 
-		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		List<TransitionSpec> transitions = getIssue().getProject().getIssueSetting().getTransitionSpecs(true);
 		for (TransitionSpec transition: transitions) {
 			if (transition.canTransite(getIssue()) && transition.getTrigger() instanceof PressButtonTrigger) {

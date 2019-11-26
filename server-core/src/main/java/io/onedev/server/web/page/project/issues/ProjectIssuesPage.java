@@ -14,7 +14,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.util.script.identity.SiteAdministrator;
@@ -39,7 +39,7 @@ public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIde
 		super(params);
 	}
 
-	protected IssueSetting getIssueSetting() {
+	protected GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();		
 	}
 	

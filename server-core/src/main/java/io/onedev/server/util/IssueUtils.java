@@ -19,7 +19,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 
@@ -49,7 +49,7 @@ public class IssueUtils {
 	@SuppressWarnings("unchecked")
 	public static Class<? extends Serializable> defineFieldBeanClass(Project project) {
 		String className = FIELD_BEAN_PREFIX + project.getId();
-		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		return (Class<? extends Serializable>) FieldSpec.defineClass(className, "Issue Fields", issueSetting.getFieldSpecs());
 	}
 	

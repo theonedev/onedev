@@ -27,7 +27,7 @@ import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Input;
@@ -48,7 +48,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 		super(id);
 	}
 
-	private IssueSetting getIssueSetting() {
+	private GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	

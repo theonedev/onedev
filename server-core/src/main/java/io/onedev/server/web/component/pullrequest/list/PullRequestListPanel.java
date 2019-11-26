@@ -219,17 +219,9 @@ public abstract class PullRequestListPanel extends Panel {
 		});
 		add(form);
 
-		if (getProject() != null) {
+		if (getProject() != null && SecurityUtils.canReadCode(getProject())) {
 			add(new BookmarkablePageLink<Void>("newRequest", NewPullRequestPage.class, 
-					NewPullRequestPage.paramsOf(getProject())) {
-	
-				@Override
-				protected void onConfigure() {
-					super.onConfigure();
-					setVisible(SecurityUtils.canReadCode(getProject()));
-				}
-				
-			});		
+					NewPullRequestPage.paramsOf(getProject())));		
 		} else {
 			add(new WebMarkupContainer("newRequest").setVisible(false));
 		}

@@ -14,7 +14,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.TransitionSpec;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
@@ -105,7 +105,7 @@ abstract class TransitionEditPanel extends Panel implements InputContext {
 		add(form);
 	}
 
-	private IssueSetting getIssueSetting() {
+	private GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	

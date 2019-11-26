@@ -15,7 +15,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.IssueConstants;
 
 public abstract class FieldCriteria extends IssueCriteria {
@@ -44,7 +44,7 @@ public abstract class FieldCriteria extends IssueCriteria {
 	@Override
 	public Collection<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
-		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		if (!IssueConstants.QUERY_FIELDS.contains(fieldName) 
 				&& issueSetting.getFieldSpec(fieldName) == null) {
 			undefinedFields.add(fieldName);

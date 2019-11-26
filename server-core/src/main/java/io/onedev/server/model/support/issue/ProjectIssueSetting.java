@@ -16,7 +16,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.BoardSpec;
 import io.onedev.server.issue.TransitionSpec;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
@@ -39,9 +39,9 @@ public class ProjectIssueSetting implements Serializable {
 
 	private List<NamedIssueQuery> namedQueries;
 	
-	private transient IssueSetting setting;
+	private transient GlobalIssueSetting setting;
 	
-	private IssueSetting getSetting() {
+	private GlobalIssueSetting getGlobalSetting() {
 		if (setting == null)
 			setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		return setting;
@@ -50,7 +50,7 @@ public class ProjectIssueSetting implements Serializable {
 	@Nullable
 	public List<TransitionSpec> getTransitionSpecs(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && transitionSpecs == null)
-			return new ArrayList<>(getSetting().getDefaultTransitionSpecs());
+			return new ArrayList<>(getGlobalSetting().getDefaultTransitionSpecs());
 		else
 			return transitionSpecs;
 	}
@@ -62,7 +62,7 @@ public class ProjectIssueSetting implements Serializable {
 	@Nullable
 	public Collection<String> getPromptFieldsUponIssueOpen(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && promptFieldsUponIssueOpen == null)
-			return new HashSet<>(getSetting().getDefaultPromptFieldsUponIssueOpen());
+			return new HashSet<>(getGlobalSetting().getDefaultPromptFieldsUponIssueOpen());
 		else
 			return promptFieldsUponIssueOpen;
 	}
@@ -74,7 +74,7 @@ public class ProjectIssueSetting implements Serializable {
 	@Nullable
 	public Collection<String> getListFields(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && listFields == null)
-			return new HashSet<>(getSetting().getListFields());
+			return new HashSet<>(getGlobalSetting().getListFields());
 		else
 			return listFields;
 	}
@@ -86,7 +86,7 @@ public class ProjectIssueSetting implements Serializable {
 	@Nullable
 	public List<BoardSpec> getBoardSpecs(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && boardSpecs == null)
-			return new ArrayList<>(getSetting().getDefaultBoardSpecs());
+			return new ArrayList<>(getGlobalSetting().getDefaultBoardSpecs());
 		else
 			return boardSpecs;
 	}
@@ -98,7 +98,7 @@ public class ProjectIssueSetting implements Serializable {
 	@Nullable
 	public List<NamedIssueQuery> getNamedQueries(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && namedQueries == null)
-			return new ArrayList<>(getSetting().getNamedQueries());
+			return new ArrayList<>(getGlobalSetting().getNamedQueries());
 		else
 			return namedQueries;
 	}
@@ -119,7 +119,7 @@ public class ProjectIssueSetting implements Serializable {
 	public void onRenameUser(String oldName, String newName) {
 		if (boardSpecs != null) {
 			for (BoardSpec board: boardSpecs)
-				board.onRenameUser(getSetting(), oldName, newName);
+				board.onRenameUser(getGlobalSetting(), oldName, newName);
 		}
 	}
 
@@ -136,7 +136,7 @@ public class ProjectIssueSetting implements Serializable {
 		Usage usage = new Usage();
 		if (boardSpecs != null) {
 			for (Iterator<BoardSpec> it = boardSpecs.iterator(); it.hasNext();) { 
-				Usage usageInBoard = it.next().onDeleteUser(getSetting(), userName);
+				Usage usageInBoard = it.next().onDeleteUser(getGlobalSetting(), userName);
 				if (usageInBoard != null)
 					usage.add(usageInBoard);
 				else
@@ -166,13 +166,13 @@ public class ProjectIssueSetting implements Serializable {
 		Set<String> undefinedFields = new HashSet<>();
 		if (listFields != null) {
 			for (String fieldName: listFields) {
-				if (getSetting().getFieldSpec(fieldName) == null)
+				if (getGlobalSetting().getFieldSpec(fieldName) == null)
 					undefinedFields.add(fieldName);
 			}
 		}
 		if (promptFieldsUponIssueOpen != null) {
 			for (String fieldName: promptFieldsUponIssueOpen) {
-				if (getSetting().getFieldSpec(fieldName) == null)
+				if (getGlobalSetting().getFieldSpec(fieldName) == null)
 					undefinedFields.add(fieldName);
 			}
 		}

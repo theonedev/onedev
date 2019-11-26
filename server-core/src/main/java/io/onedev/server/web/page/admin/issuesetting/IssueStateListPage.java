@@ -33,7 +33,7 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.StateSpec;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -81,7 +81,7 @@ public class IssueStateListPage extends IssueSettingPage {
 					}
 
 					@Override
-					protected IssueSetting getSetting() {
+					protected GlobalIssueSetting getSetting() {
 						return IssueStateListPage.this.getSetting();
 					}
 
@@ -262,7 +262,7 @@ public class IssueStateListPage extends IssueSettingPage {
 										}
 
 										@Override
-										protected IssueSetting getSetting() {
+										protected GlobalIssueSetting getSetting() {
 											return IssueStateListPage.this.getSetting();
 										}
 

@@ -53,7 +53,7 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
@@ -153,7 +153,7 @@ public abstract class IssueListPanel extends Panel {
 		return null;
 	}
 	
-	private IssueSetting getIssueSetting() {
+	private GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	

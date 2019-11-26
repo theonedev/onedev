@@ -50,7 +50,7 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Input;
@@ -202,7 +202,7 @@ public abstract class IssueSidePanel extends Panel {
 				if (SecurityUtils.canManageIssues(getProject())) {
 					setVisible(true);
 				} else {
-					IssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+					GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 					boolean hasEditableFields = false;
 					for (String fieldName: setting.getFieldNames()) {
 						if (SecurityUtils.canEditIssueField(getProject(), fieldName)) {

@@ -23,7 +23,7 @@ import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.ProjectBuildSetting;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.administration.BuildSetting;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.build.list.BuildListPanel;
@@ -80,7 +80,7 @@ public class ProjectBuildsPage extends ProjectPage {
 		return OneDev.getInstance(BuildQuerySettingManager.class);		
 	}
 	
-	protected BuildSetting getBuildSetting() {
+	protected GlobalBuildSetting getBuildSetting() {
 		return OneDev.getInstance(SettingManager.class).getBuildSetting();		
 	}
 	

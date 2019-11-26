@@ -30,9 +30,9 @@ public class RetryConditionEditSupport implements EditSupport {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-					        String refMatch = model.getObject();
-					        if (refMatch != null) {
-					        	return new Label(id, refMatch);
+					        String condition = model.getObject();
+					        if (condition != null) {
+					        	return new Label(id, condition);
 					        } else {
 								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 					        }

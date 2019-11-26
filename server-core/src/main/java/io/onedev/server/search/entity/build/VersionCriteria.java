@@ -5,6 +5,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -29,7 +30,8 @@ public class VersionCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return build.getVersion().toLowerCase().contains(value.toLowerCase());
+		String version = build.getVersion();
+		return version != null && WildcardUtils.matchString(value.toLowerCase(), version.toLowerCase());
 	}
 
 	@Override
@@ -39,7 +41,9 @@ public class VersionCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.quote(BuildConstants.FIELD_VERSION) + " " + BuildQuery.getRuleName(BuildQueryLexer.Is) + " " + BuildQuery.quote(value);
+		return BuildQuery.quote(BuildConstants.FIELD_VERSION) + " " 
+				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
+				+ BuildQuery.quote(value);
 	}
 
 }

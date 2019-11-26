@@ -20,7 +20,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.ChoiceField;
 import io.onedev.server.issue.fieldspec.FieldSpec;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -178,7 +178,7 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 		add(form);
 	}
 
-	protected abstract IssueSetting getSetting();
+	protected abstract GlobalIssueSetting getSetting();
 	
 	protected abstract void onSave(AjaxRequestTarget target);
 	

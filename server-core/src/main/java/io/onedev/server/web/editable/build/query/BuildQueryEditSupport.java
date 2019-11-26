@@ -34,9 +34,9 @@ public class BuildQueryEditSupport implements EditSupport {
 
 						@Override
 						protected Component newContent(String id, PropertyDescriptor propertyDescriptor) {
-					        String refMatch = model.getObject();
-					        if (refMatch != null) {
-					        	return new Label(id, refMatch);
+					        String query = model.getObject();
+					        if (query != null) {
+					        	return new Label(id, query);
 					        } else {
 								return new EmptyValueLabel(id, propertyDescriptor.getPropertyGetter());
 					        }

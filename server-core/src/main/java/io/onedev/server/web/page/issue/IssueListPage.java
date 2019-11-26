@@ -21,7 +21,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
@@ -75,7 +75,7 @@ public class IssueListPage extends LayoutPage {
 		super(params);
 	}
 	
-	protected IssueSetting getIssueSetting() {
+	protected GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();		
 	}
 	
@@ -200,7 +200,7 @@ public class IssueListPage extends LayoutPage {
 
 									@Override
 									protected void onSaveForAll(AjaxRequestTarget target, String name) {
-										IssueSetting issueSetting = getIssueSetting();
+										GlobalIssueSetting issueSetting = getIssueSetting();
 										NamedIssueQuery namedQuery = issueSetting.getNamedQuery(name);
 										if (namedQuery == null) {
 											namedQuery = new NamedIssueQuery(name, query);

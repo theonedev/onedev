@@ -1,10 +1,11 @@
 package io.onedev.server.util;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
+
+import io.onedev.commons.utils.Maps;
 
 public class PullRequestConstants {
 	
@@ -92,15 +93,12 @@ public class PullRequestConstants {
 			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, 
 			FIELD_CLOSE_DATE, FIELD_MERGE_STRATEGY, FIELD_COMMENT_COUNT);
 
-	public static final Map<String, String> ORDER_FIELDS = new LinkedHashMap<>();
-	
-	static {
-		ORDER_FIELDS.put(FIELD_SUBMIT_DATE, ATTR_SUBMIT_DATE);
-		ORDER_FIELDS.put(FIELD_UPDATE_DATE, ATTR_UPDATE_DATE);
-		ORDER_FIELDS.put(FIELD_CLOSE_DATE, ATTR_CLOSE_DATE);
-		ORDER_FIELDS.put(FIELD_NUMBER, ATTR_NUMBER);
-		ORDER_FIELDS.put(FIELD_STATUS, ATTR_CLOSE_STATUS);
-		ORDER_FIELDS.put(FIELD_COMMENT_COUNT, ATTR_COMMENT_COUNT);
-	}
+	public static final Map<String, String> ORDER_FIELDS = Maps.newLinkedHashMap(
+			FIELD_SUBMIT_DATE, ATTR_SUBMIT_DATE,
+			FIELD_UPDATE_DATE, ATTR_UPDATE_DATE,
+			FIELD_CLOSE_DATE, ATTR_CLOSE_DATE,
+			FIELD_NUMBER, ATTR_NUMBER,
+			FIELD_STATUS, ATTR_CLOSE_STATUS,
+			FIELD_COMMENT_COUNT, ATTR_COMMENT_COUNT);
 
 }

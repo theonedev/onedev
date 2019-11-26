@@ -23,7 +23,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequestQuerySetting;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.administration.PullRequestSetting;
+import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
@@ -82,7 +82,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 		return OneDev.getInstance(PullRequestQuerySettingManager.class);		
 	}
 	
-	protected PullRequestSetting getPullRequestSetting() {
+	protected GlobalPullRequestSetting getPullRequestSetting() {
 		return OneDev.getInstance(SettingManager.class).getPullRequestSetting();		
 	}
 	

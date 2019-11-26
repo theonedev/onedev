@@ -8,13 +8,13 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 
-public class PullRequestSetting implements Serializable {
+public class GlobalPullRequestSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	private List<NamedPullRequestQuery> namedQueries = new ArrayList<>();
 	
-	public PullRequestSetting() {
+	public GlobalPullRequestSetting() {
 		namedQueries.add(new NamedPullRequestQuery("Open", "open"));
 		namedQueries.add(new NamedPullRequestQuery("To be reviewed by me", "to be reviewed by me"));
 		namedQueries.add(new NamedPullRequestQuery("To be changed by me", "submitted by me and someone requested for changes"));

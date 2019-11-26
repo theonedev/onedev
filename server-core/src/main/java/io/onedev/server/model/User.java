@@ -35,6 +35,7 @@ import com.google.common.base.Preconditions;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.model.support.NamedBuildQuery;
+import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
@@ -112,6 +113,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     
 	@Lob
 	@Column(nullable=false, length=65535)
+	private ArrayList<NamedProjectQuery> userProjectQueries = new ArrayList<>();
+	
+	@Lob
+	@Column(nullable=false, length=65535)
 	private ArrayList<NamedIssueQuery> userIssueQueries = new ArrayList<>();
 
 	@Lob
@@ -145,6 +150,42 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
     private transient Collection<Group> groups;
     
+	public QuerySetting<NamedProjectQuery> getProjectQuerySetting() {
+		return new QuerySetting<NamedProjectQuery>() {
+
+			@Override
+			public Project getProject() {
+				return null;
+			}
+
+			@Override
+			public User getUser() {
+				return User.this;
+			}
+
+			@Override
+			public ArrayList<NamedProjectQuery> getUserQueries() {
+				return userProjectQueries;
+			}
+
+			@Override
+			public void setUserQueries(ArrayList<NamedProjectQuery> userQueries) {
+				userProjectQueries = userQueries;
+			}
+
+			@Override
+			public QueryWatchSupport<NamedProjectQuery> getQueryWatchSupport() {
+				return null;
+			}
+
+			@Override
+			public QuerySubscriptionSupport<NamedProjectQuery> getQuerySubscriptionSupport() {
+				return null;
+			}
+			
+		};
+	}
+	
 	public QuerySetting<NamedIssueQuery> getIssueQuerySetting() {
 		return new QuerySetting<NamedIssueQuery>() {
 

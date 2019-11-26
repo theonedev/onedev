@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.projectchoice;
+package io.onedev.server.web.editable.project.choice;
 
 import java.lang.reflect.Method;
 import java.util.List;

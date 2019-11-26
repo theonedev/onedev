@@ -54,7 +54,7 @@ import io.onedev.server.model.IssueQuerySetting;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -199,10 +199,11 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		if (project != null) {
 			predicates.add(builder.equal(root.get(IssueConstants.ATTR_PROJECT), project));
 		} else if (!User.asSubject(user).isPermitted(new SystemAdministration())) {
-			List<Predicate> projectPredicates = new ArrayList<>();
-			for (Project each: projectManager.getPermittedProjects(user, new AccessProject())) 
-				projectPredicates.add(builder.equal(root.get(IssueConstants.ATTR_PROJECT), each));
-			predicates.add(builder.or(projectPredicates.toArray(new Predicate[projectPredicates.size()])));
+			Collection<Project> projects = projectManager.getPermittedProjects(user, new AccessProject()); 
+			if (!projects.isEmpty())
+				predicates.add(root.get(IssueConstants.ATTR_PROJECT).in(projects));
+			else
+				predicates.add(builder.disjunction());
 		}
 		if (criteria != null)
 			predicates.add(criteria.getPredicate(root, builder, user));
@@ -235,13 +236,13 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get("number")));
+			orders.add(builder.desc(root.get(IssueConstants.ATTR_ID)));
 		query.orderBy(orders);
 		
 		return query;
 	}
 	
-	private IssueSetting getIssueSetting() {
+	private GlobalIssueSetting getIssueSetting() {
 		return settingManager.getIssueSetting();
 	}
 

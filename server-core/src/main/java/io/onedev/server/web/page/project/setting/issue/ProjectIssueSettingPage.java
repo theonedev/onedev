@@ -13,7 +13,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.tabbable.PageTab;
@@ -68,7 +68,7 @@ public abstract class ProjectIssueSettingPage extends ProjectSettingPage {
 		return getProject().getIssueSetting();
 	}
 	
-	protected IssueSetting getSetting() {
+	protected GlobalIssueSetting getSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	

@@ -1,4 +1,4 @@
-package io.onedev.server.web.editable.projectchoice;
+package io.onedev.server.web.editable.project.choice;
 
 import java.io.Serializable;
 import java.util.ArrayList;

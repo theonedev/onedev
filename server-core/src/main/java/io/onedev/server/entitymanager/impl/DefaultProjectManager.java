@@ -4,16 +4,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.shiro.authz.Permission;
@@ -25,6 +31,7 @@ import org.eclipse.jgit.lib.ConfigConstants;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.lib.StoredConfig;
+import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
@@ -60,11 +67,18 @@ import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.search.entity.EntitySort;
+import io.onedev.server.search.entity.EntitySort.Direction;
+import io.onedev.server.search.entity.project.ProjectQuery;
+import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.SystemAdministration;
+import io.onedev.server.util.ProjectConstants;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
@@ -139,6 +153,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     	return repository;
     }
     
+    @Transactional
     @Override
     public void save(Project project) {
     	save(project, null);
@@ -197,6 +212,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		}
     }
     
+    @Sessional
     @Override
     public Project find(String projectName) {
 		EntityCriteria<Project> criteria = newCriteria();
@@ -294,6 +310,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		}
 	}
 
+	@Transactional
 	@Listen
 	public void on(SystemStarted event) {
 		logger.info("Checking projects...");
@@ -413,6 +430,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		return count(true);
 	}
 	
+	@Sessional
 	@Override
 	public Collection<Project> getPermittedProjects(@Nullable User user, Permission permission) {
 		Collection<Project> projects = new HashSet<>();
@@ -442,6 +460,69 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		}
 		
 		return projects;
+	}
+
+	private CriteriaQuery<Project> buildCriteriaQuery(Session session, EntityQuery<Project> projectQuery, 
+			@Nullable User user) {
+		CriteriaBuilder builder = session.getCriteriaBuilder();
+		CriteriaQuery<Project> query = builder.createQuery(Project.class);
+		Root<Project> root = query.from(Project.class);
+		query.select(root).distinct(true);
+		
+		query.where(getPredicates(projectQuery.getCriteria(), root, builder, user));
+
+		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		for (EntitySort sort: projectQuery.getSorts()) {
+			if (sort.getDirection() == Direction.ASCENDING)
+				orders.add(builder.asc(ProjectQuery.getPath(root, ProjectConstants.ORDER_FIELDS.get(sort.getField()))));
+			else
+				orders.add(builder.desc(ProjectQuery.getPath(root, ProjectConstants.ORDER_FIELDS.get(sort.getField()))));
+		}
+
+		if (orders.isEmpty())
+			orders.add(builder.desc(root.get(ProjectConstants.ATTR_NAME)));
+		query.orderBy(orders);
+		
+		return query;
+	}
+	
+	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Project> criteria, 
+			Root<Project> root, CriteriaBuilder builder, @Nullable User user) {
+		List<Predicate> predicates = new ArrayList<>();
+		if (!User.asSubject(user).isPermitted(new SystemAdministration())) {
+			Collection<Long> projectIds = getPermittedProjects(user, new AccessProject())
+					.stream().map(it->it.getId()).collect(Collectors.toSet());
+			if (!projectIds.isEmpty())
+				predicates.add(root.get(ProjectConstants.ATTR_ID).in(projectIds));
+			else
+				predicates.add(builder.disjunction());
+		}
+		if (criteria != null)
+			predicates.add(criteria.getPredicate(root, builder, user));
+		return predicates.toArray(new Predicate[0]);
+	}
+	
+	@Sessional
+	@Override
+	public List<Project> query(User user, EntityQuery<Project> projectQuery, int firstResult, int maxResults) {
+		CriteriaQuery<Project> criteriaQuery = buildCriteriaQuery(getSession(), projectQuery, user);
+		Query<Project> query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(firstResult);
+		query.setMaxResults(maxResults);
+		return query.getResultList();
+	}
+
+	@Sessional
+	@Override
+	public int count(User user, io.onedev.server.search.entity.EntityCriteria<Project> projectCriteria) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+		Root<Project> root = criteriaQuery.from(Project.class);
+
+		criteriaQuery.where(getPredicates(projectCriteria, root, builder, user));
+
+		criteriaQuery.select(builder.count(root));
+		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 
 }

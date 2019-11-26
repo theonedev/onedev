@@ -42,7 +42,9 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public String toString() {
-		return CodeCommentQuery.quote(CodeCommentConstants.FIELD_PATH) + " " + CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Is) + " " + CodeCommentQuery.quote(value);
+		return CodeCommentQuery.quote(CodeCommentConstants.FIELD_PATH) + " " 
+				+ CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Is) + " " 
+				+ CodeCommentQuery.quote(value);
 	}
 
 }

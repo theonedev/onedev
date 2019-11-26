@@ -36,7 +36,7 @@ import io.onedev.server.issue.fieldspec.UserChoiceField;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
@@ -142,8 +142,6 @@ public class IssueQuery extends EntityQuery<Issue> {
 							checkField(fieldName, operator);
 						if (fieldName.equals(IssueConstants.FIELD_MILESTONE))
 							return new MilestoneCriteria(null);
-						else if (fieldName.equals(IssueConstants.FIELD_DESCRIPTION))
-							return new DescriptionCriteria(null);
 						else
 							return new FieldOperatorCriteria(fieldName, operator);
 					}
@@ -201,7 +199,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(IssueConstants.FIELD_COMMENT)) {
 								return new CommentCriteria(value);
 							} else {
-								FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
+								FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 								if (fieldSpec instanceof TextField) {
 									return new StringFieldCriteria(fieldName, value, operator);
 								} else {
@@ -225,7 +223,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(IssueConstants.FIELD_NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
-								FieldSpec field = getIssueSetting().getFieldSpec(fieldName);
+								FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 								if (field instanceof IssueChoiceField) {
 									return new IssueFieldCriteria(fieldName, project, value);
 								} else if (field instanceof BuildChoiceField) {
@@ -255,7 +253,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(IssueConstants.FIELD_NUMBER)) {
 								return new NumberCriteria(getIntValue(value), operator);
 							} else {
-								FieldSpec field = getIssueSetting().getFieldSpec(fieldName);
+								FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 								if (field instanceof NumberField) {
 									return new NumericFieldCriteria(fieldName, getIntValue(value), operator);
 								} else {
@@ -302,7 +300,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
 				if (validate && !IssueConstants.ORDER_FIELDS.containsKey(fieldName)) {
-					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
+					FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 					if (!(fieldSpec instanceof ChoiceField) && !(fieldSpec instanceof DateField) 
 							&& !(fieldSpec instanceof NumberField)) {
 						throw new OneException("Can not order by field: " + fieldName);
@@ -324,7 +322,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 		}
 	}
 	
-	private static IssueSetting getIssueSetting() {
+	private static GlobalIssueSetting getGlobalIssueSetting() {
 		if (WicketUtils.getPage() instanceof IssueSettingPage) 
 			return ((IssueSettingPage)WicketUtils.getPage()).getSetting();
 		else
@@ -336,13 +334,12 @@ public class IssueQuery extends EntityQuery<Issue> {
 	}
 	
 	public static void checkField(String fieldName, int operator) {
-		FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
+		FieldSpec fieldSpec = getGlobalIssueSetting().getFieldSpec(fieldName);
 		if (fieldSpec == null && !IssueConstants.QUERY_FIELDS.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case IssueQueryLexer.IsEmpty:
 			if (IssueConstants.QUERY_FIELDS.contains(fieldName) 
-					&& !fieldName.equals(IssueConstants.FIELD_DESCRIPTION) 
 					&& !fieldName.equals(IssueConstants.FIELD_MILESTONE)) { 
 				throw newOperatorException(fieldName, operator);
 			}
@@ -421,21 +418,6 @@ public class IssueQuery extends EntityQuery<Issue> {
 		return AntlrUtils.getLexerRule(IssueQueryLexer.ruleNames, operatorName);
 	}
 	
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		if (criteria != null) 
-			builder.append(criteria.toString()).append(" ");
-		else
-			builder.append("all");
-		if (!sorts.isEmpty()) {
-			builder.append("order by ");
-			for (EntitySort sort: sorts)
-				builder.append(sort.toString()).append(" ");
-		}
-		return builder.toString().trim();
-	}
-	
 	public Collection<String> getUndefinedStates() {
 		if (criteria != null) 
 			return criteria.getUndefinedStates();
@@ -458,7 +440,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 			undefinedFields.addAll(criteria.getUndefinedFields());
 		for (EntitySort sort: sorts) {
 			if (!IssueConstants.QUERY_FIELDS.contains(sort.getField()) 
-					&& getIssueSetting().getFieldSpec(sort.getField()) == null) {
+					&& getGlobalIssueSetting().getFieldSpec(sort.getField()) == null) {
 				undefinedFields.add(sort.getField());
 			}
 		}

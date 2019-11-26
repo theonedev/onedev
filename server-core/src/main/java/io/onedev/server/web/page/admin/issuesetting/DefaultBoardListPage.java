@@ -33,7 +33,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.BoardSpec;
 import io.onedev.server.issue.fieldspec.FieldSpec;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
@@ -131,7 +131,7 @@ public class DefaultBoardListPage extends IssueSettingPage {
 				List<String> columnsForDisplay = new ArrayList<>();
 				for (String column: rowModel.getObject().getColumns()) {
 					if (column == null) {
-						IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+						GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 						FieldSpec field = issueSetting.getFieldSpec(board.getIdentifyField());
 						if (field != null)
 							columnsForDisplay.add("<i>" + HtmlEscape.escapeHtml5(field.getNameOfEmptyValue()) + "</i>");

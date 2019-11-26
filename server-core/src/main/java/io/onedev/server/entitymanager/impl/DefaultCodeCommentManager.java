@@ -268,7 +268,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get("id")));
+			orders.add(builder.desc(root.get(CodeCommentConstants.ATTR_ID)));
 		query.orderBy(orders);
 		
 		return query;

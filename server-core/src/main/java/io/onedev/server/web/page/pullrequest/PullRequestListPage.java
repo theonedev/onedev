@@ -21,7 +21,7 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.administration.PullRequestSetting;
+import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.util.SecurityUtils;
@@ -76,7 +76,7 @@ public class PullRequestListPage extends LayoutPage {
 		super(params);
 	}
 	
-	protected PullRequestSetting getPullRequestSetting() {
+	protected GlobalPullRequestSetting getPullRequestSetting() {
 		return OneDev.getInstance(SettingManager.class).getPullRequestSetting();		
 	}
 
@@ -192,7 +192,7 @@ public class PullRequestListPage extends LayoutPage {
 
 									@Override
 									protected void onSaveForAll(AjaxRequestTarget target, String name) {
-										PullRequestSetting pullRequestSetting = getPullRequestSetting();
+										GlobalPullRequestSetting pullRequestSetting = getPullRequestSetting();
 										NamedPullRequestQuery namedQuery = pullRequestSetting.getNamedQuery(name);
 										if (namedQuery == null) {
 											namedQuery = new NamedPullRequestQuery(name, query);

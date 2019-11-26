@@ -1,15 +1,30 @@
-@media(max-width: 991px) {
-	table.project-list th.expanded, table.project-list td.expanded {
+@media(max-width: 767px) {
+	.project-list .expanded {
 		display: none;
-	} 
+	}
 }
-table.project-list td:not(.project) a {
-	color: #444;
+.project-list>.head {
+	position: relative;
 }
-table.project-list td.project, table.project-list td.author {
-	white-space: nowrap;
-} 
-table.project-list td.commit-date {
-	color: #888;
+.project-list>.head>* {
+	margin-bottom: 20px;
+}
+.project-list>.head>form.can-create-projects {
+	margin-right: 130px;
+}
+.project-list>.head>.add-new {
+	position: absolute;
+	right: 0;
+	top: 0;
 }
 
+.project-list>.head>.others:empty {
+	margin-bottom: 0;
+}
+.project-list>.head>.others>* {
+	margin-right: 16px;
+	color: #666;
+}
+.project-list>.head>.others>*:last-child {
+	margin-right: 0;
+}

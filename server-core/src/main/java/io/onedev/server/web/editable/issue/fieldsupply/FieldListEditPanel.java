@@ -36,7 +36,7 @@ import io.onedev.server.issue.fieldsupply.ScriptingValue;
 import io.onedev.server.issue.fieldsupply.SpecifiedValue;
 import io.onedev.server.issue.fieldsupply.ValueProvider;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyContext;
@@ -83,7 +83,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 		return fieldSpecs;
 	}
 	
-	private IssueSetting getIssueSetting() {
+	private GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	

@@ -10,7 +10,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.StateSpec;
 import io.onedev.server.model.Milestone;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.web.component.milestone.progress.MilestoneProgressBar;
 
@@ -31,7 +31,7 @@ class IssueStatsPanel extends GenericPanel<Milestone> {
 		
 		add(new MilestoneProgressBar("progress", getModel()));
 		
-		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();		
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();		
 		IssueCriteria openCriteria = issueSetting.getCategoryCriteria(StateSpec.Category.OPEN);
 		Link<Void> link = new BookmarkablePageLink<Void>("open", MilestoneDetailPage.class, 
 				MilestoneDetailPage.paramsOf(getMilestone(), openCriteria.toString()));

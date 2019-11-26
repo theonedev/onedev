@@ -23,7 +23,7 @@ import io.onedev.server.issue.fieldsupply.FieldSupply;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.util.script.identity.JobIdentity;
@@ -112,7 +112,7 @@ public class CreateIssueAction extends PostBuildAction {
 							issue.setTitle(build.interpolate(getIssueTitle()));
 							issue.setSubmitDate(new Date());
 							SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-							IssueSetting issueSetting = settingManager.getIssueSetting();
+							GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
 							issue.setState(issueSetting.getInitialStateSpec().getName());
 							
 							issue.setDescription(getIssueDescription());
@@ -142,7 +142,7 @@ public class CreateIssueAction extends PostBuildAction {
 	public void validateWithContext(CISpec ciSpec, Job job) {
 		super.validateWithContext(ciSpec, job);
 		
-		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		try {
 			FieldSupply.validateFields(issueSetting.getFieldSpecMap(getFieldNames()), issueFields);
 		} catch (ValidationException e) {

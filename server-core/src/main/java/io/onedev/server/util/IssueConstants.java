@@ -1,12 +1,13 @@
 package io.onedev.server.util;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+
+import io.onedev.commons.utils.Maps;
 
 public class IssueConstants {
 	
@@ -60,6 +61,8 @@ public class IssueConstants {
 	
 	public static final String ATTR_FIELDS = "fields";
 		
+	public static final String ATTR_ID = "id";
+	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
 			FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_SUBMITTER, FIELD_DESCRIPTION, 
 			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, 
@@ -70,14 +73,11 @@ public class IssueConstants {
 			FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, FIELD_COMMENT_COUNT, 
 			FIELD_MILESTONE);
 
-	public static final Map<String, String> ORDER_FIELDS = new LinkedHashMap<>();
-	
-	static {
-		ORDER_FIELDS.put(FIELD_VOTE_COUNT, ATTR_VOTE_COUNT);
-		ORDER_FIELDS.put(FIELD_COMMENT_COUNT, ATTR_COMMENT_COUNT);
-		ORDER_FIELDS.put(FIELD_NUMBER, ATTR_NUMBER);
-		ORDER_FIELDS.put(FIELD_SUBMIT_DATE, ATTR_SUBMIT_DATE);
-		ORDER_FIELDS.put(FIELD_UPDATE_DATE, ATTR_UPDATE_DATE);		
-	}
+	public static final Map<String, String> ORDER_FIELDS = Maps.newLinkedHashMap(
+			FIELD_VOTE_COUNT, ATTR_VOTE_COUNT,
+			FIELD_COMMENT_COUNT, ATTR_COMMENT_COUNT,
+			FIELD_NUMBER, ATTR_NUMBER,
+			FIELD_SUBMIT_DATE, ATTR_SUBMIT_DATE,
+			FIELD_UPDATE_DATE, ATTR_UPDATE_DATE);		
 	
 }

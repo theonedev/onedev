@@ -16,6 +16,7 @@ import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.MilestoneManager;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.AbstractEntity;
@@ -62,6 +63,13 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (user == null)
 			throw new OneException("Unable to find user with login: " + loginName);
 		return user;
+	}
+	
+	public static Project getProject(String projectName) {
+		Project project = OneDev.getInstance(ProjectManager.class).find(projectName);
+		if (project == null)
+			throw new OneException("Unable to find project with name: " + projectName);
+		return project;
 	}
 	
 	public static boolean getBooleanValue(String value) {

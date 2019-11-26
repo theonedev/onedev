@@ -8,13 +8,13 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.model.support.NamedBuildQuery;
 
-public class BuildSetting implements Serializable {
+public class GlobalBuildSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
 	private List<NamedBuildQuery> namedQueries = new ArrayList<>();
 	
-	public BuildSetting() {
+	public GlobalBuildSetting() {
 		namedQueries.add(new NamedBuildQuery("All", "all"));
 		namedQueries.add(new NamedBuildQuery("Successful", "successful"));
 		namedQueries.add(new NamedBuildQuery("Failed", "failed"));

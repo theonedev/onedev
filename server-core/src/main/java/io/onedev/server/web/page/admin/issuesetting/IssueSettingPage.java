@@ -10,7 +10,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
@@ -19,7 +19,7 @@ import io.onedev.server.web.page.admin.AdministrationPage;
 @SuppressWarnings("serial")
 public class IssueSettingPage extends AdministrationPage {
 
-	private final IssueSetting setting;
+	private final GlobalIssueSetting setting;
 	
 	public IssueSettingPage(PageParameters params) {
 		super(params);
@@ -37,7 +37,7 @@ public class IssueSettingPage extends AdministrationPage {
 		add(new Tabbable("issueSettingTabs", tabs));
 	}
 
-	public IssueSetting getSetting() {
+	public GlobalIssueSetting getSetting() {
 		return setting;
 	}
 	

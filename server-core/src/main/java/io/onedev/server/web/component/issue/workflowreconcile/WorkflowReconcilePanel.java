@@ -25,7 +25,7 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.ajaxlistener.ChangeTextListener;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
@@ -360,7 +360,7 @@ public abstract class WorkflowReconcilePanel extends Panel {
 				getIssueManager().fixFieldValueOrders();
 				
 				SettingManager settingManager = OneDev.getInstance(SettingManager.class);
-				IssueSetting issueSetting = settingManager.getIssueSetting();
+				GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
 				issueSetting.setReconciled(true);
 				settingManager.saveIssueSetting(issueSetting);
 				

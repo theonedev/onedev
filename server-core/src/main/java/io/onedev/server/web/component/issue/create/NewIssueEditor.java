@@ -26,7 +26,7 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
@@ -148,7 +148,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 		throw new UnsupportedOperationException();
 	}
 
-	private IssueSetting getIssueSetting() {
+	private GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	

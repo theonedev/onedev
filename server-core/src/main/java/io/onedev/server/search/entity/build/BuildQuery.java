@@ -310,4 +310,5 @@ public class BuildQuery extends EntityQuery<Build> {
 		else
 			return new BuildQuery(null, sorts);
 	}
+	
 }

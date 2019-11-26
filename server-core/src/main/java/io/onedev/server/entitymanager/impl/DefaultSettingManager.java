@@ -15,11 +15,12 @@ import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.BackupSetting;
-import io.onedev.server.model.support.administration.BuildSetting;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.model.support.administration.GroovyScript;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalProjectSetting;
 import io.onedev.server.model.support.administration.MailSetting;
-import io.onedev.server.model.support.administration.PullRequestSetting;
+import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
@@ -54,6 +55,8 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	private volatile Long pullRequestSettingId;
 	
 	private volatile Long buildSettingId;
+	
+	private volatile Long projectSettingId;
 	
 	@Inject
 	public DefaultSettingManager(Dao dao, DataManager dataManager) {
@@ -166,7 +169,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 
 	@Transactional
 	@Override
-	public void saveIssueSetting(IssueSetting issueSetting) {
+	public void saveIssueSetting(GlobalIssueSetting issueSetting) {
 		Setting setting = getSetting(Key.ISSUE);
 		if (setting == null) {
 			setting = new Setting();
@@ -178,7 +181,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	
 	@Sessional
 	@Override
-	public IssueSetting getIssueSetting() {
+	public GlobalIssueSetting getIssueSetting() {
         Setting setting;
         if (issueSettingId == null) {
     		setting = getSetting(Key.ISSUE);
@@ -187,7 +190,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
         } else {
             setting = load(issueSettingId);
         }
-        return (IssueSetting) setting.getValue();
+        return (GlobalIssueSetting) setting.getValue();
 	}
 
 	@Transactional
@@ -284,7 +287,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	
 	@Sessional
 	@Override
-	public PullRequestSetting getPullRequestSetting() {
+	public GlobalPullRequestSetting getPullRequestSetting() {
         Setting setting;
         if (pullRequestSettingId == null) {
     		setting = getSetting(Key.PULL_REQUEST);
@@ -293,12 +296,12 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
         } else {
             setting = load(pullRequestSettingId);
         }
-        return (PullRequestSetting)setting.getValue();
+        return (GlobalPullRequestSetting)setting.getValue();
 	}
 
 	@Transactional
 	@Override
-	public void savePullRequestSetting(PullRequestSetting pullRequestSetting) {
+	public void savePullRequestSetting(GlobalPullRequestSetting pullRequestSetting) {
 		Setting setting = getSetting(Key.PULL_REQUEST);
 		if (setting == null) {
 			setting = new Setting();
@@ -310,7 +313,7 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 	
 	@Sessional
 	@Override
-	public BuildSetting getBuildSetting() {
+	public GlobalBuildSetting getBuildSetting() {
         Setting setting;
         if (buildSettingId == null) {
     		setting = getSetting(Key.BUILD);
@@ -319,18 +322,44 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
         } else {
             setting = load(buildSettingId);
         }
-        return (BuildSetting)setting.getValue();
+        return (GlobalBuildSetting)setting.getValue();
 	}
 
 	@Transactional
 	@Override
-	public void saveBuildSetting(BuildSetting buildSetting) {
+	public void saveBuildSetting(GlobalBuildSetting buildSetting) {
 		Setting setting = getSetting(Key.BUILD);
 		if (setting == null) {
 			setting = new Setting();
 			setting.setKey(Key.BUILD);
 		}
 		setting.setValue(buildSetting);
+		dao.persist(setting);
+	}
+	
+	@Sessional
+	@Override
+	public GlobalProjectSetting getProjectSetting() {
+        Setting setting;
+        if (projectSettingId == null) {
+    		setting = getSetting(Key.PROJECT);
+    		Preconditions.checkNotNull(setting);
+    		projectSettingId = setting.getId();
+        } else {
+            setting = load(projectSettingId);
+        }
+        return (GlobalProjectSetting)setting.getValue();
+	}
+
+	@Transactional
+	@Override
+	public void saveProjectSetting(GlobalProjectSetting projectSetting) {
+		Setting setting = getSetting(Key.PROJECT);
+		if (setting == null) {
+			setting = new Setting();
+			setting.setKey(Key.PROJECT);
+		}
+		setting.setValue(projectSetting);
 		dao.persist(setting);
 	}
 	

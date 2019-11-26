@@ -958,10 +958,11 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		if (targetProject != null) {
 			predicates.add(builder.equal(root.get("targetProject"), targetProject));
 		} else if (!User.asSubject(user).isPermitted(new SystemAdministration())) {
-			List<Predicate> targetProjectPredicates = new ArrayList<>();
-			for (Project each: projectManager.getPermittedProjects(user, new ReadCode())) 
-				targetProjectPredicates.add(builder.equal(root.get(PullRequestConstants.ATTR_TARGET_PROJECT), each));
-			predicates.add(builder.or(targetProjectPredicates.toArray(new Predicate[targetProjectPredicates.size()])));
+			Collection<Project> projects = projectManager.getPermittedProjects(user, new ReadCode()); 
+			if (!projects.isEmpty())
+				predicates.add(root.get(PullRequestConstants.ATTR_TARGET_PROJECT).in(projects));
+			else
+				predicates.add(builder.disjunction());
 		}
 		
 		if (criteria != null)
@@ -980,14 +981,17 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: requestQuery.getSorts()) {
-			if (sort.getDirection() == Direction.ASCENDING)
-				orders.add(builder.asc(PullRequestQuery.getPath(root, PullRequestConstants.ORDER_FIELDS.get(sort.getField()))));
-			else
-				orders.add(builder.desc(PullRequestQuery.getPath(root, PullRequestConstants.ORDER_FIELDS.get(sort.getField()))));
+			if (sort.getDirection() == Direction.ASCENDING) {
+				orders.add(builder.asc(PullRequestQuery.getPath(
+						root, PullRequestConstants.ORDER_FIELDS.get(sort.getField()))));
+			} else {
+				orders.add(builder.desc(PullRequestQuery.getPath(
+						root, PullRequestConstants.ORDER_FIELDS.get(sort.getField()))));
+			}
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get("number")));
+			orders.add(builder.desc(root.get(PullRequestConstants.ATTR_ID)));
 		query.orderBy(orders);
 		
 		return query;

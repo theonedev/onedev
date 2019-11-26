@@ -24,7 +24,7 @@ import io.onedev.server.issue.transitionprerequisite.ValueMatcher;
 import io.onedev.server.issue.transitiontrigger.TransitionTrigger;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.ValueSetEdit;
@@ -191,7 +191,7 @@ public class TransitionSpec implements Serializable {
 
 	public Collection<String> getUndefinedFields(Project project) {
 		Collection<String> undefinedFields = new HashSet<>();
-		IssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		if (getPrerequisite() != null && setting.getFieldSpec(getPrerequisite().getInputName()) == null)
 			undefinedFields.add(getPrerequisite().getInputName());
 		undefinedFields.addAll(getTrigger().getUndefinedFields());
@@ -286,7 +286,7 @@ public class TransitionSpec implements Serializable {
 		return false;
 	}
 	
-	private static IssueSetting getIssueSetting() {
+	private static GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 

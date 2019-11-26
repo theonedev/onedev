@@ -24,7 +24,7 @@ import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.issue.fieldspec.GroupChoiceField;
 import io.onedev.server.issue.fieldspec.UserChoiceField;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.Usage;
@@ -175,7 +175,7 @@ public class BoardSpec implements Serializable {
 		return choices;
 	}
 	
-	private static IssueSetting getIssueSetting() {
+	private static GlobalIssueSetting getIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
@@ -309,7 +309,7 @@ public class BoardSpec implements Serializable {
 		return BoardSpec.class.getName() + ":" + projectId;
 	}
 
-	public void onRenameUser(IssueSetting issueSetting, String oldName, String newName) {
+	public void onRenameUser(GlobalIssueSetting issueSetting, String oldName, String newName) {
 		FieldSpec fieldSpec = issueSetting.getFieldSpec(getIdentifyField());
 		if (fieldSpec instanceof UserChoiceField) {
 			for (int i=0; i<getColumns().size(); i++) {
@@ -320,7 +320,7 @@ public class BoardSpec implements Serializable {
 	}
 
 	@Nullable
-	public Usage onDeleteUser(IssueSetting issueSetting, String userName) {
+	public Usage onDeleteUser(GlobalIssueSetting issueSetting, String userName) {
 		FieldSpec fieldSpec = issueSetting.getFieldSpec(getIdentifyField());
 		if (fieldSpec instanceof UserChoiceField) {
 			for (Iterator<String> it = getColumns().iterator(); it.hasNext();) {
@@ -334,7 +334,7 @@ public class BoardSpec implements Serializable {
 			return new Usage();
 	}
 	
-	public void onRenameField(IssueSetting issueSetting, String oldName, String newName) {
+	public void onRenameField(GlobalIssueSetting issueSetting, String oldName, String newName) {
 		if (getIdentifyField().equals(oldName))
 			setIdentifyField(newName);
 		int index = getDisplayFields().indexOf(oldName);
@@ -396,7 +396,7 @@ public class BoardSpec implements Serializable {
 		
 	}
 	
-	public boolean onDeleteField(IssueSetting issueSetting, String fieldName) {
+	public boolean onDeleteField(GlobalIssueSetting issueSetting, String fieldName) {
 		getDisplayFields().remove(fieldName);
 		if (getBaseQuery() != null) {
 			try {

@@ -43,7 +43,7 @@ import io.onedev.server.util.inputspec.showcondition.ValueIsOneOf;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
-public class IssueSetting implements Serializable {
+public class GlobalIssueSetting implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -63,7 +63,7 @@ public class IssueSetting implements Serializable {
 	
 	private boolean reconciled = true;
 	
-	public IssueSetting() {
+	public GlobalIssueSetting() {
 		ChoiceField type = new ChoiceField();
 		type.setName("Type");
 		SpecifiedChoices specifiedChoices = new SpecifiedChoices();

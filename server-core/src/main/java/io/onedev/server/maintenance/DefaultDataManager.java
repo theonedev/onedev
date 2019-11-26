@@ -41,10 +41,11 @@ import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.BackupSetting;
-import io.onedev.server.model.support.administration.BuildSetting;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.model.support.administration.GlobalProjectSetting;
+import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.administration.MailSetting;
-import io.onedev.server.model.support.administration.PullRequestSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
@@ -197,7 +198,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		} 
 		setting = settingManager.getSetting(Key.ISSUE);
 		if (setting == null) {
-			settingManager.saveIssueSetting(new IssueSetting());
+			settingManager.saveIssueSetting(new GlobalIssueSetting());
 		} 
 		setting = settingManager.getSetting(Key.AUTHENTICATOR);
 		if (setting == null) {
@@ -213,11 +214,15 @@ public class DefaultDataManager implements DataManager, Serializable {
 		}
 		setting = settingManager.getSetting(Key.PULL_REQUEST);
 		if (setting == null) {
-			settingManager.savePullRequestSetting(new PullRequestSetting());
+			settingManager.savePullRequestSetting(new GlobalPullRequestSetting());
 		}
 		setting = settingManager.getSetting(Key.BUILD);
 		if (setting == null) {
-			settingManager.saveBuildSetting(new BuildSetting());
+			settingManager.saveBuildSetting(new GlobalBuildSetting());
+		}
+		setting = settingManager.getSetting(Key.PROJECT);
+		if (setting == null) {
+			settingManager.saveProjectSetting(new GlobalProjectSetting());
 		}
 		
 		setting = settingManager.getSetting(Key.MAIL);

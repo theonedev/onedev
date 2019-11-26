@@ -54,7 +54,7 @@ import io.onedev.server.issue.fieldspec.PullRequestChoiceField;
 import io.onedev.server.issue.fieldspec.TextField;
 import io.onedev.server.issue.fieldspec.UserChoiceField;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.support.administration.IssueSetting;
+import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQueryParser;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.DateUtils;
@@ -87,7 +87,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 	@Override
 	protected List<InputSuggestion> suggest(TerminalExpect terminalExpect) {
-		IssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
 		
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();

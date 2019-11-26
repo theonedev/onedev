@@ -10,7 +10,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.model.support.administration.BuildSetting;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.web.editable.annotation.BuildQuery;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -21,7 +21,7 @@ public class ProjectBuildSetting implements Serializable {
 
 	private List<NamedBuildQuery> namedQueries;
 	
-	private transient BuildSetting setting;
+	private transient GlobalBuildSetting setting;
 	
 	private String buildsToPreserve = "all";
 	
@@ -37,7 +37,7 @@ public class ProjectBuildSetting implements Serializable {
 		this.buildsToPreserve = buildsToPreserve;
 	}
 	
-	private BuildSetting getSetting() {
+	private GlobalBuildSetting getGlobalSetting() {
 		if (setting == null)
 			setting = OneDev.getInstance(SettingManager.class).getBuildSetting();
 		return setting;
@@ -46,7 +46,7 @@ public class ProjectBuildSetting implements Serializable {
 	@Nullable
 	public List<NamedBuildQuery> getNamedQueries(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && namedQueries == null)
-			return new ArrayList<>(getSetting().getNamedQueries());
+			return new ArrayList<>(getGlobalSetting().getNamedQueries());
 		else
 			return namedQueries;
 	}

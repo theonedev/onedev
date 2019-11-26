@@ -20,7 +20,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.model.support.administration.BuildSetting;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.build.list.BuildListPanel;
@@ -78,7 +78,7 @@ public class BuildListPage extends LayoutPage {
 		expectedCount = params.get(PARAM_EXPECTED_COUNT).toOptionalInteger();
 	}
 
-	protected BuildSetting getBuildSetting() {
+	protected GlobalBuildSetting getBuildSetting() {
 		return OneDev.getInstance(SettingManager.class).getBuildSetting();		
 	}
 	
@@ -199,7 +199,7 @@ public class BuildListPage extends LayoutPage {
 
 									@Override
 									protected void onSaveForAll(AjaxRequestTarget target, String name) {
-										BuildSetting buildSetting = getBuildSetting();
+										GlobalBuildSetting buildSetting = getBuildSetting();
 										NamedBuildQuery namedQuery = buildSetting.getNamedQuery(name);
 										if (namedQuery == null) {
 											namedQuery = new NamedBuildQuery(name, query);
