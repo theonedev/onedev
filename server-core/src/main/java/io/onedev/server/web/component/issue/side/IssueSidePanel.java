@@ -50,6 +50,7 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
+import io.onedev.server.model.support.administration.IssueSetting;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Input;
@@ -198,8 +199,22 @@ public abstract class IssueSidePanel extends Panel {
 				super.onConfigure();
 				User user = SecurityUtils.getUser();
 				String initialState = OneDev.getInstance(SettingManager.class).getIssueSetting().getInitialStateSpec().getName();
-				setVisible(SecurityUtils.canWriteCode(getIssue().getProject())
-						|| user != null && user.equals(getIssue().getSubmitter()) && getIssue().getState().equals(initialState));
+				if (SecurityUtils.canManageIssues(getProject())) {
+					setVisible(true);
+				} else {
+					IssueSetting setting = OneDev.getInstance(SettingManager.class).getIssueSetting();
+					boolean hasEditableFields = false;
+					for (String fieldName: setting.getFieldNames()) {
+						if (SecurityUtils.canEditIssueField(getProject(), fieldName)) {
+							hasEditableFields = true;
+							break;
+						}
+					}
+					setVisible(hasEditableFields 
+							&& user != null 
+							&& user.equals(getIssue().getSubmitter()) 
+							&& getIssue().getState().equals(initialState));
+				}
 			}
 
 			@Override
@@ -353,7 +368,7 @@ public abstract class IssueSidePanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.canWriteCode(getIssue().getProject()));
+				setVisible(SecurityUtils.canScheduleIssues(getIssue().getProject()));
 			}
 			
 		});

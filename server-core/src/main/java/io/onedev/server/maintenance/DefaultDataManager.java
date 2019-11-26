@@ -127,6 +127,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 					Role developer = new Role();
 					developer.setName("Developer");
 					developer.setCodePrivilege(CodePrivilege.WRITE);
+					developer.setScheduleIssues(true);
 					developer.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
 					
 					JobPrivilege jobPrivilege = new JobPrivilege();
@@ -139,6 +140,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 					Role tester = new Role();
 					tester.setName("Tester");
 					tester.setCodePrivilege(CodePrivilege.READ);
+					tester.setScheduleIssues(true);
 					tester.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
 					
 					jobPrivilege = new JobPrivilege();

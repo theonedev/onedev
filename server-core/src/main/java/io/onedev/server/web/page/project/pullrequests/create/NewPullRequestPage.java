@@ -843,7 +843,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 	@Override
 	protected boolean isPermitted() {
-		return SecurityUtils.canReadCode(getProject());
+		return SecurityUtils.canReadCode(getProject()) && SecurityUtils.canReadCode(source.getProject());
 	}
 	
 	@Override

@@ -122,6 +122,7 @@ public abstract class NewIssueEditor extends FormComponentPanel<Issue> implement
 			
 		};
 		milestoneChoice.setRequired(false);
+		milestoneChoice.setVisible(SecurityUtils.canScheduleIssues(getProject()));
 		add(milestoneChoice);
 		
 		Collection<String> properties = IssueUtils.getPropertyNames(getProject(), 

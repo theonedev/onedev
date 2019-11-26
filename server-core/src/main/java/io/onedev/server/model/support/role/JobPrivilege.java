@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.hibernate.validator.constraints.NotEmpty;
 
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -97,9 +99,10 @@ public class JobPrivilege implements Serializable {
 		return !(boolean) EditContext.get().getInputValue("accessLog");
 	}
 	
-	@Editable(order=400, name="Access Build Reports", description="Specify space-separated reports. Use * or ? for wildcard match")
+	@Editable(order=400, name="Access Build Reports", description="Optionally specify space-separated reports. Use * or ? for wildcard match")
 	@ShowCondition("isAccessLogDisabled")
 	@Patterns
+	@Nullable
 	public String getAccessibleReports() {
 		return accessibleReports;
 	}

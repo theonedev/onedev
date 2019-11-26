@@ -18,6 +18,8 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.role.CodePrivilege;
@@ -28,11 +30,14 @@ import io.onedev.server.security.permission.AccessBuildReports;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.JobPermission;
+import io.onedev.server.security.permission.ManageCodeComments;
 import io.onedev.server.security.permission.ManageIssues;
 import io.onedev.server.security.permission.ManageJob;
 import io.onedev.server.security.permission.ManageProject;
+import io.onedev.server.security.permission.ManagePullRequests;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.permission.RunJob;
+import io.onedev.server.security.permission.ScheduleIssues;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.SecurityUtils;
@@ -57,9 +62,15 @@ public class Role extends AbstractEntity implements Permission {
 	
 	private boolean manageProject;
 	
+	private boolean managePullRequests;
+	
+	private boolean manageCodeComments;
+	
 	private CodePrivilege codePrivilege = CodePrivilege.NONE;
 	
 	private boolean manageIssues;
+	
+	private boolean scheduleIssues;
 	
 	@Lob
 	@Column(length=65535, nullable=false)
@@ -87,8 +98,7 @@ public class Role extends AbstractEntity implements Permission {
 		this.name = name;
 	}
 
-	@Editable(order=200, description="This permission is required to edit project settings. "
-			+ "It implies all other project permissions")
+	@Editable(order=200)
 	public boolean isManageProject() {
 		return manageProject;
 	}
@@ -102,8 +112,28 @@ public class Role extends AbstractEntity implements Permission {
 		return !(boolean)EditContext.get().getInputValue("manageProject");
 	}
 
-	@Editable(order=300)
+	@Editable(order=250)
 	@ShowCondition("isManageProjectDisabled")
+	public boolean isManagePullRequests() {
+		return managePullRequests;
+	}
+
+	public void setManagePullRequests(boolean managePullRequests) {
+		this.managePullRequests = managePullRequests;
+	}
+	
+	@Editable(order=260)
+	@ShowCondition("isManageProjectDisabled")
+	public boolean isManageCodeComments() {
+		return manageCodeComments;
+	}
+
+	public void setManageCodeComments(boolean manageCodeComments) {
+		this.manageCodeComments = manageCodeComments;
+	}
+
+	@Editable(order=300)
+	@ShowCondition("isCodePrivilegeVisible")
 	@NotNull
 	public CodePrivilege getCodePrivilege() {
 		return codePrivilege;
@@ -113,8 +143,13 @@ public class Role extends AbstractEntity implements Permission {
 		this.codePrivilege = codePrivilege;
 	}
 
-	@Editable(order=400, description="This permission is required to manage issue milestones and boards. "
-			+ "It implies all other issue permissions")
+	@SuppressWarnings("unused")
+	private static boolean isCodePrivilegeVisible() {
+		return !(boolean)EditContext.get().getInputValue("managePullRequests")
+				&& !(boolean)EditContext.get().getInputValue("manageCodeComments");
+	}
+	
+	@Editable(order=400)
 	@ShowCondition("isManageProjectDisabled")
 	public boolean isManageIssues() {
 		return manageIssues;
@@ -123,14 +158,25 @@ public class Role extends AbstractEntity implements Permission {
 	public void setManageIssues(boolean manageIssues) {
 		this.manageIssues = manageIssues;
 	}
-
+	
 	@SuppressWarnings("unused")
 	private static boolean isManageIssuesDisabled() {
 		return !(boolean)EditContext.get().getInputValue("manageIssues");
 	}
 	
+	@Editable(order=500, description="This permission enables one to schedule issues into milestones")
+	@ShowCondition("isManageIssuesDisabled")
+	public boolean isScheduleIssues() {
+		return scheduleIssues;
+	}
+
+	public void setScheduleIssues(boolean scheduleIssues) {
+		this.scheduleIssues = scheduleIssues;
+	}
+
 	@Editable(order=600, description="Optionally specify custom fields allowed to edit when open new issues")
 	@ChoiceProvider("getIssueFieldChoices")
+	@ShowCondition("isManageIssuesDisabled")
 	public List<String> getEditableIssueFields() {
 		return editableIssueFields;
 	}
@@ -180,60 +226,52 @@ public class Role extends AbstractEntity implements Permission {
 	}
 	
 	private Collection<Permission> getPermissions() {
-		Collection<Permission> permissions = new ArrayList<>();
+		Collection<Permission> permissions = Lists.newArrayList(new AccessProject());
+		
 		if (SecurityUtils.getUser() != null) {
-			if (manageProject) {
+			if (manageProject) 
 				permissions.add(new ManageProject());
-			} else {
-				if (codePrivilege == CodePrivilege.READ)
-					permissions.add(new ReadCode());
-				else if (codePrivilege == CodePrivilege.WRITE)
-					permissions.add(new WriteCode());
-				
-				if (manageIssues) {
-					permissions.add(new ManageIssues());
-				} else if (!editableIssueFields.isEmpty()) {
-					for (String issueField: editableIssueFields)
-						permissions.add(new EditIssueField(issueField));
-				} 
-				permissions.add(new AccessProject());
-				
-				for (JobPrivilege jobPrivilege: jobPrivileges) {
-					if (jobPrivilege.isManageJob()) {
-						permissions.add(new JobPermission(jobPrivilege.getJobNames(), new ManageJob()));
-					} else if (jobPrivilege.isRunJob()) {
-						permissions.add(new JobPermission(jobPrivilege.getJobNames(), new RunJob()));
-					} else if (jobPrivilege.isAccessLog()) {
-						permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuildLog()));
-					} else if (jobPrivilege.getAccessibleReports() != null) {
-						AccessBuildReports accessBuildReports = new AccessBuildReports(jobPrivilege.getAccessibleReports());
-						permissions.add(new JobPermission(jobPrivilege.getJobNames(), accessBuildReports));
-					} else {
-						permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuild()));
-					}
-				}
+			if (manageCodeComments)
+				permissions.add(new ManageCodeComments());
+			if (managePullRequests)
+				permissions.add(new ManagePullRequests());
+			if (codePrivilege == CodePrivilege.READ)
+				permissions.add(new ReadCode());
+			if (codePrivilege == CodePrivilege.WRITE)
+				permissions.add(new WriteCode());
+			if (manageIssues) 
+				permissions.add(new ManageIssues());
+			if (scheduleIssues)
+				permissions.add(new ScheduleIssues());
+			for (String issueField: editableIssueFields)
+				permissions.add(new EditIssueField(issueField));
+			for (JobPrivilege jobPrivilege: jobPrivileges) {
+				permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuild()));
+				if (jobPrivilege.isManageJob()) 
+					permissions.add(new JobPermission(jobPrivilege.getJobNames(), new ManageJob()));
+				if (jobPrivilege.isRunJob()) 
+					permissions.add(new JobPermission(jobPrivilege.getJobNames(), new RunJob()));
+				if (jobPrivilege.isAccessLog())
+					permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuildLog()));
+				if (jobPrivilege.getAccessibleReports() != null) { 
+					AccessBuildReports accessBuildReports = new AccessBuildReports(jobPrivilege.getAccessibleReports());
+					permissions.add(new JobPermission(jobPrivilege.getJobNames(), accessBuildReports));
+				}				
 			}
 		} else {
-			if (manageProject) {
+			if (manageProject || managePullRequests || manageCodeComments || codePrivilege != CodePrivilege.NONE)
 				permissions.add(new ReadCode());
+			if (manageProject)
 				permissions.add(new JobPermission("*", new AccessBuildLog()));
-			} else {
-				if (codePrivilege != CodePrivilege.NONE)
-					permissions.add(new ReadCode());
-				
-				permissions.add(new AccessProject());
-				
-				for (JobPrivilege jobPrivilege: jobPrivileges) {
-					if (jobPrivilege.isManageJob() || jobPrivilege.isRunJob() || jobPrivilege.isAccessLog()) {
-						permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuildLog()));
-					} else if (jobPrivilege.getAccessibleReports() != null) {
-						AccessBuildReports accessBuildReports = new AccessBuildReports(jobPrivilege.getAccessibleReports());
-						permissions.add(new JobPermission(jobPrivilege.getJobNames(), accessBuildReports));
-					} else {
-						permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuild()));
-					}
+			for (JobPrivilege jobPrivilege: jobPrivileges) {
+				permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuild()));
+				if (jobPrivilege.isManageJob() || jobPrivilege.isRunJob() || jobPrivilege.isAccessLog()) 
+					permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuildLog()));
+				if (jobPrivilege.getAccessibleReports() != null) { 
+					AccessBuildReports accessBuildReports = new AccessBuildReports(jobPrivilege.getAccessibleReports());
+					permissions.add(new JobPermission(jobPrivilege.getJobNames(), accessBuildReports));
 				}
-			}			
+			}
 		}
 		
 		return permissions;

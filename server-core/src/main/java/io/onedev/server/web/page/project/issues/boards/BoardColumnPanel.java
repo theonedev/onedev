@@ -163,14 +163,14 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 											break;
 										}
 									}
-								} else if (SecurityUtils.canWriteCode(issue.getProject())) {
+								} else {
 									FieldSpec fieldSpec = getIssueSetting().getFieldSpec(identifyField);
 									if (fieldSpec != null && SecurityUtils.canEditIssueField(getProject(), fieldSpec.getName())) {
 										issue = SerializationUtils.clone(issue);
 										issue.setFieldValue(identifyField, getColumn());
 									}
 								}
-							} else if (SecurityUtils.canWriteCode(issue.getProject())) { 
+							} else if (SecurityUtils.canScheduleIssues(issue.getProject())) { 
 								// move issue between backlog column and board column
 								issue = SerializationUtils.clone(issue);
 								issue.setMilestone(getMilestone());
@@ -334,7 +334,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 				String fieldName = getBoard().getIdentifyField();
 				if (issue.getMilestone() == null && getMilestone() != null) { 
 					// move a backlog issue to board 
-					if (!SecurityUtils.canWriteCode(issue.getProject())) 
+					if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 						throw new UnauthorizedException("Permission denied");
 					
 					OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, getMilestone(), SecurityUtils.getUser());
@@ -402,9 +402,6 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 						markAccepted(target, issue, true);
 					}
 				} else {
-					if (!SecurityUtils.canWriteCode(issue.getProject())) 
-						throw new UnauthorizedException("Permission denied");
-					
 					FieldSpec fieldSpec = getIssueSetting().getFieldSpec(fieldName);
 					if (fieldSpec == null)
 						throw new OneException("Undefined custom field: " + fieldName);

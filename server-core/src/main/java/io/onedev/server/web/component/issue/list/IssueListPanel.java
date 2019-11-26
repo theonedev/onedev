@@ -409,7 +409,8 @@ public abstract class IssueListPanel extends Panel {
 				super.onConfigure();
 				setVisible(getProject() != null 
 						&& selectionColumn != null 
-						&& !selectionColumn.getSelections().isEmpty());
+						&& !selectionColumn.getSelections().isEmpty()
+						&& SecurityUtils.canManageIssues(getProject()));
 			}
 			
 		});
@@ -458,8 +459,8 @@ public abstract class IssueListPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				setVisible(getProject() != null 
-						&& SecurityUtils.canWriteCode(getProject()) 
-						&& issuesTable.getItemCount() != 0);
+						&& issuesTable.getItemCount() != 0 
+						&& SecurityUtils.canManageIssues(getProject()));
 			}
 			
 		});
@@ -512,7 +513,7 @@ public abstract class IssueListPanel extends Panel {
 			}
 			
 		});
-		if (getProject() != null && SecurityUtils.canWriteCode(getProject())) {
+		if (getProject() != null && SecurityUtils.canManageIssues(getProject())) {
 			columns.add(selectionColumn = new SelectionColumn<Issue, Void>() {
 
 				@Override

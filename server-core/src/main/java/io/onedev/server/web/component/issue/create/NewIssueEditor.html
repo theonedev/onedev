@@ -9,12 +9,14 @@
 			<label class="control-label">Description</label>
 			<div wicket:id="description"></div>
 		</div>		
+		<wicket:enclosure child="milestone">
 		<div class="form-group">
 			<label class="control-label">Milestone</label>
 			<div>
 				<input wicket:id="milestone" type="hidden" class="form-control">
 			</div>
 		</div>		
+		</wicket:enclosure>
 		<div wicket:id="fields"></div>
 	</div>
 </wicket:panel>

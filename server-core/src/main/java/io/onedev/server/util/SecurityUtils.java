@@ -36,12 +36,15 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.CreateProjects;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.JobPermission;
+import io.onedev.server.security.permission.ManageCodeComments;
 import io.onedev.server.security.permission.ManageIssues;
 import io.onedev.server.security.permission.ManageJob;
 import io.onedev.server.security.permission.ManageProject;
+import io.onedev.server.security.permission.ManagePullRequests;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.permission.RunJob;
+import io.onedev.server.security.permission.ScheduleIssues;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.WriteCode;
 
@@ -122,6 +125,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(new ProjectPermission(project, new EditIssueField(fieldName)));
 	}
 	
+	public static boolean canScheduleIssues(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new ScheduleIssues()));
+	}
+	
 	public static boolean isAuthorizedWithRole(Project project, String roleName) {
 		Role role = OneDev.getInstance(RoleManager.class).find(roleName);
 		if (role != null) {
@@ -176,6 +183,14 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		return getSubject().isPermitted(new ProjectPermission(project, new ManageIssues()));
 	}
 	
+	public static boolean canManagePullRequests(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new ManagePullRequests()));
+	}
+	
+	public static boolean canManageCodeComments(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new ManageCodeComments()));
+	}
+	
 	public static boolean canManage(Build build) {
 		return getSubject().isPermitted(new ProjectPermission(build.getProject(), 
 				new JobPermission(build.getJobName(), new ManageJob())));
@@ -208,19 +223,19 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canModifyOrDelete(CodeComment comment) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(comment.getUser()) 
-				|| canManage(comment.getProject());
+				|| canManageCodeComments(comment.getProject());
 	}
 	
 	public static boolean canModifyOrDelete(CodeCommentReply reply) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(reply.getUser()) 
-				|| canManage(reply.getComment().getProject());
+				|| canManageCodeComments(reply.getComment().getProject());
 	}
 	
 	public static boolean canModifyOrDelete(PullRequestComment comment) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(comment.getUser()) 
-				|| canManage(comment.getRequest().getTargetProject());
+				|| canManagePullRequests(comment.getRequest().getTargetProject());
 	}
 	
 	public static boolean canModifyOrDelete(IssueComment comment) {
@@ -232,7 +247,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canModifyOrDelete(PullRequestChange change) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(change.getUser()) 
-				|| canManage(change.getRequest().getTargetProject());
+				|| canManagePullRequests(change.getRequest().getTargetProject());
 	}
 	
 	public static boolean canModifyOrDelete(IssueChange change) {
@@ -244,7 +259,7 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	public static boolean canModify(PullRequest request) {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(request.getSubmitter()) 
-				|| canManage(request.getTargetProject());
+				|| canManagePullRequests(request.getTargetProject());
 	}
 	
 	public static boolean canModify(Issue issue) {
