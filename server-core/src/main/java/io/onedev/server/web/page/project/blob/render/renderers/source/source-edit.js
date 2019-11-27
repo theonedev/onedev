@@ -23,7 +23,10 @@ onedev.server.sourceEdit = {
 			highlightIdentifiers: {delay: 500}
 		});
 		
-		onedev.server.codemirror.setModeByFileName(cm, filePath);
+		if (filePath.endsWith(".cbl") || filePath.endsWith(".pco"))
+			onedev.server.codemirror.setModeByName(cm, "cobol");
+		else
+			onedev.server.codemirror.setModeByFileName(cm, filePath);
 		
 		/*
 		 * AreYouSure can not track dirty correctly for CodeMirror generated
