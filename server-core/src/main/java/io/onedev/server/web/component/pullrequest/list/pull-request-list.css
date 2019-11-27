@@ -4,11 +4,12 @@
 .pull-request-list>.head>* {
 	margin-bottom: 20px;
 }
-.pull-request-list>.head>form {
+.pull-request-list>.head>form.can-create-pull-requests {
 	margin-right: 170px;
 }
 .pull-request-list>.head>.open-new {
 	position: absolute;
+	width: 160px;
 	right: 0;
 	top: 0;
 }

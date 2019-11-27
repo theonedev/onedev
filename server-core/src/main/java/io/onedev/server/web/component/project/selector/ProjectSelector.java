@@ -3,6 +3,8 @@ package io.onedev.server.web.component.project.selector;
 import java.util.Collection;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.attributes.CallbackParameter;
@@ -41,17 +43,14 @@ public abstract class ProjectSelector extends Panel {
 
 	private final IModel<Collection<Project>> projectsModel;
 	
-	private final Long currentProjectId;
-
 	private ListView<Project> projectsView;
 	
 	private String searchInput;
 	
-	public ProjectSelector(String id, IModel<Collection<Project>> projectsModel, Long currentProjectId) {
+	public ProjectSelector(String id, IModel<Collection<Project>> projectsModel) {
 		super(id);
 		
 		this.projectsModel = projectsModel;
-		this.currentProjectId = currentProjectId;
 	}
 
 	@Override
@@ -153,7 +152,7 @@ public abstract class ProjectSelector extends Panel {
 					}
 					
 				};
-				if (project.getId().equals(currentProjectId)) 
+				if (project.equals(getCurrent())) 
 					link.add(AttributeAppender.append("class", " current"));
 				link.add(new ProjectAvatar("avatar", project));
 				link.add(new Label("name", project.getName()));
@@ -179,6 +178,11 @@ public abstract class ProjectSelector extends Panel {
 		super.renderHead(response);
 		
 		response.render(JavaScriptHeaderItem.forReference(new ProjectSelectorResourceReference()));
+	}
+	
+	@Nullable
+	protected Project getCurrent() {
+		return null;
 	}
 	
 	protected abstract void onSelect(AjaxRequestTarget target, Project project);

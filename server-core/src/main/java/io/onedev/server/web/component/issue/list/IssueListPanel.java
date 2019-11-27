@@ -55,6 +55,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
+import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
@@ -65,10 +66,13 @@ import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
+import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.issue.fieldvalues.FieldValuesPanel;
+import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
@@ -356,10 +360,38 @@ public abstract class IssueListPanel extends Panel {
 		else
 			query = null;
 		
-		if (getProject() != null) 
+		if (getProject() != null) {
 			add(new BookmarkablePageLink<Void>("newIssue", NewIssuePage.class, NewIssuePage.paramsOf(getProject(), query)));
-		else
-			add(new WebMarkupContainer("newIssue").setVisible(false));
+		} else {
+			add(new DropdownLink("newIssue") {
+
+				@Override
+				public IModel<?> getBody() {
+					return Model.of("<i class='fa fa-plus'></i> New Issue <i class='fa fa-caret-down'></i>");
+				}
+				
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
+
+						@Override
+						protected Collection<Project> load() {
+							return OneDev.getInstance(ProjectManager.class).getPermittedProjects(
+									SecurityUtils.getUser(), new AccessProject());
+						}
+						
+					}) {
+
+						@Override
+						protected void onSelect(AjaxRequestTarget target, Project project) {
+							setResponsePage(NewIssuePage.class, NewIssuePage.paramsOf(project, query));
+						}
+
+					};
+				}
+				
+			}.setEscapeModelStrings(false));
+		}
 		
 		others.add(new ModalLink("batchEditSelected") {
 

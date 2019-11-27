@@ -1,11 +1,13 @@
 package io.onedev.server.web.component.pullrequest.list;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -42,10 +44,12 @@ import org.slf4j.LoggerFactory;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
+import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;
@@ -53,6 +57,9 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.floating.FloatingPanel;
+import io.onedev.server.web.component.link.DropdownLink;
+import io.onedev.server.web.component.project.selector.ProjectSelector;
 import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
@@ -217,13 +224,46 @@ public abstract class PullRequestListPanel extends Panel {
 			}
 			
 		});
+		if (getProject() == null || SecurityUtils.canReadCode(getProject()))
+			form.add(AttributeAppender.append("class", "can-create-pull-requests"));
 		add(form);
 
-		if (getProject() != null && SecurityUtils.canReadCode(getProject())) {
-			add(new BookmarkablePageLink<Void>("newRequest", NewPullRequestPage.class, 
-					NewPullRequestPage.paramsOf(getProject())));		
+		if (getProject() != null) {
+			if (SecurityUtils.canReadCode(getProject())) {
+				add(new BookmarkablePageLink<Void>("newRequest", NewPullRequestPage.class, 
+						NewPullRequestPage.paramsOf(getProject())));		
+			} else {
+				add(new WebMarkupContainer("newRequest").setVisible(false));
+			}
 		} else {
-			add(new WebMarkupContainer("newRequest").setVisible(false));
+			add(new DropdownLink("newRequest") {
+
+				@Override
+				public IModel<?> getBody() {
+					return Model.of("<i class='fa fa-plus'></i> New Pull Request <i class='fa fa-caret-down'></i>");
+				}
+				
+				@Override
+				protected Component newContent(String id, FloatingPanel dropdown) {
+					return new ProjectSelector(id, new LoadableDetachableModel<Collection<Project>>() {
+
+						@Override
+						protected Collection<Project> load() {
+							return OneDev.getInstance(ProjectManager.class).getPermittedProjects(
+									SecurityUtils.getUser(), new ReadCode());
+						}
+						
+					}) {
+
+						@Override
+						protected void onSelect(AjaxRequestTarget target, Project project) {
+							setResponsePage(NewPullRequestPage.class, NewPullRequestPage.paramsOf(project));
+						}
+
+					};
+				}
+				
+			}.setEscapeModelStrings(false));
 		}
 		
 		body.add(new NotificationPanel("feedback", this));

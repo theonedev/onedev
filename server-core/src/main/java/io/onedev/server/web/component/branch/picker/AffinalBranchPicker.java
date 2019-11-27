@@ -13,6 +13,7 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.SecurityUtils;
@@ -25,10 +26,10 @@ public abstract class AffinalBranchPicker extends Panel {
 	
 	private String branch;
 	
-	public AffinalBranchPicker(String id, Long repoId, String branch) {
+	public AffinalBranchPicker(String id, Long projectId, String branch) {
 		super(id);
 		
-		this.projectId = repoId;
+		this.projectId = projectId;
 		this.branch = branch;
 	}
 	
@@ -77,7 +78,7 @@ public abstract class AffinalBranchPicker extends Panel {
 				return affinals;
 			}
 			
-		}, projectId) {
+		}) {
 
 			@Override
 			protected void onSelect(AjaxRequestTarget target, Project project) {
@@ -85,6 +86,11 @@ public abstract class AffinalBranchPicker extends Panel {
 				branch = project.getDefaultBranch();
 				newBranchPicker(target);
 				AffinalBranchPicker.this.onSelect(target, project, branch);
+			}
+
+			@Override
+			protected Project getCurrent() {
+				return OneDev.getInstance(ProjectManager.class).load(projectId);
 			}
 			
 		});

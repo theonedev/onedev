@@ -13,6 +13,7 @@
 	margin-right: 130px;
 }
 .project-list>.head>.add-new {
+	width: 120px;
 	position: absolute;
 	right: 0;
 	top: 0;
