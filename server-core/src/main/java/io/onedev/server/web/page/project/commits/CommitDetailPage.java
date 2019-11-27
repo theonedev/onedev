@@ -45,9 +45,9 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.cache.CommitInfoManager;
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.job.Job;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.git.BlobIdent;
@@ -246,11 +246,11 @@ public class CommitDetailPage extends ProjectPage implements CommentSupport {
 			@Override
 			protected List<Job> load() {
 				try {
-					CISpec ciSpec = getProject().getCISpec(getCommit().copy());
-					if (ciSpec != null)
-						return ciSpec.getJobs();
+					BuildSpec buildSpec = getProject().getBuildSpec(getCommit().copy());
+					if (buildSpec != null)
+						return buildSpec.getJobs();
 				} catch (Exception e) {
-					logger.error("Error retrieving CI spec (project: {}, commit: {})", 
+					logger.error("Error retrieving build spec (project: {}, commit: {})", 
 							getProject().getName(), getCommit().name(), e);
 				}
 				return new ArrayList<>();

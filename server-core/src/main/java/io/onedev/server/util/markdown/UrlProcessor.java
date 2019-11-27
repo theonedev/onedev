@@ -33,13 +33,16 @@ public class UrlProcessor implements MarkdownProcessor {
 	public void process(Project project, Document rendered, Object context) {
 		if (context instanceof BlobRenderContext && project != null) {
 			BlobRenderContext blobRenderContext = (BlobRenderContext) context;
-			
 			Repository repository = project.getRepository();
 			RevCommit commit;
-			try (RevWalk revWalk = new RevWalk(repository)) {
-				commit = revWalk.parseCommit(repository.resolve(blobRenderContext.getBlobIdent().revision));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			if (blobRenderContext.getBlobIdent().revision != null) {
+				try (RevWalk revWalk = new RevWalk(repository)) {
+					commit = revWalk.parseCommit(repository.resolve(blobRenderContext.getBlobIdent().revision));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			} else {
+				commit = null;
 			}
 			
 			new NodeTraversor(new NodeVisitor() {
@@ -62,25 +65,25 @@ public class UrlProcessor implements MarkdownProcessor {
 									String directory = blobRenderContext.getDirectory();
 									String referencedPath = PathUtils.resolve(directory, path);
 									referencedPath = GitUtils.normalizePath(referencedPath);
-									if (referencedPath != null && TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null) {
-											element.after("<span class='missing'>!!missing!!</span>");
-											Element missingElement = element.nextElementSibling();
-											BlobIdent blobIdent = blobRenderContext.getBlobIdent();
-											Mode mode = blobRenderContext.getMode();
-											if (mode != Mode.ADD && mode != Mode.EDIT 
-													&& SecurityUtils.canModify(project, blobIdent.revision, referencedPath)) {
-												ProjectBlobPage.State state = new ProjectBlobPage.State();
-												state.blobIdent = blobRenderContext.getBlobIdent();
-												state.mode = Mode.ADD;
-												state.initialNewPath = path;
-												CharSequence urlToAddFile = RequestCycle.get().urlFor(ProjectBlobPage.class, 
-														ProjectBlobPage.paramsOf(project, state));
-												String htmlToAddFile = String.format(
-														"<a href='%s' title='Add this file' class='add-missing'><i class='fa fa-plus'></i></a>", 
-														urlToAddFile.toString());
-												missingElement.after(htmlToAddFile);
-											}
+									if (referencedPath != null && (commit == null || TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null)) {
+										element.after("<span class='missing'>!!missing!!</span>");
+										Element missingElement = element.nextElementSibling();
+										BlobIdent blobIdent = blobRenderContext.getBlobIdent();
+										Mode mode = blobRenderContext.getMode();
+										if (mode != Mode.ADD && mode != Mode.EDIT 
+												&& SecurityUtils.canModify(project, blobIdent.revision, referencedPath)) {
+											ProjectBlobPage.State state = new ProjectBlobPage.State();
+											state.blobIdent = blobRenderContext.getBlobIdent();
+											state.mode = Mode.ADD;
+											state.initialNewPath = path;
+											CharSequence urlToAddFile = RequestCycle.get().urlFor(ProjectBlobPage.class, 
+													ProjectBlobPage.paramsOf(project, state));
+											String htmlToAddFile = String.format(
+													"<a href='%s' title='Add this file' class='add-missing'><i class='fa fa-plus'></i></a>", 
+													urlToAddFile.toString());
+											missingElement.after(htmlToAddFile);
 										}
+									}
 								} catch (IOException e) {
 									throw new RuntimeException(e);
 								}
@@ -97,7 +100,7 @@ public class UrlProcessor implements MarkdownProcessor {
 									String basePath = blobRenderContext.getDirectory();
 									String referencedPath = PathUtils.resolve(basePath, UrlUtils.trimHashAndQuery(URLDecoder.decode(url, Charsets.UTF_8.name())));
 									referencedPath = GitUtils.normalizePath(referencedPath);
-									if (referencedPath != null && TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null) {
+									if (referencedPath != null && (commit == null || TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null)) {
 										element.after("<span class='missing'>!!missing!!</span>");
 									}
 								} catch (IOException e) {
@@ -108,7 +111,6 @@ public class UrlProcessor implements MarkdownProcessor {
 					}
 				}
 			}).traverse(rendered);
-			
 		}
 	}
 

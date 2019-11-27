@@ -73,8 +73,8 @@ import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.cache.CommitInfoManager;
-import io.onedev.server.ci.CISpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
 import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
@@ -290,7 +290,7 @@ public class Project extends AbstractEntity {
     
     private transient Map<String, Optional<ObjectId>> objectIdCache;
     
-    private transient Map<ObjectId, Optional<CISpec>> ciSpecCache;
+    private transient Map<ObjectId, Optional<BuildSpec>> buildSpecCache;
     
     private transient Map<ObjectId, Map<String, Status>> commitStatusCache;
     
@@ -672,36 +672,36 @@ public class Project extends AbstractEntity {
 	}
 	
 	/**
-	 * Get CI spec of specified commit
+	 * Get build spec of specified commit
 	 * @param commitId
-	 * 			commit id to get CI spec for 
+	 * 			commit id to get build spec for 
 	 * @return
-	 * 			CI spec of specified commit, or <tt>null</tt> if no CI spec is defined and 
-	 * 			auto-detection also can not provide an appropriate CI spec  
+	 * 			build spec of specified commit, or <tt>null</tt> if no build spec is defined and 
+	 * 			auto-detection also can not provide an appropriate build spec  
 	 * @throws
-	 * 			Exception when CI spec is defined but not valid
+	 * 			Exception when build spec is defined but not valid
 	 */
 	@Nullable
-	public CISpec getCISpec(ObjectId commitId) {
-		if (ciSpecCache == null)
-			ciSpecCache = new HashMap<>();
-		Optional<CISpec> ciSpec = ciSpecCache.get(commitId);
-		if (ciSpec == null) {
-			Blob blob = getBlob(new BlobIdent(commitId.name(), CISpec.BLOB_PATH, FileMode.TYPE_FILE), false);
+	public BuildSpec getBuildSpec(ObjectId commitId) {
+		if (buildSpecCache == null)
+			buildSpecCache = new HashMap<>();
+		Optional<BuildSpec> buildSpec = buildSpecCache.get(commitId);
+		if (buildSpec == null) {
+			Blob blob = getBlob(new BlobIdent(commitId.name(), BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
 			if (blob != null) 
-				ciSpec = Optional.fromNullable(CISpec.parse(blob.getBytes()));
+				buildSpec = Optional.fromNullable(BuildSpec.parse(blob.getBytes()));
 			else
-				ciSpec = Optional.absent();
-			ciSpecCache.put(commitId, ciSpec);
+				buildSpec = Optional.absent();
+			buildSpecCache.put(commitId, buildSpec);
 		}
-		return ciSpec.orNull();
+		return buildSpec.orNull();
 	}
 	
 	public List<String> getJobNames() {
 		if (jobNames == null) {
 			Set<String> jobNameSet = new HashSet<>();
 			for (RefInfo refInfo: getBranches()) {
-				Blob blob = getBlob(new BlobIdent(refInfo.getPeeledObj().name(), CISpec.BLOB_PATH, FileMode.TYPE_FILE), false);
+				Blob blob = getBlob(new BlobIdent(refInfo.getPeeledObj().name(), BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
 				if (blob != null && blob.getText() != null) {
 					try {
 						VersionedDocument dom = VersionedDocument.fromXML(blob.getText().getContent());

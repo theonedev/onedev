@@ -28,8 +28,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.job.Job;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
@@ -54,11 +54,11 @@ public abstract class CommitStatusPanel extends Panel {
 		@Override
 		protected List<Job> load() {
 			try {
-				CISpec ciSpec = getProject().getCISpec(commitId);
-				if (ciSpec != null)
-					return ciSpec.getJobs();
+				BuildSpec buildSpec = getProject().getBuildSpec(commitId);
+				if (buildSpec != null)
+					return buildSpec.getJobs();
 			} catch (Exception e) {
-				logger.error("Error retrieving CI spec (project: {}, commit: {})", 
+				logger.error("Error retrieving build spec (project: {}, commit: {})", 
 						getProject().getName(), commitId.name(), e);
 			}
 			return new ArrayList<>();

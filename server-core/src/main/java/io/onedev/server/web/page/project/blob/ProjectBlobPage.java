@@ -29,8 +29,11 @@ import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.head.OnLoadHeaderItem;
 import org.apache.wicket.markup.html.WebMarkupContainer;
+import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.upload.FileUpload;
 import org.apache.wicket.model.AbstractReadOnlyModel;
+import org.apache.wicket.model.IModel;
+import org.apache.wicket.model.Model;
 import org.apache.wicket.request.IRequestParameters;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.handler.resource.ResourceReferenceRequestHandler;
@@ -55,7 +58,7 @@ import io.onedev.commons.jsymbol.util.NoAntiCacheImage;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.CISpec;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -713,17 +716,22 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				if (SecurityUtils.canModify(getProject(), state.blobIdent.revision, CISpec.BLOB_PATH)) {
+				if (SecurityUtils.canModify(getProject(), state.blobIdent.revision, BuildSpec.BLOB_PATH)) {
 					add(new ViewStateAwareAjaxLink<Void>("addFile") {
 	
 						@Override
 						public void onClick(AjaxRequestTarget target) {
-							onModeChange(target, Mode.ADD, CISpec.BLOB_PATH);
+							onModeChange(target, Mode.ADD, BuildSpec.BLOB_PATH);
+						}
+
+						@Override
+						public IModel<?> getBody() {
+							return Model.of("adding " + BuildSpec.BLOB_PATH);
 						}
 						
 					});
 				} else {
-					add(new WebMarkupContainer("addFile") {
+					add(new Label("addFile", "adding " + BuildSpec.BLOB_PATH) {
 
 						@Override
 						protected void onComponentTag(ComponentTag tag) {
@@ -740,7 +748,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			protected void onConfigure() {
 				super.onConfigure();
 				if (resolvedRevision != null && isOnBranch() && state.blobIdent.path == null && state.mode == Mode.VIEW) {
-					BlobIdent blobIdent = new BlobIdent(resolvedRevision.name(), CISpec.BLOB_PATH, FileMode.TYPE_FILE);
+					BlobIdent blobIdent = new BlobIdent(resolvedRevision.name(), BuildSpec.BLOB_PATH, FileMode.TYPE_FILE);
 					setVisible(getProject().getBlob(blobIdent, false) == null);
 				} else {
 					setVisible(false);
@@ -1131,6 +1139,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		Project project = getProject();
 		if (state.blobIdent.revision == null) {
 			state.blobIdent.revision = "master";
+			resolvedRevision = refUpdated.getNewCommitId();
 			project.setDefaultBranch("master");
 		}
 		String branch = state.blobIdent.revision;

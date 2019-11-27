@@ -29,7 +29,7 @@ import org.apache.wicket.Application;
 import org.apache.wicket.WicketRuntimeException;
 import org.apache.wicket.util.collections.UrlExternalFormComparator;
 
-import io.onedev.server.ci.job.paramsupply.ParamSupply;
+import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.util.IssueUtils;
 
 /**

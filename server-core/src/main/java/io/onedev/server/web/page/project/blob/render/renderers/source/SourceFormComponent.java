@@ -80,7 +80,8 @@ abstract class SourceFormComponent extends FormComponentPanel<byte[]> {
 		} else {
 			jsonOfMark = "undefined";
 		}
-		String script = String.format("onedev.server.sourceEdit.onDomReady('%s', '%s', %s, '%s', %s, '%s', %b, '%s');", 
+		String script = String.format("onedev.server.sourceEdit.onDomReady("
+				+ "'%s', '%s', %s, '%s', %s, '%s', %b, '%s');", 
 				getMarkupId(), 
 				JavaScriptEscape.escapeJavaScript(getContext().getNewPath()), 
 				jsonOfMark,

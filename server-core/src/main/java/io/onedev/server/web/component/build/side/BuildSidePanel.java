@@ -26,7 +26,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;

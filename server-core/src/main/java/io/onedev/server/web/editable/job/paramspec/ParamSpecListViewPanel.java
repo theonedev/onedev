@@ -28,7 +28,7 @@ import org.apache.wicket.model.Model;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.web.asset.inputspec.InputSpecCssResourceReference;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.EditableUtils;

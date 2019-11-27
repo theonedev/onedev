@@ -32,9 +32,9 @@ import io.onedev.commons.utils.TarUtils;
 import io.onedev.k8shelper.CacheAllocationRequest;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.OneException;
-import io.onedev.server.ci.job.JobContext;
-import io.onedev.server.ci.job.JobManager;
-import io.onedev.server.ci.job.SubmoduleCredential;
+import io.onedev.server.buildspec.job.JobContext;
+import io.onedev.server.buildspec.job.JobManager;
+import io.onedev.server.buildspec.job.SubmoduleCredential;
 
 @Path("/k8s")
 @Consumes(MediaType.WILDCARD)

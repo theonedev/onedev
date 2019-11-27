@@ -10,7 +10,7 @@ import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.LineConsumer;
-import io.onedev.server.ci.job.JobExecutorDiscoverer;
+import io.onedev.server.buildspec.job.JobExecutorDiscoverer;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.rest.jersey.JerseyConfigurator;
 

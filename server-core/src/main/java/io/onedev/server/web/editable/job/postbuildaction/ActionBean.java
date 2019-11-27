@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.NotNull;
 
-import io.onedev.server.ci.job.action.PostBuildAction;
+import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable

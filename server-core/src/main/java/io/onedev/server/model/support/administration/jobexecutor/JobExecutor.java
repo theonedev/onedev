@@ -13,7 +13,7 @@ import io.onedev.commons.launcher.loader.ExtensionPoint;
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.job.JobContext;
+import io.onedev.server.buildspec.job.JobContext;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Usage;

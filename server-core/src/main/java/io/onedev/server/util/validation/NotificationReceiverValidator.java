@@ -22,7 +22,7 @@ public class NotificationReceiverValidator implements ConstraintValidator<Notifi
 			return true;
 		} else {
 			try {
-				io.onedev.server.ci.job.action.notificationreceiver.NotificationReceiver.fromString(value, null);
+				io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiver.fromString(value, null);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

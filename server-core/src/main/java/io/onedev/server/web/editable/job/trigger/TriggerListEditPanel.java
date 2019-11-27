@@ -26,9 +26,9 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.ci.job.Job;
-import io.onedev.server.ci.job.JobAware;
-import io.onedev.server.ci.job.trigger.JobTrigger;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobAware;
+import io.onedev.server.buildspec.job.trigger.JobTrigger;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;

@@ -907,8 +907,8 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 				explicit("action"), explicit("param1"), explicit("param2"), 
 				explicit("param3"), explicit("param4"));
 		
-		String script = String.format("onedev.server.sourceView.onDomReady('%s', '%s', %s, %s, '%s', '%s', "
-				+ "%s, %s, %s, %s, %s, '%s');", 
+		String script = String.format("onedev.server.sourceView.onDomReady("
+				+ "'%s', '%s', %s, %s, '%s', '%s', %s, %s, %s, %s, %s, '%s');", 
 				JavaScriptEscape.escapeJavaScript(context.getBlobIdent().path),
 				JavaScriptEscape.escapeJavaScript(blob.getText().getContent()),
 				context.getOpenComment()!=null?getJsonOfComment(context.getOpenComment()):"undefined",

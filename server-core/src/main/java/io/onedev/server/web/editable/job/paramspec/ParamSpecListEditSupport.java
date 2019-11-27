@@ -7,7 +7,7 @@ import org.apache.wicket.Component;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.utils.ReflectionUtils;
-import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.EmptyValueLabel;
 import io.onedev.server.web.editable.PropertyContext;

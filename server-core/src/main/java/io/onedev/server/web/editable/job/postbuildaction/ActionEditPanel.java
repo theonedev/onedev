@@ -10,15 +10,15 @@ import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.request.cycle.RequestCycle;
 
-import io.onedev.server.ci.CISpecAware;
-import io.onedev.server.ci.job.JobAware;
-import io.onedev.server.ci.job.action.PostBuildAction;
+import io.onedev.server.buildspec.BuildSpecAware;
+import io.onedev.server.buildspec.job.JobAware;
+import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 
 @SuppressWarnings("serial")
-abstract class ActionEditPanel extends Panel implements CISpecAware, JobAware {
+abstract class ActionEditPanel extends Panel implements BuildSpecAware, JobAware {
 
 	private final List<PostBuildAction> actions;
 	

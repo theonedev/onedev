@@ -26,11 +26,11 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.CISpecAware;
-import io.onedev.server.ci.job.Job;
-import io.onedev.server.ci.job.JobAware;
-import io.onedev.server.ci.job.action.PostBuildAction;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.BuildSpecAware;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobAware;
+import io.onedev.server.buildspec.job.action.PostBuildAction;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -89,8 +89,8 @@ class ActionListEditPanel extends PropertyEditor<List<Serializable>> {
 					}
 
 					@Override
-					public CISpec getCISpec() {
-						return ActionListEditPanel.this.getCISpec();
+					public BuildSpec getBuildSpec() {
+						return ActionListEditPanel.this.getBuildSpec();
 					}
 
 				};
@@ -160,8 +160,8 @@ class ActionListEditPanel extends PropertyEditor<List<Serializable>> {
 							}
 
 							@Override
-							public CISpec getCISpec() {
-								return ActionListEditPanel.this.getCISpec();
+							public BuildSpec getBuildSpec() {
+								return ActionListEditPanel.this.getBuildSpec();
 							}
 
 						};
@@ -223,10 +223,10 @@ class ActionListEditPanel extends PropertyEditor<List<Serializable>> {
 		}.sortable("tbody"));
 	}
 
-	private CISpec getCISpec() {
-		CISpecAware ciSpecAware = findParent(CISpecAware.class);
-		if (ciSpecAware != null)
-			return ciSpecAware.getCISpec();
+	private BuildSpec getBuildSpec() {
+		BuildSpecAware buildSpecAware = findParent(BuildSpecAware.class);
+		if (buildSpecAware != null)
+			return buildSpecAware.getBuildSpec();
 		else
 			return null;
 	}

@@ -19,6 +19,7 @@ import org.apache.wicket.util.lang.Bytes;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.model.Project;
+import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 
@@ -91,9 +92,29 @@ public abstract class BlobUploadPanel extends Panel {
 		});
 		
 		form.add(new TextField<String>("directory", new PropertyModel<String>(this, "directory")));
+		
+		ReferenceInputBehavior behavior = new ReferenceInputBehavior(true) {
+			
+			@Override
+			protected Project getProject() {
+				return context.getProject();
+			}
+			
+		};
 		form.add(new TextField<String>("summaryCommitMessage", 
-				new PropertyModel<String>(this, "summaryCommitMessage")));
-		form.add(new TextArea<String>("detailCommitMessage", new PropertyModel<String>(this, "detailCommitMessage")));
+				new PropertyModel<String>(this, "summaryCommitMessage")).add(behavior));
+		
+		behavior = new ReferenceInputBehavior(true) {
+			
+			@Override
+			protected Project getProject() {
+				return context.getProject();
+			}
+			
+		};
+		form.add(new TextArea<String>("detailCommitMessage", 
+				new PropertyModel<String>(this, "detailCommitMessage")).add(behavior));
+		
 		form.add(new AjaxLink<Void>("cancel") {
 
 			@Override

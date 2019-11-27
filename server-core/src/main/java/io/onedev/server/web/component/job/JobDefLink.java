@@ -6,13 +6,13 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.job.Job;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
-import io.onedev.server.web.page.project.blob.render.renderers.cispec.CISpecRendererProvider;
+import io.onedev.server.web.page.project.blob.render.renderers.buildspec.BuildSpecRendererProvider;
 
 @SuppressWarnings("serial")
 public abstract class JobDefLink extends BookmarkablePageLink<Void> {
@@ -45,8 +45,8 @@ public abstract class JobDefLink extends BookmarkablePageLink<Void> {
 	@Override
 	public PageParameters getPageParameters() {
 		ProjectBlobPage.State state = new ProjectBlobPage.State();
-		state.blobIdent = new BlobIdent(commitId.name(), CISpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits()); 
-		state.position = CISpecRendererProvider.getPosition(Job.SELECTION_PREFIX + jobName);
+		state.blobIdent = new BlobIdent(commitId.name(), BuildSpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits()); 
+		state.position = BuildSpecRendererProvider.getPosition(Job.SELECTION_PREFIX + jobName);
 		return ProjectBlobPage.paramsOf(getProject(), state);
 	}
 

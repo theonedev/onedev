@@ -15,9 +15,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.job.log.JobLogEntry;
-import io.onedev.server.ci.job.log.LogManager;
-import io.onedev.server.ci.job.log.LogSnippet;
+import io.onedev.server.buildspec.job.log.JobLogEntry;
+import io.onedev.server.buildspec.job.log.LogManager;
+import io.onedev.server.buildspec.job.log.LogSnippet;
 import io.onedev.server.model.Build;
 import io.onedev.server.web.behavior.WebSocketObserver;
 

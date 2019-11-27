@@ -25,7 +25,7 @@ import org.apache.wicket.markup.repeater.data.ListDataProvider;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 
-import io.onedev.server.ci.job.JobDependency;
+import io.onedev.server.buildspec.job.JobDependency;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.page.layout.SideFloating;
 import io.onedev.server.web.page.layout.SideFloating.Placement;

@@ -17,7 +17,7 @@ import org.apache.wicket.request.resource.AbstractResource;
 import com.google.common.base.Charsets;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.job.log.LogManager;
+import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;

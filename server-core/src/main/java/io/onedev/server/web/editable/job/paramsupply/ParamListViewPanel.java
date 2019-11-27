@@ -12,9 +12,9 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
-import io.onedev.server.ci.job.paramsupply.ParamSupply;
-import io.onedev.server.ci.job.paramsupply.ScriptingValues;
-import io.onedev.server.ci.job.paramsupply.SpecifiedValues;
+import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
+import io.onedev.server.buildspec.job.paramsupply.ScriptingValues;
+import io.onedev.server.buildspec.job.paramsupply.SpecifiedValues;
 import io.onedev.server.web.editable.PropertyContext;
 
 @SuppressWarnings("serial")

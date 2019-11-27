@@ -13,7 +13,7 @@ import com.google.common.collect.Sets;
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.server.ci.job.JobReport;
+import io.onedev.server.buildspec.job.JobReport;
 import io.onedev.server.model.Build;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebApplicationConfigurator;

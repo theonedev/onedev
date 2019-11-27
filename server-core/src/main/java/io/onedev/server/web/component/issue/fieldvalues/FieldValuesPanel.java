@@ -16,7 +16,7 @@ import org.unbescape.html.HtmlEscape;
 
 import io.onedev.commons.utils.ColorUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.job.paramspec.ParamSpec;
+import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.PullRequestManager;

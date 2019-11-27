@@ -1,0 +1,130 @@
+.build-spec {
+    padding: 20px;
+}
+.build-spec.not-defined {
+    font-style: italic;
+    font-size: 16px;
+    text-align: center;
+}
+.build-spec>.invalid>.title {
+    font-size: 20px;
+    color: red;
+    margin-bottom: 20px;
+}
+.build-spec>.invalid>.error-message {
+	white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 13px;
+    font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.build-spec>.valid>div {
+    border-radius: 4px;
+}
+.build-spec>.valid>div>.head {
+    font-weight: bold;
+    font-size: 16px;
+    margin-bottom: 16px;
+}
+.build-spec>.valid>div>.body {
+    position: relative;
+}
+.build-spec>.valid>div>.not-defined {
+    font-size: 16px;
+    font-style: italic;
+}
+
+.build-spec>.valid>div>.body>:first-child {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 220px;
+}
+.build-spec>.valid>div>.body>:last-child {
+    margin-left: 240px;
+}
+
+.build-spec>.valid>div>.body>.side>.navs:not(:empty) {
+    margin-bottom: 20px;
+}
+.build-spec>.valid>div>.body>.side>.navs>.nav {
+    position: relative;
+    background: #444;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+.build-spec>.valid>div>.body>.side>.navs>.nav a {
+    color: #BBB;
+}
+.build-spec>.valid>div>.body>.side>.navs>.nav .drag-indicator {
+    color: inherit;
+    margin-right: 4px;
+}
+.build-spec>.valid>div>.body>.side>.navs>.nav:hover a,
+.build-spec>.valid>div>.body>.side>.navs>.nav.active a {
+    color: white;
+    font-weight: bold;
+}
+.build-spec>.valid>div>.body>.side>.navs>.nav.active {
+    background: #080808;
+}
+.build-spec>.valid>div>.body>.side>.navs>.nav:first-child:last-child {
+    border-radius: 4px;
+}
+
+.build-spec>.valid>div>.body>.side>.navs>.nav>.select {
+    padding: 8px 28px 8px 8px;
+    text-decoration: none;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.build-spec>.valid>div>.body>.side>.navs>.nav>.delete, 
+.build-spec>.valid>div>.body>.side>.navs>.nav>.run {
+    right: 0;
+    top: 0;
+    position: absolute;
+    border-left: 1px solid #EEE;
+    padding: 8px 8px;
+    display: block;
+}
+.build-spec>.valid>div>.body>.side .add {
+	position: relative;
+}
+.build-spec>.valid>div>.body>.side .create {
+	display: block;
+	margin-right: 38px;
+	border-radius: 4px 0 0 4px;
+}
+.build-spec>.valid>div>.body>.side .create.no-suggestions {
+	margin-right: 0;
+	border-radius: 4px;
+}
+.build-spec>.valid>div>.body>.side .suggestions {
+	position: absolute;
+	right: 0;
+	top: 0;
+	border-radius: 0 4px 4px 0;
+	border-left: none;
+}
+.build-spec>.valid>div>.body>.contents>.content {
+    border-radius: 4px;
+    border: 1px solid #BBB;
+    padding: 20px;
+}
+
+.build-spec>.valid .bean-properties>table>tbody>tr>td.name {
+    width: 200px;
+}
+.build-spec>.valid .bean-properties>table>tbody>tr.property-retry td.name {
+	width: 100px;
+}
+.build-spec>.valid .bean-properties>table>tbody>tr>td.value .form-control {
+    height: 32px;
+    font-size: 13px;
+}
+.build-spec>.valid .def-list table>tbody>tr>td:first-child>div>a {
+    margin-left: 0;
+}
+
+

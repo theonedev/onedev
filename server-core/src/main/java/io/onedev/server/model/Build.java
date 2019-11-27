@@ -49,12 +49,12 @@ import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.VariableInterpolator;
+import io.onedev.server.buildspec.job.paramspec.ParamSpec;
+import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.cache.CommitInfoManager;
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.job.Job;
-import io.onedev.server.ci.job.VariableInterpolator;
-import io.onedev.server.ci.job.paramspec.ParamSpec;
-import io.onedev.server.ci.job.paramsupply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
@@ -187,7 +187,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private transient Map<Build.Status, Collection<RevCommit>> commitsCache;
 	
-	private transient CISpec ciSpec;
+	private transient BuildSpec buildSpec;
 	
 	private transient Job job;
 	
@@ -537,15 +537,15 @@ public class Build extends AbstractEntity implements Referenceable {
 			return project.getSecretValue(secretName, ObjectId.fromString(getCommitHash()));
 	}
 	
-	public CISpec getCISpec() {
-		if (ciSpec == null) 
-			ciSpec = Preconditions.checkNotNull(getProject().getCISpec(getCommitId()));
-		return ciSpec;
+	public BuildSpec getBuildSpec() {
+		if (buildSpec == null) 
+			buildSpec = Preconditions.checkNotNull(getProject().getBuildSpec(getCommitId()));
+		return buildSpec;
 	}
 	
 	public Job getJob() {
 		if (job == null) 
-			job = Preconditions.checkNotNull(getCISpec().getJobMap().get(getJobName()));
+			job = Preconditions.checkNotNull(getBuildSpec().getJobMap().get(getJobName()));
 		return job;
 	}
 

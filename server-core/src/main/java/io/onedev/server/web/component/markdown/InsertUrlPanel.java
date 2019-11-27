@@ -50,6 +50,7 @@ import io.onedev.commons.utils.UrlUtils;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.BlobIdentFilter;
 import io.onedev.server.model.Project;
+import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.blob.BlobPicker;
 import io.onedev.server.web.component.dropzonefield.DropzoneField;
 import io.onedev.server.web.component.tabbable.AjaxActionTab;
@@ -174,35 +175,41 @@ abstract class InsertUrlPanel extends Panel {
 			 * added/uploaded files while editing a markdown file
 			 */
 			ObjectId commitId;
-			try {
-				commitId = context.getProject().getRepository()
-						.resolve(context.getBlobIdent().revision);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			if (context.getBlobIdent().revision != null) {
+				try {
+					commitId = context.getProject().getRepository().resolve(context.getBlobIdent().revision);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			} else {
+				commitId = null;
 			}
 			
 			Set<BlobIdent> blobPickerState = new HashSet<>();
-			Set<String> expandedPaths = WebSession.get().getMetaData(BLOB_PICKER_STATE);
-			if (expandedPaths != null) {
-				for (String path: expandedPaths)
-					blobPickerState.add(new BlobIdent(commitId.name(), path, FileMode.TREE.getBits()));
-			} 
 			
-			BlobIdent blobIdent = context.getBlobIdent();
-			String parentPath;
-			if (blobIdent.isTree())
-				parentPath = blobIdent.path;
-			else if (blobIdent.path.contains("/"))
-				parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
-			else
-				parentPath = null;
-			
-			while (parentPath != null) {
-				blobPickerState.add(new BlobIdent(commitId.name(), parentPath, FileMode.TYPE_TREE));
-				if (parentPath.contains("/"))
-					parentPath = StringUtils.substringBeforeLast(parentPath, "/");
+			if (commitId != null) {
+				Set<String> expandedPaths = WebSession.get().getMetaData(BLOB_PICKER_STATE);
+				if (expandedPaths != null) {
+					for (String path: expandedPaths)
+						blobPickerState.add(new BlobIdent(commitId.name(), path, FileMode.TREE.getBits()));
+				} 
+				
+				BlobIdent blobIdent = context.getBlobIdent();
+				String parentPath;
+				if (blobIdent.isTree())
+					parentPath = blobIdent.path;
+				else if (blobIdent.path.contains("/"))
+					parentPath = StringUtils.substringBeforeLast(blobIdent.path, "/");
 				else
 					parentPath = null;
+				
+				while (parentPath != null) {
+					blobPickerState.add(new BlobIdent(commitId.name(), parentPath, FileMode.TYPE_TREE));
+					if (parentPath.contains("/"))
+						parentPath = StringUtils.substringBeforeLast(parentPath, "/");
+					else
+						parentPath = null;
+				}
 			}
 			
 			fragment.add(new BlobPicker("files", commitId) {
@@ -421,10 +428,28 @@ abstract class InsertUrlPanel extends Panel {
 				}
 				
 			})); 
+			
+			ReferenceInputBehavior behavior = new ReferenceInputBehavior(true) {
+				
+				@Override
+				protected Project getProject() {
+					return markdownEditor.getBlobRenderContext().getProject();
+				}
+				
+			};
 			form.add(new TextField<String>("summaryCommitMessage", 
-					new PropertyModel<String>(this, "summaryCommitMessage")));
+					new PropertyModel<String>(this, "summaryCommitMessage")).add(behavior));
+			
+			behavior = new ReferenceInputBehavior(true) {
+				
+				@Override
+				protected Project getProject() {
+					return markdownEditor.getBlobRenderContext().getProject();
+				}
+				
+			};
 			form.add(new TextArea<String>("detailCommitMessage", 
-					new PropertyModel<String>(this, "detailCommitMessage")));
+					new PropertyModel<String>(this, "detailCommitMessage")).add(behavior));
 			
 			form.add(new AjaxButton("insert") {
 

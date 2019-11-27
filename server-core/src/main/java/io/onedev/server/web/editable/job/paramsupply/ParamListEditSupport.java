@@ -8,7 +8,7 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.commons.utils.ReflectionUtils;
-import io.onedev.server.ci.job.paramsupply.ParamSupply;
+import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.web.editable.EditSupport;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;

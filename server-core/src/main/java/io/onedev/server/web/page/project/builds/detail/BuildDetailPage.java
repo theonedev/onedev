@@ -36,9 +36,9 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.job.JobManager;
-import io.onedev.server.ci.job.paramspec.ParamSpec;
-import io.onedev.server.ci.job.paramsupply.ParamSupply;
+import io.onedev.server.buildspec.job.JobManager;
+import io.onedev.server.buildspec.job.paramspec.ParamSpec;
+import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;

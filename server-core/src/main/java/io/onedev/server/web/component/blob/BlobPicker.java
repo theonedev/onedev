@@ -1,8 +1,11 @@
 package io.onedev.server.web.component.blob;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
@@ -31,7 +34,7 @@ public abstract class BlobPicker extends Panel {
 
 	private final ObjectId commitId;
 	
-	public BlobPicker(String id, ObjectId commitId) {
+	public BlobPicker(String id, @Nullable ObjectId commitId) {
 		super(id);
 		
 		this.commitId = commitId;
@@ -49,7 +52,10 @@ public abstract class BlobPicker extends Panel {
 
 			@Override
 			public Iterator<? extends BlobIdent> getRoots() {
-				return getChildren(new BlobIdent(commitId.name(), null, FileMode.TYPE_TREE));
+				if (commitId != null)
+					return getChildren(new BlobIdent(commitId.name(), null, FileMode.TYPE_TREE));
+				else
+					return new ArrayList<BlobIdent>().iterator();
 			}
 
 			@Override

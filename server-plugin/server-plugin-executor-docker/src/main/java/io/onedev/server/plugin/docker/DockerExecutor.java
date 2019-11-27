@@ -47,11 +47,11 @@ import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
-import io.onedev.server.ci.job.JobContext;
-import io.onedev.server.ci.job.JobManager;
-import io.onedev.server.ci.job.JobService;
-import io.onedev.server.ci.job.SubmoduleCredential;
-import io.onedev.server.ci.job.EnvVar;
+import io.onedev.server.buildspec.job.EnvVar;
+import io.onedev.server.buildspec.job.JobContext;
+import io.onedev.server.buildspec.job.JobManager;
+import io.onedev.server.buildspec.job.JobService;
+import io.onedev.server.buildspec.job.SubmoduleCredential;
 import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -68,7 +68,7 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=200, description="This executor runs CI jobs as docker containers on OneDev server")
+@Editable(order=200, description="This executor runs build jobs as docker containers on OneDev server")
 @ClassValidating
 @Horizontal
 public class DockerExecutor extends JobExecutor implements Testable<TestData>, Validatable {

@@ -8,7 +8,7 @@ import javax.validation.constraints.Size;
 
 import io.onedev.commons.utils.match.Matcher;
 import io.onedev.commons.utils.match.PathMatcher;
-import io.onedev.server.ci.job.JobService;
+import io.onedev.server.buildspec.job.JobService;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;

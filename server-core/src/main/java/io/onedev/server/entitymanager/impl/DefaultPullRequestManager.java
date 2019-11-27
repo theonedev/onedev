@@ -60,13 +60,13 @@ import io.onedev.commons.utils.MatrixRunner;
 import io.onedev.commons.utils.concurrent.Prioritized;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobManager;
+import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
+import io.onedev.server.buildspec.job.trigger.JobTrigger;
+import io.onedev.server.buildspec.job.trigger.PullRequestTrigger;
 import io.onedev.server.cache.CommitInfoManager;
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.job.Job;
-import io.onedev.server.ci.job.JobManager;
-import io.onedev.server.ci.job.paramsupply.ParamSupply;
-import io.onedev.server.ci.job.trigger.JobTrigger;
-import io.onedev.server.ci.job.trigger.PullRequestTrigger;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestBuildManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
@@ -734,9 +734,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				} else {
 					requiredJobNames = new HashSet<>();
 				}
-				CISpec ciSpec = project.getCISpec(commitId);
-				if (ciSpec != null) {
-					for (Job job: ciSpec.getJobs()) {
+				BuildSpec buildSpec = project.getBuildSpec(commitId);
+				if (buildSpec != null) {
+					for (Job job: buildSpec.getJobs()) {
 						for (JobTrigger trigger: job.getTriggers()) {
 							if (trigger instanceof PullRequestTrigger) {
 								PullRequestTrigger pullRequestTrigger = (PullRequestTrigger) trigger;

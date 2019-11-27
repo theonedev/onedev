@@ -12,7 +12,7 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.ci.job.action.notificationreceiver.NotificationReceiverParser;
+import io.onedev.server.buildspec.job.action.notificationreceiver.NotificationReceiverParser;
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;

@@ -33,9 +33,15 @@ onedev.server.codemirror = {
             onedev.server.codemirror.setMode(cm, modeInfo);
 	},
 	setModeByFileName: function(cm, fileName) {
-	    var modeInfo = CodeMirror.findModeByFileName(fileName);
-        if (modeInfo) 
-            onedev.server.codemirror.setMode(cm, modeInfo);
+		if (fileName.endsWith(".cbl") || fileName.endsWith(".pco")) {
+			onedev.server.codemirror.setModeByName(cm, "cobol");
+		} else if (fileName == ".onedev-buildspec") {
+			onedev.server.codemirror.setModeByName(cm, "xml");
+		} else {
+		    var modeInfo = CodeMirror.findModeByFileName(fileName);
+	        if (modeInfo) 
+	            onedev.server.codemirror.setMode(cm, modeInfo);
+		}
 	},
 	setMode: function(cm, modeInfo) {
         // specify mode via mime does not work for gfm (github flavored markdown)

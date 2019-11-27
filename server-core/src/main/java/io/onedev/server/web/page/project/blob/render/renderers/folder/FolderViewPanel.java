@@ -38,7 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.CISpec;
+import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.util.userident.UserIdent;
@@ -98,11 +98,11 @@ public class FolderViewPanel extends Panel {
 				
 				Collections.sort(children);
 				
-				BlobIdent ciSpecIdent = new BlobIdent(context.getBlobIdent().revision, 
-						CISpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits());
-				if (children.contains(ciSpecIdent)) {
-					children.remove(ciSpecIdent);
-					children.add(0, ciSpecIdent);
+				BlobIdent buildSpecIdent = new BlobIdent(context.getBlobIdent().revision, 
+						BuildSpec.BLOB_PATH, FileMode.REGULAR_FILE.getBits());
+				if (children.contains(buildSpecIdent)) {
+					children.remove(buildSpecIdent);
+					children.add(0, buildSpecIdent);
 				}
 				return children;
 			} catch (IOException e) {
@@ -191,7 +191,7 @@ public class FolderViewPanel extends Panel {
 					iconClass = "fa fa-ext fa-folder-submodule-o";
 				else if (blobIdent.isSymbolLink()) 
 					iconClass = "fa fa-ext fa-folder-symbol-link-o";
-				else if (blobIdent.path.equals(CISpec.BLOB_PATH))
+				else if (blobIdent.path.equals(BuildSpec.BLOB_PATH))
 					iconClass = "fa fa-cog";
 				else  
 					iconClass = "fa fa-file-text-o";
@@ -219,7 +219,7 @@ public class FolderViewPanel extends Panel {
 				
 				if (context.getBlobIdent().path != null) 
 					pathLink.add(new Label("label", blobIdent.path.substring(context.getBlobIdent().path.length()+1)));
-				else if (blobIdent.path.equals(CISpec.BLOB_PATH))
+				else if (blobIdent.path.equals(BuildSpec.BLOB_PATH))
 					pathLink.add(new Label("label", "<b>" + HtmlEscape.escapeHtml5(blobIdent.path) + "</b>").setEscapeModelStrings(false));
 				else
 					pathLink.add(new Label("label", blobIdent.path));

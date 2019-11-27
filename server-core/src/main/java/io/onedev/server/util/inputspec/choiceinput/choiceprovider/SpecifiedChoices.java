@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
 import javax.validation.constraints.Size;
 
-import io.onedev.server.ci.job.paramspec.ChoiceParam;
+import io.onedev.server.buildspec.job.paramspec.ChoiceParam;
 import io.onedev.server.issue.fieldspec.ChoiceField;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.util.validation.Validatable;

@@ -46,10 +46,10 @@ import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
-import io.onedev.server.ci.job.CacheSpec;
-import io.onedev.server.ci.job.EnvVar;
-import io.onedev.server.ci.job.JobContext;
-import io.onedev.server.ci.job.JobService;
+import io.onedev.server.buildspec.job.CacheSpec;
+import io.onedev.server.buildspec.job.EnvVar;
+import io.onedev.server.buildspec.job.JobContext;
+import io.onedev.server.buildspec.job.JobService;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
@@ -67,7 +67,7 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=100, description="This executor runs CI jobs as pods in a kubernetes cluster")
+@Editable(order=100, description="This executor runs build jobs as pods in a kubernetes cluster")
 @Horizontal
 public class KubernetesExecutor extends JobExecutor implements Testable<TestData> {
 

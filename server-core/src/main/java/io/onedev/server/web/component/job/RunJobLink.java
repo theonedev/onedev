@@ -13,11 +13,11 @@ import org.eclipse.jgit.lib.ObjectId;
 import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.ci.CISpec;
-import io.onedev.server.ci.job.Job;
-import io.onedev.server.ci.job.JobManager;
-import io.onedev.server.ci.job.paramspec.ParamSpec;
-import io.onedev.server.ci.job.paramsupply.ParamSupply;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.job.Job;
+import io.onedev.server.buildspec.job.JobManager;
+import io.onedev.server.buildspec.job.paramspec.ParamSpec;
+import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
@@ -47,9 +47,9 @@ public abstract class RunJobLink extends AjaxLink<Void> {
 	
 	@Override
 	public void onClick(AjaxRequestTarget target) {
-		CISpec ciSpec = Preconditions.checkNotNull(getProject().getCISpec(commitId));
+		BuildSpec buildSpec = Preconditions.checkNotNull(getProject().getBuildSpec(commitId));
 		
-		Job job = Preconditions.checkNotNull(ciSpec.getJobMap().get(jobName));
+		Job job = Preconditions.checkNotNull(buildSpec.getJobMap().get(jobName));
 		if (!job.getParamSpecs().isEmpty()) {
 			Serializable paramBean;
 			try {

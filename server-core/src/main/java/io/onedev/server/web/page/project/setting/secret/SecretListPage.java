@@ -51,7 +51,7 @@ public class SecretListPage extends ProjectSettingPage {
 		
 		add(form);
 		
-		String note = String.format("Define project secrets here to be used in CI jobs. Secret value less "
+		String note = String.format("Define project secrets here to be used in build jobs. Secret value less "
 				+ "than %d characters will not be masked in build log. For a given name, the first "
 				+ "authorized secret will be used", SecretInput.MASK.length());
 		add(new Label("note", note).setEscapeModelStrings(false));

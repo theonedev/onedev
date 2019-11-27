@@ -59,7 +59,7 @@ onedev.server.blobEdit = {
              * use appropriate blob editor for current file name. In such case we add "no-autofocus"
              * class to the blob content container in order not to jump to blob content area while 
              * inputting file name. However we want to remove this class to get better user 
-             * experience (for instance when we are editing the CI specs) when we are ready to edit 
+             * experience (for instance when we are editing the build specs) when we are ready to edit 
              * the blob content by moving mouse into blob edit area
              */
             $container.closest(".no-autofocus").removeClass("no-autofocus");
