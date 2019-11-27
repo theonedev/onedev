@@ -18,7 +18,6 @@ import io.onedev.server.event.pullrequest.PullRequestCodeCommentEvent;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Transactional;
@@ -41,8 +40,6 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 
 	private static final int INFO_VERSION = 5;
 	
-	private static final String PROJECT_VISIT_STORE = "projectVisit";
-	
 	private static final String PULL_REQUEST_VISIT_STORE = "pullRequestVisit";
 	
 	private static final String PULL_REQUEST_NOTIFICATION_STORE = "pullRequestNotification";
@@ -62,38 +59,6 @@ public class DefaultUserInfoManager extends AbstractEnvironmentManager implement
 		this.storageManager = storageManager;
 	}
 	
-	@Override
-	public void visit(User user, Project project) {
-		Environment env = getEnv(user.getId().toString());
-		Store store = getStore(env, PROJECT_VISIT_STORE);
-		env.executeInTransaction(new TransactionalExecutable() {
-			
-			@Override
-			public void execute(Transaction txn) {
-				writeLong(store, txn, new LongByteIterable(project.getId()), System.currentTimeMillis()+1000L);
-			}
-			
-		});
-	}
-
-	@Override
-	public Date getVisitDate(User user, Project project) {
-		Environment env = getEnv(user.getId().toString());
-		Store store = getStore(env, PROJECT_VISIT_STORE);
-		return env.computeInTransaction(new TransactionalComputable<Date>() {
-			
-			@Override
-			public Date compute(Transaction txn) {
-				long millis = readLong(store, txn, new LongByteIterable(project.getId()), -1);
-				if (millis != -1)
-					return new Date(millis);
-				else
-					return null;
-			}
-			
-		});
-	}
-
 	@Transactional
 	@Listen
 	public void on(EntityRemoved event) {

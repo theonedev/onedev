@@ -74,7 +74,6 @@ import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.cache.CommitInfoManager;
-import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.ci.CISpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
@@ -1375,28 +1374,6 @@ public class Project extends AbstractEntity {
 					return projectAware.getProject();
 			}
 			return null;
-		}
-	}
-	
-	public static int compareLastVisit(Project project1, Project project2) {
-		User user = SecurityUtils.getUser();
-		if (user != null) {
-			UserInfoManager userInfoManager = OneDev.getInstance(UserInfoManager.class);
-			Date date1 = userInfoManager.getVisitDate(user, project1);
-			Date date2 = userInfoManager.getVisitDate(user, project2);
-			if (date1 != null) {
-				if (date2 != null)
-					return date2.compareTo(date1);
-				else
-					return -1;
-			} else {
-				if (date2 != null)
-					return 1;
-				else
-					return project1.compareTo(project2);
-			}
-		} else {
-			return project1.compareTo(project2);
 		}
 	}
 	

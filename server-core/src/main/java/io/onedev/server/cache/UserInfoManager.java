@@ -6,17 +6,11 @@ import javax.annotation.Nullable;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 
 public interface UserInfoManager {
 	
-	void visit(User user, Project project);
-	
-	@Nullable
-	Date getVisitDate(User user, Project project);
-
 	void visitPullRequest(User user, PullRequest request);
 	
 	void visitPullRequestCodeComments(User user, PullRequest request);

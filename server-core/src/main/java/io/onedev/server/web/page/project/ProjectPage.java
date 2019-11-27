@@ -28,7 +28,6 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
-import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
@@ -127,13 +126,6 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		return new HashMap<>();
 	}
 	
-	@Override
-	protected void onAfterRender() {
-		super.onAfterRender();
-		if (getLoginUser() != null)
-			OneDev.getInstance(UserInfoManager.class).visit(getLoginUser(), getProject());
-	}
-
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
