@@ -5,6 +5,9 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -22,6 +25,8 @@ import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
+import io.onedev.server.web.editable.Path;
+import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.util.Testable;
 
 @SuppressWarnings("serial")
@@ -38,13 +43,22 @@ abstract class JobExecutorEditPanel extends Panel {
 		this.executorIndex = executorIndex;
 	}
 	
+	@Nullable
+	private JobExecutor getExecutor(String name) {
+		for (JobExecutor executor: executors) {
+			if (executor.getName().equals(name))
+				return executor;
+		}
+		return null;
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
 		JobExecutorBean bean = new JobExecutorBean();
 		if (executorIndex != -1)
-			bean.setExecutor(executors.get(executorIndex));
+			bean.setExecutor(SerializationUtils.clone(executors.get(executorIndex)));
 
 		BeanEditor editor = BeanContext.edit("editor", bean);
 		
@@ -55,7 +69,17 @@ abstract class JobExecutorEditPanel extends Panel {
 				super.onSubmit(target, form);
 				
 				JobExecutor executor = bean.getExecutor();
-
+				if (executorIndex != -1) { 
+					JobExecutor oldExecutor = executors.get(executorIndex);
+					if (!executor.getName().equals(oldExecutor.getName()) && getExecutor(executor.getName()) != null) {
+						editor.error(new Path(new PathNode.Named("executor"), new PathNode.Named("name")),
+								"This name has already been used by another job executor");
+					}
+				} else if (getExecutor(executor.getName()) != null) {
+					editor.error(new Path(new PathNode.Named("executor"), new PathNode.Named("name")),
+							"This name has already been used by another job executor");
+				}
+				
 				if (editor.isValid()) {
 					if (executorIndex != -1) {
 						executors.set(executorIndex, executor);
@@ -93,18 +117,18 @@ abstract class JobExecutorEditPanel extends Panel {
 			protected void onConfigure() {
 				super.onConfigure();
 				
-				BeanEditor jobExecutorEditor = editor.visitChildren(BeanEditor.class, new IVisitor<BeanEditor, BeanEditor>() {
+				BeanEditor executorEditor = editor.visitChildren(BeanEditor.class, new IVisitor<BeanEditor, BeanEditor>() {
 
 					public void component(BeanEditor component, IVisit<BeanEditor> visit) {
 						visit.stop(component);
 					}
 					
 				});
-				if (jobExecutorEditor != null 
-						&& jobExecutorEditor.isVisibleInHierarchy()
-						&& Testable.class.isAssignableFrom(jobExecutorEditor.getDescriptor().getBeanClass())) {
+				if (executorEditor != null 
+						&& executorEditor.isVisibleInHierarchy()
+						&& Testable.class.isAssignableFrom(executorEditor.getDescriptor().getBeanClass())) {
 					Class<? extends Serializable> testDataClass = null;					
-					for (Type type: jobExecutorEditor.getDescriptor().getBeanClass().getGenericInterfaces()) {
+					for (Type type: executorEditor.getDescriptor().getBeanClass().getGenericInterfaces()) {
 						ParameterizedType parameterizedType = (ParameterizedType) type;
 						if (parameterizedType.getRawType() == Testable.class) {
 							testDataClass = (Class<? extends Serializable>) parameterizedType.getActualTypeArguments()[0];

@@ -16,11 +16,11 @@ import org.apache.wicket.util.convert.ConversionException;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
+import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.ValueEditor;
-import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
@@ -111,11 +111,10 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 	
 	private Component newBeanEditor(Serializable propertyValue) {
 		Component beanEditor;
-		if (propertyValue != null) {
+		if (propertyValue != null)
 			beanEditor = BeanContext.edit(BEAN_EDITOR_ID, propertyValue, excludedProperties, true);
-		} else {
+		else 
 			beanEditor = new WebMarkupContainer(BEAN_EDITOR_ID).setVisible(false);
-		}
 		beanEditor.setOutputMarkupId(true);
 		beanEditor.setOutputMarkupPlaceholderTag(true);
 		return beanEditor;
@@ -123,7 +122,11 @@ public class BeanPropertyEditor extends PropertyEditor<Serializable> {
 		
 	@Override
 	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
-		((ValueEditor<?>) get(BEAN_EDITOR_ID)).error(pathInProperty, errorMessage);
+		Component editor = get(BEAN_EDITOR_ID);
+		if (editor instanceof ValueEditor)
+			((ValueEditor<?>) editor).error(propertyNode, pathInProperty, errorMessage);
+		else
+			super.error(propertyNode, pathInProperty, errorMessage);
 	}
 
 	@Override

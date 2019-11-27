@@ -660,7 +660,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}).checkReturnCode();
 		
 		String namespace = createNamespace(jobContext, jobLogger);
-		jobLogger.log("Executing job (executor: kubernetes, namespace: " + namespace + ", image: " + dockerImage + ")...");
+		jobLogger.log(String.format("Executing job (executor: %s, namespace: %s, image: %s)...", 
+				getName(), namespace, dockerImage));
 		
 		try {
 			String imagePullSecretName = createImagePullSecret(namespace, jobLogger);

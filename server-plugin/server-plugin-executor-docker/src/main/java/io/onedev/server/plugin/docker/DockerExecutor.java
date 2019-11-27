@@ -469,7 +469,8 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				@Override
 				public Void call() {
 					String network = createNetwork(jobContext, jobLogger);
-					jobLogger.log("Executing job (executor: docker, network: " + network + ", image: " + jobContext.getImage() + ")...");
+					jobLogger.log(String.format("Executing job (executor: %s, network: %s, image: %s)...", 
+							getName(), network, jobContext.getImage()));
 					try {
 						jobContext.notifyJobRunning();
 						

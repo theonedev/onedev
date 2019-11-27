@@ -102,8 +102,8 @@
 }
 .property-viewer>.bean-list>tfoot>tr>td.no-elements>div {
     border-top: 2px solid #DDD;
-    margin-top: -6px;
-    padding-top: 6px;
+    margin-top: -7px;
+    padding-top: 7px;
 }
 
 .editable>.polymorphic>.type-selector {

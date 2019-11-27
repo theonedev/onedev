@@ -30,11 +30,11 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.BeanUpdating;
 import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.ValueEditor;
-import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.annotation.ExcludedProperties;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
@@ -227,7 +227,11 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 
 	@Override
 	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
-		((ValueEditor<?>) get(BEAN_EDITOR_ID)).error(pathInProperty, errorMessage);
+		Component editor = get(BEAN_EDITOR_ID);
+		if (editor instanceof ValueEditor)
+			((ValueEditor<?>) editor).error(propertyNode, pathInProperty, errorMessage);
+		else
+			super.error(propertyNode, pathInProperty, errorMessage);
 	}
 
 	@Override

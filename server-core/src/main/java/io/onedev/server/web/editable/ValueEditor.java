@@ -53,7 +53,7 @@ public abstract class ValueEditor<T> extends FormComponentPanel<T> {
 			error(errorMessage);
 	}
 
-	protected void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
+	public void error(PathNode propertyNode, Path pathInProperty, String errorMessage) {
 		error(Path.describe(propertyNode, pathInProperty) + ": " + errorMessage);
 	}
 	

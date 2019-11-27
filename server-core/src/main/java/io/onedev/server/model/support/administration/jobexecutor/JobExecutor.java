@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jgit.lib.ObjectId;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -30,6 +31,8 @@ public abstract class JobExecutor implements Serializable {
 
 	private boolean enabled = true;
 	
+	private String name;
+	
 	private String applicableProjects;
 	
 	private String applicableBranches;
@@ -46,6 +49,16 @@ public abstract class JobExecutor implements Serializable {
 
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
+	}
+
+	@Editable(order=10)
+	@NotEmpty
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Editable(order=10000, group="Job Applicability",
