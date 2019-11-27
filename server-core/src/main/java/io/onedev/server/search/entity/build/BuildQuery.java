@@ -229,13 +229,13 @@ public class BuildQuery extends EntityQuery<Build> {
 				if (!ORDER_FIELDS.containsKey(fieldName)) 
 					throw new OneException("Can not order by field: " + fieldName);
 				
-				EntitySort commentSort = new EntitySort();
-				commentSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("asc"))
-					commentSort.setDirection(Direction.ASCENDING);
+				EntitySort buildSort = new EntitySort();
+				buildSort.setField(fieldName);
+				if (order.direction != null && order.direction.getText().equals("desc"))
+					buildSort.setDirection(Direction.DESCENDING);
 				else
-					commentSort.setDirection(Direction.DESCENDING);
-				buildSorts.add(commentSort);
+					buildSort.setDirection(Direction.ASCENDING);
+				buildSorts.add(buildSort);
 			}
 			
 			return new BuildQuery(buildCriteria, buildSorts);

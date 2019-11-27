@@ -163,10 +163,10 @@ public class ProjectQuery extends EntityQuery<Project> {
 				
 				EntitySort projectSort = new EntitySort();
 				projectSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("asc"))
-					projectSort.setDirection(Direction.ASCENDING);
-				else
+				if (order.direction != null && order.direction.getText().equals("desc"))
 					projectSort.setDirection(Direction.DESCENDING);
+				else
+					projectSort.setDirection(Direction.ASCENDING);
 				projectSorts.add(projectSort);
 			}
 			

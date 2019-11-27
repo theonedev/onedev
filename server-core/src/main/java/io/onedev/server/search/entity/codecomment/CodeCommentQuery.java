@@ -196,10 +196,10 @@ public class CodeCommentQuery extends EntityQuery<CodeComment> {
 				
 				EntitySort commentSort = new EntitySort();
 				commentSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("asc"))
-					commentSort.setDirection(Direction.ASCENDING);
-				else
+				if (order.direction != null && order.direction.getText().equals("desc"))
 					commentSort.setDirection(Direction.DESCENDING);
+				else
+					commentSort.setDirection(Direction.ASCENDING);
 				commentSorts.add(commentSort);
 			}
 			

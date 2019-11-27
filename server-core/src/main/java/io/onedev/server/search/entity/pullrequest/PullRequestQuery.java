@@ -246,10 +246,10 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 				
 				EntitySort requestSort = new EntitySort();
 				requestSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("asc"))
-					requestSort.setDirection(Direction.ASCENDING);
-				else
+				if (order.direction != null && order.direction.getText().equals("desc"))
 					requestSort.setDirection(Direction.DESCENDING);
+				else
+					requestSort.setDirection(Direction.ASCENDING);
 				requestSorts.add(requestSort);
 			}
 			

@@ -309,10 +309,10 @@ public class IssueQuery extends EntityQuery<Issue> {
 				
 				EntitySort issueSort = new EntitySort();
 				issueSort.setField(fieldName);
-				if (order.direction != null && order.direction.getText().equals("asc"))
-					issueSort.setDirection(Direction.ASCENDING);
-				else
+				if (order.direction != null && order.direction.getText().equals("desc"))
 					issueSort.setDirection(Direction.DESCENDING);
+				else
+					issueSort.setDirection(Direction.ASCENDING);
 				issueSorts.add(issueSort);
 			}
 			
