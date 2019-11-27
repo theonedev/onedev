@@ -28,9 +28,7 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
@@ -40,9 +38,9 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
+import io.onedev.server.web.component.user.UserDeleteLink;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
-import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
@@ -150,28 +148,19 @@ public class UserListPage extends AdministrationPage {
 			public void populateItem(Item<ICellPopulator<User>> cellItem, String componentId, IModel<User> rowModel) {
 				Fragment fragment = new Fragment(componentId, "actionFrag", UserListPage.this);
 				
-				User user = rowModel.getObject();
-				
-				fragment.add(new Link<Void>("delete") {
+				fragment.add(new UserDeleteLink("delete") {
 
 					@Override
-					public void onClick() {
-						try {
-							OneDev.getInstance(UserManager.class).delete(rowModel.getObject());
-							setResponsePage(UserListPage.class);
-						} catch (OneException e) {
-							getPage().error(HtmlUtils.formatAsHtml(e.getMessage()));
-						}
+					protected User getUser() {
+						return rowModel.getObject();
 					}
 
 					@Override
-					protected void onConfigure() {
-						super.onConfigure();
-						User user = rowModel.getObject();
-						setVisible(SecurityUtils.isAdministrator() && !user.isRoot() && !user.equals(getLoginUser()));
+					protected void onDeleted(AjaxRequestTarget target) {
+						setResponsePage(UserListPage.class, getPageParameters());
 					}
-
-				}.add(new ConfirmOnClick("Do you really want to delete user '" + user.getDisplayName() + "'?")));
+										
+				});
 				
 				cellItem.add(fragment);
 			}

@@ -1,4 +1,4 @@
-onedev.server.confirmAction = function(containerId, confirmInput) {
+onedev.server.confirm = function(containerId, confirmInput) {
 	var $container = $("#" + containerId);
 	var $confirmBtn = $container.find(".btn-danger, .btn-primary");
 	if (confirmInput) {

@@ -68,7 +68,7 @@ public class ProjectListPanel extends Panel {
 	
 	private final String query;
 	
-	private final Integer expectedCount;
+	private final int expectedCount;
 	
 	private IModel<ProjectQuery> parsedQueryModel = new LoadableDetachableModel<ProjectQuery>() {
 
@@ -89,7 +89,7 @@ public class ProjectListPanel extends Panel {
 		
 	};
 	
-	public ProjectListPanel(String id, @Nullable String query, @Nullable Integer expectedCount) {
+	public ProjectListPanel(String id, @Nullable String query, int expectedCount) {
 		super(id);
 		this.query = query;
 		this.expectedCount = expectedCount;
@@ -245,7 +245,7 @@ public class ProjectListPanel extends Panel {
 			
 		};
 		
-		if (expectedCount != null && expectedCount != dataProvider.size())
+		if (expectedCount != 0 && expectedCount != dataProvider.size())
 			warn("Some projects might be hidden due to permission policy");
 		
 		body.add(new NotificationPanel("feedback", this));

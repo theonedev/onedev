@@ -5,10 +5,10 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
-import io.onedev.server.web.component.confirmaction.ConfirmActionModal;
+import io.onedev.server.web.component.modal.confirm.ConfirmModal;
 
 @SuppressWarnings("serial")
-public abstract class ConfirmDeleteProjectModal extends ConfirmActionModal {
+public abstract class ConfirmDeleteProjectModal extends ConfirmModal {
 
 	public ConfirmDeleteProjectModal(AjaxRequestTarget target) {
 		super(target);

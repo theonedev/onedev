@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.confirmaction;
+package io.onedev.server.web.component.modal.confirm;
 
 import javax.annotation.Nullable;
 
@@ -8,19 +8,19 @@ import org.apache.wicket.ajax.AjaxRequestTarget;
 import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")
-public abstract class ConfirmActionModal extends ModalPanel {
+public abstract class ConfirmModal extends ModalPanel {
 
-	public ConfirmActionModal(AjaxRequestTarget target) {
+	public ConfirmModal(AjaxRequestTarget target) {
 		super(target);
 	}
 
 	@Override
 	protected Component newContent(String id) {
-		return new ConfirmActionPanel(id) {
+		return new ConfirmPanel(id) {
 			
 			@Override
 			protected void onConfirm(AjaxRequestTarget target) {
-				ConfirmActionModal.this.onConfirm(target);
+				ConfirmModal.this.onConfirm(target);
 				close();
 			}
 			
@@ -31,12 +31,12 @@ public abstract class ConfirmActionModal extends ModalPanel {
 
 			@Override
 			protected String getConfirmMessage() {
-				return ConfirmActionModal.this.getConfirmMessage();
+				return ConfirmModal.this.getConfirmMessage();
 			}
 
 			@Override
 			protected String getConfirmInput() {
-				return ConfirmActionModal.this.getConfirmInput();
+				return ConfirmModal.this.getConfirmInput();
 			}
 
 		};

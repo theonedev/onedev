@@ -80,7 +80,7 @@ public abstract class BuildListPanel extends Panel {
 	
 	private final String query;
 	
-	private final Integer expectedCount;
+	private final int expectedCount;
 	
 	private IModel<BuildQuery> parsedQueryModel = new LoadableDetachableModel<BuildQuery>() {
 
@@ -107,7 +107,7 @@ public abstract class BuildListPanel extends Panel {
 	
 	private DataTable<Build, Void> buildsTable;
 	
-	public BuildListPanel(String id, @Nullable String query, @Nullable Integer expectedCount) {
+	public BuildListPanel(String id, @Nullable String query, int expectedCount) {
 		super(id);
 		this.query = query;
 		this.expectedCount = expectedCount;
@@ -281,7 +281,7 @@ public abstract class BuildListPanel extends Panel {
 			
 		};
 		
-		if (expectedCount != null && expectedCount != dataProvider.size())
+		if (expectedCount != 0 && expectedCount != dataProvider.size())
 			warn("Some builds might be hidden due to permission policy");
 		
 		body.add(new NotificationPanel("feedback", this));

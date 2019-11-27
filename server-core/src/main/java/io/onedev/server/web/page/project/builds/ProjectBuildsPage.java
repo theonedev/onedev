@@ -157,7 +157,7 @@ public class ProjectBuildsPage extends ProjectPage {
 			
 		};
 		
-		add(new BuildListPanel("main", queryModel.getObject(), null) {
+		add(new BuildListPanel("main", queryModel.getObject(), 0) {
 
 			@Override
 			protected PagingHistorySupport getPagingHistorySupport() {

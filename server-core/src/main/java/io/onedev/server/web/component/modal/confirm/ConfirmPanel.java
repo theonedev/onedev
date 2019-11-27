@@ -1,4 +1,4 @@
-package io.onedev.server.web.component.confirmaction;
+package io.onedev.server.web.component.modal.confirm;
 
 import javax.annotation.Nullable;
 
@@ -18,9 +18,9 @@ import io.onedev.server.OneException;
 import io.onedev.server.web.component.link.PreventDefaultAjaxLink;
 
 @SuppressWarnings("serial")
-abstract class ConfirmActionPanel extends Panel {
+abstract class ConfirmPanel extends Panel {
 	
-	public ConfirmActionPanel(String id) {
+	public ConfirmPanel(String id) {
 		super(id);
 	}
 
@@ -57,7 +57,7 @@ abstract class ConfirmActionPanel extends Panel {
 					onConfirm(target);
 				} catch (OneException e) {
 					error(e.getMessage());
-					target.add(ConfirmActionPanel.this);
+					target.add(ConfirmPanel.this);
 				}
 			}
 			
@@ -78,9 +78,9 @@ abstract class ConfirmActionPanel extends Panel {
 	@Override
 	public void renderHead(IHeaderResponse response) {
 		super.renderHead(response);
-		response.render(JavaScriptHeaderItem.forReference(new ConfirmActionResourceReference()));
+		response.render(JavaScriptHeaderItem.forReference(new ConfirmResourceReference()));
 		
-		String script = String.format("onedev.server.confirmAction('%s', %s);", 
+		String script = String.format("onedev.server.confirm('%s', %s);", 
 				getMarkupId(), getConfirmInput()!=null?"'" + JavaScriptEscape.escapeJavaScript(getConfirmInput()) + "'": "undefined");
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}

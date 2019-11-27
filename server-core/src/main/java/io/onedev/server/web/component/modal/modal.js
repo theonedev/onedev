@@ -25,6 +25,8 @@ onedev.server.modal = {
 		$(document).on("keydown", $modal.data("keydown"));
 		
 		$modal.modal({backdrop: "static", "keyboard": false});
+		
+		$(document.activeElement).blur();
 	}, 
 	
 	close: function($modal, callCloseCallback) {

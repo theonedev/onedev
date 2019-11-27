@@ -8,20 +8,24 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.TextField;
+import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UrlManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 
@@ -63,7 +67,9 @@ public abstract class ProjectInfoPanel extends Panel {
 			
 		}.setVisible(SecurityUtils.canCreateProjects() &&  SecurityUtils.canReadCode(getProject())));
 		
-		WebMarkupContainer forksLink = new WebMarkupContainer("forks") {
+		String query = "forks of " + ProjectQuery.quote(getProject().getName());
+		PageParameters params = ProjectListPage.paramsOf(query, 0, getProject().getForks().size());
+		Link<Void> forksLink = new BookmarkablePageLink<Void>("forks", ProjectListPage.class, params) {
 
 			@Override
 			protected void onComponentTag(ComponentTag tag) {
@@ -74,6 +80,7 @@ public abstract class ProjectInfoPanel extends Panel {
 			
 		};
 		forksLink.add(new Label("label", getProject().getForks().size() + " forks"));
+		
 		add(forksLink.setEnabled(getProject().getForks().size() != 0));
 		
 		if (getProject().getDescription() != null)

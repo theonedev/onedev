@@ -3,26 +3,23 @@ package io.onedev.server.web.component.user.profileedit;
 import java.io.Serializable;
 
 import org.apache.wicket.Session;
+import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.html.form.Form;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.web.component.user.UserDeleteLink;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
-import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.Path;
+import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.page.admin.user.UserListPage;
-import io.onedev.server.web.util.ConfirmOnClick;
 
 @SuppressWarnings("serial")
 public class ProfileEditPanel extends GenericPanel<User> {
@@ -93,26 +90,19 @@ public class ProfileEditPanel extends GenericPanel<User> {
 		
 		form.add(new FencedFeedbackPanel("feedback", form).setEscapeModelStrings(false));
 		
-		form.add(new Link<Void>("delete") {
+		form.add(new UserDeleteLink("delete") {
 
 			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				
-				setVisible(!getUser().equals(SecurityUtils.getUser()));
+			protected User getUser() {
+				return ProfileEditPanel.this.getUser();
 			}
 
 			@Override
-			public void onClick() {
-				try {
-					OneDev.getInstance(UserManager.class).delete(getUser());
-					setResponsePage(UserListPage.class);
-				} catch (OneException e) {
-					error(HtmlUtils.formatAsHtml(e.getMessage()));
-				}
+			protected void onDeleted(AjaxRequestTarget target) {
+				setResponsePage(UserListPage.class);
 			}
-			
-		}.add(new ConfirmOnClick("Do you really want to delete user '" + getUser().getDisplayName() + "'?")));
+
+		});
 
 		add(form);
 	}

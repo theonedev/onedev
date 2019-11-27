@@ -37,7 +37,6 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
-import io.onedev.server.web.component.link.LabelLink;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -109,7 +108,12 @@ public class GroupListPage extends AdministrationPage {
 			@Override
 			public void populateItem(Item<ICellPopulator<Group>> cellItem, String componentId, IModel<Group> rowModel) {
 				Fragment fragment = new Fragment(componentId, "nameFrag", GroupListPage.this);
-				fragment.add(new LabelLink<Void>("name", Model.of(rowModel.getObject().getName())) {
+				fragment.add(new Link<Void>("name") {
+
+					@Override
+					public IModel<?> getBody() {
+						return Model.of(rowModel.getObject().getName());
+					}
 
 					@Override
 					public void onClick() {

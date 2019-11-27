@@ -42,7 +42,7 @@ public class BuildListPage extends LayoutPage {
 	
 	private static final String PARAM_EXPECTED_COUNT = "expectedCount";
 	
-	private Integer expectedCount;
+	private int expectedCount;
 	
 	private final IModel<String> queryModel = new LoadableDetachableModel<String>() {
 
@@ -75,7 +75,7 @@ public class BuildListPage extends LayoutPage {
 	
 	public BuildListPage(PageParameters params) {
 		super(params);
-		expectedCount = params.get(PARAM_EXPECTED_COUNT).toOptionalInteger();
+		expectedCount = params.get(PARAM_EXPECTED_COUNT).toInt(0);
 	}
 
 	protected GlobalBuildSetting getBuildSetting() {
@@ -108,7 +108,7 @@ public class BuildListPage extends LayoutPage {
 			@Override
 			protected Link<Void> newQueryLink(String componentId, NamedBuildQuery namedQuery) {
 				return new BookmarkablePageLink<Void>(componentId, BuildListPage.class, 
-						BuildListPage.paramsOf(namedQuery.getQuery(), 0, null));
+						BuildListPage.paramsOf(namedQuery.getQuery(), 0, 0));
 			}
 
 			@Override
@@ -146,7 +146,7 @@ public class BuildListPage extends LayoutPage {
 
 			@Override
 			public PageParameters newPageParameters(int currentPage) {
-				PageParameters params = paramsOf(queryModel.getObject(), 0, null);
+				PageParameters params = paramsOf(queryModel.getObject(), 0, 0);
 				params.add(PARAM_CURRENT_PAGE, currentPage+1);
 				return params;
 			}
@@ -167,7 +167,7 @@ public class BuildListPage extends LayoutPage {
 
 			@Override
 			protected void onQueryUpdated(AjaxRequestTarget target, String query) {
-				setResponsePage(BuildListPage.class, paramsOf(query, 0, null));
+				setResponsePage(BuildListPage.class, paramsOf(query, 0, 0));
 			}
 
 			@Override
@@ -241,14 +241,13 @@ public class BuildListPage extends LayoutPage {
 		
 	}
 	
-	public static PageParameters paramsOf(@Nullable String query, int page,
-			@Nullable Integer expectedCount) {
+	public static PageParameters paramsOf(@Nullable String query, int page, int expectedCount) {
 		PageParameters params = new PageParameters();
 		if (query != null)
 			params.add(PARAM_QUERY, query);
 		if (page != 0)
 			params.add(PARAM_CURRENT_PAGE, page);
-		if (expectedCount != null)
+		if (expectedCount != 0)
 			params.add(PARAM_EXPECTED_COUNT, expectedCount);
 		return params;
 	}

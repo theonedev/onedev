@@ -137,7 +137,7 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 				@Override
 				protected void onSelect(AjaxRequestTarget target, Component tabLink) {
-					Component content = new BuildListPanel(TAB_CONTENT_ID, null, null) {
+					Component content = new BuildListPanel(TAB_CONTENT_ID, null, 0) {
 
 						@Override
 						protected BuildQuery getBaseQuery() {
