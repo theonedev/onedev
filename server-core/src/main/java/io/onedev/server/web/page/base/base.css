@@ -615,6 +615,9 @@ td.ellipsis {
     font-size: 16px;
 }
 
+.panel-list .panel {
+	border-width: 2px;
+}
 .panel-list .drag-indicator {
 	margin-right: 8px;
 }
@@ -632,7 +635,7 @@ td.ellipsis {
 	display: block; 
 	padding: 16px; 
 	background: #F2F2F2; 
-	border: 1px solid #DDD; 
+	border: 2px solid #DDD; 
 	border-radius: 4px; 
 	font-size: 16px; 
 	color: #444; 
