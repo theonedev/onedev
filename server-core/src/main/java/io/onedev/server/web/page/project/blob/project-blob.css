@@ -101,7 +101,7 @@ body.ProjectBlobPage.additionalWidth3 {
 	color: #8a6d3b;
 	font-size: 13px;
 }
-#project-blob>.ci-support-note {
+#project-blob>.build-support-note {
 	padding: 8px;
 	border-bottom: 1px solid #DDD;
 	background: #E5FBE5;

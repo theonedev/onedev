@@ -16,7 +16,6 @@ import org.hibernate.type.Type;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
@@ -31,6 +30,7 @@ import io.onedev.server.event.pullrequest.PullRequestCommentCreated;
 import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestUpdated;
+import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;

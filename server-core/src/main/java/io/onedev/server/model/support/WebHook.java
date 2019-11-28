@@ -1,6 +1,7 @@
 package io.onedev.server.model.support;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.constraints.Size;
@@ -68,7 +69,7 @@ public class WebHook implements Serializable {
 	
 	private String postUrl;
 	
-	private List<EventType> eventTypes;
+	private List<EventType> eventTypes = new ArrayList<>();
 	
 	private String secret = RandomStringUtils.randomAlphanumeric(20);
 

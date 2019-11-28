@@ -49,6 +49,12 @@ public class DefaultStorageManager implements StorageManager {
         return projectDir;
     }
     
+    private File getUserDir(Long userId) {
+        File userDir = new File(getUsersDir(), String.valueOf(userId));
+        FileUtils.createDir(userDir);
+        return userDir;
+    }
+    
     @Override
     public File getProjectGitDir(Long projectId) {
         File gitDir = new File(getProjectDir(projectId), "git");
@@ -139,9 +145,9 @@ public class DefaultStorageManager implements StorageManager {
     
 	@Override
     public File getUserInfoDir(Long userId) {
-        File userDir = new File(getUsersDir(), String.valueOf(userId));
-        FileUtils.createDir(userDir);
-        return userDir;
+        File infoDir = new File(getUserDir(userId), "info");
+        FileUtils.createDir(infoDir);
+        return infoDir;
     }
 
 	private File getBuildsDir(Long projectId) {

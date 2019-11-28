@@ -38,9 +38,9 @@ import com.google.common.collect.Sets;
 
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CommitInfoManager;
-import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;

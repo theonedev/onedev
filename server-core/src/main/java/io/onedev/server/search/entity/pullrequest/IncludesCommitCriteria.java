@@ -10,7 +10,7 @@ import javax.persistence.criteria.Root;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CodeCommentRelationInfoManager;
+import io.onedev.server.infomanager.CodeCommentRelationInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;

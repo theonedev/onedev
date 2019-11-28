@@ -21,10 +21,10 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CommitInfoManager;
-import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;

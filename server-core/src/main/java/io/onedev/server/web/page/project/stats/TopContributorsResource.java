@@ -14,9 +14,9 @@ import org.apache.wicket.request.resource.AbstractResource;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.git.Contribution;
 import io.onedev.server.git.Contributor;
+import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.Day;

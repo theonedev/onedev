@@ -2,7 +2,10 @@ package io.onedev.server.migration;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,12 +14,16 @@ import java.util.Stack;
 
 import javax.inject.Singleton;
 
+import org.apache.commons.io.IOUtils;
 import org.dom4j.Element;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Preconditions;
 
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneException;
 
 @Singleton
 @SuppressWarnings("unused")
@@ -1035,4 +1042,218 @@ public class DataMigrator {
 		}
 	}
 
+	// from 2.0 to 3.0
+	private void migrate25(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Settings.xml")) {
+				String content;
+				try {
+					content = FileUtils.readFileToString(file, Charsets.UTF_8.name());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				content = content.replace(".support.setting.", ".support.administration.");
+				content = content.replace(".support.authenticator.", ".support.administration.authenticator.");
+				
+				VersionedDocument dom = VersionedDocument.fromXML(content);
+				for (Element element: dom.getRootElement().elements()) {
+					String key = element.elementTextTrim("key"); 
+					if (key.equals("ISSUE") || key.equals("JOB_EXECUTORS")) {
+						element.detach();
+					} else if (key.equals("BACKUP")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element folderElement = valueElement.element("folder");
+							if (folderElement != null)
+								folderElement.detach();
+						}
+					} else if (key.equals("SECURITY")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) 
+							valueElement.element("enableAnonymousAccess").setText("false");
+					} else if (key.equals("SYSTEM")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element storagePathElement = valueElement.element("storagePath");
+							String storagePath = storagePathElement.getText();
+							storagePathElement.detach();
+							try {
+								File projectsDir = new File(storagePath, "projects");
+								if (projectsDir.exists()) {
+									Path target = projectsDir.toPath();
+								    File linkDir = new File(Bootstrap.installDir, "site/projects");
+								    if (linkDir.exists())
+								    	throw new OneException("Directory already exists: " + linkDir);
+								    Files.createSymbolicLink(linkDir.toPath(), target);							
+								}
+							} catch (IOException e) {
+								throw new RuntimeException(e);
+							}
+						}
+					} else if (key.equals("AUTHENTICATOR")) {
+						Element valueElement = element.element("value");
+						if (valueElement != null) {
+							Element defaultGroupNamesElement = valueElement.element("defaultGroupNames");
+							if (defaultGroupNamesElement != null)
+								defaultGroupNamesElement.detach();
+						}
+					} 
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Groups.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) 
+					element.element("canCreateProjects").setName("createProjects");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Users.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					element.addElement("userProjectQueries");
+					
+					element.addElement("userIssueQueries");
+					element.addElement("userIssueQueryWatches");
+					element.addElement("issueQueryWatches");
+					
+					element.addElement("userPullRequestQueries");
+					element.addElement("userPullRequestQueryWatches");
+					element.addElement("pullRequestQueryWatches");
+					
+					element.addElement("userBuildQueries");
+					element.addElement("userBuildQuerySubscriptions");
+					element.addElement("buildQuerySubscriptions");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("GroupAuthorizations.xml") 
+					|| file.getName().startsWith("UserAuthorizations.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) { 
+					Element privilegeElement = element.element("privilege");
+					String privilege = privilegeElement.getTextTrim();
+					privilegeElement.detach();
+
+					String roleId;
+					switch (privilege) {
+					case "ISSUE_READ":
+						roleId = "4";
+						break;
+					case "CODE_READ":
+						roleId = "3";
+						break;
+					case "CODE_WRITE":
+						roleId = "2";
+						break;
+					default:
+						roleId = "1";
+					}
+					element.addElement("role").setText(roleId);
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Issues.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					element.element("numberStr").detach();
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("CodeComments.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element rangeElement = element.element("markPos").element("range");
+					rangeElement.element("beginLine").setName("fromRow");
+					rangeElement.element("endLine").setName("toRow");
+					rangeElement.element("beginChar").setName("fromColumn");
+					rangeElement.element("endChar").setName("toColumn");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("PullRequests.xml")) {
+				String content;
+				try {
+					content = FileUtils.readFileToString(file, Charsets.UTF_8.name());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				content = content.replace("DO_NOT_MERGE", "CREATE_MERGE_COMMIT");
+
+				VersionedDocument dom = VersionedDocument.fromXML(content);
+				for (Element element: dom.getRootElement().elements())
+					element.element("numberStr").detach();
+				
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.addElement("owner").setText("1");
+					
+					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
+						Element submitterElement = branchProtectionElement.element("submitter");
+						submitterElement.setName("user");
+						submitterElement.setText("anyone");
+						branchProtectionElement.element("configurations").detach();
+						branchProtectionElement.element("buildMerges").detach();
+						branchProtectionElement.addElement("jobNames");
+						for (Element fileProtectionElement: branchProtectionElement.element("fileProtections").elements())
+							fileProtectionElement.addElement("jobNames");
+					}
+					
+					for (Element tagProtectionElement: element.element("tagProtections").elements())
+						tagProtectionElement.element("submitter").setName("user");
+					element.addElement("secrets");
+					element.element("commitMessageTransforms").detach();
+					element.element("webHooks").detach();
+					element.addElement("webHooks");
+					element.element("issueSetting").detach();
+					element.addElement("issueSetting");
+					
+					element.element("savedBuildQueries").detach();
+					Element buildSettingElement = element.addElement("buildSetting");
+					buildSettingElement.addElement("buildsToPreserve").setText("all");
+					
+					element.element("savedCommitQueries").detach();
+					element.element("savedCodeCommentQueries").detach();
+					element.element("savedPullRequestQueries").detach();
+					
+					element.addElement("pullRequestSetting");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml") 
+					|| file.getName().startsWith("Configurations.xml")
+					|| file.getName().startsWith("IssueQuerySettings.xml")
+					|| file.getName().startsWith("PullRequestQuerySettings.xml")
+					|| file.getName().startsWith("CodeCommentQuerySettings.xml")
+					|| file.getName().startsWith("PullRequestWatchs.xml")
+					|| file.getName().startsWith("IssueWatchs.xml")
+					|| file.getName().startsWith("CommitQuerySettings.xml")
+					|| file.getName().startsWith("PullRequestBuilds.xml")
+					|| file.getName().startsWith("BuildQuerySettings.xml")
+					|| file.getName().startsWith("Builds.xml")
+					|| file.getName().startsWith("Build2s.xml")
+					|| file.getName().startsWith("BuildDependences.xml")
+					|| file.getName().startsWith("BuildParams.xml")) {
+				FileUtils.deleteFile(file);
+			} else if (file.getName().startsWith("IssueFieldEntitys.xml")) {
+				String content;
+				try {
+					content = FileUtils.readFileToString(file, Charsets.UTF_8.name());
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+				content = content.replace("io.onedev.server.model.IssueFieldEntity", 
+						"io.onedev.server.model.IssueField");
+
+				FileUtils.deleteFile(file);
+				
+				File renamedFile = new File(dataDir, file.getName().replace(
+						"IssueFieldEntitys.xml", "IssueFields.xml"));
+				FileUtils.writeFile(renamedFile, content, Charsets.UTF_8.name());
+			}
+		}
+        try (InputStream is = getClass().getResourceAsStream("migrate25_roles.xml")) {
+        	Preconditions.checkNotNull(is);
+        	FileUtils.writeFile(
+        			new File(dataDir, "Roles.xml"), 
+        			StringUtils.join(IOUtils.readLines(is, Charsets.UTF_8.name()), "\n"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+		
+	}
+	
 }

@@ -29,7 +29,7 @@ public class CodeCommentConstants {
 	
 	public static final String FIELD_CREATE_DATE = "Create Date";
 	
-	public static final String ATTR_CREATE_DATE = "date";
+	public static final String ATTR_CREATE_DATE = "createDate";
 	
 	public static final String FIELD_UPDATE_DATE = "Update Date";
 	

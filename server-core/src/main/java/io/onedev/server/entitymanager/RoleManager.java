@@ -10,4 +10,6 @@ public interface RoleManager extends EntityManager<Role> {
 	
 	@Nullable
 	Role find(String name);
+	
+	void setupDefaults();
 }

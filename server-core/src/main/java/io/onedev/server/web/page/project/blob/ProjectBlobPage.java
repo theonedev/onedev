@@ -245,7 +245,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			
 		});
 
-		newCISupportNote(null);
+		newBuildSupportNote(null);
 		newBlobContent(null);
 
 		add(searchResult = new WebMarkupContainer("searchResult"));
@@ -709,14 +709,17 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		}
 	}
 	
-	private void newCISupportNote(@Nullable AjaxRequestTarget target) {
-		Component ciSupportNote = new WebMarkupContainer("ciSupportNote") {
+	private void newBuildSupportNote(@Nullable AjaxRequestTarget target) {
+		Component buildSupportNote = new WebMarkupContainer("buildSupportNote") {
 
 			@Override
 			protected void onInitialize() {
 				super.onInitialize();
 				
-				if (SecurityUtils.canModify(getProject(), state.blobIdent.revision, BuildSpec.BLOB_PATH)) {
+				String branch = state.blobIdent.revision;
+				if (branch == null)
+					branch = "master";
+				if (SecurityUtils.canModify(getProject(), branch, BuildSpec.BLOB_PATH)) {
 					add(new ViewStateAwareAjaxLink<Void>("addFile") {
 	
 						@Override
@@ -758,10 +761,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		};
 		
 		if (target != null) {
-			replace(ciSupportNote);
-			target.add(ciSupportNote);
+			replace(buildSupportNote);
+			target.add(buildSupportNote);
 		} else {
-			add(ciSupportNote);
+			add(buildSupportNote);
 		}
 	}
 	
@@ -840,7 +843,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		target.add(revisionIndexing);
 		newBlobNavigator(target);
 		newBlobOperations(target);
-		newCISupportNote(target);
+		newBuildSupportNote(target);
 		newBlobContent(target);
 		resizeWindow(target);
 	}
@@ -946,7 +949,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			state = popState;
 			newBlobNavigator(target);
 			newBlobOperations(target);
-			newCISupportNote(target);
+			newBuildSupportNote(target);
 			newBlobContent(target);
 			resizeWindow(target);
 		}
@@ -1005,7 +1008,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			state.commentId = null;
 			newBlobNavigator(target);
 			newBlobOperations(target);
-			newCISupportNote(target);
+			newBuildSupportNote(target);
 			newBlobContent(target);
 			resizeWindow(target);
 			OneDev.getInstance(WebSocketManager.class).notifyObserverChange(this);
@@ -1017,14 +1020,14 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 			} else {
 				state.mode = Mode.VIEW;
 				newBlobOperations(target);
-				newCISupportNote(target);
+				newBuildSupportNote(target);
 				newBlobContent(target);
 				resizeWindow(target);
 			}
 		} else if (prevPosition != null) {
 			state.mode = Mode.VIEW;
 			newBlobOperations(target);
-			newCISupportNote(target);
+			newBuildSupportNote(target);
 			newBlobContent(target);
 			resizeWindow(target);
 		}
@@ -1129,7 +1132,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				newBlobOperations(target);
 			}
 		}			
-		newCISupportNote(target);
+		newBuildSupportNote(target);
 		newBlobContent(target);
 		resizeWindow(target);
 	}

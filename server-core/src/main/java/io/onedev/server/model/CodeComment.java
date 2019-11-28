@@ -33,10 +33,10 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.model.support.MarkPos;
 import io.onedev.server.storage.AttachmentStorageSupport;

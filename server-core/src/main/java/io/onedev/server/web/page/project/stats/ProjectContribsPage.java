@@ -19,8 +19,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.git.Contribution;
+import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;

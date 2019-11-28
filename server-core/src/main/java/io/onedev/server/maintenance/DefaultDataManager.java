@@ -36,7 +36,6 @@ import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.system.SystemStarting;
-import io.onedev.server.model.Role;
 import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.User;
@@ -49,8 +48,6 @@ import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
-import io.onedev.server.model.support.role.CodePrivilege;
-import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.notification.MailManager;
 import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.PersistManager;
@@ -119,48 +116,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 					user.setPassword(passwordService.encryptPassword(user.getPassword()));
 					userManager.save(user, null);
 					idManager.init(User.class);
-					
-					Role manager = new Role();
-					manager.setName("Manager");
-					manager.setManageProject(true);
-					roleManager.save(manager, null);
-					
-					Role developer = new Role();
-					developer.setName("Developer");
-					developer.setCodePrivilege(CodePrivilege.WRITE);
-					developer.setScheduleIssues(true);
-					developer.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
-					
-					JobPrivilege jobPrivilege = new JobPrivilege();
-					jobPrivilege.setJobNames("*");
-					jobPrivilege.setRunJob(true);
-					developer.getJobPrivileges().add(jobPrivilege);
-					
-					roleManager.save(developer, null);
-
-					Role tester = new Role();
-					tester.setName("Tester");
-					tester.setCodePrivilege(CodePrivilege.READ);
-					tester.setScheduleIssues(true);
-					tester.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
-					
-					jobPrivilege = new JobPrivilege();
-					jobPrivilege.setJobNames("*");
-					jobPrivilege.setAccessLog(true);
-					tester.getJobPrivileges().add(jobPrivilege);
-					
-					roleManager.save(tester, null);
-					
-					Role reporter = new Role();
-					reporter.setName("Reporter");
-					reporter.setCodePrivilege(CodePrivilege.NONE);
-					reporter.setEditableIssueFields(Lists.newArrayList("Type", "Priority"));
-					
-					jobPrivilege = new JobPrivilege();
-					jobPrivilege.setJobNames("*");
-					reporter.getJobPrivileges().add(jobPrivilege);
-
-					roleManager.save(reporter, null);					
+					roleManager.setupDefaults();					
 				}
 				
 			});

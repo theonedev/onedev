@@ -7,11 +7,15 @@ import javax.inject.Singleton;
 
 import org.hibernate.criterion.Restrictions;
 
+import com.google.common.collect.Lists;
+
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
+import io.onedev.server.model.support.role.CodePrivilege;
+import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
@@ -79,4 +83,48 @@ public class DefaultRoleManager extends AbstractEntityManager<Role> implements R
 		return dao.find(criteria);
 	}
 	
+	@Transactional
+	public void setupDefaults() {
+		Role manager = new Role();
+		manager.setName("Manager");
+		manager.setManageProject(true);
+		save(manager, null);
+		
+		Role developer = new Role();
+		developer.setName("Developer");
+		developer.setCodePrivilege(CodePrivilege.WRITE);
+		developer.setScheduleIssues(true);
+		developer.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
+		
+		JobPrivilege jobPrivilege = new JobPrivilege();
+		jobPrivilege.setJobNames("*");
+		jobPrivilege.setRunJob(true);
+		developer.getJobPrivileges().add(jobPrivilege);
+		
+		save(developer, null);
+
+		Role tester = new Role();
+		tester.setName("Tester");
+		tester.setCodePrivilege(CodePrivilege.READ);
+		tester.setScheduleIssues(true);
+		tester.setEditableIssueFields(Lists.newArrayList("Type", "Priority", "Assignee", "Resolution", "Duplicate With"));
+		
+		jobPrivilege = new JobPrivilege();
+		jobPrivilege.setJobNames("*");
+		jobPrivilege.setAccessLog(true);
+		tester.getJobPrivileges().add(jobPrivilege);
+		
+		save(tester, null);
+		
+		Role reporter = new Role();
+		reporter.setName("Reporter");
+		reporter.setCodePrivilege(CodePrivilege.NONE);
+		reporter.setEditableIssueFields(Lists.newArrayList("Type", "Priority"));
+		
+		jobPrivilege = new JobPrivilege();
+		jobPrivilege.setJobNames("*");
+		reporter.getJobPrivileges().add(jobPrivilege);
+
+		save(reporter, null);					
+	}
 }

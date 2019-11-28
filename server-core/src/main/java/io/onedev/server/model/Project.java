@@ -74,7 +74,6 @@ import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.buildspec.BuildSpec;
-import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
 import io.onedev.server.entitymanager.CodeCommentQuerySettingManager;
@@ -96,6 +95,7 @@ import io.onedev.server.git.command.BlameCommand;
 import io.onedev.server.git.command.ListChangedFilesCommand;
 import io.onedev.server.git.exception.NotFileException;
 import io.onedev.server.git.exception.ObjectNotFoundException;
+import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
@@ -257,27 +257,14 @@ public class Project extends AbstractEntity {
 	private ProjectPullRequestSetting pullRequestSetting = new ProjectPullRequestSetting();
 	
 	@Lob
-	@Column(length=65535, nullable=false)
+	@Column(length=65535)
 	@JsonView(DefaultView.class)
-	private ArrayList<NamedCommitQuery> namedCommitQueries = new ArrayList<>();
-	{
-		namedCommitQueries.add(new NamedCommitQuery("All", "all"));
-		namedCommitQueries.add(new NamedCommitQuery("Default branch", "default-branch"));
-		namedCommitQueries.add(new NamedCommitQuery("Authored by me", "authored-by-me"));
-		namedCommitQueries.add(new NamedCommitQuery("Committed by me", "committed-by-me"));
-		namedCommitQueries.add(new NamedCommitQuery("Committed recently", "after(last week)"));
-	}
+	private ArrayList<NamedCommitQuery> namedCommitQueries;
 	
 	@Lob
-	@Column(length=65535, nullable=false)
+	@Column(length=65535)
 	@JsonView(DefaultView.class)
-	private ArrayList<NamedCodeCommentQuery> namedCodeCommentQueries = new ArrayList<>(); 
-	{
-		namedCodeCommentQueries.add(new NamedCodeCommentQuery("All", "all"));
-		namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created by me", "created by me"));
-		namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is after \"last week\""));
-		namedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is after \"last week\""));
-	}
+	private ArrayList<NamedCodeCommentQuery> namedCodeCommentQueries;
 	
 	@Lob
 	@Column(length=65535, nullable=false)
@@ -994,6 +981,14 @@ public class Project extends AbstractEntity {
 	}
 	
 	public ArrayList<NamedCommitQuery> getNamedCommitQueries() {
+		if (namedCommitQueries == null) {
+			namedCommitQueries = new ArrayList<>();
+			namedCommitQueries.add(new NamedCommitQuery("All", "all"));
+			namedCommitQueries.add(new NamedCommitQuery("Default branch", "default-branch"));
+			namedCommitQueries.add(new NamedCommitQuery("Authored by me", "authored-by-me"));
+			namedCommitQueries.add(new NamedCommitQuery("Committed by me", "committed-by-me"));
+			namedCommitQueries.add(new NamedCommitQuery("Committed recently", "after(last week)"));
+		}
 		return namedCommitQueries;
 	}
 
@@ -1002,6 +997,13 @@ public class Project extends AbstractEntity {
 	}
 
 	public ArrayList<NamedCodeCommentQuery> getNamedCodeCommentQueries() {
+		if (namedCodeCommentQueries == null) {
+			namedCodeCommentQueries = new ArrayList<>(); 
+			namedCodeCommentQueries.add(new NamedCodeCommentQuery("All", "all"));
+			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created by me", "created by me"));
+			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Created recently", "\"Create Date\" is after \"last week\""));
+			namedCodeCommentQueries.add(new NamedCodeCommentQuery("Updated recently", "\"Update Date\" is after \"last week\""));
+		}
 		return namedCodeCommentQueries;
 	}
 

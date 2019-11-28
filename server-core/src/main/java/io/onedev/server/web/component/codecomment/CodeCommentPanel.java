@@ -37,9 +37,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentReplyManager;
+import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.Project;

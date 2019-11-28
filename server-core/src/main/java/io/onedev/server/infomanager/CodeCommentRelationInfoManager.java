@@ -1,4 +1,4 @@
-package io.onedev.server.cache;
+package io.onedev.server.infomanager;
 
 import java.util.Collection;
 

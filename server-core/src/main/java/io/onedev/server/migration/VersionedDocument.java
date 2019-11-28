@@ -19,6 +19,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.ObjectUtils.Null;
+import org.dom4j.Attribute;
 import org.dom4j.Branch;
 import org.dom4j.Comment;
 import org.dom4j.Document;
@@ -41,6 +42,8 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.core.util.HierarchicalStreams;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import com.thoughtworks.xstream.io.xml.Dom4JReader;
 import com.thoughtworks.xstream.io.xml.Dom4JWriter;
 import com.thoughtworks.xstream.mapper.CannotResolveClassException;
@@ -48,6 +51,7 @@ import com.thoughtworks.xstream.mapper.CannotResolveClassException;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
+import io.onedev.commons.utils.StringUtils;
 
 public final class VersionedDocument implements Document, Externalizable {
 
@@ -510,6 +514,43 @@ public final class VersionedDocument implements Document, Externalizable {
 	public synchronized void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 		xml = Preconditions.checkNotNull((String) in.readObject());
 		wrapped = null;
+	}
+	
+	public void marshall(HierarchicalStreamWriter writer) {
+		marshallElement(writer, getRootElement());
+	}
+	
+	private void marshallElement(HierarchicalStreamWriter writer, Element element) {
+		writer.startNode(element.getName());
+		for (Attribute attribute: (List<Attribute>)element.attributes())
+			writer.addAttribute(attribute.getName(), attribute.getValue());
+		if (element.getText().trim().length() != 0)
+			writer.setValue(element.getText().trim());
+		for (Element child: (List<Element>)element.elements())
+			marshallElement(writer, child);
+		writer.endNode();
+	}
+	
+	public static VersionedDocument unmarshall(HierarchicalStreamReader reader) {
+		VersionedDocument dom = new VersionedDocument();
+		unmarshallElement(reader, dom);
+		return dom;
+	}
+	
+	private static void unmarshallElement(HierarchicalStreamReader reader, Branch branch) {
+		Element element = branch.addElement(reader.getNodeName());
+		for (int i=0; i<reader.getAttributeCount(); i++) {
+			String attributeName = reader.getAttributeName(i);
+			String attributeValue = reader.getAttribute(i);
+			element.addAttribute(attributeName, attributeValue);
+		}
+		if (StringUtils.isNotBlank(reader.getValue()))
+			element.setText(reader.getValue().trim());
+		while (reader.hasMoreChildren()) {
+			reader.moveDown();
+			unmarshallElement(reader, element);
+			reader.moveUp();
+		}
 	}
 	
 }

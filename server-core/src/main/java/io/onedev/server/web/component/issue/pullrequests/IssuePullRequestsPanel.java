@@ -21,9 +21,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CodeCommentRelationInfoManager;
-import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.PullRequestManager;
+import io.onedev.server.infomanager.CodeCommentRelationInfoManager;
+import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.util.SecurityUtils;

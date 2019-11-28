@@ -77,12 +77,6 @@ import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.log.DefaultLogManager;
 import io.onedev.server.buildspec.job.log.LogManager;
 import io.onedev.server.buildspec.job.log.instruction.LogInstruction;
-import io.onedev.server.cache.CodeCommentRelationInfoManager;
-import io.onedev.server.cache.CommitInfoManager;
-import io.onedev.server.cache.DefaultCodeCommentRelationInfoManager;
-import io.onedev.server.cache.DefaultCommitInfoManager;
-import io.onedev.server.cache.DefaultUserInfoManager;
-import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
@@ -154,6 +148,12 @@ import io.onedev.server.git.GitFilter;
 import io.onedev.server.git.GitPostReceiveCallback;
 import io.onedev.server.git.GitPreReceiveCallback;
 import io.onedev.server.git.config.GitConfig;
+import io.onedev.server.infomanager.CodeCommentRelationInfoManager;
+import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.infomanager.DefaultCodeCommentRelationInfoManager;
+import io.onedev.server.infomanager.DefaultCommitInfoManager;
+import io.onedev.server.infomanager.DefaultUserInfoManager;
+import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.maintenance.ApplyDatabaseConstraints;
 import io.onedev.server.maintenance.BackupDatabase;
 import io.onedev.server.maintenance.CheckDataVersion;
@@ -163,8 +163,6 @@ import io.onedev.server.maintenance.DefaultDataManager;
 import io.onedev.server.maintenance.ResetAdminPassword;
 import io.onedev.server.maintenance.RestoreDatabase;
 import io.onedev.server.maintenance.Upgrade;
-import io.onedev.server.migration.JpaConverter;
-import io.onedev.server.migration.PersistentBagConverter;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
 import io.onedev.server.model.support.administration.jobexecutor.AutoDiscoveredJobExecutor;
@@ -234,6 +232,12 @@ import io.onedev.server.util.work.BatchWorkManager;
 import io.onedev.server.util.work.DefaultBatchWorkManager;
 import io.onedev.server.util.work.DefaultWorkExecutor;
 import io.onedev.server.util.work.WorkExecutor;
+import io.onedev.server.util.xstream.CollectionConverter;
+import io.onedev.server.util.xstream.HibernateProxyConverter;
+import io.onedev.server.util.xstream.MapConverter;
+import io.onedev.server.util.xstream.ReflectionConverter;
+import io.onedev.server.util.xstream.StringConverter;
+import io.onedev.server.util.xstream.VersionedDocumentConverter;
 import io.onedev.server.web.DefaultUrlManager;
 import io.onedev.server.web.DefaultWicketFilter;
 import io.onedev.server.web.DefaultWicketServlet;
@@ -637,10 +641,10 @@ public class CoreModule extends AbstractPluginModule {
 							
 							@Override
 							public String serializedClass(Class type) {
-								if (type == PersistentBag.class)
-									return super.serializedClass(ArrayList.class);
-								else if (type == null)
+								if (type == null)
 									return super.serializedClass(type);
+								else if (type == PersistentBag.class)
+									return super.serializedClass(ArrayList.class);
 								else if (type.getName().contains("$HibernateProxy$"))
 									return StringUtils.substringBefore(type.getName(), "$HibernateProxy$");
 								else
@@ -657,12 +661,16 @@ public class CoreModule extends AbstractPluginModule {
 				// register NullConverter as highest; otherwise NPE when unmarshal a map 
 				// containing an entry with value set to null.
 				xstream.registerConverter(new NullConverter(), XStream.PRIORITY_VERY_HIGH);
-				xstream.registerConverter(new PersistentBagConverter(xstream.getMapper()), 200);
-				xstream.registerConverter(new JpaConverter(xstream.getMapper(), xstream.getReflectionProvider()));
-				xstream.registerConverter(new ISO8601DateConverter(), 100);
-				xstream.registerConverter(new ISO8601SqlTimestampConverter(), 100); 
+				xstream.registerConverter(new StringConverter(), XStream.PRIORITY_VERY_HIGH);
+				xstream.registerConverter(new VersionedDocumentConverter(), XStream.PRIORITY_VERY_HIGH);
+				xstream.registerConverter(new HibernateProxyConverter(), XStream.PRIORITY_VERY_HIGH);
+				xstream.registerConverter(new CollectionConverter(xstream.getMapper()), XStream.PRIORITY_VERY_HIGH);
+				xstream.registerConverter(new MapConverter(xstream.getMapper()), XStream.PRIORITY_VERY_HIGH);
+				xstream.registerConverter(new ISO8601DateConverter(), XStream.PRIORITY_VERY_HIGH);
+				xstream.registerConverter(new ISO8601SqlTimestampConverter(), XStream.PRIORITY_VERY_HIGH); 
+				xstream.registerConverter(new ReflectionConverter(xstream.getMapper(), xstream.getReflectionProvider()), 
+						XStream.PRIORITY_VERY_LOW);
 				xstream.autodetectAnnotations(true);
-				
 				return xstream;
 			}
 			

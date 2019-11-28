@@ -12,9 +12,9 @@ import javax.persistence.criteria.Root;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.cache.CommitInfoManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
+import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;

@@ -12,7 +12,6 @@ import javax.inject.Singleton;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.IssueWatchManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
@@ -22,6 +21,7 @@ import io.onedev.server.event.issue.IssueChangeEvent;
 import io.onedev.server.event.issue.IssueCommented;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
+import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueWatch;

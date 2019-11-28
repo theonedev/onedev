@@ -16,11 +16,11 @@ import io.onedev.server.model.Setting;
 import io.onedev.server.model.Setting.Key;
 import io.onedev.server.model.support.administration.BackupSetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
-import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
+import io.onedev.server.model.support.administration.GroovyScript;
+import io.onedev.server.model.support.administration.MailSetting;
 import io.onedev.server.model.support.administration.SecuritySetting;
 import io.onedev.server.model.support.administration.SystemSetting;
 import io.onedev.server.model.support.administration.authenticator.Authenticator;
@@ -362,5 +362,5 @@ public class DefaultSettingManager extends AbstractEntityManager<Setting> implem
 		setting.setValue(projectSetting);
 		dao.persist(setting);
 	}
-	
+
 }

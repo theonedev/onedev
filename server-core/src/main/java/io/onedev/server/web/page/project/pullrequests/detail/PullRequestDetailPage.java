@@ -80,11 +80,11 @@ import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
-import io.onedev.server.cache.UserInfoManager;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestUpdateManager;
 import io.onedev.server.entitymanager.PullRequestWatchManager;
+import io.onedev.server.infomanager.UserInfoManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;

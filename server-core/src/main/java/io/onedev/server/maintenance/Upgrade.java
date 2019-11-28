@@ -77,10 +77,24 @@ public class Upgrade extends DefaultPersistManager {
 			bootstrapClass = "com.gitplex.launcher.bootstrap.Bootstrap";
 		} else if (version.startsWith("1.0.1")) {
 			bootstrapClass = "com.turbodev.launcher.bootstrap.Bootstrap";
-		} else if (version.startsWith("2.0.")){
+		} else if (version.startsWith("2.0.")) {
 			bootstrapClass = "io.onedev.launcher.bootstrap.Bootstrap";
 		} else {
 			bootstrapClass = "io.onedev.commons.launcher.bootstrap.Bootstrap";
+		}
+		
+		if (version.startsWith("1.") ||  version.startsWith("2.")) {
+			switch (command) {
+			case "check-data-version":
+				command = "check_data_version";
+				break;
+			case "backup-db":
+				command = "backup";
+				break;
+			case "clean-db":
+				command = "clean";
+				break;
+			}
 		}
 		Commandline cmdline= new Commandline(System.getProperty("java.home") + "/bin/java");
 		cmdline.addArgs("-Xmx" + Runtime.getRuntime().maxMemory()/1024/1024 + "m",  "-classpath", "*", bootstrapClass, 
@@ -123,18 +137,6 @@ public class Upgrade extends DefaultPersistManager {
 						+ "installation directory (it contains sub directories such as \"bin\", \"boot\", \"conf\", etc)", 
 						upgradeDir.getAbsolutePath());
 				System.exit(1);
-			}
-			String oldProgramVersion;
-			String newProgramVersion;
-			try {
-				oldProgramVersion = FileUtils.readFileToString(new File(upgradeDir, "version.txt"));
-				newProgramVersion = FileUtils.readFileToString(new File(Bootstrap.installDir, "version.txt"));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-			if (oldProgramVersion.equals(newProgramVersion)) {
-				logger.info("Program files are up to date");
-				System.exit(0);
 			}
 
 			logger.info("Upgrading {}...", upgradeDir.getAbsolutePath());
@@ -402,7 +404,28 @@ public class Upgrade extends DefaultPersistManager {
 				throw new RuntimeException(e);
 			}
 		}
+
+		if (new File(upgradeDir, "bin/apply_db_constraints.bat").exists())
+			FileUtils.deleteFile(new File(upgradeDir, "bin/apply_db_constraints.bat"));
+		if (new File(upgradeDir, "bin/apply_db_constraints.sh").exists())
+			FileUtils.deleteFile(new File(upgradeDir, "bin/apply_db_constraints.sh"));
+		if (new File(upgradeDir, "bin/backup.bat").exists())
+			FileUtils.deleteFile(new File(upgradeDir, "bin/backup.bat"));
+		if (new File(upgradeDir, "bin/backup.sh").exists())
+			FileUtils.deleteFile(new File(upgradeDir, "bin/backup.sh"));
+		if (new File(upgradeDir, "bin/restore.bat").exists())
+			FileUtils.deleteFile(new File(upgradeDir, "bin/restore.bat"));
+		if (new File(upgradeDir, "bin/restore.sh").exists())
+			FileUtils.deleteFile(new File(upgradeDir, "bin/restore.sh"));
+		if (new File(upgradeDir, "bin/reset_admin_password.bat").exists())
+			FileUtils.deleteFile(new File(upgradeDir, "bin/reset_admin_password.bat"));
+		if (new File(upgradeDir, "bin/reset_admin_password.sh").exists())
+			FileUtils.deleteFile(new File(upgradeDir, "bin/reset_admin_password.sh"));
+		
 		cleanAndCopy(Bootstrap.getBootDir(), new File(upgradeDir, "boot"));
+		if (new File(upgradeDir, "boot/system.classpath").exists())
+			FileUtils.deleteFile(new File(upgradeDir, "boot/system.classpath"));
+		
 		cleanAndCopy(Bootstrap.getLibDir(), new File(upgradeDir, "lib"));
 		for (File file: new File(Bootstrap.getSiteDir(), "avatars").listFiles()) {
 			try {
@@ -451,8 +474,33 @@ public class Upgrade extends DefaultPersistManager {
 						"hibernate.connection.provider_class=org.hibernate.hikaricp.internal.HikariCPConnectionProvider\r\n"
 						+ "hibernate.connection.autocommit=true");
 			}
+			
+			hibernateProps = StringUtils.replace(hibernateProps, "hibernate.connection.autocommit=true", "");
+			hibernateProps = StringUtils.replace(hibernateProps, "hibernate.hikari.leakDetectionThreshold=1800000", "");
+			hibernateProps = StringUtils.replace(hibernateProps, "org.hibernate.cache.ehcache.EhCacheRegionFactory", 
+					"org.hibernate.cache.jcache.JCacheRegionFactory");
+			if (!hibernateProps.contains("hibernate.cache.auto_evict_collection_cache=true")) {
+				hibernateProps += "hibernate.cache.auto_evict_collection_cache=true\r\n";
+				hibernateProps += "hibernate.javax.cache.provider=org.ehcache.jsr107.EhcacheCachingProvider\r\n"; 
+				hibernateProps += "hibernate.javax.cache.missing_cache_strategy=create\r\n";
+			}
+			
 			FileUtils.writeStringToFile(hibernatePropsFile, hibernateProps, Charsets.UTF_8);
+			
+			File serverPropsFile = new File(upgradeDir, "conf/server.properties");
+			String serverProps = FileUtils.readFileToString(serverPropsFile, Charsets.UTF_8);
+			if (serverProps.contains("sessionTimeout")) 
+				FileUtils.copyFile(new File(Bootstrap.getConfDir(), "server.properties"), serverPropsFile);
 
+			File logbackPropsFile = new File(upgradeDir, "conf/logback.xml");
+			String logbackProps = FileUtils.readFileToString(logbackPropsFile, Charsets.UTF_8);
+			if (!logbackProps.contains("AggregatedServiceLoader")) 
+				FileUtils.copyFile(new File(Bootstrap.getConfDir(), "logback.xml"), logbackPropsFile);
+			
+			File sampleKeystoreFile = new File(upgradeDir, "conf/sample.keystore");
+			if (sampleKeystoreFile.exists())
+				FileUtils.deleteFile(sampleKeystoreFile);
+			
 			File logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
 			String logbackConfig = FileUtils.readFileToString(logbackConfigFile, Charsets.UTF_8);
 			logbackConfig = StringUtils.replace(logbackConfig, "<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"/>", 
