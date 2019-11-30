@@ -123,6 +123,7 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> userIssueQueryWatches = new LinkedHashMap<>();
 	
+	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> issueQueryWatches = new LinkedHashMap<>();
 	
@@ -133,7 +134,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> userPullRequestQueryWatches = new LinkedHashMap<>();
-	
+
+	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> pullRequestQueryWatches = new LinkedHashMap<>();
 	
@@ -144,7 +146,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashSet<String> userBuildQuerySubscriptions = new LinkedHashSet<>();
-	
+
+	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashSet<String> buildQuerySubscriptions = new LinkedHashSet<>();
 	

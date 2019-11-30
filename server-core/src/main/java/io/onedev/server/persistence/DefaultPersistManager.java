@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.Driver;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Properties;
 
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.ManyToOne;
@@ -208,10 +209,17 @@ public class DefaultPersistManager implements PersistManager {
 
 	protected Connection getConnection() {
 		try {
-			Class.forName(properties.getDriver());
-	    	Connection conn = DriverManager.getConnection(properties.getUrl(), 
-	    			properties.getUser(), properties.getPassword());
-	    	return conn;
+			Driver driver = (Driver) Class.forName(properties.getDriver(), true, 
+					Thread.currentThread().getContextClassLoader()).newInstance();
+			Properties connectProps = new Properties();
+			String user = properties.getUser();
+			String password = properties.getPassword();
+	        if (user != null) 
+	            connectProps.put("user", user);
+	        if (password != null) 
+	            connectProps.put("password", password);
+			
+			return driver.connect(properties.getUrl(), connectProps);
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		}

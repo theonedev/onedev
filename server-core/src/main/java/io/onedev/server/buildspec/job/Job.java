@@ -86,7 +86,7 @@ public class Job implements Serializable, Validatable {
 	
 	private List<CacheSpec> caches = new ArrayList<>();
 
-	private String cpuRequirement = "500m";
+	private String cpuRequirement = "250m";
 	
 	private String memoryRequirement = "128m";
 	
