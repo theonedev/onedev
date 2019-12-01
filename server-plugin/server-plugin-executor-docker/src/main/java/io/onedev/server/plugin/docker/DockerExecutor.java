@@ -167,7 +167,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 		return new File(Bootstrap.getSiteDir(), "cache"); 
 	}
 
-	private String createNetwork(JobContext jobContext, JobLogger jobLogger) {
+	private String createNetwork(JobContext jobContext, boolean isWindows, JobLogger jobLogger) {
 		String network = getName() + "-" + jobContext.getProjectName() + "-" + jobContext.getBuildNumber();
 		
 		AtomicBoolean networkExists = new AtomicBoolean(false);
@@ -193,7 +193,10 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 			clearNetwork(network, jobLogger);
 		} else {
 			docker.clearArgs();
-			docker.addArgs("network", "create", network);
+			docker.addArgs("network", "create");
+			if (isWindows)
+				docker.addArgs("-d", "nat");
+			docker.addArgs(network);
 			docker.execute(new LineConsumer() {
 
 				@Override
@@ -443,64 +446,63 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
-		File hostCIHome = FileUtils.createTempDir("onedev-ci");
+		File hostCIHome = FileUtils.createTempDir("onedev-build");
 		try {
 			JobLogger jobLogger = jobContext.getLogger();
-			
 			getCapacityRunner().call(new Callable<Void>() {
 	
 				@SuppressWarnings("resource")
 				@Override
 				public Void call() {
-					String network = createNetwork(jobContext, jobLogger);
-					jobLogger.log(String.format("Executing job (executor: %s, network: %s, image: %s)...", 
-							getName(), network, jobContext.getImage()));
-					try {
-						jobContext.notifyJobRunning();
+					jobLogger.log(String.format("Executing job (executor: %s, image: %s)...", 
+							getName(), jobContext.getImage()));
+					jobContext.notifyJobRunning();
+					
+					JobManager jobManager = OneDev.getInstance(JobManager.class);		
+					File hostCacheHome = getCacheHome();
+					FileUtils.createDir(hostCacheHome);
+					
+					jobLogger.log("Allocating job caches...") ;
+					Map<CacheInstance, Date> cacheInstances = KubernetesHelper.getCacheInstances(hostCacheHome);
+					Map<CacheInstance, String> cacheAllocations = jobManager.allocateJobCaches(jobToken, new Date(), cacheInstances);
+					KubernetesHelper.preprocess(hostCacheHome, cacheAllocations, new Consumer<File>() {
+	
+						@Override
+						public void accept(File directory) {
+							cleanDirAsRoot(directory);
+						}
 						
-						JobManager jobManager = OneDev.getInstance(JobManager.class);		
-						File hostCacheHome = getCacheHome();
-						FileUtils.createDir(hostCacheHome);
+					});
 						
-						jobLogger.log("Allocating job caches...") ;
-						Map<CacheInstance, Date> cacheInstances = KubernetesHelper.getCacheInstances(hostCacheHome);
-						Map<CacheInstance, String> cacheAllocations = jobManager.allocateJobCaches(jobToken, new Date(), cacheInstances);
-						KubernetesHelper.preprocess(hostCacheHome, cacheAllocations, new Consumer<File>() {
-		
-							@Override
-							public void accept(File directory) {
-								cleanDirAsRoot(directory);
-							}
-							
-						});
-							
-						login(jobLogger);
+					login(jobLogger);
 
+					jobLogger.log("Pulling job image...") ;
+					Commandline docker = newDocker();
+					docker.addArgs("pull", jobContext.getImage());
+					docker.execute(new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							logger.debug(line);
+						}
+						
+					}, new LineConsumer() {
+
+						@Override
+						public void consume(String line) {
+							jobLogger.log(line);
+						}
+						
+					}).checkReturnCode();
+					
+					boolean isWindows = getImageOS(jobLogger, jobContext.getImage()).equalsIgnoreCase("windows");
+
+					String network = createNetwork(jobContext, isWindows, jobLogger);
+					try {
 						for (JobService jobService: jobContext.getServices()) {
 							jobLogger.log("Starting service (name: " + jobService.getName() + ", image: " + jobService.getImage() + ")...");
 							startService(network, jobService, jobLogger);
 						}
-						
-						jobLogger.log("Pulling job image...") ;
-						Commandline docker = newDocker();
-						docker.addArgs("pull", jobContext.getImage());
-						docker.execute(new LineConsumer() {
-
-							@Override
-							public void consume(String line) {
-								logger.debug(line);
-							}
-							
-						}, new LineConsumer() {
-
-							@Override
-							public void consume(String line) {
-								jobLogger.log(line);
-							}
-							
-						}).checkReturnCode();
-						
-						boolean isWindows = getImageOS(jobLogger, jobContext.getImage()).equalsIgnoreCase("windows");
 						
 						File workspaceCache = null;
 						for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
@@ -772,9 +774,9 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 						String containerWorkspace;
 						String[] containerCommand;
 						if (isWindows) {
-							containerCIHome = "C:\\onedev-ci";
-							containerWorkspace = "C:\\onedev-ci\\workspace";
-							containerCommand = new String[] {"cmd", "/c", "C:\\onedev-ci\\job-commands.bat"};						
+							containerCIHome = "C:\\onedev-build";
+							containerWorkspace = "C:\\onedev-build\\workspace";
+							containerCommand = new String[] {"cmd", "/c", "C:\\onedev-build\\job-commands.bat"};						
 	
 							File scriptFile = new File(hostCIHome, "job-commands.bat");
 							try {
@@ -783,9 +785,9 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 								throw new RuntimeException(e);
 							}
 						} else {
-							containerCIHome = "/onedev-ci";
-							containerWorkspace = "/onedev-ci/workspace";
-							containerCommand = new String[] {"sh", "/onedev-ci/job-commands.sh"};
+							containerCIHome = "/onedev-build";
+							containerWorkspace = "/onedev-build/workspace";
+							containerCommand = new String[] {"sh", "/onedev-build/job-commands.sh"};
 							
 							File scriptFile = new File(hostCIHome, "job-commands.sh");
 							try {
@@ -1014,11 +1016,11 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 			String containerWorkspacePath;
 			String containerCachePath;
 			if (windows) {
-				containerWorkspacePath = "C:\\onedev-ci\\workspace";
-				containerCachePath = "C:\\onedev-ci\\cache";
+				containerWorkspacePath = "C:\\onedev-build\\workspace";
+				containerCachePath = "C:\\onedev-build\\cache";
 			} else {
-				containerWorkspacePath = "/onedev-ci/workspace";
-				containerCachePath = "/onedev-ci/cache";
+				containerWorkspacePath = "/onedev-build/workspace";
+				containerCachePath = "/onedev-build/cache";
 			}
 			cmd.addArgs("-v", workspaceDir.getAbsolutePath() + ":" + containerWorkspacePath);
 			cmd.addArgs("-v", cacheDir.getAbsolutePath() + ":" + containerCachePath);

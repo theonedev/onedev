@@ -667,31 +667,31 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"image", dockerImage);
 	
 			String k8sHelperClassPath;
-			String containerCIHome;
+			String containerBuildHome;
 			String containerCacheHome;
 			String trustCertsHome;
 			String dockerSock;
 			if (baselineOsInfo.isLinux()) {
-				containerCIHome = "/onedev-ci";
-				containerCacheHome = containerCIHome + "/cache";
-				trustCertsHome = containerCIHome + "/trust-certs";
+				containerBuildHome = "/onedev-build";
+				containerCacheHome = containerBuildHome + "/cache";
+				trustCertsHome = containerBuildHome + "/trust-certs";
 				k8sHelperClassPath = "/k8s-helper/*";
 				mainContainerSpec.put("command", Lists.newArrayList("sh"));
-				mainContainerSpec.put("args", Lists.newArrayList(containerCIHome + "/commands.sh"));
+				mainContainerSpec.put("args", Lists.newArrayList(containerBuildHome + "/commands.sh"));
 				dockerSock = "/var/run/docker.sock";
 			} else {
-				containerCIHome = "C:\\onedev-ci";
-				containerCacheHome = containerCIHome + "\\cache";
-				trustCertsHome = containerCIHome + "\\trust-certs";
+				containerBuildHome = "C:\\onedev-build";
+				containerCacheHome = containerBuildHome + "\\cache";
+				trustCertsHome = containerBuildHome + "\\trust-certs";
 				k8sHelperClassPath = "C:\\k8s-helper\\*";
 				mainContainerSpec.put("command", Lists.newArrayList("cmd"));
-				mainContainerSpec.put("args", Lists.newArrayList("/c", containerCIHome + "\\commands.bat"));
+				mainContainerSpec.put("args", Lists.newArrayList("/c", containerBuildHome + "\\commands.bat"));
 				dockerSock = null;
 			}
 
-			Map<String, String> ciHomeMount = Maps.newLinkedHashMap(
-					"name", "ci-home", 
-					"mountPath", containerCIHome);
+			Map<String, String> buildHomeMount = Maps.newLinkedHashMap(
+					"name", "build-home", 
+					"mountPath", containerBuildHome);
 			Map<String, String> cacheHomeMount = Maps.newLinkedHashMap(
 					"name", "cache-home", 
 					"mountPath", containerCacheHome);
@@ -702,7 +702,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"name", "docker-sock", 
 					"mountPath", dockerSock);
 			
-			List<Object> volumeMounts = Lists.<Object>newArrayList(ciHomeMount, cacheHomeMount);
+			List<Object> volumeMounts = Lists.<Object>newArrayList(buildHomeMount, cacheHomeMount);
 			if (trustCertsConfigMapName != null)
 				volumeMounts.add(trustCertsMount);
 			if (dockerSock != null)
@@ -776,15 +776,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			if (!getNodeSelector().isEmpty())
 				podSpec.put("nodeSelector", toMap(getNodeSelector()));
 			
-			Map<Object, Object> ciHomeVolume = Maps.newLinkedHashMap(
-					"name", "ci-home", 
+			Map<Object, Object> buildHomeVolume = Maps.newLinkedHashMap(
+					"name", "build-home", 
 					"emptyDir", Maps.newLinkedHashMap());
 			Map<Object, Object> cacheHomeVolume = Maps.newLinkedHashMap(
 					"name", "cache-home", 
 					"hostPath", Maps.newLinkedHashMap(
 							"path", baselineOsInfo.getCacheHome(), 
 							"type", "DirectoryOrCreate"));
-			List<Object> volumes = Lists.<Object>newArrayList(ciHomeVolume, cacheHomeVolume);
+			List<Object> volumes = Lists.<Object>newArrayList(buildHomeVolume, cacheHomeVolume);
 			if (trustCertsConfigMapName != null) {
 				Map<Object, Object> trustCertsHomeVolume = Maps.newLinkedHashMap(
 						"name", "trust-certs-home", 
@@ -1398,9 +1398,9 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		public String getCacheHome() {
 			if (osName.equalsIgnoreCase("linux"))
-				return "/var/cache/onedev-ci"; 
+				return "/var/cache/onedev-build"; 
 			else
-				return "C:\\ProgramData\\onedev-ci\\cache";
+				return "C:\\ProgramData\\onedev-build\\cache";
 		}
 		
 		public static OsInfo getBaseline(Collection<OsInfo> osInfos) {

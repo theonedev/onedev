@@ -23,7 +23,7 @@ public interface BlobRenderContext extends Serializable {
 	public enum Mode {
 		VIEW, 
 		/*
-		 * Some blob can be rendered in a way for easier understanding, such as onedev-ci.xml, 
+		 * Some blob can be rendered in a way for easier understanding, such as .onedev-buildspec, 
 		 * In these cases, the VIEW_PLAIN mode enables to view plain text of the blob
 		 */
 		VIEW_PLAIN, 
