@@ -109,7 +109,7 @@
 }
 .build-spec>.valid>div>.body>.contents>.content {
     border-radius: 4px;
-    border: 1px solid #BBB;
+    border: 2px solid #DDD;
     padding: 20px;
 }
 

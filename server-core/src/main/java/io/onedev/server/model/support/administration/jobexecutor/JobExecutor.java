@@ -18,6 +18,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
+import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Patterns;
@@ -52,6 +53,7 @@ public abstract class JobExecutor implements Serializable {
 	}
 
 	@Editable(order=10)
+	@DnsName //this name may be used as namespace/network prefixes, so put a strict constraint
 	@NotEmpty
 	public String getName() {
 		return name;

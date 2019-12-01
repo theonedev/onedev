@@ -60,7 +60,6 @@ import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.inputspec.SecretInput;
-import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -83,8 +82,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	
 	private List<NodeSelectorEntry> nodeSelector = new ArrayList<>();
 	
-	private String namespacePrefix = "onedev-ci";
-	
 	private String serviceAccount;
 	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
@@ -106,19 +103,6 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		this.nodeSelector = nodeSelector;
 	}
 
-	@Editable(order=30, description="OneDev will create a separate kubernetes namespace to run each "
-			+ "job for isolation purpose. Here you may specify prefix of the namespace to identify "
-			+ "various job resources created by this executor")
-	@DnsName
-	@NotEmpty
-	public String getNamespacePrefix() {
-		return namespacePrefix;
-	}
-
-	public void setNamespacePrefix(String namespacePrefix) {
-		this.namespacePrefix = namespacePrefix;
-	}
-	
 	@Editable(order=40, description="Optionally specify a service account in above namespace to run the job "
 			+ "pod. Refer to <a href='https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'>"
 			+ "kubernetes documentation</a> on how to set up service accounts")
@@ -270,7 +254,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 	}
 	
 	private String createNamespace(@Nullable JobContext jobContext, JobLogger jobLogger) {
-		String namespace = getNamespacePrefix() + "-";
+		String namespace = getName() + "-";
 		if (jobContext != null)
 			namespace += jobContext.getProjectName().replace('.', '-').replace('_', '-') + "-" + jobContext.getBuildNumber();
 		else

@@ -31,8 +31,12 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private boolean gravatarEnabled = true;
 	
-	@Editable(name="Server URL", order=90, description="Specify root URL to access this server. OneDev uses this url "
-			+ "to construct various links in notification email.")
+	@Editable(name="Server URL", order=90, description="Specify root URL to access this server. For instance, "
+			+ "<i>http://server-dns-name:8810</i>. This url will be used in below cases:<p>"
+			+ "<ul>"
+			+ "<li> When run builds in kubernetes cluster, job pods need to access this url to download source and artifacts"
+			+ "<li> OneDev uses this url to construct various activity urls in notification emails"
+			+ "</ul>")
 	@NotEmpty
 	public String getServerUrl() {
 		return serverUrl;

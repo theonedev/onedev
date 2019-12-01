@@ -50,8 +50,10 @@ public class BeanViewer extends Panel {
 		RepeatingView groupsView = new RepeatingView("groups");
 		for (Map.Entry<String, List<PropertyContext<Serializable>>> entry: properties.entrySet()) {
 			WebMarkupContainer groupContainer = new WebMarkupContainer(groupsView.newChildId());
-			groupContainer.add(AttributeAppender.append("class", 
-					"group-" + entry.getKey().replace(" ", "-").toLowerCase()));
+			if (entry.getKey().length() != 0) {
+				groupContainer.add(AttributeAppender.append("class", 
+						"group-" + entry.getKey().replace(" ", "-").toLowerCase()));
+			}
 			groupsView.add(groupContainer);
 			WebMarkupContainer toggleLink = new WebMarkupContainer("toggle");
 			toggleLink.add(new Label("groupName", entry.getKey()));

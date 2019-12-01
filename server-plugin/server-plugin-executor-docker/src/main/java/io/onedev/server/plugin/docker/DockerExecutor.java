@@ -61,7 +61,6 @@ import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.util.validation.annotation.DnsName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
@@ -77,8 +76,6 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	
 	private static final Logger logger = LoggerFactory.getLogger(DockerExecutor.class);
 
-	private String networkPrefix = "onedev-ci";
-	
 	private List<RegistryLogin> registryLogins = new ArrayList<>();
 	
 	private int capacity = Runtime.getRuntime().availableProcessors();
@@ -88,19 +85,6 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	private String dockerExecutable;
 	
 	private transient CapacityRunner capacityRunner;
-
-	@Editable(order=30, description="OneDev will create a separate docker network to run each "
-			+ "job for isolation purpose. Here you may specify prefix of the network to identify "
-			+ "job containers created by this executor")
-	@DnsName
-	@NotEmpty
-	public String getNetworkPrefix() {
-		return networkPrefix;
-	}
-
-	public void setNetworkPrefix(String networkPrefix) {
-		this.networkPrefix = networkPrefix;
-	}
 
 	@Editable(order=400, description="Specify login information for docker registries if necessary")
 	public List<RegistryLogin> getRegistryLogins() {
@@ -184,7 +168,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	}
 
 	private String createNetwork(JobContext jobContext, JobLogger jobLogger) {
-		String network = getNetworkPrefix() + "-" + jobContext.getProjectName() + "-" + jobContext.getBuildNumber();
+		String network = getName() + "-" + jobContext.getProjectName() + "-" + jobContext.getBuildNumber();
 		
 		AtomicBoolean networkExists = new AtomicBoolean(false);
 		Commandline docker = newDocker();
