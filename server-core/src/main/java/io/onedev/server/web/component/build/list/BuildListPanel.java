@@ -49,7 +49,6 @@ import com.google.common.collect.Sets;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -63,12 +62,11 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
@@ -557,8 +555,8 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 
-		for (String param: getListParams()) {
-			columns.add(new AbstractColumn<Build, Void>(Model.of(param)) {
+		for (String paramName: getListParams()) {
+			columns.add(new AbstractColumn<Build, Void>(Model.of(paramName)) {
 
 				@Override
 				public String getCssClass() {
@@ -566,22 +564,13 @@ public abstract class BuildListPanel extends Panel {
 				}
 
 				@Override
-				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-						IModel<Build> rowModel) {
+				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId, IModel<Build> rowModel) {
 					Build build = rowModel.getObject();
-					if (build.isParamVisible(param)) {
-						Input input = build.getParamInputs().get(param);
-						if (input != null) {
-							if (input.getType().equals(ParamSpec.SECRET))
-								cellItem.add(new Label(componentId, SecretInput.MASK));
-							else
-								cellItem.add(new MultilineLabel(componentId, StringUtils.join(input.getValues(), ",")));
-						} else {
-							cellItem.add(new Label(componentId, "<i>Undefined</i>").setEscapeModelStrings(false));
-						}
-					} else {
-						cellItem.add(new Label(componentId, "<i>Undefined</i>").setEscapeModelStrings(false));
-					}
+					Input param = build.getParamInputs().get(paramName);
+					if (param != null && build.isParamVisible(paramName))
+						cellItem.add(new ParamValuesLabel(componentId, param));
+					else
+						cellItem.add(new Label(componentId, "<i>Unspecified</i>").setEscapeModelStrings(false));
 				}
 				
 			});

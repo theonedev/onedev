@@ -24,9 +24,7 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
@@ -36,10 +34,9 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.MultilineLabel;
+import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -211,10 +208,7 @@ public abstract class BuildSidePanel extends Panel {
 			protected void populateItem(ListItem<Input> item) {
 				Input param = item.getModelObject();
 				item.add(new Label("name", param.getName()));
-				if (param.getType().equals(ParamSpec.SECRET))
-					item.add(new Label("value", SecretInput.MASK));
-				else
-					item.add(new MultilineLabel("value", StringUtils.join(param.getValues(), ",")));
+				item.add(new ParamValuesLabel("value", param));
 			}
 
 			@Override

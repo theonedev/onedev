@@ -519,25 +519,21 @@ public class Build extends AbstractEntity implements Referenceable {
 		if (!checkedParamNames.add(paramName))
 			return false;
 		
-		ParamSpec paramSpec = getJob().getParamSpecMap().get(paramName);
-		if (paramSpec != null) {
-			if (paramSpec.getShowCondition() != null) {
-				Input dependentInput = getParamInputs().get(paramSpec.getShowCondition().getInputName());
-				Preconditions.checkNotNull(dependentInput);
-				String value;
-				if (!dependentInput.getValues().isEmpty())
-					value = dependentInput.getValues().iterator().next();
-				else
-					value = null;
-				if (paramSpec.getShowCondition().getValueMatcher().matches(value)) 
-					return isParamVisible(dependentInput.getName(), checkedParamNames);
-				else 
-					return false;
-			} else {
-				return true;
-			}
+		ParamSpec paramSpec = Preconditions.checkNotNull(getJob().getParamSpecMap().get(paramName));
+		if (paramSpec.getShowCondition() != null) {
+			Input dependentInput = getParamInputs().get(paramSpec.getShowCondition().getInputName());
+			Preconditions.checkNotNull(dependentInput);
+			String value;
+			if (!dependentInput.getValues().isEmpty())
+				value = dependentInput.getValues().iterator().next();
+			else
+				value = null;
+			if (paramSpec.getShowCondition().getValueMatcher().matches(value)) 
+				return isParamVisible(dependentInput.getName(), checkedParamNames);
+			else 
+				return false;
 		} else {
-			return false;
+			return true;
 		}
 	}
 	
