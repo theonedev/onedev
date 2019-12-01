@@ -44,9 +44,8 @@ public class BranchLink extends ViewStateAwarePageLink<Void> {
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
 		configure();
-		if (!isEnabled()) {
+		if (!isEnabled())
 			tag.setName("span");
-		}
 	}
 
 	@Override

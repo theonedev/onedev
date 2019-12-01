@@ -19,6 +19,8 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -28,10 +30,10 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
+import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.OddEvenItem;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -56,7 +58,7 @@ import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
@@ -284,16 +286,16 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Summary")) {
+		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
 				PullRequest request = rowModel.getObject();
-				Fragment fragment = new Fragment(componentId, "summaryFrag", PullRequestListPanel.this);
+				Fragment fragment = new Fragment(componentId, "contentFrag", PullRequestListPanel.this);
 				
 				QueryPosition position;
 				if (getProject() != null) {
-					OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
+					Item<?> row = cellItem.findParent(Item.class);
 					position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)requestsTable.getItemCount(), 
 							(int)requestsTable.getCurrentPage() * WebConstants.PAGE_SIZE + row.getIndex());
 				} else {
@@ -303,16 +305,36 @@ public abstract class PullRequestListPanel extends Panel {
 				String url = RequestCycle.get().urlFor(PullRequestActivitiesPage.class, 
 						PullRequestActivitiesPage.paramsOf(request, position)).toString();
 				
-				fragment.add(new Label("number", "<a href='" + url + "'>#" + request.getNumber() + "</a>")
-						.setEscapeModelStrings(false));
+				String label = "#" + request.getNumber();
+				if (getProject() == null)
+					label = request.getTargetProject().getName() + label;
+				fragment.add(new Label("number", "<a href='" + url + "'>" + label + "</a>").setEscapeModelStrings(false));
 				ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), url);
 				fragment.add(new Label("title", transformer.apply(request.getTitle())).setEscapeModelStrings(false));
+
+				fragment.add(new Label("comments", request.getCommentCount()));
 				
 				fragment.add(new RequestStatusLabel("status", rowModel));
+				
+				fragment.add(new BranchLink("target", request.getTarget(), request));
+
+				if (request.getSource() != null) { 
+					fragment.add(new BranchLink("source", request.getSource(), request));
+				} else { 
+					fragment.add(new Label("source", "<i>unknown</i>") {
+
+						@Override
+						protected void onComponentTag(ComponentTag tag) {
+							super.onComponentTag(tag);
+							tag.setName("span");
+						}
+						
+					}.setEscapeModelStrings(false));
+				}
+				
 				UserIdent submitterIdent = UserIdent.of(request.getSubmitter(), request.getSubmitterName());
 				fragment.add(new UserIdentPanel("submitter", submitterIdent, Mode.NAME));
 				fragment.add(new Label("submitDate", DateUtils.formatAge(request.getSubmitDate())));
-				fragment.add(new Label("comments", request.getCommentCount()));
 				
 				cellItem.add(fragment);
 			}
@@ -320,59 +342,6 @@ public abstract class PullRequestListPanel extends Panel {
 			@Override
 			public String getCssClass() {
 				return "summary";
-			}
-			
-		});
-		
-		if (getProject() == null) {
-			columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Target")) {
-	
-				@Override
-				public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-					Fragment fragment = new Fragment(componentId, "branchFrag", PullRequestListPanel.this);
-					fragment.add(new BranchLink("link", rowModel.getObject().getTarget(), rowModel.getObject()));
-					cellItem.add(fragment);
-				}
-	
-				@Override
-				public String getCssClass() {
-					return "target expanded";
-				}
-	
-			});
-		}
-		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Source")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				if (rowModel.getObject().getSource() != null) {
-					Fragment fragment = new Fragment(componentId, "branchFrag", PullRequestListPanel.this);
-					fragment.add(new BranchLink("link", rowModel.getObject().getSource(), rowModel.getObject()));
-					cellItem.add(fragment);
-				} else {
-					cellItem.add(new Label(componentId, "<i>Unknown</i>").setEscapeModelStrings(false));
-				}
-			}
-
-			@Override
-			public String getCssClass() {
-				return "source expanded";
-			}
-
-		});
-		
-		columns.add(new AbstractColumn<PullRequest, Void>(Model.of("Last Update")) {
-
-			@Override
-			public void populateItem(Item<ICellPopulator<PullRequest>> cellItem, String componentId, IModel<PullRequest> rowModel) {
-				PullRequest request = rowModel.getObject();
-				cellItem.add(new Label(componentId, DateUtils.formatAge(request.getUpdateDate())));
-			}
-
-			@Override
-			public String getCssClass() {
-				return "last-update expanded";
 			}
 			
 		});
@@ -419,19 +388,30 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		};
 		
-		body.add(requestsTable = new HistoryAwareDataTable<PullRequest, Void>("requests", columns, dataProvider, 
-				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
+		body.add(requestsTable = new DataTable<PullRequest, Void>("requests", columns, dataProvider, WebConstants.PAGE_SIZE) {
 
 			@Override
 			protected Item<PullRequest> newRowItem(String id, int index, IModel<PullRequest> model) {
 				Item<PullRequest> item = super.newRowItem(id, index, model);
-				PullRequest request = model.getObject();
+				PullRequest issue = model.getObject();
 				item.add(AttributeAppender.append("class", 
-						request.isVisitedAfter(request.getUpdateDate())?"request":"request new"));
+						issue.isVisitedAfter(issue.getUpdateDate())?"request":"request new"));
 				return item;
 			}
+			
 		});
 		
+		if (getPagingHistorySupport() != null)
+			requestsTable.setCurrentPage(getPagingHistorySupport().getCurrentPage());
+		requestsTable.addBottomToolbar(new NavigationToolbar(requestsTable) {
+
+			@Override
+			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
+				return new HistoryAwarePagingNavigator(navigatorId, table, getPagingHistorySupport());
+			}
+			
+		});
+		requestsTable.addBottomToolbar(new NoRecordsToolbar(requestsTable));
 	}
 	
 	@Override

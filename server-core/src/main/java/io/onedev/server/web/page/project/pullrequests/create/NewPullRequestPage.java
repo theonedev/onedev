@@ -505,9 +505,9 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 			@Override
 			public String getObject() {
 				if (requestModel.getObject().isOpen())
-					return "<i class='fa fa-info-circle'></i> This change is already opened for merge by pull request";
+					return "This change is already opened for merge by pull request";
 				else 
-					return "<i class='fa fa-info-circle'></i> This change is squashed/rebased onto base branch via pull request";
+					return "This change is squashed/rebased onto base branch via pull request";
 			}
 			
 		}).setEscapeModelStrings(false));
@@ -521,8 +521,7 @@ public class NewPullRequestPage extends ProjectPage implements CommentSupport {
 
 					@Override
 					public String getObject() {
-						PullRequest request = getPullRequest();
-						return "#" + request.getNumber() + " - " + request.getTitle();
+						return "#" + getPullRequest().getNumber();
 					}
 					
 				}));

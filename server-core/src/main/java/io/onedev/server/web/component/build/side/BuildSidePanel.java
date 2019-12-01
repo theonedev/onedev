@@ -24,13 +24,12 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.commons.utils.HtmlUtils;
+import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
@@ -40,6 +39,7 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
+import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -193,31 +193,14 @@ public abstract class BuildSidePanel extends Panel {
 			
 		});
 		
-		add(new ListView<BuildParam>("params", new LoadableDetachableModel<List<BuildParam>>() {
+		add(new ListView<Input>("params", new LoadableDetachableModel<List<Input>>() {
 
 			@Override
-			protected List<BuildParam> load() {
-				List<BuildParam> params = new ArrayList<>();
+			protected List<Input> load() {
+				List<Input> params = new ArrayList<>();
 				for (Map.Entry<String, Input> entry: getBuild().getParamInputs().entrySet()) {
-					if (getBuild().isParamVisible(entry.getKey())) {
-						if (entry.getValue().getValues().size() > 1) {
-							int i = 1;
-							for (String value: entry.getValue().getValues()) {
-								BuildParam param = new BuildParam();
-								param.setName(entry.getKey() + "_" + (i++));
-								param.setType(entry.getValue().getType());
-								param.setValue(value);
-								params.add(param);
-							}
-						} else {
-							BuildParam param = new BuildParam();
-							param.setName(entry.getKey());
-							param.setType(entry.getValue().getType());
-							if (entry.getValue().getValues().size() == 1)
-								param.setValue(entry.getValue().getValues().iterator().next());
-							params.add(param);
-						}
-					}
+					if (getBuild().isParamVisible(entry.getKey())) 
+						params.add(entry.getValue());
 				}
 				return params;
 			}
@@ -225,19 +208,19 @@ public abstract class BuildSidePanel extends Panel {
 		}) {
 
 			@Override
-			protected void populateItem(ListItem<BuildParam> item) {
-				BuildParam param = item.getModelObject();
+			protected void populateItem(ListItem<Input> item) {
+				Input param = item.getModelObject();
 				item.add(new Label("name", param.getName()));
 				if (param.getType().equals(ParamSpec.SECRET))
 					item.add(new Label("value", SecretInput.MASK));
 				else
-					item.add(new Label("value", HtmlUtils.formatAsHtml(param.getValue())).setEscapeModelStrings(false));
+					item.add(new MultilineLabel("value", StringUtils.join(param.getValues(), ",")));
 			}
 
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(!getBuild().getParams().isEmpty());
+				setVisible(!getModelObject().isEmpty());
 			}
 			
 		});

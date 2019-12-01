@@ -46,7 +46,7 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.ProjectQueryBehavior;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
@@ -312,7 +312,7 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		
-		body.add(new HistoryAwareDataTable<Project, Void>("projects", columns, dataProvider, 
+		body.add(new DefaultDataTable<Project, Void>("projects", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 	}
 		

@@ -18,9 +18,9 @@ import org.apache.wicket.model.IModel;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
-public class HistoryAwareDataTable<T, S> extends DataTable<T, S> {
+public class DefaultDataTable<T, S> extends DataTable<T, S> {
 
-	public HistoryAwareDataTable(final String id, final List<? extends IColumn<T, S>> columns,
+	public DefaultDataTable(final String id, final List<? extends IColumn<T, S>> columns,
 			final ISortableDataProvider<T, S> dataProvider, final int rowsPerPage, 
 			@Nullable PagingHistorySupport pagingHistorySupport) {
 		super(id, columns, dataProvider, rowsPerPage);

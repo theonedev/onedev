@@ -46,7 +46,7 @@ public class VariableInterpolator implements Function<String, String> {
 								value = build.getSecretValue(value);
 							paramValues.add(value);
 						}
-						return StringUtils.join(paramValues, "\n");
+						return StringUtils.join(paramValues, ",");
 					} else {
 						throw new OneException("Invisible param: " + paramName);
 					}

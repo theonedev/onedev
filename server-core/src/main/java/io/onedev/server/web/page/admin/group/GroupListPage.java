@@ -36,7 +36,7 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.page.admin.AdministrationPage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -229,7 +229,7 @@ public class GroupListPage extends AdministrationPage {
 			
 		};
 		
-		add(groupsTable = new HistoryAwareDataTable<>("groups", columns, dataProvider, 
+		add(groupsTable = new DefaultDataTable<>("groups", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 

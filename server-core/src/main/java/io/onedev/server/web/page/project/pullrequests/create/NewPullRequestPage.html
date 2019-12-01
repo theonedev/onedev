@@ -13,7 +13,7 @@
 					</div>
 				</td>
 				<td class="action">
-					<a wicket:id="swap" class="swap" title="Swap"><i class="fa fa-arrow-left"></i></a>
+					<a wicket:id="swap" class="swap btn btn-default" title="Swap"><i class="fa fa-arrow-left"></i></a>
 				</td>
 				<td class="source branch">
 					<div class="title">
@@ -45,7 +45,6 @@
 	<wicket:fragment wicket:id="mergedFrag">
 		<div class="alert alert-success">
 			<div class="summary">
-				<span class="fa fa-lg fa-check-circle"></span>
 				<a wicket:id="targetBranch"></a> is up to date with all commits from <a wicket:id="sourceBranch"></a>.
 				Try <a wicket:id="swapBranches">swap source and target</a> for the comparison.
 			</div>

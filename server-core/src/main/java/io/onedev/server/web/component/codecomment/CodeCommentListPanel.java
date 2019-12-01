@@ -48,7 +48,7 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.CodeCommentQueryBehavior;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
@@ -313,7 +313,7 @@ public abstract class CodeCommentListPanel extends Panel {
 
 		});
 		
-		body.add(new HistoryAwareDataTable<CodeComment, Void>("comments", columns, dataProvider, 
+		body.add(new DefaultDataTable<CodeComment, Void>("comments", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
 
 			@Override

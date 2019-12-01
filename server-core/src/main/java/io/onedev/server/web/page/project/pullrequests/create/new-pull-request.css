@@ -17,9 +17,9 @@
 #new-request>.branches td {
 	vertical-align: middle;
 	background: #F5F5F5; 
-	border: 1px solid #DDD;
+	border: 2px solid #DDD;
 	border-radius: 4px;
-	padding: 12px;
+	padding: 20px;
 }
 #new-request>.branches td.action {
 	text-align: center;

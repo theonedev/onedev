@@ -36,7 +36,7 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.MilestoneSort;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.menu.MenuItem;
@@ -260,7 +260,7 @@ public class MilestoneListPage extends ProjectIssuesPage {
 			
 		};
 		
-		add(milestonesTable = new HistoryAwareDataTable<Milestone, Void>("milestones", columns, dataProvider, 
+		add(milestonesTable = new DefaultDataTable<Milestone, Void>("milestones", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));		
 		milestonesTable.setOutputMarkupId(true);
 	}

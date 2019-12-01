@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.BeanUtils;
@@ -451,35 +452,38 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public Map<String, Input> getParamInputs() {
 		Map<String, Input> inputs = new LinkedHashMap<>();
-		List<BuildParam> params = new ArrayList<>(getParams());
-		Map<String, Integer> paramOrders = new HashMap<>();
-		
-		int index = 1;
-		for (ParamSpec paramSpec: getJob().getParamSpecs())
-			paramOrders.put(paramSpec.getName(), index++);
-			
-		Collections.sort(params, new Comparator<BuildParam>() {
 
-			@Override
-			public int compare(BuildParam o1, BuildParam o2) {
-				Integer order1 = paramOrders.get(o1.getName());
-				Integer order2 = paramOrders.get(o2.getName());
-				if (order1 == null)
-					order1 = Integer.MAX_VALUE;
-				if (order2 == null)
-					order2 = Integer.MAX_VALUE;
-				return order1 - order2;
+		Map<String, List<BuildParam>> paramMap = new HashMap<>(); 
+		for (BuildParam param: getParams()) {
+			List<BuildParam> paramsOfName = paramMap.get(param.getName());
+			if (paramsOfName == null) {
+				paramsOfName = new ArrayList<>();
+				paramMap.put(param.getName(), paramsOfName);
 			}
-			
-		});
-		for (BuildParam param: params) {
-			Input input = inputs.get(param.getName());
-			if (input == null) {
-				input = new Input(param.getName(), param.getType(), new ArrayList<>());
-				inputs.put(param.getName(), input);
+			paramsOfName.add(param);
+		}
+		for (ParamSpec paramSpec: getJob().getParamSpecs()) {
+			String paramName = paramSpec.getName();
+			List<BuildParam> params = paramMap.get(paramName);
+			if (params != null) {
+				String type = params.iterator().next().getType();
+				List<String> values = new ArrayList<>();
+				for (BuildParam param: params) {
+					if (param.getValue() != null)
+						values.add(param.getValue());
+				}
+				Collections.sort(values, new Comparator<String>() {
+
+					@Override
+					public int compare(String o1, String o2) {
+						return (int) (paramSpec.getOrdinal(o1) - paramSpec.getOrdinal(o2));
+					}
+					
+				});
+				if (!paramSpec.isAllowMultiple() && values.size() > 1) 
+					values = Lists.newArrayList(values.iterator().next());
+				inputs.put(paramName, new Input(paramName, type, values));
 			}
-			if (param.getValue() != null)
-				input.getValues().add(param.getValue());
 		}
 		return inputs;
 	}

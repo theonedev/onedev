@@ -7,7 +7,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.server.web.editable.annotation.Color;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable(name="Value")
 public class Choice implements Serializable {
@@ -18,7 +17,7 @@ public class Choice implements Serializable {
 	
 	private String value;
 	
-	private String color;
+	private String color = "#E8E8E8";
 
 	@Editable
 	public String getUuid() {
@@ -40,8 +39,8 @@ public class Choice implements Serializable {
 	}
 
 	@Editable(order=200)
+	@NotEmpty
 	@Color
-	@NameOfEmptyValue("No color")
 	public String getColor() {
 		return color;
 	}

@@ -1,11 +1,3 @@
-@media(max-width: 991px) {
-	.issue-list thead,
-	.issue-list a.list-fields, 
-	.issue-list td.custom-field {
-		display: none;
-	}
-}
-
 .issue-list>.head {
 	position: relative;
 }
@@ -34,41 +26,35 @@
 .issue-list>.body td a {
 	color: #444;
 }
-.issue-list>.body td.summary .first-line {
-	margin-bottom: 8px;
-	font-size: 16px;
-	font-weight: bold;
-}
-.issue-list>.body td.summary .title {
-	margin-right: 8px;
-}
-.issue-list>.body td.summary .number {
-	margin-right: 4px;
-}
-.issue-list>.body td.summary .copy {
-	font-size: 14px;
-}
-
-.issue-list>.body td.summary .second-line>* {
+.issue-list>.body td .number>a {
 	margin-right: 12px;
 }
-.issue-list>.body td.summary .second-line>*:last-child {
-	margin-right: 0;
+.issue-list>.body td .title>a {
+	margin-right: 4px;
 }
-.issue-list>.body td.summary .state {
+.issue-list>.body td .number>a, .issue-list>.body td .title>a {
+	font-weight: bold;
+}
+
+.issue-list>.body td .state {
 	width: 120px;
 	padding: 6px 8px;
 	text-overflow: ellipsis;
 	overflow: hidden;
 }
-.issue-list>.body td.summary .second-line {
+.issue-list>.body td .primary {
+	margin-bottom: 8px;
+}
+.issue-list>.body td .secondary>.pull-left>div {
+	margin-right: 16px;
+}
+.issue-list>.body td .submission, .issue-list>.body td .comments, .issue-list>.body td .votes {
 	color: #888;
 }
-
-.issue-list>.body th.custom-field, 
-.issue-list>.body td.custom-field {
-	white-space: nowrap;
+.issue-list>.body td .votes {
+	margin-right: 8px;	
 }
+
 .issue-list>.body .new-indicator {
 	width: 4px;
 	padding: 0;

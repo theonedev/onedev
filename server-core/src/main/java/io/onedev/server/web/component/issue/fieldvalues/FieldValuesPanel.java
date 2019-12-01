@@ -65,7 +65,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 					String value = item.getModelObject();
 					if (getField().getType().equals(FieldSpec.USER)) {
 						UserIdent userIdent = UserIdent.of(OneDev.getInstance(UserManager.class).findByName(value), value);
-						item.add(new UserIdentPanel("value", userIdent, Mode.AVATAR_AND_NAME));
+						item.add(new UserIdentPanel("value", userIdent, Mode.NAME));
 					} else if (getField().getType().equals(FieldSpec.ISSUE)) {
 						Issue issue = OneDev.getInstance(IssueManager.class)
 								.find(getIssue().getProject(), Long.valueOf(value));
@@ -109,7 +109,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 						Label label;
 						if (getField().getType().equals(ParamSpec.SECRET))
 							label = new Label("value", SecretInput.MASK);
-						else
+						else 
 							label = new Label("value", value);
 						
 						FieldSpec fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
@@ -118,15 +118,14 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 							ComponentContext.push(new ComponentContext(this));
 							try {
 								String backgroundColor = choiceProvider.getChoices(false).get(value);
-								if (backgroundColor != null) {
-									String fontColor = ColorUtils.isLight(backgroundColor)?"black":"white"; 
-									String style = String.format(
-											"background-color: %s; color: %s;", 
-											backgroundColor, fontColor);
-									label.add(AttributeAppender.append("style", style));
-									label.add(AttributeAppender.append("class", "label"));
-									item.add(AttributeAppender.append("class", "has-color"));
-								}
+								if (backgroundColor == null)
+									backgroundColor = "#E8E8E8";
+								String fontColor = ColorUtils.isLight(backgroundColor)?"black":"white"; 
+								String style = String.format(
+										"background-color: %s; color: %s;", 
+										backgroundColor, fontColor);
+								label.add(AttributeAppender.append("style", style));
+								label.add(AttributeAppender.append("class", "label"));
 							} finally {
 								ComponentContext.pop();
 							}

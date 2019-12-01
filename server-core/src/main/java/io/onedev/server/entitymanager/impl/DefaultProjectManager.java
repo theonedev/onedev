@@ -203,6 +203,10 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     	query.setParameter("forkedFrom", project);
     	query.executeUpdate();
 
+    	query = getSession().createQuery("update PullRequest set sourceProject=null where sourceProject=:sourceProject");
+    	query.setParameter("sourceProject", project);
+    	query.executeUpdate();
+    	
     	dao.remove(project);
     	
     	synchronized (repositoryCache) {

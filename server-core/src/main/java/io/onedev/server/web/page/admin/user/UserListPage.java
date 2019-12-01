@@ -36,7 +36,7 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.user.UserDeleteLink;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
@@ -218,7 +218,7 @@ public class UserListPage extends AdministrationPage {
 			
 		};
 		
-		add(usersTable = new HistoryAwareDataTable<User, Void>("users", columns, dataProvider, 
+		add(usersTable = new DefaultDataTable<User, Void>("users", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, pagingHistorySupport));
 	}
 

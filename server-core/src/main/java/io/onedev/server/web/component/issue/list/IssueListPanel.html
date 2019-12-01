@@ -23,27 +23,31 @@
 			<table wicket:id="issues" class="table"></table>
 		</div>
 	</div>
-	<wicket:fragment wicket:id="summaryFrag">
-		<div class="first-line">
-			<span wicket:id="title" class="title"></span> 
-			<span wicket:id="number" class="number"></span> 
-			<a wicket:id="copy" title="Copy issue number and title" class="copy"><i class="fa fa-copy"></i></a>
+	<wicket:fragment wicket:id="contentFrag">
+		<div class="primary clearfix">
+			<div class="pull-left">
+				<span wicket:id="number" class="number"></span> 
+				<span wicket:id="title" class="title"></span> 
+				<a wicket:id="copy" title="Copy issue number and title" class="copy"><i class="fa fa-copy"></i></a>
+			</div>
+			<div class="pull-right">
+				<span class="votes" title="Votes">
+					<span class="fa fa-thumbs-o-up"></span> <span wicket:id="votes"></span>
+				</span>
+				<span class="comments" title="Comments">
+					<span class="fa fa-comments-o"></span> <span wicket:id="comments"></span>
+				</span>
+			</div>
 		</div>
-		<div class="second-line clearfix">
-			<span wicket:id="state" class="state pull-left"></span>
-			<div class="submission pull-left">
+		<div class="secondary clearfix">
+			<div class="pull-left clearfix">
+				<div wicket:id="state" class="state pull-left"></div>
+				<div wicket:id="fields" class="field pull-left"></div>
+			</div>
+			<div class="submission pull-right">
 				submitted by <a wicket:id="submitter"></a> <span wicket:id="submitDate"></span>
 			</div>
-			<div class="pull-left votes" title="Votes">
-				<span class="fa fa-thumbs-o-up"></span> <span wicket:id="votes"></span>
-			</div>
-			<div class="pull-left comments" title="Comments">
-				<span class="fa fa-comments-o"></span> <span wicket:id="comments"></span>
-			</div>
 		</div>
-	</wicket:fragment>
-	<wicket:fragment wicket:id="projectFrag">
-		<a wicket:id="link"><span wicket:id="label"></span></a> 
 	</wicket:fragment>
 	<wicket:fragment wicket:id="listFieldsFrag">
 		<div class="issue-list-fields">

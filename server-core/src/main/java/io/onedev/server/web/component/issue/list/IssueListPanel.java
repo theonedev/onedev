@@ -22,6 +22,8 @@ import org.apache.wicket.extensions.markup.html.repeater.data.grid.ICellPopulato
 import org.apache.wicket.extensions.markup.html.repeater.data.table.AbstractColumn;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.DataTable;
 import org.apache.wicket.extensions.markup.html.repeater.data.table.IColumn;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NavigationToolbar;
+import org.apache.wicket.extensions.markup.html.repeater.data.table.NoRecordsToolbar;
 import org.apache.wicket.extensions.markup.html.repeater.util.SortableDataProvider;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
@@ -31,11 +33,11 @@ import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
-import org.apache.wicket.markup.html.link.Link;
+import org.apache.wicket.markup.html.navigation.paging.PagingNavigator;
 import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.Item;
-import org.apache.wicket.markup.repeater.OddEvenItem;
+import org.apache.wicket.markup.repeater.RepeatingView;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
@@ -63,7 +65,7 @@ import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.IssueQueryBehavior;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.datatable.selectioncolumn.SelectionColumn;
 import io.onedev.server.web.component.floating.FloatingPanel;
@@ -78,7 +80,6 @@ import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.page.project.issues.create.NewIssuePage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
 import io.onedev.server.web.util.PagingHistorySupport;
@@ -556,14 +557,14 @@ public abstract class IssueListPanel extends Panel {
 			});
 		}
 		
-		columns.add(new AbstractColumn<Issue, Void>(Model.of("Summary")) {
+		columns.add(new AbstractColumn<Issue, Void>(Model.of("")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
 					IModel<Issue> rowModel) {
 				Issue issue = rowModel.getObject();
-				Fragment fragment = new Fragment(componentId, "summaryFrag", IssueListPanel.this);
-				OddEvenItem<?> row = cellItem.findParent(OddEvenItem.class);
+				Fragment fragment = new Fragment(componentId, "contentFrag", IssueListPanel.this);
+				Item<?> row = cellItem.findParent(Item.class);
 				QueryPosition position;
 				if (getProject() != null) {
 					position = new QueryPosition(parsedQueryModel.getObject().toString(), (int)issuesTable.getItemCount(), 
@@ -574,8 +575,11 @@ public abstract class IssueListPanel extends Panel {
 				
 				String url = RequestCycle.get().urlFor(IssueActivitiesPage.class, 
 						IssueActivitiesPage.paramsOf(issue, position)).toString();
-				
-				fragment.add(new Label("number", "<a href='" + url + "'>#" + issue.getNumber() + "</a>")
+
+				String label = "#" + issue.getNumber();
+				if (getProject() == null)
+					label = issue.getProject().getName() + label;
+				fragment.add(new Label("number", "<a href='" + url + "'>" + label + "</a>")
 						.setEscapeModelStrings(false));
 				
 				String transformed = new ReferenceTransformer(issue.getProject(), url).apply(issue.getTitle());
@@ -584,55 +588,14 @@ public abstract class IssueListPanel extends Panel {
 				fragment.add(new WebMarkupContainer("copy").add(
 						new CopyClipboardBehavior(Model.of("#" + issue.getNumber() + ": " + issue.getTitle()))));
 				
-				fragment.add(new IssueStateLabel("state", rowModel));
-				
-				UserIdent submitterIdent = UserIdent.of(issue.getSubmitter(), issue.getSubmitterName());
-				fragment.add(new UserIdentPanel("submitter", submitterIdent, Mode.NAME));
-				fragment.add(new Label("submitDate", DateUtils.formatAge(issue.getSubmitDate())));
-				
 				fragment.add(new Label("votes", issue.getVoteCount()));
 				fragment.add(new Label("comments", issue.getCommentCount()));
 				
-				cellItem.add(fragment);
-			}
-			
-			@Override
-			public String getCssClass() {
-				return "summary";
-			}
-			
-		});
-		
-		if (getProject() == null) {
-			columns.add(new AbstractColumn<Issue, Void>(Model.of("Project")) {
+				fragment.add(new IssueStateLabel("state", rowModel));
 
-				@Override
-				public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-						IModel<Issue> rowModel) {
-					Issue issue = rowModel.getObject();
-					Fragment fragment = new Fragment(componentId, "projectFrag", IssueListPanel.this);
-					Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectDashboardPage.class, 
-							ProjectDashboardPage.paramsOf(issue.getProject()));
-					link.add(new Label("label", issue.getProject()));
-					fragment.add(link);
-					cellItem.add(fragment);
-				}
-				
-				@Override
-				public String getCssClass() {
-					return "project";
-				}
-				
-			});
-		}
-		
-		for (String field: getIssueSetting().sortFieldNames(getListFields())) {
-			columns.add(new AbstractColumn<Issue, Void>(Model.of(field)) {
-
-				@Override
-				public void populateItem(Item<ICellPopulator<Issue>> cellItem, String componentId,
-						IModel<Issue> rowModel) {
-					cellItem.add(new FieldValuesPanel(componentId) {
+				RepeatingView fieldsView = new RepeatingView("fields");
+				for (String field: getIssueSetting().sortFieldNames(getListFields())) {
+					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId()) {
 
 						@Override
 						protected Issue getIssue() {
@@ -648,19 +611,20 @@ public abstract class IssueListPanel extends Panel {
 								return null;
 						}
 						
-					}.setRenderBodyOnly(true));
-				}
-
-				@Override
-				public String getCssClass() {
-					return "custom-field";
-				}
+					});
+				}	
+				fragment.add(fieldsView);
 				
-			});
-		}
+				UserIdent submitterIdent = UserIdent.of(issue.getSubmitter(), issue.getSubmitterName());
+				fragment.add(new UserIdentPanel("submitter", submitterIdent, Mode.NAME));
+				fragment.add(new Label("submitDate", DateUtils.formatAge(issue.getSubmitDate())));
+				
+				cellItem.add(fragment);
+			}
+			
+		});
 		
-		body.add(issuesTable = new HistoryAwareDataTable<Issue, Void>("issues", columns, dataProvider, 
-				WebConstants.PAGE_SIZE, getPagingHistorySupport()) {
+		body.add(issuesTable = new DataTable<Issue, Void>("issues", columns, dataProvider, WebConstants.PAGE_SIZE) {
 
 			@Override
 			protected Item<Issue> newRowItem(String id, int index, IModel<Issue> model) {
@@ -670,7 +634,20 @@ public abstract class IssueListPanel extends Panel {
 						issue.isVisitedAfter(issue.getUpdateDate())?"issue":"issue new"));
 				return item;
 			}
+			
 		});
+		
+		if (getPagingHistorySupport() != null)
+			issuesTable.setCurrentPage(getPagingHistorySupport().getCurrentPage());
+		issuesTable.addBottomToolbar(new NavigationToolbar(issuesTable) {
+
+			@Override
+			protected PagingNavigator newPagingNavigator(String navigatorId, DataTable<?, ?> table) {
+				return new HistoryAwarePagingNavigator(navigatorId, table, getPagingHistorySupport());
+			}
+			
+		});
+		issuesTable.addBottomToolbar(new NoRecordsToolbar(issuesTable));
 	}
 	
 	private Collection<String> getListFields() {

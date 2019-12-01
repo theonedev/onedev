@@ -60,7 +60,7 @@ import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.datatable.HistoryAwareDataTable;
+import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
@@ -477,7 +477,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		body.add(buildsTable = new HistoryAwareDataTable<Build, Void>("builds", columns, dataProvider, 
+		body.add(buildsTable = new DefaultDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
 	}
 	

@@ -331,11 +331,18 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			if (fields != null) {
 				String type = fields.iterator().next().getType();
 				List<String> values = new ArrayList<>();
-				for (IssueField entity: fields) {
-					if (entity.getValue() != null)
-						values.add(entity.getValue());
+				for (IssueField field: fields) {
+					if (field.getValue() != null)
+						values.add(field.getValue());
 				}
-				Collections.sort(values);
+				Collections.sort(values, new Comparator<String>() {
+
+					@Override
+					public int compare(String o1, String o2) {
+						return (int) (fieldSpec.getOrdinal(o1) - fieldSpec.getOrdinal(o2));
+					}
+					
+				});
 				if (!fieldSpec.isAllowMultiple() && values.size() > 1) 
 					values = Lists.newArrayList(values.iterator().next());
 				inputs.put(fieldName, new Input(fieldName, type, values));

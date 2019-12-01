@@ -52,9 +52,15 @@
 	margin-bottom: 8px;
 }
 #request-detail>.main>.status-and-branches>.status {
+	width: 100px;
+	padding: 6px 8px;
+	text-overflow: ellipsis;
+	overflow: hidden;
 	font-size: 16px;
 	margin-right: 8px;
+	margin-top: -4px;
 }
+
 #request-detail>.main>.status-and-branches>.more-info {
 	position: absolute;
 	right: 0;

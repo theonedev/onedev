@@ -97,7 +97,7 @@ public abstract class IssueTitlePanel extends Panel {
 			@Override
 			protected String load() {
 				ReferenceTransformer transformer = new ReferenceTransformer(getIssue().getProject(), null);
-				return "#" + getIssue().getNumber() + " - " + transformer.apply(getIssue().getTitle());
+				return "#" + getIssue().getNumber() + "&nbsp;&nbsp;" + transformer.apply(getIssue().getTitle());
 			}
 			
 		}).setEscapeModelStrings(false));
