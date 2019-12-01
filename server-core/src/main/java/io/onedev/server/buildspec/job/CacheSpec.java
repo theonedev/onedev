@@ -20,7 +20,7 @@ public class CacheSpec implements Serializable {
 	
 	private String path;
 
-	@Editable(order=100, description="Specify key of the cache. Caches with same key can be reused by different builds. "
+	@Editable(order=100, description="Specify key of the cache. Caches with same key can be reused by different jobs. "
 			+ "Note: Type @ to insert variable, use \\ to escape normal occurrences of @ or \\")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty

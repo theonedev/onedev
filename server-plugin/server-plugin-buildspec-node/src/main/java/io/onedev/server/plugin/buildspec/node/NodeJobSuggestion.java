@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.job.CacheSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobSuggestion;
 import io.onedev.server.buildspec.job.VariableInterpolator;
@@ -100,6 +101,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 
 			job.setCommands(commands);
 			setupTriggers(job);
+			setupCaches(job);
 			jobs.add(job);
 		} 
 		
@@ -148,6 +150,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 
 			job.setCommands(commands);
 			setupTriggers(job);
+			setupCaches(job);
 			jobs.add(job);
 		} 
 		
@@ -190,6 +193,7 @@ public class NodeJobSuggestion implements JobSuggestion {
 
 			job.setCommands(commands);
 			setupTriggers(job);
+			setupCaches(job);
 			jobs.add(job);
 		} 
 		
@@ -230,9 +234,17 @@ public class NodeJobSuggestion implements JobSuggestion {
 			}
 			job.setCommands(commands);
 			setupTriggers(job);
+			setupCaches(job);
 			jobs.add(job);
 		} 
 		return jobs;
+	}
+	
+	private void setupCaches(Job job) {
+		CacheSpec cache = new CacheSpec();
+		cache.setKey("npm-cache");
+		cache.setPath("/root/.npm");
+		job.getCaches().add(cache);
 	}
 
 	private void setupTriggers(Job job) {
