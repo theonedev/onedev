@@ -1372,6 +1372,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		static {
 			// update this according to 
 			// https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/version-compatibility
+			WINDOWS_VERSIONS.put(".18363.", 1909);
 			WINDOWS_VERSIONS.put(".18362.", 1903);
 			WINDOWS_VERSIONS.put(".17763.", 1809);
 			WINDOWS_VERSIONS.put(".17134.", 1803); 
