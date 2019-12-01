@@ -42,7 +42,7 @@ public class FieldOperatorCriteria extends FieldCriteria {
 			Build build = Build.get();
 			if (build != null) {
 				if (operator == IssueQueryLexer.IsCurrent) { 
-					return builder.equal(attribute, build.getNumber());
+					return builder.equal(attribute, String.valueOf(build.getNumber()));
 				} else {
 					Collection<Long> numbersOfStreamPrevious = build.getNumbersOfStreamPrevious(EntityCriteria.IN_CLAUSE_LIMIT);
 					if (!numbersOfStreamPrevious.isEmpty())

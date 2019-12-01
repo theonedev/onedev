@@ -44,10 +44,10 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
 		if (allowMultiple) {
-			return builder.equal(field.get(IssueField.ATTR_VALUE), String.valueOf(value));
+			return builder.equal(field.get(IssueField.ATTR_VALUE), value);
 		} else {
 			if (operator == IssueQueryLexer.Is) 
-				return builder.equal(field.get(IssueField.ATTR_VALUE), String.valueOf(value));
+				return builder.equal(field.get(IssueField.ATTR_VALUE), value);
 			else if (operator == IssueQueryLexer.IsGreaterThan) 
 				return builder.greaterThan(field.get(IssueField.ATTR_ORDINAL), ordinal);
 			else
