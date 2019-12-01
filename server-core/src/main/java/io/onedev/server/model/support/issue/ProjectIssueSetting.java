@@ -33,7 +33,7 @@ public class ProjectIssueSetting implements Serializable {
 	
 	private Collection<String> promptFieldsUponIssueOpen;
 	
-	private Collection<String> listFields;
+	private List<String> listFields;
 	
 	private List<BoardSpec> boardSpecs;
 
@@ -72,14 +72,14 @@ public class ProjectIssueSetting implements Serializable {
 	}
 
 	@Nullable
-	public Collection<String> getListFields(boolean useDefaultIfNotDefined) {
+	public List<String> getListFields(boolean useDefaultIfNotDefined) {
 		if (useDefaultIfNotDefined && listFields == null)
-			return new HashSet<>(getGlobalSetting().getListFields());
+			return new ArrayList<>(getGlobalSetting().getListFields());
 		else
 			return listFields;
 	}
 	
-	public void setListFields(@Nullable Collection<String> listFields) {
+	public void setListFields(@Nullable List<String> listFields) {
 		this.listFields = listFields;
 	}
 

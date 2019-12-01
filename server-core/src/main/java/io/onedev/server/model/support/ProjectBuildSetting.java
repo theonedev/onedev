@@ -19,6 +19,8 @@ public class ProjectBuildSetting implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	private List<String> listParams;
+	
 	private List<NamedBuildQuery> namedQueries;
 	
 	private transient GlobalBuildSetting setting;
@@ -41,6 +43,18 @@ public class ProjectBuildSetting implements Serializable {
 		if (setting == null)
 			setting = OneDev.getInstance(SettingManager.class).getBuildSetting();
 		return setting;
+	}
+
+	@Nullable
+	public List<String> getListParams(boolean useDefaultIfNotDefined) {
+		if (useDefaultIfNotDefined && listParams == null)
+			return new ArrayList<>(getGlobalSetting().getListParams());
+		else
+			return listParams;
+	}
+	
+	public void setListParams(@Nullable List<String> listParams) {
+		this.listParams = listParams;
 	}
 
 	@Nullable

@@ -57,7 +57,7 @@ public class GlobalIssueSetting implements Serializable {
 	
 	private List<BoardSpec> defaultBoardSpecs = new ArrayList<>();
 	
-	private Collection<String> listFields = new HashSet<>();
+	private List<String> listFields = new ArrayList<>();
 	
 	private List<NamedIssueQuery> namedQueries = new ArrayList<>();
 	
@@ -552,11 +552,11 @@ public class GlobalIssueSetting implements Serializable {
 		this.defaultBoardSpecs = defaultBoardSpecs;
 	}
 
-	public Collection<String> getListFields() {
+	public List<String> getListFields() {
 		return listFields;
 	}
 
-	public void setListFields(Collection<String> listFields) {
+	public void setListFields(List<String> listFields) {
 		this.listFields = listFields;
 	}
 	

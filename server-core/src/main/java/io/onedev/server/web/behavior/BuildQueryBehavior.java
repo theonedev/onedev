@@ -99,10 +99,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
 									} else if (fieldName.equals(BuildConstants.FIELD_JOB)) {
-										if (project != null)
-											return SuggestionUtils.suggestJobs(project, matchWith);
-										else
-											return null;
+										return SuggestionUtils.suggestJobs(project, matchWith);
 									} else if (fieldName.equals(BuildConstants.FIELD_NUMBER)) {
 										return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else {

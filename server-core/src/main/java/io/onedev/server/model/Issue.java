@@ -135,6 +135,8 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	private transient List<RevCommit> commits;
 	
+	private transient Map<String, Input> fieldInputs;
+	
 	public long getVersion() {
 		return version;
 	}
@@ -314,41 +316,43 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	}
 	
 	public Map<String, Input> getFieldInputs() {
-		Map<String, Input> inputs = new LinkedHashMap<>();
-
-		Map<String, List<IssueField>> fieldMap = new HashMap<>(); 
-		for (IssueField field: getFields()) {
-			List<IssueField> fieldsOfName = fieldMap.get(field.getName());
-			if (fieldsOfName == null) {
-				fieldsOfName = new ArrayList<>();
-				fieldMap.put(field.getName(), fieldsOfName);
-			}
-			fieldsOfName.add(field);
-		}
-		for (FieldSpec fieldSpec: getIssueSetting().getFieldSpecs()) {
-			String fieldName = fieldSpec.getName();
-			List<IssueField> fields = fieldMap.get(fieldName);
-			if (fields != null) {
-				String type = fields.iterator().next().getType();
-				List<String> values = new ArrayList<>();
-				for (IssueField field: fields) {
-					if (field.getValue() != null)
-						values.add(field.getValue());
+		if (fieldInputs == null) {
+			fieldInputs = new LinkedHashMap<>();
+	
+			Map<String, List<IssueField>> fieldMap = new HashMap<>(); 
+			for (IssueField field: getFields()) {
+				List<IssueField> fieldsOfName = fieldMap.get(field.getName());
+				if (fieldsOfName == null) {
+					fieldsOfName = new ArrayList<>();
+					fieldMap.put(field.getName(), fieldsOfName);
 				}
-				Collections.sort(values, new Comparator<String>() {
-
-					@Override
-					public int compare(String o1, String o2) {
-						return (int) (fieldSpec.getOrdinal(o1) - fieldSpec.getOrdinal(o2));
+				fieldsOfName.add(field);
+			}
+			for (FieldSpec fieldSpec: getIssueSetting().getFieldSpecs()) {
+				String fieldName = fieldSpec.getName();
+				List<IssueField> fields = fieldMap.get(fieldName);
+				if (fields != null) {
+					String type = fields.iterator().next().getType();
+					List<String> values = new ArrayList<>();
+					for (IssueField field: fields) {
+						if (field.getValue() != null)
+							values.add(field.getValue());
 					}
-					
-				});
-				if (!fieldSpec.isAllowMultiple() && values.size() > 1) 
-					values = Lists.newArrayList(values.iterator().next());
-				inputs.put(fieldName, new Input(fieldName, type, values));
+					Collections.sort(values, new Comparator<String>() {
+	
+						@Override
+						public int compare(String o1, String o2) {
+							return (int) (fieldSpec.getOrdinal(o1) - fieldSpec.getOrdinal(o2));
+						}
+						
+					});
+					if (!fieldSpec.isAllowMultiple() && values.size() > 1) 
+						values = Lists.newArrayList(values.iterator().next());
+					fieldInputs.put(fieldName, new Input(fieldName, type, values));
+				}
 			}
 		}
-		return inputs;
+		return fieldInputs;
 	}
 	
 	public static String getWebSocketObservable(Long issueId) {

@@ -14,6 +14,8 @@ public class GlobalBuildSetting implements Serializable {
 	
 	private List<NamedBuildQuery> namedQueries = new ArrayList<>();
 	
+	private List<String> listParams = new ArrayList<>();
+	
 	public GlobalBuildSetting() {
 		namedQueries.add(new NamedBuildQuery("All", "all"));
 		namedQueries.add(new NamedBuildQuery("Successful", "successful"));
@@ -35,6 +37,14 @@ public class GlobalBuildSetting implements Serializable {
 		this.namedQueries = namedQueries;
 	}
 	
+	public List<String> getListParams() {
+		return listParams;
+	}
+
+	public void setListParams(List<String> listParams) {
+		this.listParams = listParams;
+	}
+
 	@Nullable
 	public NamedBuildQuery getNamedQuery(String name) {
 		for (NamedBuildQuery namedQuery: getNamedQueries()) {

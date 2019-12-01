@@ -3,10 +3,13 @@ package io.onedev.server.web.component.build.list;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
@@ -46,29 +49,38 @@ import com.google.common.collect.Sets;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.entitymanager.BuildParamManager;
+import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.BuildConstants;
-import io.onedev.server.util.DateUtils;
+import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
+import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.modal.ModalLink;
+import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.savedquery.SavedQueriesClosed;
 import io.onedev.server.web.component.savedquery.SavedQueriesOpened;
+import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
-import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QuerySaveSupport;
@@ -154,6 +166,10 @@ public abstract class BuildListPanel extends Panel {
 		}
 	}
 	
+	private GlobalBuildSetting getGlobalBuildSetting() {
+		return OneDev.getInstance(SettingManager.class).getBuildSetting();
+	}
+	
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
@@ -211,6 +227,104 @@ public abstract class BuildListPanel extends Panel {
 			}		
 			
 		});
+		
+		others.add(new ModalLink("listParams") {
+
+			private List<String> listParams;
+			
+			@Override
+			protected Component newContent(String id, ModalPanel modal) {
+				Fragment fragment = new Fragment(id, "listParamsFrag", BuildListPanel.this);
+				Form<?> form = new Form<Void>("form");
+				listParams = getListParams();
+				form.add(new StringMultiChoice("params", new IModel<Collection<String>>() {
+
+					@Override
+					public void detach() {
+					}
+
+					@Override
+					public Collection<String> getObject() {
+						return listParams;
+					}
+
+					@Override
+					public void setObject(Collection<String> object) {
+						listParams = new ArrayList<>(object);
+					}
+					
+				}, new LoadableDetachableModel<Map<String, String>>() {
+
+					@Override
+					protected Map<String, String> load() {
+						Map<String, String> choices = new LinkedHashMap<>();
+						for (String fieldName: OneDev.getInstance(BuildParamManager.class).getBuildParamNames())
+							choices.put(fieldName, fieldName);
+						return choices;
+					}
+					
+				}));
+				
+				form.add(new AjaxLink<Void>("close") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+					}
+					
+				});
+				
+				form.add(new AjaxButton("save") {
+
+					@Override
+					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
+						super.onSubmit(target, form);
+						modal.close();
+						if (getProject() != null) {
+							getProject().getBuildSetting().setListParams(listParams);
+							OneDev.getInstance(ProjectManager.class).save(getProject());
+						} else {
+							getGlobalBuildSetting().setListParams(listParams);
+							OneDev.getInstance(SettingManager.class).saveBuildSetting(getGlobalBuildSetting());
+						}
+						onQueryUpdated(target, query);
+					}
+					
+				});
+				
+				form.add(new AjaxLink<Void>("useDefault") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+						getProject().getBuildSetting().setListParams(null);
+						OneDev.getInstance(ProjectManager.class).save(getProject());
+						onQueryUpdated(target, query);
+					}
+					
+				}.setVisible(getProject() != null && getProject().getBuildSetting().getListParams(false) != null));
+				
+				form.add(new AjaxLink<Void>("cancel") {
+
+					@Override
+					public void onClick(AjaxRequestTarget target) {
+						modal.close();
+					}
+					
+				});
+
+				fragment.add(form);
+				
+				return fragment;
+			}
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(SecurityUtils.isAdministrator() || getProject() != null && SecurityUtils.canManage(getProject()));
+			}
+			
+		});		
 		
 		TextField<String> input = new TextField<String>("input", new PropertyModel<String>(this, "query"));
 		input.add(new BuildQueryBehavior(new AbstractReadOnlyModel<Project>() {
@@ -308,7 +422,10 @@ public abstract class BuildListPanel extends Panel {
 					@Override
 					public String getObject() {
 						Build build = rowModel.getObject();
-						StringBuilder builder = new StringBuilder("#" + build.getNumber());
+						StringBuilder builder = new StringBuilder();
+						if (getProject() == null)
+							builder.append(build.getProject().getName());
+						builder.append("#" + build.getNumber());
 						if (build.getVersion() != null)
 							builder.append(" (" + build.getVersion() + ")");
 						return builder.toString();
@@ -383,29 +500,6 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		if (getProject() == null) {
-			columns.add(new AbstractColumn<Build, Void>(Model.of("Project")) {
-
-				@Override
-				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-						IModel<Build> rowModel) {
-					Build build = rowModel.getObject();
-					Fragment fragment = new Fragment(componentId, "linkFrag", BuildListPanel.this);
-					Link<Void> link = new BookmarkablePageLink<Void>("link", ProjectDashboardPage.class, 
-							ProjectDashboardPage.paramsOf(build.getProject()));
-					link.add(new Label("label", build.getProject()));
-					fragment.add(link);
-					cellItem.add(fragment);
-				}
-				
-				@Override
-				public String getCssClass() {
-					return "project";
-				}
-				
-			});
-		}
-		
 		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_JOB)) {
 
 			@Override
@@ -463,22 +557,45 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_SUBMIT_DATE)) {
+		for (String param: getListParams()) {
+			columns.add(new AbstractColumn<Build, Void>(Model.of(param)) {
 
-			@Override
-			public String getCssClass() {
-				return "date expanded";
-			}
+				@Override
+				public String getCssClass() {
+					return "param expanded";
+				}
 
-			@Override
-			public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
-					IModel<Build> rowModel) {
-				cellItem.add(new Label(componentId, DateUtils.formatAge(rowModel.getObject().getSubmitDate())));
-			}
-		});
+				@Override
+				public void populateItem(Item<ICellPopulator<Build>> cellItem, String componentId,
+						IModel<Build> rowModel) {
+					Build build = rowModel.getObject();
+					if (build.isParamVisible(param)) {
+						Input input = build.getParamInputs().get(param);
+						if (input != null) {
+							if (input.getType().equals(ParamSpec.SECRET))
+								cellItem.add(new Label(componentId, SecretInput.MASK));
+							else
+								cellItem.add(new MultilineLabel(componentId, StringUtils.join(input.getValues(), ",")));
+						} else {
+							cellItem.add(new Label(componentId, "<i>Undefined</i>").setEscapeModelStrings(false));
+						}
+					} else {
+						cellItem.add(new Label(componentId, "<i>Undefined</i>").setEscapeModelStrings(false));
+					}
+				}
+				
+			});
+		}	
 		
 		body.add(buildsTable = new DefaultDataTable<Build, Void>("builds", columns, dataProvider, 
 				WebConstants.PAGE_SIZE, getPagingHistorySupport()));
+	}
+	
+	private List<String> getListParams() {
+		if (getProject() != null)
+			return getProject().getBuildSetting().getListParams(true);
+		else
+			return getGlobalBuildSetting().getListParams();
 	}
 	
 	private WebSocketObserver newBuildObserver(Long buildId) {

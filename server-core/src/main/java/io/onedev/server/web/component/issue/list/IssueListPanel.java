@@ -2,7 +2,6 @@ package io.onedev.server.web.component.issue.list;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -158,7 +157,7 @@ public abstract class IssueListPanel extends Panel {
 		return null;
 	}
 	
-	private GlobalIssueSetting getIssueSetting() {
+	private GlobalIssueSetting getGlobalIssueSetting() {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting();
 	}
 	
@@ -259,13 +258,13 @@ public abstract class IssueListPanel extends Panel {
 		
 		others.add(new ModalLink("listFields") {
 
-			private Collection<String> fieldSet;
+			private List<String> listFields;
 			
 			@Override
 			protected Component newContent(String id, ModalPanel modal) {
 				Fragment fragment = new Fragment(id, "listFieldsFrag", IssueListPanel.this);
 				Form<?> form = new Form<Void>("form");
-				fieldSet = getListFields();
+				listFields = getListFields();
 				form.add(new StringMultiChoice("fields", new IModel<Collection<String>>() {
 
 					@Override
@@ -274,12 +273,12 @@ public abstract class IssueListPanel extends Panel {
 
 					@Override
 					public Collection<String> getObject() {
-						return fieldSet;
+						return listFields;
 					}
 
 					@Override
 					public void setObject(Collection<String> object) {
-						fieldSet = new HashSet<>(object);
+						listFields = new ArrayList<>(object);
 					}
 					
 				}, new LoadableDetachableModel<Map<String, String>>() {
@@ -287,7 +286,7 @@ public abstract class IssueListPanel extends Panel {
 					@Override
 					protected Map<String, String> load() {
 						Map<String, String> choices = new LinkedHashMap<>();
-						for (String fieldName: getIssueSetting().getFieldNames())
+						for (String fieldName: getGlobalIssueSetting().getFieldNames())
 							choices.put(fieldName, fieldName);
 						return choices;
 					}
@@ -310,11 +309,11 @@ public abstract class IssueListPanel extends Panel {
 						super.onSubmit(target, form);
 						modal.close();
 						if (getProject() != null) {
-							getProject().getIssueSetting().setListFields(fieldSet);
+							getProject().getIssueSetting().setListFields(listFields);
 							OneDev.getInstance(ProjectManager.class).save(getProject());
 						} else {
-							getIssueSetting().setListFields(fieldSet);
-							OneDev.getInstance(SettingManager.class).saveIssueSetting(getIssueSetting());
+							getGlobalIssueSetting().setListFields(listFields);
+							OneDev.getInstance(SettingManager.class).saveIssueSetting(getGlobalIssueSetting());
 						}
 						onQueryUpdated(target, query);
 					}
@@ -594,7 +593,7 @@ public abstract class IssueListPanel extends Panel {
 				fragment.add(new IssueStateLabel("state", rowModel));
 
 				RepeatingView fieldsView = new RepeatingView("fields");
-				for (String field: getIssueSetting().sortFieldNames(getListFields())) {
+				for (String field: getListFields()) {
 					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId()) {
 
 						@Override
@@ -650,11 +649,11 @@ public abstract class IssueListPanel extends Panel {
 		issuesTable.addBottomToolbar(new NoRecordsToolbar(issuesTable));
 	}
 	
-	private Collection<String> getListFields() {
+	private List<String> getListFields() {
 		if (getProject() != null)
 			return getProject().getIssueSetting().getListFields(true);
 		else
-			return getIssueSetting().getListFields();
+			return getGlobalIssueSetting().getListFields();
 	}
 	
 	@Override

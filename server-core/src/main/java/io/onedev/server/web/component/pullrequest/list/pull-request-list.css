@@ -56,6 +56,7 @@
 .pull-request-list>.body td .submission, 
 .pull-request-list>.body td .comments {
 	color: #888;
+	font-size: 13px;
 }
 
 .pull-request-list>.body .new-indicator {

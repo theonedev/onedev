@@ -192,6 +192,8 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private transient Job job;
 	
+	private transient Map<String, Input> paramInputs;
+	
 	private transient Map<Build.Status, Build> streamPreviousCache = new HashMap<>();
 	
 	private transient Map<Integer, Collection<Long>> numbersOfStreamPreviousCache = new HashMap<>();
@@ -451,41 +453,42 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public Map<String, Input> getParamInputs() {
-		Map<String, Input> inputs = new LinkedHashMap<>();
-
-		Map<String, List<BuildParam>> paramMap = new HashMap<>(); 
-		for (BuildParam param: getParams()) {
-			List<BuildParam> paramsOfName = paramMap.get(param.getName());
-			if (paramsOfName == null) {
-				paramsOfName = new ArrayList<>();
-				paramMap.put(param.getName(), paramsOfName);
-			}
-			paramsOfName.add(param);
-		}
-		for (ParamSpec paramSpec: getJob().getParamSpecs()) {
-			String paramName = paramSpec.getName();
-			List<BuildParam> params = paramMap.get(paramName);
-			if (params != null) {
-				String type = params.iterator().next().getType();
-				List<String> values = new ArrayList<>();
-				for (BuildParam param: params) {
-					if (param.getValue() != null)
-						values.add(param.getValue());
+		if (paramInputs == null) {
+			paramInputs = new LinkedHashMap<>();
+			Map<String, List<BuildParam>> paramMap = new HashMap<>(); 
+			for (BuildParam param: getParams()) {
+				List<BuildParam> paramsOfName = paramMap.get(param.getName());
+				if (paramsOfName == null) {
+					paramsOfName = new ArrayList<>();
+					paramMap.put(param.getName(), paramsOfName);
 				}
-				Collections.sort(values, new Comparator<String>() {
-
-					@Override
-					public int compare(String o1, String o2) {
-						return (int) (paramSpec.getOrdinal(o1) - paramSpec.getOrdinal(o2));
-					}
-					
-				});
-				if (!paramSpec.isAllowMultiple() && values.size() > 1) 
-					values = Lists.newArrayList(values.iterator().next());
-				inputs.put(paramName, new Input(paramName, type, values));
+				paramsOfName.add(param);
 			}
+			for (ParamSpec paramSpec: getJob().getParamSpecs()) {
+				String paramName = paramSpec.getName();
+				List<BuildParam> params = paramMap.get(paramName);
+				if (params != null) {
+					String type = params.iterator().next().getType();
+					List<String> values = new ArrayList<>();
+					for (BuildParam param: params) {
+						if (param.getValue() != null)
+							values.add(param.getValue());
+					}
+					Collections.sort(values, new Comparator<String>() {
+
+						@Override
+						public int compare(String o1, String o2) {
+							return (int) (paramSpec.getOrdinal(o1) - paramSpec.getOrdinal(o2));
+						}
+						
+					});
+					if (!paramSpec.isAllowMultiple() && values.size() > 1) 
+						values = Lists.newArrayList(values.iterator().next());
+					paramInputs.put(paramName, new Input(paramName, type, values));
+				}
+			}		
 		}
-		return inputs;
+		return paramInputs;
 	}
 	
 	public BuildFacade getFacade() {
@@ -516,21 +519,25 @@ public class Build extends AbstractEntity implements Referenceable {
 		if (!checkedParamNames.add(paramName))
 			return false;
 		
-		ParamSpec paramSpec = Preconditions.checkNotNull(getJob().getParamSpecMap().get(paramName));
-		if (paramSpec.getShowCondition() != null) {
-			Input dependentInput = getParamInputs().get(paramSpec.getShowCondition().getInputName());
-			Preconditions.checkNotNull(dependentInput);
-			String value;
-			if (!dependentInput.getValues().isEmpty())
-				value = dependentInput.getValues().iterator().next();
-			else
-				value = null;
-			if (paramSpec.getShowCondition().getValueMatcher().matches(value)) 
-				return isParamVisible(dependentInput.getName(), checkedParamNames);
-			else 
-				return false;
+		ParamSpec paramSpec = getJob().getParamSpecMap().get(paramName);
+		if (paramSpec != null) {
+			if (paramSpec.getShowCondition() != null) {
+				Input dependentInput = getParamInputs().get(paramSpec.getShowCondition().getInputName());
+				Preconditions.checkNotNull(dependentInput);
+				String value;
+				if (!dependentInput.getValues().isEmpty())
+					value = dependentInput.getValues().iterator().next();
+				else
+					value = null;
+				if (paramSpec.getShowCondition().getValueMatcher().matches(value)) 
+					return isParamVisible(dependentInput.getName(), checkedParamNames);
+				else 
+					return false;
+			} else {
+				return true;
+			}
 		} else {
-			return true;
+			return false;
 		}
 	}
 	

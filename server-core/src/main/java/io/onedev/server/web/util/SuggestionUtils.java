@@ -318,28 +318,20 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestJobs(@Nullable Project project, String matchWith) {
-		return suggest(project, matchWith, new ProjectScopedSuggester() {
-			
-			@Override
-			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, 
-					@Nullable User user, String matchWith, boolean prependProject) {
-				BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-				Collection<String> jobNames = buildManager.getAccessibleJobNames(project, user).get(project);
-				for (String jobName: jobNames) {
-					LinearRange match = LinearRange.match(jobName, matchWith);
-					if (match != null) {
-						if (prependProject) {
-							int length = project.getName().length() + 1;
-							suggestions.add(new InputSuggestion(project.getName() + ":" + jobName, null, 
-									new LinearRange(match.getFrom() + length, match.getTo() + length)));
-						} else {
-							suggestions.add(new InputSuggestion(jobName, null, match));
-						}
-					}
-				}
-			}
-			
-		}, ":");
+		Collection<String> jobNames;
+		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
+		if (project != null) 
+			jobNames = buildManager.getAccessibleJobNames(project, SecurityUtils.getUser()).get(project);
+		else 
+			jobNames = buildManager.getJobNames();
+		
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		for (String jobName: jobNames) {
+			LinearRange match = LinearRange.match(jobName, matchWith);
+			if (match != null) 
+				suggestions.add(new InputSuggestion(jobName, null, match));
+		}
+		return suggestions;
 	}
 	
 	public static List<InputSuggestion> suggestMilestones(@Nullable Project project, String matchWith) {

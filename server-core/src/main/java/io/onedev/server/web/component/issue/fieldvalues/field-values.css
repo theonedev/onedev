@@ -1,3 +1,6 @@
 .field-values>.value {
 	margin-right: 0 !important;
 }
+.field-values>i {
+	font-size: 13px;
+}

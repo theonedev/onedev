@@ -50,6 +50,7 @@
 }
 .issue-list>.body td .submission, .issue-list>.body td .comments, .issue-list>.body td .votes {
 	color: #888;
+	font-size: 13px;
 }
 .issue-list>.body td .votes {
 	margin-right: 8px;	
