@@ -32,7 +32,7 @@ public class IssueChange extends AbstractEntity {
 	
 	@Column(nullable=false)
 	private Date date;
-	
+
 	@Lob
 	@Column(length=65535)
 	private IssueChangeData data;

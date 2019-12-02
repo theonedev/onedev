@@ -42,7 +42,8 @@ public class PullRequestQuerySetting extends AbstractEntity implements QuerySett
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> userQueryWatches = new LinkedHashMap<>();
-	
+
+	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> queryWatches = new LinkedHashMap<>();
 	

@@ -4,7 +4,6 @@ import java.io.Serializable;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Lob;
 
 @Embeddable
 public class ReviewResult implements Serializable {
@@ -15,8 +14,7 @@ public class ReviewResult implements Serializable {
 	
 	private Boolean approved = false;
 	
-	@Lob
-	@Column(length=65535)
+	@Column(length=16384)
 	private String comment;
 	
 	public String getCommit() {

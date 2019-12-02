@@ -43,6 +43,7 @@ public class IssueQuerySetting extends AbstractEntity implements QuerySetting<Na
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> userQueryWatches = new LinkedHashMap<>();
 	
+	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashMap<String, Boolean> queryWatches = new LinkedHashMap<>();
 	

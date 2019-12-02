@@ -17,7 +17,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -69,8 +68,7 @@ public class CodeComment extends AbstractEntity implements AttachmentStorageSupp
 	
 	private String userName;
 
-	@Lob
-	@Column(nullable=false, length=65535)
+	@Column(nullable=false, length=16384)
 	private String content;
 	
 	@Column(nullable=false)

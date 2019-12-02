@@ -43,6 +43,7 @@ public class CommitQuerySetting extends AbstractEntity implements QuerySetting<N
 	@Column(nullable=false, length=65535)
 	private LinkedHashSet<String> userQuerySubscriptions = new LinkedHashSet<>();
 	
+	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashSet<String> projectQuerySubscriptions = new LinkedHashSet<>();
 	

@@ -1180,6 +1180,9 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Projects.xml")) {
 				VersionedDocument dom = VersionedDocument.fromFile(file);
 				for (Element element: dom.getRootElement().elements()) {
+					Element defaultPrivilegeElement = element.element("defaultPrivilege");
+					if (defaultPrivilegeElement != null)
+						defaultPrivilegeElement.detach();
 					element.addElement("owner").setText("1");
 					
 					for (Element branchProtectionElement: element.element("branchProtections").elements()) {
@@ -1217,6 +1220,7 @@ public class DataMigrator {
 					|| file.getName().startsWith("Configurations.xml")
 					|| file.getName().startsWith("IssueQuerySettings.xml")
 					|| file.getName().startsWith("PullRequestQuerySettings.xml")
+					|| file.getName().startsWith("PullRequestChanges.xml")
 					|| file.getName().startsWith("CodeCommentQuerySettings.xml")
 					|| file.getName().startsWith("PullRequestWatchs.xml")
 					|| file.getName().startsWith("IssueWatchs.xml")

@@ -7,7 +7,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
@@ -33,8 +32,7 @@ public class IssueComment extends AbstractEntity {
 	@Column(nullable=false)
 	private Date date;
 	
-	@Lob
-	@Column(nullable=false, length=65535)
+	@Column(nullable=false, length=16384)
 	private String content;
 
 	public Issue getIssue() {

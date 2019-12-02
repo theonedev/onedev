@@ -167,8 +167,7 @@ public class Project extends AbstractEntity {
 	@Column(nullable=false, unique=true)
 	private String name;
 	
-	@Lob
-	@Column(length=65535)
+	@Column(length=16384)
 	private String description;
 	
 	/*

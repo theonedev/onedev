@@ -21,7 +21,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -82,8 +81,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	@Column(nullable=false)
 	private String title;
 	
-	@Lob
-	@Column(length=65535)
+	@Column(length=16384)
 	private String description;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
