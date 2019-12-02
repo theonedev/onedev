@@ -484,7 +484,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(ProjectConstants.ATTR_NAME)));
+			orders.add(builder.asc(root.get(ProjectConstants.ATTR_NAME)));
 		query.orderBy(orders);
 		
 		return query;
