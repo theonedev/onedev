@@ -135,11 +135,6 @@ public class BuildListPage extends LayoutPage {
 				OneDev.getInstance(SettingManager.class).saveBuildSetting(getBuildSetting());
 			}
 
-			@Override
-			protected ArrayList<NamedBuildQuery> getDefaultQueries() {
-				return (ArrayList<NamedBuildQuery>) getBuildSetting().getNamedQueries();
-			}
-
 		});
 		
 		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {

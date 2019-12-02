@@ -134,11 +134,6 @@ public class ProjectListPage extends LayoutPage {
 				OneDev.getInstance(SettingManager.class).saveProjectSetting(getProjectSetting());
 			}
 
-			@Override
-			protected ArrayList<NamedProjectQuery> getDefaultQueries() {
-				return (ArrayList<NamedProjectQuery>) getProjectSetting().getNamedQueries();
-			}
-
 		});
 		
 		PagingHistorySupport pagingHistorySupport = new PagingHistorySupport() {

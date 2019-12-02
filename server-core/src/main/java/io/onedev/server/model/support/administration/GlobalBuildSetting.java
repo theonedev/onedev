@@ -20,12 +20,11 @@ public class GlobalBuildSetting implements Serializable {
 		namedQueries.add(new NamedBuildQuery("All", "all"));
 		namedQueries.add(new NamedBuildQuery("Successful", "successful"));
 		namedQueries.add(new NamedBuildQuery("Failed", "failed"));
-		namedQueries.add(new NamedBuildQuery("In error", "in error"));
 		namedQueries.add(new NamedBuildQuery("Cancelled", "cancelled"));
 		namedQueries.add(new NamedBuildQuery("Timed out", "timed out"));
 		namedQueries.add(new NamedBuildQuery("Running", "running"));
 		namedQueries.add(new NamedBuildQuery("Waiting", "waiting"));
-		namedQueries.add(new NamedBuildQuery("Queueing", "queueing"));
+		namedQueries.add(new NamedBuildQuery("Pending", "pending"));
 		namedQueries.add(new NamedBuildQuery("Build recently", "\"Submit Date\" is after \"last week\""));
 	}
 	
