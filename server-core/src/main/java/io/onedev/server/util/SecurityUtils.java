@@ -36,6 +36,7 @@ import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.CreateProjects;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.JobPermission;
+import io.onedev.server.security.permission.ManageBuilds;
 import io.onedev.server.security.permission.ManageCodeComments;
 import io.onedev.server.security.permission.ManageIssues;
 import io.onedev.server.security.permission.ManageJob;
@@ -181,6 +182,10 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
 	public static boolean canManageIssues(Project project) {
 		return getSubject().isPermitted(new ProjectPermission(project, new ManageIssues()));
+	}
+	
+	public static boolean canManageBuilds(Project project) {
+		return getSubject().isPermitted(new ProjectPermission(project, new ManageBuilds()));
 	}
 	
 	public static boolean canManagePullRequests(Project project) {

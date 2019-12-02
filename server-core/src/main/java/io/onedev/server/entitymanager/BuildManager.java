@@ -51,8 +51,6 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	Collection<Long> filterBuildIds(Long projectId, Collection<String> commitHashes);
 
-	Collection<String> getJobNames();
-	
-	Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project, @Nullable User user);
+	Collection<String> getJobNames(@Nullable Project project);
 	
 }

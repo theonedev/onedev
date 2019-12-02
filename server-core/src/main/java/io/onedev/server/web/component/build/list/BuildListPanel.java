@@ -319,7 +319,8 @@ public abstract class BuildListPanel extends Panel {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(SecurityUtils.isAdministrator() || getProject() != null && SecurityUtils.canManage(getProject()));
+				setVisible(SecurityUtils.isAdministrator() 
+						|| getProject() != null && SecurityUtils.canManageBuilds(getProject()));
 			}
 			
 		});		

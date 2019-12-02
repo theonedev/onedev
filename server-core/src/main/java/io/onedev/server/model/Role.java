@@ -30,6 +30,7 @@ import io.onedev.server.security.permission.AccessBuildReports;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.EditIssueField;
 import io.onedev.server.security.permission.JobPermission;
+import io.onedev.server.security.permission.ManageBuilds;
 import io.onedev.server.security.permission.ManageCodeComments;
 import io.onedev.server.security.permission.ManageIssues;
 import io.onedev.server.security.permission.ManageJob;
@@ -75,6 +76,8 @@ public class Role extends AbstractEntity implements Permission {
 	@Lob
 	@Column(length=65535, nullable=false)
 	private ArrayList<String> editableIssueFields = new ArrayList<>();
+	
+	private boolean manageBuilds;
 	
 	@Lob
 	@Column(length=65535, nullable=false)
@@ -190,8 +193,23 @@ public class Role extends AbstractEntity implements Permission {
 		return OneDev.getInstance(SettingManager.class).getIssueSetting().getFieldNames();
 	}
 	
-	@Editable(order=700)
+	@Editable(order=650)
 	@ShowCondition("isManageProjectDisabled")
+	public boolean isManageBuilds() {
+		return manageBuilds;
+	}
+
+	public void setManageBuilds(boolean manageBuilds) {
+		this.manageBuilds = manageBuilds;
+	}
+
+	@SuppressWarnings("unused")
+	private static boolean isManageBuildsDisabled() {
+		return !(boolean)EditContext.get().getInputValue("manageBuilds");
+	}
+	
+	@Editable(order=700)
+	@ShowCondition("isManageBuildsDisabled")
 	public List<JobPrivilege> getJobPrivileges() {
 		return jobPrivileges;
 	}
@@ -245,6 +263,8 @@ public class Role extends AbstractEntity implements Permission {
 				permissions.add(new ScheduleIssues());
 			for (String issueField: editableIssueFields)
 				permissions.add(new EditIssueField(issueField));
+			if (manageBuilds)
+				permissions.add(new ManageBuilds());
 			for (JobPrivilege jobPrivilege: jobPrivileges) {
 				permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuild()));
 				if (jobPrivilege.isManageJob()) 
@@ -261,7 +281,7 @@ public class Role extends AbstractEntity implements Permission {
 		} else {
 			if (manageProject || managePullRequests || manageCodeComments || codePrivilege != CodePrivilege.NONE)
 				permissions.add(new ReadCode());
-			if (manageProject)
+			if (manageProject || manageBuilds)
 				permissions.add(new JobPermission("*", new AccessBuildLog()));
 			for (JobPrivilege jobPrivilege: jobPrivileges) {
 				permissions.add(new JobPermission(jobPrivilege.getJobNames(), new AccessBuild()));

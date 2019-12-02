@@ -696,12 +696,14 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	}
 	
 	@Override
-	public Collection<String> getJobNames() {
+	public Collection<String> getJobNames(@Nullable Project project) {
 		jobNamesLock.readLock().lock();
 		try {
 			Collection<String> jobNames = new HashSet<>();
-			for (Collection<String> each: this.jobNames.values()) 
-				jobNames.addAll(each);
+			for (Map.Entry<Long, Collection<String>> entry: this.jobNames.entrySet()) { 
+				if (project == null || project.getId().equals(entry.getKey()))
+					jobNames.addAll(entry.getValue());
+			}
 			return jobNames;
 		} finally {
 			jobNamesLock.readLock().unlock();
@@ -722,8 +724,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		}
 	}
 	
-	@Override
-	public Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project, @Nullable User user) {
+	private Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project, @Nullable User user) {
 		jobNamesLock.readLock().lock();
 		try {
 			Map<Project, Collection<String>> accessibleJobNames = new HashMap<>();

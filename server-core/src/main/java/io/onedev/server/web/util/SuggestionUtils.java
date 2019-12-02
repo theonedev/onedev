@@ -318,13 +318,7 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestJobs(@Nullable Project project, String matchWith) {
-		Collection<String> jobNames;
-		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-		if (project != null) 
-			jobNames = buildManager.getAccessibleJobNames(project, SecurityUtils.getUser()).get(project);
-		else 
-			jobNames = buildManager.getJobNames();
-		
+		Collection<String> jobNames = OneDev.getInstance(BuildManager.class).getJobNames(project);
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (String jobName: jobNames) {
 			LinearRange match = LinearRange.match(jobName, matchWith);

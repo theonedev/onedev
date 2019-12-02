@@ -48,7 +48,7 @@ public class JobPrivilege implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestJobNames(String matchWith) {
-		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class).getJobNames());
+		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class).getJobNames(null));
 		Collections.sort(jobNames);
 		return SuggestionUtils.suggest(jobNames, matchWith);
 	}
