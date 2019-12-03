@@ -53,12 +53,16 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									ProjectQuery.checkField(fieldName, operator);
-									if (fieldName.equals(ProjectConstants.FIELD_NAME))
-										return SuggestionUtils.suggestProjects(matchWith);
-									else if (fieldName.equals(ProjectConstants.FIELD_OWNER)) 
+									if (fieldName.equals(ProjectConstants.FIELD_NAME)) {
+										if (!matchWith.contains("*"))
+											return SuggestionUtils.suggestProjects(matchWith);
+										else
+											return null;
+									} else if (fieldName.equals(ProjectConstants.FIELD_OWNER)) { 
 										return SuggestionUtils.suggestUsers(matchWith);
-									else
+									} else {
 										return null;
+									}
 								} catch (OneException ex) {
 								}
 							}
@@ -92,6 +96,26 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 			}
 		}
 		return super.describe(parseExpect, suggestedLiteral);
+	}
+
+	@Override
+	protected List<String> getHints(TerminalExpect terminalExpect) {
+		List<String> hints = new ArrayList<>();
+		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
+			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
+			if ("criteriaValue".equals(spec.getLabel()) && ProjectQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+				if (!fieldElements.isEmpty()) {
+					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					if (fieldName.equals(ProjectConstants.FIELD_NAME) 
+							|| fieldName.equals(ProjectConstants.FIELD_DESCRIPTION)) {
+						hints.add("Use * for wildcard match");
+						hints.add("Use '\\' to escape quotes");
+					}
+				}
+			}
+		} 
+		return hints;
 	}
 
 }

@@ -48,7 +48,7 @@ public class ProjectBuildsPage extends ProjectPage {
 		@Override
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
-			if (query != null && query.length() == 0) {
+			if (query == null) {
 				List<String> queries = new ArrayList<>();
 				if (getProject().getBuildQuerySettingOfCurrentUser() != null) { 
 					for (NamedBuildQuery namedQuery: getProject().getBuildQuerySettingOfCurrentUser().getUserQueries())

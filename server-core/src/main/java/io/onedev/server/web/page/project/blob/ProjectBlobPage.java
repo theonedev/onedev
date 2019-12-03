@@ -1068,7 +1068,10 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 
 	@Override
 	public RevCommit getCommit() {
-		return getProject().getRevCommit(resolvedRevision, true);
+		if (resolvedRevision != null)
+			return getProject().getRevCommit(resolvedRevision, true);
+		else
+			return null;
 	}
 	
 	@Override

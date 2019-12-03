@@ -141,7 +141,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 						if (validate)
 							checkField(fieldName, operator);
 						if (fieldName.equals(IssueConstants.FIELD_MILESTONE))
-							return new MilestoneCriteria(null);
+							return new MilestoneIsEmptyCriteria();
 						else
 							return new FieldOperatorCriteria(fieldName, operator);
 					}
@@ -221,7 +221,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(IssueConstants.FIELD_COMMENT_COUNT)) {
 								return new CommentCountCriteria(getIntValue(value), operator);
 							} else if (fieldName.equals(IssueConstants.FIELD_NUMBER)) {
-								return new NumberCriteria(getIntValue(value), operator);
+								return new NumberCriteria(project, value, operator);
 							} else {
 								FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 								if (field instanceof IssueChoiceField) {
@@ -251,7 +251,7 @@ public class IssueQuery extends EntityQuery<Issue> {
 							} else if (fieldName.equals(IssueConstants.FIELD_COMMENT_COUNT)) {
 								return new CommentCountCriteria(getIntValue(value), operator);
 							} else if (fieldName.equals(IssueConstants.FIELD_NUMBER)) {
-								return new NumberCriteria(getIntValue(value), operator);
+								return new NumberCriteria(project, value, operator);
 							} else {
 								FieldSpec field = getGlobalIssueSetting().getFieldSpec(fieldName);
 								if (field instanceof NumberField) {

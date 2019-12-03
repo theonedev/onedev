@@ -1,15 +1,18 @@
 package io.onedev.server.search.entity.build;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.BuildConstants;
-import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.ProjectScopedNumber;
 
 public class NumberCriteria extends EntityCriteria<Build> {
 
@@ -17,32 +20,43 @@ public class NumberCriteria extends EntityCriteria<Build> {
 
 	private final int operator;
 	
-	private final long value;
+	private final String value;
 	
-	public NumberCriteria(long value, int operator) {
+	private final ProjectScopedNumber number;
+	
+	public NumberCriteria(@Nullable Project project, String value, int operator) {
 		this.operator = operator;
 		this.value = value;
+		number = EntityQuery.getEntityNumber(project, value);
 	}
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
-		Path<Long> attribute = root.get(IssueConstants.ATTR_NUMBER);
+		Path<Long> attribute = root.get(BuildConstants.ATTR_NUMBER);
+		Predicate numberPredicate;
 		if (operator == BuildQueryLexer.Is)
-			return builder.equal(attribute, value);
+			numberPredicate = builder.equal(attribute, number.getNumber());
 		else if (operator == BuildQueryLexer.IsGreaterThan)
-			return builder.greaterThan(attribute, value);
+			numberPredicate = builder.greaterThan(attribute, number.getNumber());
 		else
-			return builder.lessThan(attribute, value);
+			numberPredicate = builder.lessThan(attribute, number.getNumber());
+		return builder.and(
+				builder.equal(root.get(BuildConstants.ATTR_PROJECT), number.getProject()),
+				numberPredicate);
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		if (operator == BuildQueryLexer.Is)
-			return build.getNumber() == value;
-		else if (operator == BuildQueryLexer.IsGreaterThan)
-			return build.getNumber() > value;
-		else
-			return build.getNumber() < value;
+		if (build.getProject().equals(number.getProject())) {
+			if (operator == BuildQueryLexer.Is)
+				return build.getNumber() == number.getNumber();
+			else if (operator == BuildQueryLexer.IsGreaterThan)
+				return build.getNumber() > number.getNumber();
+			else
+				return build.getNumber() < number.getNumber();
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -52,7 +66,9 @@ public class NumberCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.quote(BuildConstants.FIELD_NUMBER) + " " + BuildQuery.getRuleName(operator) + " " + BuildQuery.quote(String.valueOf(value));
+		return BuildQuery.quote(BuildConstants.FIELD_NUMBER) + " " 
+				+ BuildQuery.getRuleName(operator) + " " 
+				+ BuildQuery.quote(value);
 	}
 
 }

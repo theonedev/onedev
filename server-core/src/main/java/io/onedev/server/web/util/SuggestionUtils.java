@@ -317,8 +317,10 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestJobs(@Nullable Project project, String matchWith) {
-		Collection<String> jobNames = OneDev.getInstance(BuildManager.class).getJobNames(project);
+	public static List<InputSuggestion> suggestJobs(Project project, String matchWith) {
+		Collection<String> jobNames = OneDev.getInstance(BuildManager.class)
+				.getAccessibleJobNames(project, SecurityUtils.getUser())
+				.get(project);
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (String jobName: jobNames) {
 			LinearRange match = LinearRange.match(jobName, matchWith);
@@ -328,28 +330,25 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestMilestones(@Nullable Project project, String matchWith) {
-		return suggest(project, matchWith, new ProjectScopedSuggester() {
-			
-			@Override
-			public void fillSuggestions(List<InputSuggestion> suggestions, Project project, User user, 
-					String matchWith, boolean prependProject) {
-				for (Milestone milestone: project.getMilestones()) {
-					LinearRange match = LinearRange.match(milestone.getName(), matchWith);
-					if (match != null) {
-						if (prependProject) {
-							int length = project.getName().length() + 1;
-							suggestions.add(new InputSuggestion(project.getName() + ":" + milestone.getName(), 
-									null, new LinearRange(match.getFrom() + length, match.getTo() + length)));
-						} else {
-							suggestions.add(new InputSuggestion(milestone.getName(), null, match));
-						}
-					}
-				}
-			}
-			
-		}, ":");
-		
+	public static List<InputSuggestion> suggestBuildVersions(@Nullable Project project, String matchWith) {
+		Collection<String> buildVersions = OneDev.getInstance(BuildManager.class).getBuildVersions(project);
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		for (String buildVersion: buildVersions) {
+			LinearRange match = LinearRange.match(buildVersion, matchWith);
+			if (match != null) 
+				suggestions.add(new InputSuggestion(buildVersion, null, match));
+		}
+		return suggestions;
+	}
+	
+	public static List<InputSuggestion> suggestMilestones(Project project, String matchWith) {
+		List<InputSuggestion> suggestions = new ArrayList<>();
+		for (Milestone milestone: project.getMilestones()) {
+			LinearRange match = LinearRange.match(milestone.getName(), matchWith);
+			if (match != null) 
+				suggestions.add(new InputSuggestion(milestone.getName(), null, match));
+		}
+		return suggestions;
 	}
 	
 	public static List<InputSuggestion> suggestArtifacts(Build build, String matchWith) {

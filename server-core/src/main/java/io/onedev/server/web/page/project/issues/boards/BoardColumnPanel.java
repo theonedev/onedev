@@ -264,7 +264,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		}
 		
 		if (getQuery() != null) {
-			PageParameters params = ProjectIssueListPage.paramsOf(getProject(), getQuery().toString(), 1);
+			PageParameters params = ProjectIssueListPage.paramsOf(getProject(), getQuery().toString(), 0);
 			head.add(new BookmarkablePageLink<Void>("viewAsList", ProjectIssueListPage.class, params));
 		} else {
 			head.add(new WebMarkupContainer("viewAsList").setVisible(false));

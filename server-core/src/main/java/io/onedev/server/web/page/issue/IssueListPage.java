@@ -45,8 +45,7 @@ public class IssueListPage extends LayoutPage {
 		@Override
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
-			if (query != null && query.length() == 0) {
-				query = null;
+			if (query == null) {
 				List<String> queries = new ArrayList<>();
 				if (getLoginUser() != null) {
 					for (NamedIssueQuery namedQuery: getLoginUser().getIssueQuerySetting().getUserQueries())

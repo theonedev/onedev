@@ -1,13 +1,17 @@
 package io.onedev.server.search.entity.issue;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.ProjectScopedNumber;
 
 public class NumberCriteria extends IssueCriteria {
 
@@ -15,32 +19,45 @@ public class NumberCriteria extends IssueCriteria {
 
 	private final int operator;
 	
-	private final long value;
+	private final String value;
 	
-	public NumberCriteria(long value, int operator) {
+	private final ProjectScopedNumber number;
+	
+	public NumberCriteria(@Nullable Project project, String value, int operator) {
 		this.operator = operator;
 		this.value = value;
+		number = EntityQuery.getEntityNumber(project, value);
 	}
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
 		Path<Long> attribute = root.get(IssueConstants.ATTR_NUMBER);
+		Predicate numberPredicate;
+		
 		if (operator == IssueQueryLexer.Is)
-			return builder.equal(attribute, value);
+			numberPredicate = builder.equal(attribute, number.getNumber());
 		else if (operator == IssueQueryLexer.IsGreaterThan)
-			return builder.greaterThan(attribute, value);
+			numberPredicate = builder.greaterThan(attribute, number.getNumber());
 		else
-			return builder.lessThan(attribute, value);
+			numberPredicate = builder.lessThan(attribute, number.getNumber());
+		
+		return builder.and(
+				builder.equal(root.get(IssueConstants.ATTR_PROJECT), number.getProject()),
+				numberPredicate);
 	}
 
 	@Override
 	public boolean matches(Issue issue, User user) {
-		if (operator == IssueQueryLexer.Is)
-			return issue.getNumber() == value;
-		else if (operator == IssueQueryLexer.IsGreaterThan)
-			return issue.getNumber() > value;
-		else
-			return issue.getNumber() < value;
+		if (issue.getProject().equals(number.getProject())) {
+			if (operator == IssueQueryLexer.Is)
+				return issue.getNumber() == number.getNumber();
+			else if (operator == IssueQueryLexer.IsGreaterThan)
+				return issue.getNumber() > number.getNumber();
+			else
+				return issue.getNumber() < number.getNumber();
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -52,7 +69,7 @@ public class NumberCriteria extends IssueCriteria {
 	public String toString() {
 		return IssueQuery.quote(IssueConstants.FIELD_NUMBER) + " " 
 				+ IssueQuery.getRuleName(operator) + " " 
-				+ IssueQuery.quote(String.valueOf(value));
+				+ IssueQuery.quote(value);
 	}
 
 }

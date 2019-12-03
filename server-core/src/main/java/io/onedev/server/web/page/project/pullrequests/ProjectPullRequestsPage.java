@@ -50,8 +50,7 @@ public class ProjectPullRequestsPage extends ProjectPage {
 		@Override
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
-			if (query != null && query.length() == 0) {
-				query = null;
+			if (query == null) {
 				List<String> queries = new ArrayList<>();
 				if (getProject().getPullRequestQuerySettingOfCurrentUser() != null) { 
 					for (NamedPullRequestQuery namedQuery: getProject().getPullRequestQuerySettingOfCurrentUser().getUserQueries())

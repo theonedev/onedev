@@ -1,12 +1,16 @@
 package io.onedev.server.search.entity.pullrequest;
 
+import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityQuery;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.PullRequestConstants;
 
 public class NumberCriteria extends PullRequestCriteria {
@@ -15,32 +19,45 @@ public class NumberCriteria extends PullRequestCriteria {
 
 	private final int operator;
 	
-	private final long value;
+	private final String value;
 	
-	public NumberCriteria(long value, int operator) {
+	private final ProjectScopedNumber number;
+	
+	public NumberCriteria(@Nullable Project project, String value, int operator) {
 		this.operator = operator;
 		this.value = value;
+		number = EntityQuery.getEntityNumber(project, value);
 	}
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
 		Path<Long> attribute = root.get(PullRequestConstants.ATTR_NUMBER);
+		Predicate numberPredicate;
+		
 		if (operator == PullRequestQueryLexer.Is)
-			return builder.equal(attribute, value);
+			numberPredicate = builder.equal(attribute, number.getNumber());
 		else if (operator == PullRequestQueryLexer.IsGreaterThan)
-			return builder.greaterThan(attribute, value);
+			numberPredicate = builder.greaterThan(attribute, number.getNumber());
 		else
-			return builder.lessThan(attribute, value);
+			numberPredicate = builder.lessThan(attribute, number.getNumber());
+		
+		return builder.and(
+				builder.equal(root.get(PullRequestConstants.ATTR_TARGET_PROJECT), number.getProject()),
+				numberPredicate);
 	}
 
 	@Override
 	public boolean matches(PullRequest request, User user) {
-		if (operator == PullRequestQueryLexer.Is)
-			return request.getNumber() == value;
-		else if (operator == PullRequestQueryLexer.IsGreaterThan)
-			return request.getNumber() > value;
-		else
-			return request.getNumber() < value;
+		if (request.getTargetProject().equals(number.getProject())) {
+			if (operator == PullRequestQueryLexer.Is)
+				return request.getNumber() == number.getNumber();
+			else if (operator == PullRequestQueryLexer.IsGreaterThan)
+				return request.getNumber() > number.getNumber();
+			else
+				return request.getNumber() < number.getNumber();
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -50,7 +67,9 @@ public class NumberCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequestConstants.FIELD_NUMBER) + " " + PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(String.valueOf(value));
+		return PullRequestQuery.quote(PullRequestConstants.FIELD_NUMBER) + " " 
+				+ PullRequestQuery.getRuleName(operator) + " " 
+				+ PullRequestQuery.quote(value);
 	}
 
 }

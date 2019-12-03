@@ -180,7 +180,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						case PullRequestQueryLexer.Is:
 							switch (fieldName) {
 							case PullRequestConstants.FIELD_NUMBER:
-								return new NumberCriteria(getIntValue(value), operator);
+								return new NumberCriteria(project, value, operator);
 							case PullRequestConstants.FIELD_MERGE_STRATEGY:
 								return new MergeStrategyCriteria(MergeStrategy.fromString(value));
 							case PullRequestConstants.FIELD_SOURCE_BRANCH:
@@ -201,7 +201,7 @@ public class PullRequestQuery extends EntityQuery<PullRequest> {
 						case PullRequestQueryLexer.IsGreaterThan:
 							switch (fieldName) {
 							case PullRequestConstants.FIELD_NUMBER:
-								return new NumberCriteria(getIntValue(value), operator);
+								return new NumberCriteria(project, value, operator);
 							case PullRequestConstants.FIELD_COMMENT_COUNT:
 								return new CommentCountCriteria(getIntValue(value), operator);
 							default:

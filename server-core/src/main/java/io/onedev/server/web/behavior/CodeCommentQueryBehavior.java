@@ -21,6 +21,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryLexer;
 import io.onedev.server.search.entity.codecomment.CodeCommentQueryParser;
+import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.CodeCommentConstants;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
@@ -119,4 +120,23 @@ public class CodeCommentQueryBehavior extends ANTLRAssistBehavior {
 		return super.describe(parseExpect, suggestedLiteral);
 	}
 
+	@Override
+	protected List<String> getHints(TerminalExpect terminalExpect) {
+		List<String> hints = new ArrayList<>();
+		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
+			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
+			if ("criteriaValue".equals(spec.getLabel()) && ProjectQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+				if (!fieldElements.isEmpty()) {
+					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					if (fieldName.equals(CodeCommentConstants.FIELD_CONTENT)) {
+						hints.add("Use * for wildcard match");
+						hints.add("Use '\\' to escape quotes");
+					}
+				}
+			}
+		} 
+		return hints;
+	}
+	
 }

@@ -36,7 +36,6 @@ import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
-import io.onedev.server.util.validation.annotation.RegEx;
 import io.onedev.server.web.editable.annotation.Code;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
@@ -103,7 +102,6 @@ public class Job implements Serializable, Validatable {
 	private transient Map<String, ParamSpec> paramSpecMap;
 	
 	@Editable(order=100, description="Specify name of the job")
-	@RegEx(pattern="[^:]*", message="Character ':' is not allowed") // ':' will be used as project/job separator in build query
 	@NotEmpty
 	public String getName() {
 		return name;

@@ -3,6 +3,7 @@ package io.onedev.server.search.entity;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.Path;
@@ -29,10 +30,13 @@ import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectAwareCommitId;
 import io.onedev.server.util.ProjectAwareRevision;
+import io.onedev.server.util.ProjectScopedNumber;
 
 public abstract class EntityQuery<T extends AbstractEntity> implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+	
+	private static final Pattern INSIDE_QUOTE = Pattern.compile("\"([^\"\\\\]|\\\\.)*");
 
 	public abstract EntityCriteria<T> getCriteria();
 
@@ -150,6 +154,16 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			throw new OneException("Unable to find build: " + value);
 	}
 	
+	public static ProjectScopedNumber getEntityNumber(@Nullable Project project, String value) {
+		if (project != null) {
+			if (value.startsWith("#"))
+				value = project.getName() + value;
+			else if (!value.contains("#"))
+				value = project.getName() + "#" + value;
+		}
+		return ProjectScopedNumber.from(value);
+	}
+	
 	public static Milestone getMilestone(@Nullable Project project, String value) {
 		if (project != null && !value.contains(":")) 
 			value = project.getName() + ":" + value;
@@ -197,6 +211,10 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		} else {
 			return root.get(pathName);
 		}
+	}
+	
+	public static boolean isInsideQuote(String value) {
+		return INSIDE_QUOTE.matcher(value.trim()).matches();
 	}
 	
 }

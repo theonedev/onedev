@@ -5,6 +5,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -22,13 +23,15 @@ public class JobCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
-		Path<?> attribute = root.get(BuildConstants.ATTR_JOB);
-		return builder.equal(attribute, jobName);
+		Path<String> attribute = root.get(BuildConstants.ATTR_JOB);
+		String normalized = jobName.toLowerCase().replace("*", "%");
+		return builder.like(builder.lower(attribute), normalized);
 	}
 
 	@Override
 	public boolean matches(Build build, User user) {
-		return build.getJobName().equals(jobName);
+		String jobName = build.getJobName();
+		return jobName != null && WildcardUtils.matchString(this.jobName.toLowerCase(), jobName.toLowerCase());
 	}
 
 	@Override

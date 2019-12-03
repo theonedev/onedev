@@ -21,7 +21,6 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
@@ -34,7 +33,6 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
-import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.IssueFieldManager;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.IssueQuerySettingManager;
@@ -72,6 +70,7 @@ import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
@@ -143,19 +142,8 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Sessional
 	@Override
 	public Issue find(String issueFQN) {
-		String projectName = StringUtils.substringBefore(issueFQN, "#");
-		Project project = projectManager.find(projectName);
-		if (project != null) {
-			String issueNumberStr = StringUtils.substringAfter(issueFQN, "#");
-			try {
-				Long issueNumber = Long.valueOf(issueNumberStr);
-				return find(project, issueNumber);
-			} catch (NumberFormatException e) {
-				throw new OneException("Invalid issue number: " + issueNumberStr);
-			}
-		} else {
-			return null;
-		}
+		ProjectScopedNumber number = ProjectScopedNumber.from(issueFQN);
+		return find(number.getProject(), number.getNumber());
 	}
 	
 	@Transactional

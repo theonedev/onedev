@@ -48,8 +48,7 @@ public class ProjectListPage extends LayoutPage {
 		@Override
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
-			if (query != null && query.length() == 0) {
-				query = null;
+			if (query == null) {
 				List<String> queries = new ArrayList<>();
 				if (getLoginUser() != null) {
 					for (NamedProjectQuery namedQuery: getLoginUser().getProjectQuerySetting().getUserQueries())

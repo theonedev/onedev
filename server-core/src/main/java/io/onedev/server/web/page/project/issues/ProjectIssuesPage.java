@@ -61,14 +61,7 @@ public abstract class ProjectIssuesPage extends ProjectPage implements ScriptIde
 
 			@Override
 			public Component render(String componentId) {
-				return new PageTabLink(componentId, this) {
-
-					@Override
-					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, ProjectIssueListPage.class, 
-								ProjectIssueListPage.paramsOf(getProject(), "", 0));
-					}
-				};
+				return new PageTabLink(componentId, this);
 			}
 			
 		});

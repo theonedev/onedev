@@ -88,6 +88,11 @@ public interface BlobRenderContext extends Serializable {
 	@Nullable
 	CodeComment getOpenComment();
 	
+	/**
+	 * @return
+	 * 			null when there is no commit yet
+	 */
+	@Nullable
 	RevCommit getCommit();
 	
 	/**

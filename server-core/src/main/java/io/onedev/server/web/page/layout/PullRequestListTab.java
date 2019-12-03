@@ -13,8 +13,7 @@ public class PullRequestListTab implements MainTab {
 
 	@Override
 	public Component render(String componentId) {
-		return new ViewStateAwarePageLink<Void>(componentId, PullRequestListPage.class, 
-				PullRequestListPage.paramsOf("", 0)) {
+		return new ViewStateAwarePageLink<Void>(componentId, PullRequestListPage.class) {
 
 			private static final long serialVersionUID = 1L;
 

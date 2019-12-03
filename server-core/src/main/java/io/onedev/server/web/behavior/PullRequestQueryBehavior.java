@@ -6,6 +6,7 @@ import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.D
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.RequestedForChangesByMe;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.SubmittedByMe;
 import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeReviewedByMe;
+import static io.onedev.server.util.IssueConstants.FIELD_NUMBER;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +27,7 @@ import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
+import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser;
@@ -100,6 +102,8 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 											return SuggestionUtils.suggestBranches(project, matchWith);
 										else
 											return null;
+									} else if (fieldName.equals(FIELD_NUMBER)) {
+										return SuggestionUtils.suggestPullRequests(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else if (fieldName.equals(PullRequestConstants.FIELD_MERGE_STRATEGY)) {
 										List<String> candidates = new ArrayList<>();
 										for (MergeStrategy strategy: MergeStrategy.values())
@@ -107,7 +111,6 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 										return SuggestionUtils.suggest(candidates, matchWith);
 									} else if (fieldName.equals(PullRequestConstants.FIELD_TITLE) 
 											|| fieldName.equals(PullRequestConstants.FIELD_DESCRIPTION) 
-											|| fieldName.equals(PullRequestConstants.FIELD_NUMBER) 
 											|| fieldName.equals(PullRequestConstants.FIELD_COMMENT_COUNT)
 											|| fieldName.equals(PullRequestConstants.FIELD_COMMENT)) {
 										return null;
@@ -153,6 +156,27 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 			}
 		}
 		return super.describe(parseExpect, suggestedLiteral);
+	}
+
+	@Override
+	protected List<String> getHints(TerminalExpect terminalExpect) {
+		List<String> hints = new ArrayList<>();
+		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
+			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
+			if ("criteriaValue".equals(spec.getLabel()) && ProjectQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+				if (!fieldElements.isEmpty()) {
+					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					if (fieldName.equals(PullRequestConstants.FIELD_TITLE) 
+							|| fieldName.equals(PullRequestConstants.FIELD_DESCRIPTION)
+							|| fieldName.equals(PullRequestConstants.FIELD_COMMENT)) {
+						hints.add("Use * for wildcard match");
+						hints.add("Use '\\' to escape quotes");
+					}
+				}
+			}
+		} 
+		return hints;
 	}
 
 }

@@ -111,8 +111,8 @@ public class BoardSpec implements Serializable {
 		this.columns = columns;
 	}
 
-	@Editable(order=400, description="Specify columns of the board. Each column corresponds to "
-			+ "a value of the issue field specified above")
+	@Editable(order=400, name="Board Columns", description="Specify columns of the board. "
+			+ "Each column corresponds to a value of the issue field specified above")
 	@Size(min=2, message="At least two columns need to be defined")
 	@ChoiceProvider("getColumnChoices")
 	public List<String> getEditColumns() {

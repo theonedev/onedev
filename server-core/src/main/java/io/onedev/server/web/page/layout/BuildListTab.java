@@ -13,8 +13,7 @@ public class BuildListTab implements MainTab {
 
 	@Override
 	public Component render(String componentId) {
-		return new ViewStateAwarePageLink<Void>(componentId, BuildListPage.class, 
-				BuildListPage.paramsOf("", 0, 0)) {
+		return new ViewStateAwarePageLink<Void>(componentId, BuildListPage.class) {
 
 			private static final long serialVersionUID = 1L;
 

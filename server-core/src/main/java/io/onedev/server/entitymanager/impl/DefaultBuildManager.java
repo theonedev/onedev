@@ -25,7 +25,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
@@ -85,6 +84,7 @@ import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.BuildConstants;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.patternset.PatternSet;
 
@@ -118,6 +118,10 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	private final Map<Long, Collection<String>> jobNames = new HashMap<>();
 	
 	private final ReadWriteLock jobNamesLock = new ReentrantReadWriteLock();
+	
+	private final Map<Long, Collection<String>> buildVersions = new HashMap<>();
+	
+	private final ReadWriteLock buildVersionsLock = new ReentrantReadWriteLock();
 	
 	private String taskId;
 	
@@ -170,19 +174,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Sessional
 	@Override
 	public Build find(String buildFQN) {
-		String projectName = StringUtils.substringBefore(buildFQN, "#");
-		Project project = projectManager.find(projectName);
-		if (project != null) {
-			String buildNumberStr = StringUtils.substringAfter(buildFQN, "#");
-			try {
-				Long buildNumber = Long.valueOf(buildNumberStr);
-				return find(project, buildNumber);
-			} catch (NumberFormatException e) {
-				throw new OneException("Invalid build number: " + buildNumberStr);
-			}
-		} else {
-			return null;
-		}
+		ProjectScopedNumber number = ProjectScopedNumber.from(buildFQN);
+		return find(number.getProject(), number.getNumber());
 	}
 
 	@Transactional
@@ -192,6 +185,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		
 		BuildFacade facade = build.getFacade();
 		String jobName = build.getJobName();
+		String buildVersion = build.getVersion();
 		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
@@ -207,6 +201,12 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 					populateJobNames(facade.getProjectId(), jobName);
 				} finally {
 					jobNamesLock.writeLock().unlock();
+				}
+				buildVersionsLock.writeLock().lock();
+				try {
+					populateBuildVersions(facade.getProjectId(), buildVersion);
+				} finally {
+					buildVersionsLock.writeLock().unlock();
 				}
 			}
 			
@@ -240,6 +240,15 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 						}
 					} finally {
 						jobNamesLock.writeLock().unlock();
+					}
+					buildVersionsLock.writeLock().lock();
+					try {
+						for (Iterator<Map.Entry<Long, Collection<String>>> it = buildVersions.entrySet().iterator(); it.hasNext();) {
+							if (it.next().getKey().equals(projectId))
+								it.remove();
+						}
+					} finally {
+						buildVersionsLock.writeLock().unlock();
 					}
 				}
 			});
@@ -546,12 +555,13 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	public void on(SystemStarted event) {
 		logger.info("Caching build info...");
 		
-		Query<?> query = dao.getSession().createQuery("select id, project.id, commitHash, jobName from Build");
+		Query<?> query = dao.getSession().createQuery("select id, project.id, commitHash, jobName, version from Build");
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			Long buildId = (Long) fields[0];
 			Long projectId = (Long)fields[1];
 			builds.put(buildId, new BuildFacade(buildId, projectId, (String)fields[2]));
 			populateJobNames(projectId, (String)fields[3]);
+			populateBuildVersions(projectId, (String)fields[4]);
 		}
 		taskId = taskScheduler.schedule(this);
 	}
@@ -678,6 +688,17 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		jobNamesOfProject.add(jobName);
 	}
 
+	private void populateBuildVersions(Long projectId, @Nullable String buildVersion) {
+		if (buildVersion != null) {
+			Collection<String> builldVersionsOfProject = buildVersions.get(projectId);
+			if (builldVersionsOfProject == null) {
+				builldVersionsOfProject = new HashSet<>();
+				buildVersions.put(projectId, builldVersionsOfProject);
+			}
+			builldVersionsOfProject.add(buildVersion);
+		}
+	}
+	
 	private Collection<String> getAccessibleJobNames(Role role, Collection<String> jobNames) {
 		Collection<String> accessibleJobNames = new HashSet<>();
 		if (role.isManageProject()) {
@@ -710,6 +731,21 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		}
 	}
 	
+	@Override
+	public Collection<String> getBuildVersions(@Nullable Project project) {
+		buildVersionsLock.readLock().lock();
+		try {
+			Collection<String> buildVersions = new HashSet<>();
+			for (Map.Entry<Long, Collection<String>> entry: this.buildVersions.entrySet()) { 
+				if (project == null || project.getId().equals(entry.getKey()))
+					buildVersions.addAll(entry.getValue());
+			}
+			return buildVersions;
+		} finally {
+			buildVersionsLock.readLock().unlock();
+		}
+	}
+	
 	private void populateAccessibleJobNames(Map<Project, Collection<String>> accessibleJobNames, 
 			Map<Long, Collection<String>> jobNames, Project project, Role role) {
 		Collection<String> jobNamesOfProject = jobNames.get(project.getId());
@@ -724,7 +760,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		}
 	}
 	
-	private Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project, @Nullable User user) {
+	@Override
+	public Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project, @Nullable User user) {
 		jobNamesLock.readLock().lock();
 		try {
 			Map<Project, Collection<String>> accessibleJobNames = new HashMap<>();

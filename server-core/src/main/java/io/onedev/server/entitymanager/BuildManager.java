@@ -53,4 +53,8 @@ public interface BuildManager extends EntityManager<Build> {
 
 	Collection<String> getJobNames(@Nullable Project project);
 	
+	Collection<String> getBuildVersions(@Nullable Project project);
+
+	Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project, @Nullable User user);
+
 }

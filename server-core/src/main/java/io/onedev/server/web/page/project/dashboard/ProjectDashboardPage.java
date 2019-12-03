@@ -17,7 +17,7 @@ public class ProjectDashboardPage extends ProjectPage {
 		if (SecurityUtils.canReadCode(getProject()))
 			throw new RestartResponseException(ProjectBlobPage.class, ProjectBlobPage.paramsOf(getProject()));
 		else 
-			throw new RestartResponseException(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject(), "", 0));
+			throw new RestartResponseException(ProjectIssueListPage.class, ProjectIssueListPage.paramsOf(getProject()));
 		
 	}
 

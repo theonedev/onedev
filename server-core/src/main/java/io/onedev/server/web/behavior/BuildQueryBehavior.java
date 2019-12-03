@@ -26,6 +26,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.BuildQueryLexer;
 import io.onedev.server.search.entity.build.BuildQueryParser;
+import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
@@ -67,9 +68,13 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 						if ("criteriaField".equals(spec.getLabel())) {
 							List<String> fields = new ArrayList<>(BuildConstants.QUERY_FIELDS);
 							BuildParamManager buildParamManager = OneDev.getInstance(BuildParamManager.class);
-							List<String> paramNames = new ArrayList<>(buildParamManager.getBuildParamNames());
+							List<String> paramNames = new ArrayList<>(buildParamManager.getBuildParamNames(project));
 							Collections.sort(paramNames);
-							fields.addAll(paramNames);
+							for (String paramName: paramNames) {
+								fields.add(paramName);
+								if (fields.size() >= InputAssistBehavior.MAX_SUGGESTIONS)
+									break;
+							}
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							return SuggestionUtils.suggest(new ArrayList<>(BuildConstants.ORDER_FIELDS.keySet()), matchWith);
@@ -99,15 +104,19 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
 									} else if (fieldName.equals(BuildConstants.FIELD_JOB)) {
-										return SuggestionUtils.suggestJobs(project, matchWith);
+										if (project != null && !matchWith.contains("*")) 
+											return SuggestionUtils.suggestJobs(project, matchWith);
+										else 
+											return null;
 									} else if (fieldName.equals(BuildConstants.FIELD_NUMBER)) {
 										return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+									} else if (fieldName.equals(BuildConstants.FIELD_VERSION)) {
+										if (project != null && !matchWith.contains("*"))
+											return SuggestionUtils.suggestBuildVersions(project, matchWith);
+										else
+											return null;
 									} else {
-										BuildParamManager buildParamManager = OneDev.getInstance(BuildParamManager.class);
-										List<String> paramValues = new ArrayList<>(buildParamManager.getBuildParamValues(fieldName));
-										Collections.sort(paramValues);
-										List<InputSuggestion> suggestions = SuggestionUtils.suggest(paramValues, matchWith);
-										return !suggestions.isEmpty()? suggestions: null;
+										return null;
 									}
 								} catch (OneException ex) {
 								}
@@ -155,12 +164,15 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		List<String> hints = new ArrayList<>();
 		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
-			if ("criteriaValue".equals(spec.getLabel())) {
-				String unmatched = terminalExpect.getUnmatchedText();
-				if (unmatched.indexOf('"') == unmatched.lastIndexOf('"')) { // only when we input criteria value
-					List<Element> elements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
-					if (!elements.isEmpty() && elements.get(0).getFirstMatchedToken().getText().equals("\"" + BuildConstants.FIELD_VERSION + "\""))
-						hints.add("Use * to match any part of version");
+			if ("criteriaValue".equals(spec.getLabel()) && ProjectQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+				if (!fieldElements.isEmpty()) {
+					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					if (fieldName.equals(BuildConstants.FIELD_VERSION)
+							|| fieldName.equals(BuildConstants.FIELD_JOB)) {
+						hints.add("Use * for wildcard match");
+						hints.add("Use '\\' to escape quotes");
+					}
 				}
 			}
 		} 

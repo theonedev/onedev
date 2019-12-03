@@ -13,8 +13,7 @@ public class IssueListTab implements MainTab {
 
 	@Override
 	public Component render(String componentId) {
-		return new ViewStateAwarePageLink<Void>(componentId, IssueListPage.class, 
-				IssueListPage.paramsOf("", 0)) {
+		return new ViewStateAwarePageLink<Void>(componentId, IssueListPage.class) {
 
 			private static final long serialVersionUID = 1L;
 

@@ -44,8 +44,7 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 		@Override
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toString();
-			if (query != null && query.length() == 0) {
-				query = null;
+			if (query == null) {
 				List<String> queries = new ArrayList<>();
 				if (getProject().getCodeCommentQuerySettingOfCurrentUser() != null) { 
 					for (NamedCodeCommentQuery namedQuery: getProject().getCodeCommentQuerySettingOfCurrentUser().getUserQueries())
@@ -101,7 +100,8 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 
 			@Override
 			protected Link<Void> newQueryLink(String componentId, NamedCodeCommentQuery namedQuery) {
-				return new BookmarkablePageLink<Void>(componentId, ProjectCodeCommentsPage.class, ProjectCodeCommentsPage.paramsOf(getProject(), namedQuery.getQuery()));
+				return new BookmarkablePageLink<Void>(componentId, ProjectCodeCommentsPage.class, 
+						ProjectCodeCommentsPage.paramsOf(getProject(), namedQuery.getQuery()));
 			}
 
 			@Override

@@ -45,8 +45,7 @@ public class ProjectCommitsPage extends ProjectPage {
 		@Override
 		protected String load() {
 			String query = getPageParameters().get(PARAM_COMMIT_QUERY).toString();
-			if (query != null && query.length() == 0) {
-				query = null;
+			if (query == null) {
 				List<String> queries = new ArrayList<>();
 				if (getProject().getCommitQuerySettingOfCurrentUser() != null) { 
 					for (NamedCommitQuery namedQuery: getProject().getCommitQuerySettingOfCurrentUser().getUserQueries())

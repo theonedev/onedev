@@ -29,7 +29,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.search.entity.issue.MilestoneCriteria;
+import io.onedev.server.search.entity.issue.MilestoneIsEmptyCriteria;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
@@ -48,7 +48,7 @@ abstract class BacklogColumnPanel extends Panel {
 				List<IssueCriteria> criterias = new ArrayList<>();
 				if (backlogQuery.getCriteria() != null)
 					criterias.add(backlogQuery.getCriteria());
-				criterias.add(new MilestoneCriteria(null));
+				criterias.add(new MilestoneIsEmptyCriteria());
 				return new IssueQuery(IssueCriteria.of(criterias), backlogQuery.getSorts());
 			} else {
 				return null;
@@ -112,7 +112,7 @@ abstract class BacklogColumnPanel extends Panel {
 		});
 		
 		if (getQuery() != null) {
-			PageParameters params = ProjectIssueListPage.paramsOf(getProject(), getQuery().toString(), 1);
+			PageParameters params = ProjectIssueListPage.paramsOf(getProject(), getQuery().toString(), 0);
 			add(new BookmarkablePageLink<Void>("viewAsList", ProjectIssueListPage.class, params));
 		} else {
 			add(new WebMarkupContainer("viewAsList").setVisible(false));

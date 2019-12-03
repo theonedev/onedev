@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Component;
-import org.apache.wicket.Page;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.behavior.AttributeAppender;
@@ -14,7 +13,6 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
-import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Fragment;
@@ -34,7 +32,6 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.project.avatar.ProjectAvatar;
 import io.onedev.server.web.component.sidebar.SideBar;
 import io.onedev.server.web.component.tabbable.Tab;
@@ -195,14 +192,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				
 				@Override
 				public Component render(String componentId) {
-					return new ProjectTabLink(componentId, this) {
-
-						@Override
-						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-							return new ViewStateAwarePageLink<Void>(linkId, ProjectCommitsPage.class, 
-									ProjectCommitsPage.paramsOf(getProject(), "", null));
-						}
-					};
+					return new ProjectTabLink(componentId, this);
 				}
 				
 			});
@@ -216,14 +206,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 				
 				@Override
 				public Component render(String componentId) {
-					return new ProjectTabLink(componentId, this) {
-
-						@Override
-						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-							return new ViewStateAwarePageLink<Void>(linkId, ProjectPullRequestsPage.class, 
-									ProjectPullRequestsPage.paramsOf(getProject(), "", 0));
-						}
-					};
+					return new ProjectTabLink(componentId, this);
 				}
 				
 			});
@@ -234,14 +217,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 			@Override
 			public Component render(String componentId) {
-				return new ProjectTabLink(componentId, this) {
-
-					@Override
-					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, ProjectIssueListPage.class, 
-								ProjectIssueListPage.paramsOf(getProject(), "", 0));
-					}
-				};
+				return new ProjectTabLink(componentId, this);
 			}
 			
 		});
@@ -250,14 +226,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 			@Override
 			public Component render(String componentId) {
-				return new ProjectTabLink(componentId, this) {
-
-					@Override
-					protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-						return new ViewStateAwarePageLink<Void>(linkId, ProjectBuildsPage.class, 
-								ProjectBuildsPage.paramsOf(getProject(), "", 0));
-					}
-				};
+				return new ProjectTabLink(componentId, this);
 			}
 			
 		});
@@ -268,14 +237,7 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 
 				@Override
 				public Component render(String componentId) {
-					return new ProjectTabLink(componentId, this) {
-
-						@Override
-						protected Link<?> newLink(String linkId, Class<? extends Page> pageClass) {
-							return new ViewStateAwarePageLink<Void>(linkId, ProjectCodeCommentsPage.class, 
-									ProjectCodeCommentsPage.paramsOf(getProject(), ""));
-						}
-					};
+					return new ProjectTabLink(componentId, this);
 				}
 				
 			});

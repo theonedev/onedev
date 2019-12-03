@@ -56,6 +56,7 @@ import io.onedev.server.issue.fieldspec.UserChoiceField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQueryParser;
+import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.IssueConstants;
@@ -165,6 +166,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 										} finally {
 											ComponentContext.pop();
 										}			
+									} else if (fieldName.equals(FIELD_NUMBER)) {
+										return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else if (fieldName.equals(FIELD_MILESTONE)) {
 										if (project != null)
 											return SuggestionUtils.suggestMilestones(project, matchWith);
@@ -172,8 +175,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 											return null;
 									} else if (fieldName.equals(FIELD_TITLE) || fieldName.equals(FIELD_DESCRIPTION) 
 											|| fieldName.equals(FIELD_COMMENT) || fieldName.equals(FIELD_VOTE_COUNT) 
-											|| fieldName.equals(FIELD_COMMENT_COUNT) || fieldName.equals(FIELD_NUMBER) 
-											|| fieldSpec instanceof NumberField || fieldSpec instanceof TextField) {
+											|| fieldName.equals(FIELD_COMMENT_COUNT) || fieldSpec instanceof NumberField 
+											|| fieldSpec instanceof TextField) {
 										return null;
 									}
 								} catch (OneException ex) {
@@ -217,4 +220,26 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 		return super.describe(parseExpect, suggestedLiteral);
 	}
 
+	@Override
+	protected List<String> getHints(TerminalExpect terminalExpect) {
+		List<String> hints = new ArrayList<>();
+		if (terminalExpect.getElementSpec() instanceof LexerRuleRefElementSpec) {
+			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
+			if ("criteriaValue".equals(spec.getLabel()) && ProjectQuery.isInsideQuote(terminalExpect.getUnmatchedText())) {
+				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
+				if (!fieldElements.isEmpty()) {
+					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
+					if (fieldName.equals(IssueConstants.FIELD_TITLE) 
+							|| fieldName.equals(IssueConstants.FIELD_DESCRIPTION)
+							|| fieldName.equals(IssueConstants.FIELD_COMMENT)
+							|| fieldName.equals(IssueConstants.FIELD_MILESTONE)) {
+						hints.add("Use * for wildcard match");
+						hints.add("Use '\\' to escape quotes");
+					}
+				}
+			}
+		} 
+		return hints;
+	}
+	
 }

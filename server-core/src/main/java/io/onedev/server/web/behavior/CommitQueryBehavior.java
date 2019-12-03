@@ -122,16 +122,12 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 			LexerRuleRefElementSpec spec = (LexerRuleRefElementSpec) terminalExpect.getElementSpec();
 			if (spec.getRuleName().equals("Value") && !terminalExpect.getUnmatchedText().contains(")")) {
 				int tokenType = terminalExpect.getState().getLastMatchedToken().getType();
-				if (tokenType == CommitQueryParser.COMMITTER) {
-					hints.add("Use * to match any part of committer");
-				} else if (tokenType == CommitQueryParser.AUTHOR) {
-					hints.add("Use * to match any part of author");
-				} else if (tokenType == CommitQueryParser.PATH) {
-					hints.add("Use * to match any part of path");
-				} else if (tokenType == CommitQueryParser.MESSAGE) {
-					hints.add("Use * to match any part of message");
-					hints.add("Use '\\\\' to escape special characters in regular expression");
-					hints.add("Use '\\(' and '\\)' to represent brackets in message");
+				if (tokenType == CommitQueryParser.COMMITTER 
+						|| tokenType == CommitQueryParser.AUTHOR
+						|| tokenType == CommitQueryParser.PATH
+						|| tokenType == CommitQueryParser.MESSAGE) {
+					hints.add("Use * for wildcard match");
+					hints.add("Use '\\' to escape brackets");
 				}
 			}
 		} 

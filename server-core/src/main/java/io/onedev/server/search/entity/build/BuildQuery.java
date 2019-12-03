@@ -183,7 +183,7 @@ public class BuildQuery extends EntityQuery<Build> {
 							case FIELD_JOB:
 								return new JobCriteria(value);
 							case FIELD_NUMBER:
-								return new NumberCriteria(getIntValue(value), operator);
+								return new NumberCriteria(project, value, operator);
 							case FIELD_VERSION:
 								return new VersionCriteria(value);
 							default: 
@@ -191,7 +191,7 @@ public class BuildQuery extends EntityQuery<Build> {
 							}
 						case BuildQueryLexer.IsLessThan:
 						case BuildQueryLexer.IsGreaterThan:
-							return new NumberCriteria(getIntValue(value), operator);
+							return new NumberCriteria(project, value, operator);
 						default:
 							throw new IllegalStateException();
 						}
@@ -245,7 +245,7 @@ public class BuildQuery extends EntityQuery<Build> {
 	}
 	
 	public static void checkField(Project project, String fieldName, int operator) {
-		Collection<String> paramNames = OneDev.getInstance(BuildParamManager.class).getBuildParamNames();
+		Collection<String> paramNames = OneDev.getInstance(BuildParamManager.class).getBuildParamNames(null);
 		if (!QUERY_FIELDS.contains(fieldName) && !paramNames.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {

@@ -126,6 +126,7 @@ import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.ProjectAndBranch;
+import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
@@ -1071,19 +1072,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Sessional
 	@Override
 	public PullRequest find(String pullRequestFQN) {
-		String projectName = StringUtils.substringBefore(pullRequestFQN, "#");
-		Project project = projectManager.find(projectName);
-		if (project != null) {
-			String pullRequestNumberStr = StringUtils.substringAfter(pullRequestFQN, "#");
-			try {
-				Long pullRequestNumber = Long.valueOf(pullRequestNumberStr);
-				return find(project, pullRequestNumber);
-			} catch (NumberFormatException e) {
-				throw new OneException("Invalid pull request number: " + pullRequestNumberStr);
-			}
-		} else {
-			return null;
-		}
+		ProjectScopedNumber number = ProjectScopedNumber.from(pullRequestFQN);
+		return find(number.getProject(), number.getNumber());
 	}
 	
 	@Sessional
