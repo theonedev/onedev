@@ -19,14 +19,10 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
-import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
-import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.EntityQuery;
@@ -35,14 +31,11 @@ import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;
-import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.job.JobDefLink;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.build.BuildListPage;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.QueryPositionSupport;
 
 @SuppressWarnings("serial")
@@ -96,17 +89,6 @@ public abstract class BuildSidePanel extends Panel {
 		general.setOutputMarkupId(true);
 		add(general);
 		
-		RevCommit commit = getProject().getRevCommit(getBuild().getCommitHash(), true);
-		CommitDetailPage.State commitState = new CommitDetailPage.State();
-		commitState.revision = commit.name();
-		PageParameters pageParams = CommitDetailPage.paramsOf(getProject(), commitState);
-		
-		Link<Void> hashLink = new ViewStateAwarePageLink<Void>("commitHash", CommitDetailPage.class, pageParams);
-		hashLink.add(new Label("label", GitUtils.abbreviateSHA(commit.name())));
-		general.add(hashLink);
-		
-		general.add(new WebMarkupContainer("copyCommitHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
-		
 		Link<Void> jobLink = new JobDefLink("job", getBuild().getCommitId(), getBuild().getJobName()) {
 
 			@Override
@@ -119,10 +101,10 @@ public abstract class BuildSidePanel extends Panel {
 		general.add(jobLink);
 		
 		UserIdent submitter = UserIdent.of(getBuild().getSubmitter(), getBuild().getSubmitterName());
-		general.add(new UserIdentPanel("submitter", submitter, UserIdentPanel.Mode.AVATAR_AND_NAME));
+		general.add(new UserIdentPanel("submitter", submitter, UserIdentPanel.Mode.NAME));
 
 		UserIdent canceller = UserIdent.of(getBuild().getCanceller(), getBuild().getCancellerName());
-		general.add(new UserIdentPanel("canceller", canceller, UserIdentPanel.Mode.AVATAR_AND_NAME) {
+		general.add(new UserIdentPanel("canceller", canceller, UserIdentPanel.Mode.NAME) {
 
 			@Override
 			protected void onConfigure() {

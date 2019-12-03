@@ -1,7 +1,8 @@
 .issue-pull-requests {
-    border: 2px dotted #BBB;
+    border: 1px solid #DDD;
     border-radius: 4px;
     padding: 12px;
+    background: #F9F9F9;
 }
 .issue-pull-requests>.head {
     font-weight: bold;
