@@ -24,7 +24,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
@@ -32,7 +31,6 @@ import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Restrictions;
 
@@ -60,12 +58,6 @@ import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.jackson.RestView;
 
 @Entity
-/*
- * @DynamicUpdate annotation here along with various @OptimisticLock annotations
- * on certain fields tell Hibernate not to perform version check on those fields
- * which can be updated from background thread.
- */
-@DynamicUpdate 
 @Table(
 		indexes={
 				@Index(columnList="title"), @Index(columnList="uuid"), 
@@ -77,6 +69,7 @@ import io.onedev.server.util.jackson.RestView;
 				@Index(columnList="CLOSE_STATUS"), @Index(columnList="CLOSE_USER"), 
 				@Index(columnList="CLOSE_USER_NAME")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_targetProject_id", "number"})})
+@DynamicUpdate
 public class PullRequest extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
@@ -128,10 +121,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@JsonView(DefaultView.class)
 	private String noSpaceTitle;
 	
-	@Version
-	private long version;
-	
-	@OptimisticLock(excluded=true)
 	@Embedded
 	private MergePreview lastMergePreview;
 	
@@ -596,10 +585,6 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	
 	public void setReviews(Collection<PullRequestReview> reviews) {
 		this.reviews = reviews;
-	}
-
-	public long getVersion() {
-		return version;
 	}
 
 	public String getUUID() {

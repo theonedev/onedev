@@ -75,7 +75,7 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 
 					@Override
 					public long getVersion() {
-						return getPullRequest().getVersion();
+						return 0;
 					}
 					
 				};

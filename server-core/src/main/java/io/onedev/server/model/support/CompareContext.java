@@ -7,7 +7,6 @@ import javax.persistence.Embeddable;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.OptimisticLock;
 
 import io.onedev.server.util.diff.WhitespaceOption;
 
@@ -16,17 +15,13 @@ public class CompareContext implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@OptimisticLock(excluded=true)
 	@Column(nullable=false)
 	private String compareCommit;
 
-	@OptimisticLock(excluded=true)
 	private boolean leftSide;
 	
-	@OptimisticLock(excluded=true)
 	private String pathFilter;
 	
-	@OptimisticLock(excluded=true)
 	@Column(nullable=false)
 	private WhitespaceOption whitespaceOption = WhitespaceOption.DEFAULT;
 

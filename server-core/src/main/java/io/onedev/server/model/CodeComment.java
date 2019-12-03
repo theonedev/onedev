@@ -26,7 +26,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
-import org.hibernate.annotations.DynamicUpdate;
 
 import com.google.common.base.Preconditions;
 
@@ -43,17 +42,11 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.DiffUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 
-/*
- * @DynamicUpdate annotation here along with various @OptimisticLock annotations
- * on certain fields tell Hibernate not to perform version check on those fields
- * which can be updated from background thread.
- */
 @Entity
 @Table(indexes={
 		@Index(columnList="o_project_id"), @Index(columnList="o_user_id"),
 		@Index(columnList="commit"), @Index(columnList="path"), 
 		@Index(columnList="createDate"), @Index(columnList="updateDate")})
-@DynamicUpdate 
 public class CodeComment extends AbstractEntity implements AttachmentStorageSupport {
 	
 	private static final long serialVersionUID = 1L;

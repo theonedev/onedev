@@ -31,7 +31,6 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.Version;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.dom4j.Element;
@@ -169,13 +168,6 @@ public class Project extends AbstractEntity {
 	
 	@Column(length=16384)
 	private String description;
-	
-	/*
-	 * Optimistic lock is necessary to ensure database integrity when update 
-	 * branch and tag protection settings upon project renaming/deletion
-	 */
-	@Version
-	private long version;
 	
     @OneToMany(mappedBy="project")
     private Collection<Build> builds = new ArrayList<>();
@@ -1056,10 +1048,6 @@ public class Project extends AbstractEntity {
 
 	public void setBuilds(Collection<Build> builds) {
 		this.builds = builds;
-	}
-
-	public long getVersion() {
-		return version;
 	}
 
 	public List<BlobIdent> getChildren(BlobIdent blobIdent, BlobIdentFilter blobIdentFilter) {

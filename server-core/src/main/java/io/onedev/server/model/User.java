@@ -14,7 +14,6 @@ import javax.persistence.Index;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Version;
 
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -67,13 +66,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	@Column(unique=true, nullable=false)
 	private String email;
-	
-	/*
-	 * Optimistic lock is necessary to ensure database integrity when update 
-	 * branch and tag protection settings upon user renaming/deletion
-	 */
-	@Version
-	private long version;
 	
 	@OneToMany(mappedBy="user", cascade=CascadeType.REMOVE)
 	@Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
@@ -453,10 +445,6 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public boolean isRoot() {
 		return ROOT_ID.equals(getId());
-	}
-
-	public long getVersion() {
-		return version;
 	}
 
 	public Collection<UserAuthorization> getProjectAuthorizations() {

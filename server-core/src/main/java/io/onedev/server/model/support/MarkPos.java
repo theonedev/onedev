@@ -9,7 +9,6 @@ import javax.persistence.Embeddable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.OptimisticLock;
 
 import io.onedev.commons.utils.PlanarRange;
 
@@ -18,15 +17,12 @@ public class MarkPos implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	@OptimisticLock(excluded=true)
 	@Column(nullable=false)
 	private String commit;
 
-	@OptimisticLock(excluded=true)
 	@Column(nullable=false)
 	private String path;
 	
-	@OptimisticLock(excluded=true)
 	@Column(nullable=false)
 	private PlanarRange range;
 

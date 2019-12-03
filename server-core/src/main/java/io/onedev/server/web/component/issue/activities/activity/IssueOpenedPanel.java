@@ -71,7 +71,7 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 
 					@Override
 					public long getVersion() {
-						return getIssue().getVersion();
+						return 0;
 					}
 					
 				};

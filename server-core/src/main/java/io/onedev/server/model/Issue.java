@@ -25,11 +25,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.hibernate.annotations.DynamicUpdate;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.collect.Lists;
@@ -53,10 +53,6 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Editable;
 
-/**
- * @author robin
- *
- */
 @Entity
 @Table(
 		indexes={
@@ -67,14 +63,12 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList="commentCount"), @Index(columnList="o_milestone_id"), 
 				@Index(columnList="updateDate")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})})
+@DynamicUpdate
 @Editable
 public class Issue extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
 
-	@Version
-	private long version;
-	
 	@Column(nullable=false)
 	private String state;
 	
@@ -135,10 +129,6 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	
 	private transient Map<String, Input> fieldInputs;
 	
-	public long getVersion() {
-		return version;
-	}
-
 	public String getState() {
 		return state;
 	}

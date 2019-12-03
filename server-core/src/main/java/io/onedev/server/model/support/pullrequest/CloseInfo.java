@@ -9,8 +9,6 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
-import org.hibernate.annotations.OptimisticLock;
-
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.model.User;
 
@@ -29,20 +27,16 @@ public class CloseInfo implements Serializable {
 		
 	};
 	
-	@OptimisticLock(excluded=true)
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="CLOSE_USER")
 	private User user;
 	
-	@OptimisticLock(excluded=true)
 	@Column(name="CLOSE_USER_NAME")
 	private String userName;
 
-	@OptimisticLock(excluded=true)
 	@Column(name="CLOSE_DATE")
 	private Date date;
 	
-	@OptimisticLock(excluded=true)
 	@Column(name="CLOSE_STATUS")
 	private Status status;
 

@@ -56,7 +56,8 @@ public abstract class IssueTitlePanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				OneDev.getInstance(IssueChangeManager.class).changeTitle(getIssue(), titleInput.getModelObject(), SecurityUtils.getUser());
+				OneDev.getInstance(IssueChangeManager.class).changeTitle(
+						getIssue(), titleInput.getModelObject(), SecurityUtils.getUser());
 				
 				Fragment titleViewer = newTitleViewer();
 				titleEditor.replaceWith(titleViewer);
@@ -119,7 +120,8 @@ public abstract class IssueTitlePanel extends Panel {
 			}
 			
 		});
-		titleViewer.add(new WebMarkupContainer("copy").add(new CopyClipboardBehavior(Model.of("#" + getIssue().getNumber() + ": " + getIssue().getTitle()))));
+		String copyContent = "#" + getIssue().getNumber() + ": " + getIssue().getTitle();
+		titleViewer.add(new WebMarkupContainer("copy").add(new CopyClipboardBehavior(Model.of(copyContent))));
 		
 		titleViewer.setOutputMarkupId(true);
 		
