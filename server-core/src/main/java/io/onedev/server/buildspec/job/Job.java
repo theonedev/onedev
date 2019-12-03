@@ -4,8 +4,8 @@ import static io.onedev.server.search.entity.EntityQuery.quote;
 import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
-import static io.onedev.server.util.BuildConstants.FIELD_COMMIT;
-import static io.onedev.server.util.BuildConstants.FIELD_JOB;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_COMMIT;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_JOB;
 
 import java.io.Serializable;
 import java.util.ArrayList;

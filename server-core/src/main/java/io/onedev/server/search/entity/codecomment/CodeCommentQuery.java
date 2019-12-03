@@ -1,13 +1,13 @@
 package io.onedev.server.search.entity.codecomment;
 
-import static io.onedev.server.util.CodeCommentConstants.FIELD_CONTENT;
-import static io.onedev.server.util.CodeCommentConstants.FIELD_CREATE_DATE;
-import static io.onedev.server.util.CodeCommentConstants.FIELD_PATH;
-import static io.onedev.server.util.CodeCommentConstants.FIELD_REPLY;
-import static io.onedev.server.util.CodeCommentConstants.FIELD_REPLY_COUNT;
-import static io.onedev.server.util.CodeCommentConstants.FIELD_UPDATE_DATE;
-import static io.onedev.server.util.CodeCommentConstants.ORDER_FIELDS;
-import static io.onedev.server.util.CodeCommentConstants.QUERY_FIELDS;
+import static io.onedev.server.util.query.CodeCommentQueryConstants.FIELD_CONTENT;
+import static io.onedev.server.util.query.CodeCommentQueryConstants.FIELD_CREATE_DATE;
+import static io.onedev.server.util.query.CodeCommentQueryConstants.FIELD_PATH;
+import static io.onedev.server.util.query.CodeCommentQueryConstants.FIELD_REPLY;
+import static io.onedev.server.util.query.CodeCommentQueryConstants.FIELD_REPLY_COUNT;
+import static io.onedev.server.util.query.CodeCommentQueryConstants.FIELD_UPDATE_DATE;
+import static io.onedev.server.util.query.CodeCommentQueryConstants.ORDER_FIELDS;
+import static io.onedev.server.util.query.CodeCommentQueryConstants.QUERY_FIELDS;
 
 import java.util.ArrayList;
 import java.util.Date;

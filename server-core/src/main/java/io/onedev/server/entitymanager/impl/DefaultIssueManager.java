@@ -68,11 +68,11 @@ import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.MilestoneCriteria;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.security.permission.SystemAdministration;
-import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.facade.IssueFacade;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
+import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldResolution;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
@@ -184,11 +184,11 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 			@Nullable Project project, Root<Issue> root, CriteriaBuilder builder, @Nullable User user) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (project != null) {
-			predicates.add(builder.equal(root.get(IssueConstants.ATTR_PROJECT), project));
+			predicates.add(builder.equal(root.get(IssueQueryConstants.ATTR_PROJECT), project));
 		} else if (!User.asSubject(user).isPermitted(new SystemAdministration())) {
 			Collection<Project> projects = projectManager.getPermittedProjects(user, new AccessProject()); 
 			if (!projects.isEmpty())
-				predicates.add(root.get(IssueConstants.ATTR_PROJECT).in(projects));
+				predicates.add(root.get(IssueQueryConstants.ATTR_PROJECT).in(projects));
 			else
 				predicates.add(builder.disjunction());
 		}
@@ -207,13 +207,13 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: issueQuery.getSorts()) {
-			if (IssueConstants.ORDER_FIELDS.containsKey(sort.getField())) {
+			if (IssueQueryConstants.ORDER_FIELDS.containsKey(sort.getField())) {
 				if (sort.getDirection() == Direction.ASCENDING)
-					orders.add(builder.asc(IssueQuery.getPath(root, IssueConstants.ORDER_FIELDS.get(sort.getField()))));
+					orders.add(builder.asc(IssueQuery.getPath(root, IssueQueryConstants.ORDER_FIELDS.get(sort.getField()))));
 				else
-					orders.add(builder.desc(IssueQuery.getPath(root, IssueConstants.ORDER_FIELDS.get(sort.getField()))));
+					orders.add(builder.desc(IssueQuery.getPath(root, IssueQueryConstants.ORDER_FIELDS.get(sort.getField()))));
 			} else {
-				Join<Issue, IssueField> join = root.join(IssueConstants.ATTR_FIELDS, JoinType.LEFT);
+				Join<Issue, IssueField> join = root.join(IssueQueryConstants.ATTR_FIELDS, JoinType.LEFT);
 				join.on(builder.equal(join.get(IssueField.ATTR_NAME), sort.getField()));
 				if (sort.getDirection() == Direction.ASCENDING)
 					orders.add(builder.asc(join.get(IssueField.ATTR_ORDINAL)));
@@ -223,7 +223,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(IssueConstants.ATTR_ID)));
+			orders.add(builder.desc(root.get(IssueQueryConstants.ATTR_ID)));
 		query.orderBy(orders);
 		
 		return query;
@@ -359,7 +359,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 		List<Issue> issues = new ArrayList<>();
 
 		EntityCriteria<Issue> criteria = newCriteria();
-		criteria.add(Restrictions.eq(IssueConstants.ATTR_PROJECT, project));
+		criteria.add(Restrictions.eq(IssueQueryConstants.ATTR_PROJECT, project));
 		
 		if (term.startsWith("#"))
 			term = term.substring(1);

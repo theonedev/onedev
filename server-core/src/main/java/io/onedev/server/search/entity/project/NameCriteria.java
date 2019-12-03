@@ -9,7 +9,7 @@ import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.ProjectConstants;
+import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class NameCriteria extends EntityCriteria<Project> {
 
@@ -23,7 +23,7 @@ public class NameCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder, User user) {
-		Path<String> attribute = root.get(ProjectConstants.ATTR_NAME);
+		Path<String> attribute = root.get(ProjectQueryConstants.ATTR_NAME);
 		String normalized = value.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}
@@ -41,7 +41,7 @@ public class NameCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public String toString() {
-		return ProjectQuery.quote(ProjectConstants.FIELD_NAME) + " " 
+		return ProjectQuery.quote(ProjectQueryConstants.FIELD_NAME) + " " 
 				+ ProjectQuery.getRuleName(ProjectQueryLexer.Is) + " " 
 				+ ProjectQuery.quote(value);
 	}

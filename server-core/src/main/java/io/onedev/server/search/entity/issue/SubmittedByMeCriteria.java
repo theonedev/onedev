@@ -7,7 +7,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
-import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.query.IssueQueryConstants;
 
 public class SubmittedByMeCriteria extends IssueCriteria {
 
@@ -16,7 +16,7 @@ public class SubmittedByMeCriteria extends IssueCriteria {
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
 		if (user != null) {
-			Path<User> attribute = root.get(IssueConstants.ATTR_SUBMITTER);
+			Path<User> attribute = root.get(IssueQueryConstants.ATTR_SUBMITTER);
 			return builder.equal(attribute, user);
 		} else {
 			return builder.disjunction();

@@ -12,10 +12,11 @@ import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.User;
-import io.onedev.server.util.CodeCommentConstants;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.query.CodeCommentQueryConstants;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 
-public class CommentCriteria extends PullRequestCriteria {
+public class CommentCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -27,20 +28,20 @@ public class CommentCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		From<?, ?> join = root.join(PullRequestConstants.ATTR_COMMENTS, JoinType.LEFT);
+		From<?, ?> join = root.join(PullRequestQueryConstants.ATTR_COMMENTS, JoinType.LEFT);
 		Path<String> attribute = join.get(PullRequestComment.ATTR_CONTENT);
 		Predicate commentPredicate = builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
 		
 		join = root
-				.join(PullRequestConstants.ATTR_CODE_COMMENT_RELATIONS, JoinType.LEFT)
+				.join(PullRequestQueryConstants.ATTR_CODE_COMMENT_RELATIONS, JoinType.LEFT)
 				.join(CodeCommentRelation.ATTR_COMMENT, JoinType.LEFT);
-		attribute = join.get(CodeCommentConstants.ATTR_CONTENT);
+		attribute = join.get(CodeCommentQueryConstants.ATTR_CONTENT);
 		Predicate codeCommentPredicate = builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
 		
 		join = root
-				.join(PullRequestConstants.ATTR_CODE_COMMENT_RELATIONS, JoinType.LEFT) 
+				.join(PullRequestQueryConstants.ATTR_CODE_COMMENT_RELATIONS, JoinType.LEFT) 
 				.join(CodeCommentRelation.ATTR_COMMENT, JoinType.LEFT) 
-				.join(CodeCommentConstants.ATTR_REPLIES, JoinType.LEFT);
+				.join(CodeCommentQueryConstants.ATTR_REPLIES, JoinType.LEFT);
 		attribute = join.get(CodeCommentReply.ATTR_CONTENT);
 		Predicate codeCommentReplyPredicate = builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
 		
@@ -71,7 +72,7 @@ public class CommentCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequestConstants.FIELD_COMMENT) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " + PullRequestQuery.quote(value);
+		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_COMMENT) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " + PullRequestQuery.quote(value);
 	}
 
 }

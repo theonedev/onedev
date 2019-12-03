@@ -11,16 +11,17 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.model.User;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 
-public class HasFailedBuildsCriteria extends PullRequestCriteria {
+public class HasFailedBuildsCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
 		From<?, ?> join = root
-				.join(PullRequestConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT)
+				.join(PullRequestQueryConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT)
 				.join(PullRequestBuild.ATTR_BUILD, JoinType.INNER);
 		Path<?> status = join.get(Build.STATUS);
 		

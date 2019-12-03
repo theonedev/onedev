@@ -9,10 +9,11 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 
-public class SubmittedByCriteria extends PullRequestCriteria {
+public class SubmittedByCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -27,7 +28,7 @@ public class SubmittedByCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		Path<User> attribute = root.get(PullRequestConstants.ATTR_SUBMITTER);
+		Path<User> attribute = root.get(PullRequestQueryConstants.ATTR_SUBMITTER);
 		return builder.equal(attribute, this.user);
 	}
 

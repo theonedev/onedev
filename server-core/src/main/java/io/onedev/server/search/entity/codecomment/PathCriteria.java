@@ -9,7 +9,7 @@ import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.CodeCommentConstants;
+import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class PathCriteria extends EntityCriteria<CodeComment>  {
 
@@ -23,7 +23,7 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
-		Path<String> attribute = CodeCommentQuery.getPath(root, CodeCommentConstants.ATTR_PATH);
+		Path<String> attribute = CodeCommentQuery.getPath(root, CodeCommentQueryConstants.ATTR_PATH);
 		String normalized = value.toLowerCase().replace('*', '%');
 		if (normalized.endsWith("/"))
 			normalized += "%";
@@ -42,7 +42,7 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public String toString() {
-		return CodeCommentQuery.quote(CodeCommentConstants.FIELD_PATH) + " " 
+		return CodeCommentQuery.quote(CodeCommentQueryConstants.FIELD_PATH) + " " 
 				+ CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Is) + " " 
 				+ CodeCommentQuery.quote(value);
 	}

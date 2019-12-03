@@ -8,7 +8,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.BuildConstants;
+import io.onedev.server.util.query.BuildQueryConstants;
 
 public class CancelledByMeCriteria extends EntityCriteria<Build> {
 
@@ -17,7 +17,7 @@ public class CancelledByMeCriteria extends EntityCriteria<Build> {
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
 		if (user != null) {
-			Path<User> attribute = root.get(BuildConstants.ATTR_CANCELLER);
+			Path<User> attribute = root.get(BuildQueryConstants.ATTR_CANCELLER);
 			return builder.equal(attribute, user);
 		} else {
 			return builder.disjunction();

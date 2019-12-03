@@ -1,4 +1,4 @@
-package io.onedev.server.util;
+package io.onedev.server.util.query;
 
 import java.util.List;
 import java.util.Map;
@@ -7,7 +7,7 @@ import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.Maps;
 
-public class ProjectConstants {
+public class ProjectQueryConstants {
 	
 	public static final String FIELD_NAME = "Name";
 	

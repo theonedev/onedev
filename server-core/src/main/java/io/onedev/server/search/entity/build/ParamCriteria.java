@@ -12,7 +12,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildParam;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.BuildConstants;
+import io.onedev.server.util.query.BuildQueryConstants;
 
 public class ParamCriteria extends EntityCriteria<Build> {
 
@@ -29,7 +29,7 @@ public class ParamCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
-		From<?, ?> join = root.join(BuildConstants.ATTR_PARAMS, JoinType.LEFT);
+		From<?, ?> join = root.join(BuildQueryConstants.ATTR_PARAMS, JoinType.LEFT);
 		return builder.and(
 				builder.equal(join.get(BuildParam.ATTR_NAME), name),
 				builder.equal(join.get(BuildParam.ATTR_VALUE), value));

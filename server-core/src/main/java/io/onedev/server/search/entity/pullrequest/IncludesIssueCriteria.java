@@ -17,10 +17,11 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 
-public class IncludesIssueCriteria extends PullRequestCriteria {
+public class IncludesIssueCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -38,8 +39,8 @@ public class IncludesIssueCriteria extends PullRequestCriteria {
 		Collection<Long> pullRequestIds = getPullRequestIds(issue.getProject());
 		if (!pullRequestIds.isEmpty()) {
 			return builder.and(
-					builder.equal(root.get(PullRequestConstants.ATTR_TARGET_PROJECT), issue.getProject()),
-					root.get(PullRequestConstants.ATTR_ID).in(pullRequestIds));
+					builder.equal(root.get(PullRequestQueryConstants.ATTR_TARGET_PROJECT), issue.getProject()),
+					root.get(PullRequestQueryConstants.ATTR_ID).in(pullRequestIds));
 		} else {
 			return builder.disjunction();
 		}

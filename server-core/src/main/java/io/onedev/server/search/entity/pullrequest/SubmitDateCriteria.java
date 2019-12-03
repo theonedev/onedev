@@ -9,10 +9,11 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 
-public class SubmitDateCriteria extends PullRequestCriteria {
+public class SubmitDateCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -30,7 +31,7 @@ public class SubmitDateCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		Path<Date> attribute = root.get(PullRequestConstants.ATTR_SUBMIT_DATE);
+		Path<Date> attribute = root.get(PullRequestQueryConstants.ATTR_SUBMIT_DATE);
 		if (operator == PullRequestQueryLexer.IsBefore)
 			return builder.lessThan(attribute, date);
 		else
@@ -52,7 +53,7 @@ public class SubmitDateCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequestConstants.FIELD_SUBMIT_DATE) + " " 
+		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_SUBMIT_DATE) + " " 
 				+ PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(value);
 	}
 

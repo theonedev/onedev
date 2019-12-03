@@ -10,7 +10,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.CodeCommentConstants;
+import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class UpdateDateCriteria extends EntityCriteria<CodeComment>  {
 
@@ -30,7 +30,7 @@ public class UpdateDateCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
-		Path<Date> attribute = CodeCommentQuery.getPath(root, CodeCommentConstants.ATTR_UPDATE_DATE);
+		Path<Date> attribute = CodeCommentQuery.getPath(root, CodeCommentQueryConstants.ATTR_UPDATE_DATE);
 		if (operator == CodeCommentQueryLexer.IsBefore)
 			return builder.lessThan(attribute, value);
 		else
@@ -52,7 +52,7 @@ public class UpdateDateCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public String toString() {
-		return CodeCommentQuery.quote(CodeCommentConstants.FIELD_UPDATE_DATE) + " " + CodeCommentQuery.getRuleName(operator) + " " + CodeCommentQuery.quote(rawValue);
+		return CodeCommentQuery.quote(CodeCommentQueryConstants.FIELD_UPDATE_DATE) + " " + CodeCommentQuery.getRuleName(operator) + " " + CodeCommentQuery.quote(rawValue);
 	}
 
 }

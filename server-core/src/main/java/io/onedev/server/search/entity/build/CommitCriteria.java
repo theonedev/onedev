@@ -11,7 +11,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.BuildConstants;
+import io.onedev.server.util.query.BuildQueryConstants;
 
 public class CommitCriteria extends EntityCriteria<Build>  {
 
@@ -28,8 +28,8 @@ public class CommitCriteria extends EntityCriteria<Build>  {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
-		Path<?> projectAttribute = BuildQuery.getPath(root, BuildConstants.ATTR_PROJECT);
-		Path<?> commitAttribute = BuildQuery.getPath(root, BuildConstants.ATTR_COMMIT);
+		Path<?> projectAttribute = BuildQuery.getPath(root, BuildQueryConstants.ATTR_PROJECT);
+		Path<?> commitAttribute = BuildQuery.getPath(root, BuildQueryConstants.ATTR_COMMIT);
 		return builder.and(
 				builder.equal(projectAttribute, project), 
 				builder.equal(commitAttribute, commitId.name()));
@@ -47,7 +47,7 @@ public class CommitCriteria extends EntityCriteria<Build>  {
 
 	@Override
 	public String toString() {
-		return BuildQuery.quote(BuildConstants.FIELD_COMMIT) + " " + BuildQuery.getRuleName(BuildQueryLexer.Is) + " " + BuildQuery.quote(commitId.name());
+		return BuildQuery.quote(BuildQueryConstants.FIELD_COMMIT) + " " + BuildQuery.getRuleName(BuildQueryLexer.Is) + " " + BuildQuery.quote(commitId.name());
 	}
 
 }

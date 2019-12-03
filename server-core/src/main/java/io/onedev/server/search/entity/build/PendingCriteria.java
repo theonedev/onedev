@@ -8,7 +8,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.BuildConstants;
+import io.onedev.server.util.query.BuildQueryConstants;
 
 public class PendingCriteria extends EntityCriteria<Build> {
 
@@ -16,7 +16,7 @@ public class PendingCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
-		Path<?> attribute = root.get(BuildConstants.ATTR_STATUS);
+		Path<?> attribute = root.get(BuildQueryConstants.ATTR_STATUS);
 		return builder.equal(attribute, Build.Status.PENDING);
 	}
 

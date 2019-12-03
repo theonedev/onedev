@@ -10,7 +10,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.BuildConstants;
+import io.onedev.server.util.query.BuildQueryConstants;
 
 public class RequiredByPullRequestsCriteria extends EntityCriteria<Build> {
 
@@ -18,7 +18,7 @@ public class RequiredByPullRequestsCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
-		From<?, ?> join = root.join(BuildConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT);
+		From<?, ?> join = root.join(BuildQueryConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT);
 		return builder.equal(join.get(PullRequestBuild.ATTR_REQUIRED), true); 
 	}
 

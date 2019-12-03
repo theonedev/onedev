@@ -30,10 +30,10 @@ import io.onedev.server.buildspec.job.action.condition.ActionConditionParser.Ope
 import io.onedev.server.buildspec.job.action.condition.ActionConditionParser.OrCriteriaContext;
 import io.onedev.server.buildspec.job.action.condition.ActionConditionParser.ParensCriteriaContext;
 import io.onedev.server.model.Build;
-import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.criteria.AndCriteria;
 import io.onedev.server.util.criteria.NotCriteria;
 import io.onedev.server.util.criteria.OrCriteria;
+import io.onedev.server.util.query.BuildQueryConstants;
 
 public class ActionCondition implements Predicate<Build> {
 
@@ -126,9 +126,9 @@ public class ActionCondition implements Predicate<Build> {
 					checkField(job, fieldName, operator);
 					
 					switch (fieldName) {
-					case BuildConstants.FIELD_LOG:
+					case BuildQueryConstants.FIELD_LOG:
 						return new LogCriteria(fieldValue);
-					case BuildConstants.FIELD_ERROR_MESSAGE:
+					case BuildQueryConstants.FIELD_ERROR_MESSAGE:
 						return new ErrorMessageCriteria(fieldValue);
 					default:
 						return new ParamCriteria(fieldName, fieldValue);
@@ -168,7 +168,7 @@ public class ActionCondition implements Predicate<Build> {
 	}
 	
 	public static void checkField(Job job, String fieldName, int operator) {
-		if (fieldName.equals(BuildConstants.FIELD_ERROR_MESSAGE) || fieldName.equals(BuildConstants.FIELD_LOG)) {
+		if (fieldName.equals(BuildQueryConstants.FIELD_ERROR_MESSAGE) || fieldName.equals(BuildQueryConstants.FIELD_LOG)) {
 			if (operator != ActionConditionLexer.Contains)
 				throw newOperatorException(fieldName, operator);
 		} else if (job.getParamSpecMap().containsKey(fieldName)) {

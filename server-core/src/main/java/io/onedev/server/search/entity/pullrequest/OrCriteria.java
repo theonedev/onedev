@@ -8,16 +8,17 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.OrCriteriaHelper;
 import io.onedev.server.search.entity.ParensAware;
 
-public class OrCriteria extends PullRequestCriteria implements ParensAware {
+public class OrCriteria extends EntityCriteria<PullRequest> implements ParensAware {
 	
 	private static final long serialVersionUID = 1L;
 
-	private final List<PullRequestCriteria> criterias;
+	private final List<EntityCriteria<PullRequest>> criterias;
 	
-	public OrCriteria(List<PullRequestCriteria> criterias) {
+	public OrCriteria(List<EntityCriteria<PullRequest>> criterias) {
 		this.criterias = criterias;
 	}
 

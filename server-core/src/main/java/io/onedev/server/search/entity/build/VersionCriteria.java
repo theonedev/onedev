@@ -9,7 +9,7 @@ import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.BuildConstants;
+import io.onedev.server.util.query.BuildQueryConstants;
 
 public class VersionCriteria extends EntityCriteria<Build> {
 
@@ -23,7 +23,7 @@ public class VersionCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
-		Path<String> attribute = root.get(BuildConstants.ATTR_VERSION);
+		Path<String> attribute = root.get(BuildQueryConstants.ATTR_VERSION);
 		String normalized = value.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}
@@ -41,7 +41,7 @@ public class VersionCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public String toString() {
-		return BuildQuery.quote(BuildConstants.FIELD_VERSION) + " " 
+		return BuildQuery.quote(BuildQueryConstants.FIELD_VERSION) + " " 
 				+ BuildQuery.getRuleName(BuildQueryLexer.Is) + " " 
 				+ BuildQuery.quote(value);
 	}

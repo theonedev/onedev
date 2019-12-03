@@ -8,9 +8,10 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 
-public class MergeStrategyCriteria extends PullRequestCriteria {
+public class MergeStrategyCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -22,7 +23,7 @@ public class MergeStrategyCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		Path<?> attribute = root.get(PullRequestConstants.ATTR_MERGE_STRATEGY);
+		Path<?> attribute = root.get(PullRequestQueryConstants.ATTR_MERGE_STRATEGY);
 		return builder.equal(attribute, value);
 	}
 
@@ -38,7 +39,7 @@ public class MergeStrategyCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequestConstants.FIELD_MERGE_STRATEGY) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " + PullRequestQuery.quote(value.toString());
+		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_MERGE_STRATEGY) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " + PullRequestQuery.quote(value.toString());
 	}
 
 }

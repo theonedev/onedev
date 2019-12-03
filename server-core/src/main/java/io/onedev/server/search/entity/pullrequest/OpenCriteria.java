@@ -6,14 +6,14 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.search.entity.EntityCriteria;
 
-public class OpenCriteria extends PullRequestCriteria {
+public class OpenCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
-	private PullRequestCriteria getCriteria() {
-		return new StatusCriteria(PullRequestConstants.STATE_OPEN);
+	private EntityCriteria<PullRequest> getCriteria() {
+		return new StatusCriteria(PullRequest.STATE_OPEN);
 	}
 	
 	@Override

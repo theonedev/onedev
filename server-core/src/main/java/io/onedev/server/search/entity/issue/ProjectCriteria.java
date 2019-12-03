@@ -1,7 +1,5 @@
 package io.onedev.server.search.entity.issue;
 
-import java.util.Set;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
@@ -10,33 +8,33 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.Milestone;
 import io.onedev.server.model.User;
 import io.onedev.server.util.query.IssueQueryConstants;
+import io.onedev.server.util.query.ProjectQueryConstants;
 
-public class MilestoneCriteria extends IssueCriteria {
+public class ProjectCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 	
-	private final String milestoneName;
+	private final String projectName;
 
-	public MilestoneCriteria(String milestoneName) {
-		this.milestoneName = milestoneName;
+	public ProjectCriteria(String projectName) {
+		this.projectName = projectName;
 	}
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
-		Path<String> attribute = root.join(IssueQueryConstants.ATTR_MILESTONE, JoinType.LEFT).get(Milestone.ATTR_NAME);
-		String normalized = milestoneName.toLowerCase().replace("*", "%");
+		Path<String> attribute = root
+				.join(IssueQueryConstants.ATTR_PROJECT, JoinType.INNER)
+				.get(ProjectQueryConstants.ATTR_NAME);
+		String normalized = projectName.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}
 
 	@Override
 	public boolean matches(Issue issue, User user) {
-		if (issue.getMilestone() != null)
-			return WildcardUtils.matchString(milestoneName.toLowerCase(), issue.getMilestone().getName().toLowerCase());
-		else 
-			return false;
+		return WildcardUtils.matchString(projectName.toLowerCase(), 
+				issue.getProject().getName().toLowerCase());
 	}
 
 	@Override
@@ -46,14 +44,9 @@ public class MilestoneCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(IssueQueryConstants.FIELD_MILESTONE) + " " 
+		return IssueQuery.quote(IssueQueryConstants.FIELD_PROJECT) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " 
-				+ IssueQuery.quote(milestoneName);
-	}
-
-	@Override
-	public void fill(Issue issue, Set<String> initedLists) {
-		issue.setMilestone(issue.getProject().getMilestone(milestoneName));
+				+ IssueQuery.quote(projectName);
 	}
 
 }

@@ -13,7 +13,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.BuildConstants;
+import io.onedev.server.util.query.BuildQueryConstants;
 
 public class DependenciesOfCriteria extends EntityCriteria<Build> {
 
@@ -30,7 +30,7 @@ public class DependenciesOfCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
-		From<?, ?> join = root.join(BuildConstants.ATTR_DEPENDENTS, JoinType.LEFT);
+		From<?, ?> join = root.join(BuildQueryConstants.ATTR_DEPENDENTS, JoinType.LEFT);
 		return builder.equal(join.get(BuildDependence.ATTR_DEPENDENT), build);
 	}
 

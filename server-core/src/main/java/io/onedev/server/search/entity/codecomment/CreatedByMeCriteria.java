@@ -8,7 +8,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.CodeCommentConstants;
+import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class CreatedByMeCriteria extends EntityCriteria<CodeComment> {
 
@@ -17,7 +17,7 @@ public class CreatedByMeCriteria extends EntityCriteria<CodeComment> {
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
 		if (user != null) {
-			Path<?> attribute = root.get(CodeCommentConstants.ATTR_USER);
+			Path<?> attribute = root.get(CodeCommentQueryConstants.ATTR_USER);
 			return builder.equal(attribute, user);
 		} else {
 			return builder.disjunction();

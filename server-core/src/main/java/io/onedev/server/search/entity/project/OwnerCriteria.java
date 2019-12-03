@@ -9,7 +9,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.ProjectConstants;
+import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class OwnerCriteria extends EntityCriteria<Project> {
 
@@ -26,7 +26,7 @@ public class OwnerCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder, User user) {
-		Expression<String> attribute = root.get(ProjectConstants.ATTR_OWNER);
+		Expression<String> attribute = root.get(ProjectQueryConstants.ATTR_OWNER);
 		return builder.equal(attribute, this.user);
 	}
 
@@ -42,7 +42,7 @@ public class OwnerCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public String toString() {
-		return ProjectQuery.quote(ProjectConstants.FIELD_OWNER) + " " 
+		return ProjectQuery.quote(ProjectQueryConstants.FIELD_OWNER) + " " 
 				+ ProjectQuery.getRuleName(ProjectQueryLexer.Is) + " " + ProjectQuery.quote(value);
 	}
 

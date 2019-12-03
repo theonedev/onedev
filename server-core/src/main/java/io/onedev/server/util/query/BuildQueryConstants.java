@@ -1,4 +1,4 @@
-package io.onedev.server.util;
+package io.onedev.server.util.query;
 
 import java.util.List;
 import java.util.Map;
@@ -9,7 +9,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.Maps;
 
-public class BuildConstants {
+public class BuildQueryConstants {
 	
 	public static final String ATTR_ID = "id";
 
@@ -21,7 +21,7 @@ public class BuildConstants {
 	
 	public static final String ATTR_VERSION = "version";
 	
-	public static final String FIELD_PROJECT = "project";
+	public static final String FIELD_PROJECT = "Project";
 	
 	public static final String ATTR_PROJECT = "project";
 	
@@ -80,13 +80,13 @@ public class BuildConstants {
 	public static final String FIELD_LOG = "Log";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
-			FIELD_NUMBER, FIELD_JOB, FIELD_STATUS, FIELD_SUBMITTER, FIELD_CANCELLER, 
+			FIELD_PROJECT, FIELD_NUMBER, FIELD_JOB, FIELD_STATUS, FIELD_SUBMITTER, FIELD_CANCELLER, 
 			FIELD_SUBMIT_DATE, FIELD_QUEUEING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE, 
-			FIELD_COMMIT, FIELD_PROJECT, FIELD_VERSION, FIELD_DEPENDENCIES, FIELD_DEPENDENTS, 
-			FIELD_ERROR_MESSAGE, FIELD_LOG);
+			FIELD_COMMIT, FIELD_VERSION, FIELD_DEPENDENCIES, FIELD_DEPENDENTS, FIELD_ERROR_MESSAGE, 
+			FIELD_LOG);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			FIELD_JOB, FIELD_NUMBER, FIELD_VERSION, FIELD_COMMIT, FIELD_SUBMIT_DATE, 
+			FIELD_PROJECT, FIELD_JOB, FIELD_NUMBER, FIELD_VERSION, FIELD_COMMIT, FIELD_SUBMIT_DATE, 
 			FIELD_QUEUEING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = Maps.newLinkedHashMap(
@@ -97,6 +97,7 @@ public class BuildConstants {
 			FIELD_QUEUEING_DATE, ATTR_QUEUEING_DATE,
 			FIELD_RUNNING_DATE, ATTR_RUNNING_DATE,
 			FIELD_FINISH_DATE, ATTR_FINISH_DATE,
+			FIELD_PROJECT, ATTR_PROJECT,
 			FIELD_COMMIT, ATTR_COMMIT);
 	
 }

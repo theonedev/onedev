@@ -1,15 +1,16 @@
 package io.onedev.server.search.entity.build;
 
-import static io.onedev.server.util.BuildConstants.FIELD_COMMIT;
-import static io.onedev.server.util.BuildConstants.FIELD_FINISH_DATE;
-import static io.onedev.server.util.BuildConstants.FIELD_JOB;
-import static io.onedev.server.util.BuildConstants.FIELD_NUMBER;
-import static io.onedev.server.util.BuildConstants.FIELD_QUEUEING_DATE;
-import static io.onedev.server.util.BuildConstants.FIELD_RUNNING_DATE;
-import static io.onedev.server.util.BuildConstants.FIELD_SUBMIT_DATE;
-import static io.onedev.server.util.BuildConstants.FIELD_VERSION;
-import static io.onedev.server.util.BuildConstants.ORDER_FIELDS;
-import static io.onedev.server.util.BuildConstants.QUERY_FIELDS;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_COMMIT;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_FINISH_DATE;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_JOB;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_NUMBER;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_PROJECT;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_QUEUEING_DATE;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_RUNNING_DATE;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_SUBMIT_DATE;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_VERSION;
+import static io.onedev.server.util.query.BuildQueryConstants.ORDER_FIELDS;
+import static io.onedev.server.util.query.BuildQueryConstants.QUERY_FIELDS;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -177,6 +178,8 @@ public class BuildQuery extends EntityQuery<Build> {
 								throw new IllegalStateException();
 						case BuildQueryLexer.Is:
 							switch (fieldName) {
+							case FIELD_PROJECT:
+								return new ProjectCriteria(value);
 							case FIELD_COMMIT:
 								ProjectAwareCommitId commitId = getCommitId(project, value); 
 								return new CommitCriteria(commitId.getProject(), commitId.getCommitId());
@@ -258,7 +261,8 @@ public class BuildQuery extends EntityQuery<Build> {
 				throw newOperatorException(fieldName, operator);
 			break;
 		case BuildQueryLexer.Is:
-			if (!fieldName.equals(FIELD_COMMIT) && !fieldName.equals(FIELD_JOB) && !fieldName.equals(FIELD_NUMBER) 
+			if (!fieldName.equals(FIELD_PROJECT) && !fieldName.equals(FIELD_COMMIT) 
+					&& !fieldName.equals(FIELD_JOB) && !fieldName.equals(FIELD_NUMBER) 
 					&& !fieldName.equals(FIELD_VERSION) && !paramNames.contains(fieldName)) {
 				throw newOperatorException(fieldName, operator);
 			}

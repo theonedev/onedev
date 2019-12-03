@@ -28,9 +28,9 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectAwareCommitId;
+import io.onedev.server.util.query.IssueQueryConstants;
 
 public class FixedBetweenCriteria extends IssueCriteria {
 
@@ -99,17 +99,17 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		}
 
 		Predicate issuePredicate;
-		Path<Long> attribute = root.get(IssueConstants.ATTR_NUMBER);		
+		Path<Long> attribute = root.get(IssueQueryConstants.ATTR_NUMBER);		
 		if (fixedIssueNumbers.size() > IN_CLAUSE_LIMIT) {
 			Collection<Long> allIssueNumbers = OneDev.getInstance(IssueManager.class).getIssueNumbers(project.getId());
 			issuePredicate = inManyValues(builder, attribute, fixedIssueNumbers, allIssueNumbers);
 		} else if (!fixedIssueNumbers.isEmpty()) {
-			issuePredicate = root.get(IssueConstants.ATTR_NUMBER).in(fixedIssueNumbers);
+			issuePredicate = root.get(IssueQueryConstants.ATTR_NUMBER).in(fixedIssueNumbers);
 		} else {
 			issuePredicate = builder.disjunction();
 		}
 		return builder.and(
-				builder.equal(root.get(IssueConstants.ATTR_PROJECT), project), 
+				builder.equal(root.get(IssueQueryConstants.ATTR_PROJECT), project), 
 				issuePredicate);
 	}
 

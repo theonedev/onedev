@@ -8,7 +8,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.ProjectConstants;
+import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class OwnerIsMeCriteria extends EntityCriteria<Project> {
 
@@ -16,7 +16,7 @@ public class OwnerIsMeCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder, User user) {
-		Expression<String> attribute = root.get(ProjectConstants.ATTR_OWNER);
+		Expression<String> attribute = root.get(ProjectQueryConstants.ATTR_OWNER);
 		if (user != null)
 			return builder.equal(attribute, user);
 		else
@@ -38,7 +38,7 @@ public class OwnerIsMeCriteria extends EntityCriteria<Project> {
 
 	@Override
 	public String toString() {
-		return ProjectQuery.quote(ProjectConstants.FIELD_OWNER) + " " 
+		return ProjectQuery.quote(ProjectQueryConstants.FIELD_OWNER) + " " 
 				+ ProjectQuery.getRuleName(ProjectQueryLexer.IsMe);
 	}
 

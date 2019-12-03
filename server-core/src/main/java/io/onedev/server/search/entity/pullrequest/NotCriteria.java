@@ -6,15 +6,16 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.NotCriteriaHelper;
 
-public class NotCriteria extends PullRequestCriteria {
+public class NotCriteria extends EntityCriteria<PullRequest> {
 	
 	private static final long serialVersionUID = 1L;
 
-	private final PullRequestCriteria criteria;
+	private final EntityCriteria<PullRequest> criteria;
 	
-	public NotCriteria(PullRequestCriteria criteria) {
+	public NotCriteria(EntityCriteria<PullRequest> criteria) {
 		this.criteria = criteria;
 	}
 

@@ -8,9 +8,10 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 
-public class StatusCriteria extends PullRequestCriteria {
+public class StatusCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -22,8 +23,8 @@ public class StatusCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		Path<?> attribute = PullRequestQuery.getPath(root, PullRequestConstants.ATTR_CLOSE_STATUS);
-		if (value.equalsIgnoreCase(PullRequestConstants.STATE_OPEN)) 
+		Path<?> attribute = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_CLOSE_STATUS);
+		if (value.equalsIgnoreCase(PullRequest.STATE_OPEN)) 
 			return builder.isNull(attribute);
 		else
 			return builder.equal(attribute, CloseInfo.Status.valueOf(value.toUpperCase()));
@@ -31,7 +32,7 @@ public class StatusCriteria extends PullRequestCriteria {
 
 	@Override
 	public boolean matches(PullRequest request, User user) {
-		if (value.equalsIgnoreCase(PullRequestConstants.STATE_OPEN)) 
+		if (value.equalsIgnoreCase(PullRequest.STATE_OPEN)) 
 			return request.getCloseInfo() == null;
 		else
 			return request.getCloseInfo() != null && request.getCloseInfo().getStatus().name().equalsIgnoreCase(value);
@@ -44,7 +45,7 @@ public class StatusCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequestConstants.FIELD_STATUS) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " + PullRequestQuery.quote(value);
+		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_STATUS) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Is) + " " + PullRequestQuery.quote(value);
 	}
 
 }

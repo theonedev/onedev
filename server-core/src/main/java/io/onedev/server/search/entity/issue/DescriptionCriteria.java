@@ -8,7 +8,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
-import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.query.IssueQueryConstants;
 
 public class DescriptionCriteria extends IssueCriteria {
 
@@ -22,7 +22,7 @@ public class DescriptionCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
-		Expression<String> attribute = root.get(IssueConstants.ATTR_DESCRIPTION);
+		Expression<String> attribute = root.get(IssueQueryConstants.ATTR_DESCRIPTION);
 		return builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%");
 	}
 
@@ -39,7 +39,7 @@ public class DescriptionCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(IssueConstants.FIELD_DESCRIPTION) + " " 
+		return IssueQuery.quote(IssueQueryConstants.FIELD_DESCRIPTION) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Contains) + " " 
 				+ IssueQuery.quote(value);
 	}

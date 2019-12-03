@@ -16,7 +16,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.query.IssueQueryConstants;
 
 public abstract class FieldCriteria extends IssueCriteria {
 
@@ -34,7 +34,7 @@ public abstract class FieldCriteria extends IssueCriteria {
 
 	@Override
 	public final Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
-		Join<?, ?> join = root.join(IssueConstants.ATTR_FIELDS, JoinType.LEFT);
+		Join<?, ?> join = root.join(IssueQueryConstants.ATTR_FIELDS, JoinType.LEFT);
 		Predicate namePredicate = builder.equal(join.get(IssueField.ATTR_NAME), getFieldName());
 		return builder.and(namePredicate, getValuePredicate(join, builder, user));
 	}
@@ -45,7 +45,7 @@ public abstract class FieldCriteria extends IssueCriteria {
 	public Collection<String> getUndefinedFields() {
 		Set<String> undefinedFields = new HashSet<>();
 		GlobalIssueSetting issueSetting = OneDev.getInstance(SettingManager.class).getIssueSetting();
-		if (!IssueConstants.QUERY_FIELDS.contains(fieldName) 
+		if (!IssueQueryConstants.QUERY_FIELDS.contains(fieldName) 
 				&& issueSetting.getFieldSpec(fieldName) == null) {
 			undefinedFields.add(fieldName);
 		}

@@ -10,7 +10,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.query.IssueQueryConstants;
 
 public class SubmittedByCriteria extends IssueCriteria {
 
@@ -27,7 +27,7 @@ public class SubmittedByCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
-		Path<User> attribute = root.get(IssueConstants.ATTR_SUBMITTER);
+		Path<User> attribute = root.get(IssueQueryConstants.ATTR_SUBMITTER);
 		return builder.equal(attribute, this.user);
 	}
 

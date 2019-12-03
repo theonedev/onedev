@@ -13,7 +13,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.query.IssueQueryConstants;
 
 public class PullRequestFieldCriteria extends FieldCriteria {
 
@@ -32,7 +32,7 @@ public class PullRequestFieldCriteria extends FieldCriteria {
 	@Override
 	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
 		return builder.and(
-				builder.equal(field.getParent().get(IssueConstants.ATTR_PROJECT), request.getTargetProject()),
+				builder.equal(field.getParent().get(IssueQueryConstants.ATTR_PROJECT), request.getTargetProject()),
 				builder.equal(field.get(IssueField.ATTR_ORDINAL), request.getNumber()));
 	}
 

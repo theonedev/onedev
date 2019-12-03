@@ -59,9 +59,9 @@ import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.query.BuildQueryConstants;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
@@ -445,7 +445,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_STATUS)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildQueryConstants.FIELD_STATUS)) {
 
 			@Override
 			public String getCssClass() {
@@ -499,7 +499,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_JOB)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildQueryConstants.FIELD_JOB)) {
 
 			@Override
 			public String getCssClass() {
@@ -529,7 +529,7 @@ public abstract class BuildListPanel extends Panel {
 			}
 		});
 		
-		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildConstants.FIELD_COMMIT)) {
+		columns.add(new AbstractColumn<Build, Void>(Model.of(BuildQueryConstants.FIELD_COMMIT)) {
 
 			@Override
 			public String getCssClass() {

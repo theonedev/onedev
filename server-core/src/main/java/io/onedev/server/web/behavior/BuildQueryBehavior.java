@@ -27,9 +27,9 @@ import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.search.entity.build.BuildQueryLexer;
 import io.onedev.server.search.entity.build.BuildQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;
-import io.onedev.server.util.BuildConstants;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.query.BuildQueryConstants;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -66,14 +66,19 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						Project project = getProject();
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> fields = new ArrayList<>(BuildConstants.QUERY_FIELDS);
+							List<String> fields = new ArrayList<>(BuildQueryConstants.QUERY_FIELDS);
+							if (getProject() != null)
+								fields.remove(BuildQueryConstants.FIELD_PROJECT);
 							BuildParamManager buildParamManager = OneDev.getInstance(BuildParamManager.class);
 							List<String> paramNames = new ArrayList<>(buildParamManager.getBuildParamNames(project));
 							Collections.sort(paramNames);
 							fields.addAll(paramNames);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							return SuggestionUtils.suggest(new ArrayList<>(BuildConstants.ORDER_FIELDS.keySet()), matchWith);
+							List<String> candidates = new ArrayList<>(BuildQueryConstants.ORDER_FIELDS.keySet());
+							if (getProject() != null)
+								candidates.remove(BuildQueryConstants.FIELD_PROJECT);
+							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("criteriaValue".equals(spec.getLabel())) {
 							List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 							List<Element> operatorElements = terminalExpect.getState().findMatchedElementsByLabel("operator", true);
@@ -93,20 +98,25 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = BuildQuery.getValue(fieldElements.get(0).getMatchedText());
  								try {
 									BuildQuery.checkField(project, fieldName, operator);
-									if (fieldName.equals(BuildConstants.FIELD_SUBMIT_DATE) 
-											|| fieldName.equals(BuildConstants.FIELD_QUEUEING_DATE)
-											|| fieldName.equals(BuildConstants.FIELD_RUNNING_DATE)
-											|| fieldName.equals(BuildConstants.FIELD_FINISH_DATE)) {
+									if (fieldName.equals(BuildQueryConstants.FIELD_SUBMIT_DATE) 
+											|| fieldName.equals(BuildQueryConstants.FIELD_QUEUEING_DATE)
+											|| fieldName.equals(BuildQueryConstants.FIELD_RUNNING_DATE)
+											|| fieldName.equals(BuildQueryConstants.FIELD_FINISH_DATE)) {
 										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
 										return !suggestions.isEmpty()? suggestions: null;
-									} else if (fieldName.equals(BuildConstants.FIELD_JOB)) {
+									} else if (fieldName.equals(BuildQueryConstants.FIELD_PROJECT)) {
+										if (!matchWith.contains("*"))
+											return SuggestionUtils.suggestProjects(matchWith);
+										else
+											return null;
+									} else if (fieldName.equals(BuildQueryConstants.FIELD_JOB)) {
 										if (project != null && !matchWith.contains("*")) 
 											return SuggestionUtils.suggestJobs(project, matchWith);
 										else 
 											return null;
-									} else if (fieldName.equals(BuildConstants.FIELD_NUMBER)) {
+									} else if (fieldName.equals(BuildQueryConstants.FIELD_NUMBER)) {
 										return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
-									} else if (fieldName.equals(BuildConstants.FIELD_VERSION)) {
+									} else if (fieldName.equals(BuildQueryConstants.FIELD_VERSION)) {
 										if (project != null && !matchWith.contains("*"))
 											return SuggestionUtils.suggestBuildVersions(project, matchWith);
 										else
@@ -164,8 +174,9 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(BuildConstants.FIELD_VERSION)
-							|| fieldName.equals(BuildConstants.FIELD_JOB)) {
+					if (fieldName.equals(BuildQueryConstants.FIELD_PROJECT)
+							|| fieldName.equals(BuildQueryConstants.FIELD_VERSION)
+							|| fieldName.equals(BuildQueryConstants.FIELD_JOB)) {
 						hints.add("Use * for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

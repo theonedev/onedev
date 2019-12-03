@@ -9,7 +9,7 @@ import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.CodeCommentConstants;
+import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class ContentCriteria extends EntityCriteria<CodeComment> {
 
@@ -23,7 +23,7 @@ public class ContentCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
-		Expression<String> attribute = root.get(CodeCommentConstants.ATTR_CONTENT);
+		Expression<String> attribute = root.get(CodeCommentQueryConstants.ATTR_CONTENT);
 		return builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%");
 	}
 
@@ -40,7 +40,7 @@ public class ContentCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public String toString() {
-		return CodeCommentQuery.quote(CodeCommentConstants.FIELD_CONTENT) + " " 
+		return CodeCommentQuery.quote(CodeCommentQueryConstants.FIELD_CONTENT) + " " 
 				+ CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Contains) + " " 
 				+ CodeCommentQuery.quote(value);
 	}

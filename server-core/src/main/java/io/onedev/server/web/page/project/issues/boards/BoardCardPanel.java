@@ -25,8 +25,8 @@ import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.issue.IssueStateLabel;
@@ -69,14 +69,14 @@ abstract class BoardCardPanel extends GenericPanel<Issue> {
 			@Override
 			protected void onConfigure() {
 				super.onConfigure();
-				setVisible(displayFields.contains(IssueConstants.FIELD_STATE));
+				setVisible(displayFields.contains(IssueQueryConstants.FIELD_STATE));
 			}
 			
 		});
 		
 		RepeatingView fieldsView = new RepeatingView("fields");
 		for (String fieldName: displayFields) {
-			if (!fieldName.equals(IssueConstants.FIELD_STATE)) {
+			if (!fieldName.equals(IssueQueryConstants.FIELD_STATE)) {
 				Input field = getIssue().getFieldInputs().get(fieldName);
 				if (field != null && !field.getType().equals(FieldSpec.USER) && !field.getValues().isEmpty()) {
 					fieldsView.add(new FieldValuesPanel(fieldsView.newChildId()) {

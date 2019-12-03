@@ -8,9 +8,10 @@ import javax.persistence.criteria.Root;
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 
-public class TitleCriteria extends PullRequestCriteria {
+public class TitleCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -22,7 +23,7 @@ public class TitleCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		Expression<String> attribute = root.get(PullRequestConstants.ATTR_TITLE);
+		Expression<String> attribute = root.get(PullRequestQueryConstants.ATTR_TITLE);
 		return builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%");
 	}
 
@@ -39,7 +40,7 @@ public class TitleCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequestConstants.FIELD_TITLE) + " " 
+		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_TITLE) + " " 
 				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " 
 				+ PullRequestQuery.quote(value);
 	}

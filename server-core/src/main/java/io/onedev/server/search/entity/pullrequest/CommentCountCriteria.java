@@ -7,9 +7,10 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 
-public class CommentCountCriteria extends PullRequestCriteria {
+public class CommentCountCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -24,7 +25,7 @@ public class CommentCountCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		Path<Long> attribute = root.get(PullRequestConstants.ATTR_COMMENT_COUNT);
+		Path<Long> attribute = root.get(PullRequestQueryConstants.ATTR_COMMENT_COUNT);
 		if (operator == PullRequestQueryLexer.Is)
 			return builder.equal(attribute, value);
 		else if (operator == PullRequestQueryLexer.IsGreaterThan)
@@ -50,7 +51,7 @@ public class CommentCountCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequestConstants.FIELD_COMMENT_COUNT) + " " + PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(String.valueOf(value));
+		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_COMMENT_COUNT) + " " + PullRequestQuery.getRuleName(operator) + " " + PullRequestQuery.quote(String.valueOf(value));
 	}
 
 }

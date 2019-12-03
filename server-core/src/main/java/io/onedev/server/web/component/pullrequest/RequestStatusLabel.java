@@ -8,7 +8,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
-import io.onedev.server.util.PullRequestConstants;
 
 @SuppressWarnings("serial")
 public class RequestStatusLabel extends Label {
@@ -23,7 +22,7 @@ public class RequestStatusLabel extends Label {
 				PullRequest request = requestModel.getObject();
 				CloseInfo closeInfo = request.getCloseInfo();
 				if (closeInfo == null)
-					return PullRequestConstants.STATE_OPEN;
+					return PullRequest.STATE_OPEN;
 				else 
 					return closeInfo.getStatus().toString();
 			}

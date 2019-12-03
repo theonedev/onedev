@@ -31,7 +31,7 @@ import io.onedev.server.search.entity.project.ProjectQueryParser.OrCriteriaConte
 import io.onedev.server.search.entity.project.ProjectQueryParser.OrderContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.ParensCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.QueryContext;
-import io.onedev.server.util.ProjectConstants;
+import io.onedev.server.util.query.ProjectQueryConstants;
 
 public class ProjectQuery extends EntityQuery<Project> {
 
@@ -118,7 +118,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 						
 						switch (operator) {
 						case ProjectQueryLexer.Is:
-							if (fieldName.equals(ProjectConstants.FIELD_NAME)) 
+							if (fieldName.equals(ProjectQueryConstants.FIELD_NAME)) 
 								return new NameCriteria(value);
 							else 
 								return new OwnerCriteria(value);
@@ -161,7 +161,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 			List<EntitySort> projectSorts = new ArrayList<>();
 			for (OrderContext order: queryContext.order()) {
 				String fieldName = getValue(order.Quoted().getText());
-				if (!ProjectConstants.ORDER_FIELDS.containsKey(fieldName)) 
+				if (!ProjectQueryConstants.ORDER_FIELDS.containsKey(fieldName)) 
 					throw new OneException("Can not order by field: " + fieldName);
 				
 				EntitySort projectSort = new EntitySort();
@@ -184,24 +184,24 @@ public class ProjectQuery extends EntityQuery<Project> {
 	}
 	
 	public static void checkField(String fieldName, int operator) {
-		if (!ProjectConstants.QUERY_FIELDS.contains(fieldName))
+		if (!ProjectQueryConstants.QUERY_FIELDS.contains(fieldName))
 			throw new OneException("Field not found: " + fieldName);
 		switch (operator) {
 		case ProjectQueryLexer.Contains:
-			if (!fieldName.equals(ProjectConstants.FIELD_DESCRIPTION))
+			if (!fieldName.equals(ProjectQueryConstants.FIELD_DESCRIPTION))
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.Is:
-			if (!fieldName.equals(ProjectConstants.FIELD_OWNER) && !fieldName.equals(ProjectConstants.FIELD_NAME)) 
+			if (!fieldName.equals(ProjectQueryConstants.FIELD_OWNER) && !fieldName.equals(ProjectQueryConstants.FIELD_NAME)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.IsMe:
-			if (!fieldName.equals(ProjectConstants.FIELD_OWNER)) 
+			if (!fieldName.equals(ProjectQueryConstants.FIELD_OWNER)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.IsBefore:
 		case ProjectQueryLexer.IsAfter:
-			if (!fieldName.equals(ProjectConstants.FIELD_UPDATE_DATE)) 
+			if (!fieldName.equals(ProjectQueryConstants.FIELD_UPDATE_DATE)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		}

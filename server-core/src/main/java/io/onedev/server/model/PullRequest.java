@@ -50,7 +50,6 @@ import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.storage.AttachmentStorageSupport;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectAndBranch;
-import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.Referenceable;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
@@ -74,6 +73,12 @@ import io.onedev.server.util.jackson.RestView;
 public class PullRequest extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 
 	private static final long serialVersionUID = 1L;
+	
+	public static final String STATE_OPEN = "Open";
+
+	public static final String REFS_PREFIX = "refs/pull/";
+
+	public static final int MAX_CODE_COMMENTS = 1000;
 	
 	private static final int MAX_CHECK_ERROR_LEN = 1024;
 
@@ -471,19 +476,19 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 	@JsonView(RestView.class)
 	public String getBaseRef() {
 		Preconditions.checkNotNull(getId());
-		return PullRequestConstants.REFS_PREFIX + getNumber() + "/base";
+		return PullRequest.REFS_PREFIX + getNumber() + "/base";
 	}
 
 	@JsonView(RestView.class)
 	public String getMergeRef() {
 		Preconditions.checkNotNull(getId());
-		return PullRequestConstants.REFS_PREFIX + getNumber() + "/merge";
+		return PullRequest.REFS_PREFIX + getNumber() + "/merge";
 	}
 
 	@JsonView(RestView.class)
 	public String getHeadRef() {
 		Preconditions.checkNotNull(getId());
-		return PullRequestConstants.REFS_PREFIX + getNumber() + "/head";
+		return PullRequest.REFS_PREFIX + getNumber() + "/head";
 	}
 	
 	/**

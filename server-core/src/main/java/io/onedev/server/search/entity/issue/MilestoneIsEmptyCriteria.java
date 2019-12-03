@@ -7,7 +7,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
-import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.query.IssueQueryConstants;
 
 public class MilestoneIsEmptyCriteria extends IssueCriteria {
 
@@ -15,7 +15,7 @@ public class MilestoneIsEmptyCriteria extends IssueCriteria {
 	
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
-		return builder.isNull(root.join(IssueConstants.ATTR_MILESTONE, JoinType.LEFT));
+		return builder.isNull(root.join(IssueQueryConstants.ATTR_MILESTONE, JoinType.LEFT));
 	}
 
 	@Override
@@ -30,7 +30,7 @@ public class MilestoneIsEmptyCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(IssueConstants.FIELD_MILESTONE) + " " 
+		return IssueQuery.quote(IssueQueryConstants.FIELD_MILESTONE) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.IsEmpty);
 	}
 

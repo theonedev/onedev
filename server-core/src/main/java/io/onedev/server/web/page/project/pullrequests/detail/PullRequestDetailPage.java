@@ -9,7 +9,7 @@ import static io.onedev.server.search.entity.build.BuildQuery.getRuleName;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.And;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.AssociatedWithPullRequest;
 import static io.onedev.server.search.entity.build.BuildQueryLexer.Is;
-import static io.onedev.server.util.BuildConstants.FIELD_JOB;
+import static io.onedev.server.util.query.BuildQueryConstants.FIELD_JOB;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.APPROVE;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.DELETE_SOURCE_BRANCH;
 import static io.onedev.server.web.page.project.pullrequests.detail.PullRequestOperation.DISCARD;

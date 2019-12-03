@@ -127,9 +127,9 @@ import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
@@ -960,7 +960,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		} else if (!User.asSubject(user).isPermitted(new SystemAdministration())) {
 			Collection<Project> projects = projectManager.getPermittedProjects(user, new ReadCode()); 
 			if (!projects.isEmpty())
-				predicates.add(root.get(PullRequestConstants.ATTR_TARGET_PROJECT).in(projects));
+				predicates.add(root.get(PullRequestQueryConstants.ATTR_TARGET_PROJECT).in(projects));
 			else
 				predicates.add(builder.disjunction());
 		}
@@ -983,15 +983,15 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		for (EntitySort sort: requestQuery.getSorts()) {
 			if (sort.getDirection() == Direction.ASCENDING) {
 				orders.add(builder.asc(PullRequestQuery.getPath(
-						root, PullRequestConstants.ORDER_FIELDS.get(sort.getField()))));
+						root, PullRequestQueryConstants.ORDER_FIELDS.get(sort.getField()))));
 			} else {
 				orders.add(builder.desc(PullRequestQuery.getPath(
-						root, PullRequestConstants.ORDER_FIELDS.get(sort.getField()))));
+						root, PullRequestQueryConstants.ORDER_FIELDS.get(sort.getField()))));
 			}
 		}
 
 		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(PullRequestConstants.ATTR_ID)));
+			orders.add(builder.desc(root.get(PullRequestQueryConstants.ATTR_ID)));
 		query.orderBy(orders);
 		
 		return query;
@@ -1081,7 +1081,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		List<PullRequest> requests = new ArrayList<>();
 
 		EntityCriteria<PullRequest> criteria = newCriteria();
-		criteria.add(Restrictions.eq(PullRequestConstants.ATTR_TARGET_PROJECT, project));
+		criteria.add(Restrictions.eq(PullRequestQueryConstants.ATTR_TARGET_PROJECT, project));
 		
 		if (term.startsWith("#"))
 			term = term.substring(1);

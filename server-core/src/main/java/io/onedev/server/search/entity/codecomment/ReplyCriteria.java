@@ -12,7 +12,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.CodeCommentConstants;
+import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class ReplyCriteria extends EntityCriteria<CodeComment> {
 
@@ -26,7 +26,7 @@ public class ReplyCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
-		From<?, ?> join = root.join(CodeCommentConstants.ATTR_REPLIES, JoinType.LEFT);
+		From<?, ?> join = root.join(CodeCommentQueryConstants.ATTR_REPLIES, JoinType.LEFT);
 		Path<String> attribute = join.get(CodeCommentReply.ATTR_CONTENT);
 		return builder.like(builder.lower(attribute), "%" + value.toLowerCase().replace('*', '%') + "%");
 	}
@@ -48,7 +48,7 @@ public class ReplyCriteria extends EntityCriteria<CodeComment> {
 
 	@Override
 	public String toString() {
-		return CodeCommentQuery.quote(CodeCommentConstants.FIELD_REPLY) + " " + CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Contains) + " " + CodeCommentQuery.quote(value);
+		return CodeCommentQuery.quote(CodeCommentQueryConstants.FIELD_REPLY) + " " + CodeCommentQuery.getRuleName(CodeCommentQueryLexer.Contains) + " " + CodeCommentQuery.quote(value);
 	}
 
 }

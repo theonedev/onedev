@@ -35,7 +35,6 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.PullRequestConstants;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.avatar.AvatarManager;
@@ -149,7 +148,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 						String status;
 						CloseInfo closeInfo = request.getCloseInfo();
 						if (closeInfo == null) {
-							status = PullRequestConstants.STATE_OPEN;
+							status = PullRequest.STATE_OPEN;
 							statusCss = "label-warning";
 						} else {
 							status = closeInfo.getStatus().toString();

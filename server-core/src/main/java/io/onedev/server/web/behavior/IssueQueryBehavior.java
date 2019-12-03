@@ -7,16 +7,17 @@ import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsMe;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
-import static io.onedev.server.util.IssueConstants.FIELD_COMMENT;
-import static io.onedev.server.util.IssueConstants.FIELD_COMMENT_COUNT;
-import static io.onedev.server.util.IssueConstants.FIELD_DESCRIPTION;
-import static io.onedev.server.util.IssueConstants.FIELD_MILESTONE;
-import static io.onedev.server.util.IssueConstants.FIELD_NUMBER;
-import static io.onedev.server.util.IssueConstants.FIELD_STATE;
-import static io.onedev.server.util.IssueConstants.FIELD_SUBMIT_DATE;
-import static io.onedev.server.util.IssueConstants.FIELD_TITLE;
-import static io.onedev.server.util.IssueConstants.FIELD_UPDATE_DATE;
-import static io.onedev.server.util.IssueConstants.FIELD_VOTE_COUNT;
+import static io.onedev.server.util.query.IssueQueryConstants.FIELD_COMMENT;
+import static io.onedev.server.util.query.IssueQueryConstants.FIELD_COMMENT_COUNT;
+import static io.onedev.server.util.query.IssueQueryConstants.FIELD_DESCRIPTION;
+import static io.onedev.server.util.query.IssueQueryConstants.FIELD_MILESTONE;
+import static io.onedev.server.util.query.IssueQueryConstants.FIELD_NUMBER;
+import static io.onedev.server.util.query.IssueQueryConstants.FIELD_PROJECT;
+import static io.onedev.server.util.query.IssueQueryConstants.FIELD_STATE;
+import static io.onedev.server.util.query.IssueQueryConstants.FIELD_SUBMIT_DATE;
+import static io.onedev.server.util.query.IssueQueryConstants.FIELD_TITLE;
+import static io.onedev.server.util.query.IssueQueryConstants.FIELD_UPDATE_DATE;
+import static io.onedev.server.util.query.IssueQueryConstants.FIELD_VOTE_COUNT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,8 +60,8 @@ import io.onedev.server.search.entity.issue.IssueQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -99,12 +100,16 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						Project project = getProject();
 						if ("criteriaField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(IssueConstants.QUERY_FIELDS);
+							List<String> candidates = new ArrayList<>(IssueQueryConstants.QUERY_FIELDS);
+							if (getProject() != null)
+								candidates.remove(IssueQueryConstants.FIELD_PROJECT);
 							for (FieldSpec field: issueSetting.getFieldSpecs())
 								candidates.add(field.getName());
 							return SuggestionUtils.suggest(candidates, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
-							List<String> candidates = new ArrayList<>(IssueConstants.ORDER_FIELDS.keySet());
+							List<String> candidates = new ArrayList<>(IssueQueryConstants.ORDER_FIELDS.keySet());
+							if (getProject() != null)
+								candidates.remove(IssueQueryConstants.FIELD_PROJECT);
 							for (FieldSpec field: issueSetting.getFieldSpecs()) {
 								if (field instanceof NumberField || field instanceof ChoiceField || field instanceof DateField) 
 									candidates.add(field.getName());
@@ -157,13 +162,22 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldSpec instanceof GroupChoiceField) {
 										List<String> candidates = OneDev.getInstance(GroupManager.class).query().stream().map(it->it.getName()).collect(Collectors.toList());
 										return SuggestionUtils.suggest(candidates, matchWith);
+									} else if (fieldName.equals(FIELD_PROJECT)) {
+										if (!matchWith.contains("*"))
+											return SuggestionUtils.suggestProjects(matchWith);
+										else
+											return null;
 									} else if (fieldName.equals(FIELD_STATE)) {
-										List<String> candidates = issueSetting.getStateSpecs().stream().map(it->it.getName()).collect(Collectors.toList());
+										List<String> candidates = issueSetting.getStateSpecs()
+												.stream()
+												.map(it->it.getName())
+												.collect(Collectors.toList());
 										return SuggestionUtils.suggest(candidates, matchWith);
 									} else if (fieldSpec instanceof ChoiceField) {
 										ComponentContext.push(new ComponentContext(getComponent()));
 										try {
-											List<String> candidates = new ArrayList<>(((ChoiceField)fieldSpec).getChoiceProvider().getChoices(true).keySet());
+											List<String> candidates = new ArrayList<>(((ChoiceField)fieldSpec)
+													.getChoiceProvider().getChoices(true).keySet());
 											return SuggestionUtils.suggest(candidates, matchWith);
 										} finally {
 											ComponentContext.pop();
@@ -171,7 +185,7 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 									} else if (fieldName.equals(FIELD_NUMBER)) {
 										return SuggestionUtils.suggestIssues(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 									} else if (fieldName.equals(FIELD_MILESTONE)) {
-										if (project != null)
+										if (project != null && !matchWith.contains("*"))
 											return SuggestionUtils.suggestMilestones(project, matchWith);
 										else
 											return null;
@@ -231,10 +245,11 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 				List<Element> fieldElements = terminalExpect.getState().findMatchedElementsByLabel("criteriaField", true);
 				if (!fieldElements.isEmpty()) {
 					String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
-					if (fieldName.equals(IssueConstants.FIELD_TITLE) 
-							|| fieldName.equals(IssueConstants.FIELD_DESCRIPTION)
-							|| fieldName.equals(IssueConstants.FIELD_COMMENT)
-							|| fieldName.equals(IssueConstants.FIELD_MILESTONE)) {
+					if (fieldName.equals(IssueQueryConstants.FIELD_PROJECT)
+							|| fieldName.equals(IssueQueryConstants.FIELD_TITLE) 
+							|| fieldName.equals(IssueQueryConstants.FIELD_DESCRIPTION)
+							|| fieldName.equals(IssueQueryConstants.FIELD_COMMENT)
+							|| fieldName.equals(IssueQueryConstants.FIELD_MILESTONE)) {
 						hints.add("Use * for wildcard match");
 						hints.add("Use '\\' to escape quotes");
 					}

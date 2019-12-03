@@ -9,11 +9,12 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScopedNumber;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 
-public class NumberCriteria extends PullRequestCriteria {
+public class NumberCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -31,7 +32,7 @@ public class NumberCriteria extends PullRequestCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		Path<Long> attribute = root.get(PullRequestConstants.ATTR_NUMBER);
+		Path<Long> attribute = root.get(PullRequestQueryConstants.ATTR_NUMBER);
 		Predicate numberPredicate;
 		
 		if (operator == PullRequestQueryLexer.Is)
@@ -42,7 +43,7 @@ public class NumberCriteria extends PullRequestCriteria {
 			numberPredicate = builder.lessThan(attribute, number.getNumber());
 		
 		return builder.and(
-				builder.equal(root.get(PullRequestConstants.ATTR_TARGET_PROJECT), number.getProject()),
+				builder.equal(root.get(PullRequestQueryConstants.ATTR_TARGET_PROJECT), number.getProject()),
 				numberPredicate);
 	}
 
@@ -67,7 +68,7 @@ public class NumberCriteria extends PullRequestCriteria {
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequestConstants.FIELD_NUMBER) + " " 
+		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_NUMBER) + " " 
 				+ PullRequestQuery.getRuleName(operator) + " " 
 				+ PullRequestQuery.quote(value);
 	}

@@ -10,7 +10,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.query.IssueQueryConstants;
 
 public class SubmitDateCriteria extends IssueCriteria {
 
@@ -30,7 +30,7 @@ public class SubmitDateCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
-		Path<Date> attribute = root.get(IssueConstants.ATTR_SUBMIT_DATE);
+		Path<Date> attribute = root.get(IssueQueryConstants.ATTR_SUBMIT_DATE);
 		if (operator == IssueQueryLexer.IsBefore)
 			return builder.lessThan(attribute, date);
 		else
@@ -52,7 +52,7 @@ public class SubmitDateCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(IssueConstants.FIELD_SUBMIT_DATE) + " " 
+		return IssueQuery.quote(IssueQueryConstants.FIELD_SUBMIT_DATE) + " " 
 				+ IssueQuery.getRuleName(operator) + " " + IssueQuery.quote(value);
 	}
 

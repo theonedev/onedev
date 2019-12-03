@@ -4,7 +4,7 @@ import javax.lang.model.SourceVersion;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import io.onedev.server.util.BuildConstants;
+import io.onedev.server.util.query.BuildQueryConstants;
 import io.onedev.server.util.validation.annotation.ParamName;
 
 public class ParamNameValidator implements ConstraintValidator<ParamName, String> {
@@ -30,7 +30,7 @@ public class ParamNameValidator implements ConstraintValidator<ParamName, String
 			}
 			constraintContext.buildConstraintViolationWithTemplate(message).addConstraintViolation();
 			return false;
-		} else if (BuildConstants.ALL_FIELDS.contains(value)) {
+		} else if (BuildQueryConstants.ALL_FIELDS.contains(value)) {
 			constraintContext.disableDefaultConstraintViolation();
 			if (message.length() == 0)
 				message = "'" + value + "' is reserved";

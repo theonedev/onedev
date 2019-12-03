@@ -14,7 +14,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
-import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.query.IssueQueryConstants;
 
 public class StateCriteria extends IssueCriteria {
 
@@ -28,7 +28,7 @@ public class StateCriteria extends IssueCriteria {
 
 	@Override
 	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
-		Path<?> attribute = root.get(IssueConstants.ATTR_STATE);
+		Path<?> attribute = root.get(IssueQueryConstants.ATTR_STATE);
 		return builder.equal(attribute, value);
 	}
 
@@ -49,7 +49,7 @@ public class StateCriteria extends IssueCriteria {
 
 	@Override
 	public String toString() {
-		return IssueQuery.quote(IssueConstants.FIELD_STATE) + " " 
+		return IssueQuery.quote(IssueQueryConstants.FIELD_STATE) + " " 
 				+ IssueQuery.getRuleName(IssueQueryLexer.Is) + " " + IssueQuery.quote(value);
 	}
 

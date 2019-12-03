@@ -43,9 +43,9 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -182,7 +182,7 @@ public abstract class IssueOperationsPanel extends Panel {
 
 		List<String> criterias = new ArrayList<>();
 		if (getIssue().getMilestone() != null)
-			criterias.add(IssueQuery.quote(IssueConstants.FIELD_MILESTONE) + " is " + IssueQuery.quote(getIssue().getMilestoneName()));
+			criterias.add(IssueQuery.quote(IssueQueryConstants.FIELD_MILESTONE) + " is " + IssueQuery.quote(getIssue().getMilestoneName()));
 		for (Map.Entry<String, Input> entry: getIssue().getFieldInputs().entrySet()) {
 			if (getIssue().isFieldVisible(entry.getKey())) {
 				List<String> strings = entry.getValue().getValues();

@@ -11,7 +11,7 @@ import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
-import io.onedev.server.util.CodeCommentConstants;
+import io.onedev.server.util.query.CodeCommentQueryConstants;
 
 public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 
@@ -28,8 +28,8 @@ public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 
 	@Override
 	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
-		Path<?> projectAttribute = CodeCommentQuery.getPath(root, CodeCommentConstants.ATTR_PROJECT);
-		Path<?> commitAttribute = CodeCommentQuery.getPath(root, CodeCommentConstants.ATTR_COMMIT);
+		Path<?> projectAttribute = CodeCommentQuery.getPath(root, CodeCommentQueryConstants.ATTR_PROJECT);
+		Path<?> commitAttribute = CodeCommentQuery.getPath(root, CodeCommentQueryConstants.ATTR_COMMIT);
 		return builder.and(
 				builder.equal(projectAttribute, project),
 				builder.equal(commitAttribute, commitId.name()));

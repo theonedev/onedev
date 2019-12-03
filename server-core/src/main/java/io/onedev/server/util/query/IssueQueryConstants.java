@@ -1,4 +1,4 @@
-package io.onedev.server.util;
+package io.onedev.server.util.query;
 
 import java.util.List;
 import java.util.Map;
@@ -9,7 +9,7 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.Maps;
 
-public class IssueConstants {
+public class IssueQueryConstants {
 	
 	public static final String FIELD_NUMBER = "Number";
 	
@@ -64,20 +64,21 @@ public class IssueConstants {
 	public static final String ATTR_ID = "id";
 	
 	public static final Set<String> ALL_FIELDS = Sets.newHashSet(
-			FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_SUBMITTER, FIELD_DESCRIPTION, 
-			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, 
-			FIELD_COMMENT_COUNT, FIELD_MILESTONE, FIELD_PROJECT);
+			FIELD_PROJECT, FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_SUBMITTER, 
+			FIELD_DESCRIPTION, FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, 
+			FIELD_VOTE_COUNT, FIELD_COMMENT_COUNT, FIELD_MILESTONE);
 	
 	public static final List<String> QUERY_FIELDS = Lists.newArrayList(
-			FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_DESCRIPTION, FIELD_COMMENT, 
-			FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, FIELD_COMMENT_COUNT, 
-			FIELD_MILESTONE);
+			FIELD_PROJECT, FIELD_NUMBER, FIELD_STATE, FIELD_TITLE, FIELD_DESCRIPTION, 
+			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, 
+			FIELD_COMMENT_COUNT, FIELD_MILESTONE);
 
 	public static final Map<String, String> ORDER_FIELDS = Maps.newLinkedHashMap(
 			FIELD_VOTE_COUNT, ATTR_VOTE_COUNT,
 			FIELD_COMMENT_COUNT, ATTR_COMMENT_COUNT,
 			FIELD_NUMBER, ATTR_NUMBER,
 			FIELD_SUBMIT_DATE, ATTR_SUBMIT_DATE,
+			FIELD_PROJECT, ATTR_PROJECT,
 			FIELD_UPDATE_DATE, ATTR_UPDATE_DATE);		
 	
 }

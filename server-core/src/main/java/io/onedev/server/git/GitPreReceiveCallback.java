@@ -29,6 +29,7 @@ import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.BranchProtection;
@@ -36,7 +37,6 @@ import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.permission.ManageProject;
 import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.util.PullRequestConstants;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -135,7 +135,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 	    		User user = userManager.getCurrent();
 	    		Preconditions.checkNotNull(user);
 
-	    		if (refName.startsWith(PullRequestConstants.REFS_PREFIX) || refName.startsWith(PullRequestUpdate.REFS_PREFIX)) {
+	    		if (refName.startsWith(PullRequest.REFS_PREFIX) || refName.startsWith(PullRequestUpdate.REFS_PREFIX)) {
 	    			if (!user.asSubject().isPermitted(new ProjectPermission(project, new ManageProject()))) {
 	    				error(output, refName, Lists.newArrayList("Only project administrators can update onedev refs."));
 	    				break;

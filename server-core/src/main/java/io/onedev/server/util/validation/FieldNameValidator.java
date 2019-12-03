@@ -3,7 +3,7 @@ package io.onedev.server.util.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import io.onedev.server.util.IssueConstants;
+import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.util.validation.annotation.FieldName;
 
 public class FieldNameValidator implements ConstraintValidator<FieldName, String> {
@@ -20,7 +20,7 @@ public class FieldNameValidator implements ConstraintValidator<FieldName, String
 		if (value == null) 
 			return true;
 		
-		if (IssueConstants.ALL_FIELDS.contains(value)) {
+		if (IssueQueryConstants.ALL_FIELDS.contains(value)) {
 			constraintContext.disableDefaultConstraintViolation();
 			String message = this.message;
 			if (message.length() == 0)

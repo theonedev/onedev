@@ -8,16 +8,17 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.MergePreview;
-import io.onedev.server.util.PullRequestConstants;
+import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.query.PullRequestQueryConstants;
 
-public class HasMergeConflictsCriteria extends PullRequestCriteria {
+public class HasMergeConflictsCriteria extends EntityCriteria<PullRequest> {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		Path<?> requestHead = PullRequestQuery.getPath(root, PullRequestConstants.ATTR_LAST_MERGE_PREVIEW_REQUEST_HEAD);
-		Path<?> merged = PullRequestQuery.getPath(root, PullRequestConstants.ATTR_LAST_MERGE_PREVIEW_MERGED);
+		Path<?> requestHead = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_LAST_MERGE_PREVIEW_REQUEST_HEAD);
+		Path<?> merged = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_LAST_MERGE_PREVIEW_MERGED);
 		return builder.and(
 				builder.isNotNull(requestHead), 
 				builder.isNull(merged));

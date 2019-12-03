@@ -39,11 +39,11 @@ import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.util.IssueConstants;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
+import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.ajaxlistener.DisableGlobalLoadingIndicatorListener;
 import io.onedev.server.web.behavior.RunTaskBehavior;
 import io.onedev.server.web.component.project.comment.CommentInput;
@@ -109,15 +109,15 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			public Boolean getObject() {
-				return selectedFields.contains(IssueConstants.FIELD_STATE);
+				return selectedFields.contains(IssueQueryConstants.FIELD_STATE);
 			}
 
 			@Override
 			public void setObject(Boolean object) {
 				if (object)
-					selectedFields.add(IssueConstants.FIELD_STATE);
+					selectedFields.add(IssueQueryConstants.FIELD_STATE);
 				else
-					selectedFields.remove(IssueConstants.FIELD_STATE);
+					selectedFields.remove(IssueQueryConstants.FIELD_STATE);
 			}
 			
 		}).add(newOnChangeBehavior(form)));
@@ -130,15 +130,15 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 
 			@Override
 			public Boolean getObject() {
-				return selectedFields.contains(IssueConstants.FIELD_MILESTONE);
+				return selectedFields.contains(IssueQueryConstants.FIELD_MILESTONE);
 			}
 
 			@Override
 			public void setObject(Boolean object) {
 				if (object)
-					selectedFields.add(IssueConstants.FIELD_MILESTONE);
+					selectedFields.add(IssueQueryConstants.FIELD_MILESTONE);
 				else
-					selectedFields.remove(IssueConstants.FIELD_MILESTONE);
+					selectedFields.remove(IssueQueryConstants.FIELD_MILESTONE);
 			}
 			
 		}).add(newOnChangeBehavior(form)));
@@ -196,10 +196,10 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 		}
 		
 		Set<String> excludedProperties = new HashSet<>();
-		if (!selectedFields.contains(IssueConstants.FIELD_STATE))
-			excludedProperties.add(IssueConstants.ATTR_STATE);
-		if (!selectedFields.contains(IssueConstants.FIELD_MILESTONE))
-			excludedProperties.add(IssueConstants.ATTR_MILESTONE);
+		if (!selectedFields.contains(IssueQueryConstants.FIELD_STATE))
+			excludedProperties.add(IssueQueryConstants.ATTR_STATE);
+		if (!selectedFields.contains(IssueQueryConstants.FIELD_MILESTONE))
+			excludedProperties.add(IssueQueryConstants.ATTR_MILESTONE);
 		
 		builtInFieldsEditor = BeanContext.edit("builtInFieldsEditor", builtInFieldsBean, excludedProperties, true); 
 		form.add(builtInFieldsEditor);
@@ -246,13 +246,13 @@ abstract class BatchEditPanel extends Panel implements InputContext {
 					@Override
 					protected void runTask(AjaxRequestTarget target) {
 						String state;
-						if (selectedFields.contains(IssueConstants.FIELD_STATE))
+						if (selectedFields.contains(IssueQueryConstants.FIELD_STATE))
 							state = builtInFieldsBean.getState();
 						else
 							state = null;
 						
 						Optional<Milestone> milestone;
-						if (selectedFields.contains(IssueConstants.FIELD_MILESTONE))
+						if (selectedFields.contains(IssueQueryConstants.FIELD_MILESTONE))
 							milestone = Optional.fromNullable(getProject().getMilestone(builtInFieldsBean.getMilestone()));
 						else
 							milestone = null;
