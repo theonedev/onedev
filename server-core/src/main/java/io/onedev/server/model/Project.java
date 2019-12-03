@@ -123,9 +123,10 @@ import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
 
 @Entity
-@Table(indexes={@Index(columnList="o_forkedFrom_id"), @Index(columnList="name")})
+@Table(indexes={@Index(columnList="o_forkedFrom_id"), @Index(columnList="name"), @Index(columnList="updateDate")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE)
-@DynamicUpdate
+//use dynamic update in order not to overwrite other edits while background threads change update date
+@DynamicUpdate 
 @Editable
 public class Project extends AbstractEntity {
 
@@ -188,7 +189,10 @@ public class Project extends AbstractEntity {
 	private ArrayList<Secret> secrets = new ArrayList<>();
 	
 	@Column(nullable=false)
-	private Date createdAt = new Date();
+	private Date createDate = new Date();
+	
+	@Column(nullable=false)
+	private Date updateDate = new Date();
 
 	@OneToMany(mappedBy="targetProject", cascade=CascadeType.REMOVE)
 	private Collection<PullRequest> incomingRequests = new ArrayList<>();
@@ -340,12 +344,20 @@ public class Project extends AbstractEntity {
 		this.tagProtections = tagProtections;
 	}
 
-	public Date getCreatedAt() {
-		return createdAt;
+	public Date getCreateDate() {
+		return createDate;
 	}
 
-	public void setCreatedAt(Date createdAt) {
-		this.createdAt = createdAt;
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
+
+	public Date getUpdateDate() {
+		return updateDate;
+	}
+
+	public void setUpdateDate(Date updateDate) {
+		this.updateDate = updateDate;
 	}
 
 	public Collection<PullRequest> getIncomingRequests() {

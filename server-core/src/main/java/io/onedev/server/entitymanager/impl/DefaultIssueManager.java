@@ -40,7 +40,6 @@ import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.entity.EntityRemoved;
-import io.onedev.server.event.issue.IssueCommitted;
 import io.onedev.server.event.issue.IssueEvent;
 import io.onedev.server.event.issue.IssueOpened;
 import io.onedev.server.event.system.SystemStarted;
@@ -252,8 +251,7 @@ public class DefaultIssueManager extends AbstractEntityManager<Issue> implements
 	@Transactional
 	@Listen
 	public void on(IssueEvent event) {
-		if (!(event instanceof IssueCommitted))
-			event.getIssue().setUpdateDate(event.getDate());
+		event.getIssue().setUpdateDate(event.getDate());
 	}
 	
 	@Sessional

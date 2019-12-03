@@ -48,6 +48,8 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.event.ProjectCreated;
+import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -162,22 +164,23 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     @Transactional
     @Override
     public void save(Project project, String oldName) {
-    	boolean isNew = project.isNew();
-    	
     	dao.persist(project);
-    	
-       	if (isNew) {
-       		project.setOwner(SecurityUtils.getUser());
-           	checkSanity(project);
-    	} 
-       	
     	if (oldName != null && !oldName.equals(project.getName())) {
         	for (JobExecutor jobExecutor: settingManager.getJobExecutors())
         		jobExecutor.onRenameProject(oldName, project.getName());
         	for (GroovyScript groovyScript: settingManager.getGroovyScripts())
         		groovyScript.onRenameProject(oldName, project.getName());
     	}
-    	
+    }
+    
+    @Transactional
+    @Override
+    public void create(Project project) {
+    	dao.persist(project);
+   		project.setOwner(SecurityUtils.getUser());
+       	checkSanity(project);
+       	
+       	listenerRegistry.post(new ProjectCreated(project));
     }
     
     @Transactional
@@ -235,6 +238,8 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
         checkSanity(to);
         commitInfoManager.cloneInfo(from, to);
         avatarManager.copyAvatar(from, to);
+        
+        listenerRegistry.post(new ProjectCreated(to));
 	}
 
 	private boolean isGitHookValid(File gitDir, String hookName) {
@@ -314,6 +319,12 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		}
 	}
 
+	@Transactional
+	@Listen
+	public void on(ProjectEvent event) {
+		event.getProject().setUpdateDate(event.getDate());
+	}
+	
 	@Transactional
 	@Listen
 	public void on(SystemStarted event) {

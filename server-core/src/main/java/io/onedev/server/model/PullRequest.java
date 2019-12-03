@@ -69,6 +69,7 @@ import io.onedev.server.util.jackson.RestView;
 				@Index(columnList="CLOSE_STATUS"), @Index(columnList="CLOSE_USER"), 
 				@Index(columnList="CLOSE_USER_NAME")},
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_targetProject_id", "number"})})
+//use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
 public class PullRequest extends AbstractEntity implements Referenceable, AttachmentStorageSupport {
 

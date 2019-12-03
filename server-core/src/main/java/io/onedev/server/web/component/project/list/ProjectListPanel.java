@@ -42,6 +42,7 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
@@ -63,8 +64,6 @@ import io.onedev.server.web.util.QuerySaveSupport;
 public class ProjectListPanel extends Panel {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProjectListPanel.class);
-	
-	private static final int MAX_DESCRIPTION_LEN = 120;
 	
 	private final String query;
 	
@@ -278,10 +277,7 @@ public class ProjectListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<Project>> cellItem, String componentId, 
 					IModel<Project> rowModel) {
 				Project project = rowModel.getObject();
-				if (project.getOwner() != null)
-					cellItem.add(new UserIdentPanel(componentId, UserIdent.of(project.getOwner()), Mode.AVATAR_AND_NAME));
-				else
-					cellItem.add(new Label(componentId, "<i>No owner</i>").setEscapeModelStrings(false));
+				cellItem.add(new UserIdentPanel(componentId, UserIdent.of(project.getOwner()), Mode.NAME));
 			}
 
 			@Override
@@ -291,23 +287,18 @@ public class ProjectListPanel extends Panel {
 			
 		});
 		
-		columns.add(new AbstractColumn<Project, Void>(Model.of("Description")) {
+		columns.add(new AbstractColumn<Project, Void>(Model.of("Last Update")) {
 
 			@Override
 			public void populateItem(Item<ICellPopulator<Project>> cellItem, String componentId, 
 					IModel<Project> rowModel) {
 				Project project = rowModel.getObject();
-				if (project.getDescription() != null) {
-					cellItem.add(new Label(componentId, 
-							StringUtils.abbreviate(project.getDescription(), MAX_DESCRIPTION_LEN)));
-				} else {
-					cellItem.add(new Label(componentId, "<i>No description</i>").setEscapeModelStrings(false));
-				}
+				cellItem.add(new Label(componentId, DateUtils.formatAge(project.getUpdateDate())));
 			}
 
 			@Override
 			public String getCssClass() {
-				return "description expanded";
+				return "last-update expanded";
 			}
 			
 		});

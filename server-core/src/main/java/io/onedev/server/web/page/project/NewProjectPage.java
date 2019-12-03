@@ -33,7 +33,7 @@ public class NewProjectPage extends LayoutPage {
 		Project project = new Project();
 		
 		BeanEditor editor = BeanContext.edit("editor", project, 
-				Lists.newArrayList("name", "description", "defaultRoleName"), false);
+				Lists.newArrayList("name", "description"), false);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -47,7 +47,7 @@ public class NewProjectPage extends LayoutPage {
 					editor.error(new Path(new PathNode.Named("name")),
 							"This name has already been used by another project");
 				} else {
-					projectManager.save(project, null);
+					projectManager.create(project);
 					Session.get().success("New project created");
 					setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(project));
 				}

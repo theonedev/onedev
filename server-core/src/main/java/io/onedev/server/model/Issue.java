@@ -63,6 +63,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 				@Index(columnList="commentCount"), @Index(columnList="o_milestone_id"), 
 				@Index(columnList="updateDate")}, 
 		uniqueConstraints={@UniqueConstraint(columnNames={"o_project_id", "number"})})
+//use dynamic update in order not to overwrite other edits while background threads change update date
 @DynamicUpdate
 @Editable
 public class Issue extends AbstractEntity implements Referenceable, AttachmentStorageSupport {

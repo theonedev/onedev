@@ -17,6 +17,7 @@ import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneException;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.search.entity.project.ProjectQueryParser;
+import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectConstants;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
@@ -53,7 +54,10 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 								String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
 									ProjectQuery.checkField(fieldName, operator);
-									if (fieldName.equals(ProjectConstants.FIELD_NAME)) {
+									if (fieldName.equals(ProjectConstants.FIELD_UPDATE_DATE)) {
+										List<InputSuggestion> suggestions = SuggestionUtils.suggest(DateUtils.RELAX_DATE_EXAMPLES, matchWith);
+										return !suggestions.isEmpty()? suggestions: null;
+									} else if (fieldName.equals(ProjectConstants.FIELD_NAME)) {
 										if (!matchWith.contains("*"))
 											return SuggestionUtils.suggestProjects(matchWith);
 										else

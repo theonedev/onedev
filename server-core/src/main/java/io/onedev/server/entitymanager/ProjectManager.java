@@ -35,6 +35,8 @@ public interface ProjectManager extends EntityManager<Project> {
 	 */
 	void save(Project project, @Nullable String oldName);
 	
+	void create(Project project);
+	
 	void onDeleteBranch(Project project, String branchName);
 	
 	void deleteBranch(Project project, String branchName);

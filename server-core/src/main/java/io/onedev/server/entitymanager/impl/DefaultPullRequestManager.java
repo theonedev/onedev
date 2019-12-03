@@ -633,8 +633,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Listen
 	public void on(PullRequestEvent event) {
-		if (!(event instanceof PullRequestMergePreviewCalculated) && !(event instanceof PullRequestBuildEvent))
-			event.getRequest().setUpdateDate(event.getDate());
+		event.getRequest().setUpdateDate(event.getDate());
 	}
 	
 	@Transactional

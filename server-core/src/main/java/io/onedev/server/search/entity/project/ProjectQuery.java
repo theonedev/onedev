@@ -124,6 +124,9 @@ public class ProjectQuery extends EntityQuery<Project> {
 								return new OwnerCriteria(value);
 						case ProjectQueryLexer.Contains:
 							return new DescriptionCriteria(value);
+						case ProjectQueryLexer.IsBefore:
+						case ProjectQueryLexer.IsAfter:
+							return new UpdateDateCriteria(value, operator);
 						default:
 							throw new OneException("Unexpected operator " + getRuleName(operator));
 						}
@@ -194,6 +197,11 @@ public class ProjectQuery extends EntityQuery<Project> {
 			break;
 		case ProjectQueryLexer.IsMe:
 			if (!fieldName.equals(ProjectConstants.FIELD_OWNER)) 
+				throw newOperatorException(fieldName, operator);
+			break;
+		case ProjectQueryLexer.IsBefore:
+		case ProjectQueryLexer.IsAfter:
+			if (!fieldName.equals(ProjectConstants.FIELD_UPDATE_DATE)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		}

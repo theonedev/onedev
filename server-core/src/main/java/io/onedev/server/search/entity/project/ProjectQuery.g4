@@ -9,7 +9,7 @@ query
 criteria
     : operator=ForksOf WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=IsMe #FieldOperatorCriteria
-    | criteriaField=Quoted WS+ operator=(Is|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
+    | criteriaField=Quoted WS+ operator=(Is|Contains|IsBefore|IsAfter) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria #AndCriteria
     | criteria WS+ Or WS+ criteria #OrCriteria
     | Not WS* LParens WS* criteria WS* RParens #NotCriteria
@@ -36,6 +36,14 @@ IsMe
 	: 'is' WS+  'me'
 	;
 
+IsAfter
+	: 'is' WS+ 'after'
+	;
+
+IsBefore
+	: 'is' WS+ 'before'
+	;
+	
 Contains
 	: 'contains'
 	;
