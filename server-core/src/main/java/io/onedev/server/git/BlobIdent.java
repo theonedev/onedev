@@ -18,6 +18,9 @@ public class BlobIdent implements Serializable, Comparable<BlobIdent> {
 	
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * null when there is no commit yet
+	 */
 	@Nullable
 	public String revision;
 	

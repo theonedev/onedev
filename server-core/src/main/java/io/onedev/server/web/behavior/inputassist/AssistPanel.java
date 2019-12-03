@@ -120,8 +120,10 @@ abstract class AssistPanel extends Panel {
 		String content = suggestion.getContent();
 		item.add(AttributeAppender.append("data-content", content));
 		item.add(AttributeAppender.append("data-caret", suggestion.getCaret()));
-		if (!suggestion.getContent().equals(inputStatus.getContent()))
+		if (!suggestion.getContent().equals(inputStatus.getContent()) 
+				|| suggestion.getCaret() != inputStatus.getCaret()) {
 			item.add(AttributeAppender.append("class", "different"));
+		}
 		item.setOutputMarkupId(true);
 		return item;
 	}

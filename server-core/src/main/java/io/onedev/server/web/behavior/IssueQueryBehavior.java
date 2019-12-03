@@ -118,6 +118,8 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 								return SuggestionUtils.suggestBranches(project, matchWith);
 							case "tag":
 								return SuggestionUtils.suggestTags(project, matchWith);
+							case "commit":
+								return SuggestionUtils.suggestCommits(project, matchWith);
 							case "build":
 								return SuggestionUtils.suggestBuilds(project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 							}

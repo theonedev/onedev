@@ -691,7 +691,8 @@ public class Project extends AbstractEntity {
 		if (jobNames == null) {
 			Set<String> jobNameSet = new HashSet<>();
 			for (RefInfo refInfo: getBranches()) {
-				Blob blob = getBlob(new BlobIdent(refInfo.getPeeledObj().name(), BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
+				Blob blob = getBlob(new BlobIdent(refInfo.getPeeledObj().name(), 
+						BuildSpec.BLOB_PATH, FileMode.TYPE_FILE), false);
 				if (blob != null && blob.getText() != null) {
 					try {
 						VersionedDocument dom = VersionedDocument.fromXML(blob.getText().getContent());

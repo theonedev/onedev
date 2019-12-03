@@ -21,6 +21,7 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.annotation.Multiline;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 
 @SuppressWarnings("serial")
@@ -66,8 +67,13 @@ public class StringPropertyEditor extends PropertyEditor<String> {
 			
 		});
 		
-		if (getter.getAnnotation(OmitName.class) != null)
+		if (getter.getAnnotation(OmitName.class) != null) {
 			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(getter)));
+		} else {
+			NameOfEmptyValue nameOfEmptyValue = getter.getAnnotation(NameOfEmptyValue.class);
+			if (nameOfEmptyValue != null)
+				input.add(AttributeModifier.replace("placeholder", nameOfEmptyValue.value()));
+		}
 	}
 
 	@Override

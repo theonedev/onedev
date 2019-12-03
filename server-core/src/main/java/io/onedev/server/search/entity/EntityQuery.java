@@ -96,7 +96,7 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 		if (project != null && !value.contains(":"))
 			value = project.getName() + ":" + value;
 		ProjectAwareCommitId commitId = ProjectAwareCommitId.from(value);
-		if (commitId != null)
+		if (commitId != null && commitId.getCommitId() != null)
 			return commitId;
 		else
 			throw new OneException("Unable to find revision: " + value);

@@ -119,10 +119,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	private final ReadWriteLock jobNamesLock = new ReentrantReadWriteLock();
 	
-	private final Map<Long, Collection<String>> buildVersions = new HashMap<>();
-	
-	private final ReadWriteLock buildVersionsLock = new ReentrantReadWriteLock();
-	
 	private String taskId;
 	
 	@Inject
@@ -185,7 +181,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		
 		BuildFacade facade = build.getFacade();
 		String jobName = build.getJobName();
-		String buildVersion = build.getVersion();
 		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
@@ -201,12 +196,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 					populateJobNames(facade.getProjectId(), jobName);
 				} finally {
 					jobNamesLock.writeLock().unlock();
-				}
-				buildVersionsLock.writeLock().lock();
-				try {
-					populateBuildVersions(facade.getProjectId(), buildVersion);
-				} finally {
-					buildVersionsLock.writeLock().unlock();
 				}
 			}
 			
@@ -240,15 +229,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 						}
 					} finally {
 						jobNamesLock.writeLock().unlock();
-					}
-					buildVersionsLock.writeLock().lock();
-					try {
-						for (Iterator<Map.Entry<Long, Collection<String>>> it = buildVersions.entrySet().iterator(); it.hasNext();) {
-							if (it.next().getKey().equals(projectId))
-								it.remove();
-						}
-					} finally {
-						buildVersionsLock.writeLock().unlock();
 					}
 				}
 			});
@@ -348,6 +328,28 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		return builds;
 	}
 	
+	@Sessional
+	@Override
+	public List<String> queryVersions(Project project, @Nullable User user, String matchWith, int count) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<String> criteriaQuery = builder.createQuery(String.class);
+		Root<Build> root = criteriaQuery.from(Build.class);
+		criteriaQuery.select(root.get(BuildConstants.ATTR_VERSION)).distinct(true);
+		
+		Collection<Predicate> predicates = getPredicates(project, root, builder, user);
+		predicates.add(builder.like(
+				builder.lower(root.get(BuildConstants.ATTR_VERSION)), 
+				"%" + matchWith.toLowerCase() + "%"));
+		criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
+		criteriaQuery.orderBy(builder.asc(root.get(BuildConstants.ATTR_VERSION)));
+
+		Query<String> query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(0);
+		query.setMaxResults(count);
+		
+		return query.getResultList();
+	}
+	
 	@Transactional
 	@Override
 	public void create(Build build) {
@@ -362,9 +364,9 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			buildDependenceManager.save(dependence);
 	}
 
-	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Build> criteria, 
-			@Nullable Project project, Root<Build> root, CriteriaBuilder builder, @Nullable User user) {
-		List<Predicate> predicates = new ArrayList<>();
+	private Collection<Predicate> getPredicates(@Nullable Project project, Root<Build> root, 
+			CriteriaBuilder builder, @Nullable User user) {
+		Collection<Predicate> predicates = new ArrayList<>();
 
 		Subject subject = User.asSubject(user);
 		if (project != null) {
@@ -392,6 +394,12 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			predicates.add(builder.or(projectPredicates.toArray(new Predicate[projectPredicates.size()])));
 		}
 		
+		return predicates;
+	}
+	
+	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Build> criteria, 
+			@Nullable Project project, Root<Build> root, CriteriaBuilder builder, @Nullable User user) {
+		Collection<Predicate> predicates = getPredicates(project, root, builder, user);
 		if (criteria != null)
 			predicates.add(criteria.getPredicate(root, builder, user));
 		return predicates.toArray(new Predicate[0]);
@@ -555,13 +563,12 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	public void on(SystemStarted event) {
 		logger.info("Caching build info...");
 		
-		Query<?> query = dao.getSession().createQuery("select id, project.id, commitHash, jobName, version from Build");
+		Query<?> query = dao.getSession().createQuery("select id, project.id, commitHash, jobName from Build");
 		for (Object[] fields: (List<Object[]>)query.list()) {
 			Long buildId = (Long) fields[0];
 			Long projectId = (Long)fields[1];
 			builds.put(buildId, new BuildFacade(buildId, projectId, (String)fields[2]));
 			populateJobNames(projectId, (String)fields[3]);
-			populateBuildVersions(projectId, (String)fields[4]);
 		}
 		taskId = taskScheduler.schedule(this);
 	}
@@ -688,17 +695,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		jobNamesOfProject.add(jobName);
 	}
 
-	private void populateBuildVersions(Long projectId, @Nullable String buildVersion) {
-		if (buildVersion != null) {
-			Collection<String> builldVersionsOfProject = buildVersions.get(projectId);
-			if (builldVersionsOfProject == null) {
-				builldVersionsOfProject = new HashSet<>();
-				buildVersions.put(projectId, builldVersionsOfProject);
-			}
-			builldVersionsOfProject.add(buildVersion);
-		}
-	}
-	
 	private Collection<String> getAccessibleJobNames(Role role, Collection<String> jobNames) {
 		Collection<String> accessibleJobNames = new HashSet<>();
 		if (role.isManageProject()) {
@@ -728,20 +724,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			return jobNames;
 		} finally {
 			jobNamesLock.readLock().unlock();
-		}
-	}
-	
-	@Override
-	public Collection<String> getBuildVersions(Project project) {
-		buildVersionsLock.readLock().lock();
-		try {
-			Collection<String> buildVersionsOfProject = buildVersions.get(project.getId());
-			if (buildVersionsOfProject != null)
-				return new HashSet<>(buildVersionsOfProject);
-			else
-				return new HashSet<>();
-		} finally {
-			buildVersionsLock.readLock().unlock();
 		}
 	}
 	

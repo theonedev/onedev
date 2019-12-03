@@ -108,7 +108,9 @@ public class FixedBetweenCriteria extends IssueCriteria {
 		} else {
 			issuePredicate = builder.disjunction();
 		}
-		return builder.and(builder.equal(root.get(IssueConstants.ATTR_PROJECT), project), issuePredicate);
+		return builder.and(
+				builder.equal(root.get(IssueConstants.ATTR_PROJECT), project), 
+				issuePredicate);
 	}
 
 	@Override

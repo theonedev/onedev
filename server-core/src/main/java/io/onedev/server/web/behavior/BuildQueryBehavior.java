@@ -70,11 +70,7 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 							BuildParamManager buildParamManager = OneDev.getInstance(BuildParamManager.class);
 							List<String> paramNames = new ArrayList<>(buildParamManager.getBuildParamNames(project));
 							Collections.sort(paramNames);
-							for (String paramName: paramNames) {
-								fields.add(paramName);
-								if (fields.size() >= InputAssistBehavior.MAX_SUGGESTIONS)
-									break;
-							}
+							fields.addAll(paramNames);
 							return SuggestionUtils.suggest(fields, matchWith);
 						} else if ("orderField".equals(spec.getLabel())) {
 							return SuggestionUtils.suggest(new ArrayList<>(BuildConstants.ORDER_FIELDS.keySet()), matchWith);

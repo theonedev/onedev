@@ -65,7 +65,7 @@ public abstract class JobExecutor implements Serializable {
 
 	@Editable(order=10000, group="Job Applicability",
 			description="Optionally specify space-separated projects applicable for this executor. "
-					+ "Use * or ? for wildcard match. Leave empty to match all")
+					+ "Use * or ? for wildcard match")
 	@Patterns(suggester = "suggestProjects")
 	@NameOfEmptyValue("All")
 	public String getApplicableProjects() {
@@ -83,7 +83,7 @@ public abstract class JobExecutor implements Serializable {
 
 	@Editable(order=10100, group="Job Applicability",
 			description="Optionally specify space-separated branches applicable for this executor. "
-					+ "Use * or ? for wildcard match. Leave empty to match all")
+					+ "Use * or ? for wildcard match")
 	@Patterns
 	@NameOfEmptyValue("All")
 	public String getApplicableBranches() {
@@ -96,7 +96,7 @@ public abstract class JobExecutor implements Serializable {
 
 	@Editable(order=10200, group="Job Applicability",
 			description="Optionally specify space-separated jobs applicable for this executor. "
-					+ "Use * or ? for wildcard match. Leave empty to match all")
+					+ "Use * or ? for wildcard match")
 	@Patterns
 	@NameOfEmptyValue("All")
 	public String getApplicableJobNames() {
@@ -116,7 +116,7 @@ public abstract class JobExecutor implements Serializable {
 
 	@Editable(order=10300, group="Job Applicability",
 			description="Optionally specify space-separated job images applicable for this executor. "
-					+ "Use * or ? for wildcard match. Leave empty to match all")
+					+ "Use * or ? for wildcard match")
 	@Patterns
 	@NameOfEmptyValue("All")
 	public String getApplicableJobImages() {

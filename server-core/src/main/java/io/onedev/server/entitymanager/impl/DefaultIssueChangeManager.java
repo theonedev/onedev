@@ -19,6 +19,7 @@ import com.google.common.base.Optional;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
+import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueChangeManager;
 import io.onedev.server.entitymanager.IssueFieldManager;
@@ -58,6 +59,7 @@ import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.patternset.PatternSet;
 
 @Singleton
 public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange>
@@ -223,7 +225,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 								BuildSuccessfulTrigger trigger = (BuildSuccessfulTrigger) transition.getTrigger();
 								String branches = trigger.getBranches();
 								ObjectId commitId = ObjectId.fromString(build.getCommitHash());
-								if ((trigger.getJobName() == null || trigger.getJobName().equals(build.getJobName())) 
+								if ((trigger.getJobNames() == null || PatternSet.fromString(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
 										&& build.getStatus() == Build.Status.SUCCESSFUL
 										&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
 									Build.push(build);

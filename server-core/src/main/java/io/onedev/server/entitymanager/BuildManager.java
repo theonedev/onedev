@@ -40,7 +40,7 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	Collection<Build> queryUnfinished();
 
-	List<Build> query(@Nullable Project project, @Nullable User user, String term, int count);
+	List<Build> query(Project project, @Nullable User user, String term, int count);
 	
 	List<Build> query(@Nullable Project project, @Nullable User user, 
 			EntityQuery<Build> buildQuery, int firstResult, int maxResults);
@@ -53,7 +53,7 @@ public interface BuildManager extends EntityManager<Build> {
 
 	Collection<String> getJobNames(@Nullable Project project);
 	
-	Collection<String> getBuildVersions(Project project);
+	List<String> queryVersions(Project project, @Nullable User user, String matchWith, int count);
 
 	Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project, @Nullable User user);
 }
