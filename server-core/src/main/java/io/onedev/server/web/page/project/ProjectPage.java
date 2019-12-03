@@ -41,6 +41,7 @@ import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.builds.detail.BuildDetailPage;
+import io.onedev.server.web.page.project.builds.detail.InvalidBuildPage;
 import io.onedev.server.web.page.project.codecomments.ProjectCodeCommentsPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.page.project.commits.ProjectCommitsPage;
@@ -202,7 +203,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 					0, ProjectTagsPage.class));
 			
 			tabs.add(new ProjectTab(Model.of("Pull Requests"), "fa fa-fw fa-ext fa-branch-compare", 
-					0, ProjectPullRequestsPage.class, NewPullRequestPage.class, PullRequestDetailPage.class, InvalidPullRequestPage.class) {
+					0, ProjectPullRequestsPage.class, NewPullRequestPage.class, PullRequestDetailPage.class, 
+					InvalidPullRequestPage.class) {
 				
 				@Override
 				public Component render(String componentId) {
@@ -212,8 +214,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			});
 		}
 		
-		tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, ProjectIssueListPage.class, ProjectIssuesPage.class, 
-				IssueDetailPage.class, NewIssuePage.class) {
+		tabs.add(new ProjectTab(Model.of("Issues"), "fa fa-fw fa-bug", 0, ProjectIssueListPage.class, 
+				ProjectIssuesPage.class, IssueDetailPage.class, NewIssuePage.class) {
 
 			@Override
 			public Component render(String componentId) {
@@ -222,7 +224,8 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 			
 		});
 		
-		tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-cubes", 0, ProjectBuildsPage.class, BuildDetailPage.class) {
+		tabs.add(new ProjectTab(Model.of("Builds"), "fa fa-fw fa-cubes", 0, ProjectBuildsPage.class, 
+				BuildDetailPage.class, InvalidBuildPage.class) {
 
 			@Override
 			public Component render(String componentId) {

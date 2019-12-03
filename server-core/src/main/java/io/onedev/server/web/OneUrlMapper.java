@@ -54,6 +54,7 @@ import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.branches.ProjectBranchesPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
+import io.onedev.server.web.page.project.builds.detail.InvalidBuildPage;
 import io.onedev.server.web.page.project.builds.detail.artifacts.BuildArtifactsPage;
 import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
@@ -216,6 +217,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/builds/${build}/changes", BuildChangesPage.class));
 		add(new OnePageMapper("projects/${project}/builds/${build}/fixed-issues", FixedIssuesPage.class));
 		add(new OnePageMapper("projects/${project}/builds/${build}/artifacts", BuildArtifactsPage.class));
+		add(new OnePageMapper("projects/${project}/builds/${build}/invalid", InvalidBuildPage.class));
 		
 		add(new OnePageMapper("projects/${project}/milestones", MilestoneListPage.class));
 		add(new OnePageMapper("projects/${project}/milestones/${milestone}", MilestoneDetailPage.class));

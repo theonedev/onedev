@@ -1,0 +1,19 @@
+<wicket:extend>
+	<div class="invalid-build alert alert-danger">
+		<div class="head">
+			Unable to show build as corresponding commit no longer exist in the underlying git repository
+		</div>
+		<div class="body">
+			This might happen for two reasons:
+			<ul>
+				<li> The project points to a wrong git repository. In this case, you will need to copy over the correct repository, 
+				or make sure that the correct global storage directory is specified.</li>
+				<li> The commit is no longer needed and have been garbage collected. 
+				<wicket:enclosure child="delete">
+				In this case, you may also <a wicket:id="delete">delete the build</a>
+				</wicket:enclosure>
+				</li>
+			</ul>		
+		</div>
+	</div>
+</wicket:extend>

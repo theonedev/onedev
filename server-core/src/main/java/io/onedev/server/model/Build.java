@@ -734,6 +734,10 @@ public class Build extends AbstractEntity implements Referenceable {
 		stack.get().pop();
 	}
 	
+	public boolean isValid() {
+		return getProject().getRevCommit(getCommitHash(), false) != null;
+	}
+	
 	@Nullable
 	public static Build get() {
 		if (!stack.get().isEmpty()) { 
