@@ -1,5 +1,7 @@
 package io.onedev.server.event;
 
+import java.util.Date;
+
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.Project;
@@ -14,7 +16,7 @@ public class RefUpdated extends ProjectEvent implements BuildCommitAware {
 	private final ObjectId newCommitId;
 	
 	public RefUpdated(Project project, String refName, ObjectId oldCommitId, ObjectId newCommitId) {
-		super(null, null, project);
+		super(null, new Date(), project);
 		this.refName = refName;
 		this.oldCommitId = oldCommitId;
 		this.newCommitId = newCommitId;
