@@ -732,15 +732,14 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	}
 	
 	@Override
-	public Collection<String> getBuildVersions(@Nullable Project project) {
+	public Collection<String> getBuildVersions(Project project) {
 		buildVersionsLock.readLock().lock();
 		try {
-			Collection<String> buildVersions = new HashSet<>();
-			for (Map.Entry<Long, Collection<String>> entry: this.buildVersions.entrySet()) { 
-				if (project == null || project.getId().equals(entry.getKey()))
-					buildVersions.addAll(entry.getValue());
-			}
-			return buildVersions;
+			Collection<String> buildVersionsOfProject = buildVersions.get(project.getId());
+			if (buildVersionsOfProject != null)
+				return new HashSet<>(buildVersionsOfProject);
+			else
+				return new HashSet<>();
 		} finally {
 			buildVersionsLock.readLock().unlock();
 		}

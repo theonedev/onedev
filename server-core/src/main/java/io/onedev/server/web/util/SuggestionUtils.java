@@ -330,7 +330,7 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestBuildVersions(@Nullable Project project, String matchWith) {
+	public static List<InputSuggestion> suggestBuildVersions(Project project, String matchWith) {
 		Collection<String> buildVersions = OneDev.getInstance(BuildManager.class).getBuildVersions(project);
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (String buildVersion: buildVersions) {
