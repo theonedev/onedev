@@ -1260,4 +1260,18 @@ public class DataMigrator {
 		
 	}
 	
+	private void migrate26(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element createdAtElement = element.element("createdAt");
+					createdAtElement.setName("createDate");
+					element.addElement("updateDate").setText(createdAtElement.getText());
+				}
+				dom.writeToFile(file, false);
+			} 		
+		}
+	}
+	
 }
