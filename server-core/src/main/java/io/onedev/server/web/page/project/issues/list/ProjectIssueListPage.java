@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project.issues.list;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -22,8 +21,6 @@ import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
-import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
@@ -47,22 +44,12 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 			if (query == null) {
-				List<String> queries = new ArrayList<>();
-				if (getProject().getIssueQuerySettingOfCurrentUser() != null) { 
-					for (NamedIssueQuery namedQuery: getProject().getIssueQuerySettingOfCurrentUser().getUserQueries())
-						queries.add(namedQuery.getQuery());
+				if (getProject().getIssueQuerySettingOfCurrentUser() != null 
+						&& !getProject().getIssueQuerySettingOfCurrentUser().getUserQueries().isEmpty()) {
+					query = getProject().getIssueQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
+				} else if (!getProject().getIssueSetting().getNamedQueries(true).isEmpty()) {
+					query = getProject().getIssueSetting().getNamedQueries(true).iterator().next().getQuery();
 				}
-				for (NamedIssueQuery namedQuery: getProject().getIssueSetting().getNamedQueries(true))
-					queries.add(namedQuery.getQuery());
-				for (String each: queries) {
-					try {
-						if (SecurityUtils.getUser() != null || !IssueQuery.parse(getProject(), each, true).needsLogin()) {  
-							query = each;
-							break;
-						}
-					} catch (Exception e) {
-					}
-				} 
 			}
 			return query;
 		}
@@ -93,11 +80,6 @@ public class ProjectIssueListPage extends ProjectIssuesPage {
 			@Override
 			protected NamedQueriesBean<NamedIssueQuery> newNamedQueriesBean() {
 				return new NamedIssueQueriesBean();
-			}
-
-			@Override
-			protected boolean needsLogin(NamedIssueQuery namedQuery) {
-				return IssueQuery.parse(getProject(), namedQuery.getQuery(), true).needsLogin();
 			}
 
 			@Override

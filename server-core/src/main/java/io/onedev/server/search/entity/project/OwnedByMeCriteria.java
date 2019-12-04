@@ -5,41 +5,36 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import io.onedev.server.OneException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.ProjectQueryConstants;
 
-public class OwnerIsMeCriteria extends EntityCriteria<Project> {
+public class OwnedByMeCriteria extends EntityCriteria<Project> {
 
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
 		Expression<String> attribute = root.get(ProjectQueryConstants.ATTR_OWNER);
-		if (user != null)
-			return builder.equal(attribute, user);
+		if (User.get() != null)
+			return builder.equal(attribute, User.get());
 		else
-			return builder.disjunction();
+			throw new OneException("Please login to perform this query");
 	}
 
 	@Override
-	public boolean matches(Project project, User user) {
-		if (user != null)
-			return user.equals(project.getOwner());
+	public boolean matches(Project project) {
+		if (User.get() != null)
+			return User.get().equals(project.getOwner());
 		else
-			return false;
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return true;
+			throw new OneException("Please login to perform this query");
 	}
 
 	@Override
 	public String toString() {
-		return ProjectQuery.quote(ProjectQueryConstants.FIELD_OWNER) + " " 
-				+ ProjectQuery.getRuleName(ProjectQueryLexer.IsMe);
+		return ProjectQuery.getRuleName(ProjectQueryLexer.OwnedByMe);
 	}
 
 }

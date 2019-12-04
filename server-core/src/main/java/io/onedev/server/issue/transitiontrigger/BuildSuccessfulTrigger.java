@@ -74,7 +74,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	
 	@Editable(order=300, description="Specify an issue query to filter issues eligible for this transition."
 			+ "This query will be combined with 'from states' criteria of this transition")
-	@IssueQuery
+	@IssueQuery(withCurrentUserCriteria = false, withCurrentBuildCriteria = true)
 	@NotEmpty
 	public String getIssueQuery() {
 		return issueQuery;

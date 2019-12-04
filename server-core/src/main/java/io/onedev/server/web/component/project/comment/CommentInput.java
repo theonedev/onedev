@@ -87,7 +87,7 @@ public abstract class CommentInput extends MarkdownEditor {
 			public List<Build> findBuilds(@Nullable Project project, String query, int count) {
 				if (project == null)
 					project = getProject();
-				return OneDev.getInstance(BuildManager.class).query(project, SecurityUtils.getUser(), query, count);
+				return OneDev.getInstance(BuildManager.class).query(project, query, count);
 			}
 			
 		};

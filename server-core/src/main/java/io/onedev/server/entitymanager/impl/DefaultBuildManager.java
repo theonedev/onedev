@@ -25,7 +25,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 
-import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -49,12 +49,12 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.match.StringMatcher;
 import io.onedev.commons.utils.schedule.SchedulableTask;
 import io.onedev.commons.utils.schedule.TaskScheduler;
-import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -79,11 +79,9 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.security.permission.ManageProject;
-import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ProjectScopedNumber;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.BuildFacade;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.query.BuildQueryConstants;
@@ -111,6 +109,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	private final TransactionManager transactionManager;
 	
+	private final UserManager userManager;
+	
 	private final Map<Long, BuildFacade> builds = new HashMap<>();
 	
 	private final ReadWriteLock buildsLock = new ReentrantReadWriteLock();
@@ -124,7 +124,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Inject
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
 			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager,
-			GroupManager groupManager, StorageManager storageManager, 
+			GroupManager groupManager, StorageManager storageManager, UserManager userManager,
 			ProjectManager projectManager, TransactionManager transactionManager) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
@@ -132,6 +132,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		this.storageManager = storageManager;
 		this.groupManager = groupManager;
 		this.projectManager = projectManager;
+		this.userManager = userManager;
 		this.taskScheduler = taskScheduler;
 		this.transactionManager = transactionManager;
 	}
@@ -292,16 +293,15 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 	@Sessional
 	@Override
-	public List<Build> query(Project project, @Nullable User user, String term, int count) {
+	public List<Build> query(Project project, String term, int count) {
 		List<Build> builds = new ArrayList<>();
 
 		EntityCriteria<Build> criteria = newCriteria();
 		criteria.add(Restrictions.eq(BuildQueryConstants.ATTR_PROJECT, project));
 
-		Subject subject = User.asSubject(user);
-		if (!subject.isPermitted(new ProjectPermission(project, new ManageProject()))) {
+		if (!SecurityUtils.canManage(project)) {
 			List<Criterion> jobCriterions = new ArrayList<>();
-			for (String jobName: getAccessibleJobNames(project, user).get(project)) 
+			for (String jobName: getAccessibleJobNames(project).get(project)) 
 				jobCriterions.add(Restrictions.eq(BuildQueryConstants.ATTR_JOB, jobName));
 			if (!jobCriterions.isEmpty())
 				criteria.add(Restrictions.or(jobCriterions.toArray(new Criterion[jobCriterions.size()])));
@@ -330,13 +330,13 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	@Sessional
 	@Override
-	public List<String> queryVersions(Project project, @Nullable User user, String matchWith, int count) {
+	public List<String> queryVersions(Project project, String matchWith, int count) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<String> criteriaQuery = builder.createQuery(String.class);
 		Root<Build> root = criteriaQuery.from(Build.class);
 		criteriaQuery.select(root.get(BuildQueryConstants.ATTR_VERSION)).distinct(true);
 		
-		Collection<Predicate> predicates = getPredicates(project, root, builder, user);
+		Collection<Predicate> predicates = getPredicates(project, root, builder);
 		predicates.add(builder.like(
 				builder.lower(root.get(BuildQueryConstants.ATTR_VERSION)), 
 				"%" + matchWith.toLowerCase() + "%"));
@@ -365,22 +365,21 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	}
 
 	private Collection<Predicate> getPredicates(@Nullable Project project, Root<Build> root, 
-			CriteriaBuilder builder, @Nullable User user) {
+			CriteriaBuilder builder) {
 		Collection<Predicate> predicates = new ArrayList<>();
 
-		Subject subject = User.asSubject(user);
 		if (project != null) {
 			predicates.add(builder.equal(root.get(BuildQueryConstants.ATTR_PROJECT), project));
-			if (!subject.isPermitted(new ProjectPermission(project, new ManageProject()))) {
+			if (!SecurityUtils.canManage(project)) {
 				List<Predicate> jobPredicates = new ArrayList<>();
-				for (String jobName: getAccessibleJobNames(project, user).get(project)) 
+				for (String jobName: getAccessibleJobNames(project).get(project)) 
 					jobPredicates.add(builder.equal(root.get(BuildQueryConstants.ATTR_JOB), jobName));
 				predicates.add(builder.or(jobPredicates.toArray(new Predicate[jobPredicates.size()])));
 			}
-		} else if (!subject.isPermitted(new SystemAdministration())) {
+		} else if (!SecurityUtils.isAdministrator()) {
 			List<Predicate> projectPredicates = new ArrayList<>();
-			for (Map.Entry<Project, Collection<String>> entry: getAccessibleJobNames(null, user).entrySet()) {
-				if (subject.isPermitted(new ProjectPermission(project, new ManageProject()))) {
+			for (Map.Entry<Project, Collection<String>> entry: getAccessibleJobNames(null).entrySet()) {
+				if (SecurityUtils.canManage(project)) {
 					projectPredicates.add(builder.equal(root.get(BuildQueryConstants.ATTR_PROJECT), entry.getKey()));
 				} else {
 					List<Predicate> jobPredicates = new ArrayList<>();
@@ -397,22 +396,23 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		return predicates;
 	}
 	
-	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Build> criteria, 
-			@Nullable Project project, Root<Build> root, CriteriaBuilder builder, @Nullable User user) {
-		Collection<Predicate> predicates = getPredicates(project, root, builder, user);
-		if (criteria != null)
-			predicates.add(criteria.getPredicate(root, builder, user));
+	private Predicate[] getPredicates(@Nullable Project project, 
+			io.onedev.server.search.entity.EntityCriteria<Build> criteria, 
+			Root<Build> root, CriteriaBuilder builder) {
+		Collection<Predicate> predicates = getPredicates(project, root, builder);
+		if (criteria != null) 
+			predicates.add(criteria.getPredicate(root, builder));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
-	private CriteriaQuery<Build> buildCriteriaQuery(Session session, @Nullable Project project, 
-			EntityQuery<Build> buildQuery, @Nullable User user) {
+	private CriteriaQuery<Build> buildCriteriaQuery(@Nullable Project project, 
+			Session session,  EntityQuery<Build> buildQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
 		query.select(root).distinct(true);
 		
-		query.where(getPredicates(buildQuery.getCriteria(), project, root, builder, user));
+		query.where(getPredicates(project, buildQuery.getCriteria(), root, builder));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: buildQuery.getSorts()) {
@@ -431,9 +431,9 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	@Sessional
 	@Override
-	public List<Build> query(@Nullable Project project, @Nullable User user, 
-			EntityQuery<Build> buildQuery, int firstResult, int maxResults) {
-		CriteriaQuery<Build> criteriaQuery = buildCriteriaQuery(getSession(), project, buildQuery, user);
+	public List<Build> query(@Nullable Project project, EntityQuery<Build> buildQuery, 
+			int firstResult, int maxResults) {
+		CriteriaQuery<Build> criteriaQuery = buildCriteriaQuery(project, getSession(), buildQuery);
 		Query<Build> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
@@ -442,13 +442,12 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 	@Sessional
 	@Override
-	public int count(@Nullable Project project, @Nullable User user, 
-			io.onedev.server.search.entity.EntityCriteria<Build> buildCriteria) {
+	public int count(@Nullable Project project, io.onedev.server.search.entity.EntityCriteria<Build> buildCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Build> root = criteriaQuery.from(Build.class);
 
-		criteriaQuery.where(getPredicates(buildCriteria, project, root, builder, user));
+		criteriaQuery.where(getPredicates(project, buildCriteria, root, builder));
 
 		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
@@ -519,35 +518,45 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 			@Override
 			public Boolean call() {
-				List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
-				if (!builds.isEmpty()) {
-					logger.debug("Checking build preserve condition: {}->{}", 
-							firstResult.get()+1, firstResult.get()+builds.size());
-				}
-				for (Build build: builds) {
-					Project project = build.getProject();
-					Optional<BuildQuery> query = preserveConditions.get(project.getId());
-					if (query == null) {
-						try {
-							String queryString = project.getBuildSetting().getBuildsToPreserve();
-							query = Optional.of(BuildQuery.parse(project, queryString));
-							if (query.get().needsLogin())
-								throw new OneException("This query needs login which is not supported here");
-						} catch (Exception e) {
-							logger.error("Error parsing build preserve condition of project '{}'", project.getName(), e);
-							query = Optional.absent();
-						}
-						preserveConditions.put(project.getId(), query);
+				ThreadContext.bind(userManager.getRoot().asSubject());
+				User.push(null); // do not support various 'is me' criterias
+				try {
+					List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
+					if (!builds.isEmpty()) {
+						logger.debug("Checking build preserve condition: {}->{}", 
+								firstResult.get()+1, firstResult.get()+builds.size());
 					}
-					if (query.isPresent()) {
-						if (!query.get().matches(build, null)) {
-							logger.debug("Preserve condition not satisfied, deleting build {}...", build.getId());
-							delete(build);
+					for (Build build: builds) {
+						Project project = build.getProject();
+						Optional<BuildQuery> query = preserveConditions.get(project.getId());
+						if (query == null) {
+							try {
+								String queryString = project.getBuildSetting().getBuildsToPreserve();
+								query = Optional.of(BuildQuery.parse(project, queryString));
+							} catch (Exception e) {
+								String message = String.format("Error parsing build preserve condition of project '%s'", 
+										project.getName());
+								logger.error(message, e);
+								query = Optional.absent();
+							}
+							preserveConditions.put(project.getId(), query);
+						}
+						if (query.isPresent()) {
+							try {
+								if (!query.get().matches(build)) 
+									delete(build);
+							} catch (Exception e) {
+								String message = String.format("Error preserving build '%s'", build.getFQN());
+								logger.error(message, e);
+							}
 						}
 					}
-				}
-				firstResult.set(firstResult.get() + CLEANUP_BATCH);
-				return builds.size() == CLEANUP_BATCH;
+					firstResult.set(firstResult.get() + CLEANUP_BATCH);
+					return builds.size() == CLEANUP_BATCH;
+				} finally {
+					User.pop();
+					ThreadContext.unbindSubject();
+				}						
 			}
 			
 		})) {}
@@ -742,12 +751,12 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	}
 	
 	@Override
-	public Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project, @Nullable User user) {
+	public Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project) {
 		jobNamesLock.readLock().lock();
 		try {
 			Map<Project, Collection<String>> accessibleJobNames = new HashMap<>();
-			Subject subject = User.asSubject(user);
-			if (subject.isPermitted(new SystemAdministration())) {
+			User user = SecurityUtils.getUser();
+			if (SecurityUtils.isAdministrator()) {
 				for (Map.Entry<Long, Collection<String>> entry: jobNames.entrySet())
 					accessibleJobNames.put(projectManager.load(entry.getKey()), new HashSet<>(entry.getValue()));
 			} else {

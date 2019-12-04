@@ -5,6 +5,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import io.onedev.server.OneException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -15,26 +16,21 @@ public class SubmittedByMeCriteria extends EntityCriteria<Build> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
-		if (user != null) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
+		if (User.get() != null) {
 			Path<User> attribute = root.get(BuildQueryConstants.ATTR_SUBMITTER);
-			return builder.equal(attribute, user);
+			return builder.equal(attribute, User.get());
 		} else {
-			return builder.disjunction();
+			throw new OneException("Please login to perform this query");
 		}
 	}
 
 	@Override
-	public boolean matches(Build build, User user) {
-		if (user != null)
-			return user.equals(build.getSubmitter());
+	public boolean matches(Build build) {
+		if (User.get() != null)
+			return User.get().equals(build.getSubmitter());
 		else
-			return false;
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return true;
+			throw new OneException("Please login to perform this query");
 	}
 
 	@Override

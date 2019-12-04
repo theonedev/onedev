@@ -1,12 +1,15 @@
 package io.onedev.server.web.behavior;
 
 import static io.onedev.server.search.entity.EntityQuery.getValue;
+import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
 import static io.onedev.server.search.entity.issue.IssueQuery.checkField;
 import static io.onedev.server.search.entity.issue.IssueQuery.getOperator;
-import static io.onedev.server.search.entity.issue.IssueQuery.getRuleName;
-import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsMe;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedBy;
 import static io.onedev.server.search.entity.issue.IssueQueryLexer.SubmittedByMe;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsMe;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.FixedInCurrentBuild;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsCurrent;
+import static io.onedev.server.search.entity.issue.IssueQueryLexer.IsPrevious;
 import static io.onedev.server.util.query.IssueQueryConstants.FIELD_COMMENT;
 import static io.onedev.server.util.query.IssueQueryConstants.FIELD_COMMENT_COUNT;
 import static io.onedev.server.util.query.IssueQueryConstants.FIELD_DESCRIPTION;
@@ -60,7 +63,6 @@ import io.onedev.server.search.entity.issue.IssueQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
@@ -71,9 +73,16 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
-	public IssueQueryBehavior(IModel<Project> projectModel) {
+	private final boolean withCurrentUserCriteria;
+	
+	private final boolean withCurrentBuildCriteria;
+	
+	public IssueQueryBehavior(IModel<Project> projectModel, 
+			boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria) {
 		super(IssueQueryParser.class, "query", false);
 		this.projectModel = projectModel;
+		this.withCurrentUserCriteria = withCurrentUserCriteria;
+		this.withCurrentBuildCriteria = withCurrentBuildCriteria;
 	}
 
 	@Override
@@ -215,12 +224,17 @@ public class IssueQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
-		if (SecurityUtils.getUser() == null 
-				&& (suggestedLiteral.equals(getRuleName(IsMe)) 
-						|| suggestedLiteral.equals(getRuleName(SubmittedByMe)))) {
-			return null;	
+		if (!withCurrentUserCriteria) {
+			if (suggestedLiteral.equals(getRuleName(SubmittedByMe)) || suggestedLiteral.equals(getRuleName(IsMe)))
+				return null;
 		}
-		
+		if (!withCurrentBuildCriteria) {
+			if (suggestedLiteral.equals(getRuleName(FixedInCurrentBuild)) 
+					|| suggestedLiteral.equals(getRuleName(IsCurrent))
+					|| suggestedLiteral.equals(getRuleName(IsPrevious))) {
+				return null;
+			}
+		}
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);

@@ -10,6 +10,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -28,7 +29,7 @@ public class RequestedForChangesByCriteria extends EntityCriteria<PullRequest> {
 	}
 	
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		From<?, ?> join = root.join(PullRequestQueryConstants.ATTR_REVIEWS, JoinType.LEFT);
 		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.ATTR_USER);
 		Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.ATTR_EXCLUDE_DATE);
@@ -40,15 +41,10 @@ public class RequestedForChangesByCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
+	public boolean matches(PullRequest request) {
 		PullRequestReview review = request.getReview(this.user);
 		return review != null && review.getExcludeDate() == null && review.getResult() != null
 				&& !review.getResult().isApproved();
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

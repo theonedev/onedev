@@ -28,7 +28,6 @@ import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.search.commit.CommitQueryParser.CriteriaContext;
 
 public class CommitQuery implements Serializable {
@@ -144,18 +143,14 @@ public class CommitQuery implements Serializable {
 		
 		return new CommitQuery(criterias);
 	}
-
-	public boolean needsLogin() {
-		return criterias.stream().anyMatch(it->it.needsLogin());
-	}
 	
 	private static String getValue(TerminalNode valueNode) {
 		return StringUtils.unescape(FenceAware.unfence(valueNode.getText())); 
 	}
 	
-	public boolean matches(RefUpdated event, User user) {
+	public boolean matches(RefUpdated event) {
 		if (!event.getNewCommitId().equals(ObjectId.zeroId())) 
-			return criterias.stream().allMatch(it->it.matches(event, user));
+			return criterias.stream().allMatch(it->it.matches(event));
 		else 
 			return false;
 	}

@@ -18,7 +18,7 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.BuildQueryConstants;
@@ -46,7 +46,7 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 	}
 	
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		Path<Long> attribute = root.get(BuildQueryConstants.ATTR_ID);
 		Project project = issue.getProject();
 		Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(project, issue.getNumber());
@@ -61,7 +61,7 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public boolean matches(Build build, User user) {
+	public boolean matches(Build build) {
 		if (build.getProject().equals(issue.getProject())) {
 			Collection<ObjectId> fixCommits = getCommitInfoManager().getFixCommits(build.getProject(), issue.getNumber()); 
 			for (ObjectId commit: fixCommits) {
@@ -70,11 +70,6 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 					return true;
 			}
 		}
-		return false;
-	}
-
-	@Override
-	public boolean needsLogin() {
 		return false;
 	}
 

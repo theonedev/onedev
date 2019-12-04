@@ -30,7 +30,7 @@ public class ProjectQueryConstants {
 	public static final String ATTR_FORKED_FROM = "forkedFrom";
 	
 	public static final List<String> QUERY_FIELDS = 
-			Lists.newArrayList(FIELD_NAME, FIELD_OWNER, FIELD_DESCRIPTION, FIELD_UPDATE_DATE);
+			Lists.newArrayList(FIELD_NAME, FIELD_DESCRIPTION, FIELD_UPDATE_DATE);
 
 	public static final Map<String, String> ORDER_FIELDS = Maps.newLinkedHashMap(
 			FIELD_NAME, ATTR_NAME, 

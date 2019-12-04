@@ -11,7 +11,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.IssueQueryConstants;
 
@@ -30,21 +30,16 @@ public class PullRequestFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
+	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
 		return builder.and(
 				builder.equal(field.getParent().get(IssueQueryConstants.ATTR_PROJECT), request.getTargetProject()),
 				builder.equal(field.get(IssueField.ATTR_ORDINAL), request.getNumber()));
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
 		return issue.getProject().equals(request.getTargetProject()) && Objects.equals(fieldValue, request.getNumber());
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

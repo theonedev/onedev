@@ -49,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -99,14 +100,7 @@ public abstract class IssueListPanel extends Panel {
 		protected IssueQuery load() {
 			try {
 				IssueQuery additionalQuery = IssueQuery.parse(getProject(), query, true);
-				if (SecurityUtils.getUser() == null && additionalQuery.needsLogin()) { 
-					error("Please login to perform this query");
-				} else { 
-					if (SecurityUtils.getUser() == null && getBaseQuery().needsLogin())
-						error("Please login to show issues");
-					else
-						return IssueQuery.merge(getBaseQuery(), additionalQuery);
-				}
+				return IssueQuery.merge(getBaseQuery(), additionalQuery);
 			} catch (Exception e) {
 				logger.error("Error parsing issue query: " + query, e);
 				error(e.getMessage());
@@ -227,7 +221,7 @@ public abstract class IssueListPanel extends Panel {
 				return getProject();
 			}
 			
-		}));
+		}, true, false));
 		
 		input.add(new AjaxFormComponentUpdatingBehavior("input"){
 			
@@ -376,8 +370,7 @@ public abstract class IssueListPanel extends Panel {
 
 						@Override
 						protected Collection<Project> load() {
-							return OneDev.getInstance(ProjectManager.class).getPermittedProjects(
-									SecurityUtils.getUser(), new AccessProject());
+							return OneDev.getInstance(ProjectManager.class).getPermittedProjects(new AccessProject());
 						}
 						
 					}) {
@@ -501,16 +494,26 @@ public abstract class IssueListPanel extends Panel {
 
 			@Override
 			public Iterator<? extends Issue> iterator(long first, long count) {
-				return getIssueManager().query(getProject(), SecurityUtils.getUser(), parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+				try {
+					return getIssueManager().query(getProject(), parsedQueryModel.getObject(), 
+							(int)first, (int)count).iterator();
+				} catch (OneException e) {
+					error(e.getMessage());
+					return new ArrayList<Issue>().iterator();
+				}
 			}
 
 			@Override
 			public long calcSize() {
 				IssueQuery parsedQuery = parsedQueryModel.getObject();
-				if (parsedQuery != null)
-					return getIssueManager().count(getProject(), SecurityUtils.getUser(), parsedQuery.getCriteria());
-				else
-					return 0;
+				if (parsedQuery != null) {
+					try {
+						return getIssueManager().count(getProject(), parsedQuery.getCriteria());
+					} catch (OneException e) {
+						error(e.getMessage());
+					}
+				}
+				return 0;
 			}
 
 			@Override

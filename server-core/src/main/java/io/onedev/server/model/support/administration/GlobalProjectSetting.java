@@ -16,7 +16,7 @@ public class GlobalProjectSetting implements Serializable {
 	
 	public GlobalProjectSetting() {
 		namedQueries.add(new NamedProjectQuery("All projects", "all"));
-		namedQueries.add(new NamedProjectQuery("My projects", "\"Owner\" is me"));
+		namedQueries.add(new NamedProjectQuery("My projects", "owned by me"));
 	}
 	
 	public List<NamedProjectQuery> getNamedQueries() {

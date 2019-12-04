@@ -7,7 +7,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.AndCriteriaHelper;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.ParensAware;
@@ -23,18 +23,13 @@ public class AndCriteria extends EntityCriteria<PullRequest> implements ParensAw
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		return new AndCriteriaHelper<PullRequest>(criterias).getPredicate(root, builder, user);
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
+		return new AndCriteriaHelper<PullRequest>(criterias).getPredicate(root, builder);
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
-		return new AndCriteriaHelper<PullRequest>(criterias).matches(request, user);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return new AndCriteriaHelper<PullRequest>(criterias).needsLogin();
+	public boolean matches(PullRequest request) {
+		return new AndCriteriaHelper<PullRequest>(criterias).matches(request);
 	}
 
 	@Override

@@ -6,8 +6,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 
@@ -22,7 +22,7 @@ public class StatusCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<?> attribute = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_CLOSE_STATUS);
 		if (value.equalsIgnoreCase(PullRequest.STATE_OPEN)) 
 			return builder.isNull(attribute);
@@ -31,16 +31,11 @@ public class StatusCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
+	public boolean matches(PullRequest request) {
 		if (value.equalsIgnoreCase(PullRequest.STATE_OPEN)) 
 			return request.getCloseInfo() == null;
 		else
 			return request.getCloseInfo() != null && request.getCloseInfo().getStatus().name().equalsIgnoreCase(value);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

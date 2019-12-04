@@ -99,7 +99,7 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected List<Issue> query(EntityQuery<Issue> query, int offset, int count) {
-				return getIssueManager().query(getProject(), SecurityUtils.getUser(), query, offset, count);
+				return getIssueManager().query(getProject(), query, offset, count);
 			}
 
 			@Override

@@ -5,8 +5,10 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import io.onedev.server.OneException;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 
@@ -15,26 +17,21 @@ public class DiscardedByMeCriteria extends EntityCriteria<PullRequest> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		if (user != null) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
+		if (User.get() != null) {
 			Path<User> attribute = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_CLOSE_USER);
-			return builder.equal(attribute, user);
+			return builder.equal(attribute, User.get());
 		} else {
-			return builder.disjunction();
+			throw new OneException("Please login to perform this query");
 		}
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
-		if (user != null)
-			return user.equals(request.getSubmitter());
+	public boolean matches(PullRequest request) {
+		if (User.get() != null)
+			return User.get().equals(request.getSubmitter());
 		else
-			return false;
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return true;
+			throw new OneException("Please login to perform this query");
 	}
 
 	@Override

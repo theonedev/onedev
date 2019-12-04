@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.build;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -21,8 +20,6 @@ import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
@@ -50,22 +47,10 @@ public class BuildListPage extends LayoutPage {
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 			if (query == null) {
-				List<String> queries = new ArrayList<>();
-				if (getLoginUser() != null) {
-					for (NamedBuildQuery namedQuery: getLoginUser().getBuildQuerySetting().getUserQueries())
-						queries.add(namedQuery.getQuery());
-				}
-				for (NamedBuildQuery namedQuery: getBuildSetting().getNamedQueries())
-					queries.add(namedQuery.getQuery());
-				for (String each: queries) {
-					try {
-						if (SecurityUtils.getUser() != null || !BuildQuery.parse(null, each).needsLogin()) {  
-							query = each;
-							break;
-						}
-					} catch (Exception e) {
-					}
-				} 
+				if (getLoginUser() != null && !getLoginUser().getBuildQuerySetting().getUserQueries().isEmpty()) 
+					query = getLoginUser().getBuildQuerySetting().getUserQueries().iterator().next().getQuery();
+				else if (!getBuildSetting().getNamedQueries().isEmpty())
+					query = getBuildSetting().getNamedQueries().iterator().next().getQuery();
 			}
 			return query;
 		}
@@ -97,11 +82,6 @@ public class BuildListPage extends LayoutPage {
 			@Override
 			protected NamedQueriesBean<NamedBuildQuery> newNamedQueriesBean() {
 				return new NamedBuildQueriesBean();
-			}
-
-			@Override
-			protected boolean needsLogin(NamedBuildQuery namedQuery) {
-				return BuildQuery.parse(null, namedQuery.getQuery()).needsLogin();
 			}
 
 			@Override

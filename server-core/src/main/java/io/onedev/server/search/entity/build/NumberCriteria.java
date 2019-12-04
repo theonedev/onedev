@@ -8,7 +8,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScopedNumber;
@@ -31,7 +31,7 @@ public class NumberCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		Path<Long> attribute = root.get(BuildQueryConstants.ATTR_NUMBER);
 		Predicate numberPredicate;
 		if (operator == BuildQueryLexer.Is)
@@ -46,7 +46,7 @@ public class NumberCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public boolean matches(Build build, User user) {
+	public boolean matches(Build build) {
 		if (build.getProject().equals(number.getProject())) {
 			if (operator == BuildQueryLexer.Is)
 				return build.getNumber() == number.getNumber();
@@ -57,11 +57,6 @@ public class NumberCriteria extends EntityCriteria<Build> {
 		} else {
 			return false;
 		}
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

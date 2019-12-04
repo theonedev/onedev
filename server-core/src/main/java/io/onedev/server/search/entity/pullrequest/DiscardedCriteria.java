@@ -5,8 +5,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
+
 import io.onedev.server.search.entity.EntityCriteria;
 
 public class DiscardedCriteria extends EntityCriteria<PullRequest> {
@@ -18,18 +18,13 @@ public class DiscardedCriteria extends EntityCriteria<PullRequest> {
 	}
 	
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
-		return getCriteria().getPredicate(root, builder, user);
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
+		return getCriteria().getPredicate(root, builder);
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
-		return getCriteria().matches(request, user);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
+	public boolean matches(PullRequest request) {
+		return getCriteria().matches(request);
 	}
 
 	@Override

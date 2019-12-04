@@ -16,7 +16,7 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -35,7 +35,7 @@ public class IncludesIssueCriteria extends EntityCriteria<PullRequest> {
 	}
 	
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Collection<Long> pullRequestIds = getPullRequestIds(issue.getProject());
 		if (!pullRequestIds.isEmpty()) {
 			return builder.and(
@@ -54,14 +54,9 @@ public class IncludesIssueCriteria extends EntityCriteria<PullRequest> {
 	}
 	
 	@Override
-	public boolean matches(PullRequest request, User user) {
+	public boolean matches(PullRequest request) {
 		return request.getTargetProject().equals(issue.getProject()) 
 				&& getPullRequestIds(request.getTargetProject()).contains(request.getId());
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

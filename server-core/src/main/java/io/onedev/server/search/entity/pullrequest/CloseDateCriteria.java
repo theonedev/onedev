@@ -8,7 +8,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -30,7 +30,7 @@ public class CloseDateCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<Date> attribute = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_CLOSE_DATE);
 		if (operator == PullRequestQueryLexer.IsBefore)
 			return builder.lessThan(attribute, date);
@@ -39,7 +39,7 @@ public class CloseDateCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
+	public boolean matches(PullRequest request) {
 		if (request.getCloseInfo() != null) {
 			if (operator == PullRequestQueryLexer.IsBefore)
 				return request.getCloseInfo().getDate().before(date);
@@ -48,11 +48,6 @@ public class CloseDateCriteria extends EntityCriteria<PullRequest> {
 		} else {
 			return false;
 		}
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

@@ -7,11 +7,14 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
+import com.google.common.base.Preconditions;
+
 import io.onedev.server.model.Project;
 import io.onedev.server.web.behavior.BuildQueryBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.BuildQuery;
 import io.onedev.server.web.page.project.ProjectPage;
 
 @SuppressWarnings("serial")
@@ -27,6 +30,8 @@ public class BuildQueryEditor extends PropertyEditor<String> {
 	protected void onInitialize() {
 		super.onInitialize();
     	
+		BuildQuery buildQuery = Preconditions.checkNotNull(
+				descriptor.getPropertyGetter().getAnnotation(BuildQuery.class));
     	input = new TextField<String>("input", getModel());
         input.add(new BuildQueryBehavior(new AbstractReadOnlyModel<Project>() {
 
@@ -35,7 +40,7 @@ public class BuildQueryEditor extends PropertyEditor<String> {
 				return ((ProjectPage) getPage()).getProject();
 			}
     		
-    	}));
+    	}, buildQuery.withCurrentUserCriteria()));
         
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));
         

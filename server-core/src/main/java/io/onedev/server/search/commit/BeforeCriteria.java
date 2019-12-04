@@ -9,7 +9,6 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
 
 public class BeforeCriteria extends CommitCriteria {
@@ -24,18 +23,13 @@ public class BeforeCriteria extends CommitCriteria {
 	}
 	
 	@Override
-	public boolean needsLogin() {
-		return false;
-	}
-
-	@Override
 	public void fill(Project project, RevListCommand command) {
 		for (String value: values)
 			command.before(value);
 	}
 
 	@Override
-	public boolean matches(RefUpdated event, User user) {
+	public boolean matches(RefUpdated event) {
 		RevCommit commit = event.getProject().getRevCommit(event.getNewCommitId(), true);
 		for (String value: values) {
 			if (!commit.getCommitterIdent().getWhen().before(DateUtils.parseRelaxed(value)))

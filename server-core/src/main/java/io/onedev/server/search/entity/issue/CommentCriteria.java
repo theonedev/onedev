@@ -9,7 +9,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueComment;
-import io.onedev.server.model.User;
+
 import io.onedev.server.util.query.IssueQueryConstants;
 
 public class CommentCriteria extends IssueCriteria {
@@ -23,23 +23,18 @@ public class CommentCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		From<?, ?> join = root.join(IssueQueryConstants.ATTR_COMMENTS, JoinType.LEFT);
 		Path<String> attribute = join.get(IssueComment.PATH_CONTENT);
 		return builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		for (IssueComment comment: issue.getComments()) {
 			if (comment.getContent().toLowerCase().contains(value.toLowerCase()))
 				return true;
 		}
-		return false;
-	}
-
-	@Override
-	public boolean needsLogin() {
 		return false;
 	}
 

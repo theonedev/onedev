@@ -9,6 +9,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.IssueQueryConstants;
 
@@ -26,21 +27,16 @@ public class SubmittedByCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Path<User> attribute = root.get(IssueQueryConstants.ATTR_SUBMITTER);
 		return builder.equal(attribute, this.user);
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		return Objects.equals(issue.getSubmitter(), this.user);
 	}
 
-	@Override
-	public boolean needsLogin() {
-		return false;
-	}
-	
 	@Override
 	public String toString() {
 		return IssueQuery.getRuleName(IssueQueryLexer.SubmittedBy) + " " + IssueQuery.quote(value);

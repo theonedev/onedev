@@ -12,7 +12,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.OrCriteriaHelper;
 import io.onedev.server.search.entity.ParensAware;
 import io.onedev.server.util.ValueSetEdit;
@@ -29,18 +29,13 @@ public class OrCriteria extends IssueCriteria implements ParensAware {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
-		return new OrCriteriaHelper<Issue>(criterias).getPredicate(root, builder, user);
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
+		return new OrCriteriaHelper<Issue>(criterias).getPredicate(root, builder);
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
-		return new OrCriteriaHelper<Issue>(criterias).matches(issue, user);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return new OrCriteriaHelper<Issue>(criterias).needsLogin();
+	public boolean matches(Issue issue) {
+		return new OrCriteriaHelper<Issue>(criterias).matches(issue);
 	}
 
 	@Override

@@ -10,7 +10,6 @@ import io.onedev.server.issue.StateSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.issue.IssueCriteria;
@@ -29,14 +28,14 @@ public interface IssueManager extends EntityManager<Issue> {
     
 	void open(Issue issue);
 	
-	List<Issue> query(@Nullable Project project, @Nullable User user, EntityQuery<Issue> issueQuery, 
+	List<Issue> query(@Nullable Project project, EntityQuery<Issue> issueQuery, 
 			int firstResult, int maxResults);
 	
-	int count(@Nullable Project project, @Nullable User user, @Nullable IssueCriteria issueCriteria);
+	int count(@Nullable Project project, @Nullable IssueCriteria issueCriteria);
 	
 	List<Issue> query(Project project, String term, int count);
 
-	int count(Milestone milestone, @Nullable User user, @Nullable StateSpec.Category category);
+	int count(Milestone milestone, @Nullable StateSpec.Category category);
 	
 	Collection<String> getUndefinedStates();
 	

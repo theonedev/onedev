@@ -35,7 +35,6 @@ import io.onedev.server.issue.fieldspec.TextField;
 import io.onedev.server.issue.fieldspec.UserChoiceField;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
@@ -404,13 +403,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 	}
 	
 	@Override
-	public boolean needsLogin() {
-		return criteria != null && criteria.needsLogin();
-	}
-	
-	@Override
-	public boolean matches(Issue issue, User user) {
-		return criteria == null || criteria.matches(issue, user);
+	public boolean matches(Issue issue) {
+		return criteria == null || criteria.matches(issue);
 	}
 	
 	public static String getRuleName(int rule) {

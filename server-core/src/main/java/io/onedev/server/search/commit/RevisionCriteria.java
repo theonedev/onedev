@@ -11,7 +11,6 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.search.commit.Revision.Scope;
 
 public class RevisionCriteria extends CommitCriteria {
@@ -25,11 +24,6 @@ public class RevisionCriteria extends CommitCriteria {
 		this.revisions = revisions;
 	}
 	
-	@Override
-	public boolean needsLogin() {
-		return false;
-	}
-
 	@Override
 	public void fill(Project project, RevListCommand command) {
 		boolean ranged = false;
@@ -52,7 +46,7 @@ public class RevisionCriteria extends CommitCriteria {
 	}
 
 	@Override
-	public boolean matches(RefUpdated event, User user) {
+	public boolean matches(RefUpdated event) {
 		List<Revision> untilRevisions = revisions.stream().filter(it->it.getScope() != Scope.SINCE).collect(Collectors.toList());
 		if (!untilRevisions.isEmpty()) {
 			for (Revision revision: untilRevisions) {

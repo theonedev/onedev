@@ -464,7 +464,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 
 					@Override
 					protected List<PullRequest> query(EntityQuery<PullRequest> query, int offset, int count) {
-						return getPullRequestManager().query(getProject(), getLoginUser(), query, offset, count);
+						return getPullRequestManager().query(getProject(), query, offset, count);
 					}
 
 					@Override

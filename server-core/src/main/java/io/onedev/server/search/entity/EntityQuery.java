@@ -174,12 +174,8 @@ public abstract class EntityQuery<T extends AbstractEntity> implements Serializa
 			throw new OneException("Unable to find milestone: " + value);
 	}
 	
-	public boolean needsLogin() {
-		return getCriteria() != null && getCriteria().needsLogin();
-	}
-	
-	public boolean matches(T entity, User user) {
-		return getCriteria() == null || getCriteria().matches(entity, user);
+	public boolean matches(T entity) {
+		return getCriteria() == null || getCriteria().matches(entity);
 	}
 	
 	@Override

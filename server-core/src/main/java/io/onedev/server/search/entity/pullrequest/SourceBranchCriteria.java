@@ -7,7 +7,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 
@@ -22,20 +22,15 @@ public class SourceBranchCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<String> attribute = root.get(PullRequestQueryConstants.ATTR_SOURCE_BRANCH);
 		String normalized = branch.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
+	public boolean matches(PullRequest request) {
 		return WildcardUtils.matchString(branch.toLowerCase(), request.getSourceBranch().toLowerCase());
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

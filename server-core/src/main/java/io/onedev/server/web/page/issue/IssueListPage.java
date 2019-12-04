@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.issue;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -21,7 +20,6 @@ import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
-import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.web.component.issue.list.IssueListPanel;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -46,22 +44,10 @@ public class IssueListPage extends LayoutPage {
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 			if (query == null) {
-				List<String> queries = new ArrayList<>();
-				if (getLoginUser() != null) {
-					for (NamedIssueQuery namedQuery: getLoginUser().getIssueQuerySetting().getUserQueries())
-						queries.add(namedQuery.getQuery());
-				}
-				for (NamedIssueQuery namedQuery: getIssueSetting().getNamedQueries())
-					queries.add(namedQuery.getQuery());
-				for (String each: queries) {
-					try {
-						if (getLoginUser() != null || !IssueQuery.parse(null, each, true).needsLogin()) {  
-							query = each;
-							break;
-						}
-					} catch (Exception e) {
-					}
-				} 
+				if (getLoginUser() != null && !getLoginUser().getIssueQuerySetting().getUserQueries().isEmpty())
+					query = getLoginUser().getIssueQuerySetting().getUserQueries().iterator().next().getQuery();
+				else if (!getIssueSetting().getNamedQueries().isEmpty())
+					query = getIssueSetting().getNamedQueries().iterator().next().getQuery();
 			}
 			return query;
 		}
@@ -101,11 +87,6 @@ public class IssueListPage extends LayoutPage {
 			@Override
 			protected NamedQueriesBean<NamedIssueQuery> newNamedQueriesBean() {
 				return new NamedIssueQueriesBean();
-			}
-
-			@Override
-			protected boolean needsLogin(NamedIssueQuery namedQuery) {
-				return IssueQuery.parse(null, namedQuery.getQuery(), true).needsLogin();
 			}
 
 			@Override

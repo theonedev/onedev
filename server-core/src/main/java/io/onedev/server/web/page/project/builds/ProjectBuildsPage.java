@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project.builds;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -24,8 +23,6 @@ import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.ProjectBuildSetting;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.search.entity.build.BuildQuery;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
@@ -49,23 +46,12 @@ public class ProjectBuildsPage extends ProjectPage {
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 			if (query == null) {
-				List<String> queries = new ArrayList<>();
-				if (getProject().getBuildQuerySettingOfCurrentUser() != null) { 
-					for (NamedBuildQuery namedQuery: getProject().getBuildQuerySettingOfCurrentUser().getUserQueries())
-						queries.add(namedQuery.getQuery());
+				if (getProject().getBuildQuerySettingOfCurrentUser() != null 
+						&& !getProject().getBuildQuerySettingOfCurrentUser().getUserQueries().isEmpty()) {
+					query = getProject().getBuildQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
+				} else if (!getProject().getBuildSetting().getNamedQueries(true).isEmpty()) {
+					query = getProject().getBuildSetting().getNamedQueries(true).iterator().next().getQuery();
 				}
-				for (NamedBuildQuery namedQuery: getProject().getBuildSetting().getNamedQueries(true))
-					queries.add(namedQuery.getQuery());
-				query = null;
-				for (String each: queries) {
-					try {
-						if (SecurityUtils.getUser() != null || !BuildQuery.parse(getProject(), each).needsLogin()) {  
-							query = each;
-							break;
-						}
-					} catch (Exception e) {
-					}
-				} 
 			}
 			return query;
 		}
@@ -100,11 +86,6 @@ public class ProjectBuildsPage extends ProjectPage {
 			@Override
 			protected NamedQueriesBean<NamedBuildQuery> newNamedQueriesBean() {
 				return new NamedBuildQueriesBean();
-			}
-
-			@Override
-			protected boolean needsLogin(NamedBuildQuery namedQuery) {
-				return BuildQuery.parse(getProject(), namedQuery.getQuery()).needsLogin();
 			}
 
 			@Override

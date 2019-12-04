@@ -9,6 +9,9 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UrlManager;
@@ -24,6 +27,8 @@ import io.onedev.server.search.entity.build.BuildQuery;
 
 @Singleton
 public class BuildNotificationManager {
+	
+	private static final Logger logger = LoggerFactory.getLogger(BuildNotificationManager.class);
 	
 	private final MailManager mailManager;
 	
@@ -89,12 +94,18 @@ public class BuildNotificationManager {
 		for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
 			User user = entry.getKey();
 			for (String queryString: entry.getValue()) {
+				User.push(user);
 				try {
-					if (BuildQuery.parse(event.getProject(), queryString).matches(build, user)) {
+					if (BuildQuery.parse(event.getProject(), queryString).matches(build)) {
 						notifyEmails.add(user.getEmail());
 						break;
 					}
 				} catch (Exception e) {
+					String message = String.format("Error processing build subscription (user: %s, build: %s, query: %s)", 
+							user.getName(), build.getFQN(), queryString);
+					logger.error(message, e);
+				} finally {
+					User.pop();
 				}
 			}
 		}
@@ -114,12 +125,18 @@ public class BuildNotificationManager {
 		for (Map.Entry<User, Collection<String>> entry: subscribedQueryStrings.entrySet()) {
 			User user = entry.getKey();
 			for (String queryString: entry.getValue()) {
+				User.push(user);
 				try {
-					if (BuildQuery.parse(null, queryString).matches(build, user)) {
+					if (BuildQuery.parse(null, queryString).matches(build)) {
 						notifyEmails.add(user.getEmail());
 						break;
 					}
 				} catch (Exception e) {
+					String message = String.format("Error processing build subscription (user: %s, build: %s, query: %s)", 
+							user.getName(), build.getFQN(), queryString);
+					logger.error(message, e);
+				} finally {
+					User.pop();
 				}
 			}
 		}

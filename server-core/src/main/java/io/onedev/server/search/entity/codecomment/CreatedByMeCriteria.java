@@ -5,6 +5,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import io.onedev.server.OneException;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
@@ -15,26 +16,21 @@ public class CreatedByMeCriteria extends EntityCriteria<CodeComment> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
-		if (user != null) {
+	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
+		if (User.get() != null) {
 			Path<?> attribute = root.get(CodeCommentQueryConstants.ATTR_USER);
-			return builder.equal(attribute, user);
+			return builder.equal(attribute, User.get());
 		} else {
-			return builder.disjunction();
+			throw new OneException("Please login to perform this query");
 		}
 	}
 
 	@Override
-	public boolean matches(CodeComment comment, User user) {
-		if (user != null)
-			return user.equals(comment.getUser());
+	public boolean matches(CodeComment comment) {
+		if (User.get() != null)
+			return User.get().equals(comment.getUser());
 		else
-			return false;
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return true;
+			throw new OneException("Please login to perform this query");
 	}
 
 	@Override

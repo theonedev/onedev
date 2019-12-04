@@ -46,6 +46,7 @@ import org.slf4j.LoggerFactory;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.Project;
@@ -59,6 +60,7 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.PullRequestQueryBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
 import io.onedev.server.web.component.datatable.HistoryAwarePagingNavigator;
+import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
 import io.onedev.server.web.component.project.selector.ProjectSelector;
@@ -86,11 +88,7 @@ public abstract class PullRequestListPanel extends Panel {
 		@Override
 		protected PullRequestQuery load() {
 			try {
-				PullRequestQuery parsedQuery = PullRequestQuery.parse(getProject(), query);
-				if (SecurityUtils.getUser() == null && parsedQuery.needsLogin())  
-					error("Please login to perform this query");
-				else
-					return parsedQuery;
+				return PullRequestQuery.parse(getProject(), query);
 			} catch (Exception e) {
 				logger.error("Error parsing pull request query: " + query, e);
 				error(e.getMessage());
@@ -251,8 +249,7 @@ public abstract class PullRequestListPanel extends Panel {
 
 						@Override
 						protected Collection<Project> load() {
-							return OneDev.getInstance(ProjectManager.class).getPermittedProjects(
-									SecurityUtils.getUser(), new ReadCode());
+							return OneDev.getInstance(ProjectManager.class).getPermittedProjects(new ReadCode());
 						}
 						
 					}) {
@@ -346,31 +343,30 @@ public abstract class PullRequestListPanel extends Panel {
 			
 		});
 		
-		SortableDataProvider<PullRequest, Void> dataProvider = new SortableDataProvider<PullRequest, Void>() {
-
-			private Integer count;
-			
-			@Override
-			public void detach() {
-				count = null;
-			}
+		SortableDataProvider<PullRequest, Void> dataProvider = new LoadableDetachableDataProvider<PullRequest, Void>() {
 
 			@Override
 			public Iterator<? extends PullRequest> iterator(long first, long count) {
-				return getPullRequestManager().query(getProject(), SecurityUtils.getUser(), 
-						parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+				try {
+					return getPullRequestManager().query(getProject(), parsedQueryModel.getObject(), 
+							(int)first, (int)count).iterator();
+				} catch (OneException e) {
+					error(e.getMessage());
+					return new ArrayList<PullRequest>().iterator();
+				}
 			}
 
 			@Override
-			public long size() {
-				if (count == null) {
-					PullRequestQuery parsedQuery = parsedQueryModel.getObject();
-					if (parsedQuery != null)
-						count = getPullRequestManager().count(getProject(), SecurityUtils.getUser(), parsedQuery.getCriteria());
-					else
-						count = 0;
+			public long calcSize() {
+				PullRequestQuery parsedQuery = parsedQueryModel.getObject();
+				if (parsedQuery != null) {
+					try {
+						return getPullRequestManager().count(getProject(), parsedQuery.getCriteria());
+					} catch (OneException e) {
+						error(e.getMessage());
+					}
 				}
-				return count;
+				return 0;
 			}
 
 			@Override

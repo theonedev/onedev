@@ -372,14 +372,8 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 			@Override
 			protected List<T> load() {
 				List<T> namedQueries = new ArrayList<>();
-				for (T namedQuery: getQueries()!=null?getQueries():getDefaultQueries()) {
-					try {
-						if (SecurityUtils.getUser() != null || !needsLogin(namedQuery))
-							namedQueries.add(namedQuery);
-					} catch (Exception e) {
-						namedQueries.add(namedQuery);
-					}
-				}
+				for (T namedQuery: getQueries()!=null?getQueries():getDefaultQueries())
+					namedQueries.add(namedQuery);
 				return namedQueries;
 			}
 			
@@ -553,8 +547,6 @@ public abstract class SavedQueriesPanel<T extends NamedQuery> extends Panel {
 	}
 	
 	protected abstract NamedQueriesBean<T> newNamedQueriesBean();
-	
-	protected abstract boolean needsLogin(T namedQuery);
 	
 	protected abstract Link<Void> newQueryLink(String componentId, T namedQuery);
 	

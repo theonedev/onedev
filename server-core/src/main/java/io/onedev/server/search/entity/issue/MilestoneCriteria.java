@@ -11,7 +11,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
-import io.onedev.server.model.User;
+
 import io.onedev.server.util.query.IssueQueryConstants;
 
 public class MilestoneCriteria extends IssueCriteria {
@@ -25,23 +25,18 @@ public class MilestoneCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Path<String> attribute = root.join(IssueQueryConstants.ATTR_MILESTONE, JoinType.LEFT).get(Milestone.ATTR_NAME);
 		String normalized = milestoneName.toLowerCase().replace("*", "%");
 		return builder.like(builder.lower(attribute), normalized);
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		if (issue.getMilestone() != null)
 			return WildcardUtils.matchString(milestoneName.toLowerCase(), issue.getMilestone().getName().toLowerCase());
 		else 
 			return false;
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

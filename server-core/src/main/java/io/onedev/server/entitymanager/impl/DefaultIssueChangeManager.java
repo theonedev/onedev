@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.util.lang.Objects;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -55,10 +54,12 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+
 import io.onedev.server.search.entity.issue.IssueCriteria;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.search.entity.issue.StateCriteria;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.patternset.PatternSet;
 
 @Singleton
@@ -228,20 +229,22 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 								if ((trigger.getJobNames() == null || PatternSet.fromString(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
 										&& build.getStatus() == Build.Status.SUCCESSFUL
 										&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
+									IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true);
+									List<IssueCriteria> criterias = new ArrayList<>();
+									for (String fromState: transition.getFromStates()) 
+										criterias.add(new StateCriteria(fromState));
+									criterias.add(query.getCriteria());
+									query = new IssueQuery(IssueCriteria.of(criterias), new ArrayList<>());
 									Build.push(build);
+									User.push(null); // do not support various 'is me' criterias
 									try {
-										IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true);
-										List<IssueCriteria> criterias = new ArrayList<>();
-										for (String fromState: transition.getFromStates()) 
-											criterias.add(new StateCriteria(fromState));
-										criterias.add(query.getCriteria());
-										query = new IssueQuery(IssueCriteria.of(criterias), new ArrayList<>());
-										for (Issue issue: issueManager.query(project, null, query, 0, Integer.MAX_VALUE)) {
+										for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {
 											issue.removeFields(transition.getRemoveFields());
 											changeState(issue, transition.getToState(), new HashMap<>(), null, null);
 										}
 									} finally {
 										Build.pop();
+										User.pop();
 									}
 								}
 							}

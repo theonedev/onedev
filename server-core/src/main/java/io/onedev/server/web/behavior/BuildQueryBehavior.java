@@ -28,7 +28,6 @@ import io.onedev.server.search.entity.build.BuildQueryLexer;
 import io.onedev.server.search.entity.build.BuildQueryParser;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.query.BuildQueryConstants;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
@@ -39,9 +38,12 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 
 	private final IModel<Project> projectModel;
 	
-	public BuildQueryBehavior(IModel<Project> projectModel) {
+	private final boolean withCurrentUserCriteria;
+	
+	public BuildQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria) {
 		super(BuildQueryParser.class, "query", false);
 		this.projectModel = projectModel;
+		this.withCurrentUserCriteria = withCurrentUserCriteria;
 	}
 
 	@Override
@@ -144,10 +146,11 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
-		if (SecurityUtils.getUser() == null 
-				&& (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.SubmittedByMe)) 
-						|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.CancelledByMe)))) {
-			return null;
+		if (!withCurrentUserCriteria) {
+			if (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.SubmittedByMe)) 
+					|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.CancelledByMe))) {
+				return null;
+			}
 		}
 		
 		parseExpect = parseExpect.findExpectByLabel("operator");

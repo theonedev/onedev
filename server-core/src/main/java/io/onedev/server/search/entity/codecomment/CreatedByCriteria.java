@@ -27,19 +27,14 @@ public class CreatedByCriteria extends EntityCriteria<CodeComment> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
 		Path<User> attribute = root.get(CodeCommentQueryConstants.ATTR_USER);
 		return builder.equal(attribute, this.user);
 	}
 
 	@Override
-	public boolean matches(CodeComment comment, User user) {
+	public boolean matches(CodeComment comment) {
 		return Objects.equals(comment.getUser(), this.user);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

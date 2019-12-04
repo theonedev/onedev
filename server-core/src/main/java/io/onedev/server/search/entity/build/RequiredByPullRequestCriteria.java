@@ -11,7 +11,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.BuildQueryConstants;
@@ -30,7 +30,7 @@ public class RequiredByPullRequestCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		From<?, ?> join = root.join(BuildQueryConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT);
 		
 		return builder.and(
@@ -40,14 +40,9 @@ public class RequiredByPullRequestCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public boolean matches(Build build, User user) {
+	public boolean matches(Build build) {
 		return build.getProject().equals(request.getTargetProject()) 
 				&& build.getPullRequestBuilds().stream().anyMatch(it -> it.getRequest().equals(request) && it.isRequired());
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

@@ -125,34 +125,21 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			return null;
 		}			
 
-		if (SecurityUtils.getUser() == null && additionalQuery.needsLogin()) { 
-			error("Please login to perform this query");
+		IssueQuery baseQuery;
+		try {
+			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true);
+		} catch (Exception e) {
+			String prefix;
+			if (backlog)
+				prefix = "Error parsing backlog base query: ";
+			else
+				prefix = "Error parsing base query: ";
+				
+			logger.error(prefix + baseQueryString, e);
+			error(prefix + e.getMessage());
 			return null;
-		} else { 
-			IssueQuery baseQuery;
-			try {
-				baseQuery = IssueQuery.parse(getProject(), baseQueryString, true);
-			} catch (Exception e) {
-				String prefix;
-				if (backlog)
-					prefix = "Error parsing backlog base query: ";
-				else
-					prefix = "Error parsing base query: ";
-					
-				logger.error(prefix + baseQueryString, e);
-				error(prefix + e.getMessage());
-				return null;
-			}
-			if (SecurityUtils.getUser() == null && baseQuery.needsLogin()) {
-				if (backlog)
-					error("Login is required for backlog base query");
-				else
-					error("Login is required for base query");
-				return null;
-			} else {
-				return IssueQuery.merge(baseQuery, additionalQuery);
-			}
-		} 
+		}
+		return IssueQuery.merge(baseQuery, additionalQuery);
 	}
 	
 	public IssueBoardsPage(PageParameters params) {
@@ -610,7 +597,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 			else
 				model = Model.of(query);
 			TextField<String> input = new TextField<String>("input", model);
-			input.add(new IssueQueryBehavior(projectModel));
+			input.add(new IssueQueryBehavior(projectModel, true, false));
 			if (backlog)
 				input.add(AttributeAppender.append("placeholder", "Filter backlog issues"));
 			else

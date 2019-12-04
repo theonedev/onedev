@@ -9,6 +9,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -27,19 +28,14 @@ public class DiscardedByCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<User> attribute = PullRequestQuery.getPath(root, PullRequestQueryConstants.ATTR_CLOSE_USER);
-		return builder.equal(attribute, this.user);
+		return builder.equal(attribute, user);
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
-		return Objects.equals(request.getSubmitter(), this.user);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
+	public boolean matches(PullRequest request) {
+		return Objects.equals(request.getSubmitter(), user);
 	}
 
 	@Override

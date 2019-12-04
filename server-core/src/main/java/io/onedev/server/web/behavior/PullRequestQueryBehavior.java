@@ -1,11 +1,5 @@
 package io.onedev.server.web.behavior;
 
-import static io.onedev.server.search.entity.pullrequest.PullRequestQuery.getRuleName;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ApprovedByMe;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.DiscardedByMe;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.RequestedForChangesByMe;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.SubmittedByMe;
-import static io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer.ToBeReviewedByMe;
 import static io.onedev.server.util.query.IssueQueryConstants.FIELD_NUMBER;
 
 import java.util.ArrayList;
@@ -32,7 +26,6 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryLexer;
 import io.onedev.server.search.entity.pullrequest.PullRequestQueryParser;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
@@ -145,14 +138,6 @@ public class PullRequestQueryBehavior extends ANTLRAssistBehavior {
 	
 	@Override
 	protected Optional<String> describe(ParseExpect parseExpect, String suggestedLiteral) {
-		if (SecurityUtils.getUser() == null 
-				&& (suggestedLiteral.equals(getRuleName(ToBeReviewedByMe))
-						|| suggestedLiteral.equals(getRuleName(RequestedForChangesByMe))
-						|| suggestedLiteral.equals(getRuleName(ApprovedByMe))
-						|| suggestedLiteral.equals(getRuleName(SubmittedByMe))
-						|| suggestedLiteral.equals(getRuleName(DiscardedByMe)))) {
-			return null;
-		}
 		parseExpect = parseExpect.findExpectByLabel("operator");
 		if (parseExpect != null) {
 			List<Element> fieldElements = parseExpect.getState().findMatchedElementsByLabel("criteriaField", false);

@@ -8,7 +8,6 @@ import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 
 public abstract class CommitCriteria implements Serializable {
 
@@ -19,10 +18,8 @@ public abstract class CommitCriteria implements Serializable {
 		return WildcardUtils.matchString(value, formatted);
 	}
 	
-	public abstract boolean needsLogin();
-	
 	public abstract void fill(Project project, RevListCommand command);
 	
-	public abstract boolean matches(RefUpdated event, User user);
+	public abstract boolean matches(RefUpdated event);
 	
 }

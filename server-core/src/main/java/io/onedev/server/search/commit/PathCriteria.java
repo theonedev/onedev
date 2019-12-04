@@ -15,7 +15,7 @@ import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+
 
 public class PathCriteria extends CommitCriteria {
 
@@ -33,18 +33,13 @@ public class PathCriteria extends CommitCriteria {
 	}
 
 	@Override
-	public boolean needsLogin() {
-		return false;
-	}
-
-	@Override
 	public void fill(Project project, RevListCommand command) {
 		for (String value: values)
 			command.paths().add(value);
 	}
 
 	@Override
-	public boolean matches(RefUpdated event, User user) {
+	public boolean matches(RefUpdated event) {
 		Project project = event.getProject();
 		RevCommit commit = project.getRevCommit(event.getNewCommitId(), true);
 		

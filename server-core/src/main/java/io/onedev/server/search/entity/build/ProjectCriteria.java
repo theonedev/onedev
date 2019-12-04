@@ -8,7 +8,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.Build;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.BuildQueryConstants;
 import io.onedev.server.util.query.ProjectQueryConstants;
@@ -24,7 +24,7 @@ public class ProjectCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		Path<String> attribute = root
 				.join(BuildQueryConstants.ATTR_PROJECT, JoinType.INNER)
 				.get(ProjectQueryConstants.ATTR_NAME);
@@ -33,14 +33,9 @@ public class ProjectCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public boolean matches(Build build, User user) {
+	public boolean matches(Build build) {
 		return WildcardUtils.matchString(projectName.toLowerCase(), 
 				build.getProject().getName().toLowerCase());
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

@@ -123,7 +123,6 @@ import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
-import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.WriteCode;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
@@ -952,32 +951,33 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		return addedContributions;
 	}
 	
-	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 
-			@Nullable Project targetProject, @Nullable User user, Root<PullRequest> root, CriteriaBuilder builder) {
+	private Predicate[] getPredicates(@Nullable Project targetProject, 
+			io.onedev.server.search.entity.EntityCriteria<PullRequest> criteria, 
+			Root<PullRequest> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		if (targetProject != null) {
 			predicates.add(builder.equal(root.get("targetProject"), targetProject));
-		} else if (!User.asSubject(user).isPermitted(new SystemAdministration())) {
-			Collection<Project> projects = projectManager.getPermittedProjects(user, new ReadCode()); 
+		} else if (!SecurityUtils.isAdministrator()) {
+			Collection<Project> projects = projectManager.getPermittedProjects(new ReadCode()); 
 			if (!projects.isEmpty())
 				predicates.add(root.get(PullRequestQueryConstants.ATTR_TARGET_PROJECT).in(projects));
 			else
 				predicates.add(builder.disjunction());
 		}
 		
-		if (criteria != null)
-			predicates.add(criteria.getPredicate(root, builder, user));
+		if (criteria != null) 
+			predicates.add(criteria.getPredicate(root, builder));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
 	private CriteriaQuery<PullRequest> buildCriteriaQuery(Session session, @Nullable Project targetProject, 
-			User user, EntityQuery<PullRequest> requestQuery) {
+			EntityQuery<PullRequest> requestQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<PullRequest> query = builder.createQuery(PullRequest.class);
 		Root<PullRequest> root = query.from(PullRequest.class);
 		query.select(root).distinct(true);
 		
-		query.where(getPredicates(requestQuery.getCriteria(), targetProject, user, root, builder));
+		query.where(getPredicates(targetProject, requestQuery.getCriteria(), root, builder));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: requestQuery.getSorts()) {
@@ -999,9 +999,9 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	@Sessional
 	@Override
-	public List<PullRequest> query(@Nullable Project targetProject, @Nullable User user, 
+	public List<PullRequest> query(@Nullable Project targetProject,  
 			EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults) {
-		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), targetProject, user, requestQuery);
+		CriteriaQuery<PullRequest> criteriaQuery = buildCriteriaQuery(getSession(), targetProject, requestQuery);
 		Query<PullRequest> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
@@ -1010,13 +1010,13 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	
 	@Sessional
 	@Override
-	public int count(@Nullable Project targetProject, @Nullable User user, 
+	public int count(@Nullable Project targetProject,  
 			io.onedev.server.search.entity.EntityCriteria<PullRequest> requestCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<PullRequest> root = criteriaQuery.from(PullRequest.class);
 
-		criteriaQuery.where(getPredicates(requestCriteria, targetProject, user, root, builder));
+		criteriaQuery.where(getPredicates(targetProject, requestCriteria, root, builder));
 
 		criteriaQuery.select(builder.countDistinct(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

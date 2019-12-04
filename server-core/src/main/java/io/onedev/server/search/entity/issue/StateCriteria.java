@@ -13,7 +13,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.User;
+
 import io.onedev.server.util.query.IssueQueryConstants;
 
 public class StateCriteria extends IssueCriteria {
@@ -27,19 +27,14 @@ public class StateCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Path<?> attribute = root.get(IssueQueryConstants.ATTR_STATE);
 		return builder.equal(attribute, value);
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		return issue.getState().equals(value);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

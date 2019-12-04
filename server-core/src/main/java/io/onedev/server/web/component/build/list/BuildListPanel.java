@@ -49,6 +49,7 @@ import com.google.common.collect.Sets;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -58,6 +59,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
+
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
@@ -98,14 +100,7 @@ public abstract class BuildListPanel extends Panel {
 		protected BuildQuery load() {
 			try {
 				BuildQuery additionalQuery = BuildQuery.parse(getProject(), query);
-				if (SecurityUtils.getUser() == null && additionalQuery.needsLogin()) { 
-					error("Please login to perform this query");
-				} else { 
-					if (SecurityUtils.getUser() == null && getBaseQuery().needsLogin())
-						error("Please login to show builds");
-					else
-						return BuildQuery.merge(getBaseQuery(), additionalQuery);
-				}
+				return BuildQuery.merge(getBaseQuery(), additionalQuery);
 			} catch (Exception e) {
 				logger.error("Error parsing build query: " + query, e);
 				error(e.getMessage());
@@ -333,7 +328,7 @@ public abstract class BuildListPanel extends Panel {
 				return getProject();
 			}
 			
-		}));
+		}, true));
 		
 		input.add(new AjaxFormComponentUpdatingBehavior("input"){
 			
@@ -366,17 +361,26 @@ public abstract class BuildListPanel extends Panel {
 
 			@Override
 			public Iterator<? extends Build> iterator(long first, long count) {
-				return getBuildManager().query(getProject(), SecurityUtils.getUser(), 
-						parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+				try {
+					return getBuildManager().query(getProject(), parsedQueryModel.getObject(), 
+							(int)first, (int)count).iterator();
+				} catch (OneException e) {
+					error(e.getMessage());
+					return new ArrayList<Build>().iterator();
+				}
 			}
 
 			@Override
 			public long calcSize() {
 				BuildQuery parsedQuery = parsedQueryModel.getObject();
-				if (parsedQuery != null)
-					return getBuildManager().count(getProject(), SecurityUtils.getUser(), parsedQuery.getCriteria());
-				else
-					return 0;
+				if (parsedQuery != null) {
+					try {
+						return getBuildManager().count(getProject(), parsedQuery.getCriteria());
+					} catch (OneException e) {
+						error(e.getMessage());
+					}
+				} 
+				return 0;
 			}
 
 			@Override

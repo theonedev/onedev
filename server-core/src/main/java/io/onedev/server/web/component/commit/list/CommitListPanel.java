@@ -102,14 +102,7 @@ public abstract class CommitListPanel extends Panel {
 		protected CommitQuery load() {
 			try {
 				CommitQuery additionalQuery = CommitQuery.parse(getProject(), query);
-				if (SecurityUtils.getUser() == null && additionalQuery.needsLogin()) { 
-					error("Please login to perform this query");
-				} else { 
-					if (SecurityUtils.getUser() == null && getBaseQuery().needsLogin())
-						error("Please login to show commits");
-					else
-						return CommitQuery.merge(getBaseQuery(), additionalQuery);
-				}
+				return CommitQuery.merge(getBaseQuery(), additionalQuery);
 			} catch (Exception e) {
 				logger.error("Error parsing commit query: " + query, e);
 				error(e.getMessage());

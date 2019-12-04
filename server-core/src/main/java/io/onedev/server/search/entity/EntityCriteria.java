@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -14,7 +13,6 @@ import javax.persistence.criteria.Root;
 import edu.emory.mathcs.backport.java.util.Collections;
 import io.onedev.commons.utils.RangeBuilder;
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.User;
 
 public abstract class EntityCriteria<T extends AbstractEntity> implements Serializable {
 	
@@ -22,11 +20,9 @@ public abstract class EntityCriteria<T extends AbstractEntity> implements Serial
 	
 	public static final int IN_CLAUSE_LIMIT = 1000;
 	
-	public abstract Predicate getPredicate(Root<T> root, CriteriaBuilder builder, @Nullable User user);
+	public abstract Predicate getPredicate(Root<T> root, CriteriaBuilder builder);
 
-	public abstract boolean matches(T entity, @Nullable User user);
-	
-	public abstract boolean needsLogin();
+	public abstract boolean matches(T entity);
 	
 	protected Predicate inManyValues(CriteriaBuilder builder, Path<Long> attribute, Collection<Long> inValues, 
 			Collection<Long> allValues) {

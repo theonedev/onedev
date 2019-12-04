@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
@@ -73,11 +74,7 @@ public abstract class CodeCommentListPanel extends Panel {
 		@Override
 		protected CodeCommentQuery load() {
 			try {
-				CodeCommentQuery parsedQuery = CodeCommentQuery.parse(getProject(), query);
-				if (SecurityUtils.getUser() == null && parsedQuery.needsLogin())  
-					error("Please login to perform this query");
-				else
-					return parsedQuery;
+				return CodeCommentQuery.parse(getProject(), query);
 			} catch (Exception e) {
 				logger.error("Error parsing code comment query: " + query, e);
 				error(e.getMessage());
@@ -196,17 +193,26 @@ public abstract class CodeCommentListPanel extends Panel {
 
 			@Override
 			public Iterator<? extends CodeComment> iterator(long first, long count) {
-				return getCodeCommentManager().query(getProject(), getPullRequest(), SecurityUtils.getUser(), 
-						parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+				try {
+					return getCodeCommentManager().query(getProject(), getPullRequest(), 
+							parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+				} catch (OneException e) {
+					error(e.getMessage());
+					return new ArrayList<CodeComment>().iterator();
+				}
 			}
 
 			@Override
 			public long calcSize() {
 				CodeCommentQuery parsedQuery = parsedQueryModel.getObject();
-				if (parsedQuery != null)
-					return getCodeCommentManager().count(getProject(), getPullRequest(), SecurityUtils.getUser(), parsedQuery.getCriteria());
-				else
-					return 0;
+				if (parsedQuery != null) {
+					try {
+						return getCodeCommentManager().count(getProject(), getPullRequest(), parsedQuery.getCriteria());
+					} catch (OneException e) {
+						error(e.getMessage());
+					}
+				} 
+				return 0;
 			}
 
 			@Override

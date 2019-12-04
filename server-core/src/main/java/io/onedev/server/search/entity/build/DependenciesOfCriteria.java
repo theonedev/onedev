@@ -10,7 +10,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.BuildQueryConstants;
@@ -29,22 +29,17 @@ public class DependenciesOfCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		From<?, ?> join = root.join(BuildQueryConstants.ATTR_DEPENDENTS, JoinType.LEFT);
 		return builder.equal(join.get(BuildDependence.ATTR_DEPENDENT), build);
 	}
 
 	@Override
-	public boolean matches(Build build, User user) {
+	public boolean matches(Build build) {
 		for (BuildDependence dependence: this.build.getDependencies()) {
 			if (dependence.getDependency().equals(build))
 				return true;
 		}
-		return false;
-	}
-
-	@Override
-	public boolean needsLogin() {
 		return false;
 	}
 

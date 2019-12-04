@@ -8,7 +8,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.AbstractEntity;
-import io.onedev.server.model.User;
+
 
 public class AndCriteriaHelper<T extends AbstractEntity> extends EntityCriteria<T> {
 	
@@ -21,29 +21,20 @@ public class AndCriteriaHelper<T extends AbstractEntity> extends EntityCriteria<
 	}
 
 	@Override
-	public Predicate getPredicate(Root<T> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<T> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
 		for (EntityCriteria<T> criteria: criterias)
-			predicates.add(criteria.getPredicate(root, builder, user));
+			predicates.add(criteria.getPredicate(root, builder));
 		return builder.and(predicates.toArray(new Predicate[0]));
 	}
 
 	@Override
-	public boolean matches(T entity, User user) {
+	public boolean matches(T entity) {
 		for (EntityCriteria<T> criteria: criterias) {
-			if (!criteria.matches(entity, user))
+			if (!criteria.matches(entity))
 				return false;
 		}
 		return true;
-	}
-
-	@Override
-	public boolean needsLogin() {
-		for (EntityCriteria<T> criteria: criterias) {
-			if (criteria.needsLogin())
-				return true;
-		}
-		return false;
 	}
 
 	@Override

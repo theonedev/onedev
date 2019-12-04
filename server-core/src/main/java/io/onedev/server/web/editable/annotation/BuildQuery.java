@@ -14,6 +14,8 @@ import io.onedev.server.util.validation.BuildQueryValidator;
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy=BuildQueryValidator.class) 
 public @interface BuildQuery {
+	boolean withCurrentUserCriteria();
+	
     String message() default "";
 
     Class<?>[] groups() default {};

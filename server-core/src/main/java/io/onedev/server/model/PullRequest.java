@@ -868,4 +868,8 @@ public class PullRequest extends AbstractEntity implements Referenceable, Attach
 		return getTargetProject();
 	}
 
+	public String getFQN() {
+		return getTargetProject() + "#" + getNumber();
+	}
+	
 }

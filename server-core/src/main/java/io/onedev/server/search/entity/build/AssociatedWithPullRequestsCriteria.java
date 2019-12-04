@@ -5,7 +5,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.BuildQueryConstants;
 
@@ -14,18 +14,13 @@ public class AssociatedWithPullRequestsCriteria extends EntityCriteria<Build> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		return builder.isNotEmpty(root.get(BuildQueryConstants.ATTR_PULL_REQUEST_BUILDS)); 
 	}
 
 	@Override
-	public boolean matches(Build build, User user) {
+	public boolean matches(Build build) {
 		return !build.getPullRequestBuilds().isEmpty();
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

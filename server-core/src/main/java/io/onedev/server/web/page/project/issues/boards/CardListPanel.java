@@ -15,17 +15,18 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import com.google.common.collect.Sets;
 
+import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.issue.BoardSpec;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.issue.IssueQuery;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 import io.onedev.server.web.util.QueryPosition;
+import io.onedev.server.OneException;
 
 @SuppressWarnings("serial")
 abstract class CardListPanel extends Panel {
@@ -38,32 +39,38 @@ abstract class CardListPanel extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 
+		add(new NotificationPanel("feedback", this));
+		
 		RepeatingView cardsView = new RepeatingView("cards");
 		int index = 0;
-		for (Issue issue: queryIssues(0, WebConstants.PAGE_SIZE)) {
-			Long issueId = issue.getId();
-			IModel<Issue> model = new LoadableDetachableModel<Issue>() {
-
-				@Override
-				protected Issue load() {
-					return OneDev.getInstance(IssueManager.class).load(issueId);
-				}
-				
-			};
-			int cardOffset = index;
-			cardsView.add(new BoardCardPanel(cardsView.newChildId(), model) {
-
-				@Override
-				protected QueryPosition getPosition() {
-					IssueQuery query = getQuery();
-					if (query != null)
-						return new QueryPosition(query.toString(), getCardCount(), cardOffset);
-					else
-						return null;
-				}
-
-			});
-			index++;
+		try {
+			for (Issue issue: queryIssues(0, WebConstants.PAGE_SIZE)) {
+				Long issueId = issue.getId();
+				IModel<Issue> model = new LoadableDetachableModel<Issue>() {
+	
+					@Override
+					protected Issue load() {
+						return OneDev.getInstance(IssueManager.class).load(issueId);
+					}
+					
+				};
+				int cardOffset = index;
+				cardsView.add(new BoardCardPanel(cardsView.newChildId(), model) {
+	
+					@Override
+					protected QueryPosition getPosition() {
+						IssueQuery query = getQuery();
+						if (query != null)
+							return new QueryPosition(query.toString(), getCardCount(), cardOffset);
+						else
+							return null;
+					}
+	
+				});
+				index++;
+			}
+		} catch (OneException e) {
+			error(e.getMessage());
 		}
 		add(cardsView);
 		
@@ -137,10 +144,11 @@ abstract class CardListPanel extends Panel {
 	}
 
 	private List<Issue> queryIssues(int offset, int count) {
-		if (getQuery() != null) 
-			return getIssueManager().query(getProject(), SecurityUtils.getUser(), getQuery(), offset, count);
-		else 
+		if (getQuery() != null) {
+			return getIssueManager().query(getProject(), getQuery(), offset, count);
+		} else { 
 			return new ArrayList<>();
+		}
 	}
 	
 	protected abstract Project getProject();

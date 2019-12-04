@@ -9,7 +9,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
-import io.onedev.server.model.User;
+
 
 public class StringFieldCriteria extends FieldCriteria {
 
@@ -30,7 +30,7 @@ public class StringFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
+	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
 		Path<String> attribute = field.get(IssueField.ATTR_VALUE);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(builder.lower(attribute), value.toLowerCase());
@@ -39,17 +39,12 @@ public class StringFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		String fieldValue = (String) issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.Is)
 			return value.equalsIgnoreCase(fieldValue);
 		else 
 			return fieldValue != null && fieldValue.toLowerCase().contains(value.toLowerCase());
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

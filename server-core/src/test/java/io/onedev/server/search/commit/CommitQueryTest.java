@@ -13,6 +13,7 @@ import io.onedev.server.git.AbstractGitTest;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 
+
 public class CommitQueryTest extends AbstractGitTest {
 
 	@Test
@@ -44,20 +45,25 @@ public class CommitQueryTest extends AbstractGitTest {
 		
 		User user = new User();
 		user.setEmail(CommitQueryTest.this.user.getEmailAddress());
-		assertTrue(CommitQuery.parse(project, null).matches(event, user));
-		assertFalse(CommitQuery.parse(project, "branch(dev)").matches(event, user));
-		assertTrue(CommitQuery.parse(project, "default-branch").matches(event, user));
-		assertTrue(CommitQuery.parse(project, "branch(master) path(master/*)").matches(event, user));
-		assertFalse(CommitQuery.parse(project, "path(master/file)").matches(event, user));
-		assertTrue(CommitQuery.parse(project, "path(master/)").matches(event, user));
-		assertTrue(CommitQuery.parse(project, "path(master/file) path(master/file*)").matches(event, user));
-		assertTrue(CommitQuery.parse(project, "message(dev) message(master)").matches(event, user));
-		assertTrue(CommitQuery.parse(project, "message(dev) message(m*s)").matches(event, user));
-		assertTrue(CommitQuery.parse(project, "authored-by-me author(foo@example.com)").matches(event, user));
-		assertFalse(CommitQuery.parse(project, "authored-by-me committer(foo@example.com)").matches(event, user));
-		assertTrue(CommitQuery.parse(project, "authored-by-me committer(bar@example.com)").matches(event, user));
-		assertTrue(CommitQuery.parse(project, "after(2 days ago) after(1 hour ago)").matches(event, user));
-		assertFalse(CommitQuery.parse(project, "before(1 hour ago) after(1 day ago)").matches(event, user));
+		User.push(user);
+		try {
+			assertTrue(CommitQuery.parse(project, null).matches(event));
+			assertFalse(CommitQuery.parse(project, "branch(dev)").matches(event));
+			assertTrue(CommitQuery.parse(project, "default-branch").matches(event));
+			assertTrue(CommitQuery.parse(project, "branch(master) path(master/*)").matches(event));
+			assertFalse(CommitQuery.parse(project, "path(master/file)").matches(event));
+			assertTrue(CommitQuery.parse(project, "path(master/)").matches(event));
+			assertTrue(CommitQuery.parse(project, "path(master/file) path(master/file*)").matches(event));
+			assertTrue(CommitQuery.parse(project, "message(dev) message(master)").matches(event));
+			assertTrue(CommitQuery.parse(project, "message(dev) message(m*s)").matches(event));
+			assertTrue(CommitQuery.parse(project, "authored-by-me author(foo@example.com)").matches(event));
+			assertFalse(CommitQuery.parse(project, "authored-by-me committer(foo@example.com)").matches(event));
+			assertTrue(CommitQuery.parse(project, "authored-by-me committer(bar@example.com)").matches(event));
+			assertTrue(CommitQuery.parse(project, "after(2 days ago) after(1 hour ago)").matches(event));
+			assertFalse(CommitQuery.parse(project, "before(1 hour ago) after(1 day ago)").matches(event));
+		} finally {
+			User.pop();
+		}
 	}
 
 }

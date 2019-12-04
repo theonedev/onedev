@@ -9,6 +9,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -27,24 +28,20 @@ public class SubmittedByCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<User> attribute = root.get(PullRequestQueryConstants.ATTR_SUBMITTER);
-		return builder.equal(attribute, this.user);
+		return builder.equal(attribute, user);
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
-		return Objects.equals(request.getSubmitter(), this.user);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
+	public boolean matches(PullRequest request) {
+		return Objects.equals(request.getSubmitter(), user);
 	}
 
 	@Override
 	public String toString() {
-		return PullRequestQuery.getRuleName(PullRequestQueryLexer.SubmittedBy) + " " + PullRequestQuery.quote(value);
+		return PullRequestQuery.getRuleName(PullRequestQueryLexer.SubmittedBy) + 
+				" " + PullRequestQuery.quote(value);
 	}
 
 }

@@ -505,5 +505,9 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 	public Project getAttachmentProject() {
 		return getProject();
 	}
+
+	public String getFQN() {
+		return getProject() + "#" + getNumber();
+	}
 	
 }

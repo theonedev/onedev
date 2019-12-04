@@ -6,7 +6,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 
@@ -24,7 +24,7 @@ public class CommentCountCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		Path<Long> attribute = root.get(PullRequestQueryConstants.ATTR_COMMENT_COUNT);
 		if (operator == PullRequestQueryLexer.Is)
 			return builder.equal(attribute, value);
@@ -35,18 +35,13 @@ public class CommentCountCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
+	public boolean matches(PullRequest request) {
 		if (operator == PullRequestQueryLexer.Is)
 			return request.getCommentCount() == value;
 		else if (operator == PullRequestQueryLexer.IsGreaterThan)
 			return request.getCommentCount() > value;
 		else
 			return request.getCommentCount() < value;
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

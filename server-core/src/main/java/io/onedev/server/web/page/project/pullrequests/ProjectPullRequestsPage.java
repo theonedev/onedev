@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project.pullrequests;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -26,7 +25,6 @@ import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.model.support.pullrequest.ProjectPullRequestSetting;
-import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.pullrequest.list.PullRequestListPanel;
@@ -51,22 +49,12 @@ public class ProjectPullRequestsPage extends ProjectPage {
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 			if (query == null) {
-				List<String> queries = new ArrayList<>();
-				if (getProject().getPullRequestQuerySettingOfCurrentUser() != null) { 
-					for (NamedPullRequestQuery namedQuery: getProject().getPullRequestQuerySettingOfCurrentUser().getUserQueries())
-						queries.add(namedQuery.getQuery());
+				if (getProject().getPullRequestQuerySettingOfCurrentUser() != null
+						&& !getProject().getPullRequestQuerySettingOfCurrentUser().getUserQueries().isEmpty()) {
+					query = getProject().getPullRequestQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
+				} else if (!getProject().getPullRequestSetting().getNamedQueries(true).isEmpty()) {
+					query = getProject().getPullRequestSetting().getNamedQueries(true).iterator().next().getQuery();
 				}
-				for (NamedPullRequestQuery namedQuery: getProject().getPullRequestSetting().getNamedQueries(true))
-					queries.add(namedQuery.getQuery());
-				for (String each: queries) {
-					try {
-						if (SecurityUtils.getUser() != null || !PullRequestQuery.parse(getProject(), each).needsLogin()) {  
-							query = each;
-							break;
-						}
-					} catch (Exception e) {
-					}
-				} 
 			}
 			return query;
 		}
@@ -101,11 +89,6 @@ public class ProjectPullRequestsPage extends ProjectPage {
 			@Override
 			protected NamedQueriesBean<NamedPullRequestQuery> newNamedQueriesBean() {
 				return new NamedPullRequestQueriesBean();
-			}
-
-			@Override
-			protected boolean needsLogin(NamedPullRequestQuery namedQuery) {
-				return PullRequestQuery.parse(getProject(), namedQuery.getQuery()).needsLogin();
 			}
 
 			@Override

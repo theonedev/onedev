@@ -103,10 +103,15 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 
 		@Override
 		protected Integer load() {
-			if (getQuery() != null)
-				return OneDev.getInstance(IssueManager.class).count(getProject(), SecurityUtils.getUser(), getQuery().getCriteria());
-			else
+			if (getQuery() != null) {
+				try {
+					return OneDev.getInstance(IssueManager.class).count(getProject(), getQuery().getCriteria());
+				} catch(OneException e) {
+					return 0;
+				}
+			} else {
 				return 0;
+			}
 		}
 		
 	};
@@ -175,7 +180,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 								issue = SerializationUtils.clone(issue);
 								issue.setMilestone(getMilestone());
 							}
-							if (getQuery().matches(issue, SecurityUtils.getUser())) {
+							if (getQuery().matches(issue)) {
 								String script = String.format("$('#%s').addClass('issue-droppable');", getMarkupId());
 								issueDragging.getHandler().appendJavaScript(script);
 							}

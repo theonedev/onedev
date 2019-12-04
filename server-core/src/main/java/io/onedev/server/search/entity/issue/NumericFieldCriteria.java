@@ -10,7 +10,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
-import io.onedev.server.model.User;
+
 
 public class NumericFieldCriteria extends FieldCriteria {
 
@@ -27,7 +27,7 @@ public class NumericFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
+	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
 		Path<Integer> attribute = field.get(IssueField.ATTR_ORDINAL);
 		if (operator == IssueQueryLexer.Is)
 			return builder.equal(attribute, value);
@@ -38,7 +38,7 @@ public class NumericFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		Integer fieldValue = (Integer) issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.Is)
 			return Objects.equals(fieldValue, value);
@@ -46,11 +46,6 @@ public class NumericFieldCriteria extends FieldCriteria {
 			return fieldValue != null && fieldValue > value;
 		else
 			return fieldValue != null && fieldValue < value;
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

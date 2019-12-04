@@ -49,8 +49,6 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.Secret;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.security.permission.ProjectPermission;
-import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.script.ScriptContribution;
 import io.onedev.server.util.script.identity.ScriptIdentity;
@@ -76,7 +74,7 @@ public class SuggestionUtils {
 		return suggest(project, matchWith, new ProjectScopedSuggester() {
 			
 			@Override
-			public List<InputSuggestion> suggest(Project project, User user, String matchWith) {
+			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				if (SecurityUtils.canReadCode(project)) {
 					List<String> branchNames = project.getBranches()
 							.stream()
@@ -96,7 +94,7 @@ public class SuggestionUtils {
 		return suggest(project, matchWith, new ProjectScopedSuggester() {
 			
 			@Override
-			public List<InputSuggestion> suggest(Project project, User user, String matchWith) {
+			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				if (SecurityUtils.canReadCode(project)) {
 					List<String> tagNames = project.getTags()
 							.stream()
@@ -116,7 +114,7 @@ public class SuggestionUtils {
 		return suggest(project, matchWith, new ProjectScopedSuggester() {
 			
 			@Override
-			public List<InputSuggestion> suggest(Project project, User user, String matchWith) {
+			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				if (SecurityUtils.canReadCode(project)) 
 					return null;
 				else 
@@ -128,8 +126,7 @@ public class SuggestionUtils {
 	
 	public static List<InputSuggestion> suggestProjects(String matchWith) {
 		ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
-		User user = SecurityUtils.getUser();
-		List<String> projectNames = projectManager.getPermittedProjects(user, new AccessProject())
+		List<String> projectNames = projectManager.getPermittedProjects(new AccessProject())
 				.stream()
 				.map(it->it.getName())
 				.sorted()
@@ -214,9 +211,9 @@ public class SuggestionUtils {
 		return suggest(project, matchWith, new ProjectScopedSuggester() {
 			
 			@Override
-			public List<InputSuggestion> suggest(Project project, @Nullable User user, String matchWith) {
+			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				List<InputSuggestion> suggestions = new ArrayList<>();
-				if (User.asSubject(user).isPermitted(new ProjectPermission(project, new AccessProject()))) {
+				if (SecurityUtils.canAccess(project)) {
 					for (Issue issue: OneDev.getInstance(IssueManager.class).query(project, matchWith, count))
 						suggestions.add(new InputSuggestion("#" + issue.getNumber(), issue.getTitle(), null));
 				}				
@@ -230,9 +227,9 @@ public class SuggestionUtils {
 		return suggest(project, matchWith, new ProjectScopedSuggester() {
 			
 			@Override
-			public List<InputSuggestion> suggest(Project project, @Nullable User user, String matchWith) {
+			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				List<InputSuggestion> suggestions = new ArrayList<>();
-				if (User.asSubject(user).isPermitted(new ProjectPermission(project, new ReadCode()))) {
+				if (SecurityUtils.canReadCode(project)) {
 					PullRequestManager pullRequestManager = OneDev.getInstance(PullRequestManager.class);
 					for (PullRequest request: pullRequestManager.query(project, matchWith, count))
 						suggestions.add(new InputSuggestion("#" + request.getNumber(), request.getTitle(), null));
@@ -247,9 +244,10 @@ public class SuggestionUtils {
 		return suggest(project, matchWith, new ProjectScopedSuggester() {
 			
 			@Override
-			public List<InputSuggestion> suggest(Project project, @Nullable User user, String matchWith) {
+			public List<InputSuggestion> suggest(Project project, String matchWith) {
 				List<InputSuggestion> suggestions = new ArrayList<>();
-				for (Build build: OneDev.getInstance(BuildManager.class).query(project, user, matchWith, count)) {
+				for (Build build: OneDev.getInstance(BuildManager.class)
+						.query(project, matchWith, count)) {
 					String description;
 					if (build.getVersion() != null) 
 						description = "(" + build.getVersion() + ") " + build.getJobName();
@@ -279,7 +277,6 @@ public class SuggestionUtils {
 	
 	private static List<InputSuggestion> suggest(@Nullable Project project, String matchWith, 
 			ProjectScopedSuggester projectScopedSuggester, String scopeSeparator) {
-		User user = SecurityUtils.getUser();
 		if (project == null) {
 			ProjectManager projectManager = OneDev.getInstance(ProjectManager.class);
 			if (matchWith.contains(scopeSeparator)) {
@@ -287,8 +284,7 @@ public class SuggestionUtils {
 				matchWith = StringUtils.substringAfter(matchWith, scopeSeparator);
 				project = projectManager.find(projectName);
 				if (project != null) {
-					List<InputSuggestion> projectScopedSuggestions = 
-							projectScopedSuggester.suggest(project, user, matchWith);
+					List<InputSuggestion> projectScopedSuggestions = projectScopedSuggester.suggest(project, matchWith);
 					if (projectScopedSuggestions != null) {
 						List<InputSuggestion> suggestions = new ArrayList<>();
 						for (InputSuggestion suggestion: projectScopedSuggestions) {
@@ -322,7 +318,7 @@ public class SuggestionUtils {
 				}
 			} else {
 				List<InputSuggestion> suggestions = new ArrayList<>();
-				for (Project each: projectManager.getPermittedProjects(user, new AccessProject())) {
+				for (Project each: projectManager.getPermittedProjects(new AccessProject())) {
 					LinearRange match = LinearRange.match(each.getName() + scopeSeparator, matchWith);
 					if (match != null) {
 						suggestions.add(new InputSuggestion(
@@ -337,21 +333,20 @@ public class SuggestionUtils {
 				return suggestions;
 			}
 		} else {
-			return projectScopedSuggester.suggest(project, user, matchWith);
+			return projectScopedSuggester.suggest(project, matchWith);
 		}
 	}
 	
 	public static List<InputSuggestion> suggestJobs(Project project, String matchWith) {
 		List<String> jobNames = new ArrayList<>(OneDev.getInstance(BuildManager.class)
-				.getAccessibleJobNames(project, SecurityUtils.getUser())
-				.get(project));
+				.getAccessibleJobNames(project).get(project));
 		Collections.sort(jobNames);
 		return suggest(jobNames, matchWith);
 	}
 	
 	public static List<InputSuggestion> suggestBuildVersions(Project project, String matchWith) {
 		Collection<String> buildVersions = OneDev.getInstance(BuildManager.class).queryVersions(
-				project, SecurityUtils.getUser(), matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
+				project, matchWith, InputAssistBehavior.MAX_SUGGESTIONS);
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		for (String buildVersion: buildVersions) {
 			LinearRange match = LinearRange.match(buildVersion, matchWith);
@@ -463,7 +458,7 @@ public class SuggestionUtils {
 	static interface ProjectScopedSuggester {
 		
 		@Nullable
-		List<InputSuggestion> suggest(Project project, @Nullable User user, String matchWith);
+		List<InputSuggestion> suggest(Project project, String matchWith);
 		
 	}
 	

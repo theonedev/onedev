@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Stack;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -15,7 +16,6 @@ import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
@@ -38,6 +38,7 @@ import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.validation.annotation.UserName;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
@@ -55,7 +56,16 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	
 	public static final Long ROOT_ID = 1L;
 	
-    @Column(unique=true, nullable=false)
+	private static ThreadLocal<Stack<User>> stack =  new ThreadLocal<Stack<User>>() {
+
+		@Override
+		protected Stack<User> initialValue() {
+			return new Stack<User>();
+		}
+	
+	};
+	
+	@Column(unique=true, nullable=false)
     private String name;
 
     @Column(length=1024, nullable=false)
@@ -475,6 +485,22 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		if (groups == null)  
 			groups = getMemberships().stream().map(it->it.getGroup()).collect(Collectors.toList());
 		return groups;
+	}
+	
+	public static void push(User user) {
+		stack.get().push(user);
+	}
+
+	public static void pop() {
+		stack.get().pop();
+	}
+	
+	@Nullable
+	public static User get() {
+		if (!stack.get().isEmpty())
+			return stack.get().peek();
+		else 
+			return SecurityUtils.getUser();
 	}
 	
 }

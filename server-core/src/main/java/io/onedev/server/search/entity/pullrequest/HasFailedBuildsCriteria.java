@@ -10,7 +10,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 
@@ -19,7 +19,7 @@ public class HasFailedBuildsCriteria extends EntityCriteria<PullRequest> {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		From<?, ?> join = root
 				.join(PullRequestQueryConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT)
 				.join(PullRequestBuild.ATTR_BUILD, JoinType.INNER);
@@ -32,7 +32,7 @@ public class HasFailedBuildsCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
+	public boolean matches(PullRequest request) {
 		for (PullRequestBuild build: request.getPullRequestBuilds()) {
 			if (build.getBuild().getStatus() == Build.Status.FAILED
 					|| build.getBuild().getStatus() == Build.Status.CANCELLED
@@ -40,11 +40,6 @@ public class HasFailedBuildsCriteria extends EntityCriteria<PullRequest> {
 				return true;
 			}
 		}
-		return false;
-	}
-
-	@Override
-	public boolean needsLogin() {
 		return false;
 	}
 

@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project.commits;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -21,7 +20,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.commit.list.CommitListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -46,22 +44,12 @@ public class ProjectCommitsPage extends ProjectPage {
 		protected String load() {
 			String query = getPageParameters().get(PARAM_COMMIT_QUERY).toString();
 			if (query == null) {
-				List<String> queries = new ArrayList<>();
-				if (getProject().getCommitQuerySettingOfCurrentUser() != null) { 
-					for (NamedCommitQuery namedQuery: getProject().getCommitQuerySettingOfCurrentUser().getUserQueries())
-						queries.add(namedQuery.getQuery());
+				if (getProject().getCommitQuerySettingOfCurrentUser() != null 
+						&& !getProject().getCommitQuerySettingOfCurrentUser().getUserQueries().isEmpty()) { 
+					query = getProject().getCommitQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
+				} else if (!getProject().getNamedCommitQueries().isEmpty()) {
+					query = getProject().getNamedCommitQueries().iterator().next().getQuery();
 				}
-				for (NamedCommitQuery namedQuery: getProject().getNamedCommitQueries())
-					queries.add(namedQuery.getQuery());
-				for (String each: queries) {
-					try {
-						if (SecurityUtils.getUser() != null || !CommitQuery.parse(getProject(), each).needsLogin()) {  
-							query = each;
-							break;
-						}
-					} catch (Exception e) {
-					}
-				} 
 			}
 			return query;
 		}
@@ -94,11 +82,6 @@ public class ProjectCommitsPage extends ProjectPage {
 			@Override
 			protected NamedQueriesBean<NamedCommitQuery> newNamedQueriesBean() {
 				return new NamedCommitQueriesBean();
-			}
-
-			@Override
-			protected boolean needsLogin(NamedCommitQuery namedQuery) {
-				return CommitQuery.parse(getProject(), namedQuery.getQuery()).needsLogin();
 			}
 
 			@Override

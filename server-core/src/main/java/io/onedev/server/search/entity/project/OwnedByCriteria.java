@@ -7,11 +7,12 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.ProjectQueryConstants;
 
-public class OwnerCriteria extends EntityCriteria<Project> {
+public class OwnedByCriteria extends EntityCriteria<Project> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -19,31 +20,25 @@ public class OwnerCriteria extends EntityCriteria<Project> {
 	
 	private final String value;
 	
-	public OwnerCriteria(String value) {
+	public OwnedByCriteria(String value) {
 		user = EntityQuery.getUser(value);
 		this.value = value;
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
 		Expression<String> attribute = root.get(ProjectQueryConstants.ATTR_OWNER);
 		return builder.equal(attribute, this.user);
 	}
 
 	@Override
-	public boolean matches(Project project, User user) {
+	public boolean matches(Project project) {
 		return project.getOwner().equals(this.user);
 	}
 
 	@Override
-	public boolean needsLogin() {
-		return false;
-	}
-
-	@Override
 	public String toString() {
-		return ProjectQuery.quote(ProjectQueryConstants.FIELD_OWNER) + " " 
-				+ ProjectQuery.getRuleName(ProjectQueryLexer.Is) + " " + ProjectQuery.quote(value);
+		return ProjectQuery.getRuleName(ProjectQueryLexer.OwnedBy) + " " + ProjectQuery.quote(value);
 	}
 
 }

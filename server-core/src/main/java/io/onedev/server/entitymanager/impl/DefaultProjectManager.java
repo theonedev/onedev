@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -79,7 +78,6 @@ import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.project.ProjectQuery;
 import io.onedev.server.security.permission.AccessProject;
-import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
@@ -447,12 +445,13 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	
 	@Sessional
 	@Override
-	public Collection<Project> getPermittedProjects(@Nullable User user, Permission permission) {
+	public Collection<Project> getPermittedProjects(Permission permission) {
 		Collection<Project> projects = new HashSet<>();
 		
-		if (User.asSubject(user).isPermitted(new SystemAdministration())) {
+		if (SecurityUtils.isAdministrator()) {
 			projects.addAll(query());
 		} else {
+			User user = SecurityUtils.getUser();
 			if (user != null) {
 				for (Membership membership: user.getMemberships()) {
 					for (GroupAuthorization authorization: membership.getGroup().getProjectAuthorizations()) {
@@ -477,14 +476,13 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		return projects;
 	}
 
-	private CriteriaQuery<Project> buildCriteriaQuery(Session session, EntityQuery<Project> projectQuery, 
-			@Nullable User user) {
+	private CriteriaQuery<Project> buildCriteriaQuery(Session session, EntityQuery<Project> projectQuery) {
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Project> query = builder.createQuery(Project.class);
 		Root<Project> root = query.from(Project.class);
 		query.select(root).distinct(true);
 		
-		query.where(getPredicates(projectQuery.getCriteria(), root, builder, user));
+		query.where(getPredicates(projectQuery.getCriteria(), root, builder));
 
 		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
 		for (EntitySort sort: projectQuery.getSorts()) {
@@ -502,25 +500,25 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	}
 	
 	private Predicate[] getPredicates(io.onedev.server.search.entity.EntityCriteria<Project> criteria, 
-			Root<Project> root, CriteriaBuilder builder, @Nullable User user) {
+			Root<Project> root, CriteriaBuilder builder) {
 		List<Predicate> predicates = new ArrayList<>();
-		if (!User.asSubject(user).isPermitted(new SystemAdministration())) {
-			Collection<Long> projectIds = getPermittedProjects(user, new AccessProject())
+		if (!SecurityUtils.isAdministrator()) {
+			Collection<Long> projectIds = getPermittedProjects(new AccessProject())
 					.stream().map(it->it.getId()).collect(Collectors.toSet());
 			if (!projectIds.isEmpty())
 				predicates.add(root.get(ProjectQueryConstants.ATTR_ID).in(projectIds));
 			else
 				predicates.add(builder.disjunction());
 		}
-		if (criteria != null)
-			predicates.add(criteria.getPredicate(root, builder, user));
+		if (criteria != null) 
+			predicates.add(criteria.getPredicate(root, builder));
 		return predicates.toArray(new Predicate[0]);
 	}
 	
 	@Sessional
 	@Override
-	public List<Project> query(User user, EntityQuery<Project> projectQuery, int firstResult, int maxResults) {
-		CriteriaQuery<Project> criteriaQuery = buildCriteriaQuery(getSession(), projectQuery, user);
+	public List<Project> query(EntityQuery<Project> projectQuery, int firstResult, int maxResults) {
+		CriteriaQuery<Project> criteriaQuery = buildCriteriaQuery(getSession(), projectQuery);
 		Query<Project> query = getSession().createQuery(criteriaQuery);
 		query.setFirstResult(firstResult);
 		query.setMaxResults(maxResults);
@@ -529,12 +527,12 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 
 	@Sessional
 	@Override
-	public int count(User user, io.onedev.server.search.entity.EntityCriteria<Project> projectCriteria) {
+	public int count(io.onedev.server.search.entity.EntityCriteria<Project> projectCriteria) {
 		CriteriaBuilder builder = getSession().getCriteriaBuilder();
 		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
 		Root<Project> root = criteriaQuery.from(Project.class);
 
-		criteriaQuery.where(getPredicates(projectCriteria, root, builder, user));
+		criteriaQuery.where(getPredicates(projectCriteria, root, builder));
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();

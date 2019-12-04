@@ -70,7 +70,7 @@ public class BoardSpec implements Serializable {
 	}
 
 	@Editable(order=200, description="Optionally specify a base query to filter/order issues of the board")
-	@IssueQuery
+	@IssueQuery(withCurrentUserCriteria = true, withCurrentBuildCriteria = false)
 	@Nullable
 	public String getBaseQuery() {
 		return baseQuery;
@@ -82,7 +82,7 @@ public class BoardSpec implements Serializable {
 
 	@Editable(order=250, description="Optionally specify a base query to filter/order issues in backlog. "
 			+ "Backlog issues are those not associating with any milestones")
-	@IssueQuery
+	@IssueQuery(withCurrentUserCriteria = true, withCurrentBuildCriteria = false)
 	@Nullable
 	public String getBacklogBaseQuery() {
 		return backlogBaseQuery;

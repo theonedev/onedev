@@ -10,7 +10,7 @@ import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+
 
 public class MessageCriteria extends CommitCriteria {
 
@@ -23,11 +23,6 @@ public class MessageCriteria extends CommitCriteria {
 		this.values = values;
 	}
 	
-	@Override
-	public boolean needsLogin() {
-		return false;
-	}
-
 	public List<String> getValues() {
 		return values;
 	}
@@ -39,7 +34,7 @@ public class MessageCriteria extends CommitCriteria {
 	}
 
 	@Override
-	public boolean matches(RefUpdated event, User user) {
+	public boolean matches(RefUpdated event) {
 		RevCommit commit = event.getProject().getRevCommit(event.getNewCommitId(), true);
 		for (String value: values) {
 			if (WildcardUtils.matchString("*" + value + "*", commit.getFullMessage()))

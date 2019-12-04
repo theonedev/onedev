@@ -10,7 +10,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.IssueQueryConstants;
 
@@ -33,7 +33,7 @@ public class FixedInCriteria extends IssueCriteria {
 	}
 	
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Collection<Long> fixedIssueNumbers = build.getFixedIssueNumbers();
 		if (!fixedIssueNumbers.isEmpty()) {
 			return builder.and(
@@ -45,14 +45,9 @@ public class FixedInCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		return issue.getProject().equals(build.getProject()) 
 				&& build.getFixedIssueNumbers().contains(issue.getNumber());
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

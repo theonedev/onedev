@@ -7,7 +7,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.OrCriteriaHelper;
 import io.onedev.server.search.entity.ParensAware;
@@ -23,18 +23,13 @@ public class OrCriteria extends EntityCriteria<Project> implements ParensAware {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder, User user) {
-		return new OrCriteriaHelper<Project>(criterias).getPredicate(root, builder, user);
+	public Predicate getPredicate(Root<Project> root, CriteriaBuilder builder) {
+		return new OrCriteriaHelper<Project>(criterias).getPredicate(root, builder);
 	}
 
 	@Override
-	public boolean matches(Project project, User user) {
-		return new OrCriteriaHelper<Project>(criterias).matches(project, user);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return new OrCriteriaHelper<Project>(criterias).needsLogin();
+	public boolean matches(Project project) {
+		return new OrCriteriaHelper<Project>(criterias).matches(project);
 	}
 
 	@Override

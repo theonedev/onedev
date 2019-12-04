@@ -702,6 +702,10 @@ public class Build extends AbstractEntity implements Referenceable {
 		}
 	}
 	
+	public String getFQN() {
+		return getProject().getName() + "#" + getNumber();
+	}
+	
 	public Collection<String> getOnBranches() {
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
 		Collection<ObjectId> descendants = commitInfoManager.getDescendants(

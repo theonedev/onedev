@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.pullrequest;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -23,8 +22,6 @@ import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.GlobalPullRequestSetting;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
-import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.pullrequest.list.PullRequestListPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
@@ -48,23 +45,10 @@ public class PullRequestListPage extends LayoutPage {
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 			if (query == null) {
-				List<String> queries = new ArrayList<>();
-				if (getLoginUser() != null) { 
-					for (NamedPullRequestQuery namedQuery: getLoginUser().getPullRequestQuerySetting().getUserQueries())
-						queries.add(namedQuery.getQuery());
-				}
-				for (NamedPullRequestQuery namedQuery: getPullRequestSetting().getNamedQueries())
-					queries.add(namedQuery.getQuery());
-				
-				for (String each: queries) {
-					try {
-						if (SecurityUtils.getUser() != null || !PullRequestQuery.parse(null, each).needsLogin()) {  
-							query = each;
-							break;
-						}
-					} catch (Exception e) {
-					}
-				} 
+				if (getLoginUser() != null && !getLoginUser().getPullRequestQuerySetting().getUserQueries().isEmpty())
+					query = getLoginUser().getPullRequestQuerySetting().getUserQueries().iterator().next().getQuery();
+				else if (!getPullRequestSetting().getNamedQueries().isEmpty())
+					query = getPullRequestSetting().getNamedQueries().iterator().next().getQuery();
 			}
 			return query;
 		}
@@ -95,11 +79,6 @@ public class PullRequestListPage extends LayoutPage {
 			@Override
 			protected NamedQueriesBean<NamedPullRequestQuery> newNamedQueriesBean() {
 				return new NamedPullRequestQueriesBean();
-			}
-
-			@Override
-			protected boolean needsLogin(NamedPullRequestQuery namedQuery) {
-				return PullRequestQuery.parse(null, namedQuery.getQuery()).needsLogin();
 			}
 
 			@Override

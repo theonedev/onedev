@@ -9,6 +9,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.BuildQueryConstants;
@@ -27,21 +28,16 @@ public class CancelledByCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		Path<User> attribute = root.get(BuildQueryConstants.ATTR_CANCELLER);
 		return builder.equal(attribute, this.user);
 	}
 
 	@Override
-	public boolean matches(Build build, User user) {
+	public boolean matches(Build build) {
 		return Objects.equals(build.getCanceller(), this.user);
 	}
 
-	@Override
-	public boolean needsLogin() {
-		return false;
-	}
-	
 	@Override
 	public String toString() {
 		return BuildQuery.getRuleName(BuildQueryLexer.CancelledBy) + " " + BuildQuery.quote(value);

@@ -11,7 +11,7 @@ import io.onedev.server.model.CodeCommentRelation;
 import io.onedev.server.model.CodeCommentReply;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.CodeCommentQueryConstants;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -27,7 +27,7 @@ public class CommentCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		From<?, ?> join = root.join(PullRequestQueryConstants.ATTR_COMMENTS, JoinType.LEFT);
 		Path<String> attribute = join.get(PullRequestComment.ATTR_CONTENT);
 		Predicate commentPredicate = builder.like(builder.lower(attribute), "%" + value.toLowerCase() + "%");
@@ -49,7 +49,7 @@ public class CommentCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
+	public boolean matches(PullRequest request) {
 		for (PullRequestComment comment: request.getComments()) { 
 			if (comment.getContent().toLowerCase().contains(value.toLowerCase()))
 				return true;
@@ -66,13 +66,10 @@ public class CommentCriteria extends EntityCriteria<PullRequest> {
 	}
 
 	@Override
-	public boolean needsLogin() {
-		return false;
-	}
-
-	@Override
 	public String toString() {
-		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_COMMENT) + " " + PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " + PullRequestQuery.quote(value);
+		return PullRequestQuery.quote(PullRequestQueryConstants.FIELD_COMMENT) + " " 
+				+ PullRequestQuery.getRuleName(PullRequestQueryLexer.Contains) + " " 
+				+ PullRequestQuery.quote(value);
 	}
 
 }

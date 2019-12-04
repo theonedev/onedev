@@ -6,7 +6,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.User;
+
 import io.onedev.server.util.query.IssueQueryConstants;
 
 public class MilestoneIsEmptyCriteria extends IssueCriteria {
@@ -14,18 +14,13 @@ public class MilestoneIsEmptyCriteria extends IssueCriteria {
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		return builder.isNull(root.join(IssueQueryConstants.ATTR_MILESTONE, JoinType.LEFT));
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		return issue.getMilestone() == null;
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

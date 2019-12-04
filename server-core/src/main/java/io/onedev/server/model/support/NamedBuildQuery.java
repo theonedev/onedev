@@ -34,7 +34,7 @@ public class NamedBuildQuery implements NamedQuery {
 	}
 
 	@Editable
-	@BuildQuery
+	@BuildQuery(withCurrentUserCriteria = true)
 	@NotEmpty
 	@Override
 	public String getQuery() {

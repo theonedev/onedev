@@ -32,7 +32,6 @@ import javax.validation.Validator;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.credential.PasswordService;
 import org.apache.shiro.subject.Subject;
 import org.eclipse.jgit.lib.ObjectId;
@@ -93,6 +92,7 @@ import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.BuildCommitAware;
 import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.script.identity.JobIdentity;

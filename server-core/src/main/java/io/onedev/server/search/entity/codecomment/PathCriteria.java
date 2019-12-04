@@ -7,7 +7,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.CodeComment;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.CodeCommentQueryConstants;
 
@@ -22,7 +22,7 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
 		Path<String> attribute = CodeCommentQuery.getPath(root, CodeCommentQueryConstants.ATTR_PATH);
 		String normalized = value.toLowerCase().replace('*', '%');
 		if (normalized.endsWith("/"))
@@ -31,13 +31,8 @@ public class PathCriteria extends EntityCriteria<CodeComment>  {
 	}
 	
 	@Override
-	public boolean matches(CodeComment comment, User user) {
+	public boolean matches(CodeComment comment) {
 		return WildcardUtils.matchPath(value.toLowerCase(), comment.getMarkPos().getPath().toLowerCase());
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

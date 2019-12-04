@@ -29,7 +29,6 @@ import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
@@ -63,7 +62,7 @@ public abstract class BuildSidePanel extends Panel {
 
 			@Override
 			protected List<Build> query(EntityQuery<Build> query, int offset, int count) {
-				return getBuildManager().query(getProject(), SecurityUtils.getUser(), query, offset, count);
+				return getBuildManager().query(getProject(), query, offset, count);
 			}
 
 			@Override

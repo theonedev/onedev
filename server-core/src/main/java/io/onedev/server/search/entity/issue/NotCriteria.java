@@ -7,7 +7,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.NotCriteriaHelper;
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -23,18 +23,13 @@ public class NotCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
-		return new NotCriteriaHelper<Issue>(criteria).getPredicate(root, builder, user);
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
+		return new NotCriteriaHelper<Issue>(criteria).getPredicate(root, builder);
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
-		return new NotCriteriaHelper<Issue>(criteria).matches(issue, user);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return new NotCriteriaHelper<Issue>(criteria).needsLogin();
+	public boolean matches(Issue issue) {
+		return new NotCriteriaHelper<Issue>(criteria).matches(issue);
 	}
 
 	@Override

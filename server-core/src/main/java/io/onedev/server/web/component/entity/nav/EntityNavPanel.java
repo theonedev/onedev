@@ -18,7 +18,6 @@ import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.search.entity.EntityQuery;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.util.QueryPosition;
 import io.onedev.server.web.util.QueryPositionSupport;
 
@@ -73,7 +72,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				int offset = getPosition().getOffset() - 1;
 				List<T> entities = query(query, offset, 1);
 				if (!entities.isEmpty()) {
-					if (!query.matches(getEntity(), SecurityUtils.getUser()))
+					if (!query.matches(getEntity()))
 						count--;
 					QueryPosition prevPosition = new QueryPosition(getPosition().getQuery(), count, offset);
 					getQueryPositionSupport().navTo(target, entities.get(0), prevPosition);
@@ -104,7 +103,7 @@ public abstract class EntityNavPanel<T extends AbstractEntity> extends Panel {
 				EntityQuery<T> query = parse(getPosition().getQuery());
 				int offset = getPosition().getOffset();
 				int count = getPosition().getCount();
-				if (query.matches(getEntity(), SecurityUtils.getUser())) 
+				if (query.matches(getEntity())) 
 					offset++;
 				else
 					count--;

@@ -75,11 +75,10 @@ public interface PullRequestManager extends EntityManager<PullRequest> {
 	
 	void checkQuality(PullRequest request);
 	
-	List<PullRequest> query(@Nullable Project targetProject, @Nullable User user, 
+	List<PullRequest> query(@Nullable Project targetProject, 
 			EntityQuery<PullRequest> requestQuery, int firstResult, int maxResults);
 	
-	int count(@Nullable Project targetProject, @Nullable User user, 
-			EntityCriteria<PullRequest> requestCriteria);
+	int count(@Nullable Project targetProject, EntityCriteria<PullRequest> requestCriteria);
 	
 	List<PullRequest> query(Project targetProject, String term, int count);
 

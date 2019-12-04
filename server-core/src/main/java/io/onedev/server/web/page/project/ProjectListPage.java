@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -20,8 +19,6 @@ import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.administration.GlobalProjectSetting;
-import io.onedev.server.search.entity.project.ProjectQuery;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.project.list.ProjectListPanel;
 import io.onedev.server.web.component.savedquery.NamedQueriesBean;
@@ -49,22 +46,10 @@ public class ProjectListPage extends LayoutPage {
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toOptionalString();
 			if (query == null) {
-				List<String> queries = new ArrayList<>();
-				if (getLoginUser() != null) {
-					for (NamedProjectQuery namedQuery: getLoginUser().getProjectQuerySetting().getUserQueries())
-						queries.add(namedQuery.getQuery());
-				}
-				for (NamedProjectQuery namedQuery: getProjectSetting().getNamedQueries())
-					queries.add(namedQuery.getQuery());
-				for (String each: queries) {
-					try {
-						if (SecurityUtils.getUser() != null || !ProjectQuery.parse(each).needsLogin()) {  
-							query = each;
-							break;
-						}
-					} catch (Exception e) {
-					}
-				} 
+				if (getLoginUser() != null && !getLoginUser().getProjectQuerySetting().getUserQueries().isEmpty())
+					query = getLoginUser().getProjectQuerySetting().getUserQueries().iterator().next().getQuery();
+				else if (!getProjectSetting().getNamedQueries().isEmpty())
+					query = getProjectSetting().getNamedQueries().iterator().next().getQuery();
 			}
 			return query;
 		}
@@ -96,11 +81,6 @@ public class ProjectListPage extends LayoutPage {
 			@Override
 			protected NamedQueriesBean<NamedProjectQuery> newNamedQueriesBean() {
 				return new NamedProjectQueriesBean();
-			}
-
-			@Override
-			protected boolean needsLogin(NamedProjectQuery namedQuery) {
-				return ProjectQuery.parse(namedQuery.getQuery()).needsLogin();
 			}
 
 			@Override

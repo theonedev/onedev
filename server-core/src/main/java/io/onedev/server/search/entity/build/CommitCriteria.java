@@ -9,7 +9,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.BuildQueryConstants;
 
@@ -27,7 +27,7 @@ public class CommitCriteria extends EntityCriteria<Build>  {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		Path<?> projectAttribute = BuildQuery.getPath(root, BuildQueryConstants.ATTR_PROJECT);
 		Path<?> commitAttribute = BuildQuery.getPath(root, BuildQueryConstants.ATTR_COMMIT);
 		return builder.and(
@@ -36,13 +36,8 @@ public class CommitCriteria extends EntityCriteria<Build>  {
 	}
 
 	@Override
-	public boolean matches(Build build, User user) {
+	public boolean matches(Build build) {
 		return build.getProject().equals(project) && build.getCommitHash().equals(commitId.name());
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

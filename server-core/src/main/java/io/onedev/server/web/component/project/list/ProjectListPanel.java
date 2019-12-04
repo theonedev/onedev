@@ -39,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.search.entity.project.ProjectQuery;
@@ -74,11 +75,7 @@ public class ProjectListPanel extends Panel {
 		@Override
 		protected ProjectQuery load() {
 			try {
-				ProjectQuery parsedQuery = ProjectQuery.parse(query);
-				if (SecurityUtils.getUser() == null && parsedQuery.needsLogin()) 
-					error("Please login to perform this query");
-				else 
-					return parsedQuery;
+				return ProjectQuery.parse(query);
 			} catch (Exception e) {
 				logger.error("Error parsing project query: " + query, e);
 				error(e.getMessage());
@@ -216,17 +213,25 @@ public class ProjectListPanel extends Panel {
 
 			@Override
 			public Iterator<? extends Project> iterator(long first, long count) {
-				return getProjectManager().query(SecurityUtils.getUser(), 
-						parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+				try {
+					return getProjectManager().query(parsedQueryModel.getObject(), (int)first, (int)count).iterator();
+				} catch (OneException e) {
+					error(e.getMessage());
+					return new ArrayList<Project>().iterator();
+				}
 			}
 
 			@Override
 			public long calcSize() {
 				ProjectQuery parsedQuery = parsedQueryModel.getObject();
-				if (parsedQuery != null)
-					return getProjectManager().count(SecurityUtils.getUser(), parsedQuery.getCriteria());
-				else
-					return 0;
+				if (parsedQuery != null) {
+					try {
+						return getProjectManager().count(parsedQuery.getCriteria());
+					} catch (OneException e) {
+						error(e.getMessage());
+					}
+				} 
+				return 0;
 			}
 
 			@Override

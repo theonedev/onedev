@@ -9,7 +9,7 @@ import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.CodeComment;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.CodeCommentQueryConstants;
 
@@ -27,7 +27,7 @@ public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<CodeComment> root, CriteriaBuilder builder) {
 		Path<?> projectAttribute = CodeCommentQuery.getPath(root, CodeCommentQueryConstants.ATTR_PROJECT);
 		Path<?> commitAttribute = CodeCommentQuery.getPath(root, CodeCommentQueryConstants.ATTR_COMMIT);
 		return builder.and(
@@ -36,14 +36,9 @@ public class OnCommitCriteria extends EntityCriteria<CodeComment>  {
 	}
 
 	@Override
-	public boolean matches(CodeComment comment, User user) {
+	public boolean matches(CodeComment comment) {
 		return comment.getProject().equals(project) 
 				&& comment.getMarkPos().getCommit().equals(commitId.name());
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

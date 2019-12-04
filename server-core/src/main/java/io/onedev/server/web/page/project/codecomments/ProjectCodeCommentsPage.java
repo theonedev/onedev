@@ -1,7 +1,6 @@
 package io.onedev.server.web.page.project.codecomments;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -21,7 +20,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedQuery;
 import io.onedev.server.model.support.QuerySetting;
-import io.onedev.server.search.entity.codecomment.CodeCommentQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.codecomment.CodeCommentListPanel;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -45,22 +43,12 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 		protected String load() {
 			String query = getPageParameters().get(PARAM_QUERY).toString();
 			if (query == null) {
-				List<String> queries = new ArrayList<>();
-				if (getProject().getCodeCommentQuerySettingOfCurrentUser() != null) { 
-					for (NamedCodeCommentQuery namedQuery: getProject().getCodeCommentQuerySettingOfCurrentUser().getUserQueries())
-						queries.add(namedQuery.getQuery());
+				if (getProject().getCodeCommentQuerySettingOfCurrentUser() != null 
+						&& !getProject().getCodeCommentQuerySettingOfCurrentUser().getUserQueries().isEmpty()) {
+					query = getProject().getCodeCommentQuerySettingOfCurrentUser().getUserQueries().iterator().next().getQuery();
+				} else if (!getProject().getNamedCodeCommentQueries().isEmpty()) {
+					query = getProject().getNamedCodeCommentQueries().iterator().next().getQuery();
 				}
-				for (NamedCodeCommentQuery namedQuery: getProject().getNamedCodeCommentQueries())
-					queries.add(namedQuery.getQuery());
-				for (String each: queries) {
-					try {
-						if (SecurityUtils.getUser() != null || !CodeCommentQuery.parse(getProject(), each).needsLogin()) {  
-							query = each;
-							break;
-						}
-					} catch (Exception e) {
-					}
-				} 
 			}
 			return query;
 		}
@@ -91,11 +79,6 @@ public class ProjectCodeCommentsPage extends ProjectPage {
 			@Override
 			protected NamedQueriesBean<NamedCodeCommentQuery> newNamedQueriesBean() {
 				return new NamedCodeCommentQueriesBean();
-			}
-
-			@Override
-			protected boolean needsLogin(NamedCodeCommentQuery namedQuery) {
-				return CodeCommentQuery.parse(getProject(), namedQuery.getQuery()).needsLogin();
 			}
 
 			@Override

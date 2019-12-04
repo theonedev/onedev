@@ -8,7 +8,7 @@ import javax.persistence.criteria.Predicate;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityQuery;
 
 public class DateFieldCriteria extends FieldCriteria {
@@ -29,7 +29,7 @@ public class DateFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
+	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
 		if (operator == IssueQueryLexer.IsBefore)
 			return builder.lessThan(field.get(IssueField.ATTR_ORDINAL), date.getTime());
 		else
@@ -37,17 +37,12 @@ public class DateFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		Date fieldValue = (Date) issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.IsBefore)
 			return fieldValue != null && fieldValue.before(date);
 		else
 			return fieldValue != null && fieldValue.after(date);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

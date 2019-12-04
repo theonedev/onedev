@@ -8,7 +8,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.model.Milestone;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.milestone.closelink.MilestoneCloseLinkCssResourceReference;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
@@ -22,7 +21,7 @@ public abstract class MilestoneDeleteLink extends ModalLink {
 
 	@Override
 	protected Component newContent(String id, ModalPanel modal) {
-		if (OneDev.getInstance(IssueManager.class).count(getMilestone(), SecurityUtils.getUser(), null) != 0) {
+		if (OneDev.getInstance(IssueManager.class).count(getMilestone(), null) != 0) {
 			return new ConfirmDeleteWithIssuesPanel(id) {
 
 				@Override

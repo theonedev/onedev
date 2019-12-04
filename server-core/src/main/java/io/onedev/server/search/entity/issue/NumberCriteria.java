@@ -8,7 +8,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.query.IssueQueryConstants;
@@ -30,7 +30,7 @@ public class NumberCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Path<Long> attribute = root.get(IssueQueryConstants.ATTR_NUMBER);
 		Predicate numberPredicate;
 		
@@ -47,7 +47,7 @@ public class NumberCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		if (issue.getProject().equals(number.getProject())) {
 			if (operator == IssueQueryLexer.Is)
 				return issue.getNumber() == number.getNumber();
@@ -58,11 +58,6 @@ public class NumberCriteria extends IssueCriteria {
 		} else {
 			return false;
 		}
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

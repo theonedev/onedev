@@ -26,15 +26,6 @@ public class AuthorCriteria extends CommitCriteria {
 	}
 	
 	@Override
-	public boolean needsLogin() {
-		for (String value: values) {
-			if (value == null) // authored by me
-				return true;
-		}
-		return false;
-	}
-
-	@Override
 	public void fill(Project project, RevListCommand command) {
 		for (String value: values) {
 			if (value == null) { // authored by me
@@ -49,11 +40,14 @@ public class AuthorCriteria extends CommitCriteria {
 	}
 
 	@Override
-	public boolean matches(RefUpdated event, User user) {
+	public boolean matches(RefUpdated event) {
 		RevCommit commit = event.getProject().getRevCommit(event.getNewCommitId(), true);
+		String authorEmail = commit.getAuthorIdent().getEmailAddress();
 		for (String value: values) {
 			if (value == null) { // authored by me
-				if (user.getEmail().equals(commit.getAuthorIdent().getEmailAddress())) 
+				if (User.get() == null)
+					throw new OneException("Please login to perform this query");
+				else if (User.get().getEmail().equals(authorEmail)) 
 					return true;
 			} else {
 				if (matches("*" + value + "*", commit.getAuthorIdent())) 

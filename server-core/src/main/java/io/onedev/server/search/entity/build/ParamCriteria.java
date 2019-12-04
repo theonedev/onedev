@@ -10,7 +10,7 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildParam;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.BuildQueryConstants;
 
@@ -28,7 +28,7 @@ public class ParamCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
 		From<?, ?> join = root.join(BuildQueryConstants.ATTR_PARAMS, JoinType.LEFT);
 		return builder.and(
 				builder.equal(join.get(BuildParam.ATTR_NAME), name),
@@ -36,17 +36,12 @@ public class ParamCriteria extends EntityCriteria<Build> {
 	}
 
 	@Override
-	public boolean matches(Build build, User user) {
+	public boolean matches(Build build) {
 		List<String> paramValues = build.getParamMap().get(name);
 		if (paramValues == null || paramValues.isEmpty())
 			return value == null;
 		else 
 			return paramValues.contains(value);
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

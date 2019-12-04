@@ -26,7 +26,7 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.IssueUtils;
 import io.onedev.server.util.ProjectAwareCommitId;
@@ -79,7 +79,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Set<Long> fixedIssueNumbers = new HashSet<>();
 		
 		Repository repository = project.getRepository();
@@ -114,7 +114,7 @@ public class FixedBetweenCriteria extends IssueCriteria {
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		if (project.equals(issue.getProject())) {
 			Repository repository = issue.getProject().getRepository();
 			ObjectId mergeBaseId = GitUtils.getMergeBase(repository, firstCommitId, secondCommitId);
@@ -135,11 +135,6 @@ public class FixedBetweenCriteria extends IssueCriteria {
 				}
 			}			
 		}
-		return false;
-	}
-
-	@Override
-	public boolean needsLogin() {
 		return false;
 	}
 

@@ -15,8 +15,8 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+
 import io.onedev.server.util.ValueSetEdit;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.SpecifiedChoices;
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValue;
@@ -42,7 +42,7 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
+	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
 		if (allowMultiple) {
 			return builder.equal(field.get(IssueField.ATTR_VALUE), value);
 		} else {
@@ -57,7 +57,7 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
 		if (allowMultiple) {
 			return ((List<String>)fieldValue).contains(value);
@@ -69,11 +69,6 @@ public class ChoiceFieldCriteria extends FieldCriteria {
 			else
 				return issue.getFieldOrdinal(getFieldName(), fieldValue) < ordinal;
 		}
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

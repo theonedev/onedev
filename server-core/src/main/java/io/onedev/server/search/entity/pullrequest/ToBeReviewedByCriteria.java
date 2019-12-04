@@ -10,6 +10,7 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
+
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -28,26 +29,21 @@ public class ToBeReviewedByCriteria extends EntityCriteria<PullRequest> {
 	}
 	
 	@Override
-	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder, User user) {
+	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		From<?, ?> join = root.join(PullRequestQueryConstants.ATTR_REVIEWS, JoinType.LEFT);
 		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.ATTR_USER);
 		Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.ATTR_EXCLUDE_DATE);
 		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.ATTR_RESULT_APPROVED);
 		return builder.and(
-				builder.equal(userPath, this.user), 
+				builder.equal(userPath, user), 
 				builder.isNull(excludeDatePath), 
 				builder.isNull(approvedPath));
 	}
 
 	@Override
-	public boolean matches(PullRequest request, User user) {
-		PullRequestReview review = request.getReview(this.user);
+	public boolean matches(PullRequest request) {
+		PullRequestReview review = request.getReview(user);
 		return review != null && review.getExcludeDate() == null && review.getResult() == null;
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
 	}
 
 	@Override

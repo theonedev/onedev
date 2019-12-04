@@ -26,15 +26,6 @@ public class CommitterCriteria extends CommitCriteria {
 	}
 	
 	@Override
-	public boolean needsLogin() {
-		for (String value: values) {
-			if (value == null) // committed by me
-				return true;
-		}
-		return false;
-	}
-
-	@Override
 	public void fill(Project project, RevListCommand command) {
 		for (String value: values) {
 			if (value == null) { // committed by me
@@ -49,11 +40,14 @@ public class CommitterCriteria extends CommitCriteria {
 	}
 
 	@Override
-	public boolean matches(RefUpdated event, User user) {
+	public boolean matches(RefUpdated event) {
 		RevCommit commit = event.getProject().getRevCommit(event.getNewCommitId(), true);
+		String committerEmail = commit.getCommitterIdent().getEmailAddress();
 		for (String value: values) {
 			if (value == null) { // committed by me
-				if (user.getEmail().equals(commit.getCommitterIdent().getEmailAddress())) 
+				if (User.get() == null)
+					throw new OneException("Please login to perform this query");
+				else if (User.get().getEmail().equals(committerEmail)) 
 					return true;
 			} else {
 				if (matches("*" + value + "*", commit.getCommitterIdent())) 

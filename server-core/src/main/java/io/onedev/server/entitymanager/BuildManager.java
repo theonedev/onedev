@@ -11,7 +11,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityManager;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
@@ -40,12 +39,11 @@ public interface BuildManager extends EntityManager<Build> {
 	
 	Collection<Build> queryUnfinished();
 
-	List<Build> query(Project project, @Nullable User user, String term, int count);
+	List<Build> query(Project project, String term, int count);
 	
-	List<Build> query(@Nullable Project project, @Nullable User user, 
-			EntityQuery<Build> buildQuery, int firstResult, int maxResults);
+	List<Build> query(@Nullable Project project, EntityQuery<Build> buildQuery, int firstResult, int maxResults);
 	
-	int count(@Nullable Project project, @Nullable User user, EntityCriteria<Build> buildCriteria);
+	int count(@Nullable Project project, EntityCriteria<Build> buildCriteria);
 	
 	Collection<Long> getBuildIdsByProject(Long projectId);
 	
@@ -53,7 +51,7 @@ public interface BuildManager extends EntityManager<Build> {
 
 	Collection<String> getJobNames(@Nullable Project project);
 	
-	List<String> queryVersions(Project project, @Nullable User user, String matchWith, int count);
+	List<String> queryVersions(Project project, String matchWith, int count);
 
-	Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project, @Nullable User user);
+	Map<Project, Collection<String>> getAccessibleJobNames(@Nullable Project project);
 }

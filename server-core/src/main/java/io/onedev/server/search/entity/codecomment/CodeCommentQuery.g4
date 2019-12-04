@@ -7,7 +7,7 @@ query
     ;
 
 criteria
-	: CreatedByMe #OperatorCriteria
+	: operator=CreatedByMe #OperatorCriteria
     | operator=(CreatedBy|OnCommit) WS+ criteriaValue=Quoted #OperatorValueCriteria
     | criteriaField=Quoted WS+ operator=(Is|IsBefore|IsAfter|IsGreaterThan|IsLessThan|Contains) WS+ criteriaValue=Quoted #FieldOperatorValueCriteria
     | criteria WS+ And WS+ criteria	#AndCriteria

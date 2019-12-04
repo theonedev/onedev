@@ -16,16 +16,15 @@ import org.antlr.v4.runtime.Recognizer;
 import io.onedev.commons.codeassist.AntlrUtils;
 import io.onedev.server.OneException;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.EntitySort;
 import io.onedev.server.search.entity.EntitySort.Direction;
 import io.onedev.server.search.entity.project.ProjectQueryParser.AndCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.CriteriaContext;
-import io.onedev.server.search.entity.project.ProjectQueryParser.FieldOperatorCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.FieldOperatorValueCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.NotCriteriaContext;
+import io.onedev.server.search.entity.project.ProjectQueryParser.OperatorCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.OperatorValueCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.OrCriteriaContext;
 import io.onedev.server.search.entity.project.ProjectQueryParser.OrderContext;
@@ -92,16 +91,16 @@ public class ProjectQuery extends EntityQuery<Project> {
 				projectCriteria = new ProjectQueryBaseVisitor<EntityCriteria<Project>>() {
 
 					@Override
-					public EntityCriteria<Project> visitFieldOperatorCriteria(FieldOperatorCriteriaContext ctx) {
-						String fieldName = getValue(ctx.Quoted().getText());
-						int operator = ctx.operator.getType();
-						checkField(fieldName, operator);
-						return new OwnerIsMeCriteria();
+					public EntityCriteria<Project> visitOperatorCriteria(OperatorCriteriaContext ctx) {
+						return new OwnedByMeCriteria();
 					}
 					
 					public EntityCriteria<Project> visitOperatorValueCriteria(OperatorValueCriteriaContext ctx) {
 						String value = getValue(ctx.Quoted().getText());
-						return new ForksOfCriteria(value);
+						if (ctx.operator.getType() == ProjectQueryLexer.ForksOf)
+							return new ForksOfCriteria(value);
+						else
+							return new OwnedByCriteria(value);
 					}
 					
 					@Override
@@ -118,10 +117,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 						
 						switch (operator) {
 						case ProjectQueryLexer.Is:
-							if (fieldName.equals(ProjectQueryConstants.FIELD_NAME)) 
-								return new NameCriteria(value);
-							else 
-								return new OwnerCriteria(value);
+							return new NameCriteria(value);
 						case ProjectQueryLexer.Contains:
 							return new DescriptionCriteria(value);
 						case ProjectQueryLexer.IsBefore:
@@ -192,11 +188,7 @@ public class ProjectQuery extends EntityQuery<Project> {
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.Is:
-			if (!fieldName.equals(ProjectQueryConstants.FIELD_OWNER) && !fieldName.equals(ProjectQueryConstants.FIELD_NAME)) 
-				throw newOperatorException(fieldName, operator);
-			break;
-		case ProjectQueryLexer.IsMe:
-			if (!fieldName.equals(ProjectQueryConstants.FIELD_OWNER)) 
+			if (!fieldName.equals(ProjectQueryConstants.FIELD_NAME)) 
 				throw newOperatorException(fieldName, operator);
 			break;
 		case ProjectQueryLexer.IsBefore:
@@ -208,13 +200,8 @@ public class ProjectQuery extends EntityQuery<Project> {
 	}
 	
 	@Override
-	public boolean needsLogin() {
-		return criteria != null && criteria.needsLogin();
-	}
-	
-	@Override
-	public boolean matches(Project project, User user) {
-		return criteria == null || criteria.matches(project, user);
+	public boolean matches(Project project) {
+		return criteria == null || criteria.matches(project);
 	}
 	
 	public static String getRuleName(int rule) {

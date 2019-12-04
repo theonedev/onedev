@@ -4,35 +4,29 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import io.onedev.server.OneException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
-import io.onedev.server.model.User;
+
 
 public class FixedInCurrentBuildCriteria extends IssueCriteria {
 
 	private static final long serialVersionUID = 1L;
 	
 	@Override
-	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder, User user) {
-		Build build = Build.get();
-		if (build != null)
-			return new FixedInCriteria(build).getPredicate(root, builder, user);
+	public Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
+		if (Build.get() != null)
+			return new FixedInCriteria(Build.get()).getPredicate(root, builder);
 		else
-			return builder.disjunction();
+			throw new OneException("No build in query context");
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
-		Build build = Build.get();
-		if (build != null)
-			return new FixedInCriteria(build).matches(issue, user);
+	public boolean matches(Issue issue) {
+		if (Build.get() != null)
+			return new FixedInCriteria(Build.get()).matches(issue);
 		else
-			return false;
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return false;
+			throw new OneException("No build in query context");
 	}
 
 	@Override

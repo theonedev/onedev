@@ -10,6 +10,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 
+import io.onedev.server.OneException;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
@@ -29,15 +30,15 @@ public class FieldOperatorCriteria extends FieldCriteria {
 	}
 
 	@Override
-	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder, User user) {
+	protected Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder) {
 		Path<?> attribute = field.get(IssueField.ATTR_VALUE);
 		if (operator == IssueQueryLexer.IsEmpty) {
 			return builder.isNull(attribute);
 		} else if (operator == IssueQueryLexer.IsMe) {
-			if (user != null)
-				return builder.equal(attribute, user.getName());
+			if (User.get() != null)
+				return builder.equal(attribute, User.get().getName());
 			else
-				return builder.disjunction();
+				throw new OneException("Please login to perform this query");
 		} else {
 			Build build = Build.get();
 			if (build != null) {
@@ -51,21 +52,21 @@ public class FieldOperatorCriteria extends FieldCriteria {
 						return builder.disjunction();
 				}
 			} else {
-				return builder.disjunction();
+				throw new OneException("No build in query context");
 			}
 		}
 	}
 
 	@Override
-	public boolean matches(Issue issue, User user) {
+	public boolean matches(Issue issue) {
 		Object fieldValue = issue.getFieldValue(getFieldName());
 		if (operator == IssueQueryLexer.IsEmpty) {
 			return fieldValue == null;
 		} else if (operator == IssueQueryLexer.IsMe) {
-			if (user != null)
-				return Objects.equals(fieldValue, user.getName());
+			if (User.get() != null)
+				return Objects.equals(fieldValue, User.get().getName());
 			else
-				return false;
+				throw new OneException("Please login to perform this query");
 		} else {
 			Build build = Build.get();
 			if (build != null) { 
@@ -77,14 +78,9 @@ public class FieldOperatorCriteria extends FieldCriteria {
 							.anyMatch(it->it.equals(fieldValue));
 				}
 			} else { 
-				return false;
+				throw new OneException("No build in query context");
 			}
 		}
-	}
-
-	@Override
-	public boolean needsLogin() {
-		return operator == IssueQueryLexer.IsMe;
 	}
 
 	@Override

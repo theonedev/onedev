@@ -16,6 +16,7 @@ import io.onedev.commons.codeassist.parser.ParseExpect;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
 import io.onedev.server.OneException;
 import io.onedev.server.search.entity.project.ProjectQuery;
+import io.onedev.server.search.entity.project.ProjectQueryLexer;
 import io.onedev.server.search.entity.project.ProjectQueryParser;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.query.ProjectQueryConstants;
@@ -49,7 +50,10 @@ public class ProjectQueryBehavior extends ANTLRAssistBehavior {
 							String operatorName = StringUtils.normalizeSpace(operatorElements.get(0).getMatchedText());
 							int operator = ProjectQuery.getOperator(operatorName);							
 							if (fieldElements.isEmpty()) {
-								return SuggestionUtils.suggestProjects(matchWith);
+								if (operator == ProjectQueryLexer.ForksOf)
+									return SuggestionUtils.suggestProjects(matchWith);
+								else
+									return SuggestionUtils.suggestUsers(matchWith);
 							} else {
 								String fieldName = ProjectQuery.getValue(fieldElements.get(0).getMatchedText());
 								try {
