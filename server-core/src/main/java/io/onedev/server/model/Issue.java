@@ -436,6 +436,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 				getFields().add(field);
 			}
 		}
+		fieldInputs = null;
 	}
 
 	public boolean isFieldVisible(String fieldName) {
