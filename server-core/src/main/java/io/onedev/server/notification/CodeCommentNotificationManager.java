@@ -45,14 +45,18 @@ public class CodeCommentNotificationManager {
 				String url;
 				if (event instanceof CodeCommentCreated)
 					url = urlManager.urlFor(((CodeCommentCreated)event).getComment(), null);
-				else 
+				else if (event instanceof CodeCommentReplied)
 					url = urlManager.urlFor(((CodeCommentReplied)event).getReply(), null);
+				else 
+					url = null;
 				
-				String subject = String.format("You are mentioned in a code comment on file '%s'", 
-						event.getComment().getMarkPos().getPath());
-				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-				mailManager.sendMailAsync(mentionUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
-						subject, body);
+				if (url != null) {
+					String subject = String.format("You are mentioned in a code comment on file '%s'", 
+							event.getComment().getMarkPos().getPath());
+					String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+					mailManager.sendMailAsync(mentionUsers.stream().map(User::getEmail).collect(Collectors.toList()), 
+							subject, body);
+				}
 			}
 		}
 	}
