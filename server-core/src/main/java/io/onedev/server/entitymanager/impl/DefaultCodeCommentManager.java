@@ -35,6 +35,7 @@ import org.hibernate.query.Query;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
@@ -149,11 +150,13 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		Map<CodeComment, PlanarRange> comments = new HashMap<>();
 		
 		Map<String, Map<String, List<CodeComment>>> possibleComments = new HashMap<>();
-		for (String possibleHistoryPath: commitInfoManager.getHistoryPaths(project, path)) {
+		Collection<String> possiblePaths = Sets.newHashSet(path);
+		possiblePaths.addAll(commitInfoManager.getHistoryPaths(project, path));
+		for (String possiblePath: possiblePaths) {
 			EntityCriteria<CodeComment> criteria = EntityCriteria.of(CodeComment.class);
-			criteria.add(Restrictions.eq("markPos.path", possibleHistoryPath));
+			criteria.add(Restrictions.eq("markPos.path", possiblePath));
 			for (CodeComment comment: query(criteria)) {
-				if (comment.getMarkPos().getCommit().equals(commitId.name()) && possibleHistoryPath.equals(path)) {
+				if (comment.getMarkPos().getCommit().equals(commitId.name()) && possiblePath.equals(path)) {
 					comments.put(comment, comment.getMarkPos().getRange());
 				} else {
 					Map<String, List<CodeComment>> commentsOnCommit = 
@@ -162,10 +165,10 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 						commentsOnCommit = new HashMap<>();
 						possibleComments.put(comment.getMarkPos().getCommit(), commentsOnCommit);
 					}
-					List<CodeComment> commentsOnPath = commentsOnCommit.get(possibleHistoryPath);
+					List<CodeComment> commentsOnPath = commentsOnCommit.get(possiblePath);
 					if (commentsOnPath == null) {
 						commentsOnPath = new ArrayList<>();
-						commentsOnCommit.put(possibleHistoryPath, commentsOnPath);
+						commentsOnCommit.put(possiblePath, commentsOnPath);
 					}
 					commentsOnPath.add(comment);
 				}

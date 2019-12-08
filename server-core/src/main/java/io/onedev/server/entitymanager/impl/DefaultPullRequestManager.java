@@ -84,7 +84,6 @@ import io.onedev.server.event.pullrequest.PullRequestEvent;
 import io.onedev.server.event.pullrequest.PullRequestMergePreviewCalculated;
 import io.onedev.server.event.pullrequest.PullRequestOpened;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.command.FileChange;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Group;
@@ -140,7 +139,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultPullRequestManager.class);
 	
-	private static final int MAX_CONTRIBUTION_FILES = 100;
+	private static final int MAX_COMMIT_FILES = 100;
 	
 	private static final int UI_PREVIEW_PRIORITY = 10;
 	
@@ -842,7 +841,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				candidateReviewers.add(user);
 		}
 		
-		sortByContributions(candidateReviewers, update);
+		sortByCommitCount(candidateReviewers, update);
 		
 		for (User user: candidateReviewers) {
 			reviewers.add(user);
@@ -858,7 +857,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 				if (review == null) 
 					candidateReviewers.add(user);
 			}
-			sortByContributions(candidateReviewers, update);
+			sortByCommitCount(candidateReviewers, update);
 			for (User user: candidateReviewers) {
 				reviewers.add(user);
 				PullRequestReview review = new PullRequestReview();
@@ -894,34 +893,28 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		}
 	}
 	
-	private void sortByContributions(List<User> users, PullRequestUpdate update) {
+	private void sortByCommitCount(List<User> users, PullRequestUpdate update) {
 		if (users.size() <= 1)
 			return;
 		
 		CommitInfoManager commitInfoManager = OneDev.getInstance(CommitInfoManager.class);
-		Map<User, Long> contributions = new HashMap<>();
+		Map<User, Long> commitCounts = new HashMap<>();
 		for (User user: users)
-			contributions.put(user, 0L);
+			commitCounts.put(user, 0L);
 
 		int count = 0;
-		for (FileChange change: update.getFileChanges()) {
-			String path = change.getPath();
-			int edits = change.getAdditions() + change.getDeletions();
-			if (edits < 0)
-				edits = 100;
-			else if (edits == 0)
-				edits = 1;
-			int addedContributions = addContributions(contributions, commitInfoManager, path, edits, update);
-			while (addedContributions == 0) {
+		for (String path: update.getChangedFiles()) {
+			int addedCommitCount = addCommitCounts(commitCounts, commitInfoManager, path, update);
+			while (addedCommitCount == 0) {
 				if (path.contains("/")) {
 					path = StringUtils.substringBeforeLast(path, "/");
-					addedContributions = addContributions(contributions, commitInfoManager, path, edits, update);
+					addedCommitCount = addCommitCounts(commitCounts, commitInfoManager, path, update);
 				} else {
-					addContributions(contributions, commitInfoManager, "", edits, update);
+					addCommitCounts(commitCounts, commitInfoManager, "", update);
 					break;
 				}
 			}
-			if (++count >= MAX_CONTRIBUTION_FILES)
+			if (++count >= MAX_COMMIT_FILES)
 				break;
 		}
 
@@ -929,7 +922,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 			@Override
 			public int compare(User o1, User o2) {
-				if (contributions.get(o1) < contributions.get(o2))
+				if (commitCounts.get(o1) < commitCounts.get(o2))
 					return 1;
 				else
 					return -1;
@@ -938,17 +931,16 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		});
 	}
 	
-	private int addContributions(Map<User, Long> contributions, CommitInfoManager commitInfoManager, 
-			String path, int edits, PullRequestUpdate update) {
-		int addedContributions = 0;
-		for (Map.Entry<User, Long> entry: contributions.entrySet()) {
+	private int addCommitCounts(Map<User, Long> commitCounts, CommitInfoManager commitInfoManager, 
+			String path, PullRequestUpdate update) {
+		int addedCommitCount = 0;
+		for (Map.Entry<User, Long> entry: commitCounts.entrySet()) {
 			User user = entry.getKey();
-			int pathEdits = commitInfoManager.getEdits(
-					update.getRequest().getTargetProject(), user, path);
-			entry.setValue(entry.getValue() + edits*pathEdits);
-			addedContributions += pathEdits;
+			int commitCount = commitInfoManager.getCommitCount(update.getRequest().getTargetProject(), user, path);
+			entry.setValue(entry.getValue() + commitCount);
+			addedCommitCount += commitCount;
 		}
-		return addedContributions;
+		return addedCommitCount;
 	}
 	
 	private Predicate[] getPredicates(@Nullable Project targetProject, 

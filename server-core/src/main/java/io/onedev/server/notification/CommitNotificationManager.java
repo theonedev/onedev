@@ -84,11 +84,13 @@ public class CommitNotificationManager {
 				}
 			}
 			
-			RevCommit commit = project.getRevCommit(event.getNewCommitId(), true);
-			String subject = String.format("Subscribed commit at ref '%s': %s", event.getRefName(), commit.getShortMessage());
-			String url = urlManager.urlFor(project, commit);
-			String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
-			mailManager.sendMailAsync(notifyEmails, subject, body.toString());
+			RevCommit commit = project.getRevCommit(event.getNewCommitId(), false);
+			if (commit != null) {
+				String subject = String.format("Subscribed commit at ref '%s': %s", event.getRefName(), commit.getShortMessage());
+				String url = urlManager.urlFor(project, commit);
+				String body = String.format("Visit <a href='%s'>%s</a> for details", url, url);
+				mailManager.sendMailAsync(notifyEmails, subject, body.toString());
+			}
 		}
 	}
 }

@@ -557,31 +557,38 @@ public class Project extends AbstractEntity {
 		Optional<Blob> blob = getBlobCache().get(blobIdent);
 		if (blob == null) {
 			try (RevWalk revWalk = new RevWalk(getRepository())) {
-				ObjectId revId = getObjectId(blobIdent.revision, true);		
-				RevTree revTree = revWalk.parseCommit(revId).getTree();
-				TreeWalk treeWalk = TreeWalk.forPath(getRepository(), blobIdent.path, revTree);
-				if (treeWalk != null) {
-					ObjectId blobId = treeWalk.getObjectId(0);
-					if (blobIdent.isGitLink()) {
-						String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
-						if (url == null) {
-							if (mustExist)
-								throw new ObjectNotFoundException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
-							else
-								blob = Optional.absent();
-						} else {
-							String hash = blobId.name();
-							blob = Optional.of(new Blob(blobIdent, blobId, new Submodule(url, hash).toString().getBytes()));
-						}
-					} else if (blobIdent.isTree()) {
-						throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
-					} else {
-						blob = Optional.of(new Blob(blobIdent, blobId, treeWalk.getObjectReader()));
-					}
-				} else if (mustExist) {
-					throw new ObjectNotFoundException("Unable to find blob path '" + blobIdent.path + "' in revision '" + blobIdent.revision + "'");
-				} else {
-					blob = Optional.absent();
+				ObjectId revId = getObjectId(blobIdent.revision, mustExist);		
+				if (revId != null) {
+					RevCommit commit = GitUtils.parseCommit(revWalk, revId);
+					if (commit != null) {
+						RevTree revTree = commit.getTree();
+						TreeWalk treeWalk = TreeWalk.forPath(getRepository(), blobIdent.path, revTree);
+						if (treeWalk != null) {
+							ObjectId blobId = treeWalk.getObjectId(0);
+							if (blobIdent.isGitLink()) {
+								String url = getSubmodules(blobIdent.revision).get(blobIdent.path);
+								if (url == null) {
+									if (mustExist)
+										throw new ObjectNotFoundException("Unable to find submodule '" + blobIdent.path + "' in .gitmodules");
+									else
+										blob = Optional.absent();
+								} else {
+									String hash = blobId.name();
+									blob = Optional.of(new Blob(blobIdent, blobId, new Submodule(url, hash).toString().getBytes()));
+								}
+							} else if (blobIdent.isTree()) {
+								throw new NotFileException("Path '" + blobIdent.path + "' is a tree");
+							} else {
+								blob = Optional.of(new Blob(blobIdent, blobId, treeWalk.getObjectReader()));
+							}
+						} 
+					} 				
+				} 
+				if (blob == null) {
+					if (mustExist)
+						throw new ObjectNotFoundException("Unable to find blob ident: " + blobIdent);
+					else 
+						blob = Optional.absent();
 				}
 				getBlobCache().put(blobIdent, blob);
 			} catch (IOException e) {

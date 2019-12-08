@@ -31,8 +31,6 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.server.entitymanager.impl.DefaultCodeCommentRelationManager;
 import io.onedev.server.git.GitUtils;
-import io.onedev.server.git.command.FileChange;
-import io.onedev.server.git.command.ListFileChangesCommand;
 
 @Entity
 @Table(indexes={@Index(columnList="o_request_id"), @Index(columnList="date")})
@@ -59,8 +57,6 @@ public class PullRequestUpdate extends AbstractEntity {
 	
 	private transient Collection<String> changedFiles;
 	
-	private transient Collection<FileChange> fileChanges;
-
 	public PullRequest getRequest() {
 		return request;
 	}
@@ -102,16 +98,6 @@ public class PullRequestUpdate extends AbstractEntity {
 	public void deleteRefs() {
 		GitUtils.deleteRef(GitUtils.getRefUpdate(getRequest().getTargetProject().getRepository(), getHeadRef()));
 	}	
-	
-	public Collection<FileChange> getFileChanges() {
-		if (fileChanges == null) {
-			ListFileChangesCommand cmd = new ListFileChangesCommand(getRequest().getTargetProject().getGitDir());
-			cmd.fromRev(getBaseCommitHash());
-			cmd.toRev(getHeadCommitHash());
-			fileChanges = cmd.call();
-		}
-		return fileChanges;
-	}
 	
 	/**
 	 * Get changed files of this update since previous update. This calculation 

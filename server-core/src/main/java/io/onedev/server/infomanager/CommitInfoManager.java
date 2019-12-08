@@ -17,7 +17,7 @@ public interface CommitInfoManager {
 	
 	List<String> getFiles(Project project);
 	
-	int getEdits(Project project, User user, String path);
+	int getCommitCount(Project project, User user, String path);
 	
 	int getCommitCount(Project project);
 	

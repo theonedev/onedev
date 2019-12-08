@@ -2,10 +2,12 @@ package io.onedev.server.git.command;
 
 import java.io.File;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.eclipse.jgit.util.QuotedString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,6 +97,40 @@ public abstract class GitCommand<V> {
 		if (environments != null)
 			cmd.environments(environments);
 		return cmd;
+	}
+	
+	public static FileChange parseNumStats(String line) {
+		FileChange change;
+		StringTokenizer tokenizer = new StringTokenizer(line, "\t");
+		String additionsToken = tokenizer.nextToken();
+		int additions = additionsToken.equals("-")?-1:Integer.parseInt(additionsToken);
+		String deletionsToken = tokenizer.nextToken();
+		int deletions = deletionsToken.equals("-")?-1:Integer.parseInt(deletionsToken);
+		
+		String path = tokenizer.nextToken();
+		int renameSignIndex = path.indexOf(" => ");
+		if (renameSignIndex != -1) {
+			int leftBraceIndex = path.indexOf("{");
+			int rightBraceIndex = path.indexOf("}");
+			if (leftBraceIndex != -1 && rightBraceIndex != -1 && leftBraceIndex<renameSignIndex
+					&& rightBraceIndex>renameSignIndex) {
+				String leftCommon = path.substring(0, leftBraceIndex);
+				String rightCommon = path.substring(rightBraceIndex+1);
+				String oldPath = leftCommon + path.substring(leftBraceIndex+1, renameSignIndex) 
+						+ rightCommon;
+				String newPath = leftCommon + path.substring(renameSignIndex+4, rightBraceIndex) 
+						+ rightCommon;
+    			change = new FileChange(oldPath, newPath, additions, deletions);
+			} else {
+				String oldPath = QuotedString.GIT_PATH.dequote(path.substring(0, renameSignIndex));
+				String newPath = QuotedString.GIT_PATH.dequote(path.substring(renameSignIndex+4));
+    			change = new FileChange(oldPath, newPath, additions, deletions);
+			}
+		} else {
+			path = QuotedString.GIT_PATH.dequote(path);
+			change = new FileChange(null, path, additions, deletions);
+		}            			
+		return change;
 	}
 	
 	protected String getGitExe() {

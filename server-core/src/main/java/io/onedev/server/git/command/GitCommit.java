@@ -11,8 +11,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jgit.lib.PersonIdent;
 
-import com.google.common.base.Preconditions;
-
 import io.onedev.server.git.GitUtils;
 
 public class GitCommit implements Serializable {
@@ -20,6 +18,10 @@ public class GitCommit implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private final String hash;
+	
+	private final String subject;
+	
+	private final String body;
 	
 	private final Date commitDate;
     
@@ -31,30 +33,44 @@ public class GitCommit implements Serializable {
     
     private final List<FileChange> fileChanges;
     
-    public GitCommit(String hash, @Nullable Date commitDate, @Nullable PersonIdent committer, 
-    		@Nullable PersonIdent author, List<String> parentHashes, @Nullable List<FileChange> fileChanges) {
-    	this.hash = Preconditions.checkNotNull(hash);
-    	this.commitDate = commitDate;
+    public GitCommit(String hash, @Nullable List<String> parentHashes, @Nullable PersonIdent committer, 
+    		@Nullable PersonIdent author, @Nullable Date commitDate, @Nullable String subject, 
+    		@Nullable String body, @Nullable List<FileChange> fileChanges) {
+    	this.hash = hash;
+    	this.parentHashes = parentHashes;
     	this.committer = committer;
     	this.author = author;
-    	this.parentHashes = Preconditions.checkNotNull(parentHashes);
+    	this.commitDate = commitDate;
+    	this.subject = subject;
+    	this.body = body;
     	this.fileChanges = fileChanges;
     }
-    
+
+    @Nullable
+	public String getSubject() {
+		return subject;
+	}
+
+    @Nullable
+	public String getBody() {
+		return body;
+	}
+
+    @Nullable
 	public List<String> getParentHashes() {
 		return parentHashes;
 	}
 	
-	@Nullable
+    @Nullable
     public List<FileChange> getFileChanges() {
 		return fileChanges;
 	}
 
-    public Collection<String> getChangedFiles() {
+	public Collection<String> getChangedFiles() {
     	Collection<String> changedFiles = new HashSet<>();
     	for (FileChange change: getFileChanges()) {
-    		if (change.getPath() != null)
-    			changedFiles.add(change.getPath());
+    		if (change.getNewPath() != null)
+    			changedFiles.add(change.getNewPath());
     		if (change.getOldPath() != null)
     			changedFiles.add(change.getOldPath());
     	}
@@ -65,7 +81,7 @@ public class GitCommit implements Serializable {
 		return hash;
 	}
 
-	@Nullable 
+	@Nullable
 	public PersonIdent getCommitter() {
 		return committer;
 	}
@@ -102,6 +118,10 @@ public class GitCommit implements Serializable {
 
 		public String hash;
 		
+		public String subject;
+		
+		public String body;
+		
 		public String authorName;
 		
 		public String authorEmail;
@@ -113,6 +133,8 @@ public class GitCommit implements Serializable {
 		public String committerEmail;
 		
 		public Date committerDate;
+		
+		public Date commitDate;
 		
     	public List<String> parentHashes;
 		
@@ -130,8 +152,15 @@ public class GitCommit implements Serializable {
 				author = GitUtils.newPersonIdent(authorName, authorEmail, authorDate);
 			else
 				author = null;
+
+			if (subject != null)
+				subject = subject.trim();
 			
-			return new GitCommit(hash, committerDate, committer, author, parentHashes, fileChanges);
+			if (body != null) 
+				body = body.trim();
+			
+			return new GitCommit(hash, parentHashes, committer, author, commitDate, 
+					subject, body, fileChanges);
 		}
 	}
 	

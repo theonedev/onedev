@@ -163,7 +163,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		setting = settingManager.getSetting(Key.JOB_EXECUTORS);
 		if (setting == null) {
 			AutoDiscoveredJobExecutor executor = new AutoDiscoveredJobExecutor();
-			executor.setName("auto discovered");
+			executor.setName("auto-discovered");
 			settingManager.saveJobExecutors(Lists.newArrayList(executor));
 		}
 		setting = settingManager.getSetting(Key.JOB_SCRIPTS);
