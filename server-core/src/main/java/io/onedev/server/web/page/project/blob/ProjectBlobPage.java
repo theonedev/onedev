@@ -1156,11 +1156,11 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 		String refName = refUpdated.getRefName();
 		ObjectId oldCommitId = refUpdated.getOldCommitId();
 		ObjectId newCommitId = refUpdated.getNewCommitId();
-		OneDev.getInstance(TransactionManager.class).runAsyncAfterCommit(new Runnable() {
+		OneDev.getInstance(TransactionManager.class).runAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				OneDev.getInstance(SessionManager.class).run(new Runnable() {
+				OneDev.getInstance(SessionManager.class).runAsync(new Runnable() {
 
 					@Override
 					public void run() {
@@ -1173,7 +1173,7 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 				});
 			}
 			
-		}, SecurityUtils.getSubject());
+		});
 		
 		if (target != null) {
 			BlobIdent newBlobIdent;

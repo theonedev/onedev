@@ -9,7 +9,6 @@ import java.util.UUID;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 
-import org.apache.shiro.SecurityUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
@@ -26,6 +25,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -110,6 +110,7 @@ public class CreateIssueAction extends PostBuildAction {
 							issue.setUUID(UUID.randomUUID().toString());
 							issue.setProject(build.getProject());
 							issue.setTitle(build.interpolate(getIssueTitle()));
+							issue.setSubmitter(SecurityUtils.getUser());
 							issue.setSubmitDate(new Date());
 							SettingManager settingManager = OneDev.getInstance(SettingManager.class);
 							GlobalIssueSetting issueSetting = settingManager.getIssueSetting();
@@ -127,7 +128,7 @@ public class CreateIssueAction extends PostBuildAction {
 							ScriptIdentity.pop();
 						}
 					}
-				}, SecurityUtils.getSubject());
+				});
 			}
 		});
 		

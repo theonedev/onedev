@@ -9,10 +9,10 @@ import org.apache.wicket.request.resource.DynamicImageResource;
 import org.apache.wicket.request.resource.PackageResourceReference;
 import org.eclipse.jgit.lib.ObjectId;
 
-import io.onedev.commons.utils.Provider;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
 import io.onedev.server.git.BlobIdent;
+import io.onedev.server.util.Provider;
 
 @SuppressWarnings("serial")
 public class ImageDiffPanel extends Panel {

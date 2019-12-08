@@ -22,12 +22,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.commons.utils.schedule.SchedulableTask;
-import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.util.schedule.SchedulableTask;
+import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.page.base.BasePage;
 
 @Singleton

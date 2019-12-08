@@ -9,13 +9,18 @@ package io.onedev.server.web.component.wizard;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 
 public interface WizardStep extends Serializable {
 
 	Component render(String componentId);
 	
-	String getMessage();
+	String getTitle();
+	
+	@Nullable
+	String getDescription();
 	
 	Skippable getSkippable();
 	

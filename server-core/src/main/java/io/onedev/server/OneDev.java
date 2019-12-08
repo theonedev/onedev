@@ -6,12 +6,12 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.util.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,11 +20,7 @@ import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.launcher.loader.ManagedSerializedForm;
-import io.onedev.commons.utils.init.InitStage;
-import io.onedev.commons.utils.init.ManualConfig;
-import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
 import io.onedev.server.event.system.SystemStopped;
@@ -33,8 +29,12 @@ import io.onedev.server.maintenance.DataManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.ServerConfig;
+import io.onedev.server.util.init.InitStage;
+import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.util.jetty.JettyRunner;
+import io.onedev.server.util.schedule.TaskScheduler;
 
 public class OneDev extends AbstractPlugin implements Serializable {
 
@@ -52,20 +52,21 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	private final DataManager dataManager;
 			
-	private final UserManager userManager;
-	
 	private final ServerConfig serverConfig;
 	
 	private final ListenerRegistry listenerRegistry;
 	
 	private final TaskScheduler taskScheduler;
 	
+	private final ExecutorService executorService;
+	
 	private volatile InitStage initStage;
 	
 	@Inject
 	public OneDev(JettyRunner jettyRunner, PersistManager persistManager, TaskScheduler taskScheduler,
 			SessionManager sessionManager, ServerConfig serverConfig, DataManager dataManager, 
-			SettingManager configManager, UserManager userManager, ListenerRegistry listenerRegistry) {
+			SettingManager configManager, ExecutorService executorService, 
+			ListenerRegistry listenerRegistry) {
 		this.jettyRunner = jettyRunner;
 		this.persistManager = persistManager;
 		this.taskScheduler = taskScheduler;
@@ -73,7 +74,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		this.configManager = configManager;
 		this.dataManager = dataManager;
 		this.serverConfig = serverConfig;
-		this.userManager = userManager;
+		this.executorService = executorService;
 		this.listenerRegistry = listenerRegistry;
 		
 		initStage = new InitStage("Server is Starting...");
@@ -81,8 +82,9 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	@Override
 	public void start() {
+		SecurityUtils.bindAsRoot();
+
 		System.setProperty("hsqldb.reconfig_logging", "false");
-		
 		jettyRunner.start();
 		
 		if (Bootstrap.command == null) {
@@ -101,7 +103,6 @@ public class OneDev extends AbstractPlugin implements Serializable {
 
 		sessionManager.openSession();
 		try {
-			ThreadContext.bind(userManager.getRoot().asSubject());
 			listenerRegistry.post(new SystemStarting());
 		} finally {
 			sessionManager.closeSession();
@@ -111,8 +112,9 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	@Sessional
 	@Override
 	public void postStart() {
+		SecurityUtils.bindAsRoot();
+		
 		listenerRegistry.post(new SystemStarted());
-		ThreadContext.unbindSubject();
 		logger.info("Server is ready at " + configManager.getSystemSetting().getServerUrl() + ".");
 		initStage = null;
 	}
@@ -164,16 +166,17 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	@Sessional
 	@Override
 	public void preStop() {
-		ThreadContext.bind(userManager.getRoot().asSubject());
+		SecurityUtils.bindAsRoot();
 		listenerRegistry.post(new SystemStopping());
 	}
 
 	@Override
 	public void stop() {
+		SecurityUtils.bindAsRoot();
+		
 		sessionManager.openSession();
 		try {
 			listenerRegistry.post(new SystemStopped());
-			ThreadContext.unbindSubject();
 		} finally {
 			sessionManager.closeSession();
 		}
@@ -181,6 +184,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 		
 		taskScheduler.stop();
 		jettyRunner.stop();
+		executorService.shutdown();
 	}
 		
 	public Object writeReplace() throws ObjectStreamException {

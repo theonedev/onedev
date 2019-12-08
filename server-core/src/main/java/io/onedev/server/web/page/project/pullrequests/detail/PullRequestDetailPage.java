@@ -191,15 +191,21 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		PullRequest request = getPullRequest();
-
 		WebMarkupContainer requestHead = new WebMarkupContainer("requestHead");
 		requestHead.setOutputMarkupId(true);
 		add(requestHead);
 		
-		ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), null);
-		String transformed = transformer.apply(request.getTitle());
-		requestHead.add(new Label("title", "#" + request.getNumber() + " - " + transformed) {
+		requestHead.add(new Label("title", new LoadableDetachableModel<String>() {
+
+			@Override
+			protected String load() {
+				PullRequest request = getPullRequest();
+				ReferenceTransformer transformer = new ReferenceTransformer(request.getTargetProject(), null);
+				String transformed = transformer.apply(request.getTitle());
+				return "#" + request.getNumber() + " - " + transformed;
+			}
+			
+		}) {
 
 			@Override
 			protected void onConfigure() {
@@ -271,7 +277,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 				super.onSubmit(target, form);
 				
 				if (StringUtils.isNotBlank(title)) {
-					OneDev.getInstance(PullRequestChangeManager.class).changeTitle(getPullRequest(), title, SecurityUtils.getUser());
+					OneDev.getInstance(PullRequestChangeManager.class).changeTitle(getPullRequest(), title);
 					send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 					isEditingTitle = false;
 				}
@@ -383,7 +389,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		});
 		tabs.add(new RequestTab("File Changes", PullRequestChangesPage.class));
 		tabs.add(new RequestTab("Code Comments", PullRequestCodeCommentsPage.class));
-		if (request.isOpen())
+		if (getPullRequest().isOpen())
 			tabs.add(new RequestTab("Merge Preview", MergePreviewPage.class));
 		
 		add(new Tabbable("requestTabs", tabs).setOutputMarkupId(true));
@@ -685,7 +691,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 					
 			@Override
 			protected void onUpdate(AjaxRequestTarget target) {
-				OneDev.getInstance(PullRequestChangeManager.class).changeMergeStrategy(getPullRequest(), mergeStrategy, SecurityUtils.getUser());
+				OneDev.getInstance(PullRequestChangeManager.class).changeMergeStrategy(getPullRequest(), mergeStrategy);
 				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}
 			
@@ -889,28 +895,6 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 		mergeStatusContainer.add(new WebMarkupContainer("noConflict") {
 			
 			@Override
-			protected void onInitialize() {
-				super.onInitialize();
-
-				add(new DropdownLink("checkoutInstructions") {
-
-					@Override
-					protected Component newContent(String id, FloatingPanel dropdown) {
-						return new CheckoutRequestInstructionPanel(id) {
-
-							@Override
-							protected PullRequest getPullRequest() {
-								return PullRequestDetailPage.this.getPullRequest();
-							}
-							
-						};
-					}
-					
-				});
-				
-			}
-
-			@Override
 			protected void onConfigure() {
 				super.onConfigure();
 				MergePreview preview = getPullRequest().getMergePreview();
@@ -923,7 +907,7 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 	}
 	
 	private WebMarkupContainer newOperationsContainer() {
-		final WebMarkupContainer operationsContainer = new WebMarkupContainer("operations") {
+		WebMarkupContainer operationsContainer = new WebMarkupContainer("operations") {
 
 			@Override
 			protected void onConfigure() {

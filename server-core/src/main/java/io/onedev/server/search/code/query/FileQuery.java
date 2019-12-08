@@ -16,9 +16,9 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.search.code.hit.FileHit;
 import io.onedev.server.search.code.hit.QueryHit;
+import io.onedev.server.util.match.WildcardUtils;
 
 public class FileQuery extends BlobQuery {
 

@@ -56,6 +56,25 @@
 .issue-activities .activity>.content>.body .plain.diff {
 	margin-bottom: 12px;
 }
+.issue-activities .activity>.content>.body .plain.diff>tbody>tr>td {
+	background: none !important;
+}
+.issue-activities .activity>.content>.body>.commits td {
+	color: #888;
+	padding: 4px 0;
+}
+.issue-activities .activity>.content>.body>.commits tr:hover td {
+	background: #F5F5F5;
+}
+.issue-activities .activity>.content>.body>.commits td.author {
+	width: 28px;
+}
+.issue-activities .activity>.content>.body>.commits td.hash-and-status {
+	width: 170px;
+}
+.issue-activities .activity>.content>.body>.commits td.hash-and-status>span {
+	margin-left: 4px;
+}
 .issue-activities .activity>.content>.head a {
 	color: #999;
 	margin-left: 8px;

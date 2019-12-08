@@ -5,10 +5,10 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.PullRequest;
 
 import io.onedev.server.search.entity.EntityCriteria;
+import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 
 public class SourceBranchCriteria extends EntityCriteria<PullRequest> {

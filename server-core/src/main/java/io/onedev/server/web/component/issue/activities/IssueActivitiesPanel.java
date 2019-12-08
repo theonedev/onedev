@@ -27,6 +27,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.http.WebRequest;
 import org.apache.wicket.request.http.WebResponse;
+import org.eclipse.jgit.lib.ObjectId;
 
 import com.google.common.collect.Lists;
 
@@ -40,6 +41,8 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.support.issue.changedata.IssueCommittedData;
+import io.onedev.server.model.support.issue.changedata.IssuePullRequestData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromCodeCommentData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromIssueData;
 import io.onedev.server.model.support.issue.changedata.IssueReferencedFromPullRequestData;
@@ -127,6 +130,18 @@ public abstract class IssueActivitiesPanel extends Panel {
 					IssueReferencedFromCodeCommentData referencedFromCodeCommentData = (IssueReferencedFromCodeCommentData) change.getData();
 					if (OneDev.getInstance(CodeCommentManager.class).get(referencedFromCodeCommentData.getCommentId()) != null)
 						otherActivities.add(new IssueChangeActivity(change));
+				} else if (change.getData() instanceof IssueCommittedData && SecurityUtils.canReadCode(getIssue().getProject())) {
+					IssueCommittedData issueCommittedData = (IssueCommittedData) change.getData();
+					for (ObjectId commitId: issueCommittedData.getCommitIds()) {
+						if (getIssue().getProject().getRepository().hasObject(commitId)) {
+							otherActivities.add(new IssueChangeActivity(change));
+							break;
+						}
+					}
+				} else if (change.getData() instanceof IssuePullRequestData && SecurityUtils.canReadCode(getIssue().getProject())) {
+					IssuePullRequestData issuePullRequestData = (IssuePullRequestData) change.getData();
+					if (issuePullRequestData.getPullRequest() != null)
+						otherActivities.add(new IssueChangeActivity(change));
 				} else {
 					otherActivities.add(new IssueChangeActivity(change));
 				}
@@ -154,7 +169,10 @@ public abstract class IssueActivitiesPanel extends Panel {
 		if (anchor != null)
 			row.setMarkupId(anchor);
 		
-		row.add(new UserIdentPanel("avatar", activity.getUser(), Mode.AVATAR));
+		if (activity.getUser() != null)
+			row.add(new UserIdentPanel("avatar", activity.getUser(), Mode.AVATAR));
+		else
+			row.add(new WebMarkupContainer("avatar").setVisible(false));
 
 		row.add(activity.render("content", new DeleteCallback() {
 

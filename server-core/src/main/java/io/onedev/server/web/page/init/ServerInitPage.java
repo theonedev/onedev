@@ -12,13 +12,13 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.init.InitStage;
-import io.onedev.commons.utils.init.ManualConfig;
-import io.onedev.commons.utils.init.Skippable;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.init.InitStage;
+import io.onedev.server.util.init.ManualConfig;
+import io.onedev.server.util.init.Skippable;
 import io.onedev.server.web.WebSession;
 import io.onedev.server.web.component.wizard.ManualConfigStep;
 import io.onedev.server.web.component.wizard.Wizard;
@@ -42,7 +42,7 @@ public class ServerInitPage extends BasePage {
 				
 				final ManualConfig lastConfig = clonedConfigs.remove(clonedConfigs.size()-1);
 				
-				clonedConfigs.add(new ManualConfig(lastConfig.getMessage(), lastConfig.getSetting()) {
+				clonedConfigs.add(new ManualConfig(lastConfig.getTitle(), null, lastConfig.getSetting()) {
 		
 					@Override
 					public Skippable getSkippable() {

@@ -28,8 +28,6 @@ import javax.persistence.FlushModeType;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
 
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.slf4j.Logger;
@@ -39,7 +37,6 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.server.persistence.annotation.Transactional;
 
 @Singleton
 public class DefaultTransactionManager implements TransactionManager {
@@ -111,6 +108,18 @@ public class DefaultTransactionManager implements TransactionManager {
 	}
 
 	@Override
+	public void runAsync(Runnable runnable) {
+		executorService.execute(new Runnable() {
+
+			@Override
+			public void run() {
+				DefaultTransactionManager.this.run(runnable);
+			}
+			
+		});
+	}
+	
+	@Override
 	public void runAfterCommit(Runnable runnable) {
 		if (getTransaction().isActive()) {
 			getTransaction().registerSynchronization(new Synchronization() {
@@ -134,34 +143,6 @@ public class DefaultTransactionManager implements TransactionManager {
 		} else {
 			runnable.run();
 		}
-	}
-	
-	@Transactional
-	public void runAsyncAfterCommit(Runnable runnable, Subject subject) {
-		runAfterCommit(new Runnable() {
-
-			@Override
-			public void run() {
-				executorService.execute(new Runnable() {
-
-					@Override
-					public void run() {
-						try {
-							if (subject != null)
-								ThreadContext.bind(subject);
-							runnable.run();
-						} catch (Exception e) {
-							logger.error("Error running", e);
-						} finally {
-							if (subject != null)
-								ThreadContext.unbindSubject();
-						}
-					}
-					
-				});
-			}
-			
-		});
 	}
 	
 	@Override

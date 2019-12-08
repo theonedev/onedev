@@ -16,9 +16,9 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.BeanUtils;
-import io.onedev.commons.utils.ReflectionUtils;
+import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.ShowCondition;
 

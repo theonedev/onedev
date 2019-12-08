@@ -42,7 +42,7 @@ class IssueOpenedPanel extends GenericPanel<Issue> {
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
-				OneDev.getInstance(IssueChangeManager.class).changeDescription(getIssue(), comment, SecurityUtils.getUser());
+				OneDev.getInstance(IssueChangeManager.class).changeDescription(getIssue(), comment);
 			}
 
 			@Override

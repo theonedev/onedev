@@ -35,15 +35,12 @@ import io.onedev.server.web.component.issue.workflowreconcile.UndefinedFieldValu
 import io.onedev.server.web.component.issue.workflowreconcile.UndefinedStateResolution;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
-import io.onedev.server.web.editable.annotation.Multiline;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 
 @Editable
 public class TransitionSpec implements Serializable {
 	
 	private static final long serialVersionUID = 1L;
-	
-	private String description;
 	
 	private List<String> fromStates;
 	
@@ -54,17 +51,6 @@ public class TransitionSpec implements Serializable {
 	private TransitionTrigger trigger;
 	
 	private List<String> removeFields = new ArrayList<>();
-	
-	@Editable(order=50)
-	@NameOfEmptyValue("No description")
-	@Multiline
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
 	
 	@Editable(order=100)
 	@Size(min=1, message="At least one state needs to be specified")

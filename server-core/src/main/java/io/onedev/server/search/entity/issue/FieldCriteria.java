@@ -15,7 +15,6 @@ import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.IssueField;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
-
 import io.onedev.server.util.query.IssueQueryConstants;
 
 public abstract class FieldCriteria extends IssueCriteria {
@@ -35,8 +34,10 @@ public abstract class FieldCriteria extends IssueCriteria {
 	@Override
 	public final Predicate getPredicate(Root<Issue> root, CriteriaBuilder builder) {
 		Join<?, ?> join = root.join(IssueQueryConstants.ATTR_FIELDS, JoinType.LEFT);
-		Predicate namePredicate = builder.equal(join.get(IssueField.ATTR_NAME), getFieldName());
-		return builder.and(namePredicate, getValuePredicate(join, builder));
+		join.on(builder.and(
+				builder.equal(join.get(IssueField.ATTR_NAME), getFieldName()), 
+				getValuePredicate(join, builder)));
+		return join.isNotNull();
 	}
 
 	protected abstract Predicate getValuePredicate(Join<?, ?> field, CriteriaBuilder builder);

@@ -27,10 +27,6 @@ import io.onedev.commons.launcher.loader.ManagedSerializedForm;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.ZipUtils;
-import io.onedev.commons.utils.init.ManualConfig;
-import io.onedev.commons.utils.init.Skippable;
-import io.onedev.commons.utils.schedule.SchedulableTask;
-import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.RoleManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -53,6 +49,10 @@ import io.onedev.server.persistence.IdManager;
 import io.onedev.server.persistence.PersistManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
+import io.onedev.server.util.init.ManualConfig;
+import io.onedev.server.util.init.Skippable;
+import io.onedev.server.util.schedule.SchedulableTask;
+import io.onedev.server.util.schedule.TaskScheduler;
 
 @Singleton
 public class DefaultDataManager implements DataManager, Serializable {
@@ -103,7 +103,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 			administrator = new User();
 			administrator.setId(User.ROOT_ID);
 			Set<String> excludedProperties = Sets.newHashSet("administrator", "canCreateProjects"); 
-			manualConfigs.add(new ManualConfig("Create Administator User", administrator, excludedProperties) {
+			String description = "Root account will be used by OneDev to perform internal operations";
+			manualConfigs.add(new ManualConfig("Create Root Account", description, administrator, excludedProperties) {
 
 				@Override
 				public Skippable getSkippable() {
@@ -133,7 +134,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 				systemSetting = (SystemSetting) setting.getValue();
 		}
 		if (systemSetting != null) {
-			manualConfigs.add(new ManualConfig("Specify System Setting", systemSetting) {
+			manualConfigs.add(new ManualConfig("Specify System Setting", null, systemSetting) {
 	
 				@Override
 				public Skippable getSkippable() {
@@ -187,7 +188,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (setting == null) {
 			settingManager.saveMailSetting(null);
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
-			manualConfigs.add(new ManualConfig("Specify Mail Setting", setting.getValue()) {
+			manualConfigs.add(new ManualConfig("Specify Mail Setting", null, setting.getValue()) {
 
 				@Override
 				public Skippable getSkippable() {
@@ -207,7 +208,7 @@ public class DefaultDataManager implements DataManager, Serializable {
 			settingManager.saveBackupSetting(null);
 		} else if (setting.getValue() != null && !validator.validate(setting.getValue()).isEmpty()) {
 			Serializable backupSetting = setting.getValue();
-			manualConfigs.add(new ManualConfig("Specify Backup Setting", backupSetting) {
+			manualConfigs.add(new ManualConfig("Specify Backup Setting", null, backupSetting) {
 
 				@Override
 				public Skippable getSkippable() {

@@ -45,7 +45,7 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 
 			@Override
 			protected void onSaveComment(AjaxRequestTarget target, String comment) {
-				OneDev.getInstance(PullRequestChangeManager.class).changeDescription(getPullRequest(), comment, SecurityUtils.getUser());
+				OneDev.getInstance(PullRequestChangeManager.class).changeDescription(getPullRequest(), comment);
 				send(getPage(), Broadcast.BREADTH, new PageDataChanged(target));								
 			}
 

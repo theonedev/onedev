@@ -32,14 +32,14 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.commons.utils.matchscore.MatchScoreProvider;
-import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Membership;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.util.match.MatchScoreProvider;
+import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;

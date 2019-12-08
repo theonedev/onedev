@@ -18,13 +18,10 @@
 }
 .issue-list>.head>.others>* {
 	margin-right: 16px;
-	color: #666;
+	color: #444;
 }
 .issue-list>.head>.others>*:last-child {
 	margin-right: 0;
-}
-.issue-list>.body td a {
-	color: #444;
 }
 .issue-list>.body td .number>a {
 	margin-right: 12px;
@@ -34,11 +31,13 @@
 }
 .issue-list>.body td .number>a, .issue-list>.body td .title>a {
 	font-weight: bold;
+	font-size: 15px;
 }
 
 .issue-list>.body td .state {
 	width: 120px;
-	padding: 6px 8px;
+	line-height: 16px;
+	font-size: 12px;
 	text-overflow: ellipsis;
 	overflow: hidden;
 }

@@ -7,18 +7,36 @@
 	border-top: none;
 	padding-top: 0;
 }
-.build-side>.table {
+.build-side>.general {
     width: 100%;
     display: table;
 }
-.build-side>.table>div {
+.build-side>.general>div {
     display: table-row;
 }
-.build-side>.table>div>div {
+.build-side>.general>div>div {
     display: table-cell;
     padding: 8px 0;
 }
-.build-side>.table>div>div.name {
+.build-side>.general>div>div.name {
     padding-right: 12px;
     width: 50%;
+}
+
+.build-side>.pull-requests>.head {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+.build-side>.pull-requests>.body .pull-request {
+    margin-bottom: 8px;
+    position: relative;
+    padding-right: 55px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.build-side>.pull-requests>.body .pull-request>.status {
+	position: absolute;
+	right: 0;
+	top: 3px;
 }

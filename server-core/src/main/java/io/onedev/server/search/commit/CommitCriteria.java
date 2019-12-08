@@ -4,10 +4,10 @@ import java.io.Serializable;
 
 import org.eclipse.jgit.lib.PersonIdent;
 
-import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.command.RevListCommand;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.match.WildcardUtils;
 
 public abstract class CommitCriteria implements Serializable {
 

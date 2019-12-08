@@ -23,7 +23,7 @@ public class StateSpec implements Serializable {
 	
 	private String description;
 	
-	private String color = "#777777";
+	private String color = "#0d87e9";
 	
 	@Editable(order=100)
 	@NotEmpty

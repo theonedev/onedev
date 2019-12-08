@@ -26,7 +26,7 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.commons.utils.ClassUtils;
-import io.onedev.commons.utils.ReflectionUtils;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.editable.BeanDescriptor;

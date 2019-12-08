@@ -48,10 +48,26 @@ public abstract class Wizard extends Panel {
 			@Override
 			public String getObject() {
 				String template = "Step %s of %s: %s";
-				return String.format(template, activeStepIndex+1, steps.size(), getActiveStep().getMessage());
+				return String.format(template, activeStepIndex+1, steps.size(), getActiveStep().getTitle());
 			}
 			
 		}));
+		form.add(new Label("description", new AbstractReadOnlyModel<String>() {
+
+			@Override
+			public String getObject() {
+				return getActiveStep().getDescription();
+			}
+			
+		}) {
+
+			@Override
+			protected void onConfigure() {
+				super.onConfigure();
+				setVisible(getActiveStep().getDescription() != null);
+			}
+			
+		});
 		
 		form.add(new NotificationPanel("feedback", form));
 		form.add(getActiveStep().render("content"));

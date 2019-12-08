@@ -14,19 +14,6 @@
     			<a wicket:id="moreInfo" class="more-info pull-right" title="More info"><span class="fa fa-ellipsis-h"></span></a>
             </div>
             <pre wicket:id="errorMessage" class="error-message alert alert-danger"></pre>
-            <wicket:enclosure child="commitMessage">
-            <div class="commit-info clearfix">
-                <div class="pull-left"><i class="fa fa-ext fa-commit"></i> <b>Commit</b> </div>
-                <div class="pull-left">
-					<a wicket:id="commitHash" class="hash"><span wicket:id="label"></span></a>
-					<a wicket:id="copyCommitHash" class="copy"><i class="fa fa-clipboard"></i></a>
-                </div>
-                <div wicket:id="commitMessage" class="message pull-left"></div>
-                <div class="contribution pull-right">
-                    <span wicket:id="commitAvatars"></span> <span wicket:id="commitNames"></span>
-                </div>
-            </div>
-            </wicket:enclosure>
 			<ul wicket:id="buildTabs" class="tabs nav nav-tabs"></ul>
 			<wicket:child></wicket:child>
 		</div>

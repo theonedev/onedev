@@ -7,7 +7,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.concurrent.Prioritized;
+import io.onedev.server.util.concurrent.Prioritized;
 
 public abstract class BatchWorker {
 	
@@ -23,6 +23,10 @@ public abstract class BatchWorker {
 	
 	public BatchWorker(String id) {
 		this(id, Integer.MAX_VALUE);
+	}
+	
+	public String getId() {
+		return id;
 	}
 	
 	public int getMaxBatchSize() {

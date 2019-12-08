@@ -6,17 +6,16 @@
 	background: #F5F5F5;
 }
 #project-tags .tag>.title>a.name {
-	color: #444;
 	font-weight: bold;
 	font-size: 15px;
+}
+#project-tags .tag .actions a {
+	color: #444;
 }
 #project-tags .annotated {
 	color: #999;
 	font-size: 12px;
 	margin-left: 8px;
-}
-#project-tags .annotated a {
-	color: #666;
 }
 #project-tags .annotated .ellipsis-expander {
 	margin-left: 4px;
@@ -32,9 +31,3 @@
 	margin: 8px 0;
 }
 
-#project-tags .tag>.commit-message>a {
-	color: #666;
-}
-#project-tags .tag>.actions>a {
-	color: #444;
-}

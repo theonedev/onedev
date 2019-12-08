@@ -36,9 +36,7 @@ import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.component.build.list.BuildListPanel;
 import io.onedev.server.web.component.issue.activities.IssueActivitiesPanel;
-import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
-import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
@@ -109,9 +107,6 @@ abstract class CardDetailPanel extends GenericPanel<Issue> implements InputConte
 
 		});
 
-		add(new IssuePullRequestsPanel("pullRequests", getModel()));
-		add(new IssueCommitsPanel("commits", getModel()));
-		
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new AjaxActionTab(Model.of("Activities")) {
 

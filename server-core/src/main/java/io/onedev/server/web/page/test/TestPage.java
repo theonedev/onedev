@@ -11,9 +11,9 @@ import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import io.onedev.commons.utils.Pair;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.model.support.WebHook;
+import io.onedev.server.util.Pair;
 import io.onedev.server.web.page.base.BasePage;
 
 @SuppressWarnings("serial")

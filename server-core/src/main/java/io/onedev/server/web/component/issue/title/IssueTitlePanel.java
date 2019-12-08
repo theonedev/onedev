@@ -56,8 +56,7 @@ public abstract class IssueTitlePanel extends Panel {
 			protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 				super.onSubmit(target, form);
 				
-				OneDev.getInstance(IssueChangeManager.class).changeTitle(
-						getIssue(), titleInput.getModelObject(), SecurityUtils.getUser());
+				OneDev.getInstance(IssueChangeManager.class).changeTitle(getIssue(), titleInput.getModelObject());
 				
 				Fragment titleViewer = newTitleViewer();
 				titleEditor.replaceWith(titleViewer);

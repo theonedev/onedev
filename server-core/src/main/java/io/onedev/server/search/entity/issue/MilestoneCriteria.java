@@ -8,10 +8,9 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.Milestone;
-
+import io.onedev.server.util.match.WildcardUtils;
 import io.onedev.server.util.query.IssueQueryConstants;
 
 public class MilestoneCriteria extends IssueCriteria {

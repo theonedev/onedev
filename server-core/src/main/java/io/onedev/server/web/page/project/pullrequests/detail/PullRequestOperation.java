@@ -7,7 +7,6 @@ import com.google.common.base.Preconditions;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.entitymanager.PullRequestReviewManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
@@ -135,8 +134,7 @@ public enum PullRequestOperation {
 	};
 	
 	private static boolean canReview(PullRequest request) {
-		User user = OneDev.getInstance(UserManager.class).getCurrent();
-		PullRequestReview review = request.getReview(user);
+		PullRequestReview review = request.getReview(SecurityUtils.getUser());
 		return review != null && review.getExcludeDate() == null;
 	}
 

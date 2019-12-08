@@ -3,6 +3,7 @@ package io.onedev.server.notification;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -24,31 +25,42 @@ public class DefaultMailManager implements MailManager {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultMailManager.class);
 	
-	private final SettingManager configManager;
+	private final SettingManager settingManager;
 	
 	private final TransactionManager transactionManager;
 	
+	private final ExecutorService executorService;
+	
 	@Inject
-	public DefaultMailManager(TransactionManager transactionManager, SettingManager configManager) {
+	public DefaultMailManager(TransactionManager transactionManager, SettingManager setingManager, 
+			ExecutorService executorService) {
 		this.transactionManager = transactionManager;
-		this.configManager = configManager;
+		this.settingManager = setingManager;
+		this.executorService = executorService;
 	}
 
 	@Sessional
 	@Override
 	public void sendMailAsync(Collection<String> toList, String subject, String body) {
-		transactionManager.runAsyncAfterCommit(new Runnable() {
+		transactionManager.runAfterCommit(new Runnable() {
 
 			@Override
 			public void run() {
-				try {
-					sendMail(toList, subject, body);
-				} catch (Exception e) {
-					logger.error("Error sending email (to: " + toList + ", subject: " + subject + ")", e);
-				}		
+				executorService.execute(new Runnable() {
+
+					@Override
+					public void run() {
+						try {
+							sendMail(toList, subject, body);
+						} catch (Exception e) {
+							logger.error("Error sending email (to: " + toList + ", subject: " + subject + ")", e);
+						}		
+					}
+					
+				});
 			}
 			
-		}, null);
+		});
 	}
 
 	@Override
@@ -57,57 +69,58 @@ public class DefaultMailManager implements MailManager {
 			return;
 
 		if (mailSetting == null)
-			mailSetting = configManager.getMailSetting();
+			mailSetting = settingManager.getMailSetting();
 		
-		if (mailSetting == null)
-			throw new RuntimeException("Mail setting is not defined.");
-	
-		HtmlEmail email = new HtmlEmail();
-        email.setSocketConnectionTimeout(Bootstrap.SOCKET_CONNECT_TIMEOUT);
+		if (mailSetting != null) {
+			HtmlEmail email = new HtmlEmail();
+	        email.setSocketConnectionTimeout(Bootstrap.SOCKET_CONNECT_TIMEOUT);
 
-        if (mailSetting.getTimeout() != 0)
-        	email.setSocketTimeout(mailSetting.getTimeout()*1000);
-        
-        email.setStartTLSEnabled(true);
-        email.setSSLOnConnect(mailSetting.isEnableSSL());
-        email.setSSLCheckServerIdentity(false);
-		
-		String senderEmail = mailSetting.getSenderAddress();
-		if (senderEmail == null) {
-			String hostName;
+	        if (mailSetting.getTimeout() != 0)
+	        	email.setSocketTimeout(mailSetting.getTimeout()*1000);
+	        
+	        email.setStartTLSEnabled(true);
+	        email.setSSLOnConnect(mailSetting.isEnableSSL());
+	        email.setSSLCheckServerIdentity(false);
+			
+			String senderEmail = mailSetting.getSenderAddress();
+			if (senderEmail == null) {
+				String hostName;
+				try {
+					hostName = InetAddress.getLocalHost().getHostName();
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+				senderEmail = "onedev@" + hostName;
+			}
 			try {
-				hostName = InetAddress.getLocalHost().getHostName();
-			} catch (UnknownHostException e) {
+				email.setFrom(senderEmail);
+				for (String address: toList)
+					email.addTo(address);
+		
+				email.setHostName(mailSetting.getSmtpHost());
+				email.setSmtpPort(mailSetting.getSmtpPort());
+				email.setSslSmtpPort(String.valueOf(mailSetting.getSmtpPort()));
+		        String smtpUser = mailSetting.getSmtpUser();
+				if (smtpUser != null)
+					email.setAuthentication(smtpUser, mailSetting.getSmtpPassword());
+				email.setCharset(CharEncoding.UTF_8);
+				
+				email.setSubject(subject);
+				email.setHtmlMsg(body);
+				
+				logger.debug("Sending email (to: {}, subject: {})... ", toList, subject);
+				email.send();
+			} catch (EmailException e) {
 				throw new RuntimeException(e);
 			}
-			senderEmail = "onedev@" + hostName;
-		}
-		try {
-			email.setFrom(senderEmail);
-			for (String address: toList)
-				email.addTo(address);
-	
-			email.setHostName(mailSetting.getSmtpHost());
-			email.setSmtpPort(mailSetting.getSmtpPort());
-			email.setSslSmtpPort(String.valueOf(mailSetting.getSmtpPort()));
-	        String smtpUser = mailSetting.getSmtpUser();
-			if (smtpUser != null)
-				email.setAuthentication(smtpUser, mailSetting.getSmtpPassword());
-			email.setCharset(CharEncoding.UTF_8);
-			
-			email.setSubject(subject);
-			email.setHtmlMsg(body);
-			
-			logger.debug("Sending email (to: {}, subject: {})... ", toList, subject);
-			email.send();
-		} catch (EmailException e) {
-			throw new RuntimeException(e);
+		} else {
+			logger.warn("Unable to send mail as mail setting is not specified");
 		}
 	}
 
 	@Override
 	public void sendMail(Collection<String> toList, String subject, String body) {
-		sendMail(configManager.getMailSetting(), toList, subject, body);
+		sendMail(settingManager.getMailSetting(), toList, subject, body);
 	}
 
 }

@@ -38,7 +38,6 @@ import com.google.common.collect.Sets;
 
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.Maps;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecuteResult;
@@ -56,6 +55,7 @@ import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.model.support.administration.jobexecutor.NodeSelectorEntry;
 import io.onedev.server.model.support.administration.jobexecutor.ServiceLocator;
 import io.onedev.server.plugin.executor.kubernetes.KubernetesExecutor.TestData;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
@@ -310,34 +310,34 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		List<Object> matchExpressions = new ArrayList<>();
 		for (NodeSelectorEntry selector: getNodeSelector()) {
-			matchExpressions.add(Maps.newLinkedHashMap(
+			matchExpressions.add(CollectionUtils.newLinkedHashMap(
 					"key", selector.getLabelName(), 
 					"operator", "In", 
 					"values", Lists.newArrayList(selector.getLabelValue())));
 		}
 		if (!matchExpressions.isEmpty()) {
 			List<Object> nodeSelectorTerms = Lists.<Object>newArrayList(
-					Maps.newLinkedHashMap("matchExpressions", matchExpressions));
+					CollectionUtils.newLinkedHashMap("matchExpressions", matchExpressions));
 			nodeAffinity.put("requiredDuringSchedulingIgnoredDuringExecution", 
-					Maps.newLinkedHashMap("nodeSelectorTerms", nodeSelectorTerms));
+					CollectionUtils.newLinkedHashMap("nodeSelectorTerms", nodeSelectorTerms));
 		} 
 		
 		if (jobContext != null) {
 			List<Object> preferredDuringSchedulingIgnoredDuringExecution = new ArrayList<>();
 			for (CacheSpec cacheSpec: jobContext.getCacheSpecs()) {
 				 for (int i=1; i<MAX_AFFINITY_WEIGHT; i++) {
-				 preferredDuringSchedulingIgnoredDuringExecution.add(Maps.newLinkedHashMap(
+				 preferredDuringSchedulingIgnoredDuringExecution.add(CollectionUtils.newLinkedHashMap(
 						 "weight", i, 
-						 "preference", Maps.newLinkedHashMap("matchExpressions",
-								 Lists.<Object>newArrayList(Maps.newLinkedHashMap(
+						 "preference", CollectionUtils.newLinkedHashMap("matchExpressions",
+								 Lists.<Object>newArrayList(CollectionUtils.newLinkedHashMap(
 										 "key", CACHE_LABEL_PREFIX + cacheSpec.getKey(), 
 										 "operator", "In", 
 										 "values", Lists.newArrayList(String.valueOf(i))))))); 
 				 }
-				 preferredDuringSchedulingIgnoredDuringExecution.add(Maps.newLinkedHashMap(
+				 preferredDuringSchedulingIgnoredDuringExecution.add(CollectionUtils.newLinkedHashMap(
 						"weight", MAX_AFFINITY_WEIGHT,
-						"preference", Maps.newLinkedHashMap(
-								"matchExpressions", Lists.<Object>newArrayList(Maps.newLinkedHashMap(
+						"preference", CollectionUtils.newLinkedHashMap(
+								"matchExpressions", Lists.<Object>newArrayList(CollectionUtils.newLinkedHashMap(
 										"key", CACHE_LABEL_PREFIX + cacheSpec.getKey(), 
 										"operator", "Gt", 
 										"values", Lists.newArrayList(String.valueOf(MAX_AFFINITY_WEIGHT-1)))))));
@@ -347,7 +347,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 		
 		if (!nodeAffinity.isEmpty()) 
-			return Maps.newLinkedHashMap("nodeAffinity", nodeAffinity);
+			return CollectionUtils.newLinkedHashMap("nodeAffinity", nodeAffinity);
 		else 
 			return null;
 	}
@@ -397,22 +397,22 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				String registryUrl = login.getRegistryUrl();
 				if (registryUrl == null)
 					registryUrl = "https://index.docker.io/v1/";
-				auths.put(registryUrl, Maps.newLinkedHashMap(
+				auths.put(registryUrl, CollectionUtils.newLinkedHashMap(
 						"auth", Base64.encodeBase64String(auth.getBytes(Charsets.UTF_8))));
 			}
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			try {
-				String dockerConfig = mapper.writeValueAsString(Maps.newLinkedHashMap("auths", auths));
+				String dockerConfig = mapper.writeValueAsString(CollectionUtils.newLinkedHashMap("auths", auths));
 				
 				String secretName = "image-pull-secret";
 				Map<String, String> encodedSecrets = new LinkedHashMap<>();
-				Map<Object, Object> secretDef = Maps.newLinkedHashMap(
+				Map<Object, Object> secretDef = CollectionUtils.newLinkedHashMap(
 						"apiVersion", "v1", 
 						"kind", "Secret", 
-						"metadata", Maps.newLinkedHashMap(
+						"metadata", CollectionUtils.newLinkedHashMap(
 								"name", secretName, 
 								"namespace", namespace), 
-						"data", Maps.newLinkedHashMap(
+						"data", CollectionUtils.newLinkedHashMap(
 								".dockerconfigjson", Base64.encodeBase64String(dockerConfig.getBytes(Charsets.UTF_8))));
 				secretDef.put("type", "kubernetes.io/dockerconfigjson");
 				createResource(secretDef, encodedSecrets.values(), jobLogger);
@@ -448,10 +448,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			}
 		}
 		if (!configMapData.isEmpty()) {
-			Map<Object, Object> configMapDef = Maps.newLinkedHashMap(
+			Map<Object, Object> configMapDef = CollectionUtils.newLinkedHashMap(
 					"apiVersion", "v1", 
 					"kind", "ConfigMap",
-					"metadata", Maps.newLinkedHashMap(
+					"metadata", CollectionUtils.newLinkedHashMap(
 							"name", "trust-certs", 
 							"namespace", namespace), 
 					"data", configMapData);
@@ -474,15 +474,15 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		}
 		
 		Map<String, Object> podSpec = new LinkedHashMap<>();
-		Map<Object, Object> containerSpec = Maps.newHashMap(
+		Map<Object, Object> containerSpec = CollectionUtils.newHashMap(
 				"name", "default", 
 				"image", jobService.getImage());
-		containerSpec.put("resources", Maps.newLinkedHashMap("requests", Maps.newLinkedHashMap(
+		containerSpec.put("resources", CollectionUtils.newLinkedHashMap("requests", CollectionUtils.newLinkedHashMap(
 				"cpu", jobService.getCpuRequirement(), 
 				"memory", jobService.getMemoryRequirement())));
 		List<Map<Object, Object>> envs = new ArrayList<>();
 		for (EnvVar envVar: jobService.getEnvVars()) {
-			envs.add(Maps.newLinkedHashMap(
+			envs.add(CollectionUtils.newLinkedHashMap(
 					"name", envVar.getName(), 
 					"value", envVar.getValue()));
 		}
@@ -496,7 +496,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		podSpec.put("containers", Lists.<Object>newArrayList(containerSpec));
 		if (imagePullSecretName != null)
-			podSpec.put("imagePullSecrets", Lists.<Object>newArrayList(Maps.newLinkedHashMap("name", imagePullSecretName)));
+			podSpec.put("imagePullSecrets", Lists.<Object>newArrayList(CollectionUtils.newLinkedHashMap("name", imagePullSecretName)));
 		podSpec.put("restartPolicy", "Never");		
 		
 		if (!nodeSelector.isEmpty())
@@ -504,26 +504,26 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 		
 		String podName = "service-" + jobService.getName();
 		
-		Map<Object, Object> podDef = Maps.newLinkedHashMap(
+		Map<Object, Object> podDef = CollectionUtils.newLinkedHashMap(
 				"apiVersion", "v1", 
 				"kind", "Pod", 
-				"metadata", Maps.newLinkedHashMap(
+				"metadata", CollectionUtils.newLinkedHashMap(
 						"name", podName, 
 						"namespace", namespace, 
-						"labels", Maps.newLinkedHashMap(
+						"labels", CollectionUtils.newLinkedHashMap(
 								"service", jobService.getName())), 
 				"spec", podSpec);
 		createResource(podDef, Sets.newHashSet(), jobLogger);		
 		
-		Map<Object, Object> serviceDef = Maps.newLinkedHashMap(
+		Map<Object, Object> serviceDef = CollectionUtils.newLinkedHashMap(
 				"apiVersion", "v1", 
 				"kind", "Service", 
-				"metadata", Maps.newLinkedHashMap(
+				"metadata", CollectionUtils.newLinkedHashMap(
 						"name", jobService.getName(),
 						"namespace", namespace), 
-				"spec", Maps.newLinkedHashMap(
+				"spec", CollectionUtils.newLinkedHashMap(
 						"clusterIP", "None", 
-						"selector", Maps.newLinkedHashMap(
+						"selector", CollectionUtils.newLinkedHashMap(
 								"service", jobService.getName())));
 		createResource(serviceDef, Sets.newHashSet(), jobLogger);
 		
@@ -662,7 +662,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			
 			Map<String, Object> podSpec = new LinkedHashMap<>();
 			
-			Map<Object, Object> mainContainerSpec = Maps.newHashMap(
+			Map<Object, Object> mainContainerSpec = CollectionUtils.newHashMap(
 					"name", "main", 
 					"image", dockerImage);
 	
@@ -689,16 +689,16 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				dockerSock = null;
 			}
 
-			Map<String, String> buildHomeMount = Maps.newLinkedHashMap(
+			Map<String, String> buildHomeMount = CollectionUtils.newLinkedHashMap(
 					"name", "build-home", 
 					"mountPath", containerBuildHome);
-			Map<String, String> cacheHomeMount = Maps.newLinkedHashMap(
+			Map<String, String> cacheHomeMount = CollectionUtils.newLinkedHashMap(
 					"name", "cache-home", 
 					"mountPath", containerCacheHome);
-			Map<String, String> trustCertsMount = Maps.newLinkedHashMap(
+			Map<String, String> trustCertsMount = CollectionUtils.newLinkedHashMap(
 					"name", "trust-certs-home", 
 					"mountPath", trustCertsHome);
-			Map<String, String> dockerSockMount = Maps.newLinkedHashMap(
+			Map<String, String> dockerSockMount = CollectionUtils.newLinkedHashMap(
 					"name", "docker-sock", 
 					"mountPath", dockerSock);
 			
@@ -711,16 +711,16 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			mainContainerSpec.put("volumeMounts", volumeMounts);
 			
 			if (jobContext != null) {
-				mainContainerSpec.put("resources", Maps.newLinkedHashMap("requests", Maps.newLinkedHashMap(
+				mainContainerSpec.put("resources", CollectionUtils.newLinkedHashMap("requests", CollectionUtils.newLinkedHashMap(
 						"cpu", jobContext.getCpuRequirement(), 
 						"memory", jobContext.getMemoryRequirement())));
 			}
 	
 			List<Map<Object, Object>> envs = new ArrayList<>();
-			envs.add(Maps.newLinkedHashMap(
+			envs.add(CollectionUtils.newLinkedHashMap(
 					"name", KubernetesHelper.ENV_SERVER_URL, 
 					"value", getServerUrl()));
-			envs.add(Maps.newLinkedHashMap(
+			envs.add(CollectionUtils.newLinkedHashMap(
 					"name", KubernetesHelper.ENV_JOB_TOKEN, 
 					"value", jobToken));
 
@@ -744,7 +744,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				throw new RuntimeException(e);
 			}
 			
-			Map<Object, Object> sidecarContainerSpec = Maps.newHashMap(
+			Map<Object, Object> sidecarContainerSpec = CollectionUtils.newHashMap(
 					"name", "sidecar", 
 					"image", "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion, 
 					"command", Lists.newArrayList("java"), 
@@ -752,7 +752,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 					"env", envs, 
 					"volumeMounts", volumeMounts);
 			
-			Map<Object, Object> initContainerSpec = Maps.newHashMap(
+			Map<Object, Object> initContainerSpec = CollectionUtils.newHashMap(
 					"name", "init", 
 					"image", "1dev/k8s-helper-" + baselineOsInfo.getHelperImageSuffix() + ":" + helperImageVersion, 
 					"command", Lists.newArrayList("java"), 
@@ -768,7 +768,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				podSpec.put("affinity", affinity);
 			
 			if (imagePullSecretName != null)
-				podSpec.put("imagePullSecrets", Lists.<Object>newArrayList(Maps.newLinkedHashMap("name", imagePullSecretName)));
+				podSpec.put("imagePullSecrets", Lists.<Object>newArrayList(CollectionUtils.newLinkedHashMap("name", imagePullSecretName)));
 			if (getServiceAccount() != null)
 				podSpec.put("serviceAccountName", getServiceAccount());
 			podSpec.put("restartPolicy", "Never");		
@@ -776,26 +776,26 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			if (!getNodeSelector().isEmpty())
 				podSpec.put("nodeSelector", toMap(getNodeSelector()));
 			
-			Map<Object, Object> buildHomeVolume = Maps.newLinkedHashMap(
+			Map<Object, Object> buildHomeVolume = CollectionUtils.newLinkedHashMap(
 					"name", "build-home", 
-					"emptyDir", Maps.newLinkedHashMap());
-			Map<Object, Object> cacheHomeVolume = Maps.newLinkedHashMap(
+					"emptyDir", CollectionUtils.newLinkedHashMap());
+			Map<Object, Object> cacheHomeVolume = CollectionUtils.newLinkedHashMap(
 					"name", "cache-home", 
-					"hostPath", Maps.newLinkedHashMap(
+					"hostPath", CollectionUtils.newLinkedHashMap(
 							"path", baselineOsInfo.getCacheHome(), 
 							"type", "DirectoryOrCreate"));
 			List<Object> volumes = Lists.<Object>newArrayList(buildHomeVolume, cacheHomeVolume);
 			if (trustCertsConfigMapName != null) {
-				Map<Object, Object> trustCertsHomeVolume = Maps.newLinkedHashMap(
+				Map<Object, Object> trustCertsHomeVolume = CollectionUtils.newLinkedHashMap(
 						"name", "trust-certs-home", 
-						"configMap", Maps.newLinkedHashMap(
+						"configMap", CollectionUtils.newLinkedHashMap(
 								"name", trustCertsConfigMapName));			
 				volumes.add(trustCertsHomeVolume);
 			}
 			if (dockerSock != null) {
-				Map<Object, Object> dockerSockVolume = Maps.newLinkedHashMap(
+				Map<Object, Object> dockerSockVolume = CollectionUtils.newLinkedHashMap(
 						"name", "docker-sock", 
-						"hostPath", Maps.newLinkedHashMap(
+						"hostPath", CollectionUtils.newLinkedHashMap(
 								"path", dockerSock, 
 								"type", "File"));
 				volumes.add(dockerSockVolume);
@@ -804,10 +804,10 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 
 			String podName = "job";
 			
-			Map<Object, Object> podDef = Maps.newLinkedHashMap(
+			Map<Object, Object> podDef = CollectionUtils.newLinkedHashMap(
 					"apiVersion", "v1", 
 					"kind", "Pod", 
-					"metadata", Maps.newLinkedHashMap(
+					"metadata", CollectionUtils.newLinkedHashMap(
 							"name", podName, 
 							"namespace", namespace), 
 					"spec", podSpec);

@@ -99,11 +99,12 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 				}
 
 				if (editor.isValid()) {
+					boolean displayInList;
 					if (fieldIndex != -1) {
 						FieldSpec oldField = getSetting().getFieldSpecs().get(fieldIndex);
 						getSetting().getFieldSpecs().set(fieldIndex, field);
 						getSetting().getDefaultPromptFieldsUponIssueOpen().remove(oldField.getName());
-						getSetting().getListFields().remove(oldField.getName());
+						displayInList = getSetting().getListFields().remove(oldField.getName());
 						if (!field.getName().equals(oldField.getName())) {
 							getSetting().onRenameField(oldField.getName(), field.getName());
 							getSetting().setReconciled(false);
@@ -147,9 +148,12 @@ abstract class FieldEditPanel extends Panel implements InputContext {
 						}
 					} else {
 						getSetting().getFieldSpecs().add(field);
+						displayInList = true;
 					}
 					if (bean.isPromptUponIssueOpen())
 						getSetting().getDefaultPromptFieldsUponIssueOpen().add(field.getName());
+					if (displayInList)
+						getSetting().getListFields().add(field.getName());					
 					OneDev.getInstance(SettingManager.class).saveIssueSetting(getSetting());
 					onSave(target);
 				} else {

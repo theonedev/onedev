@@ -18,15 +18,12 @@
 }
 .pull-request-list>.head>.others>* {
 	margin-right: 16px;
-	color: #666;
+	color: #444;
 }
 .pull-request-list>.head>.others>*:last-child {
 	margin-right: 0;
 }
 
-.pull-request-list>.body td a {
-	color: #444;
-}
 .pull-request-list>.body td .number>a {
 	margin-right: 12px;
 }
@@ -35,6 +32,7 @@
 }
 .pull-request-list>.body td .number>a, .pull-request-list>.body td .title>a {
 	font-weight: bold;
+	font-size: 15px;
 }
 
 .pull-request-list>.body td .status {
@@ -42,6 +40,7 @@
 	padding: 6px 8px;
 	text-overflow: ellipsis;
 	overflow: hidden;
+	font-size: 12px;
 }
 .pull-request-list>.body td .primary {
 	margin-bottom: 8px;

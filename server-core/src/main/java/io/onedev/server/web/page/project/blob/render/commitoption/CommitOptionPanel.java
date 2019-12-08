@@ -42,9 +42,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
-import io.onedev.commons.utils.Provider;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobChange;
@@ -58,6 +55,8 @@ import io.onedev.server.git.exception.ObsoleteCommitException;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
+import io.onedev.server.util.Provider;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.TrackViewStateListener;
@@ -321,7 +320,7 @@ public abstract class CommitOptionPanel extends Panel {
 				commitMessage = getDefaultCommitMessage();
 			if (StringUtils.isNotBlank(commitDetail))
 				commitMessage += "\n\n" + commitDetail;
-			User user = Preconditions.checkNotNull(OneDev.getInstance(UserManager.class).getCurrent());
+			User user = Preconditions.checkNotNull(SecurityUtils.getUser());
 
 			String revision = context.getBlobIdent().revision;
 

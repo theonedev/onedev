@@ -237,7 +237,7 @@ public abstract class IssueSidePanel extends Panel {
 						super.onSubmit(target, form);
 
 						Map<String, Object> fieldValues = IssueUtils.getFieldValues(beanEditor.newComponentContext(), fieldBean, getIssue().getFieldNames());
-						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues, SecurityUtils.getUser());
+						OneDev.getInstance(IssueChangeManager.class).changeFields(getIssue(), fieldValues);
 						Component fieldsContainer = newFieldsContainer();
 						IssueSidePanel.this.replace(fieldsContainer);
 						target.add(fieldsContainer);
@@ -276,7 +276,8 @@ public abstract class IssueSidePanel extends Panel {
 	private Component newMilestoneContainer() {
 		Fragment fragment = new Fragment("milestone", "milestoneViewFrag", this);
 		if (getIssue().getMilestone() != null) {
-			Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneDetailPage.class, MilestoneDetailPage.paramsOf(getIssue().getMilestone(), null));
+			Link<Void> link = new BookmarkablePageLink<Void>("link", MilestoneDetailPage.class, 
+					MilestoneDetailPage.paramsOf(getIssue().getMilestone(), null));
 			link.add(new Label("label", getIssue().getMilestone().getName()));
 			fragment.add(new MilestoneProgressBar("progress", new AbstractReadOnlyModel<Milestone>() {
 
@@ -324,7 +325,8 @@ public abstract class IssueSidePanel extends Panel {
 					
 				};
 				
-				StringSingleChoice choice = new StringSingleChoice("milestone", new PropertyModel<String>(this, "milestoneName"), choicesModel) {
+				StringSingleChoice choice = new StringSingleChoice("milestone", 
+						new PropertyModel<String>(this, "milestoneName"), choicesModel) {
 
 					@Override
 					protected void onInitialize() {
@@ -342,7 +344,7 @@ public abstract class IssueSidePanel extends Panel {
 					protected void onSubmit(AjaxRequestTarget target, Form<?> form) {
 						super.onSubmit(target, form);
 						Milestone milestone = getProject().getMilestone(milestoneName);
-						getIssueChangeManager().changeMilestone(getIssue(), milestone, SecurityUtils.getUser());
+						getIssueChangeManager().changeMilestone(getIssue(), milestone);
 						Component container = newMilestoneContainer();
 						IssueSidePanel.this.replace(container);
 						target.add(container);

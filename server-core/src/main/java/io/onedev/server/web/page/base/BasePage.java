@@ -42,8 +42,8 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
 
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.WebSocketObserver;
 import io.onedev.server.web.page.init.ServerInitPage;
@@ -290,7 +290,7 @@ public abstract class BasePage extends WebPage {
 	
 	@Nullable
 	protected final User getLoginUser() {
-		return OneDev.getInstance(UserManager.class).getCurrent();
+		return SecurityUtils.getUser();
 	}
 	
 	public void unauthorized() {

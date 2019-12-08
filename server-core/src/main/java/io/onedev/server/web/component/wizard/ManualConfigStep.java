@@ -2,9 +2,11 @@ package io.onedev.server.web.component.wizard;
 
 import java.io.Serializable;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.markup.html.form.FormComponent;
 
-import io.onedev.commons.utils.init.ManualConfig;
+import io.onedev.server.util.init.ManualConfig;
 import io.onedev.server.web.editable.BeanContext;
 
 @SuppressWarnings("serial")
@@ -43,8 +45,13 @@ public class ManualConfigStep implements WizardStep {
 	}
 
 	@Override
-	public String getMessage() {
-		return config.getMessage();
+	public String getTitle() {
+		return config.getTitle();
 	}
 
+	@Nullable
+	@Override
+	public String getDescription() {
+		return config.getDescription();
+	}
 }

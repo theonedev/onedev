@@ -68,8 +68,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.match.Matcher;
-import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.buildspec.BuildSpec;
@@ -112,6 +110,8 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.jackson.DefaultView;
+import io.onedev.server.util.match.Matcher;
+import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.util.validation.annotation.ProjectName;
@@ -914,7 +914,7 @@ public class Project extends AbstractEntity {
 									new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
 						}
 			    		
-			    	}, SecurityUtils.getSubject());
+			    	});
 				}
 	    		
 	    	});			
@@ -950,7 +950,7 @@ public class Project extends AbstractEntity {
 									new RefUpdated(project, refName, ObjectId.zeroId(), commitId));
 						}
 			    		
-			    	}, SecurityUtils.getSubject());
+			    	});
 				}
 	    		
 	    	});			

@@ -13,10 +13,10 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.model.Group;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.groupchoice.GroupChoiceProvider;
 import io.onedev.server.web.component.groupchoice.GroupMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;

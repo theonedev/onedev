@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import io.onedev.commons.utils.matchscore.MatchScoreProvider;
-import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.match.MatchScoreProvider;
+import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.select2.ResponseFiller;

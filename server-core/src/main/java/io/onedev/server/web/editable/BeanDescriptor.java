@@ -13,8 +13,8 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.BeanUtils;
 import io.onedev.server.OneException;
+import io.onedev.server.util.BeanUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @SuppressWarnings("serial")

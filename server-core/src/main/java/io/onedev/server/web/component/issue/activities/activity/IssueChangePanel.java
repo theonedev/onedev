@@ -1,13 +1,12 @@
 package io.onedev.server.web.component.issue.activities.activity;
 
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.GenericPanel;
 import org.apache.wicket.model.IModel;
 
 import io.onedev.server.model.IssueChange;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.userident.SystemUserIdent;
-import io.onedev.server.util.userident.UserIdent;
 
 @SuppressWarnings("serial")
 class IssueChangePanel extends GenericPanel<IssueChange> {
@@ -21,8 +20,13 @@ class IssueChangePanel extends GenericPanel<IssueChange> {
 		super.onInitialize();
 		
 		IssueChange change = getModelObject();
-		UserIdent userIdent = UserIdent.of(change.getUser(), change.getUserName());
-		add(new Label("user", userIdent.getName()).setVisible(!(userIdent instanceof SystemUserIdent)));
+		if (change.getUser() != null) 
+			add(new Label("user", change.getUser().getDisplayName()));
+		else if (change.getUserName() != null) 
+			add(new Label("user", change.getUserName()));
+		else
+			add(new WebMarkupContainer("user").setVisible(false));
+
 		add(new Label("description", change.getData().getDescription()));
 		add(new Label("age", DateUtils.formatAge(change.getDate())));
 		

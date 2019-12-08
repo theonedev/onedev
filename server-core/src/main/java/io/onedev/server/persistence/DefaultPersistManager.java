@@ -48,7 +48,6 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import io.onedev.commons.utils.BeanUtils;
 import io.onedev.commons.utils.ClassUtils;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
@@ -59,6 +58,7 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.ModelVersion;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.validation.EntityValidator;
 
 @Singleton

@@ -342,7 +342,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 						throw new UnauthorizedException("Permission denied");
 					
-					OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, getMilestone(), SecurityUtils.getUser());
+					OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, getMilestone());
 					markAccepted(target, issue, true);
 				} else if (fieldName.equals(IssueQueryConstants.FIELD_STATE)) {
 					ProjectIssueSetting workflow = getProject().getIssueSetting();
@@ -403,7 +403,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 						};
 					} else {
 						issue.removeFields(transitionRef.get().getRemoveFields());
-						OneDev.getInstance(IssueChangeManager.class).changeState(issue, getColumn(), new HashMap<>(), null, SecurityUtils.getUser());
+						OneDev.getInstance(IssueChangeManager.class).changeState(issue, getColumn(), new HashMap<>(), null);
 						markAccepted(target, issue, true);
 					}
 				} else {
@@ -416,7 +416,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 					
 					Map<String, Object> fieldValues = new HashMap<>();
 					fieldValues.put(fieldName, getColumn());
-					OneDev.getInstance(IssueChangeManager.class).changeFields(issue, fieldValues, SecurityUtils.getUser());
+					OneDev.getInstance(IssueChangeManager.class).changeFields(issue, fieldValues);
 					markAccepted(target, issue, true);
 				}
 			}

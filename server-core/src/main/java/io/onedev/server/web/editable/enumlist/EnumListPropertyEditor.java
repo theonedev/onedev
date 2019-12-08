@@ -15,7 +15,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
-import io.onedev.commons.utils.ReflectionUtils;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.select2.Select2MultiChoice;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;

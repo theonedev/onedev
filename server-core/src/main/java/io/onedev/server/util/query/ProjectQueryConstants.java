@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.Maps;
+import io.onedev.server.util.CollectionUtils;
 
 public class ProjectQueryConstants {
 	
@@ -32,7 +32,7 @@ public class ProjectQueryConstants {
 	public static final List<String> QUERY_FIELDS = 
 			Lists.newArrayList(FIELD_NAME, FIELD_DESCRIPTION, FIELD_UPDATE_DATE);
 
-	public static final Map<String, String> ORDER_FIELDS = Maps.newLinkedHashMap(
+	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			FIELD_NAME, ATTR_NAME, 
 			FIELD_OWNER, ATTR_OWNER, 
 			FIELD_UPDATE_DATE, ATTR_UPDATE_DATE);

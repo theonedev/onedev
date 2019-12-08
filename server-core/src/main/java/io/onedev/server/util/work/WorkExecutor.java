@@ -7,8 +7,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import io.onedev.commons.utils.concurrent.PrioritizedCallable;
-import io.onedev.commons.utils.concurrent.PrioritizedRunnable;
+import io.onedev.server.util.concurrent.PrioritizedCallable;
+import io.onedev.server.util.concurrent.PrioritizedRunnable;
 
 /**
  * This executor is intended to run resource intensive long running tasks
@@ -38,7 +38,5 @@ public interface WorkExecutor {
 	<T> T invokeAny(Collection<? extends PrioritizedCallable<T>> tasks,
 			long timeout, TimeUnit unit) throws InterruptedException,
 			ExecutionException, TimeoutException;
-
-	void remove(PrioritizedRunnable task);
 	
 }

@@ -27,12 +27,12 @@ public class ContributorAvatars extends Panel {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new UserIdentPanel("author", UserIdent.of(author, "Git author"), Mode.AVATAR));
+		add(new UserIdentPanel("author", UserIdent.of(author, "Author"), Mode.AVATAR));
 		if (committer.getEmailAddress().equals(author.getEmailAddress())
 				&& committer.getName().equals(author.getName())) {
 			add(new WebMarkupContainer("committer").setVisible(false));
 		} else {
-			add(new UserIdentPanel("committer", UserIdent.of(committer, "Git committer"), Mode.AVATAR));
+			add(new UserIdentPanel("committer", UserIdent.of(committer, "Committer"), Mode.AVATAR));
 		}
 	}
 

@@ -77,13 +77,13 @@ public class WebSocketProcessor extends AbstractWebSocketProcessor implements We
 	private void run(Runnable runnable) {
 		if (OneDev.getInstance().isReady()) {
 			SessionManager sessionManager = AppLoader.getInstance(SessionManager.class);
+			Subject subject = (Subject) request.getHttpServletRequest()
+					.getAttribute(WebSocketFilter.SHIRO_SUBJECT);
+	        ThreadContext.bind(subject);
 			sessionManager.openSession();
 			try {
-				Subject subject = (Subject) request.getHttpServletRequest().getAttribute(WebSocketFilter.SHIRO_SUBJECT);
-		        ThreadContext.bind(subject);
 		        runnable.run();
 			} finally {
-				ThreadContext.unbindSubject();
 				sessionManager.closeSession();
 			}
 		}

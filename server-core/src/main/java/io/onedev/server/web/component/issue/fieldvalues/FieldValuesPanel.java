@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.link.BookmarkablePageLink;
 import org.apache.wicket.markup.html.link.Link;
@@ -14,7 +15,6 @@ import org.apache.wicket.markup.html.panel.Fragment;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.unbescape.html.HtmlEscape;
 
-import io.onedev.commons.utils.ColorUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.entitymanager.BuildManager;
@@ -28,6 +28,7 @@ import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
+import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Input;
@@ -120,7 +121,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 								String backgroundColor = choiceProvider.getChoices(false).get(value);
 								if (backgroundColor == null)
 									backgroundColor = "#E8E8E8";
-								String fontColor = ColorUtils.isLight(backgroundColor)?"black":"white"; 
+								String fontColor = ColorUtils.isLight(backgroundColor)?"#333":"#f9f9f9"; 
 								String style = String.format(
 										"background-color: %s; color: %s;", 
 										backgroundColor, fontColor);
@@ -137,7 +138,7 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 				
 			});
 			add(fragment);
-		} else {
+		} else if (getField() != null) {
 			FieldSpec fieldSpec = null;
 			if (getField() != null)
 				fieldSpec = getIssueSetting().getFieldSpec(getField().getName());
@@ -147,8 +148,13 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 			else
 				displayValue = "Undefined";
 			displayValue = HtmlEscape.escapeHtml5(displayValue);
-			add(new Label("content", "<i>" + displayValue + "</i>").setEscapeModelStrings(false));
-		}		
+			Label label = new Label("content", "<i>" + displayValue + "</i>");
+			label.setEscapeModelStrings(false);
+			label.add(AttributeAppender.append("title", getField().getName()));
+			add(label);
+		} else {
+			add(new WebMarkupContainer("content").setVisible(false));
+		}
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package io.onedev.server.search.entity.pullrequest;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -22,14 +22,15 @@ public class ToBeReviewedByMeCriteria extends EntityCriteria<PullRequest> {
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
 		if (User.get() != null) {
-			From<?, ?> join = root.join(PullRequestQueryConstants.ATTR_REVIEWS, JoinType.LEFT);
+			Join<?, ?> join = root.join(PullRequestQueryConstants.ATTR_REVIEWS, JoinType.LEFT);
 			Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.ATTR_USER);
 			Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.ATTR_EXCLUDE_DATE);
 			Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.ATTR_RESULT_APPROVED);
-			return builder.and(
+			join.on(builder.and(
 					builder.equal(userPath, User.get()), 
 					builder.isNull(excludeDatePath), 
-					builder.isNull(approvedPath));
+					builder.isNull(approvedPath)));
+			return join.isNotNull();
 		} else {
 			throw new OneException("Please login to perform this query");
 		}

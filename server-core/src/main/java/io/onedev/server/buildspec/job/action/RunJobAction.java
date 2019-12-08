@@ -7,13 +7,11 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 
-import org.apache.shiro.SecurityUtils;
 import org.apache.wicket.Component;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.utils.MatrixRunner;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
@@ -27,6 +25,7 @@ import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.EditContext;
+import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.OmitName;
@@ -110,7 +109,7 @@ public class RunJobAction extends PostBuildAction {
 								@Override
 								public void run(Map<String, List<String>> paramMap) {
 									OneDev.getInstance(JobManager.class).submit(build.getProject(), 
-											build.getCommitId(), jobName, paramMap, null); 
+											build.getCommitId(), jobName, paramMap); 
 								}
 								
 							}.run();
@@ -123,7 +122,7 @@ public class RunJobAction extends PostBuildAction {
 						}
 					}
 					
-				}, SecurityUtils.getSubject());
+				});
 			}
 			
 		});

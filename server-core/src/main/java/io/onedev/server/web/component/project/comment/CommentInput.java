@@ -8,8 +8,6 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.model.IModel;
 
-import io.onedev.commons.utils.matchscore.MatchScoreProvider;
-import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.IssueManager;
@@ -21,6 +19,8 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.match.MatchScoreProvider;
+import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.web.component.markdown.AtWhoReferenceSupport;
 import io.onedev.server.web.component.markdown.MarkdownEditor;
 import io.onedev.server.web.component.markdown.UserMentionSupport;

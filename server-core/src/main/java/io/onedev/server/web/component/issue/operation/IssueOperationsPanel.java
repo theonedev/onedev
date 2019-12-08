@@ -44,7 +44,6 @@ import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.search.entity.issue.IssueQuery;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.query.IssueQueryConstants;
 import io.onedev.server.web.component.issue.IssueStateLabel;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
@@ -148,9 +147,10 @@ public abstract class IssueOperationsPanel extends Panel {
 									super.onSubmit(target, form);
 
 									getIssue().removeFields(transition.getRemoveFields());
-									Map<String, Object> fieldValues = IssueUtils.getFieldValues(editor.newComponentContext(), fieldBean, trigger.getPromptFields());
+									Map<String, Object> fieldValues = IssueUtils.getFieldValues(
+											editor.newComponentContext(), fieldBean, trigger.getPromptFields());
 									IssueChangeManager manager = OneDev.getInstance(IssueChangeManager.class);
-									manager.changeState(getIssue(), transition.getToState(), fieldValues, comment, SecurityUtils.getUser());
+									manager.changeState(getIssue(), transition.getToState(), fieldValues, comment);
 									onStateChanged(target);
 								}
 								

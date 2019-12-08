@@ -29,7 +29,6 @@ import org.hibernate.Hibernate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.onedev.commons.utils.concurrent.PrioritizedRunnable;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.SettingManager;
@@ -39,12 +38,12 @@ import io.onedev.server.git.command.ReceiveCommand;
 import io.onedev.server.git.command.UploadCommand;
 import io.onedev.server.git.exception.GitException;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.security.CodePullAuthorizationSource;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.ServerConfig;
+import io.onedev.server.util.concurrent.PrioritizedRunnable;
 import io.onedev.server.util.work.WorkExecutor;
 
 @Singleton
@@ -144,13 +143,13 @@ public class GitFilter implements Filter {
 
 	        environments.put("ONEDEV_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
 			environments.put("ONEDEV_URL", serverUrl);
-			environments.put("ONEDEV_USER_ID", User.getCurrentId().toString());
+			environments.put("ONEDEV_USER_ID", SecurityUtils.getUserId().toString());
 			environments.put("ONEDEV_REPOSITORY_ID", project.getId().toString());
 			
 			// to be compatible with old repository
 	        environments.put("GITPLEX_CURL", configManager.getSystemSetting().getCurlConfig().getExecutable());
 			environments.put("GITPLEX_URL", serverUrl);
-			environments.put("GITPLEX_USER_ID", User.getCurrentId().toString());
+			environments.put("GITPLEX_USER_ID", SecurityUtils.getUserId().toString());
 			environments.put("GITPLEX_REPOSITORY_ID", project.getId().toString());
 			
 			gitDir = storageManager.getProjectGitDir(project.getId());

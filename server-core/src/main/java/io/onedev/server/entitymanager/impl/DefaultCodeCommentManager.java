@@ -258,7 +258,6 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<CodeComment> query = builder.createQuery(CodeComment.class);
 		Root<CodeComment> root = query.from(CodeComment.class);
-		query.select(root).distinct(true);
 		
 		query.where(getPredicates(project, commentQuery.getCriteria(), request, root, builder));
 
@@ -298,7 +297,7 @@ public class DefaultCodeCommentManager extends AbstractEntityManager<CodeComment
 
 		criteriaQuery.where(getPredicates(project, commentCriteria, request, root, builder));
 
-		criteriaQuery.select(builder.countDistinct(root));
+		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 

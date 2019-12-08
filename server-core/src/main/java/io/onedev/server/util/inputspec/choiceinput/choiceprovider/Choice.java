@@ -17,7 +17,7 @@ public class Choice implements Serializable {
 	
 	private String value;
 	
-	private String color = "#E8E8E8";
+	private String color = "#0d87e9";
 
 	@Editable
 	public String getUuid() {

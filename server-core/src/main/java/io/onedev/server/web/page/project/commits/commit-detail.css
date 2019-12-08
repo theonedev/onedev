@@ -56,9 +56,6 @@
 #commit-detail>.info>.refs>div>span {
 	margin-right: 6px;
 }
-#commit-detail>.info>.refs a {
-	color: #444;
-}
 #commit-detail>.info>.contribution-and-parents {
 	padding: 16px 12px 0 54px;
 	position: relative;

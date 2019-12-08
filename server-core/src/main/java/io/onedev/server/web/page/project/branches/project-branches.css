@@ -4,12 +4,6 @@
 #project-branches>.list>table td.detail>div {
 	margin: 8px 0;
 }
-#project-branches>.list>table td.detail>.commit-message>a {
-	color: #666;
-}
-#project-branches>.list>table td.detail>.actions>a {
-	color: #444;
-}
 
 #project-branches>.list>table .detail .make-default {
 	display: none;
@@ -20,8 +14,11 @@
 #project-branches>.list>table td.detail>.title>.name {
 	font-weight: bold;
 	font-size: 15px;
-	color: #555;
 }
+#project-branches .actions a {
+	color: #444;
+}
+
 #project-branches>.list>table td.detail>.title>.label, 
 #project-branches>.list>table td.detail>.title>.btn {
 	margin-left: 8px;
@@ -46,9 +43,6 @@
 }
 #project-branches>.list>table td.behind-ahead.behind>div {
 	text-align: right;
-}
-#project-branches>.list>table td.behind-ahead a {
-	color: #555;
 }
 #project-branches>.list>table .bar {
 	height: 6px;

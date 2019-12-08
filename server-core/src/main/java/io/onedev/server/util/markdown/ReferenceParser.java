@@ -16,15 +16,15 @@ import org.jsoup.select.NodeTraversor;
 import com.google.common.collect.ImmutableSet;
 
 import io.onedev.commons.utils.HtmlUtils;
-import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.TextNodeVisitor;
 import io.onedev.commons.utils.WordUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Referenceable;
+import io.onedev.server.util.ReflectionUtils;
+import io.onedev.server.util.TextNodeVisitor;
 import io.onedev.server.util.validation.ProjectNameValidator;
 
 public abstract class ReferenceParser<T extends Referenceable> {

@@ -15,10 +15,10 @@ import org.jsoup.select.NodeTraversor;
 import com.google.common.collect.ImmutableSet;
 
 import io.onedev.commons.utils.HtmlUtils;
-import io.onedev.commons.utils.TextNodeVisitor;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.TextNodeVisitor;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
 public class CommitProcessor implements MarkdownProcessor {

@@ -56,8 +56,6 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.MatrixRunner;
-import io.onedev.commons.utils.concurrent.Prioritized;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
 import io.onedev.server.buildspec.BuildSpec;
@@ -123,9 +121,11 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.security.permission.ReadCode;
 import io.onedev.server.security.permission.WriteCode;
+import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
@@ -223,7 +223,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			change.setDate(new Date());
 			change.setData(new PullRequestSourceBranchRestoreData(note));
 			change.setRequest(request);
-			change.setUser(userManager.getCurrent());
+			change.setUser(SecurityUtils.getUser());
 			pullRequestChangeManager.save(change);
 		}
 	}
@@ -239,7 +239,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			change.setDate(new Date());
 			change.setData(new PullRequestSourceBranchDeleteData(note));
 			change.setRequest(request);
-			change.setUser(userManager.getCurrent());
+			change.setUser(SecurityUtils.getUser());
 			pullRequestChangeManager.save(change);
 		}
 	}
@@ -247,7 +247,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void reopen(PullRequest request, String note) {
-		User user = userManager.getCurrent();
+		User user = SecurityUtils.getUser();
 		request.setCloseInfo(null);
 
 		PullRequestChange change = new PullRequestChange();
@@ -262,7 +262,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
  	public void discard(PullRequest request, String note) {
-		User user = userManager.getCurrent();
+		User user = SecurityUtils.getUser();
 		Date date = new Date();
 		
 		CloseInfo closeInfo = new CloseInfo();
@@ -344,7 +344,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 									targetHeadId, newTargetHeadId));
 					}
 					
-				}, SecurityUtils.getSubject());
+				});
 			}
 		});
 	}
@@ -394,6 +394,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			reason = "closed pull request as source branch is merged into target branch";
 		
 		PullRequestChange change = new PullRequestChange();
+		change.setUser(userManager.getRoot());
 		change.setDate(date);
 		change.setData(new PullRequestMergeData(reason));
 		change.setRequest(request);
@@ -673,7 +674,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 					        	check(load(requestId));
 						}
 						
-					}, SecurityUtils.getSubject());
+					});
 				}
 				
 			});
@@ -748,7 +749,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 											@Override
 											public void run(Map<String, List<String>> paramMap) {
 												Build build = jobManager.submit(request.getTargetProject(), 
-														commitId, job.getName(), paramMap, null);
+														commitId, job.getName(), paramMap);
 												PullRequestBuild pullRequestBuild = null;
 												for (PullRequestBuild prevPullRequestBuild: prevPullRequestBuilds) {
 													if (prevPullRequestBuild.getBuild().equals(build)) {
@@ -967,7 +968,6 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<PullRequest> query = builder.createQuery(PullRequest.class);
 		Root<PullRequest> root = query.from(PullRequest.class);
-		query.select(root).distinct(true);
 		
 		query.where(getPredicates(targetProject, requestQuery.getCriteria(), root, builder));
 
@@ -1010,7 +1010,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 
 		criteriaQuery.where(getPredicates(targetProject, requestCriteria, root, builder));
 
-		criteriaQuery.select(builder.countDistinct(root));
+		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	

@@ -48,7 +48,10 @@ public class IssueChangeActivity implements IssueActivity {
 
 	@Override
 	public UserIdent getUser() {
-		return UserIdent.of(getChange().getUser(), getChange().getUserName());
+		if (getChange().getUser() != null || getChange().getUserName() != null)
+			return UserIdent.of(getChange().getUser(), getChange().getUserName());
+		else
+			return null;
 	}
 
 }

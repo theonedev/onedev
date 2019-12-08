@@ -62,13 +62,4 @@ public interface UserManager extends EntityManager<User> {
 	 */
 	@Nullable User find(PersonIdent person);
 	
-	/**
-	 * Get current authenticated user in Shiro context, or <tt>null</tt> if not 
-	 * authenticated. 
-	 * 
-	 * @return 
-	 *         current authenticated user, or <tt>null</tt> for anonymous access
-	 */
-	@Nullable User getCurrent();
-	
 }

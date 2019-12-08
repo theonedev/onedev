@@ -11,12 +11,12 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.build.choice.BuildChoiceProvider;
 import io.onedev.server.web.component.build.choice.BuildSingleChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;

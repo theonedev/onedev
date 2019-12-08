@@ -3,11 +3,8 @@ package io.onedev.server.persistence;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
-import javax.annotation.Nullable;
 import javax.inject.Provider;
 
-import org.apache.shiro.subject.Subject;
-import org.apache.shiro.util.ThreadContext;
 import org.hibernate.FlushMode;
 import org.hibernate.Session;
 import org.slf4j.Logger;
@@ -17,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import io.onedev.commons.utils.ExceptionUtils;
-import io.onedev.commons.utils.ObjectReference;
+import io.onedev.server.util.ObjectReference;
 
 @Singleton
 public class DefaultSessionManager implements SessionManager {
@@ -108,20 +105,16 @@ public class DefaultSessionManager implements SessionManager {
 	}
 
 	@Override
-	public void runAsync(Runnable runnable, @Nullable Subject subject) {
+	public void runAsync(Runnable runnable) {
 		executorService.execute(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					if (subject != null)
-						ThreadContext.bind(subject);
 					DefaultSessionManager.this.run(runnable);
 				} catch (Exception e) {
-					if (subject != null)
-						ThreadContext.unbindSubject();
 					logger.error("Error running", e);
-				} 
+				}
 			}
 			
 		});

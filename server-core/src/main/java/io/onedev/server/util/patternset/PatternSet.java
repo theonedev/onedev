@@ -20,8 +20,8 @@ import org.apache.tools.ant.DirectoryScanner;
 
 import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.match.Matcher;
 import io.onedev.server.OneException;
+import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.patternset.PatternSetParser.PatternContext;
 import io.onedev.server.util.patternset.PatternSetParser.PatternsContext;
 

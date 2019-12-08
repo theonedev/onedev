@@ -38,7 +38,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.Pair;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.PullRequestManager;
@@ -59,6 +58,7 @@ import io.onedev.server.search.code.CommitIndexed;
 import io.onedev.server.search.commit.CommitQuery;
 import io.onedev.server.search.commit.Revision;
 import io.onedev.server.search.commit.RevisionCriteria;
+import io.onedev.server.util.Pair;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.diff.WhitespaceOption;

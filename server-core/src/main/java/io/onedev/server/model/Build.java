@@ -44,7 +44,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.BeanUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
@@ -61,6 +60,7 @@ import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.BeanUtils;
 import io.onedev.server.util.ComponentContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.IssueUtils;
@@ -523,12 +523,7 @@ public class Build extends AbstractEntity implements Referenceable {
 		if (paramSpec.getShowCondition() != null) {
 			Input dependentInput = getParamInputs().get(paramSpec.getShowCondition().getInputName());
 			Preconditions.checkNotNull(dependentInput);
-			String value;
-			if (!dependentInput.getValues().isEmpty())
-				value = dependentInput.getValues().iterator().next();
-			else
-				value = null;
-			if (paramSpec.getShowCondition().getValueMatcher().matches(value)) 
+			if (paramSpec.getShowCondition().getValueMatcher().matches(dependentInput.getValues())) 
 				return isParamVisible(dependentInput.getName(), checkedParamNames);
 			else 
 				return false;
@@ -739,7 +734,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	}
 	
 	public boolean isValid() {
-		return getProject().getRevCommit(getCommitHash(), false) != null;
+		return getProject().getRepository().hasObject(ObjectId.fromString(getCommitHash()));
 	}
 	
 	@Nullable

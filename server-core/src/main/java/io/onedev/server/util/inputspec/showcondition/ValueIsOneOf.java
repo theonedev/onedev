@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.validation.constraints.Size;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,8 +54,8 @@ public class ValueIsOneOf implements ValueMatcher {
 	}
 
 	@Override
-	public boolean matches(String value) {
-		return getValues().contains(value);
+	public boolean matches(List<String> values) {
+		return CollectionUtils.containsAny(getValues(), values);
 	}
 	
 }

@@ -11,13 +11,13 @@ public class GitUserIdent extends EmailAwareIdent {
 	
 	private final String email;
 	
-	private final String gitRole;
+	private final String commitRole;
 
 	@JsonCreator
 	public GitUserIdent(@JsonProperty("name") String name, @JsonProperty("email") String email, @JsonProperty("gitRole") String gitRole) {
 		this.name = name;
 		this.email = email;
-		this.gitRole = gitRole;
+		this.commitRole = gitRole;
 	}
 	
 	public GitUserIdent(String name, String email) {
@@ -34,8 +34,8 @@ public class GitUserIdent extends EmailAwareIdent {
 		return email;
 	}
 
-	public String getGitRole() {
-		return gitRole;
+	public String getCommitRole() {
+		return commitRole;
 	}
 
 }

@@ -25,8 +25,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.util.userident.EmailAwareIdent;
-import io.onedev.server.util.userident.RemovedUserIdent;
-import io.onedev.server.util.userident.SystemUserIdent;
+import io.onedev.server.util.userident.ExternalUserIdent;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
 
@@ -50,9 +49,7 @@ public class DefaultAvatarManager implements AvatarManager {
 	@Sessional
 	@Override
 	public String getAvatarUrl(UserIdent userIdent) {
-		if (userIdent instanceof SystemUserIdent) {
-			return AVATARS_BASE_URL + "onedev.png";
-		} else if (userIdent instanceof RemovedUserIdent) {
+		if (userIdent instanceof ExternalUserIdent) {
 			return AVATARS_BASE_URL + "user.png";
 		} else {
 			EmailAwareIdent emailAwareIdent = (EmailAwareIdent) userIdent;

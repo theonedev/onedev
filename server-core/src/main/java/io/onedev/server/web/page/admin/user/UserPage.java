@@ -58,7 +58,8 @@ public abstract class UserPage extends AdministrationPage {
 			protected Component newHead(String componentId) {
 				Fragment fragment = new Fragment(componentId, "sidebarHeadFrag", UserPage.this);
 				User user = userModel.getObject();
-				fragment.add(new UserAvatar("avatar", UserIdent.of(user)).add(AttributeAppender.append("title", user.getDisplayName())));
+				fragment.add(new UserAvatar("avatar", UserIdent.of(user))
+						.add(AttributeAppender.append("title", user.getDisplayName())));
 				fragment.add(new Label("name", user.getDisplayName()));
 				return fragment;
 			}

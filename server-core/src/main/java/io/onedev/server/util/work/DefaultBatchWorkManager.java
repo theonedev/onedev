@@ -12,14 +12,17 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.loader.Listen;
-import io.onedev.commons.utils.concurrent.Prioritized;
-import io.onedev.commons.utils.concurrent.PrioritizedRunnable;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
+import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.concurrent.Prioritized;
+import io.onedev.server.util.concurrent.PrioritizedRunnable;
 
 @Singleton
 public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
@@ -100,7 +103,17 @@ public class DefaultBatchWorkManager implements BatchWorkManager, Runnable {
 
 	@Override
 	public synchronized void submit(BatchWorker worker, Prioritized work) {
-		getWorks(worker).queued.offer(work);
+		Subject subject = SecurityUtils.getSubject();
+		getWorks(new BatchWorker(worker.getId(), worker.getMaxBatchSize()) {
+
+			@Override
+			public void doWorks(Collection<Prioritized> works) {
+				ThreadContext.bind(subject);
+				worker.doWorks(works);
+			}
+			
+		}).queued.offer(work);
+		
 		notify();
 	}
 

@@ -11,10 +11,10 @@ import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.notification.MailManager;
 import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.taskbutton.TaskButton;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -66,11 +66,11 @@ public class MailSettingPage extends AdministrationPage {
 
 			@Override
 			protected String runTask(JobLogger logger) {
-				User currentUser = OneDev.getInstance(UserManager.class).getCurrent();
+				User user = SecurityUtils.getUser();
 				OneDev.getInstance(MailManager.class).sendMail(mailSettingHolder.getMailSetting(), 
-						Sets.newHashSet(currentUser.getEmail()), 
+						Sets.newHashSet(user.getEmail()), 
 						"Test email from OneDev", "Great, your mail setting is working!");
-				return "Test mail has been sent to " + currentUser.getEmail() + ", please check your mail box";
+				return "Test mail has been sent to " + user.getEmail() + ", please check your mail box";
 			}
 
 		};

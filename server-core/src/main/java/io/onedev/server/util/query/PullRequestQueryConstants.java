@@ -5,7 +5,7 @@ import java.util.Map;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.Maps;
+import io.onedev.server.util.CollectionUtils;
 
 public class PullRequestQueryConstants {
 	
@@ -89,7 +89,7 @@ public class PullRequestQueryConstants {
 			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, 
 			FIELD_CLOSE_DATE, FIELD_MERGE_STRATEGY, FIELD_COMMENT_COUNT);
 
-	public static final Map<String, String> ORDER_FIELDS = Maps.newLinkedHashMap(
+	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			FIELD_SUBMIT_DATE, ATTR_SUBMIT_DATE,
 			FIELD_UPDATE_DATE, ATTR_UPDATE_DATE,
 			FIELD_CLOSE_DATE, ATTR_CLOSE_DATE,

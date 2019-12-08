@@ -18,9 +18,6 @@ package io.onedev.server.persistence;
 
 import java.util.concurrent.Callable;
 
-import javax.annotation.Nullable;
-
-import org.apache.shiro.subject.Subject;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -34,6 +31,8 @@ public interface TransactionManager {
 	
 	void run(Runnable runnable);
 	
+	void runAsync(Runnable runnable);
+	
 	/**
 	 * Do some work after commit if there is an active transaction, or do the work immediately if there is no active 
 	 * transaction. Note that the work should not involve any other database operations in current thread 
@@ -42,7 +41,5 @@ public interface TransactionManager {
 	 */
 	void runAfterCommit(Runnable runnable);
 
-	void runAsyncAfterCommit(Runnable runnable, @Nullable Subject subject);
-	
 	void mustRunAfterTransaction(Runnable runnable);
 }

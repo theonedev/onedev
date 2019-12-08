@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
 import org.slf4j.Logger;
@@ -24,8 +25,8 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.model.Project;
-import io.onedev.server.model.User;
 import io.onedev.server.persistence.SessionManager;
+import io.onedev.server.util.SecurityUtils;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -64,6 +65,7 @@ public class GitPostReceiveCallback extends HttpServlet {
         
         Long projectId = Long.valueOf(fields.get(0));
         Long userId = Long.valueOf(fields.get(1));
+        ThreadContext.bind(SecurityUtils.asSubject(userId));
 
         String refUpdateInfo = null;
         Enumeration<String> paramNames = request.getParameterNames();
@@ -128,7 +130,7 @@ public class GitPostReceiveCallback extends HttpServlet {
 				}
 			}
         	
-        }, User.asSubject(userId));
+        });
 	}
 
 }

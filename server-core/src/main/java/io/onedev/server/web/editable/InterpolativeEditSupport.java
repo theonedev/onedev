@@ -8,7 +8,7 @@ import org.apache.wicket.model.IModel;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.ReflectionUtils;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.behavior.InterpolativeAssistBehavior;
 import io.onedev.server.web.behavior.inputassist.InputAssistBehavior;
 import io.onedev.server.web.editable.annotation.Interpolative;

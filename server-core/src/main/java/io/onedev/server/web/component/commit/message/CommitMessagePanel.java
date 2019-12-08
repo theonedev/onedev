@@ -19,9 +19,9 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.revwalk.RevCommit;
 
-import io.onedev.commons.utils.Highlighter;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.Highlighter;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.ReferenceTransformer;
 

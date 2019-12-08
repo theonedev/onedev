@@ -36,9 +36,7 @@ import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.util.script.identity.SiteAdministrator;
-import io.onedev.server.web.component.issue.commits.IssueCommitsPanel;
 import io.onedev.server.web.component.issue.operation.IssueOperationsPanel;
-import io.onedev.server.web.component.issue.pullrequests.IssuePullRequestsPanel;
 import io.onedev.server.web.component.issue.side.IssueSidePanel;
 import io.onedev.server.web.component.issue.title.IssueTitlePanel;
 import io.onedev.server.web.component.issue.workflowreconcile.WorkflowChangeAlertPanel;
@@ -127,10 +125,6 @@ public abstract class IssueDetailPage extends ProjectPage implements InputContex
 
 		});
 
-		add(new IssuePullRequestsPanel("pullRequests", issueModel));
-		
-		add(new IssueCommitsPanel("commits", issueModel));
-		
 		List<Tab> tabs = new ArrayList<>();
 		tabs.add(new IssueTab("Activities", IssueActivitiesPage.class) {
 

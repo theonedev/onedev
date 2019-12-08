@@ -23,8 +23,6 @@ import org.apache.wicket.model.Model;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.git.BlobIdent;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
@@ -71,7 +69,7 @@ public abstract class BlobViewPanel extends Panel {
 
 		Project project = context.getProject();
 		if (SecurityUtils.canWriteCode(project) && context.isOnBranch()) {
-			User user = OneDev.getInstance(UserManager.class).getCurrent();
+			User user = SecurityUtils.getUser();
 			String revision = context.getBlobIdent().revision;
 			String path = context.getBlobIdent().path;
 			boolean reviewRequired = project.isReviewRequiredForModification(user, revision, path);

@@ -32,8 +32,6 @@ import org.hibernate.criterion.MatchMode;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 
-import io.onedev.commons.utils.matchscore.MatchScoreProvider;
-import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.MembershipManager;
 import io.onedev.server.entitymanager.UserManager;
@@ -41,6 +39,8 @@ import io.onedev.server.model.Membership;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.SecurityUtils;
+import io.onedev.server.util.match.MatchScoreProvider;
+import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;

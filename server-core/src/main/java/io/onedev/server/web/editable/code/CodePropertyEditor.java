@@ -24,10 +24,10 @@ import com.google.common.base.CharMatcher;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
-import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.editable.PropertyDescriptor;

@@ -2,7 +2,7 @@ package io.onedev.server.security.permission;
 
 import org.apache.shiro.authz.Permission;
 
-import io.onedev.commons.utils.match.StringMatcher;
+import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 
 public class AccessBuildReports implements Permission {

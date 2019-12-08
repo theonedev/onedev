@@ -17,5 +17,5 @@ public interface PullRequestChangeData extends Serializable {
 	
 	@Nullable
 	abstract CommentSupport getCommentSupport();
-	
+
 }

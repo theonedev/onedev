@@ -25,7 +25,6 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Selection;
 
-import org.apache.shiro.util.ThreadContext;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -46,15 +45,11 @@ import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.match.StringMatcher;
-import io.onedev.commons.utils.schedule.SchedulableTask;
-import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.entitymanager.BuildDependenceManager;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildParamManager;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
@@ -83,8 +78,11 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ProjectScopedNumber;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.facade.BuildFacade;
+import io.onedev.server.util.match.StringMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.query.BuildQueryConstants;
+import io.onedev.server.util.schedule.SchedulableTask;
+import io.onedev.server.util.schedule.TaskScheduler;
 
 @Singleton
 public class DefaultBuildManager extends AbstractEntityManager<Build> implements BuildManager, SchedulableTask {
@@ -109,8 +107,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	
 	private final TransactionManager transactionManager;
 	
-	private final UserManager userManager;
-	
 	private final Map<Long, BuildFacade> builds = new HashMap<>();
 	
 	private final ReadWriteLock buildsLock = new ReentrantReadWriteLock();
@@ -124,7 +120,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Inject
 	public DefaultBuildManager(Dao dao, BuildParamManager buildParamManager, 
 			TaskScheduler taskScheduler, BuildDependenceManager buildDependenceManager,
-			GroupManager groupManager, StorageManager storageManager, UserManager userManager,
+			GroupManager groupManager, StorageManager storageManager, 
 			ProjectManager projectManager, TransactionManager transactionManager) {
 		super(dao);
 		this.buildParamManager = buildParamManager;
@@ -132,7 +128,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		this.storageManager = storageManager;
 		this.groupManager = groupManager;
 		this.projectManager = projectManager;
-		this.userManager = userManager;
 		this.taskScheduler = taskScheduler;
 		this.transactionManager = transactionManager;
 	}
@@ -410,7 +405,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Build> query = builder.createQuery(Build.class);
 		Root<Build> root = query.from(Build.class);
-		query.select(root).distinct(true);
+		query.select(root);
 		
 		query.where(getPredicates(project, buildQuery.getCriteria(), root, builder));
 
@@ -449,7 +444,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 		criteriaQuery.where(getPredicates(project, buildCriteria, root, builder));
 
-		criteriaQuery.select(builder.countDistinct(root));
+		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
 	}
 	
@@ -518,7 +513,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 
 			@Override
 			public Boolean call() {
-				ThreadContext.bind(userManager.getRoot().asSubject());
 				User.push(null); // do not support various 'is me' criterias
 				try {
 					List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
@@ -555,7 +549,6 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 					return builds.size() == CLEANUP_BATCH;
 				} finally {
 					User.pop();
-					ThreadContext.unbindSubject();
 				}						
 			}
 			
@@ -641,7 +634,8 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	@Override
 	public Build findStreamPrevious(Build build, Status status) {
 		Map<ObjectId, Long> buildIds = new HashMap<>();
-		for (Object[] fields: getSession().createQuery(buildQueryOfStreamPrevios(build, status, "commitHash", "id")).list()) {
+		for (Object[] fields: getSession().createQuery(buildQueryOfStreamPrevios(
+				build, status, "commitHash", "id")).list()) {
 			buildIds.put(ObjectId.fromString((String) fields[0]), (Long)fields[1]);
 		}
 		

@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +34,8 @@ import org.eclipse.jgit.lib.StoredConfig;
 import org.hibernate.Session;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
+import org.quartz.ScheduleBuilder;
+import org.quartz.SimpleScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,10 +85,13 @@ import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.query.ProjectQueryConstants;
+import io.onedev.server.util.schedule.SchedulableTask;
+import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.avatar.AvatarManager;
 
 @Singleton
-public class DefaultProjectManager extends AbstractEntityManager<Project> implements ProjectManager {
+public class DefaultProjectManager extends AbstractEntityManager<Project> 
+		implements ProjectManager, SchedulableTask {
 
 	private static final Logger logger = LoggerFactory.getLogger(DefaultProjectManager.class);
 	
@@ -103,17 +109,24 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
     
     private final TransactionManager transactionManager;
     
+    private final TaskScheduler taskScheduler;
+    
     private final ListenerRegistry listenerRegistry;
     
     private final String gitReceiveHook;
     
 	private final Map<Long, Repository> repositoryCache = new ConcurrentHashMap<>();
 	
+	private final Map<Long, Date> updateDates = new ConcurrentHashMap<>();
+	
+	private String taskId;
+	
     @Inject
     public DefaultProjectManager(Dao dao, CommitInfoManager commitInfoManager,  
     		BuildManager buildManager, AvatarManager avatarManager, GroupManager groupManager,
     		SettingManager settingManager, TransactionManager transactionManager, 
-    		SessionManager sessionManager, ListenerRegistry listenerRegistry) {
+    		SessionManager sessionManager, ListenerRegistry listenerRegistry, 
+    		TaskScheduler taskScheduler) {
     	super(dao);
     	
         this.commitInfoManager = commitInfoManager;
@@ -124,6 +137,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
         this.transactionManager = transactionManager;
         this.sessionManager = sessionManager;
         this.listenerRegistry = listenerRegistry;
+        this.taskScheduler = taskScheduler;
         
         try (InputStream is = getClass().getClassLoader().getResourceAsStream("git-receive-hook")) {
         	Preconditions.checkNotNull(is);
@@ -310,6 +324,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	
 	@Listen
 	public void on(SystemStopping event) {
+		taskScheduler.unschedule(taskId);
 		synchronized(repositoryCache) {
 			for (Repository repository: repositoryCache.values()) {
 				repository.close();
@@ -320,7 +335,10 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 	@Transactional
 	@Listen
 	public void on(ProjectEvent event) {
-		event.getProject().setUpdateDate(event.getDate());
+		/*
+		 * Update asynchronously to avoid deadlock 
+		 */
+		updateDates.put(event.getProject().getId(), event.getDate());
 	}
 	
 	@Transactional
@@ -329,6 +347,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		logger.info("Checking projects...");
 		for (Project project: query())
 			checkSanity(project);
+		taskId = taskScheduler.schedule(this);
 	}
 
 	@Transactional
@@ -377,7 +396,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 						listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
 					}
 		    		
-		    	}, SecurityUtils.getSubject());
+		    	});
 			}
     		
     	});
@@ -427,7 +446,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 						listenerRegistry.post(new RefUpdated(project, refName, commitId, ObjectId.zeroId()));
 					}
 		    		
-		    	}, SecurityUtils.getSubject());
+		    	});
 			}
     		
     	});
@@ -480,7 +499,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 		CriteriaBuilder builder = session.getCriteriaBuilder();
 		CriteriaQuery<Project> query = builder.createQuery(Project.class);
 		Root<Project> root = query.from(Project.class);
-		query.select(root).distinct(true);
+		query.select(root);
 		
 		query.where(getPredicates(projectQuery.getCriteria(), root, builder));
 
@@ -536,6 +555,36 @@ public class DefaultProjectManager extends AbstractEntityManager<Project> implem
 
 		criteriaQuery.select(builder.count(root));
 		return getSession().createQuery(criteriaQuery).uniqueResult().intValue();
+	}
+
+	@Override
+	public void execute() {
+		try {
+			transactionManager.run(new Runnable() {
+	
+				@Override
+				public void run() {
+					Date now = new Date();
+					for (Iterator<Map.Entry<Long, Date>> it = updateDates.entrySet().iterator(); it.hasNext();) {
+						Map.Entry<Long, Date> entry = it.next();
+						if (now.getTime() - entry.getValue().getTime() > 60000) {
+							Project project = get(entry.getKey());
+							if (project != null)
+								project.setUpdateDate(entry.getValue());
+							it.remove();
+						}
+					}
+				}
+				
+			});
+		} catch (Exception e) {
+			logger.error("Error flushing project update dates", e);
+		}
+	}
+
+	@Override
+	public ScheduleBuilder<?> getScheduleBuilder() {
+		return SimpleScheduleBuilder.repeatMinutelyForever();
 	}
 
 }

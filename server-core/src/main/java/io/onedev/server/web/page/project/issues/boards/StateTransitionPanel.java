@@ -18,7 +18,6 @@ import io.onedev.server.issue.TransitionSpec;
 import io.onedev.server.issue.transitiontrigger.PressButtonTrigger;
 import io.onedev.server.model.Issue;
 import io.onedev.server.util.IssueUtils;
-import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
 import io.onedev.server.web.editable.BeanContext;
@@ -57,8 +56,10 @@ abstract class StateTransitionPanel extends Panel implements InputContext {
 				super.onSubmit(target, form);
 				
 				getIssue().removeFields(getTransition().getRemoveFields());
-				Map<String, Object> fieldValues = IssueUtils.getFieldValues(editor.newComponentContext(), fieldBean, trigger.getPromptFields());
-				OneDev.getInstance(IssueChangeManager.class).changeState(getIssue(), getTransition().getToState(), fieldValues, null, SecurityUtils.getUser());
+				Map<String, Object> fieldValues = IssueUtils.getFieldValues(
+						editor.newComponentContext(), fieldBean, trigger.getPromptFields());
+				OneDev.getInstance(IssueChangeManager.class).changeState(
+						getIssue(), getTransition().getToState(), fieldValues, null);
 				onSaved(target);
 			}
 

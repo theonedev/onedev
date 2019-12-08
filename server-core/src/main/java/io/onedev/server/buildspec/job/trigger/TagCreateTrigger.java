@@ -5,12 +5,12 @@ import java.util.List;
 import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.commons.codeassist.InputSuggestion;
-import io.onedev.commons.utils.match.PathMatcher;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.event.ProjectEvent;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;

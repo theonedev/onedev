@@ -6,7 +6,7 @@
 }
 .code-comments>.head>.others>* {
 	margin-right: 16px;
-	color: #666;
+	color: #444;
 }
 .code-comments>.head>.others>*:last-child {
 	margin-right: 0;

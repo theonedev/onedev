@@ -8,8 +8,6 @@ import org.junit.Test;
 
 import com.google.common.collect.Lists;
 
-import io.onedev.commons.utils.RangeBuilder;
-
 public class RangeBuilderTest {
 
 	@Test

@@ -7,7 +7,9 @@
 	position: relative;
 }
 .issue-operations>.state-and-actions>.issue-state {
-	font-size: 20px;
+	font-size: 16px;
+	padding: 7px 24px;
+	margin-right: 32px;
 }
 .issue-operations>.state-and-actions>* {
 	margin-right: 10px;

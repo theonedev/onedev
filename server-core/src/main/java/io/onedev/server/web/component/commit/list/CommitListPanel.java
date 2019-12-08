@@ -527,8 +527,11 @@ public abstract class CommitListPanel extends Panel {
 			List<String> commitLabels = labelsModel.getObject().get(commit.name());
 			if (commitLabels == null)
 				commitLabels = new ArrayList<>();
-			for (String label: commitLabels) 
-				labelsView.add(new Label(labelsView.newChildId(), label));
+			for (String label: commitLabels) {
+				WebMarkupContainer container = new WebMarkupContainer(labelsView.newChildId());
+				container.add(new Label("label", label));
+				labelsView.add(container);
+			}
 			item.add(labelsView);
 			
 			item.add(new ContributorPanel("contribution", commit.getAuthorIdent(), commit.getCommitterIdent()));

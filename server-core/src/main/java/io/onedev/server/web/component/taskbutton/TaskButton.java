@@ -33,12 +33,12 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.WordUtils;
-import io.onedev.commons.utils.schedule.SchedulableTask;
-import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.OneDev;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStopping;
 import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.schedule.SchedulableTask;
+import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.web.component.modal.ModalPanel;
 
 @SuppressWarnings("serial")

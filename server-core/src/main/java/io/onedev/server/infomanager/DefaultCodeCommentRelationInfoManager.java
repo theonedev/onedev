@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.concurrent.Prioritized;
 import io.onedev.server.entitymanager.CodeCommentManager;
 import io.onedev.server.entitymanager.CodeCommentRelationManager;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -40,6 +39,7 @@ import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.work.BatchWorkManager;
 import io.onedev.server.util.work.BatchWorker;
 import jetbrains.exodus.ArrayByteIterable;

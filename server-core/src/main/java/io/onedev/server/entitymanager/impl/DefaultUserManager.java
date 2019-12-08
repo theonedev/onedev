@@ -108,10 +108,10 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 		
 		usage.checkInUse("User '" + user.getName() + "'");
     	
-    	Query<?> query = getSession().createQuery("update PullRequest set submitter=null, submitterName=:submitterName "
+    	Query<?> query = getSession().createQuery("update PullRequest set submitter=null, submitterIdent=:submitterIdent "
     			+ "where submitter=:submitter");
     	query.setParameter("submitter", user);
-    	query.setParameter("submitterName", user.getDisplayName());
+    	query.setParameter("submitterIdent", user.getDisplayName());
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update Build set submitter=null, submitterName=:submitterName "
@@ -209,17 +209,6 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	return findByEmail(person.getEmailAddress());
     }
     
-    @Override
-	public User getCurrent() {
-		Long userId = User.getCurrentId();
-		if (userId != 0L) {
-			User user = get(userId);
-			if (user != null)
-				return user;
-		}
-		return null;
-	}
-
 	@Listen
 	public void on(SystemStarted event) {
 		for (User user: query()) {

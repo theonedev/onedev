@@ -20,7 +20,7 @@ import org.apache.wicket.markup.html.form.HiddenField;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.PropertyModel;
 
-import io.onedev.commons.utils.Provider;
+import io.onedev.server.util.Provider;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;

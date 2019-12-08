@@ -18,7 +18,6 @@ import org.apache.wicket.ajax.markup.html.AjaxLink;
 import org.apache.wicket.core.request.handler.IPartialPageRequestHandler;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
-import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -28,9 +27,7 @@ import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.eclipse.jgit.revwalk.RevCommit;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
@@ -41,30 +38,23 @@ import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
 import io.onedev.server.entitymanager.BuildManager;
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Build.Status;
-import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.script.identity.JobIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentity;
 import io.onedev.server.util.script.identity.ScriptIdentityAware;
 import io.onedev.server.web.behavior.WebSocketObserver;
-import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.beaneditmodal.BeanEditModalPanel;
 import io.onedev.server.web.component.build.side.BuildSidePanel;
 import io.onedev.server.web.component.build.status.BuildStatusIcon;
-import io.onedev.server.web.component.commit.message.CommitMessagePanel;
-import io.onedev.server.web.component.contributorpanel.ContributorPanel;
-import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.confirm.ConfirmModal;
 import io.onedev.server.web.component.sideinfo.SideInfoClosed;
 import io.onedev.server.web.component.sideinfo.SideInfoOpened;
 import io.onedev.server.web.component.sideinfo.SideInfoPanel;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
-import io.onedev.server.web.component.user.contributoravatars.ContributorAvatars;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.annotation.Password;
@@ -75,7 +65,6 @@ import io.onedev.server.web.page.project.builds.detail.changes.BuildChangesPage;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.builds.detail.issues.FixedIssuesPage;
 import io.onedev.server.web.page.project.builds.detail.log.BuildLogPage;
-import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.BuildAware;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.QueryPosition;
@@ -199,7 +188,7 @@ public abstract class BuildDetailPage extends ProjectPage
 			private void resubmit(Serializable paramBean) {
 				Map<String, List<String>> paramMap = ParamSupply.getParamMap(getBuild().getJob(), paramBean, 
 						getBuild().getJob().getParamSpecMap().keySet());
-				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap, SecurityUtils.getUser());
+				OneDev.getInstance(JobManager.class).resubmit(getBuild(), paramMap);
 				setResponsePage(BuildDashboardPage.class, BuildDashboardPage.paramsOf(getBuild(), position));
 			}
 			
@@ -264,7 +253,7 @@ public abstract class BuildDetailPage extends ProjectPage
 
 			@Override
 			public void onClick() {
-				OneDev.getInstance(JobManager.class).cancel(getBuild(), SecurityUtils.getUser());
+				OneDev.getInstance(JobManager.class).cancel(getBuild());
 				getSession().success("Cancel request submitted");
 			}
 
@@ -328,52 +317,6 @@ public abstract class BuildDetailPage extends ProjectPage
 			
 		});
 		
-		CommitDetailPage.State commitState = new CommitDetailPage.State();
-		commitState.revision = getBuild().getCommitHash();
-		PageParameters params = CommitDetailPage.paramsOf(projectModel.getObject(), commitState);
-		
-		add(new CommitMessagePanel("commitMessage", new AbstractReadOnlyModel<RevCommit>() {
-
-			@Override
-			public RevCommit getObject() {
-				return getProject().getRevCommit(getBuild().getCommitHash(), true);
-			}
-			
-		}) {
-
-			@Override
-			protected void onConfigure() {
-				super.onConfigure();
-				setVisible(SecurityUtils.canReadCode(getProject()));
-			}
-
-			@Override
-			protected Project getProject() {
-				return BuildDetailPage.this.getProject();
-			}
-			
-		});
-		
-		RevCommit commit = getProject().getRevCommit(getBuild().getCommitHash(), true);
-		add(new ContributorAvatars("commitAvatars", commit.getAuthorIdent(), commit.getCommitterIdent()));
-		add(new ContributorPanel("commitNames", commit.getAuthorIdent(), commit.getCommitterIdent()));
-		
-		Link<Void> hashLink = new ViewStateAwarePageLink<Void>("commitHash", CommitDetailPage.class, params) {
-
-			@Override
-			protected void onComponentTag(ComponentTag tag) {
-				super.onComponentTag(tag);
-				if (!SecurityUtils.canReadCode(getProject()))
-					tag.setName("span");
-			}
-			
-		};
-		hashLink.setEnabled(SecurityUtils.canReadCode(getProject()));
-		hashLink.add(new Label("label", GitUtils.abbreviateSHA(commit.name())));
-		add(hashLink);
-		
-		add(new WebMarkupContainer("copyCommitHash").add(new CopyClipboardBehavior(Model.of(commit.name()))));
-
 		add(new Tabbable("buildTabs", new LoadableDetachableModel<List<? extends Tab>>() {
 
 			@Override

@@ -28,7 +28,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	
 	private String branches;
 	
-	private String issueQuery;
+	private String issueQuery = "fixed in current build";
 	
 	@Editable(order=100, name="Applicable Jobs", description="Optionally specify space-separated jobs "
 			+ "applicable for this trigger. Use * or ? for wildcard match")

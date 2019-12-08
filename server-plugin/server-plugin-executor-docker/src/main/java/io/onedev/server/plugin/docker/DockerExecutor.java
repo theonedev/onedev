@@ -35,14 +35,12 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.Maps;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.commons.utils.command.Commandline;
 import io.onedev.commons.utils.command.ExecuteResult;
 import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.commons.utils.command.ProcessKiller;
-import io.onedev.commons.utils.concurrent.CapacityRunner;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.k8shelper.KubernetesHelper;
 import io.onedev.server.OneDev;
@@ -56,9 +54,11 @@ import io.onedev.server.git.config.GitConfig;
 import io.onedev.server.model.support.RegistryLogin;
 import io.onedev.server.model.support.administration.jobexecutor.JobExecutor;
 import io.onedev.server.plugin.docker.DockerExecutor.TestData;
+import io.onedev.server.util.CollectionUtils;
 import io.onedev.server.util.JobLogger;
 import io.onedev.server.util.PKCS12CertExtractor;
 import io.onedev.server.util.ServerConfig;
+import io.onedev.server.util.concurrent.CapacityRunner;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -524,7 +524,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 							jobLogger.log("Retrieving source code...");
 							File tempHome = FileUtils.createTempDir();
 							try {
-								Map<String, String> environments = Maps.newHashMap("HOME", tempHome.getAbsolutePath());
+								Map<String, String> environments = CollectionUtils.newHashMap("HOME", tempHome.getAbsolutePath());
 								Commandline git = new Commandline(AppLoader.getInstance(GitConfig.class).getExecutable());	
 								git.environments(environments).workingDir(hostWorkspace);
 								

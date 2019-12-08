@@ -282,7 +282,7 @@ public class ProjectListPanel extends Panel {
 			public void populateItem(Item<ICellPopulator<Project>> cellItem, String componentId, 
 					IModel<Project> rowModel) {
 				Project project = rowModel.getObject();
-				cellItem.add(new UserIdentPanel(componentId, UserIdent.of(project.getOwner()), Mode.NAME));
+				cellItem.add(new UserIdentPanel(componentId, UserIdent.of(project.getOwner()), Mode.AVATAR_AND_NAME));
 			}
 
 			@Override

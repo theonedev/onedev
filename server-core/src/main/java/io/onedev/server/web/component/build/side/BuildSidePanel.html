@@ -1,7 +1,13 @@
 <wicket:panel>
 	<div class="build-side">
         <div wicket:id="buildNav" class="nav"></div>
-        <div wicket:id="general" class="general table">
+        <div wicket:id="general" class="general">
+        	<div>
+        		<div class="name">Commit</div>
+        		<div class="value">
+        			<a wicket:id="commit"><span wicket:id="label"></span></a>
+        		</div>
+        	</div>
             <div>
                 <div class="name">Job</div>
                 <div class="value">
@@ -39,6 +45,17 @@
             </div>
             </wicket:enclosure>
         </div>
+        <wicket:enclosure child="pullRequests">
+        <div class="pull-requests">
+	        <div class="head">Verifying Pull Requests</div>
+	        <div class="body">
+	            <div wicket:id="pullRequests" class="pull-request">
+	            	<a wicket:id="title" class="title"><span wicket:id="label"></span></a>
+	                <div wicket:id="status" class="status"></div>
+	            </div>
+	        </div>
+        </div>
+        </wicket:enclosure>
         <wicket:enclosure child="params">
         <div class="params table">
             <div wicket:id="params">

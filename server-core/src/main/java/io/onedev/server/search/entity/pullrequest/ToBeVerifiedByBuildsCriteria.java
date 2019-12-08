@@ -1,7 +1,7 @@
 package io.onedev.server.search.entity.pullrequest;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -10,7 +10,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.util.query.PullRequestQueryConstants;
 
@@ -20,16 +19,16 @@ public class ToBeVerifiedByBuildsCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		From<?, ?> join = root
+		Join<?, ?> join = root
 				.join(PullRequestQueryConstants.ATTR_PULL_REQUEST_BUILDS, JoinType.LEFT)
 				.join(PullRequestBuild.ATTR_BUILD, JoinType.INNER);
-		
 		Path<?> status = join.get(Build.STATUS);
-		
-		return builder.or(
+		join.on(builder.or(
 				builder.equal(status, Build.Status.RUNNING), 
 				builder.equal(status, Build.Status.PENDING), 
-				builder.equal(status, Build.Status.WAITING));
+				builder.equal(status, Build.Status.WAITING)));
+		
+		return join.isNotNull();
 	}
 
 	@Override

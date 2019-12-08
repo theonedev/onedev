@@ -7,7 +7,7 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.Maps;
+import io.onedev.server.util.CollectionUtils;
 
 public class IssueQueryConstants {
 	
@@ -73,7 +73,7 @@ public class IssueQueryConstants {
 			FIELD_COMMENT, FIELD_SUBMIT_DATE, FIELD_UPDATE_DATE, FIELD_VOTE_COUNT, 
 			FIELD_COMMENT_COUNT, FIELD_MILESTONE);
 
-	public static final Map<String, String> ORDER_FIELDS = Maps.newLinkedHashMap(
+	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			FIELD_VOTE_COUNT, ATTR_VOTE_COUNT,
 			FIELD_COMMENT_COUNT, ATTR_COMMENT_COUNT,
 			FIELD_NUMBER, ATTR_NUMBER,

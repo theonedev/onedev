@@ -13,7 +13,6 @@ import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.event.pullrequest.PullRequestChangeEvent;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestChange;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestDescriptionChangeData;
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestMergeStrategyChangeData;
@@ -21,6 +20,7 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestTitleCha
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.AbstractEntityManager;
 import io.onedev.server.persistence.dao.Dao;
+import io.onedev.server.util.SecurityUtils;
 
 @Singleton
 public class DefaultPullRequestChangeManager extends AbstractEntityManager<PullRequestChange> 
@@ -43,19 +43,19 @@ public class DefaultPullRequestChangeManager extends AbstractEntityManager<PullR
 	
 	@Transactional
 	@Override
-	public void changeMergeStrategy(PullRequest request, MergeStrategy mergeStrategy, @Nullable User user) {
+	public void changeMergeStrategy(PullRequest request, MergeStrategy mergeStrategy) {
 		PullRequestChange change = new PullRequestChange();
 		change.setDate(new Date());
 		change.setRequest(request);
 		change.setData(new PullRequestMergeStrategyChangeData(request.getMergeStrategy(), mergeStrategy));
-		change.setUser(user);
+		change.setUser(SecurityUtils.getUser());
 		save(change);
 		request.setMergeStrategy(mergeStrategy);
 	}
 
 	@Transactional
 	@Override
-	public void changeTitle(PullRequest request, String title, @Nullable User user) {
+	public void changeTitle(PullRequest request, String title) {
 		String prevTitle = request.getTitle();
 		if (!title.equals(prevTitle)) {
 			request.setTitle(title);
@@ -64,14 +64,14 @@ public class DefaultPullRequestChangeManager extends AbstractEntityManager<PullR
 			change.setDate(new Date());
 			change.setRequest(request);
 			change.setData(new PullRequestTitleChangeData(prevTitle, title));
-			change.setUser(user);
+			change.setUser(SecurityUtils.getUser());
 			save(change);
 		}
 	}
 
 	@Transactional
 	@Override
-	public void changeDescription(PullRequest request, @Nullable String description, @Nullable User user) {
+	public void changeDescription(PullRequest request, @Nullable String description) {
 		String prevDescription = request.getDescription();
 		if (!Objects.equal(prevDescription, description)) {
 			request.setDescription(description);
@@ -80,7 +80,7 @@ public class DefaultPullRequestChangeManager extends AbstractEntityManager<PullR
 			change.setDate(new Date());
 			change.setRequest(request);
 			change.setData(new PullRequestDescriptionChangeData(prevDescription, description));
-			change.setUser(user);
+			change.setUser(SecurityUtils.getUser());
 			save(change);
 		}
 	}

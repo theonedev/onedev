@@ -1,7 +1,6 @@
 .issue-title {
 	font-size: 20px;
 	font-weight: bold;
-	color: #444;
 	position: relative;
 }
 .issue-title a.edit {
@@ -31,6 +30,6 @@
 	right: 0;
 	margin: 0;
 }
-.issue-title form .actions a:first-child {
+.issue-title form .actions>:first-child {
 	margin-right: 0;
 }

@@ -112,7 +112,10 @@ public class PullRequestActivitiesPage extends PullRequestDetailPage {
 		if (anchor != null)
 			row.setMarkupId(anchor);
 		
-		row.add(new UserIdentPanel("avatar", activity.getUser(), Mode.AVATAR));
+		if (activity.getUser() != null)
+			row.add(new UserIdentPanel("avatar", activity.getUser(), Mode.AVATAR));
+		else
+			row.add(new WebMarkupContainer("avatar"));
 		
 		Component content = activity.render("content", new DeleteCallback() {
 

@@ -1,13 +1,25 @@
 package io.onedev.server.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.concurrent.Callable;
+
+import javax.annotation.Nullable;
 
 import org.apache.shiro.authz.Permission;
+import org.apache.shiro.subject.PrincipalCollection;
+import org.apache.shiro.subject.SimplePrincipalCollection;
+import org.apache.shiro.subject.Subject;
+import org.apache.shiro.util.ThreadContext;
+import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.eclipse.jgit.lib.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Preconditions;
+
+import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.GroupManager;
 import io.onedev.server.entitymanager.RoleManager;
@@ -48,6 +60,8 @@ import io.onedev.server.security.permission.RunJob;
 import io.onedev.server.security.permission.ScheduleIssues;
 import io.onedev.server.security.permission.SystemAdministration;
 import io.onedev.server.security.permission.WriteCode;
+import io.onedev.server.util.concurrent.PrioritizedCallable;
+import io.onedev.server.util.concurrent.PrioritizedRunnable;
 
 public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	
@@ -76,9 +90,20 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		
 		return authorizedUsers;
 	}
-	
+
+	@Nullable
 	public static User getUser() {
-		return OneDev.getInstance(UserManager.class).getCurrent();
+		Long userId = getUserId();
+		if (userId != 0L) 
+			return OneDev.getInstance(UserManager.class).get(userId);
+		else
+			return null;
+	}
+	
+	public static Long getUserId() {
+        Object principal = SecurityUtils.getSubject().getPrincipal();
+        Preconditions.checkNotNull(principal);
+        return (Long) principal;
 	}
 	
 	public static boolean canDeleteBranch(Project project, String branchName) {
@@ -271,6 +296,88 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 		User user = SecurityUtils.getUser();
 		return user != null && user.equals(issue.getSubmitter()) 
 				|| canManageIssues(issue.getProject());
+	}
+	
+    public static PrincipalCollection asPrincipal(Long userId) {
+        return new SimplePrincipalCollection(userId, "");
+    }
+    
+    public static Subject asSubject(Long userId) {
+    	WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
+        return new Subject.Builder(securityManager).principals(asPrincipal(userId)).buildSubject();
+    }
+    
+	public static void bindAsRoot() {
+		ThreadContext.bind(asSubject(User.ROOT_ID));
+	}
+	
+	public static Runnable inheritSubject(Runnable task) {
+		Subject subject = SecurityUtils.getSubject();
+		return new Runnable() {
+
+			@Override
+			public void run() {
+				ThreadContext.bind(subject);
+				task.run();
+			}
+			
+		};
+	}
+	
+	public static PrioritizedRunnable inheritSubject(PrioritizedRunnable task) {
+		Subject subject = SecurityUtils.getSubject();
+		return new PrioritizedRunnable(task.getPriority()) {
+
+			@Override
+			public void run() {
+				ThreadContext.bind(subject);
+				task.run();
+			}
+			
+		};
+	}
+	
+	public static <T> PrioritizedCallable<T> inheritSubject(PrioritizedCallable<T> task) {
+		Subject subject = SecurityUtils.getSubject();
+		return new PrioritizedCallable<T>(task.getPriority()) {
+
+			@Override
+			public T call() throws Exception {
+				ThreadContext.bind(subject);
+				return task.call();
+			}
+			
+		};
+	}
+	
+	public static <T> Callable<T> inheritSubject(Callable<T> callable) {
+		Subject subject = SecurityUtils.getSubject();
+		return new Callable<T>() {
+
+			@Override
+			public T call() throws Exception {
+				ThreadContext.bind(subject);
+				return callable.call();
+			}
+
+		};
+	}
+	
+	public static <T> Collection<Callable<T>> inheritSubject(Collection<? extends Callable<T>> callables) {
+		Subject subject = SecurityUtils.getSubject();
+		Collection<Callable<T>> wrappedTasks = new ArrayList<>();
+		for (Callable<T> task: callables) {
+			wrappedTasks.add(new Callable<T>() {
+
+				@Override
+				public T call() throws Exception {
+					ThreadContext.bind(subject);
+					return task.call();
+				}
+				
+			});
+		}
+		return wrappedTasks;
 	}
 	
 }

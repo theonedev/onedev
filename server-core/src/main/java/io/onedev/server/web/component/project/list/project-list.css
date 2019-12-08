@@ -24,7 +24,7 @@
 }
 .project-list>.head>.others>* {
 	margin-right: 16px;
-	color: #666;
+	color: #444;
 }
 .project-list>.head>.others>*:last-child {
 	margin-right: 0;

@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.issue.fieldspec.FieldSpec;
@@ -38,6 +37,7 @@ import io.onedev.server.issue.fieldsupply.ValueProvider;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;

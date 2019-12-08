@@ -15,8 +15,8 @@ import org.apache.wicket.util.convert.ConversionException;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.component.select2.Select2MultiChoice;
 import io.onedev.server.web.component.stringchoice.StringMultiChoice;
 import io.onedev.server.web.editable.PropertyDescriptor;

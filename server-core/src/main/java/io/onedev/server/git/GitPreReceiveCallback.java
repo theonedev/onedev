@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.shiro.SecurityUtils;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -27,7 +26,6 @@ import com.google.common.collect.Lists;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.ProjectManager;
-import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestUpdate;
@@ -37,6 +35,7 @@ import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.security.permission.ManageProject;
 import io.onedev.server.security.permission.ProjectPermission;
+import io.onedev.server.util.SecurityUtils;
 
 @SuppressWarnings("serial")
 @Singleton
@@ -46,12 +45,9 @@ public class GitPreReceiveCallback extends HttpServlet {
 
 	private final ProjectManager projectManager;
 	
-	private final UserManager userManager;
-	
 	@Inject
-	public GitPreReceiveCallback(ProjectManager projectManager, UserManager userManager) {
+	public GitPreReceiveCallback(ProjectManager projectManager) {
 		this.projectManager = projectManager;
-		this.userManager = userManager;
 	}
 	
 	private void error(Output output, @Nullable String refName, List<String> messages) {
@@ -86,7 +82,7 @@ public class GitPreReceiveCallback extends HttpServlet {
         List<String> fields = StringUtils.splitAndTrim(request.getPathInfo(), "/");
         Preconditions.checkState(fields.size() == 2);
         
-        SecurityUtils.getSubject().runAs(User.asPrincipal(Long.valueOf(fields.get(1))));
+        SecurityUtils.getSubject().runAs(SecurityUtils.asPrincipal(Long.valueOf(fields.get(1))));
         try {
             Project project = projectManager.load(Long.valueOf(fields.get(0)));
             
@@ -132,8 +128,7 @@ public class GitPreReceiveCallback extends HttpServlet {
 	        	String field = fields.get(pos);
 	        	ObjectId oldObjectId = ObjectId.fromString(StringUtils.reverse(field.substring(0, 40)));
 	        	
-	    		User user = userManager.getCurrent();
-	    		Preconditions.checkNotNull(user);
+	    		User user = Preconditions.checkNotNull(SecurityUtils.getUser());
 
 	    		if (refName.startsWith(PullRequest.REFS_PREFIX) || refName.startsWith(PullRequestUpdate.REFS_PREFIX)) {
 	    			if (!user.asSubject().isPermitted(new ProjectPermission(project, new ManageProject()))) {

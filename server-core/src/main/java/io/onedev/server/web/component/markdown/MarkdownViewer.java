@@ -21,7 +21,6 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
 import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.utils.ColorUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
@@ -34,6 +33,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.CloseInfo;
+import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.userident.UserIdent;

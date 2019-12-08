@@ -47,7 +47,6 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
-import io.onedev.commons.utils.MatrixRunner;
 import io.onedev.k8shelper.CacheInstance;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -92,6 +91,7 @@ import io.onedev.server.security.permission.JobPermission;
 import io.onedev.server.security.permission.ProjectPermission;
 import io.onedev.server.util.BuildCommitAware;
 import io.onedev.server.util.JobLogger;
+import io.onedev.server.util.MatrixRunner;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.patternset.PatternSet;
@@ -159,8 +159,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Transactional
 	@Override
-	public Build submit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, @Nullable User submitter) {
+	public Build submit(Project project, ObjectId commitId, String jobName, Map<String, List<String>> paramMap) {
     	Lock lock = LockUtils.getLock("job-manager: " + project.getId() + "-" + commitId.name());
     	transactionManager.mustRunAfterTransaction(new Runnable() {
 
@@ -174,15 +173,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 		// Lock to guarantee uniqueness of build (by project, commit, job and parameters)
     	try {
         	lock.lockInterruptibly();
-			return submit(project, commitId, jobName, paramMap, submitter, new LinkedHashSet<>()); 
+			return submit(project, commitId, jobName, paramMap, new LinkedHashSet<>()); 
     	} catch (Throwable e) {
     		throw ExceptionUtils.unchecked(e);
 		}
 	}
 	
 	private Build submit(Project project, ObjectId commitId, String jobName, 
-			Map<String, List<String>> paramMap, @Nullable User submitter, 
-			Set<String> checkedJobNames) {
+			Map<String, List<String>> paramMap, Set<String> checkedJobNames) {
 		
 		ScriptIdentity.push(new JobIdentity(project, commitId));
 		try {
@@ -192,7 +190,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 			build.setJobName(jobName);
 			build.setSubmitDate(new Date());
 			build.setStatus(Build.Status.WAITING);
-			build.setSubmitter(submitter);
+			build.setSubmitter(SecurityUtils.getUser());
 			
 			ParamSupply.validateParamMap(build.getJob().getParamSpecMap(), paramMap);
 			
@@ -238,7 +236,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							@Override
 							public void run(Map<String, List<String>> params) {
 								Build dependencyBuild = submit(project, commitId, dependency.getJobName(), 
-										params, submitter, new LinkedHashSet<>(checkedJobNames));
+										params, new LinkedHashSet<>(checkedJobNames));
 								BuildDependence dependence = new BuildDependence();
 								dependence.setDependency(dependencyBuild);
 								dependence.setDependent(build);
@@ -273,7 +271,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 						}
 						subject = user.asSubject();
 					} else {
-						subject = User.asSubject(0L);
+						subject = SecurityUtils.asSubject(0L);
 					}
 					String buildNumberStr = build.interpolate(dependency.getBuildNumber());
 					if (buildNumberStr.startsWith("#"))
@@ -502,7 +500,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 								if (ExceptionUtils.find(e, InterruptedException.class) == null) 
 									log(e, jobLogger);
 								throw maskSecrets(e, jobSecretsToMask);
-							}
+							} 
 							jobLogger.log("Job finished");
 						}
 					}
@@ -591,7 +589,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 															
 															@Override
 															public void run(Map<String, List<String>> paramMap) {
-																submit(project, commitId, job.getName(), paramMap, null); 
+																submit(project, commitId, job.getName(), paramMap); 
 															}
 															
 														}.run();
@@ -602,7 +600,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 													}
 												}
 												
-											}, SecurityUtils.getSubject());
+											});
 										}
 										
 									});
@@ -625,14 +623,14 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 	
 	@Transactional
 	@Override
-	public void resubmit(Build build, Map<String, List<String>> paramMap, User submitter) {
+	public void resubmit(Build build, Map<String, List<String>> paramMap) {
 		if (build.isFinished()) {
 			build.setStatus(Build.Status.WAITING);
 			build.setFinishDate(null);
 			build.setPendingDate(null);
 			build.setRunningDate(null);
 			build.setSubmitDate(new Date());
-			build.setSubmitter(submitter);
+			build.setSubmitter(SecurityUtils.getUser());
 			buildParamManager.deleteParams(build);
 			for (Map.Entry<String, List<String>> entry: paramMap.entrySet()) {
 				ParamSpec paramSpec = build.getJob().getParamSpecMap().get(entry.getKey());
@@ -667,10 +665,10 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 
 	@Sessional
 	@Override
-	public void cancel(Build build, User canceller) {
+	public void cancel(Build build) {
 		JobExecution execution = jobExecutions.get(build.getId());
 		if (execution != null)
-			execution.cancel(User.idOf(canceller));
+			execution.cancel(User.idOf(SecurityUtils.getUser()));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -783,7 +781,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 					break;
 			} catch (Throwable e) {
 				logger.error("Error checking unfinished builds", e);
-			}
+			} 
 		}	
 		status = Status.STOPPED;
 	}

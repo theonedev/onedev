@@ -146,7 +146,7 @@ abstract class BacklogColumnPanel extends Panel {
 				Issue issue = OneDev.getInstance(IssueManager.class).load(params.getParameterValue("issue").toLong());
 				if (!SecurityUtils.canScheduleIssues(issue.getProject())) 
 					throw new UnauthorizedException("Permission denied");
-				OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, null, SecurityUtils.getUser());
+				OneDev.getInstance(IssueChangeManager.class).changeMilestone(issue, null);
 				target.appendJavaScript(String.format("onedev.server.issueBoards.markAccepted(%d, true);", issue.getId()));
 			}
 			

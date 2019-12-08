@@ -7,6 +7,16 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.ForkJoinTask;
+import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
@@ -53,6 +63,7 @@ import org.hibernate.type.Type;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.inject.Provider;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.matcher.Matchers;
 import com.thoughtworks.xstream.XStream;
@@ -70,8 +81,6 @@ import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AbstractPluginModule;
 import io.onedev.commons.launcher.loader.ImplementationProvider;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.schedule.DefaultTaskScheduler;
-import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.buildspec.job.DefaultJobManager;
 import io.onedev.server.buildspec.job.JobManager;
 import io.onedev.server.buildspec.job.log.DefaultLogManager;
@@ -214,6 +223,7 @@ import io.onedev.server.storage.AttachmentStorageManager;
 import io.onedev.server.storage.DefaultAttachmentStorageManager;
 import io.onedev.server.storage.DefaultStorageManager;
 import io.onedev.server.storage.StorageManager;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.jackson.ObjectMapperConfigurator;
 import io.onedev.server.util.jackson.ObjectMapperProvider;
 import io.onedev.server.util.jackson.git.GitObjectMapperConfigurator;
@@ -224,6 +234,8 @@ import io.onedev.server.util.markdown.DefaultMarkdownManager;
 import io.onedev.server.util.markdown.EntityReferenceManager;
 import io.onedev.server.util.markdown.MarkdownManager;
 import io.onedev.server.util.markdown.MarkdownProcessor;
+import io.onedev.server.util.schedule.DefaultTaskScheduler;
+import io.onedev.server.util.schedule.TaskScheduler;
 import io.onedev.server.util.script.ScriptContribution;
 import io.onedev.server.util.validation.DefaultEntityValidator;
 import io.onedev.server.util.validation.EntityValidator;
@@ -319,7 +331,7 @@ public class CoreModule extends AbstractPluginModule {
 		bind(StorageManager.class).to(DefaultStorageManager.class);
 		bind(SettingManager.class).to(DefaultSettingManager.class);
 		bind(DataManager.class).to(DefaultDataManager.class);
-		bind(TaskScheduler.class).to(DefaultTaskScheduler.class).in(Singleton.class);
+		bind(TaskScheduler.class).to(DefaultTaskScheduler.class);
 		bind(PullRequestCommentManager.class).to(DefaultPullRequestCommentManager.class);
 		bind(CodeCommentManager.class).to(DefaultCodeCommentManager.class);
 		bind(PullRequestManager.class).to(DefaultPullRequestManager.class);
@@ -423,6 +435,70 @@ public class CoreModule extends AbstractPluginModule {
 		bind(GitFilter.class);
 		bind(GitPreReceiveCallback.class);
 		bind(GitPostReceiveCallback.class);
+		
+	    bind(ExecutorService.class).toProvider(new Provider<ExecutorService>() {
+
+			@Override
+			public ExecutorService get() {
+		        return new ThreadPoolExecutor(0, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, 
+		        		new SynchronousQueue<Runnable>()) {
+
+					@Override
+					public void execute(Runnable command) {
+						super.execute(SecurityUtils.inheritSubject(command));
+					}
+
+		        };
+			}
+	    	
+	    }).in(Singleton.class);
+	    
+	    bind(ForkJoinPool.class).toInstance(new ForkJoinPool() {
+
+			@Override
+			public ForkJoinTask<?> submit(Runnable task) {
+				return super.submit(SecurityUtils.inheritSubject(task));
+			}
+
+			@Override
+			public void execute(Runnable task) {
+				super.execute(SecurityUtils.inheritSubject(task));
+			}
+
+			@Override
+			public <T> ForkJoinTask<T> submit(Callable<T> task) {
+				return super.submit(SecurityUtils.inheritSubject(task));
+			}
+
+			@Override
+			public <T> ForkJoinTask<T> submit(Runnable task, T result) {
+				return super.submit(SecurityUtils.inheritSubject(task), result);
+			}
+
+			@Override
+			public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
+					throws InterruptedException, ExecutionException {
+				return super.invokeAny(SecurityUtils.inheritSubject(tasks));
+			}
+
+			@Override
+			public <T> T invokeAny(Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
+					throws InterruptedException, ExecutionException, TimeoutException {
+				return super.invokeAny(SecurityUtils.inheritSubject(tasks), timeout, unit);
+			}
+
+			@Override
+			public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks, 
+					long timeout, TimeUnit unit) throws InterruptedException {
+				return super.invokeAll(SecurityUtils.inheritSubject(tasks), timeout, unit);
+			}
+
+			@Override
+			public <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks) {
+				return super.invokeAll(SecurityUtils.inheritSubject(tasks));
+			}
+
+	    });
 	}
 	
 	private void configureRestServices() {

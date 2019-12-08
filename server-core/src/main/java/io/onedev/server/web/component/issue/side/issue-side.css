@@ -40,10 +40,3 @@
 .issue-side .milestone>.body>.progress {
 	margin-top: 20px;
 }
-.issue-side .commits .commit {
-    margin-bottom: 4px;
-}
-.issue-side .commits .commit .avatar {
-    width: 16px;
-    height: 16px;
-}

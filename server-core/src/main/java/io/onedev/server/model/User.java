@@ -20,7 +20,6 @@ import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.apache.shiro.subject.Subject;
-import org.apache.shiro.web.mgt.WebSecurityManager;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -29,10 +28,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import com.fasterxml.jackson.annotation.JsonView;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
 
-import io.onedev.commons.launcher.loader.AppLoader;
-import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedProjectQuery;
 import io.onedev.server.model.support.QuerySetting;
@@ -40,6 +36,7 @@ import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.jackson.DefaultView;
+import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.util.validation.annotation.UserName;
 import io.onedev.server.util.watch.QuerySubscriptionSupport;
 import io.onedev.server.util.watch.QueryWatchSupport;
@@ -346,31 +343,9 @@ public class User extends AbstractEntity implements AuthenticationInfo {
     }
 
     public Subject asSubject() {
-    	return asSubject(getId());
+    	return SecurityUtils.asSubject(getId());
     }
 
-    public static Long getCurrentId() {
-        Object principal = SecurityUtils.getSubject().getPrincipal();
-        Preconditions.checkNotNull(principal);
-        return (Long) principal;
-    }
-
-    public static PrincipalCollection asPrincipal(Long userId) {
-        return new SimplePrincipalCollection(userId, "");
-    }
-    
-    public static Subject asSubject(Long userId) {
-    	WebSecurityManager securityManager = AppLoader.getInstance(WebSecurityManager.class);
-        return new Subject.Builder(securityManager).principals(asPrincipal(userId)).buildSubject();
-    }
-    
-    public static Subject asSubject(@Nullable User user) {
-    	if (user != null)
-    		return user.asSubject();
-    	else
-    		return User.asSubject(0L);
-    }
-    
     public Collection<Project> getProjects() {
 		return projects;
 	}

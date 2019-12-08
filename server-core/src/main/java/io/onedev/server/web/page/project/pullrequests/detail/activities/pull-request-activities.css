@@ -38,23 +38,14 @@
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content tr:hover td {
 	background: #F5F5F5;
 }
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.icon {
-	width: 30px;
-}
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.author {
-	width: 35px;
+	width: 28px;
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status {
 	width: 170px;
 }
 #request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status>span {
-	margin-left: 8px;
-}
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content td.hash-and-status>span.hash {
 	margin-left: 4px;
-}
-#request-detail>.main>.activities .PullRequestUpdatedActivity>td.content a.commit {
-	color: #444;
 }
 
 #request-detail>.main>.activities .activity>td>.content {
@@ -79,6 +70,10 @@
 #request-detail>.main>.activities .activity>td>.body>.referenced-from .label {
 	line-height: inherit;
 }
+#request-detail>.main>.activities .activity>td.no-body>.head {
+	margin-top: 10px;
+}
+
 #request-detail>.main>.activities .add-comment {
 	margin-top: 16px;
 }
@@ -113,6 +108,9 @@
 }
 #request-detail>.main>.activities .activity>td.content .plain.diff {
 	margin-bottom: 12px;
+}
+#request-detail>.main>.activities .activity>td.content .plain.diff>tbody>tr>td {
+	background: none !important;
 }
 
 @media(max-width: 991px) {

@@ -2,7 +2,7 @@ package io.onedev.server.search.entity.build;
 
 import javax.annotation.Nullable;
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -10,7 +10,6 @@ import javax.persistence.criteria.Root;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.BuildDependence;
 import io.onedev.server.model.Project;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.BuildQueryConstants;
@@ -30,8 +29,9 @@ public class DependenciesOfCriteria extends EntityCriteria<Build> {
 
 	@Override
 	public Predicate getPredicate(Root<Build> root, CriteriaBuilder builder) {
-		From<?, ?> join = root.join(BuildQueryConstants.ATTR_DEPENDENTS, JoinType.LEFT);
-		return builder.equal(join.get(BuildDependence.ATTR_DEPENDENT), build);
+		Join<?, ?> join = root.join(BuildQueryConstants.ATTR_DEPENDENTS, JoinType.LEFT);
+		join.on(builder.equal(join.get(BuildDependence.ATTR_DEPENDENT), build));
+		return join.isNotNull();
 	}
 
 	@Override

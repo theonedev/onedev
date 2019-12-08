@@ -43,10 +43,8 @@ import com.google.common.base.Splitter;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.Pair;
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.concurrent.Prioritized;
 import io.onedev.server.entitymanager.IssueManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.RefUpdated;
@@ -72,6 +70,8 @@ import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.ElementPumper;
 import io.onedev.server.util.IssueUtils;
+import io.onedev.server.util.Pair;
+import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.work.BatchWorkManager;
 import io.onedev.server.util.work.BatchWorker;
 import jetbrains.exodus.ArrayByteIterable;
@@ -329,7 +329,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 		
 		Repository repository = project.getRepository();
 
-		Collection<Long> fixedIssueNumbers = new HashSet<>();
+		Map<Long, List<ObjectId>> fixedIssueNumbers = new HashMap<>();
 		
 		Pair<byte[], ObjectId> result = env.computeInTransaction(new TransactionalComputable<Pair<byte[], ObjectId>>() {
 			
@@ -488,23 +488,35 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 									
 									for (Long issueNumber: IssueUtils.parseFixedIssueNumbers(commitMessage)) {
 										ByteIterable issueKey = new LongByteIterable(issueNumber);
-										Collection<ObjectId> fixCommits = readCommits(fixCommitsStore, txn, issueKey);
+										Collection<ObjectId> fixingCommits = readCommits(fixCommitsStore, txn, issueKey);
 										
 										boolean addNextCommit = true;
-										for (Iterator<ObjectId> it = fixCommits.iterator(); it.hasNext();) {
+										for (Iterator<ObjectId> it = fixingCommits.iterator(); it.hasNext();) {
 											ObjectId fixCommit = it.next();
 											if (GitUtils.isMergedInto(project.getRepository(), null, fixCommit, currentCommitId)) { 
 												it.remove();
+												Collection<ObjectId> newFixingCommits = fixedIssueNumbers.get(issueNumber);
+												if (newFixingCommits != null) {
+													newFixingCommits.remove(fixCommit);
+													if (newFixingCommits.isEmpty())
+														fixedIssueNumbers.remove(issueNumber);
+												}
+												
 											} else if (GitUtils.isMergedInto(project.getRepository(), null, currentCommitId, fixCommit)) {
 												addNextCommit = false;
 												break;
 											}
 										}
 										if (addNextCommit) {
-											fixCommits.add(currentCommitId);
-											fixedIssueNumbers.add(issueNumber);
+											fixingCommits.add(currentCommitId);
+											List<ObjectId> newFixingCommits = fixedIssueNumbers.get(issueNumber);
+											if (newFixingCommits == null) {
+												newFixingCommits = new ArrayList<>();
+												fixedIssueNumbers.put(issueNumber, newFixingCommits);
+											}
+											newFixingCommits.add(currentCommitId);
 										}
-										writeCommits(fixCommitsStore, txn, issueKey, fixCommits);
+										writeCommits(fixCommitsStore, txn, issueKey, fixingCommits);
 									}
 									
 									if (currentCommit.getCommitDate() != null) {
@@ -749,10 +761,10 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 			}		
 		}		
 		
-		for (Long issueNumber: fixedIssueNumbers) {
-			Issue issue = issueManager.find(project, issueNumber);
+		for (Map.Entry<Long, List<ObjectId>> entry: fixedIssueNumbers.entrySet()) {
+			Issue issue = issueManager.find(project, entry.getKey());
 			if (issue != null)
-				listenerRegistry.post(new IssueCommitted(issue));
+				listenerRegistry.post(new IssueCommitted(issue, entry.getValue()));
 		}
 
 		logger.debug("Collected commit information (project: {}, ref: {})", project.getName(), refName);

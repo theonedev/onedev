@@ -74,7 +74,6 @@ import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.utils.ExceptionUtils;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.StringUtils;
-import io.onedev.commons.utils.concurrent.Prioritized;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.system.SystemStarted;
@@ -85,6 +84,7 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.IndexResult;
+import io.onedev.server.util.concurrent.Prioritized;
 import io.onedev.server.util.work.BatchWorkManager;
 import io.onedev.server.util.work.BatchWorker;
 

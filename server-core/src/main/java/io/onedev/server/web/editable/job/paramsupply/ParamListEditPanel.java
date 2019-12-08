@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.commons.utils.ReflectionUtils;
 import io.onedev.server.buildspec.job.paramspec.ParamSpec;
 import io.onedev.server.buildspec.job.paramspec.SecretParam;
 import io.onedev.server.buildspec.job.paramsupply.ParamSupply;
@@ -41,6 +40,7 @@ import io.onedev.server.buildspec.job.paramsupply.ScriptingValues;
 import io.onedev.server.buildspec.job.paramsupply.SpecifiedValues;
 import io.onedev.server.buildspec.job.paramsupply.ValuesProvider;
 import io.onedev.server.util.ComponentContext;
+import io.onedev.server.util.ReflectionUtils;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;

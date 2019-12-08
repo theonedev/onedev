@@ -17,7 +17,7 @@
 }
 .commit-list>.head>.others>* {
 	margin-right: 16px;
-	color: #666;
+	color: #444;
 }
 .commit-list>.head>.others>*:last-child {
 	margin-right: 0;
@@ -61,9 +61,6 @@
 }
 .commit-list>.body .message-and-labels .commit-message {
 	margin-right: 8px;
-}
-.commit-list>.body .message-and-labels .commit-message .ellipsis-expander {
-	margin-bottom: 2px;
 }
 .commit-list>.body .commit>.pull-right {
     margin: 6px 0 0 8px;

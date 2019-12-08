@@ -7,7 +7,7 @@ import java.util.Set;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
-import io.onedev.commons.utils.Maps;
+import io.onedev.server.util.CollectionUtils;
 
 public class BuildQueryConstants {
 	
@@ -89,7 +89,7 @@ public class BuildQueryConstants {
 			FIELD_PROJECT, FIELD_JOB, FIELD_NUMBER, FIELD_VERSION, FIELD_COMMIT, FIELD_SUBMIT_DATE, 
 			FIELD_QUEUEING_DATE, FIELD_RUNNING_DATE, FIELD_FINISH_DATE);
 
-	public static final Map<String, String> ORDER_FIELDS = Maps.newLinkedHashMap(
+	public static final Map<String, String> ORDER_FIELDS = CollectionUtils.newLinkedHashMap(
 			FIELD_JOB, ATTR_JOB,
 			FIELD_STATUS, ATTR_STATUS,
 			FIELD_NUMBER, ATTR_NUMBER,

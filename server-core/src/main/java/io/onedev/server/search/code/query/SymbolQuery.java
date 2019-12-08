@@ -18,11 +18,11 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 
 import io.onedev.commons.jsymbol.Symbol;
 import io.onedev.commons.utils.LinearRange;
-import io.onedev.commons.utils.match.WildcardUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.search.code.SearchManager;
 import io.onedev.server.search.code.hit.QueryHit;
 import io.onedev.server.search.code.hit.SymbolHit;
+import io.onedev.server.util.match.WildcardUtils;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;

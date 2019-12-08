@@ -452,12 +452,7 @@ public class Issue extends AbstractEntity implements Referenceable, AttachmentSt
 			if (fieldSpec.getShowCondition() != null) {
 				Input dependentInput = getFieldInputs().get(fieldSpec.getShowCondition().getInputName());
 				if (dependentInput != null) {
-					String value;
-					if (!dependentInput.getValues().isEmpty())
-						value = dependentInput.getValues().iterator().next();
-					else
-						value = null;
-					if (fieldSpec.getShowCondition().getValueMatcher().matches(value))
+					if (fieldSpec.getShowCondition().getValueMatcher().matches(dependentInput.getValues()))
 						return isFieldVisible(dependentInput.getName(), checkedFieldNames);
 					else
 						return false;

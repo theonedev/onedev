@@ -10,17 +10,10 @@
 	padding: 6px 12px; 
 	border-top: 1px solid #EEE; 
 }
-.folder-view>table>tbody>tr:not(.parent)>td:not(.path) a {
-	color: #444;
-}
 
 .folder-view>table>tbody>tr>td.path, .folder-view>table>tbody>tr>td.last-commit.author, 
 .folder-view>table>tbody>tr>td.last-commit.when {
 	white-space: nowrap;
-}
-.folder-view>table>tbody>tr>td.last-commit img {
-	width: 20px;
-	height: 20px;
 }
 .folder-view>table>tbody>tr>td.last-commit, .folder-view>table>tbody>tr>td.last-commit a {
 	font-size: 13px;

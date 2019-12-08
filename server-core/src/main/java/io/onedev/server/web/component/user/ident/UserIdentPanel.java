@@ -8,7 +8,6 @@ import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
 
-import io.onedev.server.util.userident.SystemUserIdent;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
@@ -40,25 +39,20 @@ public class UserIdentPanel extends Panel {
 		
 		add(AttributeAppender.append("class", "user"));
 		
-		if (!(userIdent instanceof SystemUserIdent)) {
-			add(new DropdownHoverBehavior(AlignPlacement.top(8), 350) {
+		add(new DropdownHoverBehavior(AlignPlacement.top(8), 350) {
 
-				@Override
-				protected Component newContent(String id) {
-					return new UserDetailPanel(id, userIdent);
-				}
-				
-			});
-		}
+			@Override
+			protected Component newContent(String id) {
+				return new UserDetailPanel(id, userIdent);
+			}
+			
+		});
 	}
 
 	@Override
 	protected void onComponentTag(ComponentTag tag) {
 		super.onComponentTag(tag);
-		if (userIdent instanceof SystemUserIdent)
-			tag.setName("span");
-		else
-			tag.setName("a");
+		tag.setName("a");
 	}
 
 	@Override

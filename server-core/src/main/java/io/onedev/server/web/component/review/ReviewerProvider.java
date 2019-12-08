@@ -7,13 +7,13 @@ import java.util.List;
 
 import org.apache.wicket.model.IModel;
 
-import io.onedev.commons.utils.matchscore.MatchScoreProvider;
-import io.onedev.commons.utils.matchscore.MatchScoreUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
 import io.onedev.server.model.User;
+import io.onedev.server.util.match.MatchScoreProvider;
+import io.onedev.server.util.match.MatchScoreUtils;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.component.select2.Response;
 import io.onedev.server.web.component.user.choice.AbstractUserChoiceProvider;

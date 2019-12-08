@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 
-import io.onedev.server.OneException;
 import io.onedev.server.util.EditContext;
 import io.onedev.server.util.inputspec.InputContext;
 import io.onedev.server.util.inputspec.InputSpec;
@@ -62,13 +61,7 @@ public class ShowCondition implements Serializable {
 		InputSpec inputSpec = Preconditions.checkNotNull(InputContext.get()).getInputSpec(getInputName());
 		if (inputSpec != null) {
 			Object inputValue = EditContext.get().getInputValue(getInputName());
-			List<String> strings = inputSpec.convertToStrings(inputValue);
-			if (strings.isEmpty())
-				return getValueMatcher().matches(null);
-			else if (strings.size() == 1)
-				return getValueMatcher().matches(strings.iterator().next());
-			else 
-				throw new OneException("Show condition should not be based on a multi-value input");
+			return getValueMatcher().matches(inputSpec.convertToStrings(inputValue));
 		} else {
 			logger.error("Unable to find input spec: " + getInputName());
 			return false;

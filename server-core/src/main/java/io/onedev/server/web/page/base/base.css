@@ -3,7 +3,10 @@ body {
 	background: white;
 }
 
-/* CURSORS */
+a {
+	color: #1f3b7b;
+}
+
 .pointer {
 	cursor: pointer;
 }

@@ -1,7 +1,7 @@
 package io.onedev.server.search.entity.pullrequest;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -9,7 +9,6 @@ import javax.persistence.criteria.Root;
 
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestReview;
-
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.util.query.PullRequestQueryConstants;
@@ -20,14 +19,15 @@ public class HasPendingReviewsCriteria extends EntityCriteria<PullRequest> {
 
 	@Override
 	public Predicate getPredicate(Root<PullRequest> root, CriteriaBuilder builder) {
-		From<?, ?> join = root.join(PullRequestQueryConstants.ATTR_REVIEWS, JoinType.LEFT);
+		Join<?, ?> join = root.join(PullRequestQueryConstants.ATTR_REVIEWS, JoinType.LEFT);
 		Path<?> userPath = EntityQuery.getPath(join, PullRequestReview.ATTR_USER);
 		Path<?> excludeDatePath = EntityQuery.getPath(join, PullRequestReview.ATTR_EXCLUDE_DATE);
 		Path<?> approvedPath = EntityQuery.getPath(join, PullRequestReview.ATTR_RESULT_APPROVED);
-		return builder.and(
+		join.on(builder.and(
 				builder.isNotNull(userPath), 
 				builder.isNull(excludeDatePath), 
-				builder.isNull(approvedPath));
+				builder.isNull(approvedPath)));
+		return join.isNotNull();
 	}
 
 	@Override

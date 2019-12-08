@@ -3,12 +3,14 @@ package io.onedev.server.web.component.build.side;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.AjaxSelfUpdatingTimerBehavior;
+import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.WebMarkupContainer;
@@ -19,22 +21,30 @@ import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.model.LoadableDetachableModel;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.util.time.Duration;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.BuildManager;
+import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.PullRequest;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.job.JobDefLink;
+import io.onedev.server.web.component.link.ViewStateAwarePageLink;
+import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.build.BuildListPage;
+import io.onedev.server.web.page.project.commits.CommitDetailPage;
+import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivitiesPage;
 import io.onedev.server.web.util.QueryPositionSupport;
 
 @SuppressWarnings("serial")
@@ -87,6 +97,24 @@ public abstract class BuildSidePanel extends Panel {
 		}
 		general.setOutputMarkupId(true);
 		add(general);
+		
+		CommitDetailPage.State commitState = new CommitDetailPage.State();
+		commitState.revision = getBuild().getCommitHash();
+		PageParameters params = CommitDetailPage.paramsOf(getProject(), commitState);
+		
+		Link<Void> hashLink = new ViewStateAwarePageLink<Void>("commit", CommitDetailPage.class, params) {
+
+			@Override
+			protected void onComponentTag(ComponentTag tag) {
+				super.onComponentTag(tag);
+				if (!SecurityUtils.canReadCode(getProject()))
+					tag.setName("span");
+			}
+			
+		};
+		hashLink.setEnabled(SecurityUtils.canReadCode(getProject()));
+		hashLink.add(new Label("label", GitUtils.abbreviateSHA(getBuild().getCommitHash())));
+		general.add(hashLink);
 		
 		Link<Void> jobLink = new JobDefLink("job", getBuild().getCommitId(), getBuild().getJobName()) {
 
@@ -224,6 +252,37 @@ public abstract class BuildSidePanel extends Panel {
 		
 		dependencesContainer.setVisible(dependentsLink.isVisible() || dependenciesLink.isVisible());
 		
+		add(new ListView<PullRequest>("pullRequests", new LoadableDetachableModel<List<PullRequest>>() {
+
+			@Override
+			protected List<PullRequest> load() {
+				return getBuild().getPullRequestBuilds()
+						.stream()
+						.map(it->it.getRequest())
+						.collect(Collectors.toList());
+			}
+			
+		}) {
+
+			@Override
+			protected void populateItem(ListItem<PullRequest> item) {
+				PullRequest request = item.getModelObject();
+
+				Link<Void> link = new ViewStateAwarePageLink<Void>("title", 
+						PullRequestActivitiesPage.class, 
+						PullRequestActivitiesPage.paramsOf(request, null));
+				link.add(new Label("label", "#" + request.getNumber() + " " + request.getTitle()));
+				item.add(link);
+				item.add(new RequestStatusLabel("status", item.getModel()));
+			}
+			
+			@Override
+			protected void onConfigure() {
+				setVisible(!getModelObject().isEmpty() && SecurityUtils.canReadCode(getProject()));
+			}
+			
+		});		
+
 		add(newDeleteLink("delete"));
 		
 		setOutputMarkupId(true);

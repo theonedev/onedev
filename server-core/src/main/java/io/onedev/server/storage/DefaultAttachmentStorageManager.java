@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
-import io.onedev.commons.utils.schedule.SchedulableTask;
-import io.onedev.commons.utils.schedule.TaskScheduler;
 import io.onedev.server.event.entity.EntityPersisted;
 import io.onedev.server.event.entity.EntityRemoved;
 import io.onedev.server.event.system.SystemStarted;
@@ -25,6 +23,8 @@ import io.onedev.server.persistence.annotation.Sessional;
 import io.onedev.server.persistence.annotation.Transactional;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.persistence.dao.EntityCriteria;
+import io.onedev.server.util.schedule.SchedulableTask;
+import io.onedev.server.util.schedule.TaskScheduler;
 
 @Singleton
 public class DefaultAttachmentStorageManager implements AttachmentStorageManager, SchedulableTask {
