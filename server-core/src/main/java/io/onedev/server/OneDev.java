@@ -82,7 +82,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	
 	@Override
 	public void start() {
-		SecurityUtils.bindAsRoot();
+		SecurityUtils.bindAsSystem();
 
 		System.setProperty("hsqldb.reconfig_logging", "false");
 		jettyRunner.start();
@@ -112,7 +112,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	@Sessional
 	@Override
 	public void postStart() {
-		SecurityUtils.bindAsRoot();
+		SecurityUtils.bindAsSystem();
 		
 		listenerRegistry.post(new SystemStarted());
 		logger.info("Server is ready at " + configManager.getSystemSetting().getServerUrl() + ".");
@@ -166,13 +166,13 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	@Sessional
 	@Override
 	public void preStop() {
-		SecurityUtils.bindAsRoot();
+		SecurityUtils.bindAsSystem();
 		listenerRegistry.post(new SystemStopping());
 	}
 
 	@Override
 	public void stop() {
-		SecurityUtils.bindAsRoot();
+		SecurityUtils.bindAsSystem();
 		
 		sessionManager.openSession();
 		try {

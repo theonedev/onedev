@@ -27,6 +27,7 @@ import io.onedev.server.issue.fieldspec.FieldSpec;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Issue;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.administration.GlobalIssueSetting;
 import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.ComponentContext;
@@ -34,9 +35,8 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.inputspec.SecretInput;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
-import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.page.project.builds.detail.dashboard.BuildDashboardPage;
 import io.onedev.server.web.page.project.issues.detail.IssueActivitiesPage;
@@ -65,8 +65,8 @@ public abstract class FieldValuesPanel extends Panel implements EditContext {
 				protected void populateItem(ListItem<String> item) {
 					String value = item.getModelObject();
 					if (getField().getType().equals(FieldSpec.USER)) {
-						UserIdent userIdent = UserIdent.of(OneDev.getInstance(UserManager.class).findByName(value), value);
-						item.add(new UserIdentPanel("value", userIdent, Mode.NAME));
+						User user = User.from(OneDev.getInstance(UserManager.class).findByName(value), value);
+						item.add(new UserIdentPanel("value", user, Mode.NAME));
 					} else if (getField().getType().equals(FieldSpec.ISSUE)) {
 						Issue issue = OneDev.getInstance(IssueManager.class)
 								.find(getIssue().getProject(), Long.valueOf(value));

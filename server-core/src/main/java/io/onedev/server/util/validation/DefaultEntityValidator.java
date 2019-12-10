@@ -25,8 +25,9 @@ public class DefaultEntityValidator implements EntityValidator {
 	
 	@Override
 	public void validate(AbstractEntity entity) {
-		for (ConstraintViolation<?> violation: validator.validate(entity)) {
-			reportError(entity, violation);
+		if (entity.getId() > 0) {
+			for (ConstraintViolation<?> violation: validator.validate(entity)) 
+				reportError(entity, violation);
 		}
 	}
 

@@ -56,7 +56,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
 import io.onedev.server.util.markdown.MarkdownManager;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.util.validation.ProjectNameValidator;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
@@ -290,7 +289,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 						} else {
 							userMap.put("searchKey", noSpaceName);
 						}
-						String avatarUrl = avatarManager.getAvatarUrl(UserIdent.of(user));
+						String avatarUrl = avatarManager.getAvatarUrl(user);
 						userMap.put("avatarUrl", avatarUrl);
 						userList.add(userMap);
 					}

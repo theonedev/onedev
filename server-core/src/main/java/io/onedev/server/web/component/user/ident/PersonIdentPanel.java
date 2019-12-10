@@ -7,35 +7,35 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.eclipse.jgit.lib.PersonIdent;
 
-import io.onedev.server.model.User;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
-import io.onedev.server.web.component.user.card.UserCardPanel;
+import io.onedev.server.web.component.user.card.PersonCardPanel;
 
 @SuppressWarnings("serial")
-public class UserIdentPanel extends Panel {
+public class PersonIdentPanel extends Panel {
 
-	private final Long userId;
+	private final PersonIdent personIdent;
 	
-	private final String displayName;
+	private final String gitRole;
 	
 	private final Mode mode;
 	
-	public UserIdentPanel(String id, User user, Mode mode) {
+	public PersonIdentPanel(String id, PersonIdent personIdent, String gitRole, Mode mode) {
 		super(id);
-		userId = user.getId();
-		displayName = user.getDisplayName();
+		this.personIdent = personIdent;
+		this.gitRole = gitRole;
 		this.mode = mode;
 	}
-	
+
 	@Override
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(new UserAvatar("avatar", userId, displayName).setVisible(mode != Mode.NAME));
-		add(new Label("name", displayName).setVisible(mode != Mode.AVATAR));
+		add(new UserAvatar("avatar", personIdent).setVisible(mode != Mode.NAME));
+		add(new Label("name", personIdent.getName()).setVisible(mode != Mode.AVATAR));
 		
 		add(AttributeAppender.append("class", "user"));
 		
@@ -43,7 +43,7 @@ public class UserIdentPanel extends Panel {
 
 			@Override
 			protected Component newContent(String id) {
-				return new UserCardPanel(id, userId, displayName);
+				return new PersonCardPanel(id, personIdent, gitRole);
 			}
 			
 		});

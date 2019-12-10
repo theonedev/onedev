@@ -8,7 +8,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestManager;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.model.User;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivity;
 import io.onedev.server.web.util.DeleteCallback;
 
@@ -48,8 +48,8 @@ public class PullRequestOpenedActivity implements PullRequestActivity {
 	}
 
 	@Override
-	public UserIdent getUser() {
-		return UserIdent.of(getRequest().getSubmitter(), getRequest().getSubmitterName());
+	public User getUser() {
+		return User.from(getRequest().getSubmitter(), getRequest().getSubmitterName());
 	}
 
 }

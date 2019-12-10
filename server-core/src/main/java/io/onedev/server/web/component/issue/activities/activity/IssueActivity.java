@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.markup.html.panel.Panel;
 
+import io.onedev.server.model.User;
 import io.onedev.server.web.util.DeleteCallback;
-import io.onedev.server.util.userident.UserIdent;
 
 public interface IssueActivity extends Serializable {
 	
@@ -16,7 +16,7 @@ public interface IssueActivity extends Serializable {
 	
 	Panel render(String panelId, DeleteCallback deleteCallback);
 	
-	UserIdent getUser();
+	User getUser();
 	
 	@Nullable
 	String getAnchor();

@@ -55,8 +55,8 @@ import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferenc
 import io.onedev.server.model.support.pullrequest.changedata.PullRequestReferencedFromPullRequestData;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestChangeActivity;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.activity.PullRequestCommentedActivity;

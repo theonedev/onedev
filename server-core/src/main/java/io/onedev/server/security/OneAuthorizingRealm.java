@@ -129,7 +129,7 @@ public class OneAuthorizingRealm extends AuthorizingRealm {
 				User user = null;
 		        if (userId != 0L) { 
 		            user = userManager.load(userId);
-		        	if (user.isRoot()) 
+		        	if (user.isRoot() || user.isSystem()) 
 		        		permissions.add(new SystemAdministration());
 		        	permissions.add(new UserAdministration(user));
 		           	for (Group group: user.getGroups())

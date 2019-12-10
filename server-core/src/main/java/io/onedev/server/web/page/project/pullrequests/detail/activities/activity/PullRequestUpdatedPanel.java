@@ -21,14 +21,13 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.util.DateUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.clipboard.CopyClipboardBehavior;
 import io.onedev.server.web.component.commit.message.CommitMessagePanel;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.PersonIdentPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 
@@ -71,7 +70,7 @@ class PullRequestUpdatedPanel extends GenericPanel<PullRequestUpdate> {
 			protected void populateItem(final ListItem<RevCommit> item) {
 				RevCommit commit = item.getModelObject();
 				
-				item.add(new UserIdentPanel("author", UserIdent.of(commit.getAuthorIdent()), Mode.AVATAR));
+				item.add(new PersonIdentPanel("author", commit.getAuthorIdent(), "Author", Mode.AVATAR));
 
 				item.add(new CommitMessagePanel("message", item.getModel()) {
 

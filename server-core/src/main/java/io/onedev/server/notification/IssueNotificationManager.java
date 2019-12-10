@@ -123,7 +123,7 @@ public class IssueNotificationManager {
 			watch(issue, entry.getKey(), entry.getValue());
 		}
 		
-		if (user != null)
+		if (user != null && !user.isSystem())
 			watch(issue, user, true);
 		
 		Collection<User> notifiedUsers = new HashSet<>();

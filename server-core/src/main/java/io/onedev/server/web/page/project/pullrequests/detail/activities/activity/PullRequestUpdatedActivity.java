@@ -7,8 +7,8 @@ import org.apache.wicket.model.LoadableDetachableModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.PullRequestUpdate;
+import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.Dao;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivity;
 import io.onedev.server.web.util.DeleteCallback;
 
@@ -48,7 +48,7 @@ public class PullRequestUpdatedActivity implements PullRequestActivity {
 	}
 
 	@Override
-	public UserIdent getUser() {
+	public User getUser() {
 		return null;
 	}
 

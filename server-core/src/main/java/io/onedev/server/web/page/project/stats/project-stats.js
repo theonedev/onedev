@@ -13,7 +13,7 @@ onedev.server.stats = {
 		return date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
 	},
 	contribs: {
-		onDomReady : function(overallContributions, topContributorsDataUrl, userDetailCallback) {
+		onDomReady : function(overallContributions, topContributorsDataUrl, userCardCallback) {
 			var $contribs = $("#project-contribs");
 			var $overall = $contribs.find(".overall");
 			if (Object.keys(overallContributions).length === 0) {
@@ -184,29 +184,21 @@ onedev.server.stats = {
 								$content.append($head);
 								var $left = $("<div class='pull-left'></div>");
 								$head.append($left);
-								if (contributor.author["@class"].indexOf("SystemUserIdent") != -1) {
-									$left.append("<img class='avatar' src='" + contributor.authorAvatarUrl + "'></img>");
-								} else {
-									$left.append("<a class='user'><img class='avatar' src='" + contributor.authorAvatarUrl + "'></img></a>");
-								}
+								$left.append("<a class='user'><img class='avatar' src='" + contributor.authorAvatarUrl + "'></img></a>");
 
 								var alignment = {targetX: 0, targetY: 0, x: 0, y: 100, offset: 8};
 								$left.find("a.user").hover(function() {
-									var $detail = $("<div id='user-detail' class='floating'></div>");
-									$detail.hide();
-									$detail.data("trigger", this);
-									$detail.data("alignment", alignment);
-									$("body").append($detail);
-									userDetailCallback(JSON.stringify(contributor.author));
-									return $detail;
+									var $card = $("<div id='user-card' class='floating'></div>");
+									$card.hide();
+									$card.data("trigger", this);
+									$card.data("alignment", alignment);
+									$("body").append($card);
+									userCardCallback(contributor.authorName, contributor.authorEmailAddress);
+									return $card;
 								}, alignment);
 								
-								var nameSpan = "<span class='name'>" + contributor.author.name + "</span>"; 
-								if (contributor.authorUrl) {
-									$left.append("<a href='" + contributor.authorUrl + "'>" + nameSpan + "</a>");
-								} else {
-									$left.append(nameSpan);
-								}
+								var nameSpan = "<span class='name'>" + contributor.authorName + "</span>"; 
+								$left.append(nameSpan);
 								var $totalContribution = $("<div class='total-contribution'></div>");
 								$left.append($totalContribution);
 								$totalContribution.append("<span class='commits'>" + contributor.totalCommits + " commits</span>");
@@ -310,10 +302,10 @@ onedev.server.stats = {
 				});
 			});
 		},
-		onUserDetailAvailable: function() {
-			var $userDetail = $("#user-detail");
-			$userDetail.empty().append($(".user-detail-content").children()).show();
-			$userDetail.align({placement: $userDetail.data("alignment"), target: {element: $userDetail.data("trigger")}});
+		onUserCardAvailable: function() {
+			var $userCard = $("#user-card");
+			$userCard.empty().append($(".user-card-content").children()).show();
+			$userCard.align({placement: $userCard.data("alignment"), target: {element: $userCard.data("trigger")}});
 		}
 	},
 	sourceLines: {

@@ -9,7 +9,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.model.PullRequestComment;
-import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.model.User;
 import io.onedev.server.web.page.project.pullrequests.detail.activities.PullRequestActivity;
 import io.onedev.server.web.util.DeleteCallback;
 
@@ -56,8 +56,8 @@ public class PullRequestCommentedActivity implements PullRequestActivity {
 	}
 
 	@Override
-	public UserIdent getUser() {
-		return UserIdent.of(getComment().getUser(), getComment().getUserName());
+	public User getUser() {
+		return User.from(getComment().getUser(), getComment().getUserName());
 	}
 
 }

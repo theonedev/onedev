@@ -98,13 +98,21 @@ public class DefaultDataManager implements DataManager, Serializable {
 	@Override
 	public List<ManualConfig> init() {
 		List<ManualConfig> manualConfigs = new ArrayList<ManualConfig>();
+		User system = userManager.get(User.SYSTEM_ID);
+		if (system == null) {
+			system = new User();
+			system.setId(User.SYSTEM_ID);
+			system.setName(OneDev.NAME);
+			system.setEmail("no email");
+			system.setPassword("no password");
+			userManager.save(system, null);
+		}
 		User administrator = userManager.get(User.ROOT_ID);		
 		if (administrator == null) {
 			administrator = new User();
 			administrator.setId(User.ROOT_ID);
 			Set<String> excludedProperties = Sets.newHashSet("administrator", "canCreateProjects"); 
-			String description = "Root account will be used by OneDev to perform internal operations";
-			manualConfigs.add(new ManualConfig("Create Root Account", description, administrator, excludedProperties) {
+			manualConfigs.add(new ManualConfig("Create Root Account", null, administrator, excludedProperties) {
 
 				@Override
 				public Skippable getSkippable() {

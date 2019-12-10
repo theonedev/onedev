@@ -307,8 +307,8 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
         return new Subject.Builder(securityManager).principals(asPrincipal(userId)).buildSubject();
     }
     
-	public static void bindAsRoot() {
-		ThreadContext.bind(asSubject(User.ROOT_ID));
+	public static void bindAsSystem() {
+		ThreadContext.bind(asSubject(User.SYSTEM_ID));
 	}
 	
 	public static Runnable inheritSubject(Runnable task) {

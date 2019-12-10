@@ -48,15 +48,14 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.CompareContext;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.asset.caret.CaretResourceReference;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.project.comment.CommentInput;
+import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.pullrequests.detail.PullRequestDetailPage;
 import io.onedev.server.web.page.project.pullrequests.detail.changes.PullRequestChangesPage;
@@ -103,9 +102,9 @@ public abstract class CodeCommentPanel extends Panel {
 			
 		}));
 		
-		UserIdent userIdent = UserIdent.of(getComment().getUser(), getComment().getUserName());
-		commentContainer.add(new UserIdentPanel("userAvatar", userIdent, Mode.AVATAR));
-		commentContainer.add(new Label("userName", userIdent.getName()));
+		User user = User.from(getComment().getUser(), getComment().getUserName());
+		commentContainer.add(new UserIdentPanel("userAvatar", user, Mode.AVATAR));
+		commentContainer.add(new Label("userName", user.getDisplayName()));
 		commentContainer.add(new Label("action", "commented"));
 		commentContainer.add(new Label("date", DateUtils.formatAge(getComment().getCreateDate())));
 
@@ -246,9 +245,9 @@ public abstract class CodeCommentPanel extends Panel {
 		replyContainer.setMarkupId(reply.getAnchor());
 		replyContainer.add(AttributeAppender.append("name", reply.getAnchor()));
 		
-		UserIdent userIdent = UserIdent.of(reply.getUser(), reply.getUserName());
-		replyContainer.add(new UserIdentPanel("userAvatar", userIdent, Mode.AVATAR));
-		replyContainer.add(new Label("userName", userIdent.getName()));
+		User user = User.from(reply.getUser(), reply.getUserName());
+		replyContainer.add(new UserIdentPanel("userAvatar", user, Mode.AVATAR));
+		replyContainer.add(new Label("userName", user.getDisplayName()));
 		
 		replyContainer.add(new Label("action", "replied"));
 		replyContainer.add(new Label("date", DateUtils.formatAge(reply.getDate())));

@@ -2,7 +2,6 @@ package io.onedev.server.git;
 
 import java.io.Serializable;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -59,14 +58,4 @@ public class NameAndEmail implements Comparable<NameAndEmail>, Serializable {
 		return name.compareTo(nameAndEmail.name);
 	}
 	
-	@Override
-	public String toString() {
-		return name + "\n" + emailAddress;
-	}
-	
-	public static NameAndEmail fromString(String string) {
-		String name = StringUtils.substringBefore(string, "\n");
-		String emailAddress = StringUtils.substringAfter(string, "\n");
-		return new NameAndEmail(name, emailAddress);
-	}
 }

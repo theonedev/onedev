@@ -33,6 +33,14 @@ public interface UserManager extends EntityManager<User> {
 	User getRoot();
 
 	/**
+	 * Find system user in the system. 
+	 * 
+	 * @return
+	 * 			system user. Never be <tt>null</tt>
+	 */
+	User getSystem();
+	
+	/**
 	 * Find user of specified name.
 	 * <p>
 	 * @param userName

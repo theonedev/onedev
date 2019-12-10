@@ -33,11 +33,10 @@ import io.onedev.server.model.User;
 import io.onedev.server.model.support.pullrequest.ReviewResult;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
+import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.websocket.PageDataChanged;
 
 @SuppressWarnings("serial")
@@ -114,7 +113,7 @@ public class ReviewListPanel extends GenericPanel<PullRequest> {
 			@Override
 			protected void populateItem(ListItem<PullRequestReview> item) {
 				PullRequestReview review = item.getModelObject();
-				item.add(new UserIdentPanel("user", UserIdent.of(review.getUser()), Mode.AVATAR_AND_NAME));
+				item.add(new UserIdentPanel("user", review.getUser(), Mode.AVATAR_AND_NAME));
 				
 				PullRequest request = getPullRequest();
 				

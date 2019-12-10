@@ -21,7 +21,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.Day;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.avatar.AvatarManager;
 
 class TopContributorsResource extends AbstractResource {
@@ -64,9 +63,9 @@ class TopContributorsResource extends AbstractResource {
 				List<Map<String, Object>> data = new ArrayList<>();
 				for (Contributor contributor: topContributors) {
 					Map<String, Object> contributorData = new HashMap<>();
-					UserIdent userIdent = UserIdent.of(contributor.getAuthor(), "Author");
-					contributorData.put("author", userIdent);
-					contributorData.put("authorAvatarUrl", avatarManager.getAvatarUrl(userIdent));
+					contributorData.put("authorName", contributor.getAuthor().getName());
+					contributorData.put("authorEmailAddress", contributor.getAuthor().getEmailAddress());
+					contributorData.put("authorAvatarUrl", avatarManager.getAvatarUrl(contributor.getAuthor()));
 					contributorData.put("totalCommits", contributor.getTotalContribution().getCommits());
 					contributorData.put("totalAdditions", contributor.getTotalContribution().getAdditions());
 					contributorData.put("totalDeletions", contributor.getTotalContribution().getDeletions());

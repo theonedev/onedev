@@ -51,6 +51,8 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	private static final long serialVersionUID = 1L;
 	
+	public static final Long SYSTEM_ID = -1L;
+	
 	public static final Long ROOT_ID = 1L;
 	
 	private static ThreadLocal<Stack<User>> stack =  new ThreadLocal<Stack<User>>() {
@@ -432,6 +434,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		return ROOT_ID.equals(getId());
 	}
 
+	public boolean isSystem() {
+		return SYSTEM_ID.equals(getId());
+	}
+	
 	public Collection<UserAuthorization> getProjectAuthorizations() {
 		return projectAuthorizations;
 	}
@@ -460,6 +466,17 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		if (groups == null)  
 			groups = getMemberships().stream().map(it->it.getGroup()).collect(Collectors.toList());
 		return groups;
+	}
+	
+	public static User from(@Nullable User user, @Nullable String displayName) {
+		if (user == null) {
+			user = new User();
+			if (displayName != null)
+				user.setName(displayName);
+			else
+				user.setName("Unknown");
+		}
+		return user;
 	}
 	
 	public static void push(User user) {

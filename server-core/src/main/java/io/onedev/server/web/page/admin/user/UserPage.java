@@ -14,9 +14,9 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.floating.FloatingPanel;
 import io.onedev.server.web.component.link.DropdownLink;
@@ -38,6 +38,9 @@ public abstract class UserPage extends AdministrationPage {
 		super(params);
 		
 		Long userId = params.get(PARAM_USER).toLong();
+		if (userId == User.SYSTEM_ID)
+			throw new OneException("System user is not accessible");
+		
 		userModel = new LoadableDetachableModel<User>() {
 
 			@Override
@@ -58,7 +61,7 @@ public abstract class UserPage extends AdministrationPage {
 			protected Component newHead(String componentId) {
 				Fragment fragment = new Fragment(componentId, "sidebarHeadFrag", UserPage.this);
 				User user = userModel.getObject();
-				fragment.add(new UserAvatar("avatar", UserIdent.of(user))
+				fragment.add(new UserAvatar("avatar", user)
 						.add(AttributeAppender.append("title", user.getDisplayName())));
 				fragment.add(new Label("name", user.getDisplayName()));
 				return fragment;
@@ -112,7 +115,7 @@ public abstract class UserPage extends AdministrationPage {
 			}
 			
 		};
-		link.add(new UserAvatar("avatar", UserIdent.of(getUser())));
+		link.add(new UserAvatar("avatar", getUser()));
 		link.add(new Label("name", getUser().getDisplayName()));
 		fragment.add(link);
 		

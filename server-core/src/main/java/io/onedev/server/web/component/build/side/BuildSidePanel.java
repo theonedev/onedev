@@ -30,17 +30,18 @@ import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.search.entity.EntityQuery;
 import io.onedev.server.search.entity.build.BuildQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.Input;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.build.ParamValuesLabel;
 import io.onedev.server.web.component.entity.nav.EntityNavPanel;
 import io.onedev.server.web.component.job.JobDefLink;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.pullrequest.RequestStatusLabel;
+import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.build.BuildListPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -127,11 +128,9 @@ public abstract class BuildSidePanel extends Panel {
 		jobLink.add(new Label("label", getBuild().getJobName()));
 		general.add(jobLink);
 		
-		UserIdent submitter = UserIdent.of(getBuild().getSubmitter(), getBuild().getSubmitterName());
-		general.add(new UserIdentPanel("submitter", submitter, UserIdentPanel.Mode.NAME));
+		general.add(new UserIdentPanel("submitter", User.from(getBuild().getSubmitter(), getBuild().getSubmitterName()), Mode.NAME));
 
-		UserIdent canceller = UserIdent.of(getBuild().getCanceller(), getBuild().getCancellerName());
-		general.add(new UserIdentPanel("canceller", canceller, UserIdentPanel.Mode.NAME) {
+		general.add(new UserIdentPanel("canceller", User.from(getBuild().getCanceller(), getBuild().getCancellerName()), Mode.NAME) {
 
 			@Override
 			protected void onConfigure() {

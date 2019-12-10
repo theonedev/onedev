@@ -1,26 +1,25 @@
-.user-detail {
+.user-card {
     position: relative;
     font-size: 16px;
     padding: 12px;
     line-height: 22px;
 }
-.user-detail.non-git-user .other {
+.user-card>.info {
     padding: 8px 12px 12px 80px;
 }
-.user-detail.git-user .other {
-    padding: 8px 12px 12px 104px;
+.user-card.bigger>.info {
+	padding-left: 104px;
 }
-.user-detail.non-git-user img {
+.user-card img {
     position: absolute;
     width: 64px;
     height: 64px;
 }
-.user-detail.git-user img {
-    position: absolute;
+.user-card.bigger img {
     width: 90px;
     height: 90px;
 }
-.user-detail i {
+.user-card i {
     color: #888;
     font-size: 14px;
 }

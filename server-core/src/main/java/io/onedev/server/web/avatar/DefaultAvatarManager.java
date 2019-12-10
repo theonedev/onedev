@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.apache.commons.codec.binary.Hex;
+import org.eclipse.jgit.lib.PersonIdent;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
@@ -19,14 +20,12 @@ import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
+import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.annotation.Sessional;
-import io.onedev.server.util.userident.EmailAwareIdent;
-import io.onedev.server.util.userident.ExternalUserIdent;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
 
 @Singleton
@@ -48,21 +47,48 @@ public class DefaultAvatarManager implements AvatarManager {
 	
 	@Sessional
 	@Override
-	public String getAvatarUrl(UserIdent userIdent) {
-		if (userIdent instanceof ExternalUserIdent) {
+	public String getAvatarUrl(User user) {
+		return getAvatarUrl(user.getId(), user.getDisplayName());
+	}
+	
+	@Sessional
+	@Override
+	public String getAvatarUrl(Long userId, String displayName) {
+		if (userId == null) {
 			return AVATARS_BASE_URL + "user.png";
+		} else if (userId.equals(User.SYSTEM_ID)) {
+			return AVATARS_BASE_URL + "onedev.png";
 		} else {
-			EmailAwareIdent emailAwareIdent = (EmailAwareIdent) userIdent;
-			User user = userManager.findByEmail(emailAwareIdent.getEmail());
+			User user = OneDev.getInstance(UserManager.class).load(userId);
+			File uploadedFile = getUploaded(user);
+			if (uploadedFile.exists())
+				return AVATARS_BASE_URL + "uploaded/users/" + user.getId() + ".jpg?version=" + uploadedFile.lastModified();
+			if (settingManager.getSystemSetting().isGravatarEnabled())
+				return Gravatar.getURL(user.getEmail(), GRAVATAR_SIZE);
+			else 
+				return generateAvatar(user.getName(), user.getEmail());
+		}
+	}
+	
+	@Sessional
+	@Override
+	public String getAvatarUrl(PersonIdent personIdent) {
+		if (StringUtils.isBlank(personIdent.getEmailAddress())) {
+			if (personIdent.getName().equals(OneDev.NAME)) 
+				return AVATARS_BASE_URL + "onedev.png";
+			else  
+				return AVATARS_BASE_URL + "user.png";
+		} else {
+			User user = userManager.findByEmail(personIdent.getEmailAddress());
 			if (user != null) {
 				File uploadedFile = getUploaded(user);
 				if (uploadedFile.exists())
 					return AVATARS_BASE_URL + "uploaded/users/" + user.getId() + ".jpg?version=" + uploadedFile.lastModified();
 			}
 			if (settingManager.getSystemSetting().isGravatarEnabled())
-				return Gravatar.getURL(emailAwareIdent.getEmail(), GRAVATAR_SIZE);
+				return Gravatar.getURL(personIdent.getEmailAddress(), GRAVATAR_SIZE);
 			else 
-				return generateAvatar(userIdent.getName(), emailAwareIdent.getEmail());
+				return generateAvatar(personIdent.getName(), personIdent.getEmailAddress());
 		}
 	}
 	

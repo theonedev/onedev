@@ -140,7 +140,7 @@ public class PullRequestNotificationManager implements PersistListener {
 			watch(request, entry.getKey(), entry.getValue());
 		}
 		
-		if (user != null)
+		if (user != null && !user.isSystem())
 			watch(request, user, true);
 		
 		Collection<User> notifiedUsers = new HashSet<>();

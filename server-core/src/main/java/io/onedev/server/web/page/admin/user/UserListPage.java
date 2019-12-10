@@ -33,7 +33,6 @@ import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
 import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
@@ -62,6 +61,7 @@ public class UserListPage extends AdministrationPage {
 	
 	private EntityCriteria<User> getCriteria() {
 		EntityCriteria<User> criteria = EntityCriteria.of(User.class);
+		criteria.add(Restrictions.not(Restrictions.eq("id", User.SYSTEM_ID)));
 		if (query != null) {
 			criteria.add(Restrictions.or(
 					Restrictions.ilike("name", query, MatchMode.ANYWHERE), 
@@ -117,7 +117,7 @@ public class UserListPage extends AdministrationPage {
 				User user = rowModel.getObject();
 				Fragment fragment = new Fragment(componentId, "nameFrag", UserListPage.this);
 				Link<Void> link = new BookmarkablePageLink<Void>("link", UserProfilePage.class, UserProfilePage.paramsOf(user));
-				link.add(new UserAvatar("avatar", UserIdent.of(user)));
+				link.add(new UserAvatar("avatar", user));
 				link.add(new Label("name", user.getName()));
 				fragment.add(link);
 				cellItem.add(fragment);

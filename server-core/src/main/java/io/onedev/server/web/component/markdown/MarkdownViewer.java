@@ -36,7 +36,6 @@ import io.onedev.server.model.support.pullrequest.CloseInfo;
 import io.onedev.server.util.ColorUtils;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.markdown.MarkdownManager;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.page.project.ProjectPage;
@@ -180,7 +179,7 @@ public class MarkdownViewer extends GenericPanel<String> {
 				case "user":
 					User user = OneDev.getInstance(UserManager.class).get(Long.valueOf(referenceId));
 					if (user != null) {
-						String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(UserIdent.of(user));
+						String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(user);
 						String script = String.format("onedev.server.markdown.renderUserTooltip('%s', '%s', '%s')", 
 								JavaScriptEscape.escapeJavaScript(avatarUrl), 
 								JavaScriptEscape.escapeJavaScript(user.getDisplayName()), 

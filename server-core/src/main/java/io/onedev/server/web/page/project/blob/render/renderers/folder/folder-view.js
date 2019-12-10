@@ -1,5 +1,5 @@
 onedev.server.folderView = {
-	onDomReady: function(containerId, lastCommitsUrl, userDetailCallback) {
+	onDomReady: function(containerId, lastCommitsUrl, userCardCallback) {
 		var $container = $("#" + containerId);
 		var $folderView = $container.find(">.folder-view");
 		
@@ -22,15 +22,10 @@ onedev.server.folderView = {
 						var lastCommit = lastCommits[path];
 
 						if (lastCommit) {
-							if (lastCommit.author["@class"].indexOf("SystemUserIdent") != -1) {
-								var html = "<span class='user'><img src='" + lastCommit.authorAvatarUrl + "' class='avatar'/> <span class='name'>OneDev</span></span>";
-								$row.children(".last-commit.author").empty().append(html);
-							} else {
-								var html = "<a class='user'><img src='" + lastCommit.authorAvatarUrl + "' class='avatar'/> <span class='name'></span></a>";
-								var $author = $row.children(".last-commit.author");
-								$author.empty().append(html);
-								$author.find(".name").text(lastCommit.author.name);
-							}
+							var html = "<a class='user'><img src='" + lastCommit.authorAvatarUrl + "' class='avatar'/> <span class='name'></span></a>";
+							var $author = $row.children(".last-commit.author");
+							$author.empty().append(html);
+							$author.find(".name").text(lastCommit.authorName);
 							
 							$row.children(".last-commit.when").append("<span>" + lastCommit.when + "</span>");
 							var $message = $row.children(".last-commit.message");
@@ -38,13 +33,13 @@ onedev.server.folderView = {
 
 							var alignment = {targetX: 0, targetY: 0, x: 0, y: 100, offset: 8};
 							$row.find("a.user").hover(function() {
-								var $detail = $("<div id='user-detail' class='floating'></div>");
-								$detail.hide();
-								$detail.data("trigger", this);
-								$detail.data("alignment", alignment);
-								$("body").append($detail);
-								userDetailCallback(JSON.stringify(lastCommit.author));
-								return $detail;
+								var $card = $("<div id='user-card' class='floating'></div>");
+								$card.hide();
+								$card.data("trigger", this);
+								$card.data("alignment", alignment);
+								$("body").append($card);
+								userCardCallback(lastCommit.authorName, lastCommit.authorEmailAddress);
+								return $card;
 							}, alignment);
 						}
 					});
@@ -69,9 +64,9 @@ onedev.server.folderView = {
 		});
 	}, 
 
-	onUserDetailAvailable: function() {
-		var $userDetail = $("#user-detail");
-		$userDetail.empty().append($(".user-detail-content").children()).show();
-		$userDetail.align({placement: $userDetail.data("alignment"), target: {element: $userDetail.data("trigger")}});
+	onUserCardAvailable: function() {
+		var $userCard = $("#user-card");
+		$userCard.empty().append($(".user-card-content").children()).show();
+		$userCard.align({placement: $userCard.data("alignment"), target: {element: $userCard.data("trigger")}});
 	}
 };

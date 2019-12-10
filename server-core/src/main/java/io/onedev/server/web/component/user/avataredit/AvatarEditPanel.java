@@ -12,7 +12,6 @@ import org.apache.wicket.model.PropertyModel;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.model.User;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.avatarupload.AvatarFileSelected;
 import io.onedev.server.web.component.avatarupload.AvatarUploadField;
@@ -39,7 +38,7 @@ public class AvatarEditPanel extends GenericPanel<User> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		add(new UserAvatar("avatar", UserIdent.of(getUser())));
+		add(new UserAvatar("avatar", getUser().getId(), getUser().getDisplayName()));
 		
 		add(new Link<Void>("useDefault") {
 

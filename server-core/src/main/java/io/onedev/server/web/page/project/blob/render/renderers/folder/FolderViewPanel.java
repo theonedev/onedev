@@ -28,31 +28,29 @@ import org.apache.wicket.request.cycle.RequestCycle;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 import org.unbescape.html.HtmlEscape;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 
-import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.git.Blob;
 import io.onedev.server.git.BlobIdent;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.link.ViewStateAwareAjaxLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
-import io.onedev.server.web.component.user.detail.UserDetailPanel;
+import io.onedev.server.web.component.user.card.PersonCardPanel;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 
 @SuppressWarnings("serial")
 public class FolderViewPanel extends Panel {
 
-	private static final String USER_DETAIL_ID = "userDetail";
+	private static final String USER_CARD_ID = "userCard";
 	
 	private final BlobRenderContext context;
 	
@@ -125,7 +123,7 @@ public class FolderViewPanel extends Panel {
 		
 	};
 	
-	private AbstractDefaultAjaxBehavior userDetailBehavior;
+	private AbstractDefaultAjaxBehavior userCardBehavior;
 	
 	public FolderViewPanel(String id, BlobRenderContext context) {
 		super(id);
@@ -275,22 +273,21 @@ public class FolderViewPanel extends Panel {
 		
 		add(readmeContainer);
 		
-		add(new WebMarkupContainer(USER_DETAIL_ID).setOutputMarkupId(true));
-		add(userDetailBehavior = new AbstractPostAjaxBehavior() {
+		add(new WebMarkupContainer(USER_CARD_ID).setOutputMarkupId(true));
+		add(userCardBehavior = new AbstractPostAjaxBehavior() {
 			
 			@Override
 			protected void respond(AjaxRequestTarget target) {
-				String jsonOfUserIdent = RequestCycle.get().getRequest().getPostParameters().getParameterValue("userIdent").toString();
-				try {
-					UserIdent userIdent = OneDev.getInstance(ObjectMapper.class).readValue(jsonOfUserIdent, UserIdent.class);
-					Component userDetail = new UserDetailPanel(USER_DETAIL_ID, userIdent);
-					userDetail.setOutputMarkupId(true);
-					replace(userDetail);
-					target.add(userDetail);
-					target.appendJavaScript("onedev.server.folderView.onUserDetailAvailable();");
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+				String name = RequestCycle.get().getRequest().getPostParameters()
+						.getParameterValue("name").toString();
+				String emailAddress = RequestCycle.get().getRequest().getPostParameters()
+						.getParameterValue("emailAddress").toString();
+				PersonIdent personIdent = new PersonIdent(name, emailAddress);
+				Component userCard = new PersonCardPanel(USER_CARD_ID, personIdent, "Author");
+				userCard.setOutputMarkupId(true);
+				replace(userCard);
+				target.add(userCard);
+				target.appendJavaScript("onedev.server.folderView.onUserCardAvailable();");
 			}
 			
 		});
@@ -307,8 +304,10 @@ public class FolderViewPanel extends Panel {
 		PageParameters params = LastCommitsResource.paramsOf(context.getProject(), 
 				context.getBlobIdent().revision, context.getBlobIdent().path); 
 		String lastCommitsUrl = urlFor(new LastCommitsResourceReference(), params).toString();
-		CharSequence callback = userDetailBehavior.getCallbackFunction(CallbackParameter.explicit("userIdent"));
-		String script = String.format("onedev.server.folderView.onDomReady('%s', '%s', %s)", getMarkupId(), lastCommitsUrl, callback); 
+		CharSequence callback = userCardBehavior.getCallbackFunction(
+				CallbackParameter.explicit("name"), CallbackParameter.explicit("emailAddress"));
+		String script = String.format("onedev.server.folderView.onDomReady('%s', '%s', %s)", 
+				getMarkupId(), lastCommitsUrl, callback); 
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 

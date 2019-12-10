@@ -9,7 +9,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
 import io.onedev.server.model.User;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.user.UserProfilePage;
 
@@ -28,7 +27,7 @@ abstract class SimpleUserListPanel extends Panel {
 		for (User user:  getUsers()) {
 			Link<Void> link = new BookmarkablePageLink<Void>(usersView.newChildId(), 
 					UserProfilePage.class, UserProfilePage.paramsOf(user));
-			link.add(new UserAvatar("avatar", UserIdent.of(user)));
+			link.add(new UserAvatar("avatar", user));
 			link.add(new Label("name", user.getDisplayName()));
 			usersView.add(link);
 		}

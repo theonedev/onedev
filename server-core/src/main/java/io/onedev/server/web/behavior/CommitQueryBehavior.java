@@ -79,7 +79,7 @@ public class CommitQueryBehavior extends ANTLRAssistBehavior {
 								if (StringUtils.isNotBlank(user.getEmailAddress()))
 									content = user.getName() + " <" + user.getEmailAddress() + ">";
 								else
-									content = user.getName();
+									content = user.getName() + " <>";
 								content = content.trim();
 								PatternApplied applied = WildcardUtils.applyPattern(matchWith, content, false);
 								if (applied != null)

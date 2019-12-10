@@ -49,7 +49,6 @@ import io.onedev.server.git.RefInfo;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmListener;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.commit.status.CommitStatusPanel;
@@ -60,8 +59,8 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
 import io.onedev.server.web.component.revisionpicker.RevisionPicker;
-import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.PersonIdentPanel;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
@@ -327,11 +326,10 @@ public class ProjectTagsPage extends ProjectPage {
 				if (ref.getObj() instanceof RevTag) {
 					RevTag revTag = (RevTag) ref.getObj();
 					Fragment fragment = new Fragment("annotated", "annotatedFrag", ProjectTagsPage.this);
-					if (revTag.getTaggerIdent() != null) {
-						fragment.add(new UserIdentPanel("author", UserIdent.of(revTag.getTaggerIdent()), Mode.NAME));
-					} else {
+					if (revTag.getTaggerIdent() != null) 
+						fragment.add(new PersonIdentPanel("author", revTag.getTaggerIdent(), "Tagger", Mode.NAME));
+					else 
 						fragment.add(new WebMarkupContainer("author").setVisible(false));
-					}
 					Label message = new Label("message", revTag.getFullMessage());
 					message.setOutputMarkupId(true);
 					fragment.add(message);

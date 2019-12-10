@@ -21,7 +21,6 @@ import io.onedev.server.model.Project;
 import io.onedev.server.persistence.dao.Dao;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.page.project.commits.CommitDetailPage;
 import io.onedev.server.web.util.ReferenceTransformer;
@@ -78,9 +77,9 @@ class LastCommitsResource extends AbstractResource {
 					info.when = DateUtils.formatAge(value.getCommitDate());
 					
 					PersonIdent author = value.getAuthor();
-					UserIdent userIdent = UserIdent.of(author);
-					info.author = userIdent;
-					info.authorAvatarUrl = avatarManager.getAvatarUrl(userIdent);
+					info.authorName = author.getName();
+					info.authorEmailAddress = author.getEmailAddress();
+					info.authorAvatarUrl = avatarManager.getAvatarUrl(author);
 					map.put(entry.getKey(), info);
 				}
 				String json;
@@ -115,8 +114,9 @@ class LastCommitsResource extends AbstractResource {
 		
 		String authorAvatarUrl;
 		
-		UserIdent author;
+		String authorName;
 		
+		String authorEmailAddress;
 	}
 	
 }

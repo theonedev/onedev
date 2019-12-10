@@ -59,7 +59,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     @Transactional
     @Override
 	public void save(User user, String oldName) {
-    	if (user.isRoot()) {
+    	if (user.isRoot() || user.isSystem()) {
     		getSession().replicate(user, ReplicationMode.OVERWRITE);
     		listenerRegistry.post(new EntityPersisted(user, false));
     	} else {
@@ -91,6 +91,12 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	return load(User.ROOT_ID);
     }
 
+    @Sessional
+    @Override
+    public User getSystem() {
+    	return load(User.SYSTEM_ID);
+    }
+    
     @Transactional
     @Override
 	public void delete(User user) {
@@ -108,10 +114,10 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 		
 		usage.checkInUse("User '" + user.getName() + "'");
     	
-    	Query<?> query = getSession().createQuery("update PullRequest set submitter=null, submitterIdent=:submitterIdent "
+    	Query<?> query = getSession().createQuery("update PullRequest set submitter=null, submitterName=:submitterName "
     			+ "where submitter=:submitter");
     	query.setParameter("submitter", user);
-    	query.setParameter("submitterIdent", user.getDisplayName());
+    	query.setParameter("submitterName", user.getDisplayName());
     	query.executeUpdate();
     	
     	query = getSession().createQuery("update Build set submitter=null, submitterName=:submitterName "
@@ -186,7 +192,10 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
 
 	@Override
 	public List<User> query() {
-		return query(true);
+		EntityCriteria<User> criteria = newCriteria();
+		criteria.add(Restrictions.not(Restrictions.eq("id", User.SYSTEM_ID)));
+		criteria.setCacheable(true);
+		return query(criteria);
 	}
 	
 	@Override

@@ -9,9 +9,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.model.IssueComment;
 import io.onedev.server.model.Project;
+import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.project.comment.ProjectCommentPanel;
@@ -32,8 +32,8 @@ class IssueCommentedPanel extends GenericPanel<IssueComment> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		UserIdent userIdent = UserIdent.of(getComment().getUser(), getComment().getUserName());
-		add(new Label("user", userIdent.getName()));
+		User user = User.from(getComment().getUser(), getComment().getUserName());
+		add(new Label("user", user.getDisplayName()));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate())));
 		
 		add(new ProjectCommentPanel("body") {

@@ -12,7 +12,6 @@ import com.google.common.collect.Lists;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.avatar.AvatarManager;
 import io.onedev.server.web.component.select2.ChoiceProvider;
 
@@ -23,7 +22,7 @@ public abstract class AbstractUserChoiceProvider extends ChoiceProvider<User> {
 	@Override
 	public void toJson(User choice, JSONWriter writer) throws JSONException {
 		writer.key("id").value(choice.getId()).key("name").value(HtmlEscape.escapeHtml5(choice.getDisplayName()));
-		String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(UserIdent.of(choice));
+		String avatarUrl = OneDev.getInstance(AvatarManager.class).getAvatarUrl(choice);
 		writer.key("avatar").value(avatarUrl);
 	}
 

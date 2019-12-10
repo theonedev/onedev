@@ -11,9 +11,9 @@ import io.onedev.server.entitymanager.PullRequestCommentManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestComment;
+import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.project.comment.ProjectCommentPanel;
@@ -35,8 +35,7 @@ class PullRequestCommentedPanel extends GenericPanel<PullRequestComment> {
 	protected void onInitialize() {
 		super.onInitialize();
 
-		UserIdent userIdent = UserIdent.of(getComment().getUser(), getComment().getUserName());
-		add(new Label("user", userIdent.getName()));
+		add(new Label("user", User.from(getComment().getUser(), getComment().getUserName()).getDisplayName()));
 		add(new Label("age", DateUtils.formatAge(getComment().getDate())));
 		
 		add(new SinceChangesLink("changes", new AbstractReadOnlyModel<PullRequest>() {

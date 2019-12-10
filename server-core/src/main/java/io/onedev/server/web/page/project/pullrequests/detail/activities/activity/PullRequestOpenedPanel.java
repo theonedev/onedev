@@ -10,9 +10,9 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.PullRequestChangeManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
+import io.onedev.server.model.User;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.markdown.AttachmentSupport;
 import io.onedev.server.web.component.markdown.ContentVersionSupport;
 import io.onedev.server.web.component.project.comment.ProjectCommentPanel;
@@ -32,8 +32,7 @@ class PullRequestOpenedPanel extends GenericPanel<PullRequest> {
 		super.onInitialize();
 		
 		PullRequest request = getPullRequest();
-		UserIdent userIdent = UserIdent.of(request.getSubmitter(), request.getSubmitterName());
-		add(new Label("user", userIdent.getName()));
+		add(new Label("user", User.from(request.getSubmitter(), request.getSubmitterName()).getDisplayName()));
 		add(new Label("age", DateUtils.formatAge(request.getSubmitDate())));
 		
 		add(new ProjectCommentPanel("body") {

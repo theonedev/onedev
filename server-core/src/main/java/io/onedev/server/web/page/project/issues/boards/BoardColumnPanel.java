@@ -60,12 +60,11 @@ import io.onedev.server.util.EditContext;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.inputspec.choiceinput.choiceprovider.ChoiceProvider;
 import io.onedev.server.util.query.IssueQueryConstants;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.issues.list.ProjectIssueListPage;
 
 @SuppressWarnings("serial")
@@ -255,7 +254,7 @@ abstract class BoardColumnPanel extends Panel implements EditContext {
 		WebMarkupContainer head = new WebMarkupContainer("head");
 		if (user != null) {
 			head.add(new WebMarkupContainer("title").setVisible(false));
-			head.add(new UserIdentPanel("userIdent", UserIdent.of(user), Mode.AVATAR_AND_NAME));
+			head.add(new UserIdentPanel("userIdent", User.from(user, user.getDisplayName()), Mode.AVATAR_AND_NAME));
 		} else {
 			head.add(new Label("title", title).setEscapeModelStrings(false));
 			head.add(new WebMarkupContainer("userIdent").setVisible(false));

@@ -9,7 +9,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.IssueCommentManager;
 import io.onedev.server.model.IssueComment;
-import io.onedev.server.util.userident.UserIdent;
+import io.onedev.server.model.User;
 import io.onedev.server.web.util.DeleteCallback;
 
 @SuppressWarnings("serial")
@@ -59,8 +59,8 @@ public class IssueCommentedActivity implements IssueActivity {
 	}
 
 	@Override
-	public UserIdent getUser() {
-		return UserIdent.of(getComment().getUser(), getComment().getUserName());
+	public User getUser() {
+		return User.from(getComment().getUser(), getComment().getUserName());
 	}
 	
 }

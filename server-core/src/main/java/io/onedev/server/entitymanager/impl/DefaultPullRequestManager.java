@@ -394,7 +394,7 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			reason = "closed pull request as source branch is merged into target branch";
 		
 		PullRequestChange change = new PullRequestChange();
-		change.setUser(userManager.getRoot());
+		change.setUser(userManager.getSystem());
 		change.setDate(date);
 		change.setData(new PullRequestMergeData(reason));
 		change.setRequest(request);

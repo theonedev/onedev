@@ -93,6 +93,7 @@ import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.PullRequestBuild;
 import io.onedev.server.model.PullRequestUpdate;
 import io.onedev.server.model.PullRequestWatch;
+import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.model.support.pullrequest.MergePreview;
 import io.onedev.server.model.support.pullrequest.MergeStrategy;
@@ -101,7 +102,6 @@ import io.onedev.server.search.entity.pullrequest.PullRequestQuery;
 import io.onedev.server.util.DateUtils;
 import io.onedev.server.util.ProjectAndBranch;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.ajaxlistener.ConfirmLeaveListener;
 import io.onedev.server.web.behavior.ReferenceInputBehavior;
 import io.onedev.server.web.component.branch.BranchLink;
@@ -122,8 +122,8 @@ import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.PageTabLink;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
+import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.page.project.ProjectPage;
 import io.onedev.server.web.page.project.builds.ProjectBuildsPage;
 import io.onedev.server.web.page.project.pullrequests.InvalidPullRequestPage;
@@ -789,8 +789,8 @@ public abstract class PullRequestDetailPage extends ProjectPage {
 			
 		});
 		
-		UserIdent userIdent = UserIdent.of(request.getSubmitter(), request.getSubmitterName());
-		statusAndBranchesContainer.add(new UserIdentPanel("user", userIdent, Mode.NAME));
+		User submitter = User.from(request.getSubmitter(), request.getSubmitterName());
+		statusAndBranchesContainer.add(new UserIdentPanel("user", submitter, Mode.NAME));
 		statusAndBranchesContainer.add(new Label("date", DateUtils.formatAge(request.getSubmitDate())));
 		
 		statusAndBranchesContainer.add(new BranchLink("target", request.getTarget(), null));

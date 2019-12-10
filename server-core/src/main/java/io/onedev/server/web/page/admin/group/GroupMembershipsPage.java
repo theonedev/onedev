@@ -41,7 +41,6 @@ import io.onedev.server.persistence.dao.EntityCriteria;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.util.match.MatchScoreProvider;
 import io.onedev.server.util.match.MatchScoreUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
@@ -206,7 +205,7 @@ public class GroupMembershipsPage extends GroupPage {
 				Fragment fragment = new Fragment(componentId, "nameFrag", GroupMembershipsPage.this);
 				Link<Void> link = new BookmarkablePageLink<Void>("link", UserProfilePage.class, 
 						UserProfilePage.paramsOf(user));
-				link.add(new UserAvatar("avatar", UserIdent.of(user)));
+				link.add(new UserAvatar("avatar", user));
 				link.add(new Label("name", user.getDisplayName()));
 				fragment.add(link);
 				cellItem.add(fragment);

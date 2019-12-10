@@ -19,10 +19,9 @@ import io.onedev.server.model.AbstractEntity;
 import io.onedev.server.model.User;
 import io.onedev.server.model.support.EntityWatch;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.util.watch.WatchStatus;
+import io.onedev.server.web.component.user.ident.Mode;
 import io.onedev.server.web.component.user.ident.UserIdentPanel;
-import io.onedev.server.web.component.user.ident.UserIdentPanel.Mode;
 import io.onedev.server.web.component.user.list.SimpleUserListLink;
 import io.onedev.server.web.component.watchstatus.WatchStatusLink;
 
@@ -60,7 +59,7 @@ public abstract class EntityWatchesPanel extends Panel {
 
 			@Override
 			protected String load() {
-				return "Watchers(" + String.valueOf(getEffectWatches().size()) + ")";
+				return "Watchers (" + String.valueOf(getEffectWatches().size()) + ")";
 			}
 			
 		}));
@@ -80,7 +79,7 @@ public abstract class EntityWatchesPanel extends Panel {
 			@Override
 			protected void populateItem(ListItem<EntityWatch> item) {
 				User user = item.getModelObject().getUser();
-				item.add(new UserIdentPanel("watcher", UserIdent.of(user), Mode.AVATAR));
+				item.add(new UserIdentPanel("watcher", user, Mode.AVATAR));
 			}
 
 			@Override

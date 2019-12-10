@@ -18,7 +18,6 @@ import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.User;
 import io.onedev.server.util.SecurityUtils;
-import io.onedev.server.util.userident.UserIdent;
 import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
@@ -174,9 +173,15 @@ public abstract class LayoutPage extends BasePage {
 		add(notSignedInContainer);
 		
 		WebMarkupContainer signedInContainer = new WebMarkupContainer("navSignedIn");
-		signedInContainer.add(new UserAvatar("avatar", UserIdent.of(loginUser)));
-		signedInContainer.add(new Label("name", loginUser!=null?loginUser.getDisplayName():""));
-		signedInContainer.add(new Label("header", loginUser!=null?loginUser.getDisplayName():""));
+		if (loginUser != null) {
+			signedInContainer.add(new UserAvatar("avatar", loginUser));
+			signedInContainer.add(new Label("name", loginUser.getDisplayName()));
+			signedInContainer.add(new Label("header", loginUser.getDisplayName()));
+		} else {
+			signedInContainer.add(new WebMarkupContainer("avatar"));
+			signedInContainer.add(new WebMarkupContainer("name"));
+			signedInContainer.add(new WebMarkupContainer("header"));
+		}
 		
 		signedInContainer.add(item = new WebMarkupContainer("myProfile"));
 		item.add(new ViewStateAwarePageLink<Void>("link", MyProfilePage.class));

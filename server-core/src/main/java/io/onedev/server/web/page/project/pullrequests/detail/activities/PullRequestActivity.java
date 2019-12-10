@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 
 import org.apache.wicket.Component;
 
+import io.onedev.server.model.User;
 import io.onedev.server.web.util.DeleteCallback;
-import io.onedev.server.util.userident.UserIdent;
 
 public interface PullRequestActivity extends Serializable {
 	
@@ -16,7 +16,7 @@ public interface PullRequestActivity extends Serializable {
 	
 	Component render(String componentId, DeleteCallback deleteCallback);
 	
-	UserIdent getUser();
+	User getUser();
 	
 	@Nullable
 	String getAnchor();
