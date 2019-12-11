@@ -125,7 +125,7 @@ public class ResourceBundleReferences {
 		}
 		
 		if (!cssResourceReferences.isEmpty()) {
-			cssBundleReferences.add(new CachedDependenciesConcatResourceBundleReference<CssReferenceHeaderItem>(
+			cssBundleReferences.add(new CssConcatResourceBundleReference(
 					scope, name + ".css", cssResourceReferences));			
 		}
 	}
