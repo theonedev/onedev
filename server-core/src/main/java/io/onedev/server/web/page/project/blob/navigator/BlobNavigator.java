@@ -198,8 +198,6 @@ public class BlobNavigator extends Panel {
 								BlobIdent blobIdent = model.getObject();
 								Fragment fragment = new Fragment(id, "treeNodeFrag", BlobNavigator.this);
 
-								fragment.add(new BlobIcon("icon", model));
-								
 								AjaxLink<Void> link = new ViewStateAwareAjaxLink<Void>("link") {
 
 									@Override
@@ -224,6 +222,9 @@ public class BlobNavigator extends Panel {
 									}
 									
 								};
+								
+								link.add(new BlobIcon("icon", model));
+								
 								if (blobIdent.path.indexOf('/') != -1)
 									link.add(new Label("label", StringUtils.substringAfterLast(blobIdent.path, "/")));
 								else

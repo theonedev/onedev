@@ -44,7 +44,7 @@ public class JobHtmlReport extends JobReport {
 		this.reportName = reportName;
 	}
 	
-	@Editable(order=1100, description="Specify start page of the report relative to workspace, for instance: api/index.html. "
+	@Editable(order=1100, description="Specify start page of the report relative to job workspace, for instance: api/index.html. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty

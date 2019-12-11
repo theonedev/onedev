@@ -143,9 +143,9 @@ public class Job implements Serializable, Validatable {
 		return suggestions;
 	}
 	
-	@Editable(order=120, description="Specify commands to execute in above image, with one command per line. "
-			+ "For Windows based images, commands will be interpretated by cmd.exe, and for Unix/Linux "
-			+ "based images, commands will be interpretated by shell. "
+	@Editable(order=120, name="Commands", description="Specify content of Linux shell script or Windows command batch to execute in above image. "
+			+ "It will be executed under job workspace, which may contain files of your repository and other "
+			+ "dependencies based on your configuration below. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative
 	@Code(language = Code.SHELL, variableProvider="getVariables")
@@ -190,7 +190,8 @@ public class Job implements Serializable, Validatable {
 		this.triggers = triggers;
 	}
 
-	@Editable(order=9000, group="Source Retrieval")
+	@Editable(order=9000, group="Source Retrieval", description="Whether or not to retrieve files under the repository "
+			+ "into job workspace")
 	public boolean isRetrieveSource() {
 		return retrieveSource;
 	}
@@ -260,7 +261,7 @@ public class Job implements Serializable, Validatable {
 	}
 
 	@Editable(order=9115, group="Artifacts & Reports", description="Optionally specify files to publish as job artifacts. "
-			+ "Artifact files are relative to OneDev workspace, and may use * or ? for pattern match. "
+			+ "Artifact files are relative to job workspace, and may use * or ? for pattern match. "
 			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@Patterns(interpolative = true)

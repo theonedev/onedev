@@ -179,23 +179,7 @@ public class FolderViewPanel extends Panel {
 
 			@Override
 			protected void populateItem(ListItem<BlobIdent> item) {
-				final BlobIdent blobIdent = item.getModelObject();
-				
-				WebMarkupContainer pathIcon = new WebMarkupContainer("pathIcon");
-				String iconClass;
-				if (blobIdent.isTree())
-					iconClass = "fa fa-folder-o";
-				else if (blobIdent.isGitLink()) 
-					iconClass = "fa fa-ext fa-folder-submodule-o";
-				else if (blobIdent.isSymbolLink()) 
-					iconClass = "fa fa-ext fa-folder-symbol-link-o";
-				else if (blobIdent.path.equals(BuildSpec.BLOB_PATH))
-					iconClass = "fa fa-cog";
-				else  
-					iconClass = "fa fa-file-text-o";
-				pathIcon.add(AttributeModifier.append("class", iconClass));
-				
-				item.add(pathIcon);
+				BlobIdent blobIdent = item.getModelObject();
 				
 				AjaxLink<Void> pathLink = new ViewStateAwareAjaxLink<Void>("pathLink") {
 
@@ -214,6 +198,22 @@ public class FolderViewPanel extends Panel {
 					}
 					
 				}; 
+
+				WebMarkupContainer icon = new WebMarkupContainer("icon");
+				String iconClass;
+				if (blobIdent.isTree())
+					iconClass = "fa fa-folder-o";
+				else if (blobIdent.isGitLink()) 
+					iconClass = "fa fa-ext fa-folder-submodule-o";
+				else if (blobIdent.isSymbolLink()) 
+					iconClass = "fa fa-ext fa-folder-symbol-link-o";
+				else if (blobIdent.path.equals(BuildSpec.BLOB_PATH))
+					iconClass = "fa fa-cog";
+				else  
+					iconClass = "fa fa-file-text-o";
+				icon.add(AttributeModifier.append("class", iconClass));
+				
+				pathLink.add(icon);
 				
 				if (context.getBlobIdent().path != null) 
 					pathLink.add(new Label("label", blobIdent.path.substring(context.getBlobIdent().path.length()+1)));
