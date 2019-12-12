@@ -6,7 +6,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -20,6 +22,8 @@ import io.onedev.commons.launcher.loader.AbstractPlugin;
 import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.commons.launcher.loader.ListenerRegistry;
 import io.onedev.commons.launcher.loader.ManagedSerializedForm;
+import io.onedev.commons.utils.command.Commandline;
+import io.onedev.commons.utils.command.LineConsumer;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.event.system.SystemStarted;
 import io.onedev.server.event.system.SystemStarting;
@@ -39,7 +43,7 @@ import io.onedev.server.util.schedule.TaskScheduler;
 public class OneDev extends AbstractPlugin implements Serializable {
 
 	public static final String NAME = "OneDev";
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(OneDev.class);
 	
 	private final JettyRunner jettyRunner;
@@ -120,20 +124,125 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	}
 
 	public String guessServerUrl() {
-		String hostName;
-		try {
-			hostName = InetAddress.getLocalHost().getHostName();
-		} catch (UnknownHostException e) {
-			throw new RuntimeException(e);
+		String serverUrl = null;
+		
+		String serviceHost = System.getenv("ONEDEV_SERVICE_HOST");
+		if (serviceHost != null) { // we are running inside Kubernetes  
+			Commandline kubectl = new Commandline("kubectl");
+			kubectl.addArgs("get", "service", "onedev", "-o", 
+					"jsonpath={.status.loadBalancer.ingress[0].ip}");
+			AtomicReference<String> externalIpRef = new AtomicReference<>(null);
+			kubectl.execute(new LineConsumer() {
+
+				@Override
+				public void consume(String line) {
+					externalIpRef.set(line);
+				}
+				
+			}, new LineConsumer() {
+
+				@Override
+				public void consume(String line) {
+					logger.warn(line);
+				}
+				
+			}).checkReturnCode();
+			
+			if (externalIpRef.get() != null) {
+				kubectl.clearArgs();
+				kubectl.addArgs("get", "service", "onedev", "-o", 
+						"jsonpath={range .spec.ports[*]}{.name} {.port}{'\\n'}{end}");
+				AtomicReference<String> httpPortRef = new AtomicReference<>(null);
+				AtomicReference<String> httpsPortRef = new AtomicReference<>(null);
+				kubectl.execute(new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						String protocol = StringUtils.substringBefore(line, " ");
+						if (protocol.equals("http"))
+							httpPortRef.set(StringUtils.substringAfter(line, " "));
+						else if (protocol.equals("https"))
+							httpsPortRef.set(StringUtils.substringAfter(line, " "));
+					}
+					
+				}, new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						logger.warn(line);
+					}
+					
+				}).checkReturnCode();
+				
+				serverUrl = buildServerUrl(externalIpRef.get(), httpPortRef.get(), httpsPortRef.get());
+			} 
+			
+			if (serverUrl == null) {
+				String httpPort = System.getenv("ONEDEV_SERVICE_PORT_HTTP");
+				String httpsPort = System.getenv("ONEDEV_SERVICE_PORT_HTTPS");
+				serverUrl = buildServerUrl(serviceHost, httpPort, httpsPort);
+			}
+		} 
+		
+		if (serverUrl == null) {
+			AtomicReference<String> ipRef = new AtomicReference<>(null);
+			if (Bootstrap.isInDocker()) {
+				Commandline cmd = new Commandline("ip");
+				cmd.addArgs("route");
+				cmd.execute(new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						if (line.startsWith("default")) {
+							StringTokenizer tokenizer = new StringTokenizer(line);
+							tokenizer.nextToken();
+							tokenizer.nextToken();
+							ipRef.set(tokenizer.nextToken());
+						}
+					}
+					
+				}, new LineConsumer() {
+
+					@Override
+					public void consume(String line) {
+						logger.error(line);
+					}
+					
+				}).checkReturnCode();
+			}
+			
+			if (ipRef.get() == null) {
+				try {
+					ipRef.set(InetAddress.getLocalHost().getHostName());
+				} catch (UnknownHostException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			
+			if (serverConfig.getHttpPort() != 0)
+				serverUrl = "http://" + ipRef.get() + ":" + serverConfig.getHttpPort();
+			else 
+				serverUrl = "https://" + ipRef.get() + ":" + serverConfig.getHttpsPort();
 		}
 		
-		String serverUrl;
-		if (serverConfig.getHttpPort() != 0)
-			serverUrl = "http://" + hostName + ":" + serverConfig.getHttpPort();
-		else 
-			serverUrl = "https://" + hostName + ":" + serverConfig.getHttpsPort();
-
-		return StringUtils.stripEnd(serverUrl, "/");
+		return serverUrl;
+	}
+	
+	private String buildServerUrl(String host, @Nullable String httpPort, @Nullable String httpsPort) {
+		String serverUrl = null;
+		if (httpPort != null) {
+			serverUrl = "http://" + host;
+			if (!httpPort.equals("80"))
+				serverUrl += ":" + httpPort;
+		} else if (httpsPort != null) {
+			serverUrl = "https://" + host;
+			if (!httpsPort.equals("443"))
+				serverUrl += ":" + httpsPort;
+		} else {
+			logger.warn("This OneDev deployment looks odd to me: "
+					+ "both http and https port are not specified");
+		}
+		return serverUrl;
 	}
 	
 	/**

@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -112,7 +114,8 @@ public class DefaultDataManager implements DataManager, Serializable {
 			administrator = new User();
 			administrator.setId(User.ROOT_ID);
 			Set<String> excludedProperties = Sets.newHashSet("administrator", "canCreateProjects"); 
-			manualConfigs.add(new ManualConfig("Create Root Account", null, administrator, excludedProperties) {
+			manualConfigs.add(new ManualConfig("Create Administrator Account", null, 
+					administrator, excludedProperties) {
 
 				@Override
 				public Skippable getSkippable() {
@@ -125,7 +128,6 @@ public class DefaultDataManager implements DataManager, Serializable {
 					user.setPassword(passwordService.encryptPassword(user.getPassword()));
 					userManager.save(user, null);
 					idManager.init(User.class);
-					roleManager.setupDefaults();					
 				}
 				
 			});
@@ -137,12 +139,17 @@ public class DefaultDataManager implements DataManager, Serializable {
 		if (setting == null || setting.getValue() == null) {
 			systemSetting = new SystemSetting();
 			systemSetting.setServerUrl(OneDev.getInstance().guessServerUrl());
-		} else {
-			if (!validator.validate(setting.getValue()).isEmpty())
-				systemSetting = (SystemSetting) setting.getValue();
+		} else if (!validator.validate(setting.getValue()).isEmpty()) {
+			systemSetting = (SystemSetting) setting.getValue();
 		}
 		if (systemSetting != null) {
-			manualConfigs.add(new ManualConfig("Specify System Setting", null, systemSetting) {
+			Collection<String> excludedProps = new HashSet<>();
+			if (Bootstrap.isInDocker()) {
+				excludedProps.add("gitConfig");
+				excludedProps.add("curlConfig");
+			}
+			manualConfigs.add(new ManualConfig("Specify System Setting", null, 
+					systemSetting, excludedProps) {
 	
 				@Override
 				public Skippable getSkippable() {
@@ -230,6 +237,9 @@ public class DefaultDataManager implements DataManager, Serializable {
 				
 			});
 		}
+		
+		if (roleManager.count() == 0) 
+			roleManager.setupDefaults();
 		
 		return manualConfigs;
 	}

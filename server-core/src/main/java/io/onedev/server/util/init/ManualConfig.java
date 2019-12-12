@@ -1,8 +1,8 @@
 package io.onedev.server.util.init;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -15,9 +15,10 @@ public abstract class ManualConfig implements Serializable {
 	
 	private final Serializable setting;
 	
-	private final Set<String> excludedProperties;
+	private final Collection<String> excludedProperties;
 	
-	public ManualConfig(String title, @Nullable String description, Serializable setting, Set<String> excludedProperties) {
+	public ManualConfig(String title, @Nullable String description, Serializable setting, 
+			Collection<String> excludedProperties) {
 		this.title = title;
 		this.description = description;
 		this.setting = setting;
@@ -40,7 +41,7 @@ public abstract class ManualConfig implements Serializable {
 		return setting;
 	}
 
-	public Set<String> getExcludeProperties() {
+	public Collection<String> getExcludeProperties() {
 		return excludedProperties;
 	}
 

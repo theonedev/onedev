@@ -17,6 +17,7 @@ trap _sigint SIGINT
 child=$!
 wait "$child"
 
+touch /opt/onedev/IN_DOCKER
 /opt/onedev/boot/wrapper-linux-x86-64 /opt/onedev/conf/wrapper.conf &
 child=$!
 wait "$child"

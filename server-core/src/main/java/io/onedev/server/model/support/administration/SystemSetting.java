@@ -31,9 +31,8 @@ public class SystemSetting implements Serializable, Validatable {
 	
 	private boolean gravatarEnabled = true;
 	
-	@Editable(name="Server URL", order=90, description="Specify root URL to access this server. For instance, "
-			+ "<i>http://server-dns-name:8810</i>. Build jobs running in Kubernetes cluster will access this "
-			+ "url to download source and artifacts")
+	@Editable(name="Server URL", order=90, description="Specify root URL to access this server. Build jobs "
+			+ "running in Kubernetes cluster will access this url to download source and artifacts")
 	@NotEmpty
 	public String getServerUrl() {
 		return serverUrl;
@@ -66,7 +65,7 @@ public class SystemSetting implements Serializable, Validatable {
 		this.curlConfig = curlConfig;
 	}
 
-	@Editable(order=300, description="Whether or not to enable user gravatar.")
+	@Editable(order=300, description="Whether or not to enable user gravatar (https://gravatar.com)")
 	public boolean isGravatarEnabled() {
 		return gravatarEnabled;
 	}

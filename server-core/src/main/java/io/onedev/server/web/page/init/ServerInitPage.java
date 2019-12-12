@@ -42,7 +42,8 @@ public class ServerInitPage extends BasePage {
 				
 				final ManualConfig lastConfig = clonedConfigs.remove(clonedConfigs.size()-1);
 				
-				clonedConfigs.add(new ManualConfig(lastConfig.getTitle(), null, lastConfig.getSetting()) {
+				clonedConfigs.add(new ManualConfig(lastConfig.getTitle(), lastConfig.getDescription(), 
+						lastConfig.getSetting(), lastConfig.getExcludeProperties()) {
 		
 					@Override
 					public Skippable getSkippable() {

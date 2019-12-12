@@ -20,7 +20,7 @@ import io.onedev.server.web.editable.annotation.Editable;
 public abstract class GitConfig implements Serializable, Validatable {
 
 	private static final long serialVersionUID = 1L;
-
+	
 	/**
 	 * Get git executable, for instance <tt>/usr/bin/git</tt>.
 	 * 

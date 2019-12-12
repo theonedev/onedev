@@ -1,8 +1,13 @@
 package io.onedev.server.web.page.admin.systemsetting;
 
+import java.io.File;
+import java.util.Collection;
+import java.util.HashSet;
+
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.SystemSetting;
@@ -34,7 +39,12 @@ public class SystemSettingPage extends AdministrationPage {
 			}
 			
 		};
-		form.add(BeanContext.edit("editor", systemSetting));
+		Collection<String> excludedProps = new HashSet<>();
+		if (new File(Bootstrap.installDir, "IN_DOCKER").exists()) {
+			excludedProps.add("gitConfig");
+			excludedProps.add("curlConfig");
+		}
+		form.add(BeanContext.edit("editor", systemSetting, excludedProps, true));
 		
 		add(form);
 	}
