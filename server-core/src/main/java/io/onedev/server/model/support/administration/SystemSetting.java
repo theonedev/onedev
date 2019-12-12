@@ -32,7 +32,7 @@ public class SystemSetting implements Serializable, Validatable {
 	private boolean gravatarEnabled = true;
 	
 	@Editable(name="Server URL", order=90, description="Specify root URL to access this server. For instance, "
-			+ "<i>http://server-dns-name:8810</i>. CI builds running in Kubernetes cluster will access this "
+			+ "<i>http://server-dns-name:8810</i>. Build jobs running in Kubernetes cluster will access this "
 			+ "url to download source and artifacts")
 	@NotEmpty
 	public String getServerUrl() {

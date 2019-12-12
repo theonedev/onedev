@@ -66,7 +66,9 @@ import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.OmitName;
 import io.onedev.server.web.util.Testable;
 
-@Editable(order=100, description="This executor runs build jobs as pods in a kubernetes cluster")
+@Editable(order=100, description="This executor runs build jobs as pods in a kubernetes cluster. "
+		+ "<b style='color:red'>Note:</b> Make sure server url is specified correctly in system "
+		+ "setting as job pods need to access it to download source and artifacts")
 @Horizontal
 public class KubernetesExecutor extends JobExecutor implements Testable<TestData> {
 

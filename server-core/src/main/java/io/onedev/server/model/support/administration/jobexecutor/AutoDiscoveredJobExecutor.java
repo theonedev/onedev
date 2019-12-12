@@ -13,7 +13,7 @@ import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 
-@Editable(order=10000, description="Discover appropriate job executor automatically to run builds")
+@Editable(order=10000, description="Discover appropriate job executor automatically")
 @Horizontal
 public class AutoDiscoveredJobExecutor extends JobExecutor {
 

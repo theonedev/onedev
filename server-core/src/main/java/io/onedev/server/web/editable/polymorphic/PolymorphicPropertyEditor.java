@@ -198,7 +198,7 @@ public class PolymorphicPropertyEditor extends PropertyEditor<Serializable> {
 				}
 			}
 			
-		}.setOutputMarkupPlaceholderTag(true));
+		}.setOutputMarkupPlaceholderTag(true).setEscapeModelStrings(false));
 		
 		add(newBeanEditor(getModelObject()));
 	}
