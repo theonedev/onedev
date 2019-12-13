@@ -3,6 +3,7 @@ package io.onedev.server.web.download;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -16,8 +17,6 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.archive.TgzFormat;
 import org.eclipse.jgit.archive.ZipFormat;
-
-import com.google.common.base.Charsets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
@@ -74,7 +73,7 @@ public class ArchiveDownloadResource extends AbstractResource {
 				fileName = revision + ".zip";
 			else
 				fileName = revision + ".tar.gz";
-			response.setFileName(URLEncoder.encode(fileName, Charsets.UTF_8.name()));
+			response.setFileName(URLEncoder.encode(fileName, StandardCharsets.UTF_8.name()));
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}

@@ -1,6 +1,7 @@
 package io.onedev.server.plugin.report.html;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
@@ -47,7 +48,7 @@ public class HtmlReportPage extends BuildDetailPage {
 				File startPageFile = new File(getBuild().getReportDir(JobHtmlReport.DIR), 
 						reportName + "/" + JobHtmlReport.START_PAGE);
 				if (startPageFile.exists())
-					return FileUtils.readFileToString(startPageFile);
+					return FileUtils.readFileToString(startPageFile, StandardCharsets.UTF_8);
 				else
 					return null;
 			}

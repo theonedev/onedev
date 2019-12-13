@@ -3,6 +3,7 @@ package io.onedev.server.web.component.markdown;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -14,8 +15,6 @@ import org.apache.wicket.util.crypt.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Charsets;
-
 @SuppressWarnings("serial")
 public class AttachmentUploadServlet extends HttpServlet {
 
@@ -24,12 +23,12 @@ public class AttachmentUploadServlet extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		String fileName = URLDecoder.decode(request.getHeader("File-Name"), Charsets.UTF_8.name());
+		String fileName = URLDecoder.decode(request.getHeader("File-Name"), StandardCharsets.UTF_8.name());
 		AttachmentSupport attachmentSuppport = (AttachmentSupport) SerializationUtils
 				.deserialize(Base64.decodeBase64(request.getHeader("Attachment-Support")));
 		try {
 			String attachmentName = attachmentSuppport.saveAttachment(fileName, request.getInputStream());
-			response.getWriter().print(URLEncoder.encode(attachmentName, Charsets.UTF_8.name()));
+			response.getWriter().print(URLEncoder.encode(attachmentName, StandardCharsets.UTF_8.name()));
 			response.setStatus(HttpServletResponse.SC_OK);
 		} catch (Exception e) {
 			logger.error("Error uploading attachment.", e);

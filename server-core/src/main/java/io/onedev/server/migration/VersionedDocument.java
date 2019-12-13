@@ -10,6 +10,7 @@ import java.io.ObjectOutput;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +39,6 @@ import org.dom4j.io.XMLWriter;
 import org.hibernate.proxy.HibernateProxyHelper;
 import org.xml.sax.EntityResolver;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.core.util.HierarchicalStreams;
@@ -370,7 +370,7 @@ public final class VersionedDocument implements Document, Externalizable {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		try {
 			OutputFormat format = new OutputFormat();
-			format.setEncoding(Charsets.UTF_8.name());
+			format.setEncoding(StandardCharsets.UTF_8.name());
 			if (pretty) {
 				format.setIndent(true);
 				format.setIndentSize(4);
@@ -380,7 +380,7 @@ public final class VersionedDocument implements Document, Externalizable {
 		        format.setNewlines(false);
 			}
 			new XMLWriter(baos, format).write(getWrapped());
-			return baos.toString(Charsets.UTF_8.name());
+			return baos.toString(StandardCharsets.UTF_8.name());
 		} catch (Exception e) {
 			throw ExceptionUtils.unchecked(e);
 		}
@@ -393,7 +393,7 @@ public final class VersionedDocument implements Document, Externalizable {
 			OutputFormat format = new OutputFormat();
 			format.setIndent(pretty);
 			format.setNewlines(pretty);
-			format.setEncoding(Charsets.UTF_8.name());
+			format.setEncoding(StandardCharsets.UTF_8.name());
 			XMLWriter writer = new XMLWriter(os, format);
 			writer.write(this);
 		} catch (Exception e) {
@@ -413,7 +413,7 @@ public final class VersionedDocument implements Document, Externalizable {
 	
 	public static VersionedDocument fromFile(File file) {
 		try {
-			return fromXML(FileUtils.readFileToString(file, Charsets.UTF_8.name()));
+			return fromXML(FileUtils.readFileToString(file, StandardCharsets.UTF_8.name()));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

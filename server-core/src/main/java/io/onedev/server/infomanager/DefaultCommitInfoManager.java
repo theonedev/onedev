@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,7 +37,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 
@@ -1198,7 +1198,7 @@ public class DefaultCommitInfoManager extends AbstractEnvironmentManager impleme
 				for (int pathIndex: pathIndexes) {
 					byte[] pathBytes = readBytes(indexToPathStore, txn, new IntByteIterable(pathIndex));
 					if (pathBytes != null)
-						paths.add(new String(pathBytes, Charsets.UTF_8));
+						paths.add(new String(pathBytes, StandardCharsets.UTF_8));
 				}
 				return paths;
 			}

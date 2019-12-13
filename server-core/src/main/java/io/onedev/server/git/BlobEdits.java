@@ -2,6 +2,7 @@ package io.onedev.server.git;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,7 +28,6 @@ import org.eclipse.jgit.revwalk.RevTree;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Sets;
 
@@ -278,9 +278,9 @@ public class BlobEdits implements Serializable {
 			this.mode = mode;
 			this.id = id;
 			if (mode.equals(FileMode.TYPE_TREE))
-				nameBytes = (name + "/").getBytes(Charsets.UTF_8);
+				nameBytes = (name + "/").getBytes(StandardCharsets.UTF_8);
 			else
-				nameBytes = name.getBytes(Charsets.UTF_8);
+				nameBytes = name.getBytes(StandardCharsets.UTF_8);
 		}
 
 		@Override

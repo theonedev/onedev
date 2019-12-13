@@ -1,13 +1,13 @@
 package io.onedev.server.web.page.project.blob.render.edit.plain;
 
+import java.nio.charset.StandardCharsets;
+
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.markup.html.form.TextArea;
 import org.apache.wicket.model.Model;
-
-import com.google.common.base.Charsets;
 
 @SuppressWarnings("serial")
 public class PlainEditPanel extends FormComponentPanel<byte[]> {
@@ -25,7 +25,7 @@ public class PlainEditPanel extends FormComponentPanel<byte[]> {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		add(input = new TextArea<String>("input", Model.of(new String(getModelObject(), Charsets.UTF_8))) {
+		add(input = new TextArea<String>("input", Model.of(new String(getModelObject(), StandardCharsets.UTF_8))) {
 
 			@Override
 			protected boolean shouldTrimInput() {
@@ -38,7 +38,7 @@ public class PlainEditPanel extends FormComponentPanel<byte[]> {
 	@Override
 	public void convertInput() {
 		if (input.getConvertedInput() != null)
-			setConvertedInput(input.getConvertedInput().getBytes(Charsets.UTF_8));
+			setConvertedInput(input.getConvertedInput().getBytes(StandardCharsets.UTF_8));
 		else
 			setConvertedInput(new byte[0]);
 	}

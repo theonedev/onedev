@@ -1,6 +1,7 @@
 package io.onedev.server.buildspec;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -16,7 +17,6 @@ import javax.validation.ValidationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 
 import io.onedev.commons.utils.StringUtils;
@@ -184,7 +184,7 @@ public class BuildSpec implements Serializable, Validatable {
 	
 	@Nullable
 	public static BuildSpec parse(byte[] bytes) {
-		String buildSpecString = new String(bytes, Charsets.UTF_8); 
+		String buildSpecString = new String(bytes, StandardCharsets.UTF_8); 
 		if (StringUtils.isNotBlank(buildSpecString)) {
 			try {
 				return (BuildSpec) VersionedDocument.fromXML(buildSpecString).toBean();

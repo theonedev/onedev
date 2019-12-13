@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.renderers.source;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
@@ -11,7 +12,6 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
 
 import io.onedev.commons.utils.PlanarRange;
 import io.onedev.commons.utils.StringUtils;
@@ -59,7 +59,7 @@ abstract class SourceFormComponent extends FormComponentPanel<byte[]> {
 			String initialContent = input.getModelObject();
 			if (initialContent == null || !initialContent.contains("\r\n"))
 				content = StringUtils.replace(content, "\r\n", "\n");
-			setConvertedInput(content.getBytes(Charsets.UTF_8));
+			setConvertedInput(content.getBytes(StandardCharsets.UTF_8));
 		} else {
 			setConvertedInput(new byte[0]);
 		}

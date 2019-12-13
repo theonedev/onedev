@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -32,7 +33,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
 
 import io.onedev.commons.launcher.loader.Listen;
@@ -403,7 +403,7 @@ public class DefaultLogManager implements LogManager {
 					StringBuilder builder = new StringBuilder();
 					for (JobLogEntry entry: snippet.entries)
 						builder.append(renderAsText(entry) + "\n");
-					recentBuffer = builder.toString().getBytes(Charsets.UTF_8);
+					recentBuffer = builder.toString().getBytes(StandardCharsets.UTF_8);
 				}
 			} catch (Exception e) {
 				lock.unlock();
@@ -432,7 +432,7 @@ public class DefaultLogManager implements LogManager {
 			if (pos == buffer.length) {
 				if (ois != null) {
 					try {
-						buffer = (renderAsText((JobLogEntry) ois.readObject()) + "\n").getBytes(Charsets.UTF_8);
+						buffer = (renderAsText((JobLogEntry) ois.readObject()) + "\n").getBytes(StandardCharsets.UTF_8);
 					} catch (EOFException e) {
 						IOUtils.closeQuietly(ois);
 						ois = null;

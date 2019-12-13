@@ -120,7 +120,7 @@ public class DataMigrator {
 	private void migrate7(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
 			try {
-				String content = FileUtils.readFileToString(file, Charsets.UTF_8);
+				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 				content = StringUtils.replace(content, 
 						"com.gitplex.commons.hibernate.migration.VersionTable", 
 						"com.gitplex.server.model.ModelVersion");
@@ -140,7 +140,7 @@ public class DataMigrator {
 						"com.gitplex.server.core.setting.", "com.gitplex.server.model.support.setting.");
 				content = StringUtils.replace(content, 
 						"com.gitplex.server.core.gatekeeper.", "com.gitplex.server.gatekeeper.");
-				FileUtils.writeStringToFile(file, content, Charsets.UTF_8);
+				FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8);
 				
 				if (file.getName().equals("VersionTables.xml")) {
 					FileUtils.moveFile(file, new File(file.getParentFile(), "ModelVersions.xml"));
@@ -250,7 +250,7 @@ public class DataMigrator {
 				if (file.getName().startsWith("Accounts.xml")) {
 					File renamedFile = new File(dataDir, file.getName().replace("Accounts.xml", "Users.xml"));
 					FileUtils.moveFile(file, renamedFile);
-					String content = FileUtils.readFileToString(renamedFile, Charsets.UTF_8);
+					String content = FileUtils.readFileToString(renamedFile, StandardCharsets.UTF_8);
 					content = StringUtils.replace(content, "com.gitplex.server.model.Account", 
 							"com.gitplex.server.model.User");
 					VersionedDocument dom = VersionedDocument.fromXML(content);
@@ -279,7 +279,7 @@ public class DataMigrator {
 				if (file.getName().startsWith("Depots.xml")) {
 					File renamedFile = new File(dataDir, file.getName().replace("Depots.xml", "Projects.xml"));
 					FileUtils.moveFile(file, renamedFile);
-					String content = FileUtils.readFileToString(renamedFile, Charsets.UTF_8);
+					String content = FileUtils.readFileToString(renamedFile, StandardCharsets.UTF_8);
 					content = StringUtils.replace(content, "com.gitplex.server.model.Depot", 
 							"com.gitplex.server.model.Project");
 					VersionedDocument dom = VersionedDocument.fromXML(content);
@@ -434,10 +434,10 @@ public class DataMigrator {
 	private void migrate13(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
 			try {
-				String content = FileUtils.readFileToString(file, Charsets.UTF_8);
+				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 				content = StringUtils.replace(content, "gitplex", "turbodev");
 				content = StringUtils.replace(content, "GitPlex", "TurboDev");
-				FileUtils.writeFile(file, content, Charsets.UTF_8.name());
+				FileUtils.writeFile(file, content, StandardCharsets.UTF_8.name());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -466,13 +466,13 @@ public class DataMigrator {
 	private void migrate15(File dataDir, Stack<Integer> versions) {
 		for (File file: dataDir.listFiles()) {
 			try {
-				String content = FileUtils.readFileToString(file, Charsets.UTF_8);
+				String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 				content = StringUtils.replace(content, "com.turbodev", "io.onedev");
 				content = StringUtils.replace(content, "com/turbodev", "io/onedev");
 				content = StringUtils.replace(content, "turbodev.com", "onedev.io");
 				content = StringUtils.replace(content, "turbodev", "onedev");
 				content = StringUtils.replace(content, "TurboDev", "OneDev");
-				FileUtils.writeFile(file, content, Charsets.UTF_8.name());
+				FileUtils.writeFile(file, content, StandardCharsets.UTF_8.name());
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
@@ -689,7 +689,7 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("Configs.xml")) {
 				String content;
 				try {
-					content = FileUtils.readFileToString(file, Charsets.UTF_8);
+					content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -1048,7 +1048,7 @@ public class DataMigrator {
 			if (file.getName().startsWith("Settings.xml")) {
 				String content;
 				try {
-					content = FileUtils.readFileToString(file, Charsets.UTF_8.name());
+					content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -1166,7 +1166,7 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("PullRequests.xml")) {
 				String content;
 				try {
-					content = FileUtils.readFileToString(file, Charsets.UTF_8.name());
+					content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -1235,7 +1235,7 @@ public class DataMigrator {
 			} else if (file.getName().startsWith("IssueFieldEntitys.xml")) {
 				String content;
 				try {
-					content = FileUtils.readFileToString(file, Charsets.UTF_8.name());
+					content = FileUtils.readFileToString(file, StandardCharsets.UTF_8.name());
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
@@ -1246,14 +1246,14 @@ public class DataMigrator {
 				
 				File renamedFile = new File(dataDir, file.getName().replace(
 						"IssueFieldEntitys.xml", "IssueFields.xml"));
-				FileUtils.writeFile(renamedFile, content, Charsets.UTF_8.name());
+				FileUtils.writeFile(renamedFile, content, StandardCharsets.UTF_8.name());
 			}
 		}
         try (InputStream is = getClass().getResourceAsStream("migrate25_roles.xml")) {
         	Preconditions.checkNotNull(is);
         	FileUtils.writeFile(
         			new File(dataDir, "Roles.xml"), 
-        			StringUtils.join(IOUtils.readLines(is, Charsets.UTF_8.name()), "\n"));
+        			StringUtils.join(IOUtils.readLines(is, StandardCharsets.UTF_8.name()), "\n"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

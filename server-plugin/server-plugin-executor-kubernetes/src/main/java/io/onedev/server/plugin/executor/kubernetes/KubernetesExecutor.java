@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -20,7 +21,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.codec.Charsets;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -208,7 +208,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				maskedYaml = StringUtils.replace(maskedYaml, secret, SecretInput.MASK);
 			logger.trace("Creating resource:\n" + maskedYaml);
 			
-			FileUtils.writeFile(file, resourceYaml, Charsets.UTF_8.name());
+			FileUtils.writeFile(file, resourceYaml, StandardCharsets.UTF_8.name());
 			kubectl.addArgs("create", "-f", file.getAbsolutePath(), "-o", "jsonpath={.metadata.name}");
 			kubectl.execute(new LineConsumer() {
 
@@ -400,7 +400,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 				if (registryUrl == null)
 					registryUrl = "https://index.docker.io/v1/";
 				auths.put(registryUrl, CollectionUtils.newLinkedHashMap(
-						"auth", Base64.encodeBase64String(auth.getBytes(Charsets.UTF_8))));
+						"auth", Base64.encodeBase64String(auth.getBytes(StandardCharsets.UTF_8))));
 			}
 			ObjectMapper mapper = OneDev.getInstance(ObjectMapper.class);
 			try {
@@ -415,7 +415,7 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 								"name", secretName, 
 								"namespace", namespace), 
 						"data", CollectionUtils.newLinkedHashMap(
-								".dockerconfigjson", Base64.encodeBase64String(dockerConfig.getBytes(Charsets.UTF_8))));
+								".dockerconfigjson", Base64.encodeBase64String(dockerConfig.getBytes(StandardCharsets.UTF_8))));
 				secretDef.put("type", "kubernetes.io/dockerconfigjson");
 				createResource(secretDef, encodedSecrets.values(), jobLogger);
 				return secretName;
@@ -442,7 +442,8 @@ public class KubernetesExecutor extends JobExecutor implements Testable<TestData
 			for (File file: trustCertsDir.listFiles()) {
 				if (file.isFile()) {
 					try {
-						configMapData.put("specified-cert-" + file.getName(), FileUtils.readFileToString(file));
+						configMapData.put("specified-cert-" + file.getName(), 
+								FileUtils.readFileToString(file, StandardCharsets.UTF_8));
 					} catch (IOException e) {
 						throw new RuntimeException(e);
 					}

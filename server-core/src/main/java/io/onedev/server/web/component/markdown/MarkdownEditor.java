@@ -5,6 +5,7 @@ import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,6 @@ import org.unbescape.javascript.JavaScriptEscape;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -396,7 +396,7 @@ public class MarkdownEditor extends FormComponentPanel<String> {
 				case "insertUrl":
 					String name;
 					try {
-						name = URLDecoder.decode(params.getParameterValue("param1").toString(), Charsets.UTF_8.name());
+						name = URLDecoder.decode(params.getParameterValue("param1").toString(), StandardCharsets.UTF_8.name());
 					} catch (UnsupportedEncodingException e) {
 						throw new RuntimeException(e);
 					}

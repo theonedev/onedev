@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -20,7 +21,6 @@ import java.util.function.Consumer;
 
 import javax.validation.ConstraintValidatorContext;
 
-import org.apache.commons.codec.Charsets;
 import org.apache.commons.lang3.SystemUtils;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.slf4j.Logger;
@@ -359,7 +359,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 			StringBuilder builder = new StringBuilder();
 			docker.clearArgs();
 			docker.addArgs("inspect", containerName);
-			docker.execute(new LineConsumer(Charsets.UTF_8.name()) {
+			docker.execute(new LineConsumer(StandardCharsets.UTF_8.name()) {
 
 				@Override
 				public void consume(String line) {
@@ -417,14 +417,14 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				
 				docker.clearArgs();
 				docker.addArgs("logs", containerName);
-				docker.execute(new LineConsumer(Charsets.UTF_8.name()) {
+				docker.execute(new LineConsumer(StandardCharsets.UTF_8.name()) {
 
 					@Override
 					public void consume(String line) {
 						jobLogger.log(line);
 					}
 					
-				}, new LineConsumer(Charsets.UTF_8.name()) {
+				}, new LineConsumer(StandardCharsets.UTF_8.name()) {
 
 					@Override
 					public void consume(String line) {
@@ -614,7 +614,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 								if (serverConfig.getTrustCertsDir() != null) {
 									for (File file: serverConfig.getTrustCertsDir().listFiles()) {
 										if (file.isFile()) 
-											trustCertContent.addAll(FileUtils.readLines(file));
+											trustCertContent.addAll(FileUtils.readLines(file, StandardCharsets.UTF_8));
 									}
 								}
 	
@@ -644,8 +644,8 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 									List<String> submoduleCredentials = new ArrayList<>();
 									for (SubmoduleCredential submoduleCredential: jobContext.getSubmoduleCredentials()) {
 										String url = submoduleCredential.getUrl();
-										String userName = URLEncoder.encode(submoduleCredential.getUserName(), Charsets.UTF_8.name());
-										String password = URLEncoder.encode(submoduleCredential.getPasswordSecret(), Charsets.UTF_8.name());
+										String userName = URLEncoder.encode(submoduleCredential.getUserName(), StandardCharsets.UTF_8.name());
+										String password = URLEncoder.encode(submoduleCredential.getPasswordSecret(), StandardCharsets.UTF_8.name());
 										if (url.startsWith("http://")) {
 											submoduleCredentials.add("http://" + userName + ":" + password 
 													+ "@" + url.substring("http://".length()).replace(":", "%3a"));
@@ -822,14 +822,14 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 						jobLogger.log("Running job container...");
 						
 						try {
-							docker.execute(new LineConsumer(Charsets.UTF_8.name()) {
+							docker.execute(new LineConsumer(StandardCharsets.UTF_8.name()) {
 
 								@Override
 								public void consume(String line) {
 									jobLogger.log(line);
 								}
 								
-							}, new LineConsumer(Charsets.UTF_8.name()) {
+							}, new LineConsumer(StandardCharsets.UTF_8.name()) {
 
 								@Override
 								public void consume(String line) {
@@ -902,7 +902,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				cmd.addArgs(login.getRegistryUrl());
 			ByteArrayInputStream input;
 			try {
-				input = new ByteArrayInputStream(login.getPassword().getBytes(Charsets.UTF_8.name()));
+				input = new ByteArrayInputStream(login.getPassword().getBytes(StandardCharsets.UTF_8.name()));
 			} catch (UnsupportedEncodingException e) {
 				throw new RuntimeException(e);
 			}

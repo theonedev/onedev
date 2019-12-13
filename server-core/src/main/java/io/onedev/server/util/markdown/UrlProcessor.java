@@ -2,6 +2,7 @@ package io.onedev.server.util.markdown;
 
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.wicket.request.cycle.RequestCycle;
@@ -14,8 +15,6 @@ import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.NodeTraversor;
 import org.jsoup.select.NodeVisitor;
-
-import com.google.common.base.Charsets;
 
 import io.onedev.commons.utils.PathUtils;
 import io.onedev.server.git.BlobIdent;
@@ -61,7 +60,7 @@ public class UrlProcessor implements MarkdownProcessor {
 								Element element = (Element) node;
 								element.attr("href", resolveUrl(blobRenderContext.getDirectoryUrl(), url));
 								try {
-									String path = UrlUtils.trimHashAndQuery(URLDecoder.decode(url, Charsets.UTF_8.name()));
+									String path = UrlUtils.trimHashAndQuery(URLDecoder.decode(url, StandardCharsets.UTF_8.name()));
 									String directory = blobRenderContext.getDirectory();
 									String referencedPath = PathUtils.resolve(directory, path);
 									referencedPath = GitUtils.normalizePath(referencedPath);
@@ -98,7 +97,7 @@ public class UrlProcessor implements MarkdownProcessor {
 								element.attr("src", blobRenderContext.appendRaw(resolveUrl(blobRenderContext.getDirectoryUrl(), url)));
 								try {
 									String basePath = blobRenderContext.getDirectory();
-									String referencedPath = PathUtils.resolve(basePath, UrlUtils.trimHashAndQuery(URLDecoder.decode(url, Charsets.UTF_8.name())));
+									String referencedPath = PathUtils.resolve(basePath, UrlUtils.trimHashAndQuery(URLDecoder.decode(url, StandardCharsets.UTF_8.name())));
 									referencedPath = GitUtils.normalizePath(referencedPath);
 									if (referencedPath != null && (commit == null || TreeWalk.forPath(repository, referencedPath, commit.getTree()) == null)) {
 										element.after("<span class='missing'>!!missing!!</span>");

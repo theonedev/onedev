@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -17,9 +18,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import io.onedev.commons.launcher.loader.Listen;
 import io.onedev.commons.utils.FileUtils;
 import io.onedev.server.event.system.SystemStopping;
-
-import com.google.common.base.Charsets;
-
 import jetbrains.exodus.ArrayByteIterable;
 import jetbrains.exodus.ByteIterable;
 import jetbrains.exodus.env.Environment;
@@ -223,7 +221,7 @@ public abstract class AbstractEnvironmentManager {
 	
 	static class StringByteIterable extends ArrayByteIterable {
 		StringByteIterable(String value) {
-			super(value.getBytes(Charsets.UTF_8));
+			super(value.getBytes(StandardCharsets.UTF_8));
 		}
 	}
 

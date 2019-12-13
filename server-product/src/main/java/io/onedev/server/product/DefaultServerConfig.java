@@ -2,6 +2,7 @@ package io.onedev.server.product;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -79,7 +80,7 @@ public class DefaultServerConfig implements ServerConfig {
 				keystoreEncoding = keystoreEncoding.trim();
 			if ("base64".equals(keystoreEncoding)) {
 				try {
-					String content = FileUtils.readFileToString(keystoreFile);
+					String content = FileUtils.readFileToString(keystoreFile, StandardCharsets.UTF_8);
 					keystoreFile = File.createTempFile("keystore", "pfx");
 					FileUtils.writeByteArrayToFile(keystoreFile, Base64.decodeBase64(content));
 				} catch (IOException e) {

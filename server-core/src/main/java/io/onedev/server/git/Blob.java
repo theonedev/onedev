@@ -3,6 +3,7 @@ package io.onedev.server.git;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +14,6 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.ObjectReader;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Optional;
 
 import io.onedev.server.util.ContentDetector;
@@ -110,7 +110,7 @@ public class Blob {
 	public @Nullable Text getText() {
  		if (optionalText == null) {
  			if (ident.isGitLink() || ident.isSymbolLink() || ident.isTree()) {
- 				Charset charset = Charsets.UTF_8;
+ 				Charset charset = StandardCharsets.UTF_8;
  				optionalText = Optional.of(new Text(charset, new String(bytes, charset)));
  			} else if (!isPartial()) {
 				if (!ContentDetector.isBinary(bytes, ident.path)) {

@@ -1,14 +1,13 @@
 package io.onedev.server.web.page.project.blob.render.renderers.markdown;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.OnDomReadyHeaderItem;
 import org.apache.wicket.markup.html.form.FormComponentPanel;
 import org.apache.wicket.model.Model;
-
-import com.google.common.base.Charsets;
 
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
@@ -69,7 +68,7 @@ abstract class MarkdownBlobEditor extends FormComponentPanel<byte[]> {
 			String initialContent = input.getModelObject();
 			if (initialContent == null || !initialContent.contains("\r\n"))
 				content = StringUtils.replace(content, "\r\n", "\n");
-			setConvertedInput(content.getBytes(Charsets.UTF_8));
+			setConvertedInput(content.getBytes(StandardCharsets.UTF_8));
 		} else {
 			setConvertedInput(new byte[0]);
 		}

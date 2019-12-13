@@ -1,6 +1,7 @@
 package io.onedev.server.web.page.project.blob.render.renderers.buildspec;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +27,6 @@ import org.apache.wicket.validation.IValidatable;
 import org.apache.wicket.validation.IValidator;
 import org.unbescape.javascript.JavaScriptEscape;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Throwables;
 
 import io.onedev.commons.launcher.loader.AppLoader;
@@ -290,7 +290,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 	public void convertInput() {
 		if (parseResult instanceof BuildSpec) {
 			BuildSpec buildSpec = getBuildSpec();
-			setConvertedInput(VersionedDocument.fromBean(buildSpec).toXML().getBytes(Charsets.UTF_8));
+			setConvertedInput(VersionedDocument.fromBean(buildSpec).toXML().getBytes(StandardCharsets.UTF_8));
 		} else {
 			setConvertedInput(getModelObject());
 		}

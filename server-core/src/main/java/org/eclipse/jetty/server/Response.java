@@ -30,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -549,7 +550,11 @@ public class Response implements HttpServletResponse
                 request.setAttribute(RequestDispatcher.ERROR_MESSAGE, message);
                 request.setAttribute(RequestDispatcher.ERROR_REQUEST_URI, request.getRequestURI());
                 request.setAttribute(RequestDispatcher.ERROR_SERVLET_NAME,request.getServletName());
-                error_handler.handle(null,_channel.getRequest(),_channel.getRequest(),this );
+                try {
+					error_handler.handle(null,_channel.getRequest(),_channel.getRequest(),this );
+				} catch (ServletException e) {
+					throw new RuntimeException(e);
+				}
             }
             else
             {

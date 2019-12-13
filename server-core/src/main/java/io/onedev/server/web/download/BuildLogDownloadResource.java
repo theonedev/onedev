@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -13,8 +14,6 @@ import org.apache.tika.io.IOUtils;
 import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
-
-import com.google.common.base.Charsets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.job.log.LogManager;
@@ -67,7 +66,7 @@ public class BuildLogDownloadResource extends AbstractResource {
 		response.disableCaching();
 		
 		try {
-			response.setFileName(URLEncoder.encode("build-log.txt", Charsets.UTF_8.name()));
+			response.setFileName(URLEncoder.encode("build-log.txt", StandardCharsets.UTF_8.name()));
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e);
 		}

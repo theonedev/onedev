@@ -3,6 +3,7 @@ package io.onedev.server.maintenance;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,8 +17,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Charsets;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
 import io.onedev.commons.launcher.loader.PluginManager;
@@ -450,7 +449,7 @@ public class Upgrade extends DefaultPersistManager {
 		}
 		try {
 			File wrapperConfFile = new File(upgradeDir, "conf/wrapper.conf");
-			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, Charsets.UTF_8);
+			String wrapperConf = FileUtils.readFileToString(wrapperConfFile, StandardCharsets.UTF_8);
 			wrapperConf = StringUtils.replace(wrapperConf, "com.gitplex.commons.bootstrap.Bootstrap", 
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
 			wrapperConf = StringUtils.replace(wrapperConf, "com.gitplex.launcher.bootstrap.Bootstrap", 
@@ -459,10 +458,10 @@ public class Upgrade extends DefaultPersistManager {
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
 			wrapperConf = StringUtils.replace(wrapperConf, "io.onedev.launcher.bootstrap.Bootstrap", 
 					"io.onedev.commons.launcher.bootstrap.Bootstrap");
-			FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, Charsets.UTF_8);
+			FileUtils.writeStringToFile(wrapperConfFile, wrapperConf, StandardCharsets.UTF_8);
 			
 			File hibernatePropsFile = new File(upgradeDir, "conf/hibernate.properties");
-			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, Charsets.UTF_8);
+			String hibernateProps = FileUtils.readFileToString(hibernatePropsFile, StandardCharsets.UTF_8);
 			hibernateProps = StringUtils.replace(hibernateProps, "hibernate.hikari.autoCommit=false", 
 					"hibernate.hikari.autoCommit=true");
 			hibernateProps = StringUtils.replace(hibernateProps, "GitPlex", "OneDev");
@@ -485,15 +484,15 @@ public class Upgrade extends DefaultPersistManager {
 				hibernateProps += "hibernate.javax.cache.missing_cache_strategy=create\r\n";
 			}
 			
-			FileUtils.writeStringToFile(hibernatePropsFile, hibernateProps, Charsets.UTF_8);
+			FileUtils.writeStringToFile(hibernatePropsFile, hibernateProps, StandardCharsets.UTF_8);
 			
 			File serverPropsFile = new File(upgradeDir, "conf/server.properties");
-			String serverProps = FileUtils.readFileToString(serverPropsFile, Charsets.UTF_8);
+			String serverProps = FileUtils.readFileToString(serverPropsFile, StandardCharsets.UTF_8);
 			if (serverProps.contains("sessionTimeout")) 
 				FileUtils.copyFile(new File(Bootstrap.getConfDir(), "server.properties"), serverPropsFile);
 
 			File logbackPropsFile = new File(upgradeDir, "conf/logback.xml");
-			String logbackProps = FileUtils.readFileToString(logbackPropsFile, Charsets.UTF_8);
+			String logbackProps = FileUtils.readFileToString(logbackPropsFile, StandardCharsets.UTF_8);
 			if (!logbackProps.contains("AggregatedServiceLoader")) 
 				FileUtils.copyFile(new File(Bootstrap.getConfDir(), "logback.xml"), logbackPropsFile);
 			
@@ -502,13 +501,13 @@ public class Upgrade extends DefaultPersistManager {
 				FileUtils.deleteFile(sampleKeystoreFile);
 			
 			File logbackConfigFile = new File(upgradeDir, "conf/logback.xml");
-			String logbackConfig = FileUtils.readFileToString(logbackConfigFile, Charsets.UTF_8);
+			String logbackConfig = FileUtils.readFileToString(logbackConfigFile, StandardCharsets.UTF_8);
 			logbackConfig = StringUtils.replace(logbackConfig, "<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"/>", 
 					"<triggeringPolicy class=\"ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy\"><maxFileSize>1MB</maxFileSize></triggeringPolicy>");
 			logbackConfig = StringUtils.replace(logbackConfig, "gitplex", "turbodev");
 			logbackConfig = StringUtils.replace(logbackConfig, "com.turbodev", "io.onedev");
 			logbackConfig = StringUtils.replace(logbackConfig, "turbodev", "onedev");
-			FileUtils.writeStringToFile(logbackConfigFile, logbackConfig, Charsets.UTF_8);
+			FileUtils.writeStringToFile(logbackConfigFile, logbackConfig, StandardCharsets.UTF_8);
 			
 			FileUtils.copyFile(new File(Bootstrap.installDir, "conf/wrapper-license.conf"), 
 					new File(upgradeDir, "conf/wrapper-license.conf"));
