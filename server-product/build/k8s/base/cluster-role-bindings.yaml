@@ -5,7 +5,6 @@ metadata:
 subjects:
 - kind: ServiceAccount
   name: onedev
-  namespace: onedev
 roleRef:
   kind: ClusterRole
   name: onedev
