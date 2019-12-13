@@ -1,3 +1,4 @@
+# Build the docker image for onedev server
 FROM ubuntu:18.04
 COPY onedev /app
 COPY entrypoint.sh idle.sh /root/bin/
