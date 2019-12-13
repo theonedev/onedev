@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.jetty.http.HttpContent;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.server.ResourceService;
 import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
@@ -32,6 +33,36 @@ public abstract class AssetServlet extends DefaultServlet {
 	
 	private static ThreadLocal<HttpServletRequest> requestHolder = new ThreadLocal<HttpServletRequest>();
 
+	public AssetServlet() {
+		super(new ResourceService() {
+			
+			@Override
+			protected void putHeaders(HttpServletResponse response, HttpContent content, long contentLength) {
+				super.putHeaders(response, content, contentLength);
+				
+				HttpFields fields;
+				if (response instanceof Response)
+					fields = ((Response) response).getHttpFields();
+				else
+					fields = ((Response)((HttpServletResponseWrapper) response).getResponse()).getHttpFields();
+				
+				if (requestHolder.get().getDispatcherType() == DispatcherType.ERROR) {
+					/*
+					 * Do not cache error page and also makes sure that error page is not eligible for 
+					 * modification check. That is, error page will be always retrieved.
+					 */
+		            fields.put(HttpHeader.CACHE_CONTROL, "must-revalidate,no-cache,no-store");
+				} else if (requestHolder.get().getRequestURI().equals("/favicon.ico")) {
+					/*
+					 * Make sure favicon request is cached. Otherwise, it will be requested for every 
+					 * page request.
+					 */
+					fields.put(HttpHeader.CACHE_CONTROL, "max-age=86400,public");
+				}
+			}
+			
+		});
+	}
 	@Override
 	public String getInitParameter(String name) {
 		String value = super.getInitParameter(name);
@@ -104,31 +135,6 @@ public abstract class AssetServlet extends DefaultServlet {
 	 */
 	protected abstract URL loadResource(String relativePath);
 	
-	@Override
-	protected void putHeaders(HttpServletResponse response, HttpContent content, long contentLength) {
-		super.putHeaders(response, content, contentLength);
-		
-		HttpFields fields;
-		if (response instanceof Response)
-			fields = ((Response) response).getHttpFields();
-		else
-			fields = ((Response)((HttpServletResponseWrapper) response).getResponse()).getHttpFields();
-		
-		if (requestHolder.get().getDispatcherType() == DispatcherType.ERROR) {
-			/*
-			 * Do not cache error page and also makes sure that error page is not eligible for 
-			 * modification check. That is, error page will be always retrieved.
-			 */
-            fields.put(HttpHeader.CACHE_CONTROL, "must-revalidate,no-cache,no-store");
-		} else if (requestHolder.get().getRequestURI().equals("/favicon.ico")) {
-			/*
-			 * Make sure favicon request is cached. Otherwise, it will be requested for every 
-			 * page request.
-			 */
-			fields.put(HttpHeader.CACHE_CONTROL, "max-age=86400,public");
-		}
-	}
-
 	@Override
 	protected void doGet(HttpServletRequest request,
 			HttpServletResponse response) throws ServletException, IOException {

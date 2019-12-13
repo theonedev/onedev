@@ -161,7 +161,7 @@ public abstract class BasePage extends WebPage {
 			});
 			
 			int sessionTimeout = AppLoader.getInstance(ServletContextHandler.class)
-					.getSessionHandler().getSessionManager().getMaxInactiveInterval();
+					.getSessionHandler().getMaxInactiveInterval();
 			add(new WebMarkupContainer("keepSessionAlive")
 					.add(new AjaxSelfUpdatingTimerBehavior(Duration.milliseconds(sessionTimeout*500L))));
 			

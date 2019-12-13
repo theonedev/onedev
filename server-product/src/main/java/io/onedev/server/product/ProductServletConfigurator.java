@@ -66,7 +66,7 @@ public class ProductServletConfigurator implements ServletConfigurator {
 	public void configure(ServletContextHandler context) {
 		context.setContextPath("/");
 		
-		context.getSessionHandler().getSessionManager().setMaxInactiveInterval(serverConfig.getSessionTimeout());
+		context.getSessionHandler().setMaxInactiveInterval(serverConfig.getSessionTimeout());
 		
 		context.setInitParameter(EnvironmentLoader.ENVIRONMENT_CLASS_PARAM, OneWebEnvironment.class.getName());
 		context.addEventListener(new EnvironmentLoaderListener());
