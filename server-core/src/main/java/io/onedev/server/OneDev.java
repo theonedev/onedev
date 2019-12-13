@@ -2,7 +2,10 @@ package io.onedev.server;
 
 import java.io.ObjectStreamException;
 import java.io.Serializable;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.Set;
@@ -14,6 +17,7 @@ import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -213,9 +217,23 @@ public class OneDev extends AbstractPlugin implements Serializable {
 			
 			if (ipRef.get() == null) {
 				try {
-					ipRef.set(InetAddress.getLocalHost().getHostName());
-				} catch (UnknownHostException e) {
-					throw new RuntimeException(e);
+					if (SystemUtils.IS_OS_MAC_OSX) {
+						try (Socket socket = new Socket()) {
+							socket.connect(new InetSocketAddress("microsoft.com", 80));
+							ipRef.set(StringUtils.stripStart(socket.getLocalAddress().toString(), "/"));					
+						} 
+					} else {
+						try (DatagramSocket socket = new DatagramSocket()) {
+							socket.connect(InetAddress.getByName("8.8.8.8"), 10002);
+							ipRef.set(socket.getLocalAddress().getHostAddress());
+						} 
+					}
+				} catch (Exception e) {
+					try {
+						ipRef.set(InetAddress.getLocalHost().getHostName());
+					} catch (UnknownHostException e2) {
+						throw new RuntimeException(e2);
+					}
 				}
 			}
 			

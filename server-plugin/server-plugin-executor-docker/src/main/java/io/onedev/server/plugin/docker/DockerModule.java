@@ -56,6 +56,7 @@ public class DockerModule extends AbstractPluginModule {
 						}
 						
 					}).checkReturnCode();
+					
 					return new DockerExecutor();
 				} catch (Exception e) {
 					return null;

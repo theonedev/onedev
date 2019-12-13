@@ -6,7 +6,9 @@ body {
 a {
 	color: #1f3b7b;
 }
-
+a.embedded-reference {
+	color: #0d87e9;
+}
 .pointer {
 	cursor: pointer;
 }
@@ -18,6 +20,9 @@ a {
     border-color: #a94442;
     -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, .075);
+}
+.red {
+	color: red;
 }
 
 /* FEEDBACK */

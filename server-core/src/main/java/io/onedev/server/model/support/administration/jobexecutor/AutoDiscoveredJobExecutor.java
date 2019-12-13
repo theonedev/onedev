@@ -38,6 +38,8 @@ public class AutoDiscoveredJobExecutor extends JobExecutor {
 				
 			});
 			JobExecutor jobExecutor = jobExecutors.iterator().next();
+			context.getLogger().log("Discovered job executor type: " 
+					+ EditableUtils.getDisplayName(jobExecutor.getClass()));
 			jobExecutor.setName(getName());
 			jobExecutor.setApplicableBranches(getApplicableBranches());
 			jobExecutor.setCacheTTL(getCacheTTL());

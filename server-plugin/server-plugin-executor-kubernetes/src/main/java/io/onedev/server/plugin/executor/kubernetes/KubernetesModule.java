@@ -58,6 +58,7 @@ public class KubernetesModule extends AbstractPluginModule {
 						}
 						
 					}).checkReturnCode();
+					
 					return new KubernetesExecutor();
 				} catch (Exception e) {
 					return null;
