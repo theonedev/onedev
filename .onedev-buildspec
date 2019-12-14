@@ -7,6 +7,7 @@
             <paramSpecs/>
             <image>1dev/build-environment:1.0</image>
             <commands>
+                <string>set -e</string>
                 <string>echo "Detecting project version (may require some time while downloading maven dependencies)..."</string>
                 <string>buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
                 <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
@@ -32,11 +33,7 @@
             <services/>
             <artifacts>*.zip, *.sh</artifacts>
             <reports/>
-            <triggers>
-                <io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
-                    <params/>
-                </io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
-            </triggers>
+            <triggers/>
             <caches>
                 <io.onedev.server.buildspec.job.CacheSpec>
                     <key>maven-cache</key>
