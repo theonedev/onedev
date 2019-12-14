@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<io.onedev.server.buildspec.BuildSpec revision="0">
+    <jobs>
+        <io.onedev.server.buildspec.job.Job>
+            <name>Release</name>
+            <paramSpecs/>
+            <image>1dev/build-environment:1.0</image>
+            <commands>
+                <string>set -e</string>
+                <string>echo "Detecting project version (may require some time while downloading maven dependencies)..."</string>
+                <string>buildVersion=$(mvn org.apache.maven.plugins:maven-help-plugin:3.1.0:evaluate -Dexpression=project.version -q -DforceStdout)</string>
+                <string>echo "##onedev[SetBuildVersion '$buildVersion']"</string>
+                <string></string>
+                <string>cd server-product/build</string>
+                <string>sh build.sh @secrets:dockerhub-password@</string>
+                <string></string>
+                <string>cd ../..</string>
+                <string></string>
+                <string>mv server-product/target/k8s ./k8s-resources</string>
+                <string>zip -r k8s-resources.zip k8s-resources</string>
+                <string></string>
+                <string>mv server-product/target/*.zip .</string>
+                <string></string>
+                <string>cat &lt;&lt; EOF &gt; run-as-docker.sh</string>
+                <string>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):/usr/bin/docker -v /opt/onedev:/opt/onedev -p 6610:6610 1dev/server:${buildVersion}</string>
+                <string>EOF</string>
+            </commands>
+            <retrieveSource>true</retrieveSource>
+            <submoduleCredentials/>
+            <jobDependencies/>
+            <projectDependencies/>
+            <services/>
+            <artifacts>*.zip *.sh</artifacts>
+            <reports/>
+            <triggers/>
+            <caches>
+                <io.onedev.server.buildspec.job.CacheSpec>
+                    <key>maven-cache</key>
+                    <path>/root/.m2/repository</path>
+                </io.onedev.server.buildspec.job.CacheSpec>
+            </caches>
+            <cpuRequirement>250m</cpuRequirement>
+            <memoryRequirement>128m</memoryRequirement>
+            <timeout>3600</timeout>
+            <postBuildActions/>
+            <retryCondition>never</retryCondition>
+            <maxRetries>3</maxRetries>
+            <retryDelay>30</retryDelay>
+        </io.onedev.server.buildspec.job.Job>
+        <io.onedev.server.buildspec.job.Job>
+            <name>Sync with GitHub</name>
+            <paramSpecs/>
+            <image>alpine/git:1.0.7</image>
+            <commands>
+                <string>git push https://robinshine:@secrets:github-password@\@github.com/theonedev/server</string>
+            </commands>
+            <retrieveSource>true</retrieveSource>
+            <submoduleCredentials/>
+            <jobDependencies/>
+            <projectDependencies/>
+            <services/>
+            <reports/>
+            <triggers>
+                <io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
+                    <params/>
+                </io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
+            </triggers>
+            <caches/>
+            <cpuRequirement>250m</cpuRequirement>
+            <memoryRequirement>128m</memoryRequirement>
+            <timeout>3600</timeout>
+            <postBuildActions/>
+            <retryCondition>never</retryCondition>
+            <maxRetries>3</maxRetries>
+            <retryDelay>30</retryDelay>
+        </io.onedev.server.buildspec.job.Job>
+    </jobs>
+</io.onedev.server.buildspec.BuildSpec>
