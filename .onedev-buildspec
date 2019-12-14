@@ -31,7 +31,7 @@
             <jobDependencies/>
             <projectDependencies/>
             <services/>
-            <artifacts>*.zip, *.sh</artifacts>
+            <artifacts>*.zip *.sh</artifacts>
             <reports/>
             <triggers/>
             <caches>
