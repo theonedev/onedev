@@ -8,7 +8,7 @@ cp docker/* ../target/docker
 unzip ../target/onedev-${buildVersion}.zip -d ../target/docker
 mv ../target/docker/onedev-${buildVersion} ../target/docker/onedev
 cp ../target/sandbox/site/lib/mysql* ../target/sandbox/site/lib/postgresql* ../target/docker/onedev/site/lib
-docker build -t 1dev/server:${buildVersion} ../target/docker
+docker build -t 1dev/server:${buildVersion} -f docker/Dockerfile.server ../target/docker
 docker login -u robinshen -p $@
 docker push 1dev/server:${buildVersion}
 
