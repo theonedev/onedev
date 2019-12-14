@@ -35,11 +35,7 @@
 	font-size: 15px;
 }
 
-.pull-request-list>.body td .status {
-	width: 100px;
-	padding: 6px 8px;
-	text-overflow: ellipsis;
-	overflow: hidden;
+.pull-request-list>.body td .request-status {
 	font-size: 12px;
 }
 .pull-request-list>.body td .primary {

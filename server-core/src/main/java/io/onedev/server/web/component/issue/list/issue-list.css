@@ -34,12 +34,8 @@
 	font-size: 15px;
 }
 
-.issue-list>.body td .state {
-	width: 120px;
-	line-height: 16px;
+.issue-list>.body td .issue-state {
 	font-size: 12px;
-	text-overflow: ellipsis;
-	overflow: hidden;
 }
 .issue-list>.body td .primary {
 	margin-bottom: 8px;
