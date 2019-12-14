@@ -29,7 +29,7 @@ import io.onedev.server.util.validation.ProjectNameValidator;
 
 public abstract class ReferenceParser<T extends Referenceable> {
 	
-	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("pre", "code", "a");
+	private static final Collection<String> IGNORED_TAGS = ImmutableSet.of("code", "a");
 	
 	private final Pattern pattern;
 	

@@ -36,7 +36,7 @@ public class ReferenceTransformer implements Function<String, String> {
 	
 	@Override
 	public String apply(String t) {
-		String escaped = HtmlEscape.escapeHtml5(t);
+		String escaped = "<pre>" + HtmlEscape.escapeHtml5(t) + "</pre>";
 		Document doc = Jsoup.parseBodyFragment(escaped);
 		
 		new IssueParser() {
@@ -96,7 +96,7 @@ public class ReferenceTransformer implements Function<String, String> {
 		
 		if (url != null) {
 			StringBuilder builder = new StringBuilder();
-			for (Node node: Jsoup.parseBodyFragment(doc.body().html()).body().childNodes()) {
+			for (Node node: Jsoup.parseBodyFragment(doc.body().html()).body().child(0).childNodes()) {
 				if (node instanceof TextNode) {
 					TextNode textNode = (TextNode) node;
 					builder.append("<a href='" + url + "'>" + textNode.getWholeText() + "</a>");
@@ -106,7 +106,7 @@ public class ReferenceTransformer implements Function<String, String> {
 			}
 			return builder.toString();
 		} else {
-			return doc.body().html();
+			return doc.body().child(0).html();
 		}
 	}
 	
