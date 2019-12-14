@@ -446,7 +446,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 	
 	@Override
 	public void execute(String jobToken, JobContext jobContext) {
-		File hostCIHome = FileUtils.createTempDir("onedev-build");
+		File hostBuildHome = FileUtils.createTempDir("onedev-build");
 		try {
 			JobLogger jobLogger = jobContext.getLogger();
 			getCapacityRunner().call(new Callable<Void>() {
@@ -516,7 +516,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 						if (workspaceCache != null) {
 							hostWorkspace = workspaceCache;
 						} else { 
-							hostWorkspace = new File(hostCIHome, "workspace");
+							hostWorkspace = new File(hostBuildHome, "workspace");
 							FileUtils.createDir(hostWorkspace);
 						}
 						
@@ -770,26 +770,29 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 							throw new RuntimeException(e);
 						}
 	
-						String containerCIHome;
+						String containerBuildHome;
 						String containerWorkspace;
+						String containerEntryPoint;
 						String[] containerCommand;
 						if (isWindows) {
-							containerCIHome = "C:\\onedev-build";
+							containerBuildHome = "C:\\onedev-build";
 							containerWorkspace = "C:\\onedev-build\\workspace";
-							containerCommand = new String[] {"cmd", "/c", "C:\\onedev-build\\job-commands.bat"};						
+							containerEntryPoint = "cmd";
+							containerCommand = new String[] {"/c", "C:\\onedev-build\\job-commands.bat"};						
 	
-							File scriptFile = new File(hostCIHome, "job-commands.bat");
+							File scriptFile = new File(hostBuildHome, "job-commands.bat");
 							try {
 								FileUtils.writeLines(scriptFile, jobContext.getCommands(), "\r\n");
 							} catch (IOException e) {
 								throw new RuntimeException(e);
 							}
 						} else {
-							containerCIHome = "/onedev-build";
+							containerBuildHome = "/onedev-build";
 							containerWorkspace = "/onedev-build/workspace";
-							containerCommand = new String[] {"sh", "/onedev-build/job-commands.sh"};
+							containerEntryPoint = "sh";
+							containerCommand = new String[] {"/onedev-build/job-commands.sh"};
 							
-							File scriptFile = new File(hostCIHome, "job-commands.sh");
+							File scriptFile = new File(hostBuildHome, "job-commands.sh");
 							try {
 								FileUtils.writeLines(scriptFile, jobContext.getCommands(), "\n");
 							} catch (IOException e) {
@@ -803,7 +806,7 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 						if (getRunOptions() != null)
 							docker.addArgs(StringUtils.parseQuoteTokens(getRunOptions()));
 						
-						docker.addArgs("-v", hostCIHome.getAbsolutePath() + ":" + containerCIHome);
+						docker.addArgs("-v", hostBuildHome.getAbsolutePath() + ":" + containerBuildHome);
 						if (workspaceCache != null)
 							docker.addArgs("-v", workspaceCache.getAbsolutePath() + ":" + containerWorkspace);
 						for (Map.Entry<CacheInstance, String> entry: cacheAllocations.entrySet()) {
@@ -816,7 +819,8 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 						if (SystemUtils.IS_OS_LINUX)
 							docker.addArgs("-v", "/var/run/docker.sock:/var/run/docker.sock");
 						
-						docker.addArgs("-w", containerWorkspace, jobContext.getImage());
+						docker.addArgs("-w", containerWorkspace, "--entrypoint=" + containerEntryPoint);
+						docker.addArgs(jobContext.getImage());
 						docker.addArgs(containerCommand);
 						
 						jobLogger.log("Running job container...");
@@ -885,8 +889,8 @@ public class DockerExecutor extends JobExecutor implements Testable<TestData>, V
 				
 			});
 		} finally {
-			cleanDirAsRoot(hostCIHome);
-			FileUtils.deleteDir(hostCIHome);
+			cleanDirAsRoot(hostBuildHome);
+			FileUtils.deleteDir(hostBuildHome);
 		}
 	}
 
