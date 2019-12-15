@@ -84,7 +84,7 @@ import io.onedev.server.web.page.project.pullrequests.detail.mergepreview.MergeP
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
-import io.onedev.server.web.page.project.setting.build.BuildSettingPage;
+import io.onedev.server.web.page.project.setting.build.BuildPreserveSettingPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
 import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
 import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
@@ -233,7 +233,7 @@ public class OneUrlMapper extends CompoundRequestMapper {
 		add(new OnePageMapper("projects/${project}/settings/issue/state-transitions", StateTransitionsPage.class));
 		add(new OnePageMapper("projects/${project}/settings/issue/prompt-fields-upon-issue-open", 
 				PromptFieldsUponIssueOpenSettingPage.class));
-		add(new OnePageMapper("projects/${project}/settings/build", BuildSettingPage.class));
+		add(new OnePageMapper("projects/${project}/settings/build-preservations", BuildPreserveSettingPage.class));
 		add(new OnePageMapper("projects/${project}/settings/web-hooks", WebHooksPage.class));
 	}
 

@@ -17,7 +17,6 @@ import javax.inject.Singleton;
 import org.apache.commons.io.IOUtils;
 import org.dom4j.Element;
 
-import com.google.common.base.Charsets;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.bootstrap.Bootstrap;
@@ -1271,6 +1270,22 @@ public class DataMigrator {
 				}
 				dom.writeToFile(file, false);
 			} 		
+		}
+	}
+	
+	private void migrate27(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element buildSettingElement = element.element("buildSetting");
+					buildSettingElement.element("buildsToPreserve").detach();
+					buildSettingElement.addElement("preservations");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("IssueChanges.xml")) {
+				FileUtils.deleteFile(file);
+			}
 		}
 	}
 	

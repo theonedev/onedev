@@ -40,7 +40,6 @@ import org.quartz.ScheduleBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 
 import io.onedev.commons.launcher.loader.Listen;
@@ -63,6 +62,7 @@ import io.onedev.server.model.Project;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
+import io.onedev.server.model.support.BuildPreservation;
 import io.onedev.server.model.support.role.JobPrivilege;
 import io.onedev.server.persistence.TransactionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -392,7 +392,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	}
 	
 	private Predicate[] getPredicates(@Nullable Project project, 
-			io.onedev.server.search.entity.EntityCriteria<Build> criteria, 
+			@Nullable io.onedev.server.search.entity.EntityCriteria<Build> criteria, 
 			Root<Build> root, CriteriaBuilder builder) {
 		Collection<Predicate> predicates = getPredicates(project, root, builder);
 		if (criteria != null) 
@@ -409,17 +409,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		
 		query.where(getPredicates(project, buildQuery.getCriteria(), root, builder));
 
-		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
-		for (EntitySort sort: buildQuery.getSorts()) {
-			if (sort.getDirection() == Direction.ASCENDING)
-				orders.add(builder.asc(BuildQuery.getPath(root, BuildQueryConstants.ORDER_FIELDS.get(sort.getField()))));
-			else
-				orders.add(builder.desc(BuildQuery.getPath(root, BuildQueryConstants.ORDER_FIELDS.get(sort.getField()))));
-		}
-
-		if (orders.isEmpty())
-			orders.add(builder.desc(root.get(BuildQueryConstants.ATTR_ID)));
-		query.orderBy(orders);
+		applyOrders(root, query, builder, buildQuery);
 		
 		return query;
 	}
@@ -435,6 +425,41 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		return query.getResultList();
 	}
 
+	private void applyOrders(Root<Build> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder builder, 
+			EntityQuery<Build> buildQuery) {
+		List<javax.persistence.criteria.Order> orders = new ArrayList<>();
+		for (EntitySort sort: buildQuery.getSorts()) {
+			if (sort.getDirection() == Direction.ASCENDING)
+				orders.add(builder.asc(BuildQuery.getPath(root, BuildQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+			else
+				orders.add(builder.desc(BuildQuery.getPath(root, BuildQueryConstants.ORDER_FIELDS.get(sort.getField()))));
+		}
+
+		if (orders.isEmpty())
+			orders.add(builder.desc(root.get(BuildQueryConstants.ATTR_ID)));
+		criteriaQuery.orderBy(orders);
+	}
+	
+	@Sessional
+	@Override
+	public Collection<Long> queryIds(Project project, EntityQuery<Build> buildQuery, 
+			int firstResult, int maxResults) {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Long> criteriaQuery = builder.createQuery(Long.class);
+		Root<Build> root = criteriaQuery.from(Build.class);
+		criteriaQuery.select(root.get(BuildQueryConstants.ATTR_ID));
+
+		criteriaQuery.where(getPredicates(project, buildQuery.getCriteria(), root, builder));
+
+		applyOrders(root, criteriaQuery, builder, buildQuery);
+
+		Query<Long> query = getSession().createQuery(criteriaQuery);
+		query.setFirstResult(firstResult);
+		query.setMaxResults(maxResults);
+		
+		return query.list();
+	}
+	
 	@Sessional
 	@Override
 	public int count(@Nullable Project project, io.onedev.server.search.entity.EntityCriteria<Build> buildCriteria) {
@@ -501,55 +526,66 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			jobStatus.add(status);
 		}
 	}
+	
+	@Sessional
+	protected long getMaxId() {
+		CriteriaBuilder builder = getSession().getCriteriaBuilder();
+		CriteriaQuery<Long> query = builder.createQuery(Long.class);
+		Root<Build> root = query.from(Build.class);
+		query.select(builder.max(root.get(BuildQueryConstants.ATTR_ID)));
+		Long maxId = getSession().createQuery(query).getSingleResult();
+		return maxId!=null?maxId:0;
+	}
 
 	@Override
 	public void execute() {
+		long maxId = getMaxId();
+		Collection<Long> idsToPreserve = new HashSet<>();
+		for (Project project: projectManager.query()) {
+			logger.debug("Populating preserved build ids of project '" + project.getName() + "'...");
+			List<BuildPreservation> preservations = project.getBuildSetting().getPreservations();
+			if (preservations.isEmpty()) {
+				idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
+			} else {
+				for (BuildPreservation preservation: project.getBuildSetting().getPreservations()) {
+					try {
+						BuildQuery query = BuildQuery.parse(project, preservation.getCondition(), false, false);
+						int count;
+						if (preservation.getCount() != null)
+							count = preservation.getCount();
+						else
+							count = Integer.MAX_VALUE;
+						idsToPreserve.addAll(queryIds(project, query, 0, count));
+					} catch (Exception e) {
+						String message = String.format("Error parsing build preserve condition(project: %s, condition: %s)", 
+								project.getName(), preservation.getCondition());
+						logger.error(message, e);
+						idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
+					}
+				}
+			}
+		}
+
 		EntityCriteria<Build> criteria = newCriteria();
-		
 		AtomicInteger firstResult = new AtomicInteger(0);
-		Map<Long, Optional<BuildQuery>> preserveConditions = new HashMap<>(); 
 		
 		while (transactionManager.call(new Callable<Boolean>() {
 
 			@Override
 			public Boolean call() {
-				User.push(null); // do not support various 'is me' criterias
-				try {
-					List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
-					if (!builds.isEmpty()) {
-						logger.debug("Checking build preserve condition: {}->{}", 
-								firstResult.get()+1, firstResult.get()+builds.size());
+				List<Build> builds = query(criteria, firstResult.get(), CLEANUP_BATCH);
+				if (!builds.isEmpty()) {
+					logger.debug("Checking build preservation: {}->{}", 
+							firstResult.get()+1, firstResult.get()+builds.size());
+				}
+				for (Build build: builds) {
+					if (build.isFinished() && build.getId() <= maxId && !idsToPreserve.contains(build.getId())) {
+						logger.debug("Deleting build " + build.getFQN() + "...");
+						delete(build);
 					}
-					for (Build build: builds) {
-						Project project = build.getProject();
-						Optional<BuildQuery> query = preserveConditions.get(project.getId());
-						if (query == null) {
-							try {
-								String queryString = project.getBuildSetting().getBuildsToPreserve();
-								query = Optional.of(BuildQuery.parse(project, queryString));
-							} catch (Exception e) {
-								String message = String.format("Error parsing build preserve condition of project '%s'", 
-										project.getName());
-								logger.error(message, e);
-								query = Optional.absent();
-							}
-							preserveConditions.put(project.getId(), query);
-						}
-						if (query.isPresent()) {
-							try {
-								if (!query.get().matches(build)) 
-									delete(build);
-							} catch (Exception e) {
-								String message = String.format("Error preserving build '%s'", build.getFQN());
-								logger.error(message, e);
-							}
-						}
-					}
-					firstResult.set(firstResult.get() + CLEANUP_BATCH);
-					return builds.size() == CLEANUP_BATCH;
-				} finally {
-					User.pop();
-				}						
+				}
+				firstResult.set(firstResult.get() + CLEANUP_BATCH);
+				return builds.size() == CLEANUP_BATCH;
 			}
 			
 		})) {}
@@ -658,7 +694,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	}
 	
 	@Override
-	public Collection<Long> getBuildIdsByProject(Long projectId) {
+	public Collection<Long> getIdsByProject(Long projectId) {
 		buildsLock.readLock().lock();
 		try {
 			Collection<Long> buildIds = new HashSet<>();
@@ -673,7 +709,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 	}
 
 	@Override
-	public Collection<Long> filterBuildIds(Long projectId, Collection<String> commitHashes) {
+	public Collection<Long> filterIds(Long projectId, Collection<String> commitHashes) {
 		buildsLock.readLock().lock();
 		try {
 			Collection<Long> buildIds = new HashSet<>();

@@ -113,7 +113,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 	private IssueQuery parse(boolean backlog, @Nullable String baseQueryString, @Nullable String additionalQueryString) {
 		IssueQuery additionalQuery;
 		try {
-			additionalQuery = IssueQuery.parse(getProject(), additionalQueryString, true);
+			additionalQuery = IssueQuery.parse(getProject(), additionalQueryString, true, true, false);
 		} catch (Exception e) {
 			String prefix;
 			if (backlog)
@@ -127,7 +127,7 @@ public class IssueBoardsPage extends ProjectIssuesPage {
 
 		IssueQuery baseQuery;
 		try {
-			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true);
+			baseQuery = IssueQuery.parse(getProject(), baseQueryString, true, true, false);
 		} catch (Exception e) {
 			String prefix;
 			if (backlog)

@@ -13,7 +13,6 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.eclipse.jgit.lib.FileMode;
-import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 import io.onedev.server.git.BlobIdent;
@@ -32,11 +31,11 @@ import io.onedev.server.web.page.project.commits.CommitDetailPage;
 @SuppressWarnings("serial")
 public abstract class IssueCommittedPanel extends GenericPanel<List<RevCommit>> {
 
-	private final List<ObjectId> commitIds;
+	private final List<String> commitHashes;
 	
-	public IssueCommittedPanel(String id, List<ObjectId> commitIds) {
+	public IssueCommittedPanel(String id, List<String> commitHashes) {
 		super(id);
-		this.commitIds = commitIds;
+		this.commitHashes = commitHashes;
 	}
 	
 	@Override
@@ -48,8 +47,8 @@ public abstract class IssueCommittedPanel extends GenericPanel<List<RevCommit>> 
 			@Override
 			protected List<RevCommit> load() {
 				List<RevCommit> commits = new ArrayList<>();
-				for (ObjectId commitId: commitIds) {
-					RevCommit commit = getIssue().getProject().getRevCommit(commitId, false); 
+				for (String commitHash: commitHashes) {
+					RevCommit commit = getIssue().getProject().getRevCommit(commitHash, false); 
 					if (commit != null)
 						commits.add(commit);
 				}

@@ -1,5 +1,8 @@
 package io.onedev.server.web.editable.numeric;
 
+import java.lang.reflect.Method;
+
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.model.IModel;
@@ -7,8 +10,11 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.util.convert.ConversionException;
 
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
+import io.onedev.server.web.editable.EditableUtils;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
+import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
+import io.onedev.server.web.editable.annotation.OmitName;
 
 @SuppressWarnings("serial")
 public class NumericPropertyEditor extends PropertyEditor<Number> {
@@ -36,6 +42,15 @@ public class NumericPropertyEditor extends PropertyEditor<Number> {
 			}
 			
 		});
+		
+		Method getter = getDescriptor().getPropertyGetter();
+		if (getter.getAnnotation(OmitName.class) != null) {
+			input.add(AttributeModifier.replace("placeholder", EditableUtils.getDisplayName(getter)));
+		} else {
+			NameOfEmptyValue nameOfEmptyValue = getter.getAnnotation(NameOfEmptyValue.class);
+			if (nameOfEmptyValue != null)
+				input.add(AttributeModifier.replace("placeholder", nameOfEmptyValue.value()));
+		}
 	}
 
 	@Override

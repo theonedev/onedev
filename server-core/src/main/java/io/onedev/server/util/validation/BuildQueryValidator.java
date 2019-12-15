@@ -11,9 +11,15 @@ public class BuildQueryValidator implements ConstraintValidator<BuildQuery, Stri
 
 	private String message;
 	
+	private boolean withCurrentUserCriteria;
+	
+	private boolean withUnfinishedCriteria;
+	
 	@Override
 	public void initialize(BuildQuery constaintAnnotation) {
 		message = constaintAnnotation.message();
+		withCurrentUserCriteria = constaintAnnotation.withCurrentUserCriteria();
+		withUnfinishedCriteria = constaintAnnotation.withUnfinishedCriteria();
 	}
 
 	@Override
@@ -23,7 +29,8 @@ public class BuildQueryValidator implements ConstraintValidator<BuildQuery, Stri
 		} else {
 			Project project = Project.get();
 			try {
-				io.onedev.server.search.entity.build.BuildQuery.parse(project, value);
+				io.onedev.server.search.entity.build.BuildQuery.parse(project, value, 
+						withCurrentUserCriteria, withUnfinishedCriteria);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

@@ -183,7 +183,7 @@ public class ProjectIssueSetting implements Serializable {
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedFields());
+					undefinedFields.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true).getUndefinedFields());
 				} catch (Exception e) {
 				}
 			}
@@ -212,7 +212,7 @@ public class ProjectIssueSetting implements Serializable {
 			for (Iterator<NamedIssueQuery> it = namedQueries.iterator(); it.hasNext();) {
 				NamedIssueQuery namedQuery = it.next();
 				try {
-					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
+					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
 					boolean remove = false;
 					for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 						UndefinedFieldResolution resolution = entry.getValue();
@@ -253,7 +253,7 @@ public class ProjectIssueSetting implements Serializable {
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false).getUndefinedStates());
+					undefinedStates.addAll(IssueQuery.parse(project, namedQuery.getQuery(), false, true, true).getUndefinedStates());
 				} catch (Exception e) {
 				}
 			}
@@ -276,7 +276,7 @@ public class ProjectIssueSetting implements Serializable {
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false);
+					IssueQuery query = IssueQuery.parse(project, namedQuery.getQuery(), false, true, true);
 					for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 						query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 					namedQuery.setQuery(query.toString());
@@ -301,7 +301,7 @@ public class ProjectIssueSetting implements Serializable {
 		if (namedQueries != null) {
 			for (NamedIssueQuery namedQuery: namedQueries) {
 				try {
-					undefinedFieldValues.addAll(IssueQuery.parse(null, namedQuery.getQuery(), false).getUndefinedFieldValues());
+					undefinedFieldValues.addAll(IssueQuery.parse(null, namedQuery.getQuery(), false, true, true).getUndefinedFieldValues());
 				} catch (Exception e) {
 				}
 			}
@@ -323,7 +323,7 @@ public class ProjectIssueSetting implements Serializable {
 				NamedIssueQuery namedQuery = it.next();
 				try {
 					boolean remove = false;
-					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
+					IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
 					for (Map.Entry<String, ValueSetEdit> entry: valueSetEdits.entrySet()) {
 						if (query.onEditFieldValues(entry.getKey(), entry.getValue())) {
 							remove = true;

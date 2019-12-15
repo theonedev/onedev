@@ -11,6 +11,10 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 
 	private String message;
 	
+	private boolean withCurrentUserCriteria;
+	
+	private boolean withCurrentBuildCriteria;
+	
 	@Override
 	public void initialize(IssueQuery constaintAnnotation) {
 		message = constaintAnnotation.message();
@@ -23,7 +27,8 @@ public class IssueQueryValidator implements ConstraintValidator<IssueQuery, Stri
 		} else {
 			Project project = Project.get();
 			try {
-				io.onedev.server.search.entity.issue.IssueQuery.parse(project, value, true);
+				io.onedev.server.search.entity.issue.IssueQuery.parse(project, value, 
+						true, withCurrentUserCriteria, withCurrentBuildCriteria);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();

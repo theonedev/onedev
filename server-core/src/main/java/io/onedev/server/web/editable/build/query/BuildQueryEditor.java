@@ -40,7 +40,7 @@ public class BuildQueryEditor extends PropertyEditor<String> {
 				return ((ProjectPage) getPage()).getProject();
 			}
     		
-    	}, buildQuery.withCurrentUserCriteria()));
+    	}, buildQuery.withCurrentUserCriteria(), buildQuery.withUnfinishedCriteria()));
         
 		input.setLabel(Model.of(getDescriptor().getDisplayName()));
         

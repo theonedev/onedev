@@ -99,7 +99,7 @@ public abstract class BuildListPanel extends Panel {
 		@Override
 		protected BuildQuery load() {
 			try {
-				BuildQuery additionalQuery = BuildQuery.parse(getProject(), query);
+				BuildQuery additionalQuery = BuildQuery.parse(getProject(), query, true, true);
 				return BuildQuery.merge(getBaseQuery(), additionalQuery);
 			} catch (Exception e) {
 				logger.error("Error parsing build query: " + query, e);
@@ -328,7 +328,7 @@ public abstract class BuildListPanel extends Panel {
 				return getProject();
 			}
 			
-		}, true));
+		}, true, true));
 		
 		input.add(new AjaxFormComponentUpdatingBehavior("input"){
 			

@@ -365,7 +365,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
 				if (query.onDeleteState(stateName))
 					it.remove();
 				else
@@ -382,7 +382,7 @@ public class GlobalIssueSetting implements Serializable {
 			board.onRenameState(oldName, newName);
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
 				query.onRenameState(oldName, newName);
 				namedQuery.setQuery(query.toString());
 			} catch (Exception e) {
@@ -414,7 +414,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
 				if (query.onEditFieldValues(fieldName, valueSetEdit))
 					it.remove();
 				else
@@ -443,7 +443,7 @@ public class GlobalIssueSetting implements Serializable {
 			board.onRenameField(this, oldName, newName);
 		for (NamedIssueQuery namedQuery: getNamedQueries()) {
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
 				query.onRenameField(oldName, newName);
 				namedQuery.setQuery(query.toString());
 			} catch (Exception e) {
@@ -465,7 +465,7 @@ public class GlobalIssueSetting implements Serializable {
 		for (Iterator<NamedIssueQuery> it = getNamedQueries().iterator(); it.hasNext();) {
 			NamedIssueQuery namedQuery = it.next();
 			try {
-				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false);
+				IssueQuery query = IssueQuery.parse(null, namedQuery.getQuery(), false, true, true);
 				if (query.onDeleteField(fieldName))
 					it.remove();
 				else

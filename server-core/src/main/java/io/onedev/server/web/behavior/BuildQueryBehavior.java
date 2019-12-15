@@ -40,10 +40,14 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 	
 	private final boolean withCurrentUserCriteria;
 	
-	public BuildQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria) {
+	private final boolean withUnfinishedCriteria;
+	
+	public BuildQueryBehavior(IModel<Project> projectModel, boolean withCurrentUserCriteria, 
+			boolean withUnfinishedCriteria) {
 		super(BuildQueryParser.class, "query", false);
 		this.projectModel = projectModel;
 		this.withCurrentUserCriteria = withCurrentUserCriteria;
+		this.withUnfinishedCriteria = withUnfinishedCriteria;
 	}
 
 	@Override
@@ -149,6 +153,13 @@ public class BuildQueryBehavior extends ANTLRAssistBehavior {
 		if (!withCurrentUserCriteria) {
 			if (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.SubmittedByMe)) 
 					|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.CancelledByMe))) {
+				return null;
+			}
+		}
+		if (!withUnfinishedCriteria) {
+			if (suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.Running)) 
+					|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.Waiting))
+					|| suggestedLiteral.equals(BuildQuery.getRuleName(BuildQueryLexer.Pending))) {
 				return null;
 			}
 		}

@@ -132,8 +132,8 @@ public abstract class IssueActivitiesPanel extends Panel {
 						otherActivities.add(new IssueChangeActivity(change));
 				} else if (change.getData() instanceof IssueCommittedData && SecurityUtils.canReadCode(getIssue().getProject())) {
 					IssueCommittedData issueCommittedData = (IssueCommittedData) change.getData();
-					for (ObjectId commitId: issueCommittedData.getCommitIds()) {
-						if (getIssue().getProject().getRepository().hasObject(commitId)) {
+					for (String commitHash: issueCommittedData.getCommitHashes()) {
+						if (getIssue().getProject().getRepository().hasObject(ObjectId.fromString(commitHash))) {
 							otherActivities.add(new IssueChangeActivity(change));
 							break;
 						}

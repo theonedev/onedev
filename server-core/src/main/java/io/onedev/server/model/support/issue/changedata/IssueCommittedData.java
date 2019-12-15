@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.wicket.Component;
-import org.eclipse.jgit.lib.ObjectId;
 
 import io.onedev.server.model.Group;
 import io.onedev.server.model.Issue;
@@ -18,19 +17,19 @@ public class IssueCommittedData implements IssueChangeData {
 
 	private static final long serialVersionUID = 1L;
 
-	private final List<ObjectId> commitIds;
+	private final List<String> commitHashes;
 	
-	public IssueCommittedData(List<ObjectId> commitIds) {
-		this.commitIds = commitIds;
+	public IssueCommittedData(List<String> commitHashes) {
+		this.commitHashes = commitHashes;
 	}
 	
-	public List<ObjectId> getCommitIds() {
-		return commitIds;
+	public List<String> getCommitHashes() {
+		return commitHashes;
 	}
 
 	@Override
 	public Component render(String componentId, IssueChange change) {
-		return new IssueCommittedPanel(componentId, commitIds) {
+		return new IssueCommittedPanel(componentId, commitHashes) {
 			
 			private static final long serialVersionUID = 1L;
 

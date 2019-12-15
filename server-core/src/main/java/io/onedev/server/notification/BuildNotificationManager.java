@@ -96,7 +96,7 @@ public class BuildNotificationManager {
 			for (String queryString: entry.getValue()) {
 				User.push(user);
 				try {
-					if (BuildQuery.parse(event.getProject(), queryString).matches(build)) {
+					if (BuildQuery.parse(event.getProject(), queryString, true, true).matches(build)) {
 						notifyEmails.add(user.getEmail());
 						break;
 					}
@@ -127,7 +127,7 @@ public class BuildNotificationManager {
 			for (String queryString: entry.getValue()) {
 				User.push(user);
 				try {
-					if (BuildQuery.parse(null, queryString).matches(build)) {
+					if (BuildQuery.parse(null, queryString, true, true).matches(build)) {
 						notifyEmails.add(user.getEmail());
 						break;
 					}

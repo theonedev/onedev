@@ -6,12 +6,9 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.hibernate.validator.constraints.NotEmpty;
-
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.SettingManager;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
-import io.onedev.server.web.editable.annotation.BuildQuery;
 import io.onedev.server.web.editable.annotation.Editable;
 
 @Editable
@@ -25,20 +22,16 @@ public class ProjectBuildSetting implements Serializable {
 	
 	private transient GlobalBuildSetting setting;
 	
-	private String buildsToPreserve = "all";
+	private List<BuildPreservation> preservations = new ArrayList<>();
 	
-	@Editable(description="Specify builds to preserve. OneDev will run every night to remove builds not matching "
-			+ "query specified here")
-	@BuildQuery(withCurrentUserCriteria = false)
-	@NotEmpty
-	public String getBuildsToPreserve() {
-		return buildsToPreserve;
+	public List<BuildPreservation> getPreservations() {
+		return preservations;
 	}
 
-	public void setBuildsToPreserve(String buildsToPreserve) {
-		this.buildsToPreserve = buildsToPreserve;
+	public void setPreservations(List<BuildPreservation> preservations) {
+		this.preservations = preservations;
 	}
-	
+
 	private GlobalBuildSetting getGlobalSetting() {
 		if (setting == null)
 			setting = OneDev.getInstance(SettingManager.class).getBuildSetting();

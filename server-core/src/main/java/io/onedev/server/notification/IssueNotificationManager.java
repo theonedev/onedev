@@ -85,7 +85,7 @@ public class IssueNotificationManager {
 
 			@Override
 			protected EntityQuery<Issue> parse(String queryString) {
-				return IssueQuery.parse(issue.getProject(), queryString, true);
+				return IssueQuery.parse(issue.getProject(), queryString, true, true, false);
 			}
 
 			@Override
@@ -111,7 +111,7 @@ public class IssueNotificationManager {
 
 			@Override
 			protected EntityQuery<Issue> parse(String queryString) {
-				return IssueQuery.parse(null, queryString, true);
+				return IssueQuery.parse(null, queryString, true, true, false);
 			}
 
 			@Override

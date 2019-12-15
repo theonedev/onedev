@@ -88,7 +88,7 @@ public abstract class IssueSidePanel extends Panel {
 
 			@Override
 			protected EntityQuery<Issue> parse(String queryString) {
-				return IssueQuery.parse(getProject(), queryString, true);
+				return IssueQuery.parse(getProject(), queryString, true, true, false);
 			}
 
 			@Override

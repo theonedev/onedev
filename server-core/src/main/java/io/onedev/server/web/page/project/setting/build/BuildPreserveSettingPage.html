@@ -1,0 +1,12 @@
+<wicket:extend>
+	<div class="page-title">Build Preserve Setting</div>
+	<div class="help-block">Define rules to preserve builds. A build will be preserved as long as one rule preserves it.  
+	All builds will be preserved if no rules are defined</div>
+	<form wicket:id="form" class="leave-confirm build-preservations">
+        <div wicket:id="feedback"></div>
+        <div wicket:id="editor"></div>
+		<div class="actions">
+			<input type="submit" class="btn btn-primary dirty-aware" value="Save">
+		</div>
+	</form>
+</wicket:extend>

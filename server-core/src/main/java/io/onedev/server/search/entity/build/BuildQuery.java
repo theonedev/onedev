@@ -68,7 +68,8 @@ public class BuildQuery extends EntityQuery<Build> {
 		this(null, new ArrayList<>());
 	}
 	
-	public static BuildQuery parse(@Nullable Project project, @Nullable String queryString) {
+	public static BuildQuery parse(@Nullable Project project, @Nullable String queryString, 
+			boolean withCurrentUserCriteria, boolean withUnfinishedCriteria) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			BuildQueryLexer lexer = new BuildQueryLexer(is);
@@ -112,14 +113,24 @@ public class BuildQuery extends EntityQuery<Build> {
 						case BuildQueryLexer.TimedOut:
 							return new TimedOutCriteria();
 						case BuildQueryLexer.Waiting:
+							if (!withUnfinishedCriteria)
+								throw new OneException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new WaitingCriteria();
 						case BuildQueryLexer.Pending:
+							if (!withUnfinishedCriteria)
+								throw new OneException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new PendingCriteria();
 						case BuildQueryLexer.Running:
+							if (!withUnfinishedCriteria)
+								throw new OneException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new RunningCriteria();
 						case BuildQueryLexer.SubmittedByMe:
+							if (!withCurrentUserCriteria)
+								throw new OneException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new SubmittedByMeCriteria();
 						case BuildQueryLexer.CancelledByMe:
+							if (!withCurrentUserCriteria)
+								throw new OneException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new CancelledByMeCriteria();
 						case BuildQueryLexer.AssociatedWithPullRequests:
 							return new AssociatedWithPullRequestsCriteria();

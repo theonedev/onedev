@@ -97,7 +97,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	public void onRenameState(String oldName, String newName) {
 		try {
 			io.onedev.server.search.entity.issue.IssueQuery query = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false);
+					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true);
 			query.onRenameState(oldName, newName);
 			issueQuery = query.toString();
 		} catch (Exception e) {
@@ -108,7 +108,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	public boolean onDeleteState(String stateName) {
 		try {
 			io.onedev.server.search.entity.issue.IssueQuery query = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false);
+					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true);
 			if (query.onDeleteState(stateName)) {
 				return true;
 			} else {
@@ -124,7 +124,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	public void onRenameField(String oldName, String newName) {
 		try {
 			io.onedev.server.search.entity.issue.IssueQuery query = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false);
+					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true);
 			query.onRenameField(oldName, newName);
 			issueQuery = query.toString();
 		} catch (Exception e) {
@@ -135,7 +135,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	public boolean onDeleteField(String fieldName) {
 		try {
 			io.onedev.server.search.entity.issue.IssueQuery query = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false);
+					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true);
 			if (query.onDeleteField(fieldName)) {
 				return true;
 			} else {
@@ -151,7 +151,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	public boolean onEditFieldValues(String fieldName, ValueSetEdit valueSetEdit) {
 		try {
 			io.onedev.server.search.entity.issue.IssueQuery query = 
-					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false);
+					io.onedev.server.search.entity.issue.IssueQuery.parse(null, issueQuery, false, true, true);
 			if (query.onEditFieldValues(fieldName, valueSetEdit)) {
 				return true;
 			} else {
@@ -167,7 +167,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	public Collection<String> getUndefinedStates() {
 		try {
 			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false).getUndefinedStates();
+					.parse(null, issueQuery, false, true, true).getUndefinedStates();
 		} catch (Exception e) {
 			return new HashSet<>();
 		}
@@ -177,7 +177,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	public Collection<String> getUndefinedFields() {
 		try {
 			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false).getUndefinedFields();
+					.parse(null, issueQuery, false, true, true).getUndefinedFields();
 		} catch (Exception e) {
 			return new HashSet<>();
 		}
@@ -187,7 +187,7 @@ public class BuildSuccessfulTrigger extends TransitionTrigger {
 	public Collection<UndefinedFieldValue> getUndefinedFieldValues() {
 		try {
 			return io.onedev.server.search.entity.issue.IssueQuery
-					.parse(null, issueQuery, false).getUndefinedFieldValues();
+					.parse(null, issueQuery, false, true, true).getUndefinedFieldValues();
 		} catch (Exception e) {
 			return new HashSet<>();
 		}

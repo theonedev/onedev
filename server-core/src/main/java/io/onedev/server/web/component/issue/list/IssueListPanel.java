@@ -99,7 +99,7 @@ public abstract class IssueListPanel extends Panel {
 		@Override
 		protected IssueQuery load() {
 			try {
-				IssueQuery additionalQuery = IssueQuery.parse(getProject(), query, true);
+				IssueQuery additionalQuery = IssueQuery.parse(getProject(), query, true, true, false);
 				return IssueQuery.merge(getBaseQuery(), additionalQuery);
 			} catch (Exception e) {
 				logger.error("Error parsing issue query: " + query, e);

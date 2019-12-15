@@ -16,6 +16,8 @@ import io.onedev.server.util.validation.BuildQueryValidator;
 public @interface BuildQuery {
 	boolean withCurrentUserCriteria();
 	
+	boolean withUnfinishedCriteria();
+	
     String message() default "";
 
     Class<?>[] groups() default {};

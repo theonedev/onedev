@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -40,7 +41,6 @@ import io.onedev.server.model.IssueChange;
 import io.onedev.server.model.Milestone;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
-import io.onedev.server.model.User;
 import io.onedev.server.model.support.issue.changedata.IssueBatchUpdateData;
 import io.onedev.server.model.support.issue.changedata.IssueCommittedData;
 import io.onedev.server.model.support.issue.changedata.IssueDescriptionChangeData;
@@ -236,14 +236,13 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 								if ((trigger.getJobNames() == null || PatternSet.fromString(trigger.getJobNames()).matches(new StringMatcher(), build.getJobName())) 
 										&& build.getStatus() == Build.Status.SUCCESSFUL
 										&& (branches == null || project.isCommitOnBranches(commitId, branches))) {
-									IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true);
+									IssueQuery query = IssueQuery.parse(project, trigger.getIssueQuery(), true, false, true);
 									List<IssueCriteria> criterias = new ArrayList<>();
 									for (String fromState: transition.getFromStates()) 
 										criterias.add(new StateCriteria(fromState));
 									criterias.add(query.getCriteria());
 									query = new IssueQuery(IssueCriteria.of(criterias), new ArrayList<>());
 									Build.push(build);
-									User.push(null); // do not support various 'is me' criterias
 									try {
 										for (Issue issue: issueManager.query(project, query, 0, Integer.MAX_VALUE)) {
 											issue.removeFields(transition.getRemoveFields());
@@ -251,7 +250,6 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 										}
 									} finally {
 										Build.pop();
-										User.pop();
 									}
 								}
 							}
@@ -336,7 +334,7 @@ public class DefaultIssueChangeManager extends AbstractEntityManager<IssueChange
 		IssueChange change = new IssueChange();
 		change.setIssue(issue);
 		change.setDate(new Date());
-		change.setData(new IssueCommittedData(event.getFixCommits()));
+		change.setData(new IssueCommittedData(event.getFixCommits().stream().map(it->it.name()).collect(Collectors.toList())));
 		save(change);
 		
 		for (TransitionSpec transition: issue.getProject().getIssueSetting().getTransitionSpecs(true)) {

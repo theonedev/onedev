@@ -84,7 +84,8 @@ public class IssueQuery extends EntityQuery<Issue> {
 		return sorts;
 	}
 
-	public static IssueQuery parse(@Nullable Project project, @Nullable String queryString, boolean validate) {
+	public static IssueQuery parse(@Nullable Project project, @Nullable String queryString, 
+			boolean validate, boolean withCurrentUserCriteria, boolean withCurrentBuildCriteria) {
 		if (queryString != null) {
 			CharStream is = CharStreams.fromString(queryString); 
 			IssueQueryLexer lexer = new IssueQueryLexer(is);
@@ -125,8 +126,12 @@ public class IssueQuery extends EntityQuery<Issue> {
 					public IssueCriteria visitOperatorCriteria(OperatorCriteriaContext ctx) {
 						switch (ctx.operator.getType()) {
 						case IssueQueryLexer.SubmittedByMe:
+							if (!withCurrentUserCriteria)
+								throw new OneException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new SubmittedByMeCriteria();
 						case IssueQueryLexer.FixedInCurrentBuild:
+							if (!withCurrentBuildCriteria)
+								throw new OneException("Criteria '" + ctx.operator.getText() + "' is not supported here");
 							return new FixedInCurrentBuildCriteria();
 						default:
 							throw new OneException("Unexpected operator: " + ctx.operator.getText());
@@ -139,9 +144,13 @@ public class IssueQuery extends EntityQuery<Issue> {
 						int operator = ctx.operator.getType();
 						if (validate)
 							checkField(fieldName, operator);
-						if (fieldName.equals(IssueQueryConstants.FIELD_MILESTONE))
+						if (fieldName.equals(IssueQueryConstants.FIELD_MILESTONE)) 
 							return new MilestoneIsEmptyCriteria();
-						else
+						else if (operator == IssueQueryLexer.IsMe && !withCurrentUserCriteria)
+							throw new OneException("Operator '" + getRuleName(operator) + "' is not supported here");
+						else if ((operator == IssueQueryLexer.IsCurrent || operator == IssueQueryLexer.IsPrevious) && !withCurrentBuildCriteria)
+							throw new OneException("Operator '" + getRuleName(operator) + "' is not supported here");
+						else 
 							return new FieldOperatorCriteria(fieldName, operator);
 					}
 					

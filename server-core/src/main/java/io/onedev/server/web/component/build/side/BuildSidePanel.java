@@ -63,7 +63,7 @@ public abstract class BuildSidePanel extends Panel {
 
 			@Override
 			protected EntityQuery<Build> parse(String queryString) {
-				return BuildQuery.parse(getProject(), queryString);
+				return BuildQuery.parse(getProject(), queryString, true, true);
 			}
 
 			@Override

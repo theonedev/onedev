@@ -192,7 +192,7 @@ public class BoardSpec implements Serializable {
 		if (getBaseQuery() != null) {
 			try {
 				undefinedStates.addAll(io.onedev.server.search.entity.issue.IssueQuery.parse(
-						project, getBaseQuery(), false).getUndefinedStates());
+						project, getBaseQuery(), false, true, true).getUndefinedStates());
 			} catch (Exception e) {
 			}
 		}
@@ -209,7 +209,7 @@ public class BoardSpec implements Serializable {
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(project, getBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(project, getBaseQuery(), false, true, true);
 				for (Map.Entry<String, UndefinedStateResolution> resolutionEntry: resolutions.entrySet())
 					query.onRenameState(resolutionEntry.getKey(), resolutionEntry.getValue().getNewState());
 				setBaseQuery(query.toString());
@@ -234,7 +234,7 @@ public class BoardSpec implements Serializable {
 		if (getBaseQuery() != null) {
 			try {
 				undefinedFields.addAll(io.onedev.server.search.entity.issue.IssueQuery
-						.parse(project, getBaseQuery(), false).getUndefinedFields());
+						.parse(project, getBaseQuery(), false, true, true).getUndefinedFields());
 			} catch (Exception e) {
 			}
 		}
@@ -257,7 +257,7 @@ public class BoardSpec implements Serializable {
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false, true, true);
 				boolean remove = false;
 				for (Map.Entry<String, UndefinedFieldResolution> entry: resolutions.entrySet()) {
 					UndefinedFieldResolution resolution = entry.getValue();
@@ -347,7 +347,7 @@ public class BoardSpec implements Serializable {
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false, true, true);
 				query.onRenameField(oldName, newName);
 				setBaseQuery(query.toString());
 			} catch (Exception e) {
@@ -356,7 +356,7 @@ public class BoardSpec implements Serializable {
 		if (getBacklogBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false, true, true);
 				query.onRenameField(oldName, newName);
 				setBacklogBaseQuery(query.toString());
 			} catch (Exception e) {
@@ -378,7 +378,7 @@ public class BoardSpec implements Serializable {
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false, true, true);
 				query.onRenameState(oldName, newName);
 				setBaseQuery(query.toString());
 			} catch (Exception e) {
@@ -387,7 +387,7 @@ public class BoardSpec implements Serializable {
 		if (getBacklogBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false, true, true);
 				query.onRenameState(oldName, newName);
 				setBacklogBaseQuery(query.toString());
 			} catch (Exception e) {
@@ -401,7 +401,7 @@ public class BoardSpec implements Serializable {
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false, true, true);
 				if (query.onDeleteField(fieldName))
 					setBaseQuery(null);
 				else
@@ -412,7 +412,7 @@ public class BoardSpec implements Serializable {
 		if (getBacklogBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false, true, true);
 				if (query.onDeleteField(fieldName))
 					setBacklogBaseQuery(null);
 				else
@@ -430,7 +430,7 @@ public class BoardSpec implements Serializable {
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false, true, true);
 				if (query.onDeleteState(stateName))
 					setBaseQuery(null);
 				else
@@ -441,7 +441,7 @@ public class BoardSpec implements Serializable {
 		if (getBacklogBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false, true, true);
 				if (query.onDeleteState(stateName))
 					setBacklogBaseQuery(null);
 				else
@@ -469,7 +469,7 @@ public class BoardSpec implements Serializable {
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false, true, true);
 				if (query.onEditFieldValues(fieldName, valueSetEdit))
 					setBaseQuery(null);
 				else
@@ -480,7 +480,7 @@ public class BoardSpec implements Serializable {
 		if (getBacklogBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false, true, true);
 				if (query.onEditFieldValues(fieldName, valueSetEdit))
 					setBacklogBaseQuery(null);
 				else
@@ -505,7 +505,7 @@ public class BoardSpec implements Serializable {
 		if (getBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBaseQuery(), false, true, true);
 				undefinedFieldValues.addAll(query.getUndefinedFieldValues());
 			} catch (Exception e) {
 			}
@@ -513,7 +513,7 @@ public class BoardSpec implements Serializable {
 		if (getBacklogBaseQuery() != null) {
 			try {
 				io.onedev.server.search.entity.issue.IssueQuery query = 
-						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false);
+						io.onedev.server.search.entity.issue.IssueQuery.parse(null, getBacklogBaseQuery(), false, true, true);
 				undefinedFieldValues.addAll(query.getUndefinedFieldValues());
 			} catch (Exception e) {
 			}

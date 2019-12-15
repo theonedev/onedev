@@ -54,10 +54,10 @@ public class FixedIssueCriteria extends EntityCriteria<Build> {
 		for (ObjectId each: getCommitInfoManager().getDescendants(project, fixCommits))
 			descendents.add(each.name());
 		BuildManager buildManager = OneDev.getInstance(BuildManager.class);
-		Collection<Long> inBuildIds = buildManager.filterBuildIds(project.getId(), descendents);
+		Collection<Long> inBuildIds = buildManager.filterIds(project.getId(), descendents);
 		return builder.and(
 				builder.equal(root.get(BuildQueryConstants.ATTR_PROJECT), issue.getProject()),
-				inManyValues(builder, attribute, inBuildIds, buildManager.getBuildIdsByProject(project.getId())));
+				inManyValues(builder, attribute, inBuildIds, buildManager.getIdsByProject(project.getId())));
 	}
 
 	@Override
