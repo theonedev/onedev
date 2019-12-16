@@ -44,7 +44,7 @@ import io.onedev.server.model.Issue;
 import io.onedev.server.model.Project;
 import io.onedev.server.model.PullRequest;
 import io.onedev.server.model.User;
-import io.onedev.server.model.support.Secret;
+import io.onedev.server.model.support.JobSecret;
 import io.onedev.server.model.support.administration.GroovyScript;
 import io.onedev.server.security.permission.AccessProject;
 import io.onedev.server.util.SecurityUtils;
@@ -145,10 +145,10 @@ public class SuggestionUtils {
 			variables.put(var.name().toLowerCase(), null);
 		for (ParamSpec paramSpec: job.getParamSpecs()) 
 			variables.put(VariableInterpolator.PARAMS_PREFIX + paramSpec.getName(), paramSpec.getDescription());
-		for (Secret secret: project.getSecrets()) {
+		for (JobSecret secret: project.getBuildSetting().getHierarchySecrets(project)) {
 			String varName = VariableInterpolator.SECRETS_PREFIX + secret.getName();
-			if (!variables.containsKey(varName) 
-					&& (commitId != null && secret.isAuthorized(project, commitId) || commitId == null && secret.isAuthorized(project, "master"))) {
+			if (commitId != null && secret.isAuthorized(project, commitId) 
+					|| commitId == null && secret.isAuthorized(project, "master")) {
 				variables.put(varName, null);
 			}
 		}
@@ -175,12 +175,12 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestSecrets(Project project, String matchWith) {
+	public static List<InputSuggestion> suggestJobSecrets(Project project, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
 
-		for (Secret secret: project.getSecrets()) {
+		for (JobSecret secret: project.getBuildSetting().getSecrets()) {
 			int index = secret.getName().toLowerCase().indexOf(matchWith);
 			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
 				suggestions.add(new InputSuggestion(secret.getName(), new LinearRange(index, index+matchWith.length())));

@@ -31,6 +31,7 @@ import com.google.common.base.MoreObjects;
 
 import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedProjectQuery;
+import io.onedev.server.model.support.UserBuildSetting;
 import io.onedev.server.model.support.QuerySetting;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
@@ -151,6 +152,10 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Lob
 	@Column(nullable=false, length=65535)
 	private LinkedHashSet<String> buildQuerySubscriptions = new LinkedHashSet<>();
+	
+	@Lob
+	@Column(length=65535, nullable=false)
+	private UserBuildSetting buildSetting = new UserBuildSetting();
 	
     private transient Collection<Group> groups;
     
@@ -446,6 +451,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 		this.projectAuthorizations = projectAuthorizations;
 	}
 	
+	public UserBuildSetting getBuildSetting() {
+		return buildSetting;
+	}
+
+	public void setBuildSetting(UserBuildSetting buildSetting) {
+		this.buildSetting = buildSetting;
+	}
+
 	@Override
 	public int compareTo(AbstractEntity entity) {
 		User user = (User) entity;

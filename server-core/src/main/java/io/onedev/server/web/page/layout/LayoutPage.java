@@ -46,7 +46,8 @@ import io.onedev.server.web.page.my.MyAvatarPage;
 import io.onedev.server.web.page.my.MyPage;
 import io.onedev.server.web.page.my.MyPasswordPage;
 import io.onedev.server.web.page.my.MyProfilePage;
-import io.onedev.server.web.page.my.MyTokenPage;
+import io.onedev.server.web.page.my.buildsetting.MyBuildSettingPage;
+import io.onedev.server.web.page.my.buildsetting.MySecretListPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
 import io.onedev.server.web.page.security.RegisterPage;
@@ -197,10 +198,10 @@ public abstract class LayoutPage extends BasePage {
 		item.add(new ViewStateAwarePageLink<Void>("link", MyPasswordPage.class));
 		if (getPage() instanceof MyPasswordPage)
 			item.add(AttributeAppender.append("class", "active"));
-		
-		signedInContainer.add(item = new WebMarkupContainer("myAccessToken"));
-		item.add(new ViewStateAwarePageLink<Void>("link", MyTokenPage.class));
-		if (getPage() instanceof MyTokenPage)
+				
+		signedInContainer.add(item = new WebMarkupContainer("myBuildSetting"));
+		item.add(new ViewStateAwarePageLink<Void>("link", MySecretListPage.class));
+		if (getPage() instanceof MyBuildSettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 		
 		signedInContainer.add(new ViewStateAwarePageLink<Void>("signOut", LogoutPage.class));

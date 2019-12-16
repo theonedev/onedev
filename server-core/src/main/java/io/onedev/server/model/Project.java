@@ -69,7 +69,6 @@ import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.BuildQuerySettingManager;
@@ -99,7 +98,6 @@ import io.onedev.server.model.support.BranchProtection;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.ProjectBuildSetting;
-import io.onedev.server.model.support.Secret;
 import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.issue.ProjectIssueSetting;
@@ -182,11 +180,6 @@ public class Project extends AbstractEntity {
 	@Column(nullable=false, length=65535)
 	@JsonView(DefaultView.class)
 	private ArrayList<TagProtection> tagProtections = new ArrayList<>();
-	
-	@Lob
-	@Column(nullable=false, length=65535)
-	@JsonView(DefaultView.class)
-	private ArrayList<Secret> secrets = new ArrayList<>();
 	
 	@Column(nullable=false)
 	private Date createDate = new Date();
@@ -1151,15 +1144,6 @@ public class Project extends AbstractEntity {
 		this.webHooks = webHooks;
 	}
 
-	@Editable
-	public ArrayList<Secret> getSecrets() {
-		return secrets;
-	}
-
-	public void setSecrets(ArrayList<Secret> secrets) {
-		this.secrets = secrets;
-	}
-	
 	@Nullable
 	public TagProtection getTagProtection(String tagName, User user) {
 		for (TagProtection protection: tagProtections) {
@@ -1361,14 +1345,6 @@ public class Project extends AbstractEntity {
 			Map<String, String> gitEnvs) {
 		BranchProtection protection = getBranchProtection(branch, user);
 		return protection != null && protection.isBuildRequiredForPush(this, branch, oldObjectId, newObjectId, gitEnvs);
-	}
-	
-	public String getSecretValue(String secretName, ObjectId commitId) {
-		for (Secret secret: getSecrets()) {
-			if (secret.getName().equals(secretName) && secret.isAuthorized(this, commitId))
-				return secret.getValue();
-		}
-		throw new OneException("No authorized secret found: " + secretName);
 	}
 	
 	@Nullable

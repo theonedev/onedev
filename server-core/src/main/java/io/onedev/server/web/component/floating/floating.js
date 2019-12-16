@@ -11,8 +11,8 @@ onedev.server.floating = {
 			 * floating panel, as normally the triggering element already has the logic 
 			 * closing the floating when it is clicked (to achieve the toggle effect) 
 			 */
-			var x = e.pageX + $(window).scrollLeft();
-			var y = e.pageY + $(window).scrollTop();
+			var x = e.pageX;
+			var y = e.pageY;
 			
 			// add this extra check as otherwise clicking on scroll bar of floating will hide the 
 			// floating in IE

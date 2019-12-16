@@ -112,8 +112,8 @@ onedev.server.inputassist = {
 					var $active = $dropdown.find("tr.active");
 					if ($active.length != 0) 
 						$input.data("update")($active);
-					else if ($dropdown.find("tr.different").length != 0)
-						$input.data("update")($dropdown.find("tr.different").first());
+					else if ($dropdown.find("tr").length != 0)
+						$input.data("update")($dropdown.find("tr").first());
 				}
 				return false;
 			} else {

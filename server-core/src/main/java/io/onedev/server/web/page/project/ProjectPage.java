@@ -60,11 +60,11 @@ import io.onedev.server.web.page.project.setting.ProjectSettingTab;
 import io.onedev.server.web.page.project.setting.authorization.ProjectAuthorizationsPage;
 import io.onedev.server.web.page.project.setting.avatar.AvatarEditPage;
 import io.onedev.server.web.page.project.setting.branchprotection.BranchProtectionPage;
-import io.onedev.server.web.page.project.setting.build.BuildPreserveSettingPage;
+import io.onedev.server.web.page.project.setting.build.ProjectBuildSettingPage;
+import io.onedev.server.web.page.project.setting.build.ProjectSecretListPage;
 import io.onedev.server.web.page.project.setting.general.GeneralSettingPage;
-import io.onedev.server.web.page.project.setting.issue.PromptFieldsUponIssueOpenSettingPage;
+import io.onedev.server.web.page.project.setting.issue.ProjectIssueSettingPage;
 import io.onedev.server.web.page.project.setting.issue.StateTransitionsPage;
-import io.onedev.server.web.page.project.setting.secret.SecretListPage;
 import io.onedev.server.web.page.project.setting.tagprotection.TagProtectionPage;
 import io.onedev.server.web.page.project.setting.webhook.WebHooksPage;
 import io.onedev.server.web.page.project.stats.ProjectContribsPage;
@@ -309,9 +309,10 @@ public abstract class ProjectPage extends LayoutPage implements ProjectAware {
 		tabs.add(new ProjectSettingTab("Authorizations", "fa fa-fw fa-user", ProjectAuthorizationsPage.class));
 		tabs.add(new ProjectSettingTab("Branch Protection", "fa fa-fw fa-lock", BranchProtectionPage.class));
 		tabs.add(new ProjectSettingTab("Tag Protection", "fa fa-fw fa-lock", TagProtectionPage.class));
-		tabs.add(new ProjectSettingTab("Secrets", "fa fa-fw fa-key", SecretListPage.class));
-		tabs.add(new ProjectSettingTab("Issue Setting", "fa fa-fw fa-bug", StateTransitionsPage.class, PromptFieldsUponIssueOpenSettingPage.class));
-		tabs.add(new ProjectSettingTab("Build Preserve Setting", "fa fa-fw fa-cubes", BuildPreserveSettingPage.class));
+		tabs.add(new ProjectSettingTab("Issue Setting", "fa fa-fw fa-bug", 
+				StateTransitionsPage.class, ProjectIssueSettingPage.class));
+		tabs.add(new ProjectSettingTab("Build Setting", "fa fa-fw fa-cubes", 
+				ProjectSecretListPage.class, ProjectBuildSettingPage.class));
 		tabs.add(new ProjectSettingTab("Web Hooks", "fa fa-fw fa-volume-up", WebHooksPage.class));
 		return tabs;
 	}

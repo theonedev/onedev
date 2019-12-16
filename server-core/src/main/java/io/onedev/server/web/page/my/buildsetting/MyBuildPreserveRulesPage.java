@@ -1,4 +1,4 @@
-package io.onedev.server.web.page.project.setting.build;
+package io.onedev.server.web.page.my.buildsetting;
 
 import java.io.Serializable;
 
@@ -8,14 +8,13 @@ import org.apache.wicket.model.AbstractReadOnlyModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
 import io.onedev.server.OneDev;
-import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.web.editable.PropertyContext;
-import io.onedev.server.web.page.project.setting.ProjectSettingPage;
 
 @SuppressWarnings("serial")
-public class BuildPreserveSettingPage extends ProjectSettingPage {
+public class MyBuildPreserveRulesPage extends MyBuildSettingPage {
 
-	public BuildPreserveSettingPage(PageParameters params) {
+	public MyBuildPreserveRulesPage(PageParameters params) {
 		super(params);
 	}
 
@@ -29,9 +28,9 @@ public class BuildPreserveSettingPage extends ProjectSettingPage {
 			protected void onSubmit() {
 				super.onSubmit();
 				
-				OneDev.getInstance(ProjectManager.class).save(getProject());
-				getSession().success("Build preserve setting has been saved");
-				setResponsePage(BuildPreserveSettingPage.class, BuildPreserveSettingPage.paramsOf(getProject()));
+				OneDev.getInstance(UserManager.class).save(getLoginUser());
+				getSession().success("Build preserve rules have been saved");
+				setResponsePage(MyBuildPreserveRulesPage.class);
 			}
 			
 		};
@@ -42,10 +41,10 @@ public class BuildPreserveSettingPage extends ProjectSettingPage {
 
 			@Override
 			public Serializable getObject() {
-				return getProject().getBuildSetting();
+				return getLoginUser().getBuildSetting();
 			}
 			
-		}, "preservations"));
+		}, "buildPreservations"));
 		
 		add(form);
 	}

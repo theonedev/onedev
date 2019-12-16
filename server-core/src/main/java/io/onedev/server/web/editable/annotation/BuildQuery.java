@@ -18,6 +18,8 @@ public @interface BuildQuery {
 	
 	boolean withUnfinishedCriteria();
 	
+	boolean noAutoFocus() default true;
+	
     String message() default "";
 
     Class<?>[] groups() default {};

@@ -6,14 +6,14 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import io.onedev.server.model.support.Secret;
+import io.onedev.server.model.support.JobSecret;
 import io.onedev.server.web.editable.annotation.ChoiceProvider;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.util.WicketUtils;
 
 @Editable
-public class SecretEditBean implements Serializable {
+public class JobSecretEditBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
@@ -34,8 +34,8 @@ public class SecretEditBean implements Serializable {
 	private static List<String> getSecretChoices() {
 		List<String> secretNames = new ArrayList<>();
 		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
-		for (Secret secret: page.getProject().getSecrets()) {
-			if (!secretNames.contains(secret.getName()) && secret.isAuthorized(page.getProject(), page.getCommit()))
+		for (JobSecret secret: page.getProject().getBuildSetting().getSecrets()) {
+			if (secret.isAuthorized(page.getProject(), page.getCommit()))
 				secretNames.add(secret.getName());
 		}
 		return secretNames;

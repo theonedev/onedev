@@ -623,7 +623,7 @@ td.ellipsis {
     font-size: 16px;
 }
 
-.panel-list .panel {
+.panel {
 	border-width: 2px;
 }
 .panel-list .drag-indicator {

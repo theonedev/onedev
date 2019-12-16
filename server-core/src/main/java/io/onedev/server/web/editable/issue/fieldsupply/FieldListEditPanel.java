@@ -42,7 +42,7 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.SecretEditBean;
+import io.onedev.server.web.editable.JobSecretEditBean;
 import io.onedev.server.web.editable.annotation.FieldNamesProvider;
 import io.onedev.server.web.editable.annotation.Password;
 
@@ -241,7 +241,7 @@ class FieldListEditPanel extends PropertyEditor<List<Serializable>> {
 			if (property.getPropertyGetter().getAnnotation(Password.class) == null) {
 				return PropertyContext.edit("value", fieldBean, property.getPropertyName());
 			} else { 
-				SecretEditBean bean = new SecretEditBean();
+				JobSecretEditBean bean = new JobSecretEditBean();
 				bean.setSecret((String) property.getPropertyValue(fieldBean));
 				return PropertyContext.edit("value", bean, "secret");
 			}		

@@ -42,7 +42,7 @@ public class Authentication implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<String> getPasswordSecretChoices() {
-		return Project.get().getSecrets().stream().map(it->it.getName()).collect(Collectors.toList());
+		return Project.get().getBuildSetting().getSecrets().stream().map(it->it.getName()).collect(Collectors.toList());
 	}
 	
 }

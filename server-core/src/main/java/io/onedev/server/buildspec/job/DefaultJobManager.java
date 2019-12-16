@@ -264,7 +264,7 @@ public class DefaultJobManager implements JobManager, Runnable, CodePullAuthoriz
 							throw new OneException("Unable to access dependency project '" 
 									+ dependency.getProjectName() + "': user not found");
 						}
-						String password = project.getSecretValue(dependency.getAuthentication().getPasswordSecret(), commitId);
+						String password = project.getBuildSetting().getSecretValue(project, dependency.getAuthentication().getPasswordSecret(), commitId);
 						if (!passwordService.passwordsMatch(password, user.getPassword())) {
 							throw new OneException("Unable to access dependency project '" 
 									+ dependency.getProjectName() + "': password incorrect");

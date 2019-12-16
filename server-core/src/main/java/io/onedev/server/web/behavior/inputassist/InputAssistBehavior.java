@@ -3,7 +3,6 @@ package io.onedev.server.web.behavior.inputassist;
 import static org.apache.wicket.ajax.attributes.CallbackParameter.explicit;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.wicket.Component;
@@ -41,17 +40,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 	public static final int MAX_SUGGESTIONS = 1000;
 	
-	private final boolean noAutoFocus;
-	
 	private FloatingPanel dropdown;
-	
-	public InputAssistBehavior(boolean noAutoFocus) {
-		this.noAutoFocus = noAutoFocus;
-	}
-	
-	public InputAssistBehavior() {
-		this(true);
-	}
 	
 	@Override
 	protected void onBind() {
@@ -59,8 +48,6 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 		
 		Component input = getComponent();
 		input.add(AttributeAppender.append("class", "input-assist"));
-		if (noAutoFocus)
-			input.add(AttributeAppender.append("class", "no-autofocus"));
 		input.setOutputMarkupId(true);
 	}
 
@@ -147,18 +134,19 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 			
 			if (inputCaret != null) {
 				InputStatus inputStatus = new InputStatus(inputContent, inputCaret);
-				List<InputCompletion> suggestions;				
+				List<InputCompletion> suggestions = new ArrayList<>();				
 				ComponentContext.push(new ComponentContext(getComponent()));
 				try {
-					suggestions = getSuggestions(new InputStatus(inputContent, inputCaret));
+					for (InputCompletion suggestion: getSuggestions(new InputStatus(inputContent, inputCaret))) {
+						if (!suggestion.getContent().equals(inputStatus.getContent()) 
+								|| suggestion.getCaret() != inputStatus.getCaret()) {
+							suggestions.add(suggestion);
+							if (suggestions.size() >= MAX_SUGGESTIONS)
+								break;
+						}
+					}
 				} finally {
 					ComponentContext.pop();
-				}
-				int count = 0;
-				for (Iterator<InputCompletion> it = suggestions.iterator(); it.hasNext();) {
-					it.next();
-					if (++count > MAX_SUGGESTIONS)
-						it.remove();
 				}
 				if (!suggestions.isEmpty()) {
 					int anchor = getAnchor(inputContent.substring(0, inputCaret));
@@ -167,7 +155,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 
 							@Override
 							protected Component newContent(String id) {
-								return new AssistPanel(id, getComponent(), inputStatus, suggestions, getHints(inputStatus)) {
+								return new AssistPanel(id, getComponent(), suggestions, getHints(inputStatus)) {
 
 									@Override
 									protected void onClose(AjaxRequestTarget target) {
@@ -189,7 +177,7 @@ public abstract class InputAssistBehavior extends AbstractPostAjaxBehavior {
 						target.appendJavaScript(script);
 					} else {
 						Component content = dropdown.getContent();
-						Component newContent = new AssistPanel(content.getId(), getComponent(), inputStatus, suggestions, getHints(inputStatus)) {
+						Component newContent = new AssistPanel(content.getId(), getComponent(), suggestions, getHints(inputStatus)) {
 
 							@Override
 							protected void onClose(AjaxRequestTarget target) {

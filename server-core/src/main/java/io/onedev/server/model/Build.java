@@ -536,7 +536,7 @@ public class Build extends AbstractEntity implements Referenceable {
 		if (secretName.startsWith(SecretInput.LITERAL_VALUE_PREFIX))
 			return secretName.substring(SecretInput.LITERAL_VALUE_PREFIX.length());
 		else
-			return project.getSecretValue(secretName, ObjectId.fromString(getCommitHash()));
+			return project.getBuildSetting().getSecretValue(project, secretName, ObjectId.fromString(getCommitHash()));
 	}
 	
 	public BuildSpec getBuildSpec() {

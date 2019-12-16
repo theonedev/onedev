@@ -19,6 +19,7 @@ import org.apache.wicket.ajax.markup.html.form.AjaxButton;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.event.Broadcast;
 import org.apache.wicket.event.IEvent;
+import org.apache.wicket.feedback.FencedFeedbackPanel;
 import org.apache.wicket.markup.ComponentTag;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -49,7 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 
-import de.agilecoders.wicket.core.markup.html.bootstrap.common.NotificationPanel;
+import io.onedev.commons.utils.HtmlUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
 import io.onedev.server.OneException;
@@ -105,7 +106,7 @@ public abstract class CommitListPanel extends Panel {
 				return CommitQuery.merge(getBaseQuery(), additionalQuery);
 			} catch (Exception e) {
 				logger.error("Error parsing commit query: " + query, e);
-				error(e.getMessage());
+				error(HtmlUtils.formatAsHtml(e.getMessage()));
 			}
 			return null;
 		}
@@ -152,7 +153,7 @@ public abstract class CommitListPanel extends Panel {
 					commitHashes = command.call();
 				} catch (Exception e) {
 					if (e.getMessage() != null)
-						error(e.getMessage());
+						error(HtmlUtils.formatAsHtml(e.getMessage()));
 					else
 						error("Error calculating commits: check log for details");
 					commitHashes = new ArrayList<>();
@@ -358,8 +359,9 @@ public abstract class CommitListPanel extends Panel {
 		body.setOutputMarkupId(true);
 		add(body);
 		
-		NotificationPanel feedback;
-		body.add(feedback = new NotificationPanel("feedback", this));
+		FencedFeedbackPanel feedback;
+		body.add(feedback = new FencedFeedbackPanel("feedback", this));
+		feedback.setEscapeModelStrings(false);
 		
 		body.add(new WebMarkupContainer("noCommits") {
 

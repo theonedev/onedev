@@ -13,7 +13,6 @@ import org.apache.wicket.markup.html.panel.Panel;
 import org.apache.wicket.markup.repeater.RepeatingView;
 
 import io.onedev.commons.codeassist.InputCompletion;
-import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.web.behavior.infinitescroll.InfiniteScrollBehavior;
 
@@ -24,16 +23,13 @@ abstract class AssistPanel extends Panel {
 	
 	private final Component input;
 	
-	private final InputStatus inputStatus;
-	
 	private final List<String> hints;
 
 	private final List<InputCompletion> suggestions;
 	
-	public AssistPanel(String id, Component input, InputStatus inputStatus, List<InputCompletion> suggestions, List<String> hints) {
+	public AssistPanel(String id, Component input, List<InputCompletion> suggestions, List<String> hints) {
 		super(id);
 		this.input = input;
-		this.inputStatus = inputStatus;
 		this.suggestions = suggestions;
 		this.hints = hints;
 	}
@@ -120,10 +116,6 @@ abstract class AssistPanel extends Panel {
 		String content = suggestion.getContent();
 		item.add(AttributeAppender.append("data-content", content));
 		item.add(AttributeAppender.append("data-caret", suggestion.getCaret()));
-		if (!suggestion.getContent().equals(inputStatus.getContent()) 
-				|| suggestion.getCaret() != inputStatus.getCaret()) {
-			item.add(AttributeAppender.append("class", "different"));
-		}
 		item.setOutputMarkupId(true);
 		return item;
 	}

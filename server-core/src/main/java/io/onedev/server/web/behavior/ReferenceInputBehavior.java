@@ -30,7 +30,6 @@ public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 	private final boolean appendTitle;
 	
 	public ReferenceInputBehavior(boolean appendTitle) {
-		super(false);
 		this.appendTitle = appendTitle;
 	}
 	
@@ -90,7 +89,7 @@ public abstract class ReferenceInputBehavior extends InputAssistBehavior {
 								content + inputStatus.getContentAfterCaret(), content.length(), 
 								suggestion.getDescription(), suggestion.getMatch());
 					} else {
-						String content = contentBeforeCaret.substring(0, hashIndex) + suggestion.getContent() + " "; 
+						String content = contentBeforeCaret.substring(0, hashIndex) + suggestion.getContent(); 
 						completion = new InputCompletion(suggestion.getContent(), 
 								content + inputStatus.getContentAfterCaret(), content.length(), 
 								suggestion.getDescription(), suggestion.getMatch());

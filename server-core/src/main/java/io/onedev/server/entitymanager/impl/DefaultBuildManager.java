@@ -543,11 +543,11 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 		Collection<Long> idsToPreserve = new HashSet<>();
 		for (Project project: projectManager.query()) {
 			logger.debug("Populating preserved build ids of project '" + project.getName() + "'...");
-			List<BuildPreservation> preservations = project.getBuildSetting().getPreservations();
+			List<BuildPreservation> preservations = project.getBuildSetting().getHierarchyBuildPreservations(project);
 			if (preservations.isEmpty()) {
 				idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
 			} else {
-				for (BuildPreservation preservation: project.getBuildSetting().getPreservations()) {
+				for (BuildPreservation preservation: project.getBuildSetting().getBuildPreservations()) {
 					try {
 						BuildQuery query = BuildQuery.parse(project, preservation.getCondition(), false, false);
 						int count;

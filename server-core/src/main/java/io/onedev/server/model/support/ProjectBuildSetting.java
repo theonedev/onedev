@@ -2,12 +2,19 @@ package io.onedev.server.model.support;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import org.eclipse.jgit.lib.ObjectId;
+
 import io.onedev.server.OneDev;
+import io.onedev.server.OneException;
 import io.onedev.server.entitymanager.SettingManager;
+import io.onedev.server.model.Project;
 import io.onedev.server.model.support.administration.GlobalBuildSetting;
 import io.onedev.server.web.editable.annotation.Editable;
 
@@ -20,16 +27,26 @@ public class ProjectBuildSetting implements Serializable {
 	
 	private List<NamedBuildQuery> namedQueries;
 	
+	private List<JobSecret> secrets = new ArrayList<>();
+	
+	private List<BuildPreservation> buildPreservations = new ArrayList<>();
+	
 	private transient GlobalBuildSetting setting;
 	
-	private List<BuildPreservation> preservations = new ArrayList<>();
-	
-	public List<BuildPreservation> getPreservations() {
-		return preservations;
+	public List<JobSecret> getSecrets() {
+		return secrets;
 	}
 
-	public void setPreservations(List<BuildPreservation> preservations) {
-		this.preservations = preservations;
+	public void setSecrets(List<JobSecret> secrets) {
+		this.secrets = secrets;
+	}
+	
+	public List<BuildPreservation> getBuildPreservations() {
+		return buildPreservations;
+	}
+
+	public void setBuildPreservations(List<BuildPreservation> buildPreservations) {
+		this.buildPreservations = buildPreservations;
 	}
 
 	private GlobalBuildSetting getGlobalSetting() {
@@ -69,6 +86,38 @@ public class ProjectBuildSetting implements Serializable {
 				return namedQuery;
 		}
 		return null;
+	}
+	
+	public List<JobSecret> getInheritedSecrets(Project project) {
+		Map<String, JobSecret> inheritedSecrets = new LinkedHashMap<>();
+		for (JobSecret secret: project.getOwner().getBuildSetting().getSecrets())
+			inheritedSecrets.put(secret.getName(), secret);
+		inheritedSecrets.keySet().removeAll(secrets.stream().map(it->it.getName()).collect(Collectors.toSet()));
+		return new ArrayList<>(inheritedSecrets.values());
+	}
+	
+	public List<JobSecret> getHierarchySecrets(Project project) {
+		List<JobSecret> hierarchySecrets = new ArrayList<>(getSecrets());
+		hierarchySecrets.addAll(getInheritedSecrets(project));
+		return hierarchySecrets;
+	}
+	
+	public String getSecretValue(Project project, String secretName, ObjectId commitId) {
+		for (JobSecret secret: getHierarchySecrets(project)) {
+			if (secret.getName().equals(secretName)) {
+				if (secret.isAuthorized(project, commitId))				
+					return secret.getValue();
+				else
+					throw new OneException("Job secret not authorized: " + secretName);
+			}
+		}
+		throw new OneException("No job secret found: " + secretName);
+	}
+	
+	public List<BuildPreservation> getHierarchyBuildPreservations(Project project) {
+		List<BuildPreservation> hierarchyBuildPreservations = new ArrayList<>(getBuildPreservations());
+		hierarchyBuildPreservations.addAll(project.getOwner().getBuildSetting().getBuildPreservations());
+		return hierarchyBuildPreservations;
 	}
 	
 }

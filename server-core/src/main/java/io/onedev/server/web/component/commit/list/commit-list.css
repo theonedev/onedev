@@ -26,7 +26,7 @@
 .commit-list>.body .no-commits {
 	font-size: 16px;
 }
-.commit-list>.body li {
+.commit-list>.body>ul>li {
 	padding: 4px 0;
 	position: relative;
 }

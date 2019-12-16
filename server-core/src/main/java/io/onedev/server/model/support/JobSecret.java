@@ -1,12 +1,16 @@
 package io.onedev.server.model.support;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jgit.lib.ObjectId;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import io.onedev.commons.codeassist.InputCompletion;
+import io.onedev.commons.codeassist.InputStatus;
 import io.onedev.commons.codeassist.InputSuggestion;
+import io.onedev.commons.utils.LinearRange;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
@@ -15,22 +19,22 @@ import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.Password;
 import io.onedev.server.web.editable.annotation.Patterns;
+import io.onedev.server.web.editable.annotation.SuggestionProvider;
 import io.onedev.server.web.util.SuggestionUtils;
 
 @Editable
-public class Secret implements Serializable {
+public class JobSecret implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
 	private String name;
 
-	private String description;
-	
 	private String value;
 	
 	private String authorizedBranches;
 	
 	@Editable(order=100)
+	@SuggestionProvider("suggestNames")
 	@NotEmpty
 	@DnsName
 	public String getName() {
@@ -40,14 +44,23 @@ public class Secret implements Serializable {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	@Editable(order=150)
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
+	
+	@SuppressWarnings("unused")
+	private static List<InputCompletion> suggestNames(InputStatus inputStatus) {
+		Project project = Project.get();
+		List<InputCompletion> suggestions = new ArrayList<>();
+		if (project != null) {
+			for (JobSecret secret: project.getBuildSetting().getInheritedSecrets(project)) {
+				LinearRange match = LinearRange.match(secret.getName(), inputStatus.getContentBeforeCaret());
+				if (match != null) {
+					InputCompletion suggestion = new InputCompletion(secret.getName(), 
+							secret.getName() + inputStatus.getContentAfterCaret(), 
+							secret.getName().length(), "override inherited", match);
+					suggestions.add(suggestion);
+				}
+			}
+		} 
+		return suggestions;
 	}
 
 	@Editable(order=200)
@@ -88,4 +101,5 @@ public class Secret implements Serializable {
 		return authorizedBranches == null 
 				|| PatternSet.fromString(authorizedBranches).matches(new PathMatcher(), branch);
 	}
+	
 }

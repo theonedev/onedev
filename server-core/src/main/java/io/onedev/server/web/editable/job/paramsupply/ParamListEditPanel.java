@@ -45,7 +45,7 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
-import io.onedev.server.web.editable.SecretEditBean;
+import io.onedev.server.web.editable.JobSecretEditBean;
 import io.onedev.server.web.editable.annotation.ParamSpecProvider;
 import io.onedev.server.web.editable.annotation.Password;
 
@@ -268,7 +268,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 		if (property.getPropertyGetter().getAnnotation(Password.class) == null) {
 			item.add(PropertyContext.edit("value", paramBean, property.getPropertyName()));
 		} else { 
-			SecretEditBean bean = new SecretEditBean();
+			JobSecretEditBean bean = new JobSecretEditBean();
 			bean.setSecret((String) property.getPropertyValue(paramBean));
 			item.add(PropertyContext.edit("value", bean, "secret"));
 		}			
