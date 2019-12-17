@@ -1035,6 +1035,13 @@ public class ProjectBlobPage extends ProjectPage implements BlobRenderContext, S
 	}
 
 	@Override
+	public void pushState(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable String position) {
+		state.blobIdent = blobIdent;
+		state.position = position;
+		pushState(target);
+	}
+	
+	@Override
 	public void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits) {
 		newSearchResult(target, hits);
 		resizeWindow(target);

@@ -26,6 +26,8 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LinearRange;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.server.OneDev;
+import io.onedev.server.buildspec.BuildSpec;
+import io.onedev.server.buildspec.Property;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobVariable;
 import io.onedev.server.buildspec.job.VariableInterpolator;
@@ -135,7 +137,7 @@ public class SuggestionUtils {
 	}
 	
 	public static List<InputSuggestion> suggestVariables(Project project, @Nullable ObjectId commitId, 
-			Job job, String matchWith) {
+			BuildSpec buildSpec, Job job, String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		int numSuggestions = 0;
 		List<InputSuggestion> suggestions = new ArrayList<>();
@@ -145,6 +147,8 @@ public class SuggestionUtils {
 			variables.put(var.name().toLowerCase(), null);
 		for (ParamSpec paramSpec: job.getParamSpecs()) 
 			variables.put(VariableInterpolator.PARAMS_PREFIX + paramSpec.getName(), paramSpec.getDescription());
+		for (Property property: buildSpec.getProperties())
+			variables.put(VariableInterpolator.PROPERTIES_PREFIX + property.getName(), null);
 		for (JobSecret secret: project.getBuildSetting().getHierarchySecrets(project)) {
 			String varName = VariableInterpolator.SECRETS_PREFIX + secret.getName();
 			if (commitId != null && secret.isAuthorized(project, commitId) 

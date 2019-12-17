@@ -24,6 +24,7 @@ import io.onedev.server.web.behavior.AbstractPostAjaxBehavior;
 import io.onedev.server.web.component.MultilineLabel;
 import io.onedev.server.web.component.job.RunJobLink;
 import io.onedev.server.web.editable.BeanContext;
+import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
 import io.onedev.server.web.page.project.blob.render.view.BlobViewPanel;
 
@@ -46,7 +47,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 			if (buildSpec != null) {
 				Fragment validFrag = new Fragment("content", "validFrag", this);			
 				if (!buildSpec.getJobs().isEmpty()) {
-					Fragment hasJobsFrag = new Fragment("body", "hasJobsFrag", this);
+					Fragment hasJobsFrag = new Fragment("jobs", "hasJobsFrag", this);
 					
 					RepeatingView navsView = new RepeatingView("navs");
 					RepeatingView jobsView = new RepeatingView("contents");
@@ -70,8 +71,14 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 					
 					validFrag.add(hasJobsFrag);
 				} else {
-					validFrag.add(new Label("body", "No jobs defined").add(AttributeAppender.append("class", "not-defined")));
+					validFrag.add(new Label("jobs", "No jobs defined").add(AttributeAppender.append("class", "not-defined")));
 				}
+				
+				if (!buildSpec.getProperties().isEmpty())
+					validFrag.add(PropertyContext.view("properties", buildSpec, "properties"));
+				else
+					validFrag.add(new Label("properties", "No properties defined").add(AttributeAppender.append("class", "not-defined")));
+					
 				add(validFrag);
 			} else {
 				add(new Label("content", "Build spec not defined").add(AttributeAppender.append("class", "not-defined")));
@@ -89,7 +96,7 @@ public class BuildSpecBlobViewPanel extends BlobViewPanel {
 				IRequestParameters params = RequestCycle.get().getRequest().getPostParameters();
 				String selection = params.getParameterValue("selection").toString();
 				String position = BuildSpecRendererProvider.getPosition(selection);
-				context.onSelect(target, context.getBlobIdent(), position);
+				context.pushState(target, context.getBlobIdent(), position);
 			}
 			
 		});

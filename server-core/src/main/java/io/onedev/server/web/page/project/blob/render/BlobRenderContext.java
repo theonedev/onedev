@@ -71,6 +71,8 @@ public interface BlobRenderContext extends Serializable {
 	
 	boolean isOnBranch();
 	
+	void pushState(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable String position);
+	
 	void onSelect(AjaxRequestTarget target, BlobIdent blobIdent, @Nullable String position);
 	
 	void onSearchComplete(AjaxRequestTarget target, List<QueryHit> hits);

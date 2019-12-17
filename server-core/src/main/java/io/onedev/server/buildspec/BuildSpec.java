@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import javax.annotation.Nullable;
 import javax.validation.ConstraintValidatorContext;
@@ -43,7 +44,11 @@ public class BuildSpec implements Serializable, Validatable {
 	
 	private List<Job> jobs = new ArrayList<>();
 	
+	private List<Property> properties = new ArrayList<>();
+	
 	private transient Map<String, Job> jobMap;
+	
+	private transient Map<String, String> propertyMap;
 	
 	@Editable
 	@Valid
@@ -55,6 +60,15 @@ public class BuildSpec implements Serializable, Validatable {
 		this.jobs = jobs;
 	}
 	
+	@Editable
+	public List<Property> getProperties() {
+		return properties;
+	}
+
+	public void setProperties(List<Property> properties) {
+		this.properties = properties;
+	}
+
 	public Map<String, Job> getJobMap() {
 		if (jobMap == null) { 
 			jobMap = new LinkedHashMap<>();
@@ -62,6 +76,15 @@ public class BuildSpec implements Serializable, Validatable {
 				jobMap.put(job.getName(), job);
 		}
 		return jobMap;
+	}
+	
+	public Map<String, String> getPropertyMap() {
+		if (propertyMap == null) { 
+			propertyMap = new LinkedHashMap<>();
+			for (Property property: properties)
+				propertyMap.put(property.getName(), property.getValue());
+		}
+		return propertyMap;
 	}
 	
 	@Override
@@ -196,4 +219,9 @@ public class BuildSpec implements Serializable, Validatable {
 		}
 	}
 
+	@SuppressWarnings("unused")
+	private void migrate1(VersionedDocument dom, Stack<Integer> versions) {
+		dom.getRootElement().addElement("properties");
+	}
+	
 }

@@ -188,7 +188,7 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	private transient Map<Build.Status, Collection<RevCommit>> commitsCache;
 	
-	private transient BuildSpec buildSpec;
+	private transient BuildSpec spec;
 	
 	private transient Job job;
 	
@@ -539,15 +539,15 @@ public class Build extends AbstractEntity implements Referenceable {
 			return project.getBuildSetting().getSecretValue(project, secretName, ObjectId.fromString(getCommitHash()));
 	}
 	
-	public BuildSpec getBuildSpec() {
-		if (buildSpec == null) 
-			buildSpec = Preconditions.checkNotNull(getProject().getBuildSpec(getCommitId()));
-		return buildSpec;
+	public BuildSpec getSpec() {
+		if (spec == null) 
+			spec = Preconditions.checkNotNull(getProject().getBuildSpec(getCommitId()));
+		return spec;
 	}
 	
 	public Job getJob() {
 		if (job == null) 
-			job = Preconditions.checkNotNull(getBuildSpec().getJobMap().get(getJobName()));
+			job = Preconditions.checkNotNull(getSpec().getJobMap().get(getJobName()));
 		return job;
 	}
 

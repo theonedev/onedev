@@ -693,7 +693,8 @@ public class SourceViewPanel extends BlobViewPanel implements Positionable, Sear
 
 					@Override
 					public void onClick(AjaxRequestTarget target) {
-						context.onSelect(target, context.getBlobIdent(), SourceRendererProvider.getPosition(symbol.getPosition()));
+						context.onSelect(target, context.getBlobIdent(),
+								SourceRendererProvider.getPosition(symbol.getPosition()));
 					}
 					
 				};

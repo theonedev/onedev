@@ -18,6 +18,8 @@ public class VariableInterpolator implements Function<String, String> {
 
 	public static final String PARAMS_PREFIX = "params:"; 
 	
+	public static final String PROPERTIES_PREFIX = "properties:";
+	
 	public static final String SECRETS_PREFIX = "secrets:";
 	
 	public static final String SCRIPTS_PREFIX = "scripts:";
@@ -53,6 +55,13 @@ public class VariableInterpolator implements Function<String, String> {
 				}					
 			}
 			throw new OneException("Undefined param: " + paramName);
+		} else if (t.startsWith(PROPERTIES_PREFIX)) {
+			String propertyName = t.substring(PROPERTIES_PREFIX.length());
+			String propertyValue = build.getSpec().getPropertyMap().get(propertyName);
+			if (propertyValue != null)
+				return propertyValue;
+			else
+				throw new OneException("Undefined property: " + propertyName);
 		} else if (t.startsWith(SECRETS_PREFIX)) {
 			String secretName = t.substring(SECRETS_PREFIX.length());
 			return build.getSecretValue(secretName);

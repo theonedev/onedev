@@ -127,17 +127,23 @@ public class Job implements Serializable, Validatable {
 		Component component = ComponentContext.get().getComponent();
 		List<InputSuggestion> suggestions = new ArrayList<>();
 		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
-		JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
-		if (jobAware != null) {
-			Job job = jobAware.getJob();
-			if (job != null) {
-				RevCommit commit;
-				if (page.getBlobIdent().revision != null)
-					commit = page.getCommit();
-				else
-					commit = null;
-				suggestions.addAll(SuggestionUtils.suggestVariables(page.getProject(), commit, job, matchWith));
-			
+		BuildSpecAware buildSpecAware = WicketUtils.findInnermost(component, BuildSpecAware.class);
+		if (buildSpecAware != null) {
+			BuildSpec buildSpec = buildSpecAware.getBuildSpec();
+			if (buildSpec != null) {
+				JobAware jobAware = WicketUtils.findInnermost(component, JobAware.class);
+				if (jobAware != null) {
+					Job job = jobAware.getJob();
+					if (job != null) {
+						RevCommit commit;
+						if (page.getBlobIdent().revision != null)
+							commit = page.getCommit();
+						else
+							commit = null;
+						suggestions.addAll(SuggestionUtils.suggestVariables(
+								page.getProject(), commit, buildSpec, job, matchWith));
+					}
+				}
 			}
 		}
 		return suggestions;
@@ -164,8 +170,9 @@ public class Job implements Serializable, Validatable {
 		ProjectBlobPage page = (ProjectBlobPage) WicketUtils.getPage();
 		Project project = page.getProject();
 		ObjectId commitId = page.getCommit();
+		BuildSpec buildSpec = ComponentContext.get().getComponent().findParent(BuildSpecAware.class).getBuildSpec();
 		Job job = ComponentContext.get().getComponent().findParent(JobAware.class).getJob();
-		for (InputSuggestion suggestion: SuggestionUtils.suggestVariables(project, commitId, job, ""))  
+		for (InputSuggestion suggestion: SuggestionUtils.suggestVariables(project, commitId, buildSpec, job, ""))  
 			variables.add(suggestion.getContent());
 		return variables;
 	}

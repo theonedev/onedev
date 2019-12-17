@@ -33,6 +33,7 @@ import io.onedev.commons.launcher.loader.AppLoader;
 import io.onedev.server.OneDev;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.BuildSpecAware;
+import io.onedev.server.buildspec.Property;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.JobAware;
 import io.onedev.server.buildspec.job.JobSuggestion;
@@ -48,6 +49,8 @@ import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.PathNode;
+import io.onedev.server.web.editable.PropertyContext;
+import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PathNode.Indexed;
 import io.onedev.server.web.editable.PathNode.Named;
 import io.onedev.server.web.page.project.blob.render.BlobRenderContext;
@@ -63,6 +66,8 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 	private RepeatingView jobNavs;
 	
 	private RepeatingView jobContents;
+	
+	private PropertyEditor<Serializable> properties;
 	
 	private AbstractPostAjaxBehavior deleteBehavior;
 	
@@ -109,13 +114,13 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 	
 	private void addJob(AjaxRequestTarget target, Job job) {
 		Component nav = newJobNav(job);
-		String script = String.format("$('.build-spec>.valid>.jobs>.body>.side>.navs').append(\"<div id='%s'></div>\");", 
+		String script = String.format("$('.build-spec>.valid>.body>.jobs>.side>.navs').append(\"<div id='%s'></div>\");", 
 				nav.getMarkupId());
 		target.prependJavaScript(script);
 		target.add(nav);
 
 		Component content = newJobContent(job);
-		script = String.format("$('.build-spec>.valid>.jobs>.body>.contents').append(\"<div id='%s'></div>\");", 
+		script = String.format("$('.build-spec>.valid>.body>.jobs>.contents').append(\"<div id='%s'></div>\");", 
 				content.getMarkupId());
 		target.prependJavaScript(script);
 		target.add(content);
@@ -225,7 +230,9 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 					target.appendJavaScript(String.format("onedev.server.buildSpec.swapJobs(%d, %d)", fromIndex, toIndex));
 				}
 				
-			}.sortable(".jobs>.body>.side>.navs"));
+			}.sortable(".body>.jobs>.side>.navs"));
+			
+			content.add(properties = PropertyContext.edit("properties", buildSpec, "properties"));
 			
 			add(new IValidator<byte[]>() {
 				
@@ -308,6 +315,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 		response.render(OnDomReadyHeaderItem.forScript(script));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public BuildSpec getBuildSpec() {
 		if (parseResult instanceof BuildSpec) {
@@ -316,6 +324,7 @@ public class BuildSpecEditPanel extends FormComponentPanel<byte[]> implements Bu
 				BeanEditor jobContent = (BeanEditor) child;
 				buildSpec.getJobs().add((Job) jobContent.getConvertedInput());
 			}
+			buildSpec.setProperties((List<Property>) properties.getConvertedInput());
 			return buildSpec;
 		} else {
 			return null;

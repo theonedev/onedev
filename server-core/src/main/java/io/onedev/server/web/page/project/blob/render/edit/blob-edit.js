@@ -18,7 +18,7 @@ onedev.server.blobEdit = {
 	    $head.find(".save>a").click(function() {
     		onedev.server.viewState.getFromViewAndSetToHistory();
 	    	var $content = $body.find(">.content");
-	    	var $positionAware = $content.find(".position-aware");
+	    	var $positionAware = $content.find(".position-aware:visible");
 	    	if ($positionAware.length != 0) {
 		    	var position = $positionAware.data("getPosition")();
 		    	$content.children(".position").val(position);
