@@ -7,12 +7,19 @@ import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.panel.Panel;
+import org.apache.wicket.request.cycle.RequestCycle;
+import org.apache.wicket.request.mapper.parameter.PageParameters;
 
+import io.onedev.server.OneDev;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.User;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.component.user.card.UserCardPanel;
+import io.onedev.server.web.page.admin.user.UserProfilePage;
+import io.onedev.server.web.page.my.MyProfilePage;
 
 @SuppressWarnings("serial")
 public class UserIdentPanel extends Panel {
@@ -38,6 +45,16 @@ public class UserIdentPanel extends Panel {
 		add(new Label("name", displayName).setVisible(mode != Mode.AVATAR));
 		
 		add(AttributeAppender.append("class", "user"));
+		if (userId != null) {
+			User user = OneDev.getInstance(UserManager.class).load(userId);
+			if (SecurityUtils.isAdministrator()) {
+				CharSequence url = RequestCycle.get().urlFor(UserProfilePage.class, UserProfilePage.paramsOf(user));
+				add(AttributeAppender.append("href", url.toString()));
+			} else if (user.equals(SecurityUtils.getUser())) {
+				CharSequence url = RequestCycle.get().urlFor(MyProfilePage.class, new PageParameters());
+				add(AttributeAppender.append("href", url.toString()));
+			}
+		}
 		
 		add(new DropdownHoverBehavior(AlignPlacement.top(8), 350) {
 

@@ -25,6 +25,8 @@ import io.onedev.server.web.component.link.ViewStateAwarePageLink;
 import io.onedev.server.web.component.markdown.MarkdownViewer;
 import io.onedev.server.web.component.modal.ModalLink;
 import io.onedev.server.web.component.modal.ModalPanel;
+import io.onedev.server.web.component.user.ident.Mode;
+import io.onedev.server.web.component.user.ident.UserIdentPanel;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 import io.onedev.server.web.page.project.dashboard.ProjectDashboardPage;
@@ -44,6 +46,7 @@ public abstract class ProjectInfoPanel extends Panel {
 		super.onInitialize();
 		
 		add(new Label("name", getProject().getName()));
+		add(new UserIdentPanel("owner", getProject().getOwner(), Mode.NAME));
 
 		add(new ModalLink("forkNow") {
 			
