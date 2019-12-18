@@ -255,7 +255,7 @@ onedev.server = {
 				$ajaxLoadingIndicator[0].timer = setTimeout(function() {
 					if (!$ajaxLoadingIndicator.is(":visible") && $(".ajax-indicator:visible").length == 0)
 						$ajaxLoadingIndicator.show();
-				}, 1000);		
+				}, 2000);		
 			}
 			ongoingAjaxRequests++;
 		});
