@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.wicket.feedback.FencedFeedbackPanel;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.AbstractReadOnlyModel;
@@ -31,13 +30,9 @@ public class ProjectSecretListPage extends ProjectBuildSettingPage {
 		super.onInitialize();
 
 		List<JobSecret> inheritedSecrets = getProject().getBuildSetting().getInheritedSecrets(getProject());
-		if (!inheritedSecrets.isEmpty()) {
-			InheritedSecretsBean bean = new InheritedSecretsBean();
-			bean.setSecrets(inheritedSecrets);
-			add(PropertyContext.view("inheritedSecrets", bean, "secrets"));
-		} else {
-			add(new WebMarkupContainer("inheritedSecrets").setVisible(false));
-		}
+		InheritedSecretsBean bean = new InheritedSecretsBean();
+		bean.setSecrets(inheritedSecrets);
+		add(PropertyContext.view("inheritedSecrets", bean, "secrets"));
 
 		Form<?> form = new Form<Void>("form") {
 

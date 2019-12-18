@@ -31,7 +31,7 @@ public class ProjectBuildSetting implements Serializable {
 	
 	private List<BuildPreservation> buildPreservations = new ArrayList<>();
 	
-	private transient GlobalBuildSetting setting;
+	private transient GlobalBuildSetting globalSetting;
 	
 	public List<JobSecret> getSecrets() {
 		return secrets;
@@ -50,9 +50,9 @@ public class ProjectBuildSetting implements Serializable {
 	}
 
 	private GlobalBuildSetting getGlobalSetting() {
-		if (setting == null)
-			setting = OneDev.getInstance(SettingManager.class).getBuildSetting();
-		return setting;
+		if (globalSetting == null)
+			globalSetting = OneDev.getInstance(SettingManager.class).getBuildSetting();
+		return globalSetting;
 	}
 
 	@Nullable

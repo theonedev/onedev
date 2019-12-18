@@ -1289,4 +1289,28 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate28(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					Element buildSettingElement = element.addElement("buildSetting");
+					buildSettingElement.addElement("secrets");
+					buildSettingElement.addElement("buildPreservations");
+				}
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					element.element("secrets").detach();
+					element.element("buildSetting").detach();
+					Element buildSettingElement = element.addElement("buildSetting");
+					buildSettingElement.addElement("secrets");
+					buildSettingElement.addElement("buildPreservations");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }
