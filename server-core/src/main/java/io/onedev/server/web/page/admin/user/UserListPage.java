@@ -40,6 +40,7 @@ import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.user.UserDeleteLink;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 
 @SuppressWarnings("serial")
@@ -158,6 +159,16 @@ public class UserListPage extends AdministrationPage {
 					@Override
 					protected void onDeleted(AjaxRequestTarget target) {
 						setResponsePage(UserListPage.class, getPageParameters());
+					}
+										
+				});
+				
+				fragment.add(new Link<Void>("impersonate") {
+
+					@Override
+					public void onClick() {
+						SecurityUtils.getSubject().runAs(rowModel.getObject().getPrincipals());
+						setResponsePage(ProjectListPage.class);
 					}
 										
 				});

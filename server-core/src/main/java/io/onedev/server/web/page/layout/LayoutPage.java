@@ -2,6 +2,7 @@ package io.onedev.server.web.page.layout;
 
 import org.apache.wicket.Component;
 import org.apache.wicket.RestartResponseAtInterceptPageException;
+import org.apache.wicket.Session;
 import org.apache.wicket.behavior.AttributeAppender;
 import org.apache.wicket.markup.head.CssHeaderItem;
 import org.apache.wicket.markup.head.IHeaderResponse;
@@ -48,6 +49,7 @@ import io.onedev.server.web.page.my.MyPasswordPage;
 import io.onedev.server.web.page.my.MyProfilePage;
 import io.onedev.server.web.page.my.buildsetting.MyBuildSettingPage;
 import io.onedev.server.web.page.my.buildsetting.MySecretListPage;
+import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
 import io.onedev.server.web.page.security.RegisterPage;
@@ -203,9 +205,28 @@ public abstract class LayoutPage extends BasePage {
 		item.add(new ViewStateAwarePageLink<Void>("link", MySecretListPage.class));
 		if (getPage() instanceof MyBuildSettingPage)
 			item.add(AttributeAppender.append("class", "active"));
-		
-		signedInContainer.add(new ViewStateAwarePageLink<Void>("signOut", LogoutPage.class));
+
+		if (SecurityUtils.getSubject().isRunAs()) {
+			Link<Void> signOutLink = new Link<Void>("signOut") {
+
+				@Override
+				public void onClick() {
+					SecurityUtils.getSubject().releaseRunAs();
+					Session.get().warn("Exited impersonation");
+					setResponsePage(ProjectListPage.class);
+				}
+				
+			}; 
+			signOutLink.add(new Label("label", "Exit Impersonation"));
+			signedInContainer.add(signOutLink);
+		} else {
+			ViewStateAwarePageLink<Void> signOutLink = new ViewStateAwarePageLink<Void>("signOut", LogoutPage.class); 
+			signOutLink.add(new Label("label", "Sign Out"));
+			signedInContainer.add(signOutLink);
+		}
+
 		signedInContainer.setVisible(loginUser != null);
+		
 		if (getPage() instanceof MyPage)
 			signedInContainer.add(AttributeAppender.append("class", "active"));
 		
