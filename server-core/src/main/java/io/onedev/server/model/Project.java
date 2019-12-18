@@ -115,7 +115,6 @@ import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
-import io.onedev.server.web.editable.annotation.NameOfEmptyValue;
 import io.onedev.server.web.editable.annotation.UserChoice;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
@@ -156,7 +155,7 @@ public class Project extends AbstractEntity {
 	private Project forkedFrom;
 	
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(nullable=true)
+	@JoinColumn
 	private User owner;
 	
 	@Transient
@@ -312,7 +311,7 @@ public class Project extends AbstractEntity {
 
 	@Editable(order=500, name="Owner", description="Projects without owners are considered orphan projects")
 	@UserChoice
-	@NameOfEmptyValue("No owner")
+	@NotEmpty
 	public String getOwnerName() {
 		return ownerName;
 	}
@@ -394,7 +393,6 @@ public class Project extends AbstractEntity {
 		this.forkedFrom = forkedFrom;
 	}
 
-	@Nullable
 	public User getOwner() {
 		return owner;
 	}

@@ -1,15 +1,18 @@
 package io.onedev.server.web.page.project;
 
+import java.util.Collection;
+
 import org.apache.wicket.Session;
 import org.apache.wicket.markup.head.IHeaderResponse;
 import org.apache.wicket.markup.head.JavaScriptHeaderItem;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
+import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.editable.BeanContext;
@@ -32,8 +35,12 @@ public class NewProjectPage extends LayoutPage {
 		
 		Project project = new Project();
 		
-		BeanEditor editor = BeanContext.edit("editor", project, 
-				Lists.newArrayList("name", "description"), false);
+		Collection<String> properties = Sets.newHashSet("name", "description");
+		if (SecurityUtils.isAdministrator())
+			properties.add("ownerName");
+		project.setOwnerName(SecurityUtils.getUser().getName());
+		
+		BeanEditor editor = BeanContext.edit("editor", project, properties, false);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -47,6 +54,7 @@ public class NewProjectPage extends LayoutPage {
 					editor.error(new Path(new PathNode.Named("name")),
 							"This name has already been used by another project");
 				} else {
+					project.setOwner(OneDev.getInstance(UserManager.class).findByName(project.getOwnerName()));
 					projectManager.create(project);
 					Session.get().success("New project created");
 					setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(project));

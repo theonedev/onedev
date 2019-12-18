@@ -1,22 +1,23 @@
 package io.onedev.server.web.page.project.setting.general;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 import org.apache.wicket.Session;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.markup.html.AjaxLink;
-import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
-import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import io.onedev.server.OneDev;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.entitymanager.UserManager;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.SecurityUtils;
 import io.onedev.server.web.component.project.ConfirmDeleteProjectModal;
 import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
@@ -40,16 +41,13 @@ public class GeneralSettingPage extends ProjectSettingPage {
 	protected void onInitialize() {
 		super.onInitialize();
 		
-		if (!getProject().isNew()) 
-			add(new Label("help", "Git repository of this project is stored at: " + getProject().getGitDir()));
-		else 
-			add(new WebMarkupContainer("help").setVisible(false));
+		add(new Label("help", "Git repository of this project is stored at: " + getProject().getGitDir()));
 		
-		if (getProject().getOwner() != null)
+		Collection<String> properties = Sets.newHashSet("name", "description");
+		if (SecurityUtils.isAdministrator()) {
+			properties.add("ownerName");
 			getProject().setOwnerName(getProject().getOwner().getName());
-		else
-			getProject().setOwnerName(null);
-		
+		}
 		editor = BeanContext.editModel("editor", new IModel<Serializable>() {
 
 			@Override
@@ -68,7 +66,7 @@ public class GeneralSettingPage extends ProjectSettingPage {
 				editor.getDescriptor().copyProperties(object, getProject());
 			}
 			
-		}, Lists.newArrayList("name", "description", "defaultRoleName", "ownerName"), false);
+		}, properties, false);
 		
 		Form<?> form = new Form<Void>("form") {
 
@@ -88,10 +86,8 @@ public class GeneralSettingPage extends ProjectSettingPage {
 					String errorMessage = "This name has already been used by another project"; 
 					editor.error(new Path(new PathNode.Named("name")), errorMessage);
 				} else {
-					if (project.getOwnerName() != null)
+					if (SecurityUtils.isAdministrator())
 						project.setOwner(OneDev.getInstance(UserManager.class).findByName(project.getOwnerName()));
-					else
-						project.setOwner(null);
 					projectManager.save(project, oldName);
 					Session.get().success("General setting has been updated");
 					setResponsePage(GeneralSettingPage.class, paramsOf(project));

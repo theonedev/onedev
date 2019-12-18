@@ -1,11 +1,12 @@
 package io.onedev.server.event;
 
 import io.onedev.server.model.Project;
+import io.onedev.server.util.SecurityUtils;
 
 public class ProjectCreated extends ProjectEvent {
 	
 	public ProjectCreated(Project project) {
-		super(project.getOwner(), project.getCreateDate(), project);
+		super(SecurityUtils.getUser(), project.getCreateDate(), project);
 	}
 
 }

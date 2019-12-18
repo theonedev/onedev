@@ -189,7 +189,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
     @Override
     public void create(Project project) {
     	dao.persist(project);
-   		project.setOwner(SecurityUtils.getUser());
        	checkSanity(project);
        	
        	listenerRegistry.post(new ProjectCreated(project));
@@ -244,7 +243,6 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 	@Override
 	public void fork(Project from, Project to) {
     	dao.persist(to);
-    	to.setOwner(SecurityUtils.getUser());
         FileUtils.cleanDir(to.getGitDir());
         new CloneCommand(to.getGitDir()).mirror(true).from(from.getGitDir().getAbsolutePath()).call();
         checkSanity(to);
@@ -472,6 +470,7 @@ public class DefaultProjectManager extends AbstractEntityManager<Project>
 		} else {
 			User user = SecurityUtils.getUser();
 			if (user != null) {
+				projects.addAll(user.getProjects());
 				for (Membership membership: user.getMemberships()) {
 					for (GroupAuthorization authorization: membership.getGroup().getProjectAuthorizations()) {
 						if (authorization.getRole().implies(permission))
