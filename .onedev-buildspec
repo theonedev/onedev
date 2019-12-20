@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<io.onedev.server.buildspec.BuildSpec revision="0">
+<io.onedev.server.buildspec.BuildSpec revision="1">
     <jobs>
         <io.onedev.server.buildspec.job.Job>
             <name>Release</name>
@@ -54,7 +54,7 @@
             <paramSpecs/>
             <image>alpine/git:1.0.7</image>
             <commands>
-                <string>git push https://robinshine:@secrets:github-password@\@github.com/theonedev/server</string>
+                <string>git push https://robinshine:@secrets:github-password@\@github.com/theonedev/server HEAD:master</string>
             </commands>
             <retrieveSource>true</retrieveSource>
             <submoduleCredentials/>
@@ -77,4 +77,5 @@
             <retryDelay>30</retryDelay>
         </io.onedev.server.buildspec.job.Job>
     </jobs>
+    <properties/>
 </io.onedev.server.buildspec.BuildSpec>
