@@ -547,7 +547,7 @@ public class DefaultBuildManager extends AbstractEntityManager<Build> implements
 			if (preservations.isEmpty()) {
 				idsToPreserve.addAll(queryIds(project, new BuildQuery(), 0, Integer.MAX_VALUE));
 			} else {
-				for (BuildPreservation preservation: project.getBuildSetting().getBuildPreservations()) {
+				for (BuildPreservation preservation: preservations) {
 					try {
 						BuildQuery query = BuildQuery.parse(project, preservation.getCondition(), false, false);
 						int count;

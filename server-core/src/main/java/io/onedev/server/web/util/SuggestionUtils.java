@@ -179,19 +179,6 @@ public class SuggestionUtils {
 		return suggestions;
 	}
 	
-	public static List<InputSuggestion> suggestJobSecrets(Project project, String matchWith) {
-		matchWith = matchWith.toLowerCase();
-		int numSuggestions = 0;
-		List<InputSuggestion> suggestions = new ArrayList<>();
-
-		for (JobSecret secret: project.getBuildSetting().getSecrets()) {
-			int index = secret.getName().toLowerCase().indexOf(matchWith);
-			if (index != -1 && numSuggestions++<InputAssistBehavior.MAX_SUGGESTIONS) 
-				suggestions.add(new InputSuggestion(secret.getName(), new LinearRange(index, index+matchWith.length())));
-		}
-		return suggestions;
-	}
-	
 	public static List<InputSuggestion> suggestUsers(String matchWith) {
 		matchWith = matchWith.toLowerCase();
 		List<InputSuggestion> suggestions = new ArrayList<>();

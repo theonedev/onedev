@@ -16,7 +16,6 @@ import javax.persistence.EntityNotFoundException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.apache.tika.io.IOUtils;
-import org.apache.tika.mime.MimeTypes;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.apache.wicket.request.resource.AbstractResource;
 
@@ -29,6 +28,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.model.Build;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.ContentDetector;
 import io.onedev.server.util.SecurityUtils;
 
 public class ArtifactDownloadResource extends AbstractResource {
@@ -94,7 +94,11 @@ public class ArtifactDownloadResource extends AbstractResource {
 		}
 			
 		ResourceResponse response = new ResourceResponse();
-		response.setContentType(MimeTypes.OCTET_STREAM);
+		try (InputStream is = new FileInputStream(artifactFile)) {
+			response.setContentType(ContentDetector.detectMediaType(is, artifactPath).toString());
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 		
 		response.disableCaching();
 		

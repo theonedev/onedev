@@ -12,7 +12,7 @@ public class SpecifiedValues implements ValuesProvider {
 
 	public static final String DISPLAY_NAME = "Use specified values";
 	
-	public static final String SECRET_DISPLAY_NAME = "Use specified project secrets";
+	public static final String SECRET_DISPLAY_NAME = "Use specified job secrets";
 
 	private List<List<String>> values = new ArrayList<>();
 	

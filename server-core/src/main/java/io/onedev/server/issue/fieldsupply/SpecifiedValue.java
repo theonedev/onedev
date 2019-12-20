@@ -12,7 +12,7 @@ public class SpecifiedValue implements ValueProvider {
 
 	public static final String DISPLAY_NAME = "Use specified value";
 	
-	public static final String SECRET_DISPLAY_NAME = "Use specified project secret";
+	public static final String SECRET_DISPLAY_NAME = "Use specified job secret";
 
 	private List<String> value = new ArrayList<>();
 	

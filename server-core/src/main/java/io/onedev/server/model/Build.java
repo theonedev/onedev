@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,8 +38,6 @@ import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
@@ -48,7 +47,6 @@ import io.onedev.commons.utils.FileUtils;
 import io.onedev.commons.utils.LockUtils;
 import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.OneDev;
-import io.onedev.server.OneException;
 import io.onedev.server.buildspec.BuildSpec;
 import io.onedev.server.buildspec.job.Job;
 import io.onedev.server.buildspec.job.VariableInterpolator;
@@ -58,6 +56,7 @@ import io.onedev.server.entitymanager.BuildManager;
 import io.onedev.server.git.GitUtils;
 import io.onedev.server.git.RefInfo;
 import io.onedev.server.infomanager.CommitInfoManager;
+import io.onedev.server.model.support.JobSecret;
 import io.onedev.server.search.entity.EntityCriteria;
 import io.onedev.server.storage.StorageManager;
 import io.onedev.server.util.BeanUtils;
@@ -89,8 +88,6 @@ import io.onedev.server.web.util.WicketUtils;
 public class Build extends AbstractEntity implements Referenceable {
 
 	private static final long serialVersionUID = 1L;
-	
-	private static final Logger logger = LoggerFactory.getLogger(Build.class);
 	
 	private static ThreadLocal<Stack<Build>> stack =  new ThreadLocal<Stack<Build>>() {
 
@@ -497,16 +494,21 @@ public class Build extends AbstractEntity implements Referenceable {
 	
 	public Collection<String> getSecretValuesToMask() {
 		Collection<String> secretValuesToMask = new HashSet<>();
+		for (JobSecret secret: getProject().getBuildSetting().getHierarchySecrets(getProject())) {
+			if (secret.isAuthorized(getProject(), getCommitId()))
+				secretValuesToMask.add(secret.getValue());
+		}
+		
 		for (BuildParam param: getParams()) {
 			if (param.getType().equals(ParamSpec.SECRET) && param.getValue() != null) {		
-				try {
-					String value = getSecretValue(param.getValue());
-					if (value.length() >= SecretInput.MASK.length())
-						secretValuesToMask.add(value);
-				} catch (OneException e) {
-					logger.error("Error retrieving secret value", e);
-				}
+				if (param.getValue().startsWith(SecretInput.LITERAL_VALUE_PREFIX)) 
+					secretValuesToMask.add(param.getValue().substring(SecretInput.LITERAL_VALUE_PREFIX.length()));
 			}
+		}
+		
+		for (Iterator<String> it = secretValuesToMask.iterator(); it.hasNext();) {
+			if (it.next().length() < SecretInput.MASK.length())
+				it.remove();
 		}
 		return secretValuesToMask;
 	}

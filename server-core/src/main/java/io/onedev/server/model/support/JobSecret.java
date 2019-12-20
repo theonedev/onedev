@@ -90,7 +90,11 @@ public class JobSecret implements Serializable {
 	
 	@SuppressWarnings("unused")
 	private static List<InputSuggestion> suggestBranches(String matchWith) {
-		return SuggestionUtils.suggestBranches(Project.get(), matchWith);
+		Project project = Project.get();
+		if (project != null)
+			return SuggestionUtils.suggestBranches(project, matchWith);
+		else
+			return new ArrayList<>();
 	}
 	
 	public boolean isAuthorized(Project project, ObjectId commitId) {

@@ -182,7 +182,7 @@ class ParamListEditPanel extends PropertyEditor<List<Serializable>> {
 					
 				});
 				container.add(valuesProviderChoice);
-				container.add(new Label("description", property.getDescription()));
+				container.add(new Label("description", property.getDescription()).setEscapeModelStrings(false));
 				container.add(new FencedFeedbackPanel("feedback", container));
 				container.setOutputMarkupId(true);
 				paramsView.add(container);
