@@ -21,6 +21,7 @@ import io.onedev.server.web.editable.BeanContext;
 import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.PathNode;
+import io.onedev.server.web.page.project.ProjectOwnerBean;
 import io.onedev.server.web.page.project.blob.ProjectBlobPage;
 
 @SuppressWarnings("serial")
@@ -42,15 +43,16 @@ abstract class ForkOptionPanel extends Panel {
 		project.setName(getProject().getName() + "." + SecurityUtils.getUser().getName());
 		
 		Collection<String> properties = Sets.newHashSet("name", "description");
-		if (SecurityUtils.isAdministrator())
-			properties.add("ownerName");
-		project.setOwnerName(SecurityUtils.getUser().getName());
+		ProjectOwnerBean ownerBean = new ProjectOwnerBean();
+		ownerBean.setOwner(SecurityUtils.getUser().getName());
 		
 		BeanEditor editor = BeanContext.edit("editor", project, properties, false);
 		
 		Form<?> form = new Form<Void>("form");
 		form.setOutputMarkupId(true);
+		
 		form.add(editor);
+		form.add(BeanContext.edit("ownerEditor", ownerBean).setVisible(SecurityUtils.isAdministrator()));
 		
 		form.add(new AjaxButton("save") {
 
@@ -64,7 +66,7 @@ abstract class ForkOptionPanel extends Panel {
 							"This name has already been used by another project");
 					target.add(form);
 				} else {
-					project.setOwner(OneDev.getInstance(UserManager.class).findByName(project.getOwnerName()));
+					project.setOwner(OneDev.getInstance(UserManager.class).findByName(ownerBean.getOwner()));
 					projectManager.fork(getProject(), project);
 					Session.get().success("Project forked");
 					setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(project));

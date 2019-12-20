@@ -36,9 +36,8 @@ public class NewProjectPage extends LayoutPage {
 		Project project = new Project();
 		
 		Collection<String> properties = Sets.newHashSet("name", "description");
-		if (SecurityUtils.isAdministrator())
-			properties.add("ownerName");
-		project.setOwnerName(SecurityUtils.getUser().getName());
+		ProjectOwnerBean ownerBean = new ProjectOwnerBean();
+		ownerBean.setOwner(SecurityUtils.getUser().getName());
 		
 		BeanEditor editor = BeanContext.edit("editor", project, properties, false);
 		
@@ -54,7 +53,7 @@ public class NewProjectPage extends LayoutPage {
 					editor.error(new Path(new PathNode.Named("name")),
 							"This name has already been used by another project");
 				} else {
-					project.setOwner(OneDev.getInstance(UserManager.class).findByName(project.getOwnerName()));
+					project.setOwner(OneDev.getInstance(UserManager.class).findByName(ownerBean.getOwner()));
 					projectManager.create(project);
 					Session.get().success("New project created");
 					setResponsePage(ProjectBlobPage.class, ProjectBlobPage.paramsOf(project));
@@ -63,6 +62,7 @@ public class NewProjectPage extends LayoutPage {
 			
 		};
 		form.add(editor);
+		form.add(BeanContext.edit("ownerEditor", ownerBean).setVisible(SecurityUtils.isAdministrator()));
 		
 		add(form);
 	}

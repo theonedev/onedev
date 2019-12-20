@@ -30,7 +30,6 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import org.apache.commons.lang3.SerializationUtils;
 import org.dom4j.Element;
@@ -115,7 +114,6 @@ import io.onedev.server.util.usermatcher.UserMatcher;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
-import io.onedev.server.web.editable.annotation.UserChoice;
 import io.onedev.server.web.util.ProjectAware;
 import io.onedev.server.web.util.WicketUtils;
 
@@ -158,9 +156,6 @@ public class Project extends AbstractEntity {
 	@JoinColumn
 	private User owner;
 	
-	@Transient
-	private String ownerName;
-
 	@Column(nullable=false, unique=true)
 	private String name;
 	
@@ -307,17 +302,6 @@ public class Project extends AbstractEntity {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	@Editable(order=500, name="Owner", description="Projects without owners are considered orphan projects")
-	@UserChoice
-	@NotEmpty
-	public String getOwnerName() {
-		return ownerName;
-	}
-
-	public void setOwnerName(String ownerName) {
-		this.ownerName = ownerName;
 	}
 
 	public ArrayList<BranchProtection> getBranchProtections() {
