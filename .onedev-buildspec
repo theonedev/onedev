@@ -65,6 +65,7 @@
             <triggers>
                 <io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
                     <params/>
+                    <branches>master</branches>
                 </io.onedev.server.buildspec.job.trigger.BranchUpdateTrigger>
             </triggers>
             <caches/>
