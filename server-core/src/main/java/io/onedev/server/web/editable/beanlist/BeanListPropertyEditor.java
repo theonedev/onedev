@@ -31,6 +31,7 @@ import io.onedev.server.web.behavior.sortable.SortBehavior;
 import io.onedev.server.web.behavior.sortable.SortPosition;
 import io.onedev.server.web.editable.BeanDescriptor;
 import io.onedev.server.web.editable.EditableUtils;
+import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.PathNode.Indexed;
 import io.onedev.server.web.editable.PathNode.Named;
@@ -38,7 +39,6 @@ import io.onedev.server.web.editable.PropertyContext;
 import io.onedev.server.web.editable.PropertyDescriptor;
 import io.onedev.server.web.editable.PropertyEditor;
 import io.onedev.server.web.editable.PropertyUpdating;
-import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.editable.annotation.ExcludedProperties;
 
 @SuppressWarnings("serial")
@@ -134,9 +134,8 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 		rows = new RepeatingView("elements");
 		add(rows);
 		
-		for (Serializable element: list) {
+		for (Serializable element: list)
 			addRow(element);
-		}
 		
 		add(new AjaxButton("addElement") {
 
@@ -153,6 +152,9 @@ public class BeanListPropertyEditor extends PropertyEditor<List<Serializable>> {
 					firstRow = null;
 				
 				Component newRow = addRow(newElement());
+				for (int i=0; i<rows.size()-1; i++) 
+					rows.swap(rows.size()-i-1, rows.size()-i-2);
+				
 				String script = String.format("$('<tr id=\"%s\"></tr>')", newRow.getMarkupId());
 				if (firstRow != null)
 					script += ".insertBefore('#" + firstRow.getMarkupId() + "');";
