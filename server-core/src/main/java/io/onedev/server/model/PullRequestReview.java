@@ -46,7 +46,7 @@ public class PullRequestReview extends AbstractEntity {
 	@Embedded
 	private ReviewResult result;
 	
-	private transient Optional<PullRequestUpdate> updateOpt;
+	private transient Optional<PullRequestUpdate> updateOptional;
 	
 	public User getUser() {
 		return user;
@@ -84,7 +84,7 @@ public class PullRequestReview extends AbstractEntity {
 
 	@Nullable
 	public PullRequestUpdate getUpdate() {
-		if (updateOpt == null) {
+		if (updateOptional == null) {
 			PullRequestUpdate update = null;
 			if (result != null) {
 				MergePreview preview = request.getMergePreview();
@@ -99,9 +99,9 @@ public class PullRequestReview extends AbstractEntity {
 					}
 				}
 			}
-			updateOpt = Optional.ofNullable(update);
+			updateOptional = Optional.ofNullable(update);
 		}
-		return updateOpt.orElse(null);
+		return updateOptional.orElse(null);
 	}
 	
 }

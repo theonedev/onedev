@@ -26,6 +26,9 @@ import io.onedev.server.web.component.tabbable.PageTab;
 import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.admin.group.authorization.GroupAuthorizationsPage;
+import io.onedev.server.web.page.admin.group.membership.GroupMembershipsPage;
+import io.onedev.server.web.page.admin.group.profile.GroupProfilePage;
 
 @SuppressWarnings("serial")
 public abstract class GroupPage extends AdministrationPage {

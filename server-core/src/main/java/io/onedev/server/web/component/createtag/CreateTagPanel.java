@@ -114,7 +114,7 @@ public abstract class CreateTagPanel extends Panel {
 					User user = Preconditions.checkNotNull(SecurityUtils.getUser());
 
 					TagProtection protection = project.getTagProtection(tagName, user);
-					if (protection != null && protection.isNoCreation()) {
+					if (protection.isNoCreation()) {
 						form.error("Unable to create protected tag");
 						target.focusComponent(nameInput);
 						target.add(form);

@@ -1,5 +1,7 @@
 package io.onedev.server.web.page.admin.user;
 
+import javax.annotation.Nullable;
+
 import org.apache.wicket.Component;
 import org.apache.wicket.model.Model;
 
@@ -10,20 +12,20 @@ public class UserTab extends PageTab {
 
 	private final String iconClass;
 	
-	public UserTab(String title, String iconClass, Class<? extends UserPage> mainPageClass) {
+	public UserTab(String title, @Nullable String iconClass, Class<? extends UserPage> mainPageClass) {
 		super(Model.of(title), mainPageClass);
 		
 		this.iconClass = iconClass;
 	}
 
-	public UserTab(String title, String iconClass, Class<? extends UserPage> mainPageClass, 
+	public UserTab(String title, @Nullable String iconClass, Class<? extends UserPage> mainPageClass, 
 			Class<? extends UserPage> additionalPageClass1) {
 		super(Model.of(title), mainPageClass, additionalPageClass1);
 		
 		this.iconClass = iconClass;
 	}
 
-	public UserTab(String title, String iconClass, Class<? extends UserPage> mainPageClass, 
+	public UserTab(String title, @Nullable String iconClass, Class<? extends UserPage> mainPageClass, 
 			Class<? extends UserPage> additionalPageClass1, 
 			Class<? extends UserPage> additionalPageClass2) {
 		super(Model.of(title), mainPageClass, additionalPageClass1, additionalPageClass2);
@@ -31,7 +33,7 @@ public class UserTab extends PageTab {
 		this.iconClass = iconClass;
 	}
 	
-	public UserTab(String title, String iconClass, Class<? extends UserPage> mainPageClass, 
+	public UserTab(String title, @Nullable String iconClass, Class<? extends UserPage> mainPageClass, 
 			Class<? extends UserPage> additionalPageClass1, 
 			Class<? extends UserPage> additionalPageClass2, 
 			Class<? extends UserPage> additionalPageClass3) {

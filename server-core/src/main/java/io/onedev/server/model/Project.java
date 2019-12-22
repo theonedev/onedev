@@ -94,6 +94,7 @@ import io.onedev.server.infomanager.CommitInfoManager;
 import io.onedev.server.migration.VersionedDocument;
 import io.onedev.server.model.Build.Status;
 import io.onedev.server.model.support.BranchProtection;
+import io.onedev.server.model.support.FileProtection;
 import io.onedev.server.model.support.NamedCodeCommentQuery;
 import io.onedev.server.model.support.NamedCommitQuery;
 import io.onedev.server.model.support.ProjectBuildSetting;
@@ -110,7 +111,8 @@ import io.onedev.server.util.jackson.DefaultView;
 import io.onedev.server.util.match.Matcher;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.usermatcher.UserMatcher;
+import io.onedev.server.util.reviewrequirement.ReviewRequirement;
+import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.util.validation.annotation.ProjectName;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Markdown;
@@ -1118,6 +1120,7 @@ public class Project extends AbstractEntity {
 		return sortedMilestones;
 	}
 	
+	@Editable
 	public ArrayList<WebHook> getWebHooks() {
 		return webHooks;
 	}
@@ -1126,28 +1129,63 @@ public class Project extends AbstractEntity {
 		this.webHooks = webHooks;
 	}
 
-	@Nullable
-	public TagProtection getTagProtection(String tagName, User user) {
-		for (TagProtection protection: tagProtections) {
-			if (protection.isEnabled() 
-					&& UserMatcher.fromString(protection.getUser()).matches(this, user)
-					&& PatternSet.fromString(protection.getTags()).matches(new PathMatcher(), tagName)) {
-				return protection;
-			}
-		}
-		return null;
+	public List<WebHook> getHierarchyWebHooks() {
+		List<WebHook> hierarchyWebHooks = new ArrayList<>(getWebHooks());
+		hierarchyWebHooks.addAll(getOwner().getWebHooks());
+		return hierarchyWebHooks;
 	}
 	
-	@Nullable
-	public BranchProtection getBranchProtection(String branchName, @Nullable User user) {
-		for (BranchProtection protection: branchProtections) {
+	public TagProtection getTagProtection(String tagName, User user) {
+		boolean noCreation = false;
+		boolean noDeletion = false;
+		boolean noUpdate = false;
+		for (TagProtection protection: getTagProtections()) {
 			if (protection.isEnabled() 
-					&& UserMatcher.fromString(protection.getUser()).matches(this, user) 
-					&& PatternSet.fromString(protection.getBranches()).matches(new PathMatcher(), branchName)) {
-				return protection;
+					&& UserMatch.fromString(protection.getUserMatch()).matches(this, user)
+					&& PatternSet.fromString(protection.getTags()).matches(new PathMatcher(), tagName)) {
+				noCreation = noCreation || protection.isNoCreation();
+				noDeletion = noDeletion || protection.isNoDeletion();
+				noUpdate = noUpdate || protection.isNoUpdate();
 			}
 		}
-		return null;
+		
+		TagProtection protection = new TagProtection();
+		protection.setNoCreation(noCreation);
+		protection.setNoDeletion(noDeletion);
+		protection.setNoUpdate(noUpdate);
+		
+		return protection;
+	}
+	
+	public BranchProtection getBranchProtection(String branchName, @Nullable User user) {
+		boolean noCreation = false;
+		boolean noDeletion = false;
+		boolean noForcedPush = false;
+		Set<String> jobNames = new HashSet<>();
+		List<FileProtection> fileProtections = new ArrayList<>();
+		ReviewRequirement reviewRequirement = ReviewRequirement.fromString(null);
+		for (BranchProtection protection: getBranchProtections()) {
+			if (protection.isEnabled() 
+					&& UserMatch.fromString(protection.getUserMatch()).matches(this, user) 
+					&& PatternSet.fromString(protection.getBranches()).matches(new PathMatcher(), branchName)) {
+				noCreation = noCreation || protection.isNoCreation();
+				noDeletion = noDeletion || protection.isNoDeletion();
+				noForcedPush = noForcedPush || protection.isNoForcedPush();
+				jobNames.addAll(protection.getJobNames());
+				fileProtections.addAll(protection.getFileProtections());
+				reviewRequirement.mergeWith(protection.getParsedReviewRequirement());
+			}
+		}
+		
+		BranchProtection protection = new BranchProtection();
+		protection.setFileProtections(fileProtections);
+		protection.setJobNames(new ArrayList<>(jobNames));
+		protection.setNoCreation(noCreation);
+		protection.setNoDeletion(noDeletion);
+		protection.setNoForcedPush(noForcedPush);
+		protection.setParsedReviewRequirement(reviewRequirement);
+		
+		return protection;
 	}
 
 	@Override
@@ -1305,28 +1343,21 @@ public class Project extends AbstractEntity {
 	}
 	
 	public boolean isReviewRequiredForModification(User user, String branch, @Nullable String file) {
-		BranchProtection protection = getBranchProtection(branch, user);
-		if (protection != null) 
-			return protection.isReviewRequiredForModification(user, this, branch, file);
-		else
-			return false;
+		return getBranchProtection(branch, user).isReviewRequiredForModification(user, this, branch, file);
 	}
 
 	public boolean isReviewRequiredForPush(User user, String branch, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
-		BranchProtection protection = getBranchProtection(branch, user);
-		return protection != null && protection.isReviewRequiredForPush(user, this, branch, oldObjectId, newObjectId, gitEnvs);
+		return getBranchProtection(branch, user).isReviewRequiredForPush(user, this, branch, oldObjectId, newObjectId, gitEnvs);
 	}
 	
 	public boolean isBuildRequiredForModification(User user, String branch, @Nullable String file) {
-		BranchProtection protection = getBranchProtection(branch, user);
-		return protection != null && protection.isBuildRequiredForModification(this, branch, file);
+		return getBranchProtection(branch, user).isBuildRequiredForModification(this, branch, file);
 	}
 	
 	public boolean isBuildRequiredForPush(User user, String branch, ObjectId oldObjectId, ObjectId newObjectId, 
 			Map<String, String> gitEnvs) {
-		BranchProtection protection = getBranchProtection(branch, user);
-		return protection != null && protection.isBuildRequiredForPush(this, branch, oldObjectId, newObjectId, gitEnvs);
+		return getBranchProtection(branch, user).isBuildRequiredForPush(this, branch, oldObjectId, newObjectId, gitEnvs);
 	}
 	
 	@Nullable

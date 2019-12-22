@@ -29,7 +29,7 @@ public abstract class ProjectBuildSettingPage extends ProjectSettingPage {
 		super.onInitialize();
 		
 		List<Tab> tabs = new ArrayList<>();
-		tabs.add(new PageTab(Model.of("Secrets"), ProjectSecretListPage.class) {
+		tabs.add(new PageTab(Model.of("Secrets"), ProjectSecretsPage.class) {
 
 			@Override
 			public Component render(String componentId) {
@@ -37,7 +37,7 @@ public abstract class ProjectBuildSettingPage extends ProjectSettingPage {
 			}
 			
 		});
-		tabs.add(new PageTab(Model.of("Build Preserve Rules"), ProjectBuildPreserveRulesPage.class) {
+		tabs.add(new PageTab(Model.of("Build Preserve Rules"), ProjectBuildPreservationsPage.class) {
 			
 			@Override
 			public Component render(String componentId) {

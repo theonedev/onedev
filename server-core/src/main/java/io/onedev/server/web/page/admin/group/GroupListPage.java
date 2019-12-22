@@ -38,6 +38,8 @@ import io.onedev.server.web.WebConstants;
 import io.onedev.server.web.behavior.OnTypingDoneBehavior;
 import io.onedev.server.web.component.datatable.DefaultDataTable;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.admin.group.create.NewGroupPage;
+import io.onedev.server.web.page.admin.group.profile.GroupProfilePage;
 import io.onedev.server.web.util.ConfirmOnClick;
 import io.onedev.server.web.util.PagingHistorySupport;
 

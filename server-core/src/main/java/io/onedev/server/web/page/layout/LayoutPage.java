@@ -27,7 +27,7 @@ import io.onedev.server.web.page.admin.databasebackup.DatabaseBackupPage;
 import io.onedev.server.web.page.admin.groovyscript.GroovyScriptListPage;
 import io.onedev.server.web.page.admin.group.GroupListPage;
 import io.onedev.server.web.page.admin.group.GroupPage;
-import io.onedev.server.web.page.admin.group.NewGroupPage;
+import io.onedev.server.web.page.admin.group.create.NewGroupPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueFieldListPage;
 import io.onedev.server.web.page.admin.issuesetting.IssueSettingPage;
 import io.onedev.server.web.page.admin.jobexecutor.JobExecutorPage;
@@ -39,16 +39,17 @@ import io.onedev.server.web.page.admin.securitysetting.SecuritySettingPage;
 import io.onedev.server.web.page.admin.serverinformation.ServerInformationPage;
 import io.onedev.server.web.page.admin.serverlog.ServerLogPage;
 import io.onedev.server.web.page.admin.systemsetting.SystemSettingPage;
-import io.onedev.server.web.page.admin.user.NewUserPage;
 import io.onedev.server.web.page.admin.user.UserListPage;
 import io.onedev.server.web.page.admin.user.UserPage;
+import io.onedev.server.web.page.admin.user.create.NewUserPage;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.my.MyAvatarPage;
 import io.onedev.server.web.page.my.MyPage;
-import io.onedev.server.web.page.my.MyPasswordPage;
-import io.onedev.server.web.page.my.MyProfilePage;
+import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.my.buildsetting.MyBuildSettingPage;
-import io.onedev.server.web.page.my.buildsetting.MySecretListPage;
+import io.onedev.server.web.page.my.buildsetting.MySecretsPage;
+import io.onedev.server.web.page.my.password.MyPasswordPage;
+import io.onedev.server.web.page.my.profile.MyProfilePage;
+import io.onedev.server.web.page.my.webhook.MyWebHooksPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.page.security.LoginPage;
 import io.onedev.server.web.page.security.LogoutPage;
@@ -200,12 +201,17 @@ public abstract class LayoutPage extends BasePage {
 		item.add(new ViewStateAwarePageLink<Void>("link", MyPasswordPage.class));
 		if (getPage() instanceof MyPasswordPage)
 			item.add(AttributeAppender.append("class", "active"));
-				
+
 		signedInContainer.add(item = new WebMarkupContainer("myBuildSetting"));
-		item.add(new ViewStateAwarePageLink<Void>("link", MySecretListPage.class));
+		item.add(new ViewStateAwarePageLink<Void>("link", MySecretsPage.class));
 		if (getPage() instanceof MyBuildSettingPage)
 			item.add(AttributeAppender.append("class", "active"));
 
+		signedInContainer.add(item = new WebMarkupContainer("myWebHooks"));
+		item.add(new ViewStateAwarePageLink<Void>("link", MyWebHooksPage.class));
+		if (getPage() instanceof MyWebHooksPage)
+			item.add(AttributeAppender.append("class", "active"));
+		
 		if (SecurityUtils.getSubject().isRunAs()) {
 			Link<Void> signOutLink = new Link<Void>("signOut") {
 

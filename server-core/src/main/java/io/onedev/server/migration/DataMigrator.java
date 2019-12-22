@@ -1313,4 +1313,24 @@ public class DataMigrator {
 		}
 	}
 	
+	private void migrate29(File dataDir, Stack<Integer> versions) {
+		for (File file: dataDir.listFiles()) {
+			if (file.getName().startsWith("Users.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements())
+					element.addElement("webHooks");
+				dom.writeToFile(file, false);
+			} else if (file.getName().startsWith("Projects.xml")) {
+				VersionedDocument dom = VersionedDocument.fromFile(file);
+				for (Element element: dom.getRootElement().elements()) {
+					for (Element branchProtectionElement: element.element("branchProtections").elements())
+						branchProtectionElement.element("user").setName("userMatch");
+					for (Element tagProtectionElement: element.element("tagProtections").elements())
+						tagProtectionElement.element("user").setName("userMatch");
+				}
+				dom.writeToFile(file, false);
+			}
+		}
+	}
+	
 }

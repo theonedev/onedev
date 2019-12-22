@@ -26,7 +26,10 @@ public class UserTabLink extends Panel {
 		UserPage page = (UserPage) getPage();
 		Link<Void> link = new ViewStateAwarePageLink<Void>("link", 
 				tab.getMainPageClass(), UserPage.paramsOf(page.getUser()));
-		link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", tab.getIconClass())));
+		if (tab.getIconClass() != null)
+			link.add(new WebMarkupContainer("icon").add(AttributeAppender.append("class", tab.getIconClass())));
+		else
+			link.add(new WebMarkupContainer("icon").setVisible(false));
 		link.add(new Label("label", tab.getTitleModel()));
 		add(link);
 	}

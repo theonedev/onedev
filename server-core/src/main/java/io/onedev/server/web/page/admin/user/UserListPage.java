@@ -40,6 +40,8 @@ import io.onedev.server.web.component.datatable.LoadableDetachableDataProvider;
 import io.onedev.server.web.component.user.UserDeleteLink;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.admin.user.create.NewUserPage;
+import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 import io.onedev.server.web.page.project.ProjectListPage;
 import io.onedev.server.web.util.PagingHistorySupport;
 

@@ -684,22 +684,22 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 	@Transactional
 	@Override
 	public void checkQuality(PullRequest request) {
-		BranchProtection branchProtection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
-		if (branchProtection != null) {
-			checkReviews(ReviewRequirement.fromString(branchProtection.getReviewRequirement()), request.getLatestUpdate());
+		BranchProtection branchProtection = request.getTargetProject().getBranchProtection(
+				request.getTargetBranch(), request.getSubmitter());
+		checkReviews(branchProtection.getParsedReviewRequirement(), request.getLatestUpdate());
 
-			Set<FileProtection> checkedFileProtections = new HashSet<>();
-			for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
-				if (checkedFileProtections.containsAll(branchProtection.getFileProtections()))
-					break;
-				PullRequestUpdate update = request.getSortedUpdates().get(i);
-				for (String file: update.getChangedFiles()) {
-					FileProtection fileProtection = branchProtection.getFileProtection(file);
-					if (fileProtection != null  
-							&& !checkedFileProtections.contains(fileProtection)) {
-						checkedFileProtections.add(fileProtection);
-						checkReviews(ReviewRequirement.fromString(fileProtection.getReviewRequirement()), update);
-					}
+		ReviewRequirement checkedRequirement = ReviewRequirement.fromString(null);
+		for (int i=request.getSortedUpdates().size()-1; i>=0; i--) {
+			if (branchProtection.getFileProtections().stream().allMatch(
+					it->checkedRequirement.covers(it.getParsedReviewRequirement()))) {
+				break;
+			}
+			PullRequestUpdate update = request.getSortedUpdates().get(i);
+			for (String file: update.getChangedFiles()) {
+				FileProtection fileProtection = branchProtection.getFileProtection(file);
+				if (!checkedRequirement.covers(fileProtection.getParsedReviewRequirement())) {
+					checkedRequirement.mergeWith(fileProtection.getParsedReviewRequirement());
+					checkReviews(fileProtection.getParsedReviewRequirement(), update);
 				}
 			}
 		}
@@ -727,12 +727,8 @@ public class DefaultPullRequestManager extends AbstractEntityManager<PullRequest
 			try {
 				Collection<String> requiredJobNames;
 				BranchProtection protection = request.getTargetProject().getBranchProtection(request.getTargetBranch(), request.getSubmitter());
-				if (protection != null) {
-					requiredJobNames = protection.getRequiredJobs(request.getTargetProject(), request.getTargetBranch(), 
-							request.getTarget().getObjectId(), commitId, new HashMap<>());
-				} else {
-					requiredJobNames = new HashSet<>();
-				}
+				requiredJobNames = protection.getRequiredJobs(request.getTargetProject(), request.getTargetBranch(), 
+						request.getTarget().getObjectId(), commitId, new HashMap<>());
 				BuildSpec buildSpec = project.getBuildSpec(commitId);
 				if (buildSpec != null) {
 					for (Job job: buildSpec.getJobs()) {

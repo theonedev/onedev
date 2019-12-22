@@ -31,8 +31,9 @@ import com.google.common.base.MoreObjects;
 
 import io.onedev.server.model.support.NamedBuildQuery;
 import io.onedev.server.model.support.NamedProjectQuery;
-import io.onedev.server.model.support.UserBuildSetting;
 import io.onedev.server.model.support.QuerySetting;
+import io.onedev.server.model.support.UserBuildSetting;
+import io.onedev.server.model.support.WebHook;
 import io.onedev.server.model.support.issue.NamedIssueQuery;
 import io.onedev.server.model.support.pullrequest.NamedPullRequestQuery;
 import io.onedev.server.util.SecurityUtils;
@@ -156,6 +157,11 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 	@Lob
 	@Column(length=65535, nullable=false)
 	private UserBuildSetting buildSetting = new UserBuildSetting();
+	
+	@Lob
+	@Column(length=65535, nullable=false)
+	@JsonView(DefaultView.class)
+	private ArrayList<WebHook> webHooks = new ArrayList<>();
 	
     private transient Collection<Group> groups;
     
@@ -457,6 +463,14 @@ public class User extends AbstractEntity implements AuthenticationInfo {
 
 	public void setBuildSetting(UserBuildSetting buildSetting) {
 		this.buildSetting = buildSetting;
+	}
+
+	public ArrayList<WebHook> getWebHooks() {
+		return webHooks;
+	}
+
+	public void setWebHooks(ArrayList<WebHook> webHooks) {
+		this.webHooks = webHooks;
 	}
 
 	@Override

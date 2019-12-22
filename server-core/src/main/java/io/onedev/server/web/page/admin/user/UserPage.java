@@ -26,8 +26,14 @@ import io.onedev.server.web.component.tabbable.Tab;
 import io.onedev.server.web.component.tabbable.Tabbable;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.page.admin.AdministrationPage;
+import io.onedev.server.web.page.admin.user.authorization.UserAuthorizationsPage;
+import io.onedev.server.web.page.admin.user.avatar.UserAvatarPage;
 import io.onedev.server.web.page.admin.user.buildsetting.UserBuildSettingPage;
-import io.onedev.server.web.page.admin.user.buildsetting.UserSecretListPage;
+import io.onedev.server.web.page.admin.user.buildsetting.UserSecretsPage;
+import io.onedev.server.web.page.admin.user.membership.UserMembershipsPage;
+import io.onedev.server.web.page.admin.user.password.UserPasswordPage;
+import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
+import io.onedev.server.web.page.admin.user.webhook.UserWebHooksPage;
 
 @SuppressWarnings("serial")
 public abstract class UserPage extends AdministrationPage {
@@ -84,10 +90,10 @@ public abstract class UserPage extends AdministrationPage {
 		tabs.add(new UserTab("Edit Avatar", "fa fa-fw fa-picture-o", UserAvatarPage.class));
 			
 		tabs.add(new UserTab("Change Password", "fa fa-fw fa-key", UserPasswordPage.class));
-		tabs.add(new UserTab("Access Token", "fa fa-fw fa-ticket", UserTokenPage.class));
 		tabs.add(new UserTab("Belonging Groups", "fa fa-fw fa-group", UserMembershipsPage.class));
 		tabs.add(new UserTab("Authorized Projects", "fa fa-fw fa-ext fa-repo", UserAuthorizationsPage.class));
-		tabs.add(new UserTab("Build Setting", "fa fa-fw fa-cubes", UserSecretListPage.class, UserBuildSettingPage.class));
+		tabs.add(new UserTab("Build Setting", "fa fa-fw fa-cubes", UserSecretsPage.class, UserBuildSettingPage.class));
+		tabs.add(new UserTab("Web Hooks", "fa fa-fw fa-volume-up", UserWebHooksPage.class, UserWebHooksPage.class));
 		
 		return tabs;
 	}

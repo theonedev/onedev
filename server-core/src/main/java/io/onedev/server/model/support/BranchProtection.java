@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -26,8 +27,8 @@ import io.onedev.server.util.Usage;
 import io.onedev.server.util.match.PathMatcher;
 import io.onedev.server.util.patternset.PatternSet;
 import io.onedev.server.util.reviewrequirement.ReviewRequirement;
-import io.onedev.server.util.usermatcher.Anyone;
-import io.onedev.server.util.usermatcher.UserMatcher;
+import io.onedev.server.util.usermatch.Anyone;
+import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.JobChoice;
@@ -45,7 +46,7 @@ public class BranchProtection implements Serializable {
 	
 	private String branches;
 	
-	private String user = new Anyone().toString();
+	private String userMatch = new Anyone().toString();
 	
 	private boolean noForcedPush = true;
 	
@@ -54,6 +55,8 @@ public class BranchProtection implements Serializable {
 	private boolean noCreation = true;
 	
 	private String reviewRequirement;
+	
+	private transient ReviewRequirement parsedReviewRequirement;
 	
 	private List<String> jobNames = new ArrayList<>();
 	
@@ -86,12 +89,12 @@ public class BranchProtection implements Serializable {
 	@Editable(order=150, name="Applicable Users", description="Rule will apply only if the user changing the branch matches criteria specified here")
 	@io.onedev.server.web.editable.annotation.UserMatcher
 	@NotEmpty(message="may not be empty")
-	public String getUser() {
-		return user;
+	public String getUserMatch() {
+		return userMatch;
 	}
 
-	public void setUser(String user) {
-		this.user = user;
+	public void setUserMatch(String userMatch) {
+		this.userMatch = userMatch;
 	}
 
 	@Editable(order=200, description="Check this to not allow forced push")
@@ -122,7 +125,7 @@ public class BranchProtection implements Serializable {
 	}
 
 	@Editable(order=400, name="Required Reviewers", description="Optionally specify required reviewers for changes of "
-			+ "specified branch. OneDev assumes that the user submitting the change has completed the review already")
+			+ "specified branch")
 	@io.onedev.server.web.editable.annotation.ReviewRequirement
 	@NameOfEmptyValue("No one")
 	public String getReviewRequirement() {
@@ -133,6 +136,17 @@ public class BranchProtection implements Serializable {
 		this.reviewRequirement = reviewRequirement;
 	}
 
+	public ReviewRequirement getParsedReviewRequirement() {
+		if (parsedReviewRequirement == null)
+			parsedReviewRequirement = ReviewRequirement.fromString(reviewRequirement);
+		return parsedReviewRequirement;
+	}
+	
+	public void setParsedReviewRequirement(ReviewRequirement parsedReviewRequirement) {
+		this.parsedReviewRequirement = parsedReviewRequirement;
+		reviewRequirement = parsedReviewRequirement.toString();
+	}
+	
 	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")
 	@JobChoice
 	@NameOfEmptyValue("No any")
@@ -144,8 +158,7 @@ public class BranchProtection implements Serializable {
 		this.jobNames = jobNames;
 	}
 	
-	@Editable(order=700, description="Optionally specify additional users to review "
-			+ "particular paths. For each changed file, the first matched file protection setting will be used")
+	@Editable(order=700, description="Optionally specify path protection rules")
 	@NotNull(message="may not be empty")
 	@Valid
 	public List<FileProtection> getFileProtections() {
@@ -156,17 +169,23 @@ public class BranchProtection implements Serializable {
 		this.fileProtections = fileProtections;
 	}
 	
-	@Nullable
 	public FileProtection getFileProtection(String file) {
+		Set<String> jobNames = new HashSet<>();
+		ReviewRequirement reviewRequirement = ReviewRequirement.fromString(null);
 		for (FileProtection protection: fileProtections) {
-			if (PatternSet.fromString(protection.getPaths()).matches(new PathMatcher(), file))
-				return protection;
+			if (PatternSet.fromString(protection.getPaths()).matches(new PathMatcher(), file)) {
+				jobNames.addAll(protection.getJobNames());
+				reviewRequirement.mergeWith(protection.getParsedReviewRequirement());
+			}
 		}
-		return null;
+		FileProtection protection = new FileProtection();
+		protection.setJobNames(new ArrayList<>(jobNames));
+		protection.setParsedReviewRequirement(reviewRequirement);
+		return protection;
 	}
 	
 	public void onRenameGroup(String oldName, String newName) {
-		user = UserMatcher.onRenameGroup(user, oldName, newName);
+		userMatch = UserMatch.onRenameGroup(userMatch, oldName, newName);
 		reviewRequirement = ReviewRequirement.onRenameGroup(reviewRequirement, oldName, newName);
 		
 		for (FileProtection fileProtection: getFileProtections()) {
@@ -177,7 +196,7 @@ public class BranchProtection implements Serializable {
 	
 	public Usage onDeleteGroup(String groupName) {
 		Usage usage = new Usage();
-		if (UserMatcher.isUsingGroup(user, groupName))
+		if (UserMatch.isUsingGroup(userMatch, groupName))
 			usage.add("applicable users");
 		if (ReviewRequirement.isUsingGroup(reviewRequirement, groupName))
 			usage.add("required reviewers");
@@ -191,8 +210,8 @@ public class BranchProtection implements Serializable {
 		return usage.prefix("branch protection '" + getBranches() + "'");
 	}
 	
-	public void onRenameUser(Project project, String oldName, String newName) {
-		user = UserMatcher.onRenameUser(user, oldName, newName);
+	public void onRenameUser(String oldName, String newName) {
+		userMatch = UserMatch.onRenameUser(userMatch, oldName, newName);
 		reviewRequirement = ReviewRequirement.onRenameUser(reviewRequirement, oldName, newName);
 		
 		for (FileProtection fileProtection: getFileProtections()) {
@@ -203,7 +222,7 @@ public class BranchProtection implements Serializable {
 	
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (UserMatcher.isUsingUser(user, userName))
+		if (UserMatch.isUsingUser(userMatch, userName))
 			usage.add("applicable users");
 		if (ReviewRequirement.isUsingUser(reviewRequirement, userName))
 			usage.add("required reviewers");
@@ -230,27 +249,12 @@ public class BranchProtection implements Serializable {
 	 * 			result of the check. 
 	 */
 	public boolean isReviewRequiredForModification(User user, Project project, String branch, @Nullable String file) {
-		if (!ReviewRequirement.fromString(getReviewRequirement()).satisfied(user)) 
-			return true;
-		if (file != null) {
-			FileProtection fileProtection = getFileProtection(file);
-			if (fileProtection != null 
-					&& !ReviewRequirement.fromString(fileProtection.getReviewRequirement()).satisfied(user)) {
-				return true;
-			}
-		}
-		return false;
+		return !getParsedReviewRequirement().satisfied(user) 
+				|| file != null && !getFileProtection(file).getParsedReviewRequirement().satisfied(user); 
 	}
 	
 	public boolean isBuildRequiredForModification(Project project, String branch, @Nullable String file) {
-		if (!getJobNames().isEmpty()) 
-			return true;
-		if (file != null) {
-			FileProtection fileProtection = getFileProtection(file);
-			if (fileProtection != null && !fileProtection.getJobNames().isEmpty()) 
-				return true;
-		}
-		return false;
+		return !getJobNames().isEmpty() || file != null && !getFileProtection(file).getJobNames().isEmpty();
 	}
 
 	/**
@@ -271,15 +275,12 @@ public class BranchProtection implements Serializable {
 	 */
 	public boolean isReviewRequiredForPush(User user, Project project, String branch, ObjectId oldObjectId, 
 			ObjectId newObjectId, Map<String, String> gitEnvs) {
-		if (!ReviewRequirement.fromString(getReviewRequirement()).satisfied(user)) 
+		if (!getParsedReviewRequirement().satisfied(user)) 
 			return true;
 
 		for (String changedFile: project.getChangedFiles(oldObjectId, newObjectId, gitEnvs)) {
-			FileProtection fileProtection = getFileProtection(changedFile);
-			if (fileProtection != null  
-					&& !ReviewRequirement.fromString(fileProtection.getReviewRequirement()).satisfied(user)) {
+			if (!getFileProtection(changedFile).getParsedReviewRequirement().satisfied(user)) 
 				return true;
-			}
 		}
 		return false;
 	}
@@ -287,11 +288,8 @@ public class BranchProtection implements Serializable {
 	public Collection<String> getRequiredJobs(Project project, String branch, 
 			ObjectId oldObjectId, ObjectId newObjectId, Map<String, String> gitEnvs) {
 		Collection<String> requiredJobs = new HashSet<>(getJobNames());
-		for (String changedFile: project.getChangedFiles(oldObjectId, newObjectId, gitEnvs)) {
-			FileProtection fileProtection = getFileProtection(changedFile);
-			if (fileProtection != null) 
-				requiredJobs.addAll(fileProtection.getJobNames());
-		}
+		for (String changedFile: project.getChangedFiles(oldObjectId, newObjectId, gitEnvs)) 
+			requiredJobs.addAll(getFileProtection(changedFile).getJobNames());
 		return requiredJobs;
 	}
 	

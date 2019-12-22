@@ -1,0 +1,23 @@
+<wicket:extend>
+	<div class="page-title">Branch Protection</div>
+	<div class="help-block">
+	Define branch protection rules
+	</div>
+	<div wicket:id="branchProtectionSetting" class="panel-list">
+		<ul class="list-unstyled protections">
+			<li wicket:id="protections" class="protection"><div wicket:id="protection"></div></li>
+		</ul>
+		<div wicket:id="newProtection"></div>
+	</div>
+	<wicket:fragment wicket:id="editNewFrag">
+		<div class="protection panel panel-default">
+			<div class="panel-heading"><div class="panel-title">Edit Rule</div></div>
+			<div class="panel-body">
+				<div wicket:id="editor"></div>
+			</div>
+		</div>
+	</wicket:fragment>
+	<wicket:fragment wicket:id="addNewLinkFrag">
+		<a wicket:id="link" class="add-new"><i class="fa fa-plus-circle fa-lg"></i> Add Rule</a>
+	</wicket:fragment>
+</wicket:extend>

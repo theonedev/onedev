@@ -19,7 +19,7 @@ import io.onedev.server.web.editable.BeanEditor;
 import io.onedev.server.web.editable.PathNode;
 import io.onedev.server.web.editable.Path;
 import io.onedev.server.web.page.base.BasePage;
-import io.onedev.server.web.page.my.MyAvatarPage;
+import io.onedev.server.web.page.my.avatar.MyAvatarPage;
 import io.onedev.server.web.page.project.ProjectListPage;
 
 @SuppressWarnings("serial")

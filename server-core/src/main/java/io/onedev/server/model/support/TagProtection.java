@@ -9,8 +9,8 @@ import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Project;
 import io.onedev.server.util.Usage;
 import io.onedev.server.util.patternset.PatternSet;
-import io.onedev.server.util.usermatcher.Anyone;
-import io.onedev.server.util.usermatcher.UserMatcher;
+import io.onedev.server.util.usermatch.Anyone;
+import io.onedev.server.util.usermatch.UserMatch;
 import io.onedev.server.web.editable.annotation.Editable;
 import io.onedev.server.web.editable.annotation.Horizontal;
 import io.onedev.server.web.editable.annotation.Patterns;
@@ -26,7 +26,7 @@ public class TagProtection implements Serializable {
 	
 	private String tags;
 	
-	private String user = new Anyone().toString();
+	private String userMatch = new Anyone().toString();
 	
 	private boolean noUpdate = true;
 	
@@ -61,12 +61,12 @@ public class TagProtection implements Serializable {
 	@Editable(order=150, name="Applicable Users", description="Rule will apply only if the user changing the tag matches criteria specified here")
 	@io.onedev.server.web.editable.annotation.UserMatcher
 	@NotEmpty(message="may not be empty")
-	public String getUser() {
-		return user;
+	public String getUserMatch() {
+		return userMatch;
 	}
 
-	public void setUser(String user) {
-		this.user = user;
+	public void setUserMatch(String userMatch) {
+		this.userMatch = userMatch;
 	}
 
 	@Editable(order=200, description="Check this to not allow tag update")
@@ -97,23 +97,23 @@ public class TagProtection implements Serializable {
 	}
 
 	public void onRenameGroup(String oldName, String newName) {
-		user = UserMatcher.onRenameGroup(user, oldName, newName);
+		userMatch = UserMatch.onRenameGroup(userMatch, oldName, newName);
 	}
 	
 	public Usage onDeleteGroup(String groupName) {
 		Usage usage = new Usage();
-		if (UserMatcher.isUsingGroup(user, groupName))
+		if (UserMatch.isUsingGroup(userMatch, groupName))
 			usage.add("applicable users");
 		return usage.prefix("tag protection '" + getTags() + "'");
 	}
 	
 	public void onRenameUser(String oldName, String newName) {
-		user = UserMatcher.onRenameUser(user, oldName, newName);
+		userMatch = UserMatch.onRenameUser(userMatch, oldName, newName);
 	}
 	
 	public Usage onDeleteUser(String userName) {
 		Usage usage = new Usage();
-		if (UserMatcher.isUsingUser(user, userName))
+		if (UserMatch.isUsingUser(userMatch, userName))
 			usage.add("applicable users");
 		return usage.prefix("tag protection '" + getTags() + "'");
 	}

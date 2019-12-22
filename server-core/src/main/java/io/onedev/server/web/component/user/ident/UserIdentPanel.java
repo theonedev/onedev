@@ -18,8 +18,8 @@ import io.onedev.server.web.behavior.dropdown.DropdownHoverBehavior;
 import io.onedev.server.web.component.floating.AlignPlacement;
 import io.onedev.server.web.component.user.avatar.UserAvatar;
 import io.onedev.server.web.component.user.card.UserCardPanel;
-import io.onedev.server.web.page.admin.user.UserProfilePage;
-import io.onedev.server.web.page.my.MyProfilePage;
+import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
+import io.onedev.server.web.page.my.profile.MyProfilePage;
 
 @SuppressWarnings("serial")
 public class UserIdentPanel extends Panel {

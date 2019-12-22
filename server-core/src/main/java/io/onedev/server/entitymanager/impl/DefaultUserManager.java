@@ -69,7 +69,7 @@ public class DefaultUserManager extends AbstractEntityManager<User> implements U
     	if (oldName != null && !oldName.equals(user.getName())) {
     		for (Project project: projectManager.query()) {
     			for (BranchProtection protection: project.getBranchProtections())
-    				protection.onRenameUser(project, oldName, user.getName());
+    				protection.onRenameUser(oldName, user.getName());
     			for (TagProtection protection: project.getTagProtections())
     				protection.onRenameUser(oldName, user.getName());
     			project.getIssueSetting().onRenameUser(oldName, user.getName());

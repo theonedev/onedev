@@ -6,7 +6,7 @@ import io.onedev.commons.codeassist.FenceAware;
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.commons.codeassist.grammar.LexerRuleRefElementSpec;
 import io.onedev.commons.codeassist.parser.TerminalExpect;
-import io.onedev.server.util.usermatcher.UserMatcherParser;
+import io.onedev.server.util.usermatch.UserMatchParser;
 import io.onedev.server.web.behavior.inputassist.ANTLRAssistBehavior;
 import io.onedev.server.web.util.SuggestionUtils;
 
@@ -14,7 +14,7 @@ import io.onedev.server.web.util.SuggestionUtils;
 public class UserMatcherBehavior extends ANTLRAssistBehavior {
 
 	public UserMatcherBehavior() {
-		super(UserMatcherParser.class, "userMatcher", false);
+		super(UserMatchParser.class, "userMatch", false);
 	}
 
 	@Override
@@ -28,9 +28,9 @@ public class UserMatcherBehavior extends ANTLRAssistBehavior {
 					protected List<InputSuggestion> match(String matchWith) {
 						int tokenType = terminalExpect.getState().getLastMatchedToken().getType();
 						switch (tokenType) {
-						case UserMatcherParser.USER:
+						case UserMatchParser.USER:
 							return SuggestionUtils.suggestUsers(matchWith);
-						case UserMatcherParser.GROUP:
+						case UserMatchParser.GROUP:
 							return SuggestionUtils.suggestGroups(matchWith);
 						default: 
 							return null;

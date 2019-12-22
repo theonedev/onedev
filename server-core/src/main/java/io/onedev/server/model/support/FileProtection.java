@@ -10,6 +10,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import io.onedev.commons.codeassist.InputSuggestion;
 import io.onedev.server.model.Project;
+import io.onedev.server.util.reviewrequirement.ReviewRequirement;
 import io.onedev.server.util.validation.Validatable;
 import io.onedev.server.util.validation.annotation.ClassValidating;
 import io.onedev.server.web.editable.annotation.Editable;
@@ -28,10 +29,12 @@ public class FileProtection implements Serializable, Validatable {
 	
 	private String reviewRequirement;
 	
+	private transient ReviewRequirement parsedReviewRequirement;
+	
 	private List<String> jobNames = new ArrayList<>();
 	
 	@Editable(order=100, description="Specify space-separated paths to be protected. Use * or ? for wildcard match")
-	@Patterns(suggester = "getPathSuggestions")
+	@Patterns(suggester = "suggestPaths")
 	@NotEmpty
 	public String getPaths() {
 		return paths;
@@ -42,8 +45,11 @@ public class FileProtection implements Serializable, Validatable {
 	}
 	
 	@SuppressWarnings("unused")
-	private static List<InputSuggestion> getPathSuggestions(String matchWith) {
-		return SuggestionUtils.suggestBlobs(Project.get(), matchWith);
+	private static List<InputSuggestion> suggestPaths(String matchWith) {
+		if (Project.get() != null)
+			return SuggestionUtils.suggestBlobs(Project.get(), matchWith);
+		else
+			return new ArrayList<>();
 	}
 
 	@Editable(order=200, name="Reviewers", description="Specify required reviewers if specified path is "
@@ -55,6 +61,17 @@ public class FileProtection implements Serializable, Validatable {
 
 	public void setReviewRequirement(String reviewRequirement) {
 		this.reviewRequirement = reviewRequirement;
+	}
+	
+	public ReviewRequirement getParsedReviewRequirement() {
+		if (parsedReviewRequirement == null)
+			parsedReviewRequirement = ReviewRequirement.fromString(reviewRequirement);
+		return parsedReviewRequirement;
+	}
+	
+	public void setParsedReviewRequirement(ReviewRequirement parsedReviewRequirement) {
+		this.parsedReviewRequirement = parsedReviewRequirement;
+		reviewRequirement = parsedReviewRequirement.toString();
 	}
 	
 	@Editable(order=500, name="Required Builds", description="Optionally choose required builds")

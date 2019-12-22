@@ -5,7 +5,7 @@ import org.jsoup.nodes.Document;
 
 import io.onedev.server.model.Project;
 import io.onedev.server.model.User;
-import io.onedev.server.web.page.admin.user.UserProfilePage;
+import io.onedev.server.web.page.admin.user.profile.UserProfilePage;
 
 public class MentionProcessor extends MentionParser implements MarkdownProcessor {
 	

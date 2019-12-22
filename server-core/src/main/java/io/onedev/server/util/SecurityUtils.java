@@ -39,8 +39,6 @@ import io.onedev.server.model.PullRequestComment;
 import io.onedev.server.model.Role;
 import io.onedev.server.model.User;
 import io.onedev.server.model.UserAuthorization;
-import io.onedev.server.model.support.BranchProtection;
-import io.onedev.server.model.support.TagProtection;
 import io.onedev.server.security.permission.AccessBuild;
 import io.onedev.server.security.permission.AccessBuildLog;
 import io.onedev.server.security.permission.AccessBuildReports;
@@ -107,30 +105,24 @@ public class SecurityUtils extends org.apache.shiro.SecurityUtils {
 	}
 	
 	public static boolean canDeleteBranch(Project project, String branchName) {
-		if (canWriteCode(project)) {
-			BranchProtection protection = project.getBranchProtection(branchName, getUser());
-			return protection == null || !protection.isNoDeletion();
-		} else {
+		if (canWriteCode(project)) 
+			return !project.getBranchProtection(branchName, getUser()).isNoDeletion();
+		else 
 			return false;
-		}
 	}
 	
 	public static boolean canCreateTag(Project project, String tagName) {
-		if (canWriteCode(project)) {
-			TagProtection protection = project.getTagProtection(tagName, getUser());
-			return protection == null || !protection.isNoCreation();
-		} else {
+		if (canWriteCode(project)) 
+			return !project.getTagProtection(tagName, getUser()).isNoCreation();
+		else 
 			return false;
-		}
 	}
 	
 	public static boolean canCreateBranch(Project project, String branchName) {
-		if (canWriteCode(project)) {
-			BranchProtection protection = project.getBranchProtection(branchName, getUser());
-			return protection == null || !protection.isNoCreation();
-		} else {
+		if (canWriteCode(project)) 
+			return !project.getBranchProtection(branchName, getUser()).isNoCreation();
+		else 
 			return false;
-		}
 	}
 	
 	public static boolean canModify(Project project, String branch, String file) {

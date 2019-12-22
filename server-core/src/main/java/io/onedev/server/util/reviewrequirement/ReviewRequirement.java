@@ -51,11 +51,10 @@ public class ReviewRequirement {
 					String userName = getValue(criteria.userCriteria().Value());
 					User user = OneDev.getInstance(UserManager.class).findByName(userName);
 					if (user != null) {
-						if (!users.contains(user)) { 
+						if (!users.contains(user)) 
 							users.add(user);
-						} else {
+						else  
 							throw new OneException("User '" + userName + "' is included multiple times");
-						}
 					} else {
 						throw new OneException("Unable to find user '" + userName + "'");
 					}
@@ -191,4 +190,31 @@ public class ReviewRequirement {
 		else
 			return null;
 	}
+	
+	public void mergeWith(ReviewRequirement requirement) {
+		for (User user: requirement.getUsers()) {
+			if (!users.contains(user))
+				users.add(user);
+		}
+		for (Map.Entry<Group, Integer> entry: requirement.getGroups().entrySet()) {
+			Integer count = groups.get(entry.getKey());
+			if (count == null || count < entry.getValue())
+				groups.put(entry.getKey(), entry.getValue());
+		}
+	}
+	
+	public boolean covers(ReviewRequirement requirement) {
+		if (users.containsAll(requirement.getUsers()) 
+				&& groups.keySet().containsAll(requirement.getGroups().keySet())) {
+			for (Map.Entry<Group, Integer> entry: groups.entrySet()) {
+				Integer count = requirement.getGroups().get(entry.getKey());
+				if (count != null && count > entry.getValue())
+					return false;
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 }

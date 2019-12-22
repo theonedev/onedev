@@ -21,7 +21,7 @@ public class UserMatcherValidator implements ConstraintValidator<UserMatcher, St
 			return true;
 		} else {
 			try {
-				io.onedev.server.util.usermatcher.UserMatcher.parse(value);
+				io.onedev.server.util.usermatch.UserMatch.parse(value);
 				return true;
 			} catch (Exception e) {
 				constraintContext.disableDefaultConstraintViolation();
