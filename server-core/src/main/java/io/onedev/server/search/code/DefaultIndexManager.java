@@ -77,7 +77,6 @@ import io.onedev.commons.utils.StringUtils;
 import io.onedev.server.entitymanager.ProjectManager;
 import io.onedev.server.event.RefUpdated;
 import io.onedev.server.event.system.SystemStarted;
-import io.onedev.server.git.GitUtils;
 import io.onedev.server.model.Project;
 import io.onedev.server.persistence.SessionManager;
 import io.onedev.server.persistence.annotation.Sessional;
@@ -297,8 +296,8 @@ public class DefaultIndexManager implements IndexManager {
 		writer.addDocument(document);
 	}
 	
-	private BatchWorker getBatchWorker(Long projectId, Long forkRootId) {
-		return new BatchWorker("project-" + forkRootId + "-indexBlob", 1) {
+	private BatchWorker getBatchWorker(Long projectId) {
+		return new BatchWorker("project-" + projectId + "-indexBlob", 1) {
 
 			@Override
 			public void doWorks(Collection<Prioritized> works) {
@@ -309,13 +308,8 @@ public class DefaultIndexManager implements IndexManager {
 						Preconditions.checkState(works.size() == 1);
 
 						Project project = projectManager.load(projectId);
-						Project forkRoot = project.getForkRoot();
-						
 						ObjectId commitId = ((IndexWork) works.iterator().next()).getCommitId();
-												
-						if (!forkRootId.equals(projectId) && !forkRoot.getRepository().hasObject(commitId))
-							GitUtils.fetch(project.getRepository(), commitId, forkRoot.getRepository());
-						doIndex(forkRoot, commitId);
+						doIndex(project, commitId);
 						
 						listenerRegistry.post(new CommitIndexed(project, commitId.copy()));
 					}
@@ -379,7 +373,7 @@ public class DefaultIndexManager implements IndexManager {
 
 	@Override
 	public boolean isIndexed(Project project, ObjectId commit) {
-		File indexDir = storageManager.getProjectIndexDir(project.getForkRoot().getId());
+		File indexDir = storageManager.getProjectIndexDir(project.getId());
 		try (Directory directory = FSDirectory.open(indexDir.toPath())) {
 			if (DirectoryReader.indexExists(directory)) {
 				try (IndexReader reader = DirectoryReader.open(directory)) {
@@ -401,7 +395,7 @@ public class DefaultIndexManager implements IndexManager {
 		// as many tags might be pushed all at once when the repository is imported 
 		if (event.getRefName().startsWith(Constants.R_HEADS) && !event.getNewCommitId().equals(ObjectId.zeroId())) {
 			IndexWork work = new IndexWork(BACKEND_INDEXING_PRIORITY, event.getNewCommitId());
-			batchWorkManager.submit(getBatchWorker(event.getProject().getId(), event.getProject().getForkRoot().getId()), work);
+			batchWorkManager.submit(getBatchWorker(event.getProject().getId()), work);
 		}
 	}
 	
@@ -434,7 +428,7 @@ public class DefaultIndexManager implements IndexManager {
 		else
 			priority = BACKEND_INDEXING_PRIORITY;
 		IndexWork work = new IndexWork(priority, commit);
-		batchWorkManager.submit(getBatchWorker(project.getId(), project.getForkRoot().getId()), work);
+		batchWorkManager.submit(getBatchWorker(project.getId()), work);
 	}
 	
 	private static class IndexWork extends Prioritized {
