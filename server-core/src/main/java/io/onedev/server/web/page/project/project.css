@@ -8,7 +8,7 @@
 }
 #project>.sidebar>.head a {
 	display: block;
-	border-bottom: 2px solid #E0E0E0;
+	border-bottom: 4px solid #EEE;
 	padding: 10px 22px 10px 4px;
 	font-size: 16px;
 	white-space: nowrap;
