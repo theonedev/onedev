@@ -46,7 +46,7 @@ public class CreateIssueAction extends PostBuildAction {
 	private List<FieldSupply> issueFields = new ArrayList<>();
 	
 	@Editable(order=1000, name="Title", group="Issue Detail", description="Specify title of the issue. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Interpolative(variableSuggester="suggestVariables")
 	@NotEmpty
 	public String getIssueTitle() {
@@ -58,7 +58,7 @@ public class CreateIssueAction extends PostBuildAction {
 	}
 	
 	@Editable(order=1050, name="Description", group="Issue Detail", description="Optionally specify description of the issue. "
-			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://github.com/theonedev/onedev/wiki/Variable-Substitution' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
+			+ "<b>Note:</b> Type <tt>@</tt> to <a href='https://code.onedev.io/projects/onedev-manual/blob/master/pages/variable-substitution.md' target='_blank' tabindex='-1'>insert variable</a>, use <tt>\\</tt> to escape normal occurrences of <tt>@</tt> or <tt>\\</tt>")
 	@Multiline
 	@Interpolative(variableSuggester="suggestVariables")
 	public String getIssueDescription() {

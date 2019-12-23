@@ -33,11 +33,9 @@ public class GroovyScript implements Serializable {
 
 	private String name;
 	
-	private String description;
-	
 	private List<String> content;
 	
-	private boolean canBeUsedByJobs = true;
+	private boolean canBeUsedByBuildJobs = true;
 	
 	private String allowedProjects;
 	
@@ -54,15 +52,6 @@ public class GroovyScript implements Serializable {
 		this.name = name;
 	}
 
-	@Editable(order=200)
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
 	@Editable(order=300)
 	@Code(language = Code.GROOVY)
 	@Size(min=1, message="May not be empty")
@@ -75,23 +64,23 @@ public class GroovyScript implements Serializable {
 	}
 	
 	@Editable(order=350)
-	public boolean isCanBeUsedByJobs() {
-		return canBeUsedByJobs;
+	public boolean isCanBeUsedByBuildJobs() {
+		return canBeUsedByBuildJobs;
 	}
 
-	public void setCanBeUsedByJobs(boolean canBeUsedByJobs) {
-		this.canBeUsedByJobs = canBeUsedByJobs;
+	public void setCanBeUsedByBuildJobs(boolean canBeUsedByBuildJobs) {
+		this.canBeUsedByBuildJobs = canBeUsedByBuildJobs;
 	}
 	
 	@SuppressWarnings("unused")
-	private static boolean isCanBeUsedByJobsEnabled() {
-		return (boolean) EditContext.get().getInputValue("canBeUsedByJobs");
+	private static boolean isCanBeUsedByBuildJobsEnabled() {
+		return (boolean) EditContext.get().getInputValue("canBeUsedByBuildJobs");
 	}
 
 	@Editable(order=400, description="Optionally specify space-separated projects allowed to "
 			+ "execute this script. Use * or ? for wildcard match. Leave empty to allow all")
 	@Patterns(suggester = "suggestProjects")
-	@ShowCondition("isCanBeUsedByJobsEnabled")
+	@ShowCondition("isCanBeUsedByBuildJobsEnabled")
 	@NameOfEmptyValue("All")
 	public String getAllowedProjects() {
 		return allowedProjects;
@@ -104,7 +93,7 @@ public class GroovyScript implements Serializable {
 	@Editable(order=500, description="Optionally specify space-separated branches allowed to "
 		+ "execute this script. Use * or ? for wildcard match. Leave empty to allow all")
 	@Patterns
-	@ShowCondition("isCanBeUsedByJobsEnabled")
+	@ShowCondition("isCanBeUsedByBuildJobsEnabled")
 	@NameOfEmptyValue("All")
 	public String getAllowedBranches() {
 		return allowedBranches;
@@ -122,7 +111,7 @@ public class GroovyScript implements Serializable {
 	public final boolean isAuthorized(ScriptIdentity identity) {
 		if (identity instanceof SiteAdministrator) { 
 			return true;
-		} else if (isCanBeUsedByJobs() && identity instanceof JobIdentity) {
+		} else if (isCanBeUsedByBuildJobs() && identity instanceof JobIdentity) {
 			JobIdentity jobIdentity = (JobIdentity) identity;
 			Matcher matcher = new PathMatcher();
 			return (getAllowedProjects() == null || PatternSet.fromString(getAllowedProjects()).matches(matcher, jobIdentity.getProject().getName()))

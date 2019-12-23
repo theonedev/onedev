@@ -338,7 +338,7 @@ onedev.server.textDiff = {
 			function showInvalidSelection() {
 				var $content = $("<div></div>");
 				$content.append("<a class='invalid'><i class='fa fa-warning'></i> Invalid selection, click for details</a>");
-				$content.children("a").attr("href", doclink + "/Diff-Selection");
+				$content.children("a").attr("href", doclink + "/pages/diff-selection.md").attr("target", "_blank");
 				return {
 					position: position, 
 					content: $content

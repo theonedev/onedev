@@ -319,7 +319,7 @@ public class OneDev extends AbstractPlugin implements Serializable {
 	}	
 	
 	public String getDocRoot() {
-		return "https://github.com/theonedev/onedev/wiki";
+		return "https://code.onedev.io/projects/onedev-manual/blob/master";
 	}
 	
 }
