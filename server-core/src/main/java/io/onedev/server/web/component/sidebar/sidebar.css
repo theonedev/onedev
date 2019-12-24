@@ -8,7 +8,7 @@
 	overflow: hidden;
 	width: 240px;
 	border-left: 1px solid #FAFAFA;
-	border-right: 2px solid #E0E0E0;
+	border-right: 4px solid #EEE;
 	z-index: 210;
 }
 .sidebar .fa, .sidebar .fa-ext {
@@ -52,7 +52,7 @@
 }
 .minimizable.sidebar>a.mini-toggle {
 	display: block;
-	border-top: 2px solid #E0E0E0;
+	border-top: 4px solid #EEE;
 	height: 40px;
 	text-decoration: none;
 	font-size: 24px;
