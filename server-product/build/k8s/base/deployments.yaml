@@ -38,6 +38,8 @@ spec:
             secretKeyRef:
               name: mysql
               key: password
+        - name: hibernate_hikari_maximumPoolSize
+          value: 25
       initContainers:
       - name: init
         image: busybox
