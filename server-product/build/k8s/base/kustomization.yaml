@@ -6,6 +6,7 @@ secretGenerator:
   literals:
   - password=changeit
 resources:
+- namespaces.yaml
 - service-accounts.yaml
 - cluster-roles.yaml
 - cluster-role-bindings.yaml

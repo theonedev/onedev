@@ -1,3 +1,4 @@
+namespace: onedev
 images:
 - name: 1dev/server
   newTag: ${buildVersion}

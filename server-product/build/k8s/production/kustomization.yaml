@@ -1,3 +1,4 @@
+namespace: onedev
 bases:
 - ../base
 commonLabels:
