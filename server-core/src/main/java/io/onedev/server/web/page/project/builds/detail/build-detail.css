@@ -55,7 +55,8 @@
 	}
 	#build-detail .side-info {
 		box-shadow: none;
-		border-left-width: 2px;
+		border-left-width: 4px;
+		border-color: #EEE;
 		display: block !important;
 	}
 	#build-detail a.more-info, #build-detail .side-info>a.close {

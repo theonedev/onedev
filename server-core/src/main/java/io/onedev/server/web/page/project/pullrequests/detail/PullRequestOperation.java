@@ -33,7 +33,13 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			return canReview(request) && request.isOpen();
+			if (request.isOpen()) {
+				PullRequestReview review = request.getReview(SecurityUtils.getUser());
+				return review != null && review.getExcludeDate() == null 
+						&& (review.getResult() == null || !review.getResult().isApproved());
+			} else {
+				return false;
+			}
 		}
 
 		@Override
@@ -54,7 +60,13 @@ public enum PullRequestOperation {
 
 		@Override
 		public boolean canOperate(PullRequest request) {
-			return canReview(request) && request.isOpen();
+			if (request.isOpen()) {
+				PullRequestReview review = request.getReview(SecurityUtils.getUser());
+				return review != null && review.getExcludeDate() == null 
+						&& (review.getResult() == null || review.getResult().isApproved());
+			} else {
+				return false;
+			}
 		}
 
 		@Override
@@ -133,11 +145,6 @@ public enum PullRequestOperation {
 
 	};
 	
-	private static boolean canReview(PullRequest request) {
-		PullRequestReview review = request.getReview(SecurityUtils.getUser());
-		return review != null && review.getExcludeDate() == null;
-	}
-
 	public abstract void operate(PullRequest request, @Nullable String comment);
 	
 	public abstract boolean canOperate(PullRequest request);	

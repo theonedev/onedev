@@ -186,7 +186,8 @@ ul>li>a.code-comments.new .fa-circle {
 	}
 	#request-detail .side-info {
 		box-shadow: none;
-		border-left-width: 2px;
+		border-left-width: 4px;
+		border-color: #EEE;
 		display: block !important;
 	}
 	#request-detail .side-info.closed {

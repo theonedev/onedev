@@ -16,7 +16,8 @@
 	}
 	#issue-detail .side-info {
 		box-shadow: none;
-		border-left-width: 2px;
+		border-left-width: 4px;
+		border-color: #EEE;
 		display: block !important;
 	}
 	#issue-detail .issue-operations a.more-info, #issue-detail .side-info>a.close {
