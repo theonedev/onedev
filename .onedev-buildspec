@@ -24,7 +24,7 @@
                 <string>mv server-product/target/*.zip .</string>
                 <string></string>
                 <string>cat &lt;&lt; EOF &gt; run-as-docker.sh</string>
-                <string>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(which docker):/usr/bin/docker -v /opt/onedev:/opt/onedev -p 6610:6610 1dev/server:${buildVersion}</string>
+                <string>docker run -it --rm -v /var/run/docker.sock:/var/run/docker.sock -v \\$(which docker):/usr/bin/docker -v /opt/onedev:/opt/onedev -p 6610:6610 1dev/server:${buildVersion}</string>
                 <string>EOF</string>
             </commands>
             <retrieveSource>true</retrieveSource>
